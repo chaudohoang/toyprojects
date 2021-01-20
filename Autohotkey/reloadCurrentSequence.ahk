@@ -39,6 +39,6 @@ else if (deviceInterface = "Emu2p0_PG.Emu2p0_PG")
     Send, ^o
 	sleep, 10
 	Send, %Model%
-	sleep, 100
+	sleep, 500
 	Send, {enter}
 #ifWinExist
