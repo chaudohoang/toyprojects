@@ -37,8 +37,8 @@ else if (deviceInterface = "Emu2p0_PG.Emu2p0_PG")
     WinActivate ahk_exe TrueTest.exe
 	sleep , 10
     Send, ^o
-	sleep, 10
-	Send, %Model%
 	sleep, 500
+	Send, %Model%
+	sleep, 100
 	Send, {enter}
 #ifWinExist
