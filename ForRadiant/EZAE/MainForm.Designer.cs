@@ -29,75 +29,63 @@ namespace EZAE
         /// </summary>
         private void InitializeComponent()
         {
-            this.menuStrip2 = new System.Windows.Forms.MenuStrip();
-            this.SetupMenu = new System.Windows.Forms.ToolStripMenuItem();
-            this.testToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.updateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.trueTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuStrip2.SuspendLayout();
+            this.btnSetsequence = new System.Windows.Forms.Button();
+            this.btnSetupPC = new System.Windows.Forms.Button();
+            this.btnCreateFFC = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
-            // menuStrip2
+            // btnSetsequence
             // 
-            this.menuStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.SetupMenu,
-            this.updateToolStripMenuItem});
-            this.menuStrip2.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip2.Name = "menuStrip2";
-            this.menuStrip2.Size = new System.Drawing.Size(800, 24);
-            this.menuStrip2.TabIndex = 1;
-            this.menuStrip2.Text = "menuStrip2";
+            this.btnSetsequence.Location = new System.Drawing.Point(4, 5);
+            this.btnSetsequence.Name = "btnSetsequence";
+            this.btnSetsequence.Size = new System.Drawing.Size(105, 76);
+            this.btnSetsequence.TabIndex = 0;
+            this.btnSetsequence.Text = "Set Sequence";
+            this.btnSetsequence.UseVisualStyleBackColor = true;
+            this.btnSetsequence.Click += new System.EventHandler(this.btnSetsequence_Click);
             // 
-            // SetupMenu
+            // btnSetupPC
             // 
-            this.SetupMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.testToolStripMenuItem});
-            this.SetupMenu.Name = "SetupMenu";
-            this.SetupMenu.Size = new System.Drawing.Size(49, 20);
-            this.SetupMenu.Text = "Setup";
+            this.btnSetupPC.Location = new System.Drawing.Point(115, 5);
+            this.btnSetupPC.Name = "btnSetupPC";
+            this.btnSetupPC.Size = new System.Drawing.Size(105, 76);
+            this.btnSetupPC.TabIndex = 1;
+            this.btnSetupPC.Text = "Setup PC";
+            this.btnSetupPC.UseVisualStyleBackColor = true;
+            this.btnSetupPC.Click += new System.EventHandler(this.btnSetupPC_Click);
             // 
-            // testToolStripMenuItem
+            // btnCreateFFC
             // 
-            this.testToolStripMenuItem.Name = "testToolStripMenuItem";
-            this.testToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.testToolStripMenuItem.Text = "Set Sequence";
-            this.testToolStripMenuItem.Click += new System.EventHandler(this.testToolStripMenuItem_Click);
-            // 
-            // updateToolStripMenuItem
-            // 
-            this.updateToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.trueTestToolStripMenuItem});
-            this.updateToolStripMenuItem.Name = "updateToolStripMenuItem";
-            this.updateToolStripMenuItem.Size = new System.Drawing.Size(57, 20);
-            this.updateToolStripMenuItem.Text = "Update";
-            // 
-            // trueTestToolStripMenuItem
-            // 
-            this.trueTestToolStripMenuItem.Name = "trueTestToolStripMenuItem";
-            this.trueTestToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.trueTestToolStripMenuItem.Text = "TrueTest";
+            this.btnCreateFFC.Location = new System.Drawing.Point(4, 87);
+            this.btnCreateFFC.Name = "btnCreateFFC";
+            this.btnCreateFFC.Size = new System.Drawing.Size(105, 76);
+            this.btnCreateFFC.TabIndex = 2;
+            this.btnCreateFFC.Text = "Create FFC Databases";
+            this.btnCreateFFC.UseVisualStyleBackColor = true;
+            this.btnCreateFFC.Click += new System.EventHandler(this.btnCreateFFC_Click);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.menuStrip2);
+            this.AutoSize = true;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.ClientSize = new System.Drawing.Size(490, 270);
+            this.Controls.Add(this.btnCreateFFC);
+            this.Controls.Add(this.btnSetupPC);
+            this.Controls.Add(this.btnSetsequence);
             this.Name = "MainForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "MainForm";
-            this.menuStrip2.ResumeLayout(false);
-            this.menuStrip2.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
-        private System.Windows.Forms.MenuStrip menuStrip2;
-        private System.Windows.Forms.ToolStripMenuItem SetupMenu;
-        private System.Windows.Forms.ToolStripMenuItem testToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem updateToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem trueTestToolStripMenuItem;
+
+        private System.Windows.Forms.Button btnSetsequence;
+        private System.Windows.Forms.Button btnSetupPC;
+        private System.Windows.Forms.Button btnCreateFFC;
     }
 }
 
