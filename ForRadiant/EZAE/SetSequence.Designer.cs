@@ -30,22 +30,22 @@ namespace EZAE
         private void InitializeComponent()
         {
             this.lblSubframe = new System.Windows.Forms.Label();
-            this.subframeBox = new System.Windows.Forms.ComboBox();
-            this.btnAddSubframe = new System.Windows.Forms.Button();
+            this.cbSubframe = new System.Windows.Forms.ComboBox();
+            this.btnSaveSubframe = new System.Windows.Forms.Button();
             this.btnDelSubframe = new System.Windows.Forms.Button();
-            this.focusBox = new System.Windows.Forms.ComboBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.rotationBox = new System.Windows.Forms.ComboBox();
+            this.cbFocusDistance = new System.Windows.Forms.ComboBox();
+            this.lblFocusDistance = new System.Windows.Forms.Label();
+            this.lblCameraRotatioin = new System.Windows.Forms.Label();
+            this.cbCameraRotation = new System.Windows.Forms.ComboBox();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-            this.calBox = new System.Windows.Forms.ComboBox();
-            this.label3 = new System.Windows.Forms.Label();
+            this.cbCalBox = new System.Windows.Forms.ComboBox();
+            this.lblCalibrationIDs = new System.Windows.Forms.Label();
             this.btnApply = new System.Windows.Forms.Button();
-            this.label4 = new System.Windows.Forms.Label();
-            this.sequenceName = new System.Windows.Forms.Label();
+            this.lblSequence = new System.Windows.Forms.Label();
+            this.lblSequenceFileName = new System.Windows.Forms.Label();
             this.btnUseLastModified = new System.Windows.Forms.Button();
             this.btnBrowseSequence = new System.Windows.Forms.Button();
-            this.label5 = new System.Windows.Forms.Label();
+            this.lblSequencePath = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // lblSubframe
@@ -57,23 +57,23 @@ namespace EZAE
             this.lblSubframe.TabIndex = 0;
             this.lblSubframe.Text = "Subframe";
             // 
-            // subframeBox
+            // cbSubframe
             // 
-            this.subframeBox.FormattingEnabled = true;
-            this.subframeBox.Location = new System.Drawing.Point(89, 58);
-            this.subframeBox.Name = "subframeBox";
-            this.subframeBox.Size = new System.Drawing.Size(152, 21);
-            this.subframeBox.TabIndex = 1;
+            this.cbSubframe.FormattingEnabled = true;
+            this.cbSubframe.Location = new System.Drawing.Point(89, 58);
+            this.cbSubframe.Name = "cbSubframe";
+            this.cbSubframe.Size = new System.Drawing.Size(152, 21);
+            this.cbSubframe.TabIndex = 1;
             // 
-            // btnAddSubframe
+            // btnSaveSubframe
             // 
-            this.btnAddSubframe.Location = new System.Drawing.Point(247, 56);
-            this.btnAddSubframe.Name = "btnAddSubframe";
-            this.btnAddSubframe.Size = new System.Drawing.Size(40, 23);
-            this.btnAddSubframe.TabIndex = 2;
-            this.btnAddSubframe.Text = "Save";
-            this.btnAddSubframe.UseVisualStyleBackColor = true;
-            this.btnAddSubframe.Click += new System.EventHandler(this.btnAddSubframe_Click);
+            this.btnSaveSubframe.Location = new System.Drawing.Point(247, 56);
+            this.btnSaveSubframe.Name = "btnSaveSubframe";
+            this.btnSaveSubframe.Size = new System.Drawing.Size(40, 23);
+            this.btnSaveSubframe.TabIndex = 2;
+            this.btnSaveSubframe.Text = "Save";
+            this.btnSaveSubframe.UseVisualStyleBackColor = true;
+            this.btnSaveSubframe.Click += new System.EventHandler(this.btnSaveSubframe_Click);
             // 
             // btnDelSubframe
             // 
@@ -85,68 +85,68 @@ namespace EZAE
             this.btnDelSubframe.UseVisualStyleBackColor = true;
             this.btnDelSubframe.Click += new System.EventHandler(this.btnDelSubframe_Click);
             // 
-            // focusBox
+            // cbFocusDistance
             // 
-            this.focusBox.FormattingEnabled = true;
-            this.focusBox.Items.AddRange(new object[] {
+            this.cbFocusDistance.FormattingEnabled = true;
+            this.cbFocusDistance.Items.AddRange(new object[] {
             ""});
-            this.focusBox.Location = new System.Drawing.Point(89, 85);
-            this.focusBox.Name = "focusBox";
-            this.focusBox.Size = new System.Drawing.Size(152, 21);
-            this.focusBox.TabIndex = 4;
+            this.cbFocusDistance.Location = new System.Drawing.Point(89, 85);
+            this.cbFocusDistance.Name = "cbFocusDistance";
+            this.cbFocusDistance.Size = new System.Drawing.Size(152, 21);
+            this.cbFocusDistance.TabIndex = 4;
             // 
-            // label1
+            // lblFocusDistance
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(2, 88);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(81, 13);
-            this.label1.TabIndex = 3;
-            this.label1.Text = "Focus Distance";
+            this.lblFocusDistance.AutoSize = true;
+            this.lblFocusDistance.Location = new System.Drawing.Point(2, 88);
+            this.lblFocusDistance.Name = "lblFocusDistance";
+            this.lblFocusDistance.Size = new System.Drawing.Size(81, 13);
+            this.lblFocusDistance.TabIndex = 3;
+            this.lblFocusDistance.Text = "Focus Distance";
             // 
-            // label2
+            // lblCameraRotatioin
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(2, 115);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(86, 13);
-            this.label2.TabIndex = 5;
-            this.label2.Text = "Camera Rotation";
+            this.lblCameraRotatioin.AutoSize = true;
+            this.lblCameraRotatioin.Location = new System.Drawing.Point(2, 115);
+            this.lblCameraRotatioin.Name = "lblCameraRotatioin";
+            this.lblCameraRotatioin.Size = new System.Drawing.Size(86, 13);
+            this.lblCameraRotatioin.TabIndex = 5;
+            this.lblCameraRotatioin.Text = "Camera Rotation";
             // 
-            // rotationBox
+            // cbCameraRotation
             // 
-            this.rotationBox.FormattingEnabled = true;
-            this.rotationBox.Items.AddRange(new object[] {
+            this.cbCameraRotation.FormattingEnabled = true;
+            this.cbCameraRotation.Items.AddRange(new object[] {
             "",
             "None",
             "Clockwise90",
             "Rotate180",
             "Counterclockwise90"});
-            this.rotationBox.Location = new System.Drawing.Point(89, 112);
-            this.rotationBox.Name = "rotationBox";
-            this.rotationBox.Size = new System.Drawing.Size(152, 21);
-            this.rotationBox.TabIndex = 6;
+            this.cbCameraRotation.Location = new System.Drawing.Point(89, 112);
+            this.cbCameraRotation.Name = "cbCameraRotation";
+            this.cbCameraRotation.Size = new System.Drawing.Size(152, 21);
+            this.cbCameraRotation.TabIndex = 6;
             // 
-            // calBox
+            // cbCalBox
             // 
-            this.calBox.FormattingEnabled = true;
-            this.calBox.Items.AddRange(new object[] {
+            this.cbCalBox.FormattingEnabled = true;
+            this.cbCalBox.Items.AddRange(new object[] {
             "Copy from first step",
             "1,1,1,1"});
-            this.calBox.Location = new System.Drawing.Point(89, 139);
-            this.calBox.Name = "calBox";
-            this.calBox.Size = new System.Drawing.Size(152, 21);
-            this.calBox.TabIndex = 8;
-            this.calBox.Text = "Copy from first step";
+            this.cbCalBox.Location = new System.Drawing.Point(89, 139);
+            this.cbCalBox.Name = "cbCalBox";
+            this.cbCalBox.Size = new System.Drawing.Size(152, 21);
+            this.cbCalBox.TabIndex = 8;
+            this.cbCalBox.Text = "Copy from first step";
             // 
-            // label3
+            // lblCalibrationIDs
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(2, 142);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(75, 13);
-            this.label3.TabIndex = 7;
-            this.label3.Text = "Calibration IDs";
+            this.lblCalibrationIDs.AutoSize = true;
+            this.lblCalibrationIDs.Location = new System.Drawing.Point(2, 142);
+            this.lblCalibrationIDs.Name = "lblCalibrationIDs";
+            this.lblCalibrationIDs.Size = new System.Drawing.Size(75, 13);
+            this.lblCalibrationIDs.TabIndex = 7;
+            this.lblCalibrationIDs.Text = "Calibration IDs";
             // 
             // btnApply
             // 
@@ -158,22 +158,22 @@ namespace EZAE
             this.btnApply.UseVisualStyleBackColor = true;
             this.btnApply.Click += new System.EventHandler(this.btnApply_Click);
             // 
-            // label4
+            // lblSequence
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(2, 7);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(56, 13);
-            this.label4.TabIndex = 10;
-            this.label4.Text = "Sequence";
+            this.lblSequence.AutoSize = true;
+            this.lblSequence.Location = new System.Drawing.Point(2, 7);
+            this.lblSequence.Name = "lblSequence";
+            this.lblSequence.Size = new System.Drawing.Size(56, 13);
+            this.lblSequence.TabIndex = 10;
+            this.lblSequence.Text = "Sequence";
             // 
-            // sequenceName
+            // lblSequenceFileName
             // 
-            this.sequenceName.AutoSize = true;
-            this.sequenceName.Location = new System.Drawing.Point(88, 32);
-            this.sequenceName.Name = "sequenceName";
-            this.sequenceName.Size = new System.Drawing.Size(0, 13);
-            this.sequenceName.TabIndex = 11;
+            this.lblSequenceFileName.AutoSize = true;
+            this.lblSequenceFileName.Location = new System.Drawing.Point(88, 32);
+            this.lblSequenceFileName.Name = "lblSequenceFileName";
+            this.lblSequenceFileName.Size = new System.Drawing.Size(0, 13);
+            this.lblSequenceFileName.TabIndex = 11;
             // 
             // btnUseLastModified
             // 
@@ -195,14 +195,14 @@ namespace EZAE
             this.btnBrowseSequence.UseVisualStyleBackColor = true;
             this.btnBrowseSequence.Click += new System.EventHandler(this.btnBrowseSequence_Click);
             // 
-            // label5
+            // lblSequencePath
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(2, 32);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(81, 13);
-            this.label5.TabIndex = 12;
-            this.label5.Text = "Sequence Path";
+            this.lblSequencePath.AutoSize = true;
+            this.lblSequencePath.Location = new System.Drawing.Point(2, 32);
+            this.lblSequencePath.Name = "lblSequencePath";
+            this.lblSequencePath.Size = new System.Drawing.Size(81, 13);
+            this.lblSequencePath.TabIndex = 12;
+            this.lblSequencePath.Text = "Sequence Path";
             // 
             // SetSequence
             // 
@@ -211,23 +211,24 @@ namespace EZAE
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(339, 167);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.sequenceName);
-            this.Controls.Add(this.label4);
+            this.Controls.Add(this.lblSequencePath);
+            this.Controls.Add(this.lblSequenceFileName);
+            this.Controls.Add(this.lblSequence);
             this.Controls.Add(this.btnApply);
-            this.Controls.Add(this.calBox);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.rotationBox);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.focusBox);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.cbCalBox);
+            this.Controls.Add(this.lblCalibrationIDs);
+            this.Controls.Add(this.cbCameraRotation);
+            this.Controls.Add(this.lblCameraRotatioin);
+            this.Controls.Add(this.cbFocusDistance);
+            this.Controls.Add(this.lblFocusDistance);
             this.Controls.Add(this.btnBrowseSequence);
             this.Controls.Add(this.btnUseLastModified);
             this.Controls.Add(this.btnDelSubframe);
-            this.Controls.Add(this.btnAddSubframe);
-            this.Controls.Add(this.subframeBox);
+            this.Controls.Add(this.btnSaveSubframe);
+            this.Controls.Add(this.cbSubframe);
             this.Controls.Add(this.lblSubframe);
             this.Name = "SetSequence";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "SetSequence";
             this.Load += new System.EventHandler(this.FormLoad);
             this.ResumeLayout(false);
@@ -238,21 +239,21 @@ namespace EZAE
         #endregion
 
         private System.Windows.Forms.Label lblSubframe;
-        private System.Windows.Forms.ComboBox subframeBox;
-        private System.Windows.Forms.Button btnAddSubframe;
+        private System.Windows.Forms.ComboBox cbSubframe;
+        private System.Windows.Forms.Button btnSaveSubframe;
         private System.Windows.Forms.Button btnDelSubframe;
-        private System.Windows.Forms.ComboBox focusBox;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.ComboBox rotationBox;
+        private System.Windows.Forms.ComboBox cbFocusDistance;
+        private System.Windows.Forms.Label lblFocusDistance;
+        private System.Windows.Forms.Label lblCameraRotatioin;
+        private System.Windows.Forms.ComboBox cbCameraRotation;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
-        private System.Windows.Forms.ComboBox calBox;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.ComboBox cbCalBox;
+        private System.Windows.Forms.Label lblCalibrationIDs;
         private System.Windows.Forms.Button btnApply;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label sequenceName;
+        private System.Windows.Forms.Label lblSequence;
+        private System.Windows.Forms.Label lblSequenceFileName;
         private System.Windows.Forms.Button btnUseLastModified;
         private System.Windows.Forms.Button btnBrowseSequence;
-        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label lblSequencePath;
     }
 }

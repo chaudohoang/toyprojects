@@ -23,28 +23,32 @@ namespace EZAE
         private void FormLoad(object sender, EventArgs e)
         {
             LoadSubframe();
-            var latestfile = new DirectoryInfo("C:\\Radiant Vision Systems Data\\TrueTest\\Sequence").GetFiles().OrderByDescending(o => o.LastWriteTime).FirstOrDefault();
-            sequenceName.Text = latestfile.FullName;
+            if (Directory.Exists(@"C:\Radiant Vision Systems Data\TrueTest\Sequence"))
+            {
+                var latestfile = new DirectoryInfo(@"C:\Radiant Vision Systems Data\TrueTest\Sequence").GetFiles().OrderByDescending(o => o.LastWriteTime).FirstOrDefault();
+                lblSequenceFileName.Text = latestfile.FullName;
+            }
+            
         }
 
         public void LoadSubframe()
         {
-            subframeBox.Items.Clear();
+            cbSubframe.Items.Clear();
             string path = "subframe.txt";
             List<string> lines = new List<string>(File.ReadAllLines(path));
             foreach (string line in lines)
             {
-                subframeBox.Items.Add(line);
+                cbSubframe.Items.Add(line);
             }
 
         }
 
-        private void btnAddSubframe_Click(object sender, EventArgs e)
+        private void btnSaveSubframe_Click(object sender, EventArgs e)
         {
             string path = "subframe.txt";
             List<string> lines = new List<string>(File.ReadAllLines(path));
-            if (subframeBox.Text != "")
-                lines.Add(subframeBox.Text);
+            if (cbSubframe.Text != "")
+                lines.Add(cbSubframe.Text);
             File.WriteAllLines(path, lines.Distinct());
             LoadSubframe();
           
@@ -53,7 +57,7 @@ namespace EZAE
         private void btnDelSubframe_Click(object sender, EventArgs e)
         {
             string path = "subframe.txt";
-            File.WriteAllLines(path, File.ReadLines(path).Where(l => l != subframeBox.Text).ToList().Distinct());
+            File.WriteAllLines(path, File.ReadLines(path).Where(l => l != cbSubframe.Text).ToList().Distinct());
             LoadSubframe();
 
         }
@@ -64,24 +68,24 @@ namespace EZAE
             XmlNodeList nodes;
 
             var xmlDoc = new XmlDocument();
-            xmlDoc.Load(sequenceName.Text);
+            xmlDoc.Load(lblSequenceFileName.Text);
 
             string x, y, width, height, lensdistance, colorcalID, imagescalingID, flatfieldID, cameraRotation;
 
             x = y = width = height = lensdistance = colorcalID = imagescalingID = flatfieldID = cameraRotation= "";
             
-            if (subframeBox.Text != "")
+            if (cbSubframe.Text != "")
             {
-                string[] values = subframeBox.Text.Split(',');
+                string[] values = cbSubframe.Text.Split(',');
                 x = values[0];
                 y = values[1];
                 width = values[2];
                 height = values[3];
             }
 
-            if (calBox.Text != "Copy from first step")
+            if (cbCalBox.Text != "Copy from first step")
             {
-                string[] values = calBox.Text.Split(',');
+                string[] values = cbCalBox.Text.Split(',');
                 colorcalID = values[1];
                 imagescalingID = values[2];
                 flatfieldID = values[3];
@@ -103,14 +107,14 @@ namespace EZAE
                 }
             }
 
-            if (focusBox.Text != "")
+            if (cbFocusDistance.Text != "")
             {
-                lensdistance = focusBox.Text;
+                lensdistance = cbFocusDistance.Text;
             }
 
-            if (rotationBox.Text != "")
+            if (cbCameraRotation.Text != "")
             {
-                cameraRotation = rotationBox.Text;
+                cameraRotation = cbCameraRotation.Text;
             }
 
             nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/LensDistance");
@@ -231,15 +235,18 @@ namespace EZAE
             }
             
 
-            xmlDoc.Save(sequenceName.Text);
+            xmlDoc.Save(lblSequenceFileName.Text);
         }
 
         private void btnUseLastModified_Click(object sender, EventArgs e)
         {
-            var latestfile = new DirectoryInfo("C:\\Radiant Vision Systems Data\\TrueTest\\Sequence").GetFiles().OrderByDescending(o => o.LastWriteTime).FirstOrDefault();
-            sequenceName.Text = latestfile.FullName;
-            this.Controls.Remove(subframeBox);
-            this.Controls.Add(subframeBox);
+            if (Directory.Exists(@"C:\Radiant Vision Systems Data\TrueTest\Sequence"))
+            {
+                var latestfile = new DirectoryInfo(@"C:\Radiant Vision Systems Data\TrueTest\Sequence").GetFiles().OrderByDescending(o => o.LastWriteTime).FirstOrDefault();
+                lblSequenceFileName.Text = latestfile.FullName;
+            }
+            this.Controls.Remove(cbSubframe);
+            this.Controls.Add(cbSubframe);
         }
 
         private void btnBrowseSequence_Click(object sender, EventArgs e)
@@ -247,14 +254,14 @@ namespace EZAE
 
             using (OpenFileDialog dialog = new OpenFileDialog())
             {
-                dialog.InitialDirectory = "C:\\Radiant Vision Systems Data\\TrueTest\\Sequence";
+                dialog.InitialDirectory = @"C:\Radiant Vision Systems Data\TrueTest\Sequence";
                 if (dialog.ShowDialog(this)==DialogResult.OK)
                 {
-                    sequenceName.Text = dialog.FileName;
+                    lblSequenceFileName.Text = dialog.FileName;
                 }
             }
-            this.Controls.Remove(subframeBox);
-            this.Controls.Add(subframeBox);
+            this.Controls.Remove(cbSubframe);
+            this.Controls.Add(cbSubframe);
         }
     }
 }

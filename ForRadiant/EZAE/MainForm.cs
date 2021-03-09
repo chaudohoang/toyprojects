@@ -16,6 +16,7 @@ namespace EZAE
     {
         public MainForm()
         {
+            
             InitializeComponent();
         }
 
@@ -35,7 +36,7 @@ namespace EZAE
         {
             if (File.Exists(@"FFC_Database_Template\Generabe FFC Database.vbs"))
             {
-                RunVBS(@"FFC_Database_Template\Generabe FFC Database.vbs");
+                Process.Start(@"FFC_Database_Template\Generabe FFC Database.vbs");
 
             }
         }
@@ -49,10 +50,6 @@ namespace EZAE
             proc.Start();
         }
 
-        public void RunVBS(string fileName)
-        {
-            var proc = System.Diagnostics.Process.Start(fileName);
-            
-        }
+        
     }
 }
