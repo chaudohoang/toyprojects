@@ -79,6 +79,7 @@ namespace EZAE
             this.btnCheckLC.TabIndex = 3;
             this.btnCheckLC.Text = "Check License Code";
             this.btnCheckLC.UseVisualStyleBackColor = true;
+            this.btnCheckLC.Click += new System.EventHandler(this.btnCheckLC_Click);
             // 
             // btnOpenImageJ
             // 
@@ -88,6 +89,7 @@ namespace EZAE
             this.btnOpenImageJ.TabIndex = 4;
             this.btnOpenImageJ.Text = "Open ImageJ";
             this.btnOpenImageJ.UseVisualStyleBackColor = true;
+            this.btnOpenImageJ.Click += new System.EventHandler(this.btnOpenImageJ_Click);
             // 
             // btnOpenLanSearch
             // 
@@ -97,6 +99,7 @@ namespace EZAE
             this.btnOpenLanSearch.TabIndex = 5;
             this.btnOpenLanSearch.Text = "Open Lan Search";
             this.btnOpenLanSearch.UseVisualStyleBackColor = true;
+            this.btnOpenLanSearch.Click += new System.EventHandler(this.btnOpenLanSearch_Click);
             // 
             // btnOpenMTFCenter
             // 
@@ -106,6 +109,7 @@ namespace EZAE
             this.btnOpenMTFCenter.TabIndex = 7;
             this.btnOpenMTFCenter.Text = "Open MTF Center";
             this.btnOpenMTFCenter.UseVisualStyleBackColor = true;
+            this.btnOpenMTFCenter.Click += new System.EventHandler(this.btnOpenMTFCenter_Click);
             // 
             // btnOpenTools
             // 
@@ -115,6 +119,7 @@ namespace EZAE
             this.btnOpenTools.TabIndex = 8;
             this.btnOpenTools.Text = "Open Tools";
             this.btnOpenTools.UseVisualStyleBackColor = true;
+            this.btnOpenTools.Click += new System.EventHandler(this.btnOpenTools_Click);
             // 
             // btnOpenUpdates
             // 
@@ -124,6 +129,7 @@ namespace EZAE
             this.btnOpenUpdates.TabIndex = 9;
             this.btnOpenUpdates.Text = "Open Updates";
             this.btnOpenUpdates.UseVisualStyleBackColor = true;
+            this.btnOpenUpdates.Click += new System.EventHandler(this.btnOpenUpdates_Click);
             // 
             // btnEngineeringMode
             // 
@@ -133,6 +139,7 @@ namespace EZAE
             this.btnEngineeringMode.TabIndex = 10;
             this.btnEngineeringMode.Text = "Engineering Mode";
             this.btnEngineeringMode.UseVisualStyleBackColor = true;
+            this.btnEngineeringMode.Click += new System.EventHandler(this.btnEngineeringMode_Click);
             // 
             // MainForm
             // 

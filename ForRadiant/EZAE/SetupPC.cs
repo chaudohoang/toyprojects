@@ -116,8 +116,78 @@ namespace EZAE
         {
             if (File.Exists(@"Installer\iview457_x64_setup silent.bat"))
             {
-                ExecuteAsAdmin(@"Installer\iview457_x64_setup silent.bat");
+                Process.Start(@"Installer\iview457_x64_setup silent.bat");
             }
+        }
+
+        private void btnInstallVC12_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnInstallVC1519_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnInstallKdiff_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnInstallNPP_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnInstallDotnet_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnInstallMatlab_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnShareC_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnShareD_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnShareE_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnShareRVSData_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnCreateOTPandResult_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnShareDProgram_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnPinFolders_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnGivePermission_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

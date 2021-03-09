@@ -48,7 +48,7 @@ namespace EZAE
             this.btnCreateOTPandResult = new System.Windows.Forms.Button();
             this.btnShareDProgram = new System.Windows.Forms.Button();
             this.btnPinFolders = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
+            this.btnGivePermission = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnInstallTightVNC
@@ -118,6 +118,7 @@ namespace EZAE
             this.btnInstallVC12.TabIndex = 6;
             this.btnInstallVC12.Text = "Install VC++2012";
             this.btnInstallVC12.UseVisualStyleBackColor = true;
+            this.btnInstallVC12.Click += new System.EventHandler(this.btnInstallVC12_Click);
             // 
             // btnInstallVC1519
             // 
@@ -127,6 +128,7 @@ namespace EZAE
             this.btnInstallVC1519.TabIndex = 7;
             this.btnInstallVC1519.Text = "Install VC++2015-2019";
             this.btnInstallVC1519.UseVisualStyleBackColor = true;
+            this.btnInstallVC1519.Click += new System.EventHandler(this.btnInstallVC1519_Click);
             // 
             // btnInstallIrfanview
             // 
@@ -146,6 +148,7 @@ namespace EZAE
             this.btnInstallKdiff.TabIndex = 9;
             this.btnInstallKdiff.Text = "Install Kdiff";
             this.btnInstallKdiff.UseVisualStyleBackColor = true;
+            this.btnInstallKdiff.Click += new System.EventHandler(this.btnInstallKdiff_Click);
             // 
             // btnInstallNPP
             // 
@@ -155,6 +158,7 @@ namespace EZAE
             this.btnInstallNPP.TabIndex = 10;
             this.btnInstallNPP.Text = "Install Notepad++";
             this.btnInstallNPP.UseVisualStyleBackColor = true;
+            this.btnInstallNPP.Click += new System.EventHandler(this.btnInstallNPP_Click);
             // 
             // btnInstallDotnet
             // 
@@ -164,6 +168,7 @@ namespace EZAE
             this.btnInstallDotnet.TabIndex = 11;
             this.btnInstallDotnet.Text = "Install Dotnet 4.8";
             this.btnInstallDotnet.UseVisualStyleBackColor = true;
+            this.btnInstallDotnet.Click += new System.EventHandler(this.btnInstallDotnet_Click);
             // 
             // btnInstallMatlab
             // 
@@ -173,6 +178,7 @@ namespace EZAE
             this.btnInstallMatlab.TabIndex = 12;
             this.btnInstallMatlab.Text = "Install Matlab";
             this.btnInstallMatlab.UseVisualStyleBackColor = true;
+            this.btnInstallMatlab.Click += new System.EventHandler(this.btnInstallMatlab_Click);
             // 
             // btnShareC
             // 
@@ -182,6 +188,7 @@ namespace EZAE
             this.btnShareC.TabIndex = 13;
             this.btnShareC.Text = "ShareCDrive";
             this.btnShareC.UseVisualStyleBackColor = true;
+            this.btnShareC.Click += new System.EventHandler(this.btnShareC_Click);
             // 
             // btnShareD
             // 
@@ -191,6 +198,7 @@ namespace EZAE
             this.btnShareD.TabIndex = 14;
             this.btnShareD.Text = "ShareDDrive";
             this.btnShareD.UseVisualStyleBackColor = true;
+            this.btnShareD.Click += new System.EventHandler(this.btnShareD_Click);
             // 
             // btnShareE
             // 
@@ -200,6 +208,7 @@ namespace EZAE
             this.btnShareE.TabIndex = 15;
             this.btnShareE.Text = "ShareEDrive";
             this.btnShareE.UseVisualStyleBackColor = true;
+            this.btnShareE.Click += new System.EventHandler(this.btnShareE_Click);
             // 
             // btnShareRVSData
             // 
@@ -209,6 +218,7 @@ namespace EZAE
             this.btnShareRVSData.TabIndex = 16;
             this.btnShareRVSData.Text = "ShareRVSData";
             this.btnShareRVSData.UseVisualStyleBackColor = true;
+            this.btnShareRVSData.Click += new System.EventHandler(this.btnShareRVSData_Click);
             // 
             // btnCreateOTPandResult
             // 
@@ -218,6 +228,7 @@ namespace EZAE
             this.btnCreateOTPandResult.TabIndex = 17;
             this.btnCreateOTPandResult.Text = "Create OTP and Result";
             this.btnCreateOTPandResult.UseVisualStyleBackColor = true;
+            this.btnCreateOTPandResult.Click += new System.EventHandler(this.btnCreateOTPandResult_Click);
             // 
             // btnShareDProgram
             // 
@@ -227,6 +238,7 @@ namespace EZAE
             this.btnShareDProgram.TabIndex = 18;
             this.btnShareDProgram.Text = "ShareDProgram";
             this.btnShareDProgram.UseVisualStyleBackColor = true;
+            this.btnShareDProgram.Click += new System.EventHandler(this.btnShareDProgram_Click);
             // 
             // btnPinFolders
             // 
@@ -236,15 +248,17 @@ namespace EZAE
             this.btnPinFolders.TabIndex = 19;
             this.btnPinFolders.Text = "Pin Folders";
             this.btnPinFolders.UseVisualStyleBackColor = true;
+            this.btnPinFolders.Click += new System.EventHandler(this.btnPinFolders_Click);
             // 
-            // button1
+            // btnGivePermission
             // 
-            this.button1.Location = new System.Drawing.Point(114, 206);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(129, 28);
-            this.button1.TabIndex = 20;
-            this.button1.Text = "TT Full Permisison";
-            this.button1.UseVisualStyleBackColor = true;
+            this.btnGivePermission.Location = new System.Drawing.Point(114, 206);
+            this.btnGivePermission.Name = "btnGivePermission";
+            this.btnGivePermission.Size = new System.Drawing.Size(129, 28);
+            this.btnGivePermission.TabIndex = 20;
+            this.btnGivePermission.Text = "TT Full Permisison";
+            this.btnGivePermission.UseVisualStyleBackColor = true;
+            this.btnGivePermission.Click += new System.EventHandler(this.btnGivePermission_Click);
             // 
             // SetupPC
             // 
@@ -253,7 +267,7 @@ namespace EZAE
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(469, 263);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.btnGivePermission);
             this.Controls.Add(this.btnPinFolders);
             this.Controls.Add(this.btnShareDProgram);
             this.Controls.Add(this.btnCreateOTPandResult);
@@ -301,6 +315,6 @@ namespace EZAE
         private System.Windows.Forms.Button btnCreateOTPandResult;
         private System.Windows.Forms.Button btnShareDProgram;
         private System.Windows.Forms.Button btnPinFolders;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btnGivePermission;
     }
 }
