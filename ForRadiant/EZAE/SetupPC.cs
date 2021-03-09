@@ -22,25 +22,24 @@ namespace EZAE
         public void ExecuteAsAdmin(string fileName)
         {
             Process proc = new Process();
-            proc.StartInfo.FileName = fileName;
-            proc.StartInfo.UseShellExecute = true;
-            proc.StartInfo.Verb = "runas";
-            proc.Start();
+            if (File.Exists(fileName))
+            {
+                proc.StartInfo.FileName = fileName;
+                proc.StartInfo.UseShellExecute = true;
+                proc.StartInfo.Verb = "runas";
+                proc.Start();
+            }
         }
 
         private void btnInstallTightVNC_Click(object sender, EventArgs e)
         {
-            if (cbTightVNCPath.Text=="D:\\Program")
+            if (cbTightVNCPath.Text==@"D:\Program")
             {
                 ExecuteAsAdmin(@"Installer\tightvncDProgram.exe");
             }
-            else if (cbTightVNCPath.Text == "D:\\Program")
+            else if (cbTightVNCPath.Text == @"D:\Program")
             {
                 ExecuteAsAdmin(@"Installer\tightvncCProgram.exe");
-            }
-            else
-            {
-
             }
         }
 
@@ -53,10 +52,6 @@ namespace EZAE
             else if (File.Exists(@"C:\Program\TightVNC\Remove TightVNC.bat"))
             {
                 ExecuteAsAdmin(@"C:\Program\TightVNC\Remove TightVNC.bat");
-            }
-            else
-            {
-
             }
         }
 
