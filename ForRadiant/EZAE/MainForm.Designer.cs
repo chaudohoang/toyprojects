@@ -38,7 +38,7 @@ namespace EZAE
             // 
             this.btnSetsequence.Location = new System.Drawing.Point(4, 5);
             this.btnSetsequence.Name = "btnSetsequence";
-            this.btnSetsequence.Size = new System.Drawing.Size(105, 76);
+            this.btnSetsequence.Size = new System.Drawing.Size(84, 23);
             this.btnSetsequence.TabIndex = 0;
             this.btnSetsequence.Text = "Set Sequence";
             this.btnSetsequence.UseVisualStyleBackColor = true;
@@ -46,9 +46,9 @@ namespace EZAE
             // 
             // btnSetupPC
             // 
-            this.btnSetupPC.Location = new System.Drawing.Point(115, 5);
+            this.btnSetupPC.Location = new System.Drawing.Point(94, 5);
             this.btnSetupPC.Name = "btnSetupPC";
-            this.btnSetupPC.Size = new System.Drawing.Size(105, 76);
+            this.btnSetupPC.Size = new System.Drawing.Size(62, 23);
             this.btnSetupPC.TabIndex = 1;
             this.btnSetupPC.Text = "Setup PC";
             this.btnSetupPC.UseVisualStyleBackColor = true;
@@ -56,9 +56,9 @@ namespace EZAE
             // 
             // btnCreateFFC
             // 
-            this.btnCreateFFC.Location = new System.Drawing.Point(4, 87);
+            this.btnCreateFFC.Location = new System.Drawing.Point(162, 5);
             this.btnCreateFFC.Name = "btnCreateFFC";
-            this.btnCreateFFC.Size = new System.Drawing.Size(105, 76);
+            this.btnCreateFFC.Size = new System.Drawing.Size(128, 23);
             this.btnCreateFFC.TabIndex = 2;
             this.btnCreateFFC.Text = "Create FFC Databases";
             this.btnCreateFFC.UseVisualStyleBackColor = true;
@@ -70,13 +70,13 @@ namespace EZAE
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(490, 270);
+            this.ClientSize = new System.Drawing.Size(513, 270);
             this.Controls.Add(this.btnCreateFFC);
             this.Controls.Add(this.btnSetupPC);
             this.Controls.Add(this.btnSetsequence);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "MainForm";
+            this.Text = "EZAE";
             this.ResumeLayout(false);
 
         }

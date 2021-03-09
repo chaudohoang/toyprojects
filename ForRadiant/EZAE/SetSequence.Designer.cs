@@ -210,7 +210,7 @@ namespace EZAE
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(341, 167);
+            this.ClientSize = new System.Drawing.Size(339, 167);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.sequenceName);
             this.Controls.Add(this.label4);
