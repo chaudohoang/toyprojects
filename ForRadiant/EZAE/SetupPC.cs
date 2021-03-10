@@ -116,78 +116,120 @@ namespace EZAE
         {
             if (File.Exists(@"Installer\iview457_x64_setup silent.bat"))
             {
-                Process.Start(@"Installer\iview457_x64_setup silent.bat");
+                ExecuteAsAdmin(@"Installer\iview457_x64_setup silent.bat");
             }
         }
 
         private void btnInstallVC12_Click(object sender, EventArgs e)
         {
-
+            if (File.Exists(@"Installer\Visual C++ 2012\VC2012_silent_install.bat"))
+            {
+                ExecuteAsAdmin(@"Installer\Visual C++ 2012\VC2012_silent_install.bat");
+            }
         }
 
         private void btnInstallVC1519_Click(object sender, EventArgs e)
         {
-
+            if (File.Exists(@"Installer\Visual C++ 2015-2019\VC2015-2019_silent_install.bat"))
+            {
+                ExecuteAsAdmin(@"Installer\Visual C++ 2015-2019\VC2015-2019_silent_install.bat");
+            }
         }
 
         private void btnInstallKdiff_Click(object sender, EventArgs e)
         {
-
+            if (File.Exists(@"Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat"))
+            {
+                ExecuteAsAdmin(@"Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat");
+            }
         }
 
         private void btnInstallNPP_Click(object sender, EventArgs e)
         {
-
+            if (File.Exists(@"Installer\npp.7.8.1.Installer.x64 silent.bat"))
+            {
+                ExecuteAsAdmin(@"Installer\npp.7.8.1.Installer.x64 silent.bat");
+            }
         }
 
         private void btnInstallDotnet_Click(object sender, EventArgs e)
         {
-
+            if (File.Exists(@"Installer\ndp48-x86-x64-allos-enu.exe"))
+            {
+                ExecuteAsAdmin(@"Installer\ndp48-x86-x64-allos-enu.exe");
+            }
         }
 
         private void btnInstallMatlab_Click(object sender, EventArgs e)
         {
-
+            if (File.Exists(@"Installer\MCR_R2017b_win64_installer.exe"))
+            {
+                ExecuteAsAdmin(@"Installer\MCR_R2017b_win64_installer.exe");
+            }
         }
 
         private void btnShareC_Click(object sender, EventArgs e)
         {
-
+            if (File.Exists(@"Tools\ShareC.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\ShareC.bat");
+            }
         }
 
         private void btnShareD_Click(object sender, EventArgs e)
         {
-
+            if (File.Exists(@"Tools\ShareD.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\ShareD.bat");
+            }
         }
 
         private void btnShareE_Click(object sender, EventArgs e)
         {
-
+            if (File.Exists(@"Tools\ShareE.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\ShareE.bat");
+            }
         }
 
         private void btnShareRVSData_Click(object sender, EventArgs e)
         {
-
+            if (File.Exists(@"Tools\ShareRadiantVisionSystemsData.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\ShareRadiantVisionSystemsData.bat");
+            }
         }
 
         private void btnCreateOTPandResult_Click(object sender, EventArgs e)
         {
-
+            if (File.Exists(@"Tools\CreateOTPandResult.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\CreateOTPandResult.bat");
+            }
         }
 
         private void btnShareDProgram_Click(object sender, EventArgs e)
         {
-
+            if (File.Exists(@"Tools\ShareDProgram.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\ShareDProgram.bat");
+            }
         }
 
         private void btnPinFolders_Click(object sender, EventArgs e)
         {
-
+            if (File.Exists(@"Tools\pinFolders.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\pinFolders.bat");
+            }
         }
 
         private void btnGivePermission_Click(object sender, EventArgs e)
         {
-
+            if (File.Exists(@"Tools\updatePermission.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\updatePermission.bat");
+            }
         }
     }
 }
