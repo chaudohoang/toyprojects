@@ -291,7 +291,10 @@ namespace EZAE
 
         private void btnFirewallOff_Click(object sender, EventArgs e)
         {
-
+            if (File.Exists(@"Tools\FirewallOff.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\FirewallOff.bat");
+            }
         }
     }
 }
