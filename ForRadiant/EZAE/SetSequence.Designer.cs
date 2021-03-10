@@ -29,6 +29,7 @@ namespace EZAE
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SetSequence));
             this.lblSubframe = new System.Windows.Forms.Label();
             this.cbSubframe = new System.Windows.Forms.ComboBox();
             this.btnSaveSubframe = new System.Windows.Forms.Button();
@@ -227,6 +228,7 @@ namespace EZAE
             this.Controls.Add(this.btnSaveSubframe);
             this.Controls.Add(this.cbSubframe);
             this.Controls.Add(this.lblSubframe);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "SetSequence";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "SetSequence";

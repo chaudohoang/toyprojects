@@ -26,9 +26,9 @@ namespace EZAE
             form.Show();
         }
 
-        private void btnSetupPC_Click(object sender, EventArgs e)
+        private void btnTweakPC_Click(object sender, EventArgs e)
         {
-            SetupPC form = new SetupPC();
+            TweakPC form = new TweakPC();
             form.Show();
         }
 
@@ -36,15 +36,6 @@ namespace EZAE
         {
             string filepath = @"FFC_Database_Template\Generabe FFC Database.vbs";
             if (File.Exists(filepath));
-            {
-                Process.Start(filepath);
-            }
-        }
- 
-        private void btnEngineeringMode_Click(object sender, EventArgs e)
-        {
-            string filepath = @"Tools\EngineerMode.exe";
-            if (File.Exists(filepath))
             {
                 Process.Start(filepath);
             }
@@ -114,5 +105,88 @@ namespace EZAE
                 Process.Start(folderpath);
             }
         }
+
+        private void btnPinEngineerMode_Click(object sender, EventArgs e)
+        {
+            string filepath = @"Tools\pinEngineerModeToTaskBar.bat";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void btnDooone1_Click(object sender, EventArgs e)
+        {
+            string filepath = @"C:\Windows\dooone1.lnk";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void btnDooone2_Click(object sender, EventArgs e)
+        {
+            string filepath = @"C:\Windows\dooone2.lnk";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void btnDooone3_Click(object sender, EventArgs e)
+        {
+            string filepath = @"C:\Windows\dooone3.lnk";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void btnDooone4_Click(object sender, EventArgs e)
+        {
+            string filepath = @"C:\Windows\dooone4.lnk";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void btnGooil1_Click(object sender, EventArgs e)
+        {
+            string filepath = @"C:\Windows\gooil1.lnk";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void btnGooil2_Click(object sender, EventArgs e)
+        {
+            string filepath = @"C:\Windows\gooil2.lnk";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void btnGooil3_Click(object sender, EventArgs e)
+        {
+            string filepath = @"C:\Windows\gooil3.lnk";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void btnGooil4_Click(object sender, EventArgs e)
+        {
+            string filepath = @"C:\Windows\gooil4.lnk";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        
     }
 }

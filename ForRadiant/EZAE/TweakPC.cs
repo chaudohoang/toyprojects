@@ -12,9 +12,9 @@ using System.Windows.Forms;
 
 namespace EZAE
 {
-    public partial class SetupPC : Form
+    public partial class TweakPC : Form
     {
-        public SetupPC()
+        public TweakPC()
         {
             InitializeComponent();
         }
@@ -40,6 +40,10 @@ namespace EZAE
             else if (cbTightVNCPath.Text == @"D:\Program")
             {
                 ExecuteAsAdmin(@"Installer\tightvncCProgram.exe");
+            }
+            else if (cbTightVNCPath.Text == @"E:\Program")
+            {
+                ExecuteAsAdmin(@"Installer\tightvncEProgram.exe");
             }
         }
 
@@ -230,6 +234,64 @@ namespace EZAE
             {
                 ExecuteAsAdmin(@"Tools\updatePermission.bat");
             }
+        }
+
+        private void btnInstallWireshark_Click(object sender, EventArgs e)
+        {
+            if (File.Exists(@"Installer\Wireshark-win64-3.4.3.exe"))
+            {
+                ExecuteAsAdmin(@"Installer\Wireshark-win64-3.4.3.exe");
+            }
+        }
+
+        private void btnShareCProgram_Click(object sender, EventArgs e)
+        {
+            if (File.Exists(@"Tools\ShareCProgram.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\ShareCProgram.bat");
+            }
+        }
+
+        private void btnShareEProgram_Click(object sender, EventArgs e)
+        {
+            if (File.Exists(@"Tools\ShareEProgram.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\ShareEProgram.bat");
+            }
+        }
+
+        private void btnCopyAllToLocalProgram_Click(object sender, EventArgs e)
+        {
+            if (File.Exists(@"CopyScript\copyFilesToLocal.vbs"))
+            {
+                Process.Start(@"CopyScript\copyFilesToLocal.vbs");
+            }
+
+            if (File.Exists(@"CopyScript\copyFoldesToLocal.vbs"))
+            {
+                Process.Start(@"CopyScript\copyFoldesToLocal.vbs");
+            }
+        }
+
+        private void btnUACOff_Click(object sender, EventArgs e)
+        {
+            if (File.Exists(@"Tools\disableUAC.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\disableUAC.bat");
+            }
+        }
+
+        private void btnPasswordSharingOff_Click(object sender, EventArgs e)
+        {
+            if (File.Exists(@"Tools\PasswordSharingOff.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\PasswordSharingOff.bat");
+            }
+        }
+
+        private void btnFirewallOff_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿
 namespace EZAE
 {
-    partial class SetupPC
+    partial class TweakPC
     {
         /// <summary>
         /// Required designer variable.
@@ -29,6 +29,7 @@ namespace EZAE
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TweakPC));
             this.btnInstallTightVNC = new System.Windows.Forms.Button();
             this.btnRemoveTightVNC = new System.Windows.Forms.Button();
             this.cbTightVNCPath = new System.Windows.Forms.ComboBox();
@@ -49,6 +50,13 @@ namespace EZAE
             this.btnShareDProgram = new System.Windows.Forms.Button();
             this.btnPinFolders = new System.Windows.Forms.Button();
             this.btnGivePermission = new System.Windows.Forms.Button();
+            this.btnInstallWireshark = new System.Windows.Forms.Button();
+            this.btnShareCProgram = new System.Windows.Forms.Button();
+            this.btnShareEProgram = new System.Windows.Forms.Button();
+            this.btnCopyAllToLocalProgram = new System.Windows.Forms.Button();
+            this.btnUACOff = new System.Windows.Forms.Button();
+            this.btnPasswordSharingOff = new System.Windows.Forms.Button();
+            this.btnFirewallOff = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnInstallTightVNC
@@ -76,7 +84,8 @@ namespace EZAE
             this.cbTightVNCPath.FormattingEnabled = true;
             this.cbTightVNCPath.Items.AddRange(new object[] {
             "D:\\Program",
-            "C:\\Program"});
+            "C:\\Program",
+            "E:\\Program"});
             this.cbTightVNCPath.Location = new System.Drawing.Point(114, 7);
             this.cbTightVNCPath.Name = "cbTightVNCPath";
             this.cbTightVNCPath.Size = new System.Drawing.Size(129, 21);
@@ -232,9 +241,9 @@ namespace EZAE
             // 
             // btnShareDProgram
             // 
-            this.btnShareDProgram.Location = new System.Drawing.Point(249, 172);
+            this.btnShareDProgram.Location = new System.Drawing.Point(114, 206);
             this.btnShareDProgram.Name = "btnShareDProgram";
-            this.btnShareDProgram.Size = new System.Drawing.Size(105, 28);
+            this.btnShareDProgram.Size = new System.Drawing.Size(129, 28);
             this.btnShareDProgram.TabIndex = 18;
             this.btnShareDProgram.Text = "ShareDProgram";
             this.btnShareDProgram.UseVisualStyleBackColor = true;
@@ -242,7 +251,7 @@ namespace EZAE
             // 
             // btnPinFolders
             // 
-            this.btnPinFolders.Location = new System.Drawing.Point(3, 206);
+            this.btnPinFolders.Location = new System.Drawing.Point(249, 172);
             this.btnPinFolders.Name = "btnPinFolders";
             this.btnPinFolders.Size = new System.Drawing.Size(105, 28);
             this.btnPinFolders.TabIndex = 19;
@@ -252,21 +261,98 @@ namespace EZAE
             // 
             // btnGivePermission
             // 
-            this.btnGivePermission.Location = new System.Drawing.Point(114, 206);
+            this.btnGivePermission.Location = new System.Drawing.Point(3, 240);
             this.btnGivePermission.Name = "btnGivePermission";
-            this.btnGivePermission.Size = new System.Drawing.Size(129, 28);
+            this.btnGivePermission.Size = new System.Drawing.Size(105, 28);
             this.btnGivePermission.TabIndex = 20;
             this.btnGivePermission.Text = "TT Full Permisison";
             this.btnGivePermission.UseVisualStyleBackColor = true;
             this.btnGivePermission.Click += new System.EventHandler(this.btnGivePermission_Click);
             // 
-            // SetupPC
+            // btnInstallWireshark
+            // 
+            this.btnInstallWireshark.Location = new System.Drawing.Point(249, 240);
+            this.btnInstallWireshark.Name = "btnInstallWireshark";
+            this.btnInstallWireshark.Size = new System.Drawing.Size(105, 28);
+            this.btnInstallWireshark.TabIndex = 21;
+            this.btnInstallWireshark.Text = "Install Wireshark";
+            this.btnInstallWireshark.UseVisualStyleBackColor = true;
+            this.btnInstallWireshark.Click += new System.EventHandler(this.btnInstallWireshark_Click);
+            // 
+            // btnShareCProgram
+            // 
+            this.btnShareCProgram.Location = new System.Drawing.Point(3, 206);
+            this.btnShareCProgram.Name = "btnShareCProgram";
+            this.btnShareCProgram.Size = new System.Drawing.Size(105, 28);
+            this.btnShareCProgram.TabIndex = 22;
+            this.btnShareCProgram.Text = "ShareCProgram";
+            this.btnShareCProgram.UseVisualStyleBackColor = true;
+            this.btnShareCProgram.Click += new System.EventHandler(this.btnShareCProgram_Click);
+            // 
+            // btnShareEProgram
+            // 
+            this.btnShareEProgram.Location = new System.Drawing.Point(249, 206);
+            this.btnShareEProgram.Name = "btnShareEProgram";
+            this.btnShareEProgram.Size = new System.Drawing.Size(105, 28);
+            this.btnShareEProgram.TabIndex = 23;
+            this.btnShareEProgram.Text = "ShareEProgram";
+            this.btnShareEProgram.UseVisualStyleBackColor = true;
+            this.btnShareEProgram.Click += new System.EventHandler(this.btnShareEProgram_Click);
+            // 
+            // btnCopyAllToLocalProgram
+            // 
+            this.btnCopyAllToLocalProgram.Location = new System.Drawing.Point(114, 240);
+            this.btnCopyAllToLocalProgram.Name = "btnCopyAllToLocalProgram";
+            this.btnCopyAllToLocalProgram.Size = new System.Drawing.Size(129, 28);
+            this.btnCopyAllToLocalProgram.TabIndex = 24;
+            this.btnCopyAllToLocalProgram.Text = "Copy All To Local";
+            this.btnCopyAllToLocalProgram.UseVisualStyleBackColor = true;
+            this.btnCopyAllToLocalProgram.Click += new System.EventHandler(this.btnCopyAllToLocalProgram_Click);
+            // 
+            // btnUACOff
+            // 
+            this.btnUACOff.Location = new System.Drawing.Point(3, 274);
+            this.btnUACOff.Name = "btnUACOff";
+            this.btnUACOff.Size = new System.Drawing.Size(105, 28);
+            this.btnUACOff.TabIndex = 25;
+            this.btnUACOff.Text = "UAC Off";
+            this.btnUACOff.UseVisualStyleBackColor = true;
+            this.btnUACOff.Click += new System.EventHandler(this.btnUACOff_Click);
+            // 
+            // btnPasswordSharingOff
+            // 
+            this.btnPasswordSharingOff.Location = new System.Drawing.Point(114, 274);
+            this.btnPasswordSharingOff.Name = "btnPasswordSharingOff";
+            this.btnPasswordSharingOff.Size = new System.Drawing.Size(129, 28);
+            this.btnPasswordSharingOff.TabIndex = 26;
+            this.btnPasswordSharingOff.Text = "Password Sharing Off";
+            this.btnPasswordSharingOff.UseVisualStyleBackColor = true;
+            this.btnPasswordSharingOff.Click += new System.EventHandler(this.btnPasswordSharingOff_Click);
+            // 
+            // btnFirewallOff
+            // 
+            this.btnFirewallOff.Location = new System.Drawing.Point(249, 274);
+            this.btnFirewallOff.Name = "btnFirewallOff";
+            this.btnFirewallOff.Size = new System.Drawing.Size(105, 28);
+            this.btnFirewallOff.TabIndex = 27;
+            this.btnFirewallOff.Text = "Firewall Off";
+            this.btnFirewallOff.UseVisualStyleBackColor = true;
+            this.btnFirewallOff.Click += new System.EventHandler(this.btnFirewallOff_Click);
+            // 
+            // TweakPC
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(469, 263);
+            this.ClientSize = new System.Drawing.Size(441, 333);
+            this.Controls.Add(this.btnFirewallOff);
+            this.Controls.Add(this.btnPasswordSharingOff);
+            this.Controls.Add(this.btnUACOff);
+            this.Controls.Add(this.btnCopyAllToLocalProgram);
+            this.Controls.Add(this.btnShareEProgram);
+            this.Controls.Add(this.btnShareCProgram);
+            this.Controls.Add(this.btnInstallWireshark);
             this.Controls.Add(this.btnGivePermission);
             this.Controls.Add(this.btnPinFolders);
             this.Controls.Add(this.btnShareDProgram);
@@ -287,9 +373,10 @@ namespace EZAE
             this.Controls.Add(this.cbTightVNCPath);
             this.Controls.Add(this.btnRemoveTightVNC);
             this.Controls.Add(this.btnInstallTightVNC);
-            this.Name = "SetupPC";
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Name = "TweakPC";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "SetupPC";
+            this.Text = "Tweak PC";
             this.ResumeLayout(false);
 
         }
@@ -316,5 +403,12 @@ namespace EZAE
         private System.Windows.Forms.Button btnShareDProgram;
         private System.Windows.Forms.Button btnPinFolders;
         private System.Windows.Forms.Button btnGivePermission;
+        private System.Windows.Forms.Button btnInstallWireshark;
+        private System.Windows.Forms.Button btnShareCProgram;
+        private System.Windows.Forms.Button btnShareEProgram;
+        private System.Windows.Forms.Button btnCopyAllToLocalProgram;
+        private System.Windows.Forms.Button btnUACOff;
+        private System.Windows.Forms.Button btnPasswordSharingOff;
+        private System.Windows.Forms.Button btnFirewallOff;
     }
 }
