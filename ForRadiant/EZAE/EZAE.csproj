@@ -60,18 +60,6 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SetSequence.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SetSequence.Designer.cs">
-      <DependentUpon>SetSequence.cs</DependentUpon>
-    </Compile>
-    <Compile Include="TweakPC.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="TweakPC.Designer.cs">
-      <DependentUpon>TweakPC.cs</DependentUpon>
-    </Compile>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -84,12 +72,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="SetSequence.resx">
-      <DependentUpon>SetSequence.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="TweakPC.resx">
-      <DependentUpon>TweakPC.cs</DependentUpon>
-    </EmbeddedResource>
     <None Include="app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -105,7 +87,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ez.ico" />
     <Content Include="Gear.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
