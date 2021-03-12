@@ -22,15 +22,6 @@ namespace EZAE
 
         }
 
-        private void btnCreateFFC_Click(object sender, EventArgs e)
-        {
-            string filepath = @"FFC_Database_Template\Generabe FFC Database.vbs";
-            if (File.Exists(filepath));
-            {
-                Process.Start(filepath);
-            }
-        }
-
         public void ExecuteAsAdmin(string fileName)
         {
             Process proc = new Process();
@@ -40,142 +31,6 @@ namespace EZAE
             proc.Start();
         }
 
-        private void btnCheckLC_Click(object sender, EventArgs e)
-        {
-            string filepath = @"WPSOffice\et.exe";
-            string lcfilepath = @"License Code Combined List.xlsx";
-            if ( File.Exists(filepath) && File.Exists(lcfilepath) ) 
-            {
-                Process.Start(filepath, "\"" + lcfilepath + "\"");
-            }
-            
-        }
-
-        private void btnOpenImageJ_Click(object sender, EventArgs e)
-        {
-            string filepath = @"ImageJ\ImageJ.exe";
-            if (File.Exists(filepath))
-            {
-                Process.Start(filepath);
-            }
-        }
-
-        private void btnOpenLanSearch_Click(object sender, EventArgs e)
-        {
-            string filepath = @"lansearchpro_portable\lansearc.exe";
-            if (File.Exists(filepath))
-            {
-                Process.Start(filepath);
-            }
-        }
-
-        private void btnOpenMTFCenter_Click(object sender, EventArgs e)
-        {
-            string filepath = @"MTF_Center\MTF.exe";
-            if (File.Exists(filepath))
-            {
-                Process.Start(filepath);
-            }
-        }
-
-        private void btnOpenUpdates_Click(object sender, EventArgs e)
-        {
-            string folderpath = @"Updates";
-            if (Directory.Exists(folderpath))
-            {
-                Process.Start(folderpath);
-            }
-        }
-
-        private void btnOpenTools_Click(object sender, EventArgs e)
-        {
-            string folderpath = @"Tools";
-            if (Directory.Exists(folderpath))
-            {
-                Process.Start(folderpath);
-            }
-        }
-
-        private void btnPinEngineerMode_Click(object sender, EventArgs e)
-        {
-            string filepath = @"Tools\pinEngineerModeToTaskBar.bat";
-            if (File.Exists(filepath))
-            {
-                Process.Start(filepath);
-            }
-        }
-
-        private void btnDooone1_Click(object sender, EventArgs e)
-        {
-            string filepath = @"C:\Windows\dooone1.lnk";
-            if (File.Exists(filepath))
-            {
-                Process.Start(filepath);
-            }
-        }
-
-        private void btnDooone2_Click(object sender, EventArgs e)
-        {
-            string filepath = @"C:\Windows\dooone2.lnk";
-            if (File.Exists(filepath))
-            {
-                Process.Start(filepath);
-            }
-        }
-
-        private void btnDooone3_Click(object sender, EventArgs e)
-        {
-            string filepath = @"C:\Windows\dooone3.lnk";
-            if (File.Exists(filepath))
-            {
-                Process.Start(filepath);
-            }
-        }
-
-        private void btnDooone4_Click(object sender, EventArgs e)
-        {
-            string filepath = @"C:\Windows\dooone4.lnk";
-            if (File.Exists(filepath))
-            {
-                Process.Start(filepath);
-            }
-        }
-
-        private void btnGooil1_Click(object sender, EventArgs e)
-        {
-            string filepath = @"C:\Windows\gooil1.lnk";
-            if (File.Exists(filepath))
-            {
-                Process.Start(filepath);
-            }
-        }
-
-        private void btnGooil2_Click(object sender, EventArgs e)
-        {
-            string filepath = @"C:\Windows\gooil2.lnk";
-            if (File.Exists(filepath))
-            {
-                Process.Start(filepath);
-            }
-        }
-
-        private void btnGooil3_Click(object sender, EventArgs e)
-        {
-            string filepath = @"C:\Windows\gooil3.lnk";
-            if (File.Exists(filepath))
-            {
-                Process.Start(filepath);
-            }
-        }
-
-        private void btnGooil4_Click(object sender, EventArgs e)
-        {
-            string filepath = @"C:\Windows\gooil4.lnk";
-            if (File.Exists(filepath))
-            {
-                Process.Start(filepath);
-            }
-        }
 
         private void btnApply_Click(object sender, EventArgs e)
         {
@@ -354,33 +209,183 @@ namespace EZAE
             }
         }
 
-        private void btnUseLastModified_Click(object sender, EventArgs e)
+
+
+     
+    
+        
+
+       
+
+        private void tabSetSequence_Enter(object sender, EventArgs e)
         {
+          
             if (Directory.Exists(@"C:\Radiant Vision Systems Data\TrueTest\Sequence"))
             {
                 var latestfile = new DirectoryInfo(@"C:\Radiant Vision Systems Data\TrueTest\Sequence").GetFiles().OrderByDescending(o => o.LastWriteTime).FirstOrDefault();
                 lblSequenceFileName.Text = latestfile.FullName;
             }
-            this.Controls.Remove(cbSubframe);
-            this.Controls.Add(cbSubframe);
         }
 
-        private void btnBrowseSequence_Click(object sender, EventArgs e)
+        private void tabSetupPC_Enter(object sender, EventArgs e)
         {
-
-            using (OpenFileDialog dialog = new OpenFileDialog())
-            {
-                dialog.InitialDirectory = @"C:\Radiant Vision Systems Data\TrueTest\Sequence";
-                if (dialog.ShowDialog(this) == DialogResult.OK)
-                {
-                    lblSequenceFileName.Text = dialog.FileName;
-                }
-            }
-            this.Controls.Remove(cbSubframe);
-            this.Controls.Add(cbSubframe);
+         
         }
 
-        private void btnInstallTightVNC_Click(object sender, EventArgs e)
+        private void tabControl_Enter(object sender, EventArgs e)
+        {
+        
+        }
+
+
+        private void cmdPinEngineerMode_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = @"Tools\pinEngineerModeToTaskBar.bat";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void cmdOpenImageJ_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = @"ImageJ\ImageJ.exe";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void cmdOpenLanSearch_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = @"lansearchpro_portable\lansearc.exe";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void cmdOpenUpdates_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string folderpath = @"Updates";
+            if (Directory.Exists(folderpath))
+            {
+                Process.Start(folderpath);
+            }
+        }
+
+        private void cmdOpenMTFCenter_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = @"MTF_Center\MTF.exe";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void cmdOpenTools_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string folderpath = @"Tools";
+            if (Directory.Exists(folderpath))
+            {
+                Process.Start(folderpath);
+            }
+        }
+
+        private void cmdCheckLC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = @"WPSOffice\et.exe";
+            string lcfilepath = @"License Code Combined List.xlsx";
+            if (File.Exists(filepath) && File.Exists(lcfilepath))
+            {
+                Process.Start(filepath, "\"" + lcfilepath + "\"");
+            }
+        }
+
+        private void cmdCreateFFC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = @"FFC_Database_Template\Generabe FFC Database.vbs";
+            if (File.Exists(filepath)) ;
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void cmdOpenDooone1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = @"C:\Windows\dooone1.lnk";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void cmdOpenDooone2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = @"C:\Windows\dooone2.lnk";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void cmdOpenDooone3_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = @"C:\Windows\dooone3.lnk";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void cmdOpenDooone4_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = @"C:\Windows\dooone4.lnk";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void cmdOpenGooil1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = @"C:\Windows\gooil1.lnk";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void cmdOpenGooil2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = @"C:\Windows\gooil2.lnk";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void cmdOpenGooil3_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = @"C:\Windows\gooil3.lnk";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+ 
+
+        private void cmdOpenGooil4_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = @"C:\Windows\gooil4.lnk";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void cmdInstallTightVNC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (cbTightVNCPath.Text == @"D:\Program")
             {
@@ -396,7 +401,7 @@ namespace EZAE
             }
         }
 
-        private void btnRemoveTightVNC_Click(object sender, EventArgs e)
+        private void cmdRemoveTightVNC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (File.Exists(@"D:\Program\TightVNC\Remove TightVNC.bat"))
             {
@@ -408,7 +413,7 @@ namespace EZAE
             }
         }
 
-        private void btnCopyDISettings_Click(object sender, EventArgs e)
+        private void cmdCopyDISettings_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             switch (cbDIList.Text)
             {
@@ -465,7 +470,7 @@ namespace EZAE
             }
         }
 
-        private void btnInstallIrfanview_Click(object sender, EventArgs e)
+        private void cmdInstallIrfanview_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (File.Exists(@"Installer\iview457_x64_setup silent.bat"))
             {
@@ -473,7 +478,7 @@ namespace EZAE
             }
         }
 
-        private void btnInstallVC12_Click(object sender, EventArgs e)
+        private void cmdInstallVC12_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (File.Exists(@"Installer\Visual C++ 2012\VC2012_silent_install.bat"))
             {
@@ -481,7 +486,7 @@ namespace EZAE
             }
         }
 
-        private void btnInstallVC1519_Click(object sender, EventArgs e)
+        private void cmdInstallVC1519_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (File.Exists(@"Installer\Visual C++ 2015-2019\VC2015-2019_silent_install.bat"))
             {
@@ -489,7 +494,7 @@ namespace EZAE
             }
         }
 
-        private void btnInstallKdiff_Click(object sender, EventArgs e)
+        private void cmdInstallKdiff_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (File.Exists(@"Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat"))
             {
@@ -497,7 +502,7 @@ namespace EZAE
             }
         }
 
-        private void btnInstallNPP_Click(object sender, EventArgs e)
+        private void cmdInstallNPP_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (File.Exists(@"Installer\npp.7.8.1.Installer.x64 silent.bat"))
             {
@@ -505,7 +510,7 @@ namespace EZAE
             }
         }
 
-        private void btnInstallDotnet_Click(object sender, EventArgs e)
+        private void cmdInstallDotnet48_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (File.Exists(@"Installer\ndp48-x86-x64-allos-enu.exe"))
             {
@@ -513,7 +518,7 @@ namespace EZAE
             }
         }
 
-        private void btnInstallMatlab_Click(object sender, EventArgs e)
+        private void cmdInstallMatlab_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (File.Exists(@"Installer\MCR_R2017b_win64_installer.exe"))
             {
@@ -521,7 +526,7 @@ namespace EZAE
             }
         }
 
-        private void btnShareC_Click(object sender, EventArgs e)
+        private void cmdShareC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (File.Exists(@"Tools\ShareC.bat"))
             {
@@ -529,7 +534,7 @@ namespace EZAE
             }
         }
 
-        private void btnShareD_Click(object sender, EventArgs e)
+        private void cmdShareD_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (File.Exists(@"Tools\ShareD.bat"))
             {
@@ -537,7 +542,7 @@ namespace EZAE
             }
         }
 
-        private void btnShareE_Click(object sender, EventArgs e)
+        private void cmdShareE_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (File.Exists(@"Tools\ShareE.bat"))
             {
@@ -545,7 +550,7 @@ namespace EZAE
             }
         }
 
-        private void btnShareRVSData_Click(object sender, EventArgs e)
+        private void cmdShareRVSData_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (File.Exists(@"Tools\ShareRadiantVisionSystemsData.bat"))
             {
@@ -553,47 +558,7 @@ namespace EZAE
             }
         }
 
-        private void btnCreateOTPandResult_Click(object sender, EventArgs e)
-        {
-            if (File.Exists(@"Tools\CreateOTPandResult.bat"))
-            {
-                ExecuteAsAdmin(@"Tools\CreateOTPandResult.bat");
-            }
-        }
-
-        private void btnShareDProgram_Click(object sender, EventArgs e)
-        {
-            if (File.Exists(@"Tools\ShareDProgram.bat"))
-            {
-                ExecuteAsAdmin(@"Tools\ShareDProgram.bat");
-            }
-        }
-
-        private void btnPinFolders_Click(object sender, EventArgs e)
-        {
-            if (File.Exists(@"Tools\pinFolders.bat"))
-            {
-                ExecuteAsAdmin(@"Tools\pinFolders.bat");
-            }
-        }
-
-        private void btnGivePermission_Click(object sender, EventArgs e)
-        {
-            if (File.Exists(@"Tools\updatePermission.bat"))
-            {
-                ExecuteAsAdmin(@"Tools\updatePermission.bat");
-            }
-        }
-
-        private void btnInstallWireshark_Click(object sender, EventArgs e)
-        {
-            if (File.Exists(@"Installer\Wireshark-win64-3.4.3.exe"))
-            {
-                ExecuteAsAdmin(@"Installer\Wireshark-win64-3.4.3.exe");
-            }
-        }
-
-        private void btnShareCProgram_Click(object sender, EventArgs e)
+        private void cmdShareCProgram_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (File.Exists(@"Tools\ShareCProgram.bat"))
             {
@@ -601,7 +566,15 @@ namespace EZAE
             }
         }
 
-        private void btnShareEProgram_Click(object sender, EventArgs e)
+        private void cmdShareDProgram_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"Tools\ShareDProgram.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\ShareDProgram.bat");
+            }
+        }
+
+        private void cmdShareEProgram_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (File.Exists(@"Tools\ShareEProgram.bat"))
             {
@@ -609,7 +582,86 @@ namespace EZAE
             }
         }
 
-        private void btnCopyAllToLocalProgram_Click(object sender, EventArgs e)
+        private void cmdCreateOTPandResult_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"Installer\CopyOTP.vbs"))
+            {
+                Process.Start(@"Installer\CopyOTP.vbs");
+            }
+
+        }
+
+        private void cmdSetTTPermission_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"Tools\updatePermission.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\updatePermission.bat");
+            }
+        }
+
+       
+        private void cmdInstallWireshark_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"Installer\Wireshark-win64-3.4.3.exe"))
+            {
+                ExecuteAsAdmin(@"Installer\Wireshark-win64-3.4.3.exe");
+            }
+        }
+
+        private void cmdPinFixturePcFolders_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"Tools\pinFixturePCFolders.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\pinFixturePCFolders.bat");
+            }
+        }
+
+        private void cmdPinCameraPcFolders_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"Tools\pinCameraPCFolders.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\pinCameraPCFolders.bat");
+            }
+        }
+
+        private void cmdUACOff_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"Tools\disableUAC.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\disableUAC.bat");
+            }
+        }
+
+        private void cmdFirewallOff_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"Tools\FirewallOff.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\FirewallOff.bat");
+            }
+        }
+
+        private void cmdBrowseSequence_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            using (OpenFileDialog dialog = new OpenFileDialog())
+            {
+                dialog.InitialDirectory = @"C:\Radiant Vision Systems Data\TrueTest\Sequence";
+                if (dialog.ShowDialog(this) == DialogResult.OK)
+                {
+                    lblSequenceFileName.Text = dialog.FileName;
+                }
+            }
+        }
+
+        private void cmdUseLastModifiedSequence_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (Directory.Exists(@"C:\Radiant Vision Systems Data\TrueTest\Sequence"))
+            {
+                var latestfile = new DirectoryInfo(@"C:\Radiant Vision Systems Data\TrueTest\Sequence").GetFiles().OrderByDescending(o => o.LastWriteTime).FirstOrDefault();
+                lblSequenceFileName.Text = latestfile.FullName;
+            }
+        }
+
+        private void cmdCopyRVStolocal_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (File.Exists(@"CopyScript\copyFilesToLocal.vbs"))
             {
@@ -622,15 +674,7 @@ namespace EZAE
             }
         }
 
-        private void btnUACOff_Click(object sender, EventArgs e)
-        {
-            if (File.Exists(@"Tools\disableUAC.bat"))
-            {
-                ExecuteAsAdmin(@"Tools\disableUAC.bat");
-            }
-        }
-
-        private void btnPasswordSharingOff_Click(object sender, EventArgs e)
+        private void cmdPasswordSharingOff_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (File.Exists(@"Tools\PasswordSharingOff.bat"))
             {
@@ -638,32 +682,181 @@ namespace EZAE
             }
         }
 
-        private void btnFirewallOff_Click(object sender, EventArgs e)
+        private void cmdOneclickSetupCameraPC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
+            if (File.Exists(@"Tools\disableUAC.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\disableUAC.bat");
+            }
+
+            if (File.Exists(@"Tools\PasswordSharingOff.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\PasswordSharingOff.bat");
+            }
+
             if (File.Exists(@"Tools\FirewallOff.bat"))
             {
                 ExecuteAsAdmin(@"Tools\FirewallOff.bat");
             }
-        }
 
-        private void tabSetSequence_Enter(object sender, EventArgs e)
-        {
-          
-            if (Directory.Exists(@"C:\Radiant Vision Systems Data\TrueTest\Sequence"))
+            if (File.Exists(@"Tools\ShareC.bat"))
             {
-                var latestfile = new DirectoryInfo(@"C:\Radiant Vision Systems Data\TrueTest\Sequence").GetFiles().OrderByDescending(o => o.LastWriteTime).FirstOrDefault();
-                lblSequenceFileName.Text = latestfile.FullName;
+                ExecuteAsAdmin(@"Tools\ShareC.bat");
+            }
+
+            if (File.Exists(@"Tools\ShareD.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\ShareD.bat");
+            }
+
+            if (File.Exists(@"Tools\ShareE.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\ShareE.bat");
+            }
+
+            if (File.Exists(@"Tools\ShareRadiantVisionSystemsData.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\ShareRadiantVisionSystemsData.bat");
+            }
+
+            if (File.Exists(@"Tools\ShareProgram.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\ShareProgram.bat");
+            }
+
+            if (File.Exists(@"Tools\pinFixturePCFolders.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\pinFixturePCFolders.bat");
+            }
+
+            if (File.Exists(@"Installer\Visual C++ 2012\VC2012_silent_install.bat"))
+            {
+                ExecuteAsAdmin(@"Installer\Visual C++ 2012\VC2012_silent_install.bat");
+            }
+
+            if (File.Exists(@"Installer\Visual C++ 2015-2019\VC2015-2019_silent_install.bat"))
+            {
+                ExecuteAsAdmin(@"Installer\Visual C++ 2015-2019\VC2015-2019_silent_install.bat");
+            }
+
+            if (File.Exists(@"Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat"))
+            {
+                ExecuteAsAdmin(@"Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat");
+            }
+
+            if (File.Exists(@"Installer\iview457_x64_setup silent.bat"))
+            {
+                ExecuteAsAdmin(@"Installer\iview457_x64_setup silent.bat");
+            }
+
+            if (File.Exists(@"Installer\npp.7.8.1.Installer.x64 silent.bat"))
+            {
+                ExecuteAsAdmin(@"Installer\npp.7.8.1.Installer.x64 silent.bat");
+            }
+
+            if (File.Exists(@"Installer\ndp48-x86-x64-allos-enu.exe"))
+            {
+                ExecuteAsAdmin(@"Installer\ndp48-x86-x64-allos-enu.exe");
+            }
+
+            if (File.Exists(@"Installer\MCR_R2017b_win64_installer.exe"))
+            {
+                ExecuteAsAdmin(@"Installer\MCR_R2017b_win64_installer.exe");
             }
         }
 
-        private void tabSetupPC_Enter(object sender, EventArgs e)
+        private void cmdOneclickSetupFixturePC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-         
+            if (File.Exists(@"Tools\disableUAC.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\disableUAC.bat");
+            }
+
+            if (File.Exists(@"Tools\PasswordSharingOff.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\PasswordSharingOff.bat");
+            }
+
+            if (File.Exists(@"Tools\FirewallOff.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\FirewallOff.bat");
+            }
+
+            if (File.Exists(@"Tools\ShareC.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\ShareC.bat");
+            }
+
+            if (File.Exists(@"Tools\ShareD.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\ShareD.bat");
+            }
+
+            if (File.Exists(@"Tools\ShareE.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\ShareE.bat");
+            }
+
+            if (File.Exists(@"Tools\ShareProgram.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\ShareProgram.bat");
+            }
+
+            if (File.Exists(@"Tools\pinCameraPCFolders.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\pinCameraPCFolders.bat");
+            }
+
+            if (File.Exists(@"Installer\Visual C++ 2012\VC2012_silent_install.bat"))
+            {
+                ExecuteAsAdmin(@"Installer\Visual C++ 2012\VC2012_silent_install.bat");
+            }
+
+            if (File.Exists(@"Installer\Visual C++ 2015-2019\VC2015-2019_silent_install.bat"))
+            {
+                ExecuteAsAdmin(@"Installer\Visual C++ 2015-2019\VC2015-2019_silent_install.bat");
+            }
+
+            if (File.Exists(@"Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat"))
+            {
+                ExecuteAsAdmin(@"Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat");
+            }
+
+            if (File.Exists(@"Installer\iview457_x64_setup silent.bat"))
+            {
+                ExecuteAsAdmin(@"Installer\iview457_x64_setup silent.bat");
+            }
+
+            if (File.Exists(@"Installer\npp.7.8.1.Installer.x64 silent.bat"))
+            {
+                ExecuteAsAdmin(@"Installer\npp.7.8.1.Installer.x64 silent.bat");
+            }
         }
 
-        private void tabControl_Enter(object sender, EventArgs e)
+        private void cmdOneclickSetupTrueTest_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-        
+            if (File.Exists(@"Installer\CopyOTP.vbs"))
+            {
+                Process.Start(@"Installer\CopyOTP.vbs");
+            }
+
+            if (File.Exists(@"Tools\updatePermission.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\updatePermission.bat");
+            }
+
+            if (File.Exists(@"Installer\DISettings\SetupDI.bat"))
+            {
+                ExecuteAsAdmin(@"Installer\DISettings\SetupDI.bat");
+            }
+        }
+
+        private void cmdBackupCurrentTT_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"Tools\backupCurrentTT.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\backupCurrentTT.bat");
+            }
         }
     }
 }

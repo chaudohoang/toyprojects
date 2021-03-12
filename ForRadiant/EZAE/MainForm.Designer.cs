@@ -30,233 +30,79 @@ namespace EZAE
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            this.btnCreateFFC = new System.Windows.Forms.Button();
-            this.btnCheckLC = new System.Windows.Forms.Button();
-            this.btnOpenImageJ = new System.Windows.Forms.Button();
-            this.btnOpenLanSearch = new System.Windows.Forms.Button();
-            this.btnOpenMTFCenter = new System.Windows.Forms.Button();
-            this.btnOpenTools = new System.Windows.Forms.Button();
-            this.btnOpenUpdates = new System.Windows.Forms.Button();
-            this.btnPinEngineerMode = new System.Windows.Forms.Button();
-            this.btnDooone1 = new System.Windows.Forms.Button();
-            this.btnDooone2 = new System.Windows.Forms.Button();
-            this.btnDooone3 = new System.Windows.Forms.Button();
-            this.btnDooone4 = new System.Windows.Forms.Button();
-            this.btnGooil1 = new System.Windows.Forms.Button();
-            this.btnGooil2 = new System.Windows.Forms.Button();
-            this.btnGooil3 = new System.Windows.Forms.Button();
-            this.btnGooil4 = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabControl = new System.Windows.Forms.TabPage();
+            this.cmdOpenGooil4 = new System.Windows.Forms.LinkLabel();
+            this.cmdOpenGooil3 = new System.Windows.Forms.LinkLabel();
+            this.cmdOpenGooil2 = new System.Windows.Forms.LinkLabel();
+            this.cmdOpenGooil1 = new System.Windows.Forms.LinkLabel();
+            this.cmdOpenDooone4 = new System.Windows.Forms.LinkLabel();
+            this.cmdOpenDooone3 = new System.Windows.Forms.LinkLabel();
+            this.cmdOpenDooone2 = new System.Windows.Forms.LinkLabel();
+            this.cmdOpenDooone1 = new System.Windows.Forms.LinkLabel();
+            this.cmdCreateFFC = new System.Windows.Forms.LinkLabel();
+            this.cmdCheckLC = new System.Windows.Forms.LinkLabel();
+            this.cmdOpenTools = new System.Windows.Forms.LinkLabel();
+            this.cmdOpenMTFCenter = new System.Windows.Forms.LinkLabel();
+            this.cmdOpenUpdates = new System.Windows.Forms.LinkLabel();
+            this.cmdOpenLanSearch = new System.Windows.Forms.LinkLabel();
+            this.cmdOpenImageJ = new System.Windows.Forms.LinkLabel();
+            this.cmdPinEngineerMode = new System.Windows.Forms.LinkLabel();
             this.tabSetupPC = new System.Windows.Forms.TabPage();
-            this.btnFirewallOff = new System.Windows.Forms.Button();
-            this.btnInstallTightVNC = new System.Windows.Forms.Button();
-            this.btnCopyDISettings = new System.Windows.Forms.Button();
-            this.btnPasswordSharingOff = new System.Windows.Forms.Button();
-            this.cbDIList = new System.Windows.Forms.ComboBox();
+            this.cmdOneclickSetupFixturePC = new System.Windows.Forms.LinkLabel();
+            this.cmdOneclickSetupCameraPC = new System.Windows.Forms.LinkLabel();
+            this.cmdFirewallOff = new System.Windows.Forms.LinkLabel();
+            this.cmdPasswordSharingOff = new System.Windows.Forms.LinkLabel();
+            this.cmdUACOff = new System.Windows.Forms.LinkLabel();
+            this.cmdPinCameraPcFolders = new System.Windows.Forms.LinkLabel();
+            this.cmdPinFixturePcFolders = new System.Windows.Forms.LinkLabel();
+            this.cmdInstallWireshark = new System.Windows.Forms.LinkLabel();
+            this.cmdCopyRVStolocal = new System.Windows.Forms.LinkLabel();
+            this.cmdShareEProgram = new System.Windows.Forms.LinkLabel();
+            this.cmdShareDProgram = new System.Windows.Forms.LinkLabel();
+            this.cmdShareCProgram = new System.Windows.Forms.LinkLabel();
+            this.cmdShareRVSData = new System.Windows.Forms.LinkLabel();
+            this.cmdShareE = new System.Windows.Forms.LinkLabel();
+            this.cmdShareD = new System.Windows.Forms.LinkLabel();
+            this.cmdShareC = new System.Windows.Forms.LinkLabel();
+            this.cmdInstallMatlab = new System.Windows.Forms.LinkLabel();
+            this.cmdInstallDotnet48 = new System.Windows.Forms.LinkLabel();
+            this.cmdInstallNPP = new System.Windows.Forms.LinkLabel();
+            this.cmdInstallKdiff = new System.Windows.Forms.LinkLabel();
+            this.cmdInstallVC1519 = new System.Windows.Forms.LinkLabel();
+            this.cmdInstallVC12 = new System.Windows.Forms.LinkLabel();
+            this.cmdInstallIrfanview = new System.Windows.Forms.LinkLabel();
+            this.cmdRemoveTightVNC = new System.Windows.Forms.LinkLabel();
+            this.cmdInstallTightVNC = new System.Windows.Forms.LinkLabel();
             this.cbTightVNCPath = new System.Windows.Forms.ComboBox();
-            this.btnUACOff = new System.Windows.Forms.Button();
-            this.btnInstallVC12 = new System.Windows.Forms.Button();
-            this.btnRemoveTightVNC = new System.Windows.Forms.Button();
-            this.btnCopyAllToLocalProgram = new System.Windows.Forms.Button();
-            this.btnInstallVC1519 = new System.Windows.Forms.Button();
-            this.btnInstallIrfanview = new System.Windows.Forms.Button();
-            this.btnShareEProgram = new System.Windows.Forms.Button();
-            this.btnInstallKdiff = new System.Windows.Forms.Button();
-            this.btnInstallNPP = new System.Windows.Forms.Button();
-            this.btnShareCProgram = new System.Windows.Forms.Button();
-            this.btnInstallDotnet = new System.Windows.Forms.Button();
-            this.btnInstallMatlab = new System.Windows.Forms.Button();
-            this.btnInstallWireshark = new System.Windows.Forms.Button();
-            this.btnShareC = new System.Windows.Forms.Button();
-            this.btnShareD = new System.Windows.Forms.Button();
-            this.btnGivePermission = new System.Windows.Forms.Button();
-            this.btnShareE = new System.Windows.Forms.Button();
-            this.btnShareRVSData = new System.Windows.Forms.Button();
-            this.btnPinFolders = new System.Windows.Forms.Button();
-            this.btnCreateOTPandResult = new System.Windows.Forms.Button();
-            this.btnShareDProgram = new System.Windows.Forms.Button();
             this.tabSetSequence = new System.Windows.Forms.TabPage();
+            this.cmdSetTTPermission = new System.Windows.Forms.LinkLabel();
+            this.cmdCopyDISettings = new System.Windows.Forms.LinkLabel();
+            this.cbDIList = new System.Windows.Forms.ComboBox();
+            this.cmdCreateOTPandResult = new System.Windows.Forms.LinkLabel();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.cmdBrowseSequence = new System.Windows.Forms.LinkLabel();
             this.lblSequencePath = new System.Windows.Forms.Label();
-            this.lblSequence = new System.Windows.Forms.Label();
-            this.lblSubframe = new System.Windows.Forms.Label();
-            this.lblSequenceFileName = new System.Windows.Forms.Label();
-            this.cbSubframe = new System.Windows.Forms.ComboBox();
-            this.btnUseLastModified = new System.Windows.Forms.Button();
-            this.cbCalBox = new System.Windows.Forms.ComboBox();
-            this.btnBrowseSequence = new System.Windows.Forms.Button();
-            this.lblFocusDistance = new System.Windows.Forms.Label();
-            this.lblCalibrationIDs = new System.Windows.Forms.Label();
-            this.cbFocusDistance = new System.Windows.Forms.ComboBox();
-            this.lblCameraRotatioin = new System.Windows.Forms.Label();
-            this.btnApply = new System.Windows.Forms.Button();
+            this.cmdUseLastModifiedSequence = new System.Windows.Forms.LinkLabel();
             this.cbCameraRotation = new System.Windows.Forms.ComboBox();
+            this.btnApply = new System.Windows.Forms.Button();
+            this.lblSubframe = new System.Windows.Forms.Label();
+            this.lblCameraRotatioin = new System.Windows.Forms.Label();
+            this.lblSequenceFileName = new System.Windows.Forms.Label();
+            this.cbFocusDistance = new System.Windows.Forms.ComboBox();
+            this.cbSubframe = new System.Windows.Forms.ComboBox();
+            this.lblCalibrationIDs = new System.Windows.Forms.Label();
+            this.lblFocusDistance = new System.Windows.Forms.Label();
+            this.cbCalBox = new System.Windows.Forms.ComboBox();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.cmdOneclickSetupTrueTest = new System.Windows.Forms.LinkLabel();
+            this.cmdBackupCurrentTT = new System.Windows.Forms.LinkLabel();
             this.tabControl1.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabSetupPC.SuspendLayout();
             this.tabSetSequence.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // btnCreateFFC
-            // 
-            this.btnCreateFFC.Location = new System.Drawing.Point(3, 173);
-            this.btnCreateFFC.Name = "btnCreateFFC";
-            this.btnCreateFFC.Size = new System.Drawing.Size(123, 28);
-            this.btnCreateFFC.TabIndex = 2;
-            this.btnCreateFFC.Text = "Make FFC Database";
-            this.btnCreateFFC.UseVisualStyleBackColor = true;
-            this.btnCreateFFC.Click += new System.EventHandler(this.btnCreateFFC_Click);
-            // 
-            // btnCheckLC
-            // 
-            this.btnCheckLC.Location = new System.Drawing.Point(3, 71);
-            this.btnCheckLC.Name = "btnCheckLC";
-            this.btnCheckLC.Size = new System.Drawing.Size(123, 28);
-            this.btnCheckLC.TabIndex = 3;
-            this.btnCheckLC.Text = "Check License Code";
-            this.btnCheckLC.UseVisualStyleBackColor = true;
-            this.btnCheckLC.Click += new System.EventHandler(this.btnCheckLC_Click);
-            // 
-            // btnOpenImageJ
-            // 
-            this.btnOpenImageJ.Location = new System.Drawing.Point(132, 3);
-            this.btnOpenImageJ.Name = "btnOpenImageJ";
-            this.btnOpenImageJ.Size = new System.Drawing.Size(123, 28);
-            this.btnOpenImageJ.TabIndex = 4;
-            this.btnOpenImageJ.Text = "Open ImageJ";
-            this.btnOpenImageJ.UseVisualStyleBackColor = true;
-            this.btnOpenImageJ.Click += new System.EventHandler(this.btnOpenImageJ_Click);
-            // 
-            // btnOpenLanSearch
-            // 
-            this.btnOpenLanSearch.Location = new System.Drawing.Point(261, 3);
-            this.btnOpenLanSearch.Name = "btnOpenLanSearch";
-            this.btnOpenLanSearch.Size = new System.Drawing.Size(123, 28);
-            this.btnOpenLanSearch.TabIndex = 5;
-            this.btnOpenLanSearch.Text = "Open Lan Search";
-            this.btnOpenLanSearch.UseVisualStyleBackColor = true;
-            this.btnOpenLanSearch.Click += new System.EventHandler(this.btnOpenLanSearch_Click);
-            // 
-            // btnOpenMTFCenter
-            // 
-            this.btnOpenMTFCenter.Location = new System.Drawing.Point(132, 37);
-            this.btnOpenMTFCenter.Name = "btnOpenMTFCenter";
-            this.btnOpenMTFCenter.Size = new System.Drawing.Size(123, 28);
-            this.btnOpenMTFCenter.TabIndex = 7;
-            this.btnOpenMTFCenter.Text = "Open MTF Center";
-            this.btnOpenMTFCenter.UseVisualStyleBackColor = true;
-            this.btnOpenMTFCenter.Click += new System.EventHandler(this.btnOpenMTFCenter_Click);
-            // 
-            // btnOpenTools
-            // 
-            this.btnOpenTools.Location = new System.Drawing.Point(261, 37);
-            this.btnOpenTools.Name = "btnOpenTools";
-            this.btnOpenTools.Size = new System.Drawing.Size(123, 28);
-            this.btnOpenTools.TabIndex = 8;
-            this.btnOpenTools.Text = "Open Tools";
-            this.btnOpenTools.UseVisualStyleBackColor = true;
-            this.btnOpenTools.Click += new System.EventHandler(this.btnOpenTools_Click);
-            // 
-            // btnOpenUpdates
-            // 
-            this.btnOpenUpdates.Location = new System.Drawing.Point(3, 37);
-            this.btnOpenUpdates.Name = "btnOpenUpdates";
-            this.btnOpenUpdates.Size = new System.Drawing.Size(123, 28);
-            this.btnOpenUpdates.TabIndex = 9;
-            this.btnOpenUpdates.Text = "Open Updates";
-            this.btnOpenUpdates.UseVisualStyleBackColor = true;
-            this.btnOpenUpdates.Click += new System.EventHandler(this.btnOpenUpdates_Click);
-            // 
-            // btnPinEngineerMode
-            // 
-            this.btnPinEngineerMode.Location = new System.Drawing.Point(3, 3);
-            this.btnPinEngineerMode.Name = "btnPinEngineerMode";
-            this.btnPinEngineerMode.Size = new System.Drawing.Size(123, 28);
-            this.btnPinEngineerMode.TabIndex = 13;
-            this.btnPinEngineerMode.Text = "Pin Engineer Mode";
-            this.btnPinEngineerMode.UseVisualStyleBackColor = true;
-            this.btnPinEngineerMode.Click += new System.EventHandler(this.btnPinEngineerMode_Click);
-            // 
-            // btnDooone1
-            // 
-            this.btnDooone1.Location = new System.Drawing.Point(132, 71);
-            this.btnDooone1.Name = "btnDooone1";
-            this.btnDooone1.Size = new System.Drawing.Size(123, 28);
-            this.btnDooone1.TabIndex = 14;
-            this.btnDooone1.Text = "Open Dooone1";
-            this.btnDooone1.UseVisualStyleBackColor = true;
-            this.btnDooone1.Click += new System.EventHandler(this.btnDooone1_Click);
-            // 
-            // btnDooone2
-            // 
-            this.btnDooone2.Location = new System.Drawing.Point(261, 71);
-            this.btnDooone2.Name = "btnDooone2";
-            this.btnDooone2.Size = new System.Drawing.Size(123, 28);
-            this.btnDooone2.TabIndex = 15;
-            this.btnDooone2.Text = "Open Dooone2";
-            this.btnDooone2.UseVisualStyleBackColor = true;
-            this.btnDooone2.Click += new System.EventHandler(this.btnDooone2_Click);
-            // 
-            // btnDooone3
-            // 
-            this.btnDooone3.Location = new System.Drawing.Point(3, 105);
-            this.btnDooone3.Name = "btnDooone3";
-            this.btnDooone3.Size = new System.Drawing.Size(123, 28);
-            this.btnDooone3.TabIndex = 16;
-            this.btnDooone3.Text = "Open Dooone3";
-            this.btnDooone3.UseVisualStyleBackColor = true;
-            this.btnDooone3.Click += new System.EventHandler(this.btnDooone3_Click);
-            // 
-            // btnDooone4
-            // 
-            this.btnDooone4.Location = new System.Drawing.Point(132, 105);
-            this.btnDooone4.Name = "btnDooone4";
-            this.btnDooone4.Size = new System.Drawing.Size(123, 28);
-            this.btnDooone4.TabIndex = 17;
-            this.btnDooone4.Text = "Open Dooone4";
-            this.btnDooone4.UseVisualStyleBackColor = true;
-            this.btnDooone4.Click += new System.EventHandler(this.btnDooone4_Click);
-            // 
-            // btnGooil1
-            // 
-            this.btnGooil1.Location = new System.Drawing.Point(261, 105);
-            this.btnGooil1.Name = "btnGooil1";
-            this.btnGooil1.Size = new System.Drawing.Size(123, 28);
-            this.btnGooil1.TabIndex = 18;
-            this.btnGooil1.Text = "Open Gooil1";
-            this.btnGooil1.UseVisualStyleBackColor = true;
-            this.btnGooil1.Click += new System.EventHandler(this.btnGooil1_Click);
-            // 
-            // btnGooil2
-            // 
-            this.btnGooil2.Location = new System.Drawing.Point(3, 139);
-            this.btnGooil2.Name = "btnGooil2";
-            this.btnGooil2.Size = new System.Drawing.Size(123, 28);
-            this.btnGooil2.TabIndex = 19;
-            this.btnGooil2.Text = "Open Gooil2";
-            this.btnGooil2.UseVisualStyleBackColor = true;
-            this.btnGooil2.Click += new System.EventHandler(this.btnGooil2_Click);
-            // 
-            // btnGooil3
-            // 
-            this.btnGooil3.Location = new System.Drawing.Point(132, 139);
-            this.btnGooil3.Name = "btnGooil3";
-            this.btnGooil3.Size = new System.Drawing.Size(123, 28);
-            this.btnGooil3.TabIndex = 20;
-            this.btnGooil3.Text = "Open Gooil3";
-            this.btnGooil3.UseVisualStyleBackColor = true;
-            this.btnGooil3.Click += new System.EventHandler(this.btnGooil3_Click);
-            // 
-            // btnGooil4
-            // 
-            this.btnGooil4.Location = new System.Drawing.Point(261, 139);
-            this.btnGooil4.Name = "btnGooil4";
-            this.btnGooil4.Size = new System.Drawing.Size(123, 28);
-            this.btnGooil4.TabIndex = 21;
-            this.btnGooil4.Text = "Open Gooil4";
-            this.btnGooil4.UseVisualStyleBackColor = true;
-            this.btnGooil4.Click += new System.EventHandler(this.btnGooil4_Click);
             // 
             // tabControl1
             // 
@@ -266,112 +112,577 @@ namespace EZAE
             this.tabControl1.Location = new System.Drawing.Point(2, 3);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(583, 354);
+            this.tabControl1.Size = new System.Drawing.Size(672, 423);
             this.tabControl1.TabIndex = 22;
             // 
             // tabControl
             // 
-            this.tabControl.Controls.Add(this.btnPinEngineerMode);
-            this.tabControl.Controls.Add(this.btnGooil4);
-            this.tabControl.Controls.Add(this.btnCreateFFC);
-            this.tabControl.Controls.Add(this.btnGooil3);
-            this.tabControl.Controls.Add(this.btnCheckLC);
-            this.tabControl.Controls.Add(this.btnGooil2);
-            this.tabControl.Controls.Add(this.btnOpenImageJ);
-            this.tabControl.Controls.Add(this.btnGooil1);
-            this.tabControl.Controls.Add(this.btnOpenLanSearch);
-            this.tabControl.Controls.Add(this.btnDooone4);
-            this.tabControl.Controls.Add(this.btnOpenMTFCenter);
-            this.tabControl.Controls.Add(this.btnDooone3);
-            this.tabControl.Controls.Add(this.btnOpenTools);
-            this.tabControl.Controls.Add(this.btnDooone2);
-            this.tabControl.Controls.Add(this.btnOpenUpdates);
-            this.tabControl.Controls.Add(this.btnDooone1);
+            this.tabControl.Controls.Add(this.cmdOpenGooil4);
+            this.tabControl.Controls.Add(this.cmdOpenGooil3);
+            this.tabControl.Controls.Add(this.cmdOpenGooil2);
+            this.tabControl.Controls.Add(this.cmdOpenGooil1);
+            this.tabControl.Controls.Add(this.cmdOpenDooone4);
+            this.tabControl.Controls.Add(this.cmdOpenDooone3);
+            this.tabControl.Controls.Add(this.cmdOpenDooone2);
+            this.tabControl.Controls.Add(this.cmdOpenDooone1);
+            this.tabControl.Controls.Add(this.cmdCreateFFC);
+            this.tabControl.Controls.Add(this.cmdCheckLC);
+            this.tabControl.Controls.Add(this.cmdOpenTools);
+            this.tabControl.Controls.Add(this.cmdOpenMTFCenter);
+            this.tabControl.Controls.Add(this.cmdOpenUpdates);
+            this.tabControl.Controls.Add(this.cmdOpenLanSearch);
+            this.tabControl.Controls.Add(this.cmdOpenImageJ);
+            this.tabControl.Controls.Add(this.cmdPinEngineerMode);
             this.tabControl.Location = new System.Drawing.Point(4, 22);
             this.tabControl.Name = "tabControl";
-            this.tabControl.Size = new System.Drawing.Size(575, 328);
+            this.tabControl.Size = new System.Drawing.Size(664, 397);
             this.tabControl.TabIndex = 2;
             this.tabControl.Text = "Control";
             this.tabControl.UseVisualStyleBackColor = true;
             this.tabControl.Enter += new System.EventHandler(this.tabControl_Enter);
             // 
+            // cmdOpenGooil4
+            // 
+            this.cmdOpenGooil4.AutoSize = true;
+            this.cmdOpenGooil4.Location = new System.Drawing.Point(222, 114);
+            this.cmdOpenGooil4.Name = "cmdOpenGooil4";
+            this.cmdOpenGooil4.Size = new System.Drawing.Size(66, 13);
+            this.cmdOpenGooil4.TabIndex = 38;
+            this.cmdOpenGooil4.TabStop = true;
+            this.cmdOpenGooil4.Text = "Open Gooil4";
+            this.cmdOpenGooil4.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenGooil4_LinkClicked);
+            // 
+            // cmdOpenGooil3
+            // 
+            this.cmdOpenGooil3.AutoSize = true;
+            this.cmdOpenGooil3.Location = new System.Drawing.Point(150, 114);
+            this.cmdOpenGooil3.Name = "cmdOpenGooil3";
+            this.cmdOpenGooil3.Size = new System.Drawing.Size(66, 13);
+            this.cmdOpenGooil3.TabIndex = 37;
+            this.cmdOpenGooil3.TabStop = true;
+            this.cmdOpenGooil3.Text = "Open Gooil3";
+            this.cmdOpenGooil3.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenGooil3_LinkClicked);
+            // 
+            // cmdOpenGooil2
+            // 
+            this.cmdOpenGooil2.AutoSize = true;
+            this.cmdOpenGooil2.Location = new System.Drawing.Point(78, 114);
+            this.cmdOpenGooil2.Name = "cmdOpenGooil2";
+            this.cmdOpenGooil2.Size = new System.Drawing.Size(66, 13);
+            this.cmdOpenGooil2.TabIndex = 36;
+            this.cmdOpenGooil2.TabStop = true;
+            this.cmdOpenGooil2.Text = "Open Gooil2";
+            this.cmdOpenGooil2.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenGooil2_LinkClicked);
+            // 
+            // cmdOpenGooil1
+            // 
+            this.cmdOpenGooil1.AutoSize = true;
+            this.cmdOpenGooil1.Location = new System.Drawing.Point(6, 114);
+            this.cmdOpenGooil1.Name = "cmdOpenGooil1";
+            this.cmdOpenGooil1.Size = new System.Drawing.Size(66, 13);
+            this.cmdOpenGooil1.TabIndex = 35;
+            this.cmdOpenGooil1.TabStop = true;
+            this.cmdOpenGooil1.Text = "Open Gooil1";
+            this.cmdOpenGooil1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenGooil1_LinkClicked);
+            // 
+            // cmdOpenDooone4
+            // 
+            this.cmdOpenDooone4.AutoSize = true;
+            this.cmdOpenDooone4.Location = new System.Drawing.Point(264, 89);
+            this.cmdOpenDooone4.Name = "cmdOpenDooone4";
+            this.cmdOpenDooone4.Size = new System.Drawing.Size(80, 13);
+            this.cmdOpenDooone4.TabIndex = 34;
+            this.cmdOpenDooone4.TabStop = true;
+            this.cmdOpenDooone4.Text = "Open Dooone4";
+            this.cmdOpenDooone4.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenDooone4_LinkClicked);
+            // 
+            // cmdOpenDooone3
+            // 
+            this.cmdOpenDooone3.AutoSize = true;
+            this.cmdOpenDooone3.Location = new System.Drawing.Point(178, 89);
+            this.cmdOpenDooone3.Name = "cmdOpenDooone3";
+            this.cmdOpenDooone3.Size = new System.Drawing.Size(80, 13);
+            this.cmdOpenDooone3.TabIndex = 33;
+            this.cmdOpenDooone3.TabStop = true;
+            this.cmdOpenDooone3.Text = "Open Dooone3";
+            this.cmdOpenDooone3.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenDooone3_LinkClicked);
+            // 
+            // cmdOpenDooone2
+            // 
+            this.cmdOpenDooone2.AutoSize = true;
+            this.cmdOpenDooone2.Location = new System.Drawing.Point(92, 89);
+            this.cmdOpenDooone2.Name = "cmdOpenDooone2";
+            this.cmdOpenDooone2.Size = new System.Drawing.Size(80, 13);
+            this.cmdOpenDooone2.TabIndex = 32;
+            this.cmdOpenDooone2.TabStop = true;
+            this.cmdOpenDooone2.Text = "Open Dooone2";
+            this.cmdOpenDooone2.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenDooone2_LinkClicked);
+            // 
+            // cmdOpenDooone1
+            // 
+            this.cmdOpenDooone1.AutoSize = true;
+            this.cmdOpenDooone1.Location = new System.Drawing.Point(6, 89);
+            this.cmdOpenDooone1.Name = "cmdOpenDooone1";
+            this.cmdOpenDooone1.Size = new System.Drawing.Size(80, 13);
+            this.cmdOpenDooone1.TabIndex = 31;
+            this.cmdOpenDooone1.TabStop = true;
+            this.cmdOpenDooone1.Text = "Open Dooone1";
+            this.cmdOpenDooone1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenDooone1_LinkClicked);
+            // 
+            // cmdCreateFFC
+            // 
+            this.cmdCreateFFC.AutoSize = true;
+            this.cmdCreateFFC.Location = new System.Drawing.Point(118, 61);
+            this.cmdCreateFFC.Name = "cmdCreateFFC";
+            this.cmdCreateFFC.Size = new System.Drawing.Size(114, 13);
+            this.cmdCreateFFC.TabIndex = 30;
+            this.cmdCreateFFC.TabStop = true;
+            this.cmdCreateFFC.Text = "Create FFC Databases";
+            this.cmdCreateFFC.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCreateFFC_LinkClicked);
+            // 
+            // cmdCheckLC
+            // 
+            this.cmdCheckLC.AutoSize = true;
+            this.cmdCheckLC.Location = new System.Drawing.Point(6, 61);
+            this.cmdCheckLC.Name = "cmdCheckLC";
+            this.cmdCheckLC.Size = new System.Drawing.Size(106, 13);
+            this.cmdCheckLC.TabIndex = 29;
+            this.cmdCheckLC.TabStop = true;
+            this.cmdCheckLC.Text = "Check License Code";
+            this.cmdCheckLC.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCheckLC_LinkClicked);
+            // 
+            // cmdOpenTools
+            // 
+            this.cmdOpenTools.AutoSize = true;
+            this.cmdOpenTools.Location = new System.Drawing.Point(186, 34);
+            this.cmdOpenTools.Name = "cmdOpenTools";
+            this.cmdOpenTools.Size = new System.Drawing.Size(62, 13);
+            this.cmdOpenTools.TabIndex = 28;
+            this.cmdOpenTools.TabStop = true;
+            this.cmdOpenTools.Text = "Open Tools";
+            this.cmdOpenTools.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenTools_LinkClicked);
+            // 
+            // cmdOpenMTFCenter
+            // 
+            this.cmdOpenMTFCenter.AutoSize = true;
+            this.cmdOpenMTFCenter.Location = new System.Drawing.Point(88, 34);
+            this.cmdOpenMTFCenter.Name = "cmdOpenMTFCenter";
+            this.cmdOpenMTFCenter.Size = new System.Drawing.Size(92, 13);
+            this.cmdOpenMTFCenter.TabIndex = 27;
+            this.cmdOpenMTFCenter.TabStop = true;
+            this.cmdOpenMTFCenter.Text = "Open MTF Center";
+            this.cmdOpenMTFCenter.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenMTFCenter_LinkClicked);
+            // 
+            // cmdOpenUpdates
+            // 
+            this.cmdOpenUpdates.AutoSize = true;
+            this.cmdOpenUpdates.Location = new System.Drawing.Point(6, 34);
+            this.cmdOpenUpdates.Name = "cmdOpenUpdates";
+            this.cmdOpenUpdates.Size = new System.Drawing.Size(76, 13);
+            this.cmdOpenUpdates.TabIndex = 26;
+            this.cmdOpenUpdates.TabStop = true;
+            this.cmdOpenUpdates.Text = "Open Updates";
+            this.cmdOpenUpdates.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenUpdates_LinkClicked);
+            // 
+            // cmdOpenLanSearch
+            // 
+            this.cmdOpenLanSearch.AutoSize = true;
+            this.cmdOpenLanSearch.Location = new System.Drawing.Point(185, 10);
+            this.cmdOpenLanSearch.Name = "cmdOpenLanSearch";
+            this.cmdOpenLanSearch.Size = new System.Drawing.Size(91, 13);
+            this.cmdOpenLanSearch.TabIndex = 25;
+            this.cmdOpenLanSearch.TabStop = true;
+            this.cmdOpenLanSearch.Text = "Open Lan Search";
+            this.cmdOpenLanSearch.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenLanSearch_LinkClicked);
+            // 
+            // cmdOpenImageJ
+            // 
+            this.cmdOpenImageJ.AutoSize = true;
+            this.cmdOpenImageJ.Location = new System.Drawing.Point(109, 10);
+            this.cmdOpenImageJ.Name = "cmdOpenImageJ";
+            this.cmdOpenImageJ.Size = new System.Drawing.Size(70, 13);
+            this.cmdOpenImageJ.TabIndex = 24;
+            this.cmdOpenImageJ.TabStop = true;
+            this.cmdOpenImageJ.Text = "Open ImageJ";
+            this.cmdOpenImageJ.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenImageJ_LinkClicked);
+            // 
+            // cmdPinEngineerMode
+            // 
+            this.cmdPinEngineerMode.AutoSize = true;
+            this.cmdPinEngineerMode.Location = new System.Drawing.Point(6, 10);
+            this.cmdPinEngineerMode.Name = "cmdPinEngineerMode";
+            this.cmdPinEngineerMode.Size = new System.Drawing.Size(97, 13);
+            this.cmdPinEngineerMode.TabIndex = 23;
+            this.cmdPinEngineerMode.TabStop = true;
+            this.cmdPinEngineerMode.Text = "Pin Engineer Mode";
+            this.cmdPinEngineerMode.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdPinEngineerMode_LinkClicked);
+            // 
             // tabSetupPC
             // 
-            this.tabSetupPC.Controls.Add(this.btnFirewallOff);
-            this.tabSetupPC.Controls.Add(this.btnInstallTightVNC);
-            this.tabSetupPC.Controls.Add(this.btnCopyDISettings);
-            this.tabSetupPC.Controls.Add(this.btnPasswordSharingOff);
-            this.tabSetupPC.Controls.Add(this.cbDIList);
+            this.tabSetupPC.Controls.Add(this.cmdOneclickSetupFixturePC);
+            this.tabSetupPC.Controls.Add(this.cmdOneclickSetupCameraPC);
+            this.tabSetupPC.Controls.Add(this.cmdFirewallOff);
+            this.tabSetupPC.Controls.Add(this.cmdPasswordSharingOff);
+            this.tabSetupPC.Controls.Add(this.cmdUACOff);
+            this.tabSetupPC.Controls.Add(this.cmdPinCameraPcFolders);
+            this.tabSetupPC.Controls.Add(this.cmdPinFixturePcFolders);
+            this.tabSetupPC.Controls.Add(this.cmdInstallWireshark);
+            this.tabSetupPC.Controls.Add(this.cmdCopyRVStolocal);
+            this.tabSetupPC.Controls.Add(this.cmdShareEProgram);
+            this.tabSetupPC.Controls.Add(this.cmdShareDProgram);
+            this.tabSetupPC.Controls.Add(this.cmdShareCProgram);
+            this.tabSetupPC.Controls.Add(this.cmdShareRVSData);
+            this.tabSetupPC.Controls.Add(this.cmdShareE);
+            this.tabSetupPC.Controls.Add(this.cmdShareD);
+            this.tabSetupPC.Controls.Add(this.cmdShareC);
+            this.tabSetupPC.Controls.Add(this.cmdInstallMatlab);
+            this.tabSetupPC.Controls.Add(this.cmdInstallDotnet48);
+            this.tabSetupPC.Controls.Add(this.cmdInstallNPP);
+            this.tabSetupPC.Controls.Add(this.cmdInstallKdiff);
+            this.tabSetupPC.Controls.Add(this.cmdInstallVC1519);
+            this.tabSetupPC.Controls.Add(this.cmdInstallVC12);
+            this.tabSetupPC.Controls.Add(this.cmdInstallIrfanview);
+            this.tabSetupPC.Controls.Add(this.cmdRemoveTightVNC);
+            this.tabSetupPC.Controls.Add(this.cmdInstallTightVNC);
             this.tabSetupPC.Controls.Add(this.cbTightVNCPath);
-            this.tabSetupPC.Controls.Add(this.btnUACOff);
-            this.tabSetupPC.Controls.Add(this.btnInstallVC12);
-            this.tabSetupPC.Controls.Add(this.btnRemoveTightVNC);
-            this.tabSetupPC.Controls.Add(this.btnCopyAllToLocalProgram);
-            this.tabSetupPC.Controls.Add(this.btnInstallVC1519);
-            this.tabSetupPC.Controls.Add(this.btnInstallIrfanview);
-            this.tabSetupPC.Controls.Add(this.btnShareEProgram);
-            this.tabSetupPC.Controls.Add(this.btnInstallKdiff);
-            this.tabSetupPC.Controls.Add(this.btnInstallNPP);
-            this.tabSetupPC.Controls.Add(this.btnShareCProgram);
-            this.tabSetupPC.Controls.Add(this.btnInstallDotnet);
-            this.tabSetupPC.Controls.Add(this.btnInstallMatlab);
-            this.tabSetupPC.Controls.Add(this.btnInstallWireshark);
-            this.tabSetupPC.Controls.Add(this.btnShareC);
-            this.tabSetupPC.Controls.Add(this.btnShareD);
-            this.tabSetupPC.Controls.Add(this.btnGivePermission);
-            this.tabSetupPC.Controls.Add(this.btnShareE);
-            this.tabSetupPC.Controls.Add(this.btnShareRVSData);
-            this.tabSetupPC.Controls.Add(this.btnPinFolders);
-            this.tabSetupPC.Controls.Add(this.btnCreateOTPandResult);
-            this.tabSetupPC.Controls.Add(this.btnShareDProgram);
             this.tabSetupPC.Location = new System.Drawing.Point(4, 22);
             this.tabSetupPC.Name = "tabSetupPC";
             this.tabSetupPC.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSetupPC.Size = new System.Drawing.Size(404, 328);
+            this.tabSetupPC.Size = new System.Drawing.Size(664, 397);
             this.tabSetupPC.TabIndex = 1;
             this.tabSetupPC.Text = "Setup PC";
             this.tabSetupPC.UseVisualStyleBackColor = true;
             this.tabSetupPC.Enter += new System.EventHandler(this.tabSetupPC_Enter);
             // 
-            // btnFirewallOff
+            // cmdOneclickSetupFixturePC
             // 
-            this.btnFirewallOff.Location = new System.Drawing.Point(249, 275);
-            this.btnFirewallOff.Name = "btnFirewallOff";
-            this.btnFirewallOff.Size = new System.Drawing.Size(105, 28);
-            this.btnFirewallOff.TabIndex = 54;
-            this.btnFirewallOff.Text = "Firewall Off";
-            this.btnFirewallOff.UseVisualStyleBackColor = true;
-            this.btnFirewallOff.Click += new System.EventHandler(this.btnFirewallOff_Click);
+            this.cmdOneclickSetupFixturePC.AutoSize = true;
+            this.cmdOneclickSetupFixturePC.LinkColor = System.Drawing.Color.Red;
+            this.cmdOneclickSetupFixturePC.Location = new System.Drawing.Point(152, 10);
+            this.cmdOneclickSetupFixturePC.Name = "cmdOneclickSetupFixturePC";
+            this.cmdOneclickSetupFixturePC.Size = new System.Drawing.Size(135, 13);
+            this.cmdOneclickSetupFixturePC.TabIndex = 80;
+            this.cmdOneclickSetupFixturePC.TabStop = true;
+            this.cmdOneclickSetupFixturePC.Text = "One Click Setup Fixture PC";
+            this.cmdOneclickSetupFixturePC.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOneclickSetupFixturePC_LinkClicked);
             // 
-            // btnInstallTightVNC
+            // cmdOneclickSetupCameraPC
             // 
-            this.btnInstallTightVNC.Location = new System.Drawing.Point(3, 3);
-            this.btnInstallTightVNC.Name = "btnInstallTightVNC";
-            this.btnInstallTightVNC.Size = new System.Drawing.Size(105, 28);
-            this.btnInstallTightVNC.TabIndex = 28;
-            this.btnInstallTightVNC.Text = "Install TightVNC to";
-            this.btnInstallTightVNC.UseVisualStyleBackColor = true;
-            this.btnInstallTightVNC.Click += new System.EventHandler(this.btnInstallTightVNC_Click);
+            this.cmdOneclickSetupCameraPC.AutoSize = true;
+            this.cmdOneclickSetupCameraPC.LinkColor = System.Drawing.Color.Red;
+            this.cmdOneclickSetupCameraPC.Location = new System.Drawing.Point(6, 10);
+            this.cmdOneclickSetupCameraPC.Name = "cmdOneclickSetupCameraPC";
+            this.cmdOneclickSetupCameraPC.Size = new System.Drawing.Size(140, 13);
+            this.cmdOneclickSetupCameraPC.TabIndex = 79;
+            this.cmdOneclickSetupCameraPC.TabStop = true;
+            this.cmdOneclickSetupCameraPC.Text = "One Click Setup Camera PC";
+            this.cmdOneclickSetupCameraPC.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOneclickSetupCameraPC_LinkClicked);
             // 
-            // btnCopyDISettings
+            // cmdFirewallOff
             // 
-            this.btnCopyDISettings.Location = new System.Drawing.Point(3, 37);
-            this.btnCopyDISettings.Name = "btnCopyDISettings";
-            this.btnCopyDISettings.Size = new System.Drawing.Size(105, 28);
-            this.btnCopyDISettings.TabIndex = 31;
-            this.btnCopyDISettings.Text = "Copy DISettings";
-            this.btnCopyDISettings.UseVisualStyleBackColor = true;
-            this.btnCopyDISettings.Click += new System.EventHandler(this.btnCopyDISettings_Click);
+            this.cmdFirewallOff.AutoSize = true;
+            this.cmdFirewallOff.Location = new System.Drawing.Point(294, 178);
+            this.cmdFirewallOff.Name = "cmdFirewallOff";
+            this.cmdFirewallOff.Size = new System.Drawing.Size(59, 13);
+            this.cmdFirewallOff.TabIndex = 78;
+            this.cmdFirewallOff.TabStop = true;
+            this.cmdFirewallOff.Text = "Firewall Off";
+            this.cmdFirewallOff.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdFirewallOff_LinkClicked);
             // 
-            // btnPasswordSharingOff
+            // cmdPasswordSharingOff
             // 
-            this.btnPasswordSharingOff.Location = new System.Drawing.Point(114, 275);
-            this.btnPasswordSharingOff.Name = "btnPasswordSharingOff";
-            this.btnPasswordSharingOff.Size = new System.Drawing.Size(129, 28);
-            this.btnPasswordSharingOff.TabIndex = 53;
-            this.btnPasswordSharingOff.Text = "Password Sharing Off";
-            this.btnPasswordSharingOff.UseVisualStyleBackColor = true;
-            this.btnPasswordSharingOff.Click += new System.EventHandler(this.btnPasswordSharingOff_Click);
+            this.cmdPasswordSharingOff.AutoSize = true;
+            this.cmdPasswordSharingOff.Location = new System.Drawing.Point(179, 178);
+            this.cmdPasswordSharingOff.Name = "cmdPasswordSharingOff";
+            this.cmdPasswordSharingOff.Size = new System.Drawing.Size(109, 13);
+            this.cmdPasswordSharingOff.TabIndex = 77;
+            this.cmdPasswordSharingOff.TabStop = true;
+            this.cmdPasswordSharingOff.Text = "Password Sharing Off";
+            this.cmdPasswordSharingOff.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdPasswordSharingOff_LinkClicked);
+            // 
+            // cmdUACOff
+            // 
+            this.cmdUACOff.AutoSize = true;
+            this.cmdUACOff.Location = new System.Drawing.Point(127, 178);
+            this.cmdUACOff.Name = "cmdUACOff";
+            this.cmdUACOff.Size = new System.Drawing.Size(46, 13);
+            this.cmdUACOff.TabIndex = 76;
+            this.cmdUACOff.TabStop = true;
+            this.cmdUACOff.Text = "UAC Off";
+            this.cmdUACOff.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdUACOff_LinkClicked);
+            // 
+            // cmdPinCameraPcFolders
+            // 
+            this.cmdPinCameraPcFolders.AutoSize = true;
+            this.cmdPinCameraPcFolders.Location = new System.Drawing.Point(6, 178);
+            this.cmdPinCameraPcFolders.Name = "cmdPinCameraPcFolders";
+            this.cmdPinCameraPcFolders.Size = new System.Drawing.Size(115, 13);
+            this.cmdPinCameraPcFolders.TabIndex = 75;
+            this.cmdPinCameraPcFolders.TabStop = true;
+            this.cmdPinCameraPcFolders.Text = "Pin Camera PC Folders";
+            this.cmdPinCameraPcFolders.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdPinCameraPcFolders_LinkClicked);
+            // 
+            // cmdPinFixturePcFolders
+            // 
+            this.cmdPinFixturePcFolders.AutoSize = true;
+            this.cmdPinFixturePcFolders.Location = new System.Drawing.Point(225, 154);
+            this.cmdPinFixturePcFolders.Name = "cmdPinFixturePcFolders";
+            this.cmdPinFixturePcFolders.Size = new System.Drawing.Size(110, 13);
+            this.cmdPinFixturePcFolders.TabIndex = 74;
+            this.cmdPinFixturePcFolders.TabStop = true;
+            this.cmdPinFixturePcFolders.Text = "Pin Fixture PC Folders";
+            this.cmdPinFixturePcFolders.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdPinFixturePcFolders_LinkClicked);
+            // 
+            // cmdInstallWireshark
+            // 
+            this.cmdInstallWireshark.AutoSize = true;
+            this.cmdInstallWireshark.Location = new System.Drawing.Point(134, 154);
+            this.cmdInstallWireshark.Name = "cmdInstallWireshark";
+            this.cmdInstallWireshark.Size = new System.Drawing.Size(85, 13);
+            this.cmdInstallWireshark.TabIndex = 73;
+            this.cmdInstallWireshark.TabStop = true;
+            this.cmdInstallWireshark.Text = "Install Wireshark";
+            this.cmdInstallWireshark.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdInstallWireshark_LinkClicked);
+            // 
+            // cmdCopyRVStolocal
+            // 
+            this.cmdCopyRVStolocal.AutoSize = true;
+            this.cmdCopyRVStolocal.Location = new System.Drawing.Point(6, 154);
+            this.cmdCopyRVStolocal.Name = "cmdCopyRVStolocal";
+            this.cmdCopyRVStolocal.Size = new System.Drawing.Size(122, 13);
+            this.cmdCopyRVStolocal.TabIndex = 72;
+            this.cmdCopyRVStolocal.TabStop = true;
+            this.cmdCopyRVStolocal.Text = "Copy RVS folder to local";
+            this.cmdCopyRVStolocal.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCopyRVStolocal_LinkClicked);
+            // 
+            // cmdShareEProgram
+            // 
+            this.cmdShareEProgram.AutoSize = true;
+            this.cmdShareEProgram.Location = new System.Drawing.Point(203, 130);
+            this.cmdShareEProgram.Name = "cmdShareEProgram";
+            this.cmdShareEProgram.Size = new System.Drawing.Size(92, 13);
+            this.cmdShareEProgram.TabIndex = 71;
+            this.cmdShareEProgram.TabStop = true;
+            this.cmdShareEProgram.Text = "Share E:\\Program";
+            this.cmdShareEProgram.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdShareEProgram_LinkClicked);
+            // 
+            // cmdShareDProgram
+            // 
+            this.cmdShareDProgram.AutoSize = true;
+            this.cmdShareDProgram.Location = new System.Drawing.Point(104, 130);
+            this.cmdShareDProgram.Name = "cmdShareDProgram";
+            this.cmdShareDProgram.Size = new System.Drawing.Size(93, 13);
+            this.cmdShareDProgram.TabIndex = 70;
+            this.cmdShareDProgram.TabStop = true;
+            this.cmdShareDProgram.Text = "Share D:\\Program";
+            this.cmdShareDProgram.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdShareDProgram_LinkClicked);
+            // 
+            // cmdShareCProgram
+            // 
+            this.cmdShareCProgram.AutoSize = true;
+            this.cmdShareCProgram.Location = new System.Drawing.Point(6, 130);
+            this.cmdShareCProgram.Name = "cmdShareCProgram";
+            this.cmdShareCProgram.Size = new System.Drawing.Size(92, 13);
+            this.cmdShareCProgram.TabIndex = 69;
+            this.cmdShareCProgram.TabStop = true;
+            this.cmdShareCProgram.Text = "Share C:\\Program";
+            this.cmdShareCProgram.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdShareCProgram_LinkClicked);
+            // 
+            // cmdShareRVSData
+            // 
+            this.cmdShareRVSData.AutoSize = true;
+            this.cmdShareRVSData.Location = new System.Drawing.Point(160, 106);
+            this.cmdShareRVSData.Name = "cmdShareRVSData";
+            this.cmdShareRVSData.Size = new System.Drawing.Size(83, 13);
+            this.cmdShareRVSData.TabIndex = 68;
+            this.cmdShareRVSData.TabStop = true;
+            this.cmdShareRVSData.Text = "Share RVSData";
+            this.cmdShareRVSData.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdShareRVSData_LinkClicked);
+            // 
+            // cmdShareE
+            // 
+            this.cmdShareE.AutoSize = true;
+            this.cmdShareE.Location = new System.Drawing.Point(109, 106);
+            this.cmdShareE.Name = "cmdShareE";
+            this.cmdShareE.Size = new System.Drawing.Size(45, 13);
+            this.cmdShareE.TabIndex = 67;
+            this.cmdShareE.TabStop = true;
+            this.cmdShareE.Text = "Share E";
+            this.cmdShareE.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdShareE_LinkClicked);
+            // 
+            // cmdShareD
+            // 
+            this.cmdShareD.AutoSize = true;
+            this.cmdShareD.Location = new System.Drawing.Point(57, 106);
+            this.cmdShareD.Name = "cmdShareD";
+            this.cmdShareD.Size = new System.Drawing.Size(46, 13);
+            this.cmdShareD.TabIndex = 66;
+            this.cmdShareD.TabStop = true;
+            this.cmdShareD.Text = "Share D";
+            this.cmdShareD.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdShareD_LinkClicked);
+            // 
+            // cmdShareC
+            // 
+            this.cmdShareC.AutoSize = true;
+            this.cmdShareC.Location = new System.Drawing.Point(6, 106);
+            this.cmdShareC.Name = "cmdShareC";
+            this.cmdShareC.Size = new System.Drawing.Size(45, 13);
+            this.cmdShareC.TabIndex = 65;
+            this.cmdShareC.TabStop = true;
+            this.cmdShareC.Text = "Share C";
+            this.cmdShareC.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdShareC_LinkClicked);
+            // 
+            // cmdInstallMatlab
+            // 
+            this.cmdInstallMatlab.AutoSize = true;
+            this.cmdInstallMatlab.Location = new System.Drawing.Point(195, 82);
+            this.cmdInstallMatlab.Name = "cmdInstallMatlab";
+            this.cmdInstallMatlab.Size = new System.Drawing.Size(138, 13);
+            this.cmdInstallMatlab.TabIndex = 64;
+            this.cmdInstallMatlab.TabStop = true;
+            this.cmdInstallMatlab.Text = "Install Matlab Runtime 2017";
+            this.cmdInstallMatlab.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdInstallMatlab_LinkClicked);
+            // 
+            // cmdInstallDotnet48
+            // 
+            this.cmdInstallDotnet48.AutoSize = true;
+            this.cmdInstallDotnet48.Location = new System.Drawing.Point(102, 82);
+            this.cmdInstallDotnet48.Name = "cmdInstallDotnet48";
+            this.cmdInstallDotnet48.Size = new System.Drawing.Size(87, 13);
+            this.cmdInstallDotnet48.TabIndex = 63;
+            this.cmdInstallDotnet48.TabStop = true;
+            this.cmdInstallDotnet48.Text = "Install Dotnet 4.8";
+            this.cmdInstallDotnet48.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdInstallDotnet48_LinkClicked);
+            // 
+            // cmdInstallNPP
+            // 
+            this.cmdInstallNPP.AutoSize = true;
+            this.cmdInstallNPP.Location = new System.Drawing.Point(6, 82);
+            this.cmdInstallNPP.Name = "cmdInstallNPP";
+            this.cmdInstallNPP.Size = new System.Drawing.Size(90, 13);
+            this.cmdInstallNPP.TabIndex = 62;
+            this.cmdInstallNPP.TabStop = true;
+            this.cmdInstallNPP.Text = "Install Notepad++";
+            this.cmdInstallNPP.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdInstallNPP_LinkClicked);
+            // 
+            // cmdInstallKdiff
+            // 
+            this.cmdInstallKdiff.AutoSize = true;
+            this.cmdInstallKdiff.Location = new System.Drawing.Point(219, 57);
+            this.cmdInstallKdiff.Name = "cmdInstallKdiff";
+            this.cmdInstallKdiff.Size = new System.Drawing.Size(58, 13);
+            this.cmdInstallKdiff.TabIndex = 61;
+            this.cmdInstallKdiff.TabStop = true;
+            this.cmdInstallKdiff.Text = "Install Kdiff";
+            this.cmdInstallKdiff.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdInstallKdiff_LinkClicked);
+            // 
+            // cmdInstallVC1519
+            // 
+            this.cmdInstallVC1519.AutoSize = true;
+            this.cmdInstallVC1519.Location = new System.Drawing.Point(99, 57);
+            this.cmdInstallVC1519.Name = "cmdInstallVC1519";
+            this.cmdInstallVC1519.Size = new System.Drawing.Size(114, 13);
+            this.cmdInstallVC1519.TabIndex = 60;
+            this.cmdInstallVC1519.TabStop = true;
+            this.cmdInstallVC1519.Text = "Install VC++2015-2019";
+            this.cmdInstallVC1519.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdInstallVC1519_LinkClicked);
+            // 
+            // cmdInstallVC12
+            // 
+            this.cmdInstallVC12.AutoSize = true;
+            this.cmdInstallVC12.Location = new System.Drawing.Point(6, 57);
+            this.cmdInstallVC12.Name = "cmdInstallVC12";
+            this.cmdInstallVC12.Size = new System.Drawing.Size(87, 13);
+            this.cmdInstallVC12.TabIndex = 59;
+            this.cmdInstallVC12.TabStop = true;
+            this.cmdInstallVC12.Text = "Install VC++2012";
+            this.cmdInstallVC12.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdInstallVC12_LinkClicked);
+            // 
+            // cmdInstallIrfanview
+            // 
+            this.cmdInstallIrfanview.AutoSize = true;
+            this.cmdInstallIrfanview.Location = new System.Drawing.Point(283, 57);
+            this.cmdInstallIrfanview.Name = "cmdInstallIrfanview";
+            this.cmdInstallIrfanview.Size = new System.Drawing.Size(80, 13);
+            this.cmdInstallIrfanview.TabIndex = 58;
+            this.cmdInstallIrfanview.TabStop = true;
+            this.cmdInstallIrfanview.Text = "Install Irfanview";
+            this.cmdInstallIrfanview.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdInstallIrfanview_LinkClicked);
+            // 
+            // cmdRemoveTightVNC
+            // 
+            this.cmdRemoveTightVNC.AutoSize = true;
+            this.cmdRemoveTightVNC.Location = new System.Drawing.Point(242, 32);
+            this.cmdRemoveTightVNC.Name = "cmdRemoveTightVNC";
+            this.cmdRemoveTightVNC.Size = new System.Drawing.Size(96, 13);
+            this.cmdRemoveTightVNC.TabIndex = 56;
+            this.cmdRemoveTightVNC.TabStop = true;
+            this.cmdRemoveTightVNC.Text = "Remove TightVNC";
+            this.cmdRemoveTightVNC.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdRemoveTightVNC_LinkClicked);
+            // 
+            // cmdInstallTightVNC
+            // 
+            this.cmdInstallTightVNC.AutoSize = true;
+            this.cmdInstallTightVNC.Location = new System.Drawing.Point(6, 32);
+            this.cmdInstallTightVNC.Name = "cmdInstallTightVNC";
+            this.cmdInstallTightVNC.Size = new System.Drawing.Size(95, 13);
+            this.cmdInstallTightVNC.TabIndex = 55;
+            this.cmdInstallTightVNC.TabStop = true;
+            this.cmdInstallTightVNC.Text = "Install TightVNC to";
+            this.cmdInstallTightVNC.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdInstallTightVNC_LinkClicked);
+            // 
+            // cbTightVNCPath
+            // 
+            this.cbTightVNCPath.FormattingEnabled = true;
+            this.cbTightVNCPath.Items.AddRange(new object[] {
+            "D:\\Program",
+            "C:\\Program",
+            "E:\\Program"});
+            this.cbTightVNCPath.Location = new System.Drawing.Point(107, 29);
+            this.cbTightVNCPath.Name = "cbTightVNCPath";
+            this.cbTightVNCPath.Size = new System.Drawing.Size(129, 21);
+            this.cbTightVNCPath.TabIndex = 30;
+            this.cbTightVNCPath.Text = "D:\\Program";
+            // 
+            // tabSetSequence
+            // 
+            this.tabSetSequence.Controls.Add(this.cmdBackupCurrentTT);
+            this.tabSetSequence.Controls.Add(this.cmdOneclickSetupTrueTest);
+            this.tabSetSequence.Controls.Add(this.cmdSetTTPermission);
+            this.tabSetSequence.Controls.Add(this.cmdCopyDISettings);
+            this.tabSetSequence.Controls.Add(this.cbDIList);
+            this.tabSetSequence.Controls.Add(this.cmdCreateOTPandResult);
+            this.tabSetSequence.Controls.Add(this.groupBox1);
+            this.tabSetSequence.Location = new System.Drawing.Point(4, 22);
+            this.tabSetSequence.Name = "tabSetSequence";
+            this.tabSetSequence.Padding = new System.Windows.Forms.Padding(3);
+            this.tabSetSequence.Size = new System.Drawing.Size(664, 397);
+            this.tabSetSequence.TabIndex = 0;
+            this.tabSetSequence.Text = "Setup TrueTest";
+            this.tabSetSequence.UseVisualStyleBackColor = true;
+            this.tabSetSequence.Enter += new System.EventHandler(this.tabSetSequence_Enter);
+            // 
+            // cmdSetTTPermission
+            // 
+            this.cmdSetTTPermission.AutoSize = true;
+            this.cmdSetTTPermission.Location = new System.Drawing.Point(166, 207);
+            this.cmdSetTTPermission.Name = "cmdSetTTPermission";
+            this.cmdSetTTPermission.Size = new System.Drawing.Size(166, 13);
+            this.cmdSetTTPermission.TabIndex = 73;
+            this.cmdSetTTPermission.TabStop = true;
+            this.cmdSetTTPermission.Text = "Set TrueTest folder full permission";
+            this.cmdSetTTPermission.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdSetTTPermission_LinkClicked);
+            // 
+            // cmdCopyDISettings
+            // 
+            this.cmdCopyDISettings.AutoSize = true;
+            this.cmdCopyDISettings.Location = new System.Drawing.Point(7, 229);
+            this.cmdCopyDISettings.Name = "cmdCopyDISettings";
+            this.cmdCopyDISettings.Size = new System.Drawing.Size(86, 13);
+            this.cmdCopyDISettings.TabIndex = 57;
+            this.cmdCopyDISettings.TabStop = true;
+            this.cmdCopyDISettings.Text = "Copy DI Settings";
+            this.cmdCopyDISettings.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCopyDISettings_LinkClicked);
             // 
             // cbDIList
             // 
@@ -385,382 +696,74 @@ namespace EZAE
             "Emu2p0 CH2",
             "Emu2p0 CH3",
             "Emu2p0 CH4"});
-            this.cbDIList.Location = new System.Drawing.Point(114, 42);
+            this.cbDIList.Location = new System.Drawing.Point(99, 226);
             this.cbDIList.Name = "cbDIList";
             this.cbDIList.Size = new System.Drawing.Size(129, 21);
             this.cbDIList.TabIndex = 32;
             // 
-            // cbTightVNCPath
+            // cmdCreateOTPandResult
             // 
-            this.cbTightVNCPath.FormattingEnabled = true;
-            this.cbTightVNCPath.Items.AddRange(new object[] {
-            "D:\\Program",
-            "C:\\Program",
-            "E:\\Program"});
-            this.cbTightVNCPath.Location = new System.Drawing.Point(114, 8);
-            this.cbTightVNCPath.Name = "cbTightVNCPath";
-            this.cbTightVNCPath.Size = new System.Drawing.Size(129, 21);
-            this.cbTightVNCPath.TabIndex = 30;
-            this.cbTightVNCPath.Text = "D:\\Program";
+            this.cmdCreateOTPandResult.AutoSize = true;
+            this.cmdCreateOTPandResult.Location = new System.Drawing.Point(6, 207);
+            this.cmdCreateOTPandResult.Name = "cmdCreateOTPandResult";
+            this.cmdCreateOTPandResult.Size = new System.Drawing.Size(154, 13);
+            this.cmdCreateOTPandResult.TabIndex = 72;
+            this.cmdCreateOTPandResult.TabStop = true;
+            this.cmdCreateOTPandResult.Text = "Create OTP and Result Folders";
+            this.cmdCreateOTPandResult.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCreateOTPandResult_LinkClicked);
             // 
-            // btnUACOff
+            // groupBox1
             // 
-            this.btnUACOff.Location = new System.Drawing.Point(3, 275);
-            this.btnUACOff.Name = "btnUACOff";
-            this.btnUACOff.Size = new System.Drawing.Size(105, 28);
-            this.btnUACOff.TabIndex = 52;
-            this.btnUACOff.Text = "UAC Off";
-            this.btnUACOff.UseVisualStyleBackColor = true;
-            this.btnUACOff.Click += new System.EventHandler(this.btnUACOff_Click);
+            this.groupBox1.Controls.Add(this.cmdBrowseSequence);
+            this.groupBox1.Controls.Add(this.lblSequencePath);
+            this.groupBox1.Controls.Add(this.cmdUseLastModifiedSequence);
+            this.groupBox1.Controls.Add(this.cbCameraRotation);
+            this.groupBox1.Controls.Add(this.btnApply);
+            this.groupBox1.Controls.Add(this.lblSubframe);
+            this.groupBox1.Controls.Add(this.lblCameraRotatioin);
+            this.groupBox1.Controls.Add(this.lblSequenceFileName);
+            this.groupBox1.Controls.Add(this.cbFocusDistance);
+            this.groupBox1.Controls.Add(this.cbSubframe);
+            this.groupBox1.Controls.Add(this.lblCalibrationIDs);
+            this.groupBox1.Controls.Add(this.lblFocusDistance);
+            this.groupBox1.Controls.Add(this.cbCalBox);
+            this.groupBox1.Location = new System.Drawing.Point(6, 6);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(634, 172);
+            this.groupBox1.TabIndex = 29;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Set Sequence";
             // 
-            // btnInstallVC12
+            // cmdBrowseSequence
             // 
-            this.btnInstallVC12.Location = new System.Drawing.Point(3, 71);
-            this.btnInstallVC12.Name = "btnInstallVC12";
-            this.btnInstallVC12.Size = new System.Drawing.Size(105, 28);
-            this.btnInstallVC12.TabIndex = 33;
-            this.btnInstallVC12.Text = "Install VC++2012";
-            this.btnInstallVC12.UseVisualStyleBackColor = true;
-            this.btnInstallVC12.Click += new System.EventHandler(this.btnInstallVC12_Click);
-            // 
-            // btnRemoveTightVNC
-            // 
-            this.btnRemoveTightVNC.Location = new System.Drawing.Point(249, 3);
-            this.btnRemoveTightVNC.Name = "btnRemoveTightVNC";
-            this.btnRemoveTightVNC.Size = new System.Drawing.Size(105, 28);
-            this.btnRemoveTightVNC.TabIndex = 29;
-            this.btnRemoveTightVNC.Text = "Remove TightVNC";
-            this.btnRemoveTightVNC.UseVisualStyleBackColor = true;
-            this.btnRemoveTightVNC.Click += new System.EventHandler(this.btnRemoveTightVNC_Click);
-            // 
-            // btnCopyAllToLocalProgram
-            // 
-            this.btnCopyAllToLocalProgram.Location = new System.Drawing.Point(114, 241);
-            this.btnCopyAllToLocalProgram.Name = "btnCopyAllToLocalProgram";
-            this.btnCopyAllToLocalProgram.Size = new System.Drawing.Size(129, 28);
-            this.btnCopyAllToLocalProgram.TabIndex = 51;
-            this.btnCopyAllToLocalProgram.Text = "Copy All To Local";
-            this.btnCopyAllToLocalProgram.UseVisualStyleBackColor = true;
-            this.btnCopyAllToLocalProgram.Click += new System.EventHandler(this.btnCopyAllToLocalProgram_Click);
-            // 
-            // btnInstallVC1519
-            // 
-            this.btnInstallVC1519.Location = new System.Drawing.Point(114, 71);
-            this.btnInstallVC1519.Name = "btnInstallVC1519";
-            this.btnInstallVC1519.Size = new System.Drawing.Size(129, 28);
-            this.btnInstallVC1519.TabIndex = 34;
-            this.btnInstallVC1519.Text = "Install VC++2015-2019";
-            this.btnInstallVC1519.UseVisualStyleBackColor = true;
-            this.btnInstallVC1519.Click += new System.EventHandler(this.btnInstallVC1519_Click);
-            // 
-            // btnInstallIrfanview
-            // 
-            this.btnInstallIrfanview.Location = new System.Drawing.Point(249, 37);
-            this.btnInstallIrfanview.Name = "btnInstallIrfanview";
-            this.btnInstallIrfanview.Size = new System.Drawing.Size(105, 28);
-            this.btnInstallIrfanview.TabIndex = 35;
-            this.btnInstallIrfanview.Text = "Install Irfanview";
-            this.btnInstallIrfanview.UseVisualStyleBackColor = true;
-            this.btnInstallIrfanview.Click += new System.EventHandler(this.btnInstallIrfanview_Click);
-            // 
-            // btnShareEProgram
-            // 
-            this.btnShareEProgram.Location = new System.Drawing.Point(249, 207);
-            this.btnShareEProgram.Name = "btnShareEProgram";
-            this.btnShareEProgram.Size = new System.Drawing.Size(105, 28);
-            this.btnShareEProgram.TabIndex = 50;
-            this.btnShareEProgram.Text = "ShareEProgram";
-            this.btnShareEProgram.UseVisualStyleBackColor = true;
-            this.btnShareEProgram.Click += new System.EventHandler(this.btnShareEProgram_Click);
-            // 
-            // btnInstallKdiff
-            // 
-            this.btnInstallKdiff.Location = new System.Drawing.Point(249, 71);
-            this.btnInstallKdiff.Name = "btnInstallKdiff";
-            this.btnInstallKdiff.Size = new System.Drawing.Size(105, 28);
-            this.btnInstallKdiff.TabIndex = 36;
-            this.btnInstallKdiff.Text = "Install Kdiff";
-            this.btnInstallKdiff.UseVisualStyleBackColor = true;
-            this.btnInstallKdiff.Click += new System.EventHandler(this.btnInstallKdiff_Click);
-            // 
-            // btnInstallNPP
-            // 
-            this.btnInstallNPP.Location = new System.Drawing.Point(3, 105);
-            this.btnInstallNPP.Name = "btnInstallNPP";
-            this.btnInstallNPP.Size = new System.Drawing.Size(105, 28);
-            this.btnInstallNPP.TabIndex = 37;
-            this.btnInstallNPP.Text = "Install Notepad++";
-            this.btnInstallNPP.UseVisualStyleBackColor = true;
-            this.btnInstallNPP.Click += new System.EventHandler(this.btnInstallNPP_Click);
-            // 
-            // btnShareCProgram
-            // 
-            this.btnShareCProgram.Location = new System.Drawing.Point(3, 207);
-            this.btnShareCProgram.Name = "btnShareCProgram";
-            this.btnShareCProgram.Size = new System.Drawing.Size(105, 28);
-            this.btnShareCProgram.TabIndex = 49;
-            this.btnShareCProgram.Text = "ShareCProgram";
-            this.btnShareCProgram.UseVisualStyleBackColor = true;
-            this.btnShareCProgram.Click += new System.EventHandler(this.btnShareCProgram_Click);
-            // 
-            // btnInstallDotnet
-            // 
-            this.btnInstallDotnet.Location = new System.Drawing.Point(114, 105);
-            this.btnInstallDotnet.Name = "btnInstallDotnet";
-            this.btnInstallDotnet.Size = new System.Drawing.Size(129, 28);
-            this.btnInstallDotnet.TabIndex = 38;
-            this.btnInstallDotnet.Text = "Install Dotnet 4.8";
-            this.btnInstallDotnet.UseVisualStyleBackColor = true;
-            this.btnInstallDotnet.Click += new System.EventHandler(this.btnInstallDotnet_Click);
-            // 
-            // btnInstallMatlab
-            // 
-            this.btnInstallMatlab.Location = new System.Drawing.Point(249, 105);
-            this.btnInstallMatlab.Name = "btnInstallMatlab";
-            this.btnInstallMatlab.Size = new System.Drawing.Size(105, 28);
-            this.btnInstallMatlab.TabIndex = 39;
-            this.btnInstallMatlab.Text = "Install Matlab";
-            this.btnInstallMatlab.UseVisualStyleBackColor = true;
-            this.btnInstallMatlab.Click += new System.EventHandler(this.btnInstallMatlab_Click);
-            // 
-            // btnInstallWireshark
-            // 
-            this.btnInstallWireshark.Location = new System.Drawing.Point(249, 241);
-            this.btnInstallWireshark.Name = "btnInstallWireshark";
-            this.btnInstallWireshark.Size = new System.Drawing.Size(105, 28);
-            this.btnInstallWireshark.TabIndex = 48;
-            this.btnInstallWireshark.Text = "Install Wireshark";
-            this.btnInstallWireshark.UseVisualStyleBackColor = true;
-            this.btnInstallWireshark.Click += new System.EventHandler(this.btnInstallWireshark_Click);
-            // 
-            // btnShareC
-            // 
-            this.btnShareC.Location = new System.Drawing.Point(3, 139);
-            this.btnShareC.Name = "btnShareC";
-            this.btnShareC.Size = new System.Drawing.Size(105, 28);
-            this.btnShareC.TabIndex = 40;
-            this.btnShareC.Text = "ShareCDrive";
-            this.btnShareC.UseVisualStyleBackColor = true;
-            this.btnShareC.Click += new System.EventHandler(this.btnShareC_Click);
-            // 
-            // btnShareD
-            // 
-            this.btnShareD.Location = new System.Drawing.Point(114, 139);
-            this.btnShareD.Name = "btnShareD";
-            this.btnShareD.Size = new System.Drawing.Size(129, 28);
-            this.btnShareD.TabIndex = 41;
-            this.btnShareD.Text = "ShareDDrive";
-            this.btnShareD.UseVisualStyleBackColor = true;
-            this.btnShareD.Click += new System.EventHandler(this.btnShareD_Click);
-            // 
-            // btnGivePermission
-            // 
-            this.btnGivePermission.Location = new System.Drawing.Point(3, 241);
-            this.btnGivePermission.Name = "btnGivePermission";
-            this.btnGivePermission.Size = new System.Drawing.Size(105, 28);
-            this.btnGivePermission.TabIndex = 47;
-            this.btnGivePermission.Text = "TT Full Permisison";
-            this.btnGivePermission.UseVisualStyleBackColor = true;
-            this.btnGivePermission.Click += new System.EventHandler(this.btnGivePermission_Click);
-            // 
-            // btnShareE
-            // 
-            this.btnShareE.Location = new System.Drawing.Point(249, 139);
-            this.btnShareE.Name = "btnShareE";
-            this.btnShareE.Size = new System.Drawing.Size(105, 28);
-            this.btnShareE.TabIndex = 42;
-            this.btnShareE.Text = "ShareEDrive";
-            this.btnShareE.UseVisualStyleBackColor = true;
-            this.btnShareE.Click += new System.EventHandler(this.btnShareE_Click);
-            // 
-            // btnShareRVSData
-            // 
-            this.btnShareRVSData.Location = new System.Drawing.Point(3, 173);
-            this.btnShareRVSData.Name = "btnShareRVSData";
-            this.btnShareRVSData.Size = new System.Drawing.Size(105, 28);
-            this.btnShareRVSData.TabIndex = 43;
-            this.btnShareRVSData.Text = "ShareRVSData";
-            this.btnShareRVSData.UseVisualStyleBackColor = true;
-            this.btnShareRVSData.Click += new System.EventHandler(this.btnShareRVSData_Click);
-            // 
-            // btnPinFolders
-            // 
-            this.btnPinFolders.Location = new System.Drawing.Point(249, 173);
-            this.btnPinFolders.Name = "btnPinFolders";
-            this.btnPinFolders.Size = new System.Drawing.Size(105, 28);
-            this.btnPinFolders.TabIndex = 46;
-            this.btnPinFolders.Text = "Pin Folders";
-            this.btnPinFolders.UseVisualStyleBackColor = true;
-            this.btnPinFolders.Click += new System.EventHandler(this.btnPinFolders_Click);
-            // 
-            // btnCreateOTPandResult
-            // 
-            this.btnCreateOTPandResult.Location = new System.Drawing.Point(114, 173);
-            this.btnCreateOTPandResult.Name = "btnCreateOTPandResult";
-            this.btnCreateOTPandResult.Size = new System.Drawing.Size(129, 28);
-            this.btnCreateOTPandResult.TabIndex = 44;
-            this.btnCreateOTPandResult.Text = "Create OTP and Result";
-            this.btnCreateOTPandResult.UseVisualStyleBackColor = true;
-            this.btnCreateOTPandResult.Click += new System.EventHandler(this.btnCreateOTPandResult_Click);
-            // 
-            // btnShareDProgram
-            // 
-            this.btnShareDProgram.Location = new System.Drawing.Point(114, 207);
-            this.btnShareDProgram.Name = "btnShareDProgram";
-            this.btnShareDProgram.Size = new System.Drawing.Size(129, 28);
-            this.btnShareDProgram.TabIndex = 45;
-            this.btnShareDProgram.Text = "ShareDProgram";
-            this.btnShareDProgram.UseVisualStyleBackColor = true;
-            this.btnShareDProgram.Click += new System.EventHandler(this.btnShareDProgram_Click);
-            // 
-            // tabSetSequence
-            // 
-            this.tabSetSequence.Controls.Add(this.lblSequencePath);
-            this.tabSetSequence.Controls.Add(this.lblSequence);
-            this.tabSetSequence.Controls.Add(this.lblSubframe);
-            this.tabSetSequence.Controls.Add(this.lblSequenceFileName);
-            this.tabSetSequence.Controls.Add(this.cbSubframe);
-            this.tabSetSequence.Controls.Add(this.btnUseLastModified);
-            this.tabSetSequence.Controls.Add(this.cbCalBox);
-            this.tabSetSequence.Controls.Add(this.btnBrowseSequence);
-            this.tabSetSequence.Controls.Add(this.lblFocusDistance);
-            this.tabSetSequence.Controls.Add(this.lblCalibrationIDs);
-            this.tabSetSequence.Controls.Add(this.cbFocusDistance);
-            this.tabSetSequence.Controls.Add(this.lblCameraRotatioin);
-            this.tabSetSequence.Controls.Add(this.btnApply);
-            this.tabSetSequence.Controls.Add(this.cbCameraRotation);
-            this.tabSetSequence.Location = new System.Drawing.Point(4, 22);
-            this.tabSetSequence.Name = "tabSetSequence";
-            this.tabSetSequence.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSetSequence.Size = new System.Drawing.Size(404, 328);
-            this.tabSetSequence.TabIndex = 0;
-            this.tabSetSequence.Text = "Set Sequence";
-            this.tabSetSequence.UseVisualStyleBackColor = true;
-            this.tabSetSequence.Enter += new System.EventHandler(this.tabSetSequence_Enter);
+            this.cmdBrowseSequence.AutoSize = true;
+            this.cmdBrowseSequence.Location = new System.Drawing.Point(149, 16);
+            this.cmdBrowseSequence.Name = "cmdBrowseSequence";
+            this.cmdBrowseSequence.Size = new System.Drawing.Size(92, 13);
+            this.cmdBrowseSequence.TabIndex = 75;
+            this.cmdBrowseSequence.TabStop = true;
+            this.cmdBrowseSequence.Text = "Browse sequence";
+            this.cmdBrowseSequence.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdBrowseSequence_LinkClicked);
             // 
             // lblSequencePath
             // 
             this.lblSequencePath.AutoSize = true;
-            this.lblSequencePath.Location = new System.Drawing.Point(6, 35);
+            this.lblSequencePath.Location = new System.Drawing.Point(6, 38);
             this.lblSequencePath.Name = "lblSequencePath";
-            this.lblSequencePath.Size = new System.Drawing.Size(81, 13);
+            this.lblSequencePath.Size = new System.Drawing.Size(99, 13);
             this.lblSequencePath.TabIndex = 28;
-            this.lblSequencePath.Text = "Sequence Path";
+            this.lblSequencePath.Text = "Target Sequence : ";
             // 
-            // lblSequence
+            // cmdUseLastModifiedSequence
             // 
-            this.lblSequence.AutoSize = true;
-            this.lblSequence.Location = new System.Drawing.Point(6, 10);
-            this.lblSequence.Name = "lblSequence";
-            this.lblSequence.Size = new System.Drawing.Size(56, 13);
-            this.lblSequence.TabIndex = 26;
-            this.lblSequence.Text = "Sequence";
-            // 
-            // lblSubframe
-            // 
-            this.lblSubframe.AutoSize = true;
-            this.lblSubframe.Location = new System.Drawing.Point(6, 64);
-            this.lblSubframe.Name = "lblSubframe";
-            this.lblSubframe.Size = new System.Drawing.Size(52, 13);
-            this.lblSubframe.TabIndex = 13;
-            this.lblSubframe.Text = "Subframe";
-            // 
-            // lblSequenceFileName
-            // 
-            this.lblSequenceFileName.AutoSize = true;
-            this.lblSequenceFileName.Location = new System.Drawing.Point(92, 35);
-            this.lblSequenceFileName.Name = "lblSequenceFileName";
-            this.lblSequenceFileName.Size = new System.Drawing.Size(0, 13);
-            this.lblSequenceFileName.TabIndex = 27;
-            // 
-            // cbSubframe
-            // 
-            this.cbSubframe.FormattingEnabled = true;
-            this.cbSubframe.Items.AddRange(new object[] {
-            "800,450,2784,5676",
-            "700,250,2984,6076",
-            "1000,1300,4576,1784"});
-            this.cbSubframe.Location = new System.Drawing.Point(93, 61);
-            this.cbSubframe.Name = "cbSubframe";
-            this.cbSubframe.Size = new System.Drawing.Size(184, 21);
-            this.cbSubframe.TabIndex = 14;
-            // 
-            // btnUseLastModified
-            // 
-            this.btnUseLastModified.Location = new System.Drawing.Point(88, 5);
-            this.btnUseLastModified.Name = "btnUseLastModified";
-            this.btnUseLastModified.Size = new System.Drawing.Size(149, 23);
-            this.btnUseLastModified.TabIndex = 16;
-            this.btnUseLastModified.Text = "Use last modified";
-            this.btnUseLastModified.UseVisualStyleBackColor = true;
-            // 
-            // cbCalBox
-            // 
-            this.cbCalBox.FormattingEnabled = true;
-            this.cbCalBox.Items.AddRange(new object[] {
-            "Copy from first step",
-            "1,1,1,1"});
-            this.cbCalBox.Location = new System.Drawing.Point(93, 142);
-            this.cbCalBox.Name = "cbCalBox";
-            this.cbCalBox.Size = new System.Drawing.Size(184, 21);
-            this.cbCalBox.TabIndex = 24;
-            this.cbCalBox.Text = "Copy from first step";
-            // 
-            // btnBrowseSequence
-            // 
-            this.btnBrowseSequence.Location = new System.Drawing.Point(243, 5);
-            this.btnBrowseSequence.Name = "btnBrowseSequence";
-            this.btnBrowseSequence.Size = new System.Drawing.Size(131, 23);
-            this.btnBrowseSequence.TabIndex = 15;
-            this.btnBrowseSequence.Text = "Browse";
-            this.btnBrowseSequence.UseVisualStyleBackColor = true;
-            // 
-            // lblFocusDistance
-            // 
-            this.lblFocusDistance.AutoSize = true;
-            this.lblFocusDistance.Location = new System.Drawing.Point(6, 91);
-            this.lblFocusDistance.Name = "lblFocusDistance";
-            this.lblFocusDistance.Size = new System.Drawing.Size(81, 13);
-            this.lblFocusDistance.TabIndex = 19;
-            this.lblFocusDistance.Text = "Focus Distance";
-            // 
-            // lblCalibrationIDs
-            // 
-            this.lblCalibrationIDs.AutoSize = true;
-            this.lblCalibrationIDs.Location = new System.Drawing.Point(6, 145);
-            this.lblCalibrationIDs.Name = "lblCalibrationIDs";
-            this.lblCalibrationIDs.Size = new System.Drawing.Size(75, 13);
-            this.lblCalibrationIDs.TabIndex = 23;
-            this.lblCalibrationIDs.Text = "Calibration IDs";
-            // 
-            // cbFocusDistance
-            // 
-            this.cbFocusDistance.FormattingEnabled = true;
-            this.cbFocusDistance.Items.AddRange(new object[] {
-            ""});
-            this.cbFocusDistance.Location = new System.Drawing.Point(93, 88);
-            this.cbFocusDistance.Name = "cbFocusDistance";
-            this.cbFocusDistance.Size = new System.Drawing.Size(184, 21);
-            this.cbFocusDistance.TabIndex = 20;
-            // 
-            // lblCameraRotatioin
-            // 
-            this.lblCameraRotatioin.AutoSize = true;
-            this.lblCameraRotatioin.Location = new System.Drawing.Point(6, 118);
-            this.lblCameraRotatioin.Name = "lblCameraRotatioin";
-            this.lblCameraRotatioin.Size = new System.Drawing.Size(86, 13);
-            this.lblCameraRotatioin.TabIndex = 21;
-            this.lblCameraRotatioin.Text = "Camera Rotation";
-            // 
-            // btnApply
-            // 
-            this.btnApply.Location = new System.Drawing.Point(283, 61);
-            this.btnApply.Name = "btnApply";
-            this.btnApply.Size = new System.Drawing.Size(91, 102);
-            this.btnApply.TabIndex = 25;
-            this.btnApply.Text = "Apply";
-            this.btnApply.UseVisualStyleBackColor = true;
-            this.btnApply.Click += new System.EventHandler(this.btnApply_Click);
+            this.cmdUseLastModifiedSequence.AutoSize = true;
+            this.cmdUseLastModifiedSequence.Location = new System.Drawing.Point(6, 16);
+            this.cmdUseLastModifiedSequence.Name = "cmdUseLastModifiedSequence";
+            this.cmdUseLastModifiedSequence.Size = new System.Drawing.Size(137, 13);
+            this.cmdUseLastModifiedSequence.TabIndex = 74;
+            this.cmdUseLastModifiedSequence.TabStop = true;
+            this.cmdUseLastModifiedSequence.Text = "Use last modified sequence";
+            this.cmdUseLastModifiedSequence.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdUseLastModifiedSequence_LinkClicked);
             // 
             // cbCameraRotation
             // 
@@ -771,10 +774,121 @@ namespace EZAE
             "Clockwise90",
             "Rotate180",
             "Counterclockwise90"});
-            this.cbCameraRotation.Location = new System.Drawing.Point(93, 115);
+            this.cbCameraRotation.Location = new System.Drawing.Point(93, 112);
             this.cbCameraRotation.Name = "cbCameraRotation";
             this.cbCameraRotation.Size = new System.Drawing.Size(184, 21);
             this.cbCameraRotation.TabIndex = 22;
+            // 
+            // btnApply
+            // 
+            this.btnApply.Location = new System.Drawing.Point(283, 58);
+            this.btnApply.Name = "btnApply";
+            this.btnApply.Size = new System.Drawing.Size(91, 102);
+            this.btnApply.TabIndex = 25;
+            this.btnApply.Text = "Apply";
+            this.btnApply.UseVisualStyleBackColor = true;
+            this.btnApply.Click += new System.EventHandler(this.btnApply_Click);
+            // 
+            // lblSubframe
+            // 
+            this.lblSubframe.AutoSize = true;
+            this.lblSubframe.Location = new System.Drawing.Point(6, 61);
+            this.lblSubframe.Name = "lblSubframe";
+            this.lblSubframe.Size = new System.Drawing.Size(52, 13);
+            this.lblSubframe.TabIndex = 13;
+            this.lblSubframe.Text = "Subframe";
+            // 
+            // lblCameraRotatioin
+            // 
+            this.lblCameraRotatioin.AutoSize = true;
+            this.lblCameraRotatioin.Location = new System.Drawing.Point(6, 115);
+            this.lblCameraRotatioin.Name = "lblCameraRotatioin";
+            this.lblCameraRotatioin.Size = new System.Drawing.Size(86, 13);
+            this.lblCameraRotatioin.TabIndex = 21;
+            this.lblCameraRotatioin.Text = "Camera Rotation";
+            // 
+            // lblSequenceFileName
+            // 
+            this.lblSequenceFileName.AutoSize = true;
+            this.lblSequenceFileName.Location = new System.Drawing.Point(111, 38);
+            this.lblSequenceFileName.Name = "lblSequenceFileName";
+            this.lblSequenceFileName.Size = new System.Drawing.Size(0, 13);
+            this.lblSequenceFileName.TabIndex = 27;
+            // 
+            // cbFocusDistance
+            // 
+            this.cbFocusDistance.FormattingEnabled = true;
+            this.cbFocusDistance.Items.AddRange(new object[] {
+            ""});
+            this.cbFocusDistance.Location = new System.Drawing.Point(93, 85);
+            this.cbFocusDistance.Name = "cbFocusDistance";
+            this.cbFocusDistance.Size = new System.Drawing.Size(184, 21);
+            this.cbFocusDistance.TabIndex = 20;
+            // 
+            // cbSubframe
+            // 
+            this.cbSubframe.FormattingEnabled = true;
+            this.cbSubframe.Items.AddRange(new object[] {
+            "800,450,2784,5676",
+            "700,250,2984,6076",
+            "1000,1300,4576,1784"});
+            this.cbSubframe.Location = new System.Drawing.Point(93, 58);
+            this.cbSubframe.Name = "cbSubframe";
+            this.cbSubframe.Size = new System.Drawing.Size(184, 21);
+            this.cbSubframe.TabIndex = 14;
+            // 
+            // lblCalibrationIDs
+            // 
+            this.lblCalibrationIDs.AutoSize = true;
+            this.lblCalibrationIDs.Location = new System.Drawing.Point(6, 142);
+            this.lblCalibrationIDs.Name = "lblCalibrationIDs";
+            this.lblCalibrationIDs.Size = new System.Drawing.Size(75, 13);
+            this.lblCalibrationIDs.TabIndex = 23;
+            this.lblCalibrationIDs.Text = "Calibration IDs";
+            // 
+            // lblFocusDistance
+            // 
+            this.lblFocusDistance.AutoSize = true;
+            this.lblFocusDistance.Location = new System.Drawing.Point(6, 88);
+            this.lblFocusDistance.Name = "lblFocusDistance";
+            this.lblFocusDistance.Size = new System.Drawing.Size(81, 13);
+            this.lblFocusDistance.TabIndex = 19;
+            this.lblFocusDistance.Text = "Focus Distance";
+            // 
+            // cbCalBox
+            // 
+            this.cbCalBox.FormattingEnabled = true;
+            this.cbCalBox.Items.AddRange(new object[] {
+            "Copy from first step",
+            "1,1,1,1"});
+            this.cbCalBox.Location = new System.Drawing.Point(93, 139);
+            this.cbCalBox.Name = "cbCalBox";
+            this.cbCalBox.Size = new System.Drawing.Size(184, 21);
+            this.cbCalBox.TabIndex = 24;
+            this.cbCalBox.Text = "Copy from first step";
+            // 
+            // cmdOneclickSetupTrueTest
+            // 
+            this.cmdOneclickSetupTrueTest.AutoSize = true;
+            this.cmdOneclickSetupTrueTest.LinkColor = System.Drawing.Color.Red;
+            this.cmdOneclickSetupTrueTest.Location = new System.Drawing.Point(6, 185);
+            this.cmdOneclickSetupTrueTest.Name = "cmdOneclickSetupTrueTest";
+            this.cmdOneclickSetupTrueTest.Size = new System.Drawing.Size(130, 13);
+            this.cmdOneclickSetupTrueTest.TabIndex = 81;
+            this.cmdOneclickSetupTrueTest.TabStop = true;
+            this.cmdOneclickSetupTrueTest.Text = "One Click Setup TrueTest";
+            this.cmdOneclickSetupTrueTest.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOneclickSetupTrueTest_LinkClicked);
+            // 
+            // cmdBackupCurrentTT
+            // 
+            this.cmdBackupCurrentTT.AutoSize = true;
+            this.cmdBackupCurrentTT.Location = new System.Drawing.Point(6, 250);
+            this.cmdBackupCurrentTT.Name = "cmdBackupCurrentTT";
+            this.cmdBackupCurrentTT.Size = new System.Drawing.Size(127, 13);
+            this.cmdBackupCurrentTT.TabIndex = 82;
+            this.cmdBackupCurrentTT.TabStop = true;
+            this.cmdBackupCurrentTT.Text = "Backup Current TrueTest";
+            this.cmdBackupCurrentTT.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdBackupCurrentTT_LinkClicked);
             // 
             // MainForm
             // 
@@ -782,7 +896,7 @@ namespace EZAE
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(589, 398);
+            this.ClientSize = new System.Drawing.Size(760, 479);
             this.Controls.Add(this.tabControl1);
             this.HelpButton = true;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -791,41 +905,26 @@ namespace EZAE
             this.Text = "EZAE";
             this.tabControl1.ResumeLayout(false);
             this.tabControl.ResumeLayout(false);
+            this.tabControl.PerformLayout();
             this.tabSetupPC.ResumeLayout(false);
+            this.tabSetupPC.PerformLayout();
             this.tabSetSequence.ResumeLayout(false);
             this.tabSetSequence.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
 
         }
 
         #endregion
-        private System.Windows.Forms.Button btnCreateFFC;
-        private System.Windows.Forms.Button btnCheckLC;
-        private System.Windows.Forms.Button btnOpenImageJ;
-        private System.Windows.Forms.Button btnOpenLanSearch;
-        private System.Windows.Forms.Button btnOpenMTFCenter;
-        private System.Windows.Forms.Button btnOpenTools;
-        private System.Windows.Forms.Button btnOpenUpdates;
-        private System.Windows.Forms.Button btnPinEngineerMode;
-        private System.Windows.Forms.Button btnDooone1;
-        private System.Windows.Forms.Button btnDooone2;
-        private System.Windows.Forms.Button btnDooone3;
-        private System.Windows.Forms.Button btnDooone4;
-        private System.Windows.Forms.Button btnGooil1;
-        private System.Windows.Forms.Button btnGooil2;
-        private System.Windows.Forms.Button btnGooil3;
-        private System.Windows.Forms.Button btnGooil4;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabSetSequence;
         private System.Windows.Forms.TabPage tabSetupPC;
         private System.Windows.Forms.Label lblSequencePath;
-        private System.Windows.Forms.Label lblSequence;
         private System.Windows.Forms.Label lblSubframe;
         private System.Windows.Forms.Label lblSequenceFileName;
         private System.Windows.Forms.ComboBox cbSubframe;
-        private System.Windows.Forms.Button btnUseLastModified;
         private System.Windows.Forms.ComboBox cbCalBox;
-        private System.Windows.Forms.Button btnBrowseSequence;
         private System.Windows.Forms.Label lblFocusDistance;
         private System.Windows.Forms.Label lblCalibrationIDs;
         private System.Windows.Forms.ComboBox cbFocusDistance;
@@ -833,34 +932,58 @@ namespace EZAE
         private System.Windows.Forms.Button btnApply;
         private System.Windows.Forms.ComboBox cbCameraRotation;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
-        private System.Windows.Forms.Button btnFirewallOff;
-        private System.Windows.Forms.Button btnPasswordSharingOff;
-        private System.Windows.Forms.Button btnUACOff;
-        private System.Windows.Forms.Button btnCopyAllToLocalProgram;
-        private System.Windows.Forms.Button btnShareEProgram;
-        private System.Windows.Forms.Button btnShareCProgram;
-        private System.Windows.Forms.Button btnInstallWireshark;
-        private System.Windows.Forms.Button btnGivePermission;
-        private System.Windows.Forms.Button btnPinFolders;
-        private System.Windows.Forms.Button btnShareDProgram;
-        private System.Windows.Forms.Button btnCreateOTPandResult;
-        private System.Windows.Forms.Button btnShareRVSData;
-        private System.Windows.Forms.Button btnShareE;
-        private System.Windows.Forms.Button btnShareD;
-        private System.Windows.Forms.Button btnShareC;
-        private System.Windows.Forms.Button btnInstallMatlab;
-        private System.Windows.Forms.Button btnInstallDotnet;
-        private System.Windows.Forms.Button btnInstallNPP;
-        private System.Windows.Forms.Button btnInstallKdiff;
-        private System.Windows.Forms.Button btnInstallIrfanview;
-        private System.Windows.Forms.Button btnInstallVC1519;
-        private System.Windows.Forms.Button btnInstallVC12;
         private System.Windows.Forms.ComboBox cbDIList;
-        private System.Windows.Forms.Button btnCopyDISettings;
         private System.Windows.Forms.ComboBox cbTightVNCPath;
-        private System.Windows.Forms.Button btnRemoveTightVNC;
-        private System.Windows.Forms.Button btnInstallTightVNC;
         private System.Windows.Forms.TabPage tabControl;
+        private System.Windows.Forms.LinkLabel cmdPinEngineerMode;
+        private System.Windows.Forms.LinkLabel cmdOpenUpdates;
+        private System.Windows.Forms.LinkLabel cmdOpenLanSearch;
+        private System.Windows.Forms.LinkLabel cmdOpenImageJ;
+        private System.Windows.Forms.LinkLabel cmdOpenTools;
+        private System.Windows.Forms.LinkLabel cmdOpenMTFCenter;
+        private System.Windows.Forms.LinkLabel cmdOpenDooone1;
+        private System.Windows.Forms.LinkLabel cmdCreateFFC;
+        private System.Windows.Forms.LinkLabel cmdCheckLC;
+        private System.Windows.Forms.LinkLabel cmdOpenDooone2;
+        private System.Windows.Forms.LinkLabel cmdOpenDooone3;
+        private System.Windows.Forms.LinkLabel cmdOpenDooone4;
+        private System.Windows.Forms.LinkLabel cmdOpenGooil2;
+        private System.Windows.Forms.LinkLabel cmdOpenGooil1;
+        private System.Windows.Forms.LinkLabel cmdOpenGooil3;
+        private System.Windows.Forms.LinkLabel cmdOpenGooil4;
+        private System.Windows.Forms.LinkLabel cmdInstallTightVNC;
+        private System.Windows.Forms.LinkLabel cmdRemoveTightVNC;
+        private System.Windows.Forms.LinkLabel cmdCopyDISettings;
+        private System.Windows.Forms.LinkLabel cmdInstallIrfanview;
+        private System.Windows.Forms.LinkLabel cmdInstallVC12;
+        private System.Windows.Forms.LinkLabel cmdInstallVC1519;
+        private System.Windows.Forms.LinkLabel cmdInstallKdiff;
+        private System.Windows.Forms.LinkLabel cmdInstallNPP;
+        private System.Windows.Forms.LinkLabel cmdInstallDotnet48;
+        private System.Windows.Forms.LinkLabel cmdInstallMatlab;
+        private System.Windows.Forms.LinkLabel cmdShareC;
+        private System.Windows.Forms.LinkLabel cmdShareD;
+        private System.Windows.Forms.LinkLabel cmdShareE;
+        private System.Windows.Forms.LinkLabel cmdShareRVSData;
+        private System.Windows.Forms.LinkLabel cmdShareCProgram;
+        private System.Windows.Forms.LinkLabel cmdShareDProgram;
+        private System.Windows.Forms.LinkLabel cmdShareEProgram;
+        private System.Windows.Forms.LinkLabel cmdCreateOTPandResult;
+        private System.Windows.Forms.LinkLabel cmdSetTTPermission;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.LinkLabel cmdCopyRVStolocal;
+        private System.Windows.Forms.LinkLabel cmdInstallWireshark;
+        private System.Windows.Forms.LinkLabel cmdPinCameraPcFolders;
+        private System.Windows.Forms.LinkLabel cmdPinFixturePcFolders;
+        private System.Windows.Forms.LinkLabel cmdUACOff;
+        private System.Windows.Forms.LinkLabel cmdFirewallOff;
+        private System.Windows.Forms.LinkLabel cmdPasswordSharingOff;
+        private System.Windows.Forms.LinkLabel cmdBrowseSequence;
+        private System.Windows.Forms.LinkLabel cmdUseLastModifiedSequence;
+        private System.Windows.Forms.LinkLabel cmdOneclickSetupCameraPC;
+        private System.Windows.Forms.LinkLabel cmdOneclickSetupFixturePC;
+        private System.Windows.Forms.LinkLabel cmdOneclickSetupTrueTest;
+        private System.Windows.Forms.LinkLabel cmdBackupCurrentTT;
     }
 }
 
