@@ -19,7 +19,6 @@ namespace EZAE
         {
             
             InitializeComponent();
-
         }
 
         public void ExecuteAsAdmin(string fileName)
