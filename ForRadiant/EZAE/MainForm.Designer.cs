@@ -47,8 +47,11 @@ namespace EZAE
             this.cmdOpenUpdates = new System.Windows.Forms.LinkLabel();
             this.cmdOpenLanSearch = new System.Windows.Forms.LinkLabel();
             this.cmdOpenImageJ = new System.Windows.Forms.LinkLabel();
+            this.cmdOpenEngineerMode = new System.Windows.Forms.LinkLabel();
             this.cmdPinEngineerMode = new System.Windows.Forms.LinkLabel();
             this.tabSetupPC = new System.Windows.Forms.TabPage();
+            this.cbProgramFolder = new System.Windows.Forms.ComboBox();
+            this.cmdShareProgram = new System.Windows.Forms.LinkLabel();
             this.cmdOneclickSetupFixturePC = new System.Windows.Forms.LinkLabel();
             this.cmdOneclickSetupCameraPC = new System.Windows.Forms.LinkLabel();
             this.cmdFirewallOff = new System.Windows.Forms.LinkLabel();
@@ -58,9 +61,6 @@ namespace EZAE
             this.cmdPinFixturePcFolders = new System.Windows.Forms.LinkLabel();
             this.cmdInstallWireshark = new System.Windows.Forms.LinkLabel();
             this.cmdCopyRVStolocal = new System.Windows.Forms.LinkLabel();
-            this.cmdShareEProgram = new System.Windows.Forms.LinkLabel();
-            this.cmdShareDProgram = new System.Windows.Forms.LinkLabel();
-            this.cmdShareCProgram = new System.Windows.Forms.LinkLabel();
             this.cmdShareRVSData = new System.Windows.Forms.LinkLabel();
             this.cmdShareE = new System.Windows.Forms.LinkLabel();
             this.cmdShareD = new System.Windows.Forms.LinkLabel();
@@ -74,10 +74,15 @@ namespace EZAE
             this.cmdInstallIrfanview = new System.Windows.Forms.LinkLabel();
             this.cmdRemoveTightVNC = new System.Windows.Forms.LinkLabel();
             this.cmdInstallTightVNC = new System.Windows.Forms.LinkLabel();
+            this.cbFixture = new System.Windows.Forms.ComboBox();
             this.cbTightVNCPath = new System.Windows.Forms.ComboBox();
             this.tabSetSequence = new System.Windows.Forms.TabPage();
+            this.cmdInstallTrueTest = new System.Windows.Forms.LinkLabel();
+            this.cmdBackupCurrentTT = new System.Windows.Forms.LinkLabel();
+            this.cmdOneclickSetupTrueTestSettings = new System.Windows.Forms.LinkLabel();
             this.cmdSetTTPermission = new System.Windows.Forms.LinkLabel();
             this.cmdCopyDISettings = new System.Windows.Forms.LinkLabel();
+            this.cbTrueTestInstallerList = new System.Windows.Forms.ComboBox();
             this.cbDIList = new System.Windows.Forms.ComboBox();
             this.cmdCreateOTPandResult = new System.Windows.Forms.LinkLabel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -95,8 +100,6 @@ namespace EZAE
             this.lblFocusDistance = new System.Windows.Forms.Label();
             this.cbCalBox = new System.Windows.Forms.ComboBox();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-            this.cmdOneclickSetupTrueTest = new System.Windows.Forms.LinkLabel();
-            this.cmdBackupCurrentTT = new System.Windows.Forms.LinkLabel();
             this.tabControl1.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabSetupPC.SuspendLayout();
@@ -132,6 +135,7 @@ namespace EZAE
             this.tabControl.Controls.Add(this.cmdOpenUpdates);
             this.tabControl.Controls.Add(this.cmdOpenLanSearch);
             this.tabControl.Controls.Add(this.cmdOpenImageJ);
+            this.tabControl.Controls.Add(this.cmdOpenEngineerMode);
             this.tabControl.Controls.Add(this.cmdPinEngineerMode);
             this.tabControl.Location = new System.Drawing.Point(4, 22);
             this.tabControl.Name = "tabControl";
@@ -287,7 +291,7 @@ namespace EZAE
             // cmdOpenLanSearch
             // 
             this.cmdOpenLanSearch.AutoSize = true;
-            this.cmdOpenLanSearch.Location = new System.Drawing.Point(185, 10);
+            this.cmdOpenLanSearch.Location = new System.Drawing.Point(238, 61);
             this.cmdOpenLanSearch.Name = "cmdOpenLanSearch";
             this.cmdOpenLanSearch.Size = new System.Drawing.Size(91, 13);
             this.cmdOpenLanSearch.TabIndex = 25;
@@ -298,7 +302,7 @@ namespace EZAE
             // cmdOpenImageJ
             // 
             this.cmdOpenImageJ.AutoSize = true;
-            this.cmdOpenImageJ.Location = new System.Drawing.Point(109, 10);
+            this.cmdOpenImageJ.Location = new System.Drawing.Point(223, 10);
             this.cmdOpenImageJ.Name = "cmdOpenImageJ";
             this.cmdOpenImageJ.Size = new System.Drawing.Size(70, 13);
             this.cmdOpenImageJ.TabIndex = 24;
@@ -306,10 +310,21 @@ namespace EZAE
             this.cmdOpenImageJ.Text = "Open ImageJ";
             this.cmdOpenImageJ.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenImageJ_LinkClicked);
             // 
+            // cmdOpenEngineerMode
+            // 
+            this.cmdOpenEngineerMode.AutoSize = true;
+            this.cmdOpenEngineerMode.Location = new System.Drawing.Point(6, 10);
+            this.cmdOpenEngineerMode.Name = "cmdOpenEngineerMode";
+            this.cmdOpenEngineerMode.Size = new System.Drawing.Size(108, 13);
+            this.cmdOpenEngineerMode.TabIndex = 23;
+            this.cmdOpenEngineerMode.TabStop = true;
+            this.cmdOpenEngineerMode.Text = "Open Engineer Mode";
+            this.cmdOpenEngineerMode.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenEngineerMode_LinkClicked);
+            // 
             // cmdPinEngineerMode
             // 
             this.cmdPinEngineerMode.AutoSize = true;
-            this.cmdPinEngineerMode.Location = new System.Drawing.Point(6, 10);
+            this.cmdPinEngineerMode.Location = new System.Drawing.Point(120, 10);
             this.cmdPinEngineerMode.Name = "cmdPinEngineerMode";
             this.cmdPinEngineerMode.Size = new System.Drawing.Size(97, 13);
             this.cmdPinEngineerMode.TabIndex = 23;
@@ -319,6 +334,8 @@ namespace EZAE
             // 
             // tabSetupPC
             // 
+            this.tabSetupPC.Controls.Add(this.cbProgramFolder);
+            this.tabSetupPC.Controls.Add(this.cmdShareProgram);
             this.tabSetupPC.Controls.Add(this.cmdOneclickSetupFixturePC);
             this.tabSetupPC.Controls.Add(this.cmdOneclickSetupCameraPC);
             this.tabSetupPC.Controls.Add(this.cmdFirewallOff);
@@ -328,9 +345,6 @@ namespace EZAE
             this.tabSetupPC.Controls.Add(this.cmdPinFixturePcFolders);
             this.tabSetupPC.Controls.Add(this.cmdInstallWireshark);
             this.tabSetupPC.Controls.Add(this.cmdCopyRVStolocal);
-            this.tabSetupPC.Controls.Add(this.cmdShareEProgram);
-            this.tabSetupPC.Controls.Add(this.cmdShareDProgram);
-            this.tabSetupPC.Controls.Add(this.cmdShareCProgram);
             this.tabSetupPC.Controls.Add(this.cmdShareRVSData);
             this.tabSetupPC.Controls.Add(this.cmdShareE);
             this.tabSetupPC.Controls.Add(this.cmdShareD);
@@ -344,6 +358,7 @@ namespace EZAE
             this.tabSetupPC.Controls.Add(this.cmdInstallIrfanview);
             this.tabSetupPC.Controls.Add(this.cmdRemoveTightVNC);
             this.tabSetupPC.Controls.Add(this.cmdInstallTightVNC);
+            this.tabSetupPC.Controls.Add(this.cbFixture);
             this.tabSetupPC.Controls.Add(this.cbTightVNCPath);
             this.tabSetupPC.Location = new System.Drawing.Point(4, 22);
             this.tabSetupPC.Name = "tabSetupPC";
@@ -354,11 +369,35 @@ namespace EZAE
             this.tabSetupPC.UseVisualStyleBackColor = true;
             this.tabSetupPC.Enter += new System.EventHandler(this.tabSetupPC_Enter);
             // 
+            // cbProgramFolder
+            // 
+            this.cbProgramFolder.FormattingEnabled = true;
+            this.cbProgramFolder.Items.AddRange(new object[] {
+            "",
+            "D:\\Program",
+            "C:\\Program",
+            "E:\\Program"});
+            this.cbProgramFolder.Location = new System.Drawing.Point(332, 103);
+            this.cbProgramFolder.Name = "cbProgramFolder";
+            this.cbProgramFolder.Size = new System.Drawing.Size(80, 21);
+            this.cbProgramFolder.TabIndex = 82;
+            // 
+            // cmdShareProgram
+            // 
+            this.cmdShareProgram.AutoSize = true;
+            this.cmdShareProgram.Location = new System.Drawing.Point(249, 106);
+            this.cmdShareProgram.Name = "cmdShareProgram";
+            this.cmdShareProgram.Size = new System.Drawing.Size(77, 13);
+            this.cmdShareProgram.TabIndex = 81;
+            this.cmdShareProgram.TabStop = true;
+            this.cmdShareProgram.Text = "Share Program";
+            this.cmdShareProgram.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdShareProgram_LinkClicked);
+            // 
             // cmdOneclickSetupFixturePC
             // 
             this.cmdOneclickSetupFixturePC.AutoSize = true;
             this.cmdOneclickSetupFixturePC.LinkColor = System.Drawing.Color.Red;
-            this.cmdOneclickSetupFixturePC.Location = new System.Drawing.Point(152, 10);
+            this.cmdOneclickSetupFixturePC.Location = new System.Drawing.Point(228, 10);
             this.cmdOneclickSetupFixturePC.Name = "cmdOneclickSetupFixturePC";
             this.cmdOneclickSetupFixturePC.Size = new System.Drawing.Size(135, 13);
             this.cmdOneclickSetupFixturePC.TabIndex = 80;
@@ -381,7 +420,7 @@ namespace EZAE
             // cmdFirewallOff
             // 
             this.cmdFirewallOff.AutoSize = true;
-            this.cmdFirewallOff.Location = new System.Drawing.Point(294, 178);
+            this.cmdFirewallOff.Location = new System.Drawing.Point(173, 152);
             this.cmdFirewallOff.Name = "cmdFirewallOff";
             this.cmdFirewallOff.Size = new System.Drawing.Size(59, 13);
             this.cmdFirewallOff.TabIndex = 78;
@@ -392,7 +431,7 @@ namespace EZAE
             // cmdPasswordSharingOff
             // 
             this.cmdPasswordSharingOff.AutoSize = true;
-            this.cmdPasswordSharingOff.Location = new System.Drawing.Point(179, 178);
+            this.cmdPasswordSharingOff.Location = new System.Drawing.Point(58, 152);
             this.cmdPasswordSharingOff.Name = "cmdPasswordSharingOff";
             this.cmdPasswordSharingOff.Size = new System.Drawing.Size(109, 13);
             this.cmdPasswordSharingOff.TabIndex = 77;
@@ -403,7 +442,7 @@ namespace EZAE
             // cmdUACOff
             // 
             this.cmdUACOff.AutoSize = true;
-            this.cmdUACOff.Location = new System.Drawing.Point(127, 178);
+            this.cmdUACOff.Location = new System.Drawing.Point(6, 152);
             this.cmdUACOff.Name = "cmdUACOff";
             this.cmdUACOff.Size = new System.Drawing.Size(46, 13);
             this.cmdUACOff.TabIndex = 76;
@@ -414,7 +453,7 @@ namespace EZAE
             // cmdPinCameraPcFolders
             // 
             this.cmdPinCameraPcFolders.AutoSize = true;
-            this.cmdPinCameraPcFolders.Location = new System.Drawing.Point(6, 178);
+            this.cmdPinCameraPcFolders.Location = new System.Drawing.Point(6, 130);
             this.cmdPinCameraPcFolders.Name = "cmdPinCameraPcFolders";
             this.cmdPinCameraPcFolders.Size = new System.Drawing.Size(115, 13);
             this.cmdPinCameraPcFolders.TabIndex = 75;
@@ -425,7 +464,7 @@ namespace EZAE
             // cmdPinFixturePcFolders
             // 
             this.cmdPinFixturePcFolders.AutoSize = true;
-            this.cmdPinFixturePcFolders.Location = new System.Drawing.Point(225, 154);
+            this.cmdPinFixturePcFolders.Location = new System.Drawing.Point(127, 130);
             this.cmdPinFixturePcFolders.Name = "cmdPinFixturePcFolders";
             this.cmdPinFixturePcFolders.Size = new System.Drawing.Size(110, 13);
             this.cmdPinFixturePcFolders.TabIndex = 74;
@@ -436,7 +475,7 @@ namespace EZAE
             // cmdInstallWireshark
             // 
             this.cmdInstallWireshark.AutoSize = true;
-            this.cmdInstallWireshark.Location = new System.Drawing.Point(134, 154);
+            this.cmdInstallWireshark.Location = new System.Drawing.Point(243, 130);
             this.cmdInstallWireshark.Name = "cmdInstallWireshark";
             this.cmdInstallWireshark.Size = new System.Drawing.Size(85, 13);
             this.cmdInstallWireshark.TabIndex = 73;
@@ -447,46 +486,13 @@ namespace EZAE
             // cmdCopyRVStolocal
             // 
             this.cmdCopyRVStolocal.AutoSize = true;
-            this.cmdCopyRVStolocal.Location = new System.Drawing.Point(6, 154);
+            this.cmdCopyRVStolocal.Location = new System.Drawing.Point(238, 152);
             this.cmdCopyRVStolocal.Name = "cmdCopyRVStolocal";
             this.cmdCopyRVStolocal.Size = new System.Drawing.Size(122, 13);
             this.cmdCopyRVStolocal.TabIndex = 72;
             this.cmdCopyRVStolocal.TabStop = true;
             this.cmdCopyRVStolocal.Text = "Copy RVS folder to local";
             this.cmdCopyRVStolocal.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCopyRVStolocal_LinkClicked);
-            // 
-            // cmdShareEProgram
-            // 
-            this.cmdShareEProgram.AutoSize = true;
-            this.cmdShareEProgram.Location = new System.Drawing.Point(203, 130);
-            this.cmdShareEProgram.Name = "cmdShareEProgram";
-            this.cmdShareEProgram.Size = new System.Drawing.Size(92, 13);
-            this.cmdShareEProgram.TabIndex = 71;
-            this.cmdShareEProgram.TabStop = true;
-            this.cmdShareEProgram.Text = "Share E:\\Program";
-            this.cmdShareEProgram.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdShareEProgram_LinkClicked);
-            // 
-            // cmdShareDProgram
-            // 
-            this.cmdShareDProgram.AutoSize = true;
-            this.cmdShareDProgram.Location = new System.Drawing.Point(104, 130);
-            this.cmdShareDProgram.Name = "cmdShareDProgram";
-            this.cmdShareDProgram.Size = new System.Drawing.Size(93, 13);
-            this.cmdShareDProgram.TabIndex = 70;
-            this.cmdShareDProgram.TabStop = true;
-            this.cmdShareDProgram.Text = "Share D:\\Program";
-            this.cmdShareDProgram.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdShareDProgram_LinkClicked);
-            // 
-            // cmdShareCProgram
-            // 
-            this.cmdShareCProgram.AutoSize = true;
-            this.cmdShareCProgram.Location = new System.Drawing.Point(6, 130);
-            this.cmdShareCProgram.Name = "cmdShareCProgram";
-            this.cmdShareCProgram.Size = new System.Drawing.Size(92, 13);
-            this.cmdShareCProgram.TabIndex = 69;
-            this.cmdShareCProgram.TabStop = true;
-            this.cmdShareCProgram.Text = "Share C:\\Program";
-            this.cmdShareCProgram.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdShareCProgram_LinkClicked);
             // 
             // cmdShareRVSData
             // 
@@ -612,7 +618,7 @@ namespace EZAE
             // cmdRemoveTightVNC
             // 
             this.cmdRemoveTightVNC.AutoSize = true;
-            this.cmdRemoveTightVNC.Location = new System.Drawing.Point(242, 32);
+            this.cmdRemoveTightVNC.Location = new System.Drawing.Point(193, 32);
             this.cmdRemoveTightVNC.Name = "cmdRemoveTightVNC";
             this.cmdRemoveTightVNC.Size = new System.Drawing.Size(96, 13);
             this.cmdRemoveTightVNC.TabIndex = 56;
@@ -631,25 +637,39 @@ namespace EZAE
             this.cmdInstallTightVNC.Text = "Install TightVNC to";
             this.cmdInstallTightVNC.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdInstallTightVNC_LinkClicked);
             // 
+            // cbFixture
+            // 
+            this.cbFixture.FormattingEnabled = true;
+            this.cbFixture.Items.AddRange(new object[] {
+            "",
+            "Dooone",
+            "Gooil"});
+            this.cbFixture.Location = new System.Drawing.Point(152, 7);
+            this.cbFixture.Name = "cbFixture";
+            this.cbFixture.Size = new System.Drawing.Size(70, 21);
+            this.cbFixture.TabIndex = 30;
+            // 
             // cbTightVNCPath
             // 
             this.cbTightVNCPath.FormattingEnabled = true;
             this.cbTightVNCPath.Items.AddRange(new object[] {
+            "",
             "D:\\Program",
             "C:\\Program",
             "E:\\Program"});
             this.cbTightVNCPath.Location = new System.Drawing.Point(107, 29);
             this.cbTightVNCPath.Name = "cbTightVNCPath";
-            this.cbTightVNCPath.Size = new System.Drawing.Size(129, 21);
+            this.cbTightVNCPath.Size = new System.Drawing.Size(80, 21);
             this.cbTightVNCPath.TabIndex = 30;
-            this.cbTightVNCPath.Text = "D:\\Program";
             // 
             // tabSetSequence
             // 
+            this.tabSetSequence.Controls.Add(this.cmdInstallTrueTest);
             this.tabSetSequence.Controls.Add(this.cmdBackupCurrentTT);
-            this.tabSetSequence.Controls.Add(this.cmdOneclickSetupTrueTest);
+            this.tabSetSequence.Controls.Add(this.cmdOneclickSetupTrueTestSettings);
             this.tabSetSequence.Controls.Add(this.cmdSetTTPermission);
             this.tabSetSequence.Controls.Add(this.cmdCopyDISettings);
+            this.tabSetSequence.Controls.Add(this.cbTrueTestInstallerList);
             this.tabSetSequence.Controls.Add(this.cbDIList);
             this.tabSetSequence.Controls.Add(this.cmdCreateOTPandResult);
             this.tabSetSequence.Controls.Add(this.groupBox1);
@@ -661,6 +681,40 @@ namespace EZAE
             this.tabSetSequence.Text = "Setup TrueTest";
             this.tabSetSequence.UseVisualStyleBackColor = true;
             this.tabSetSequence.Enter += new System.EventHandler(this.tabSetSequence_Enter);
+            // 
+            // cmdInstallTrueTest
+            // 
+            this.cmdInstallTrueTest.AutoSize = true;
+            this.cmdInstallTrueTest.Location = new System.Drawing.Point(7, 253);
+            this.cmdInstallTrueTest.Name = "cmdInstallTrueTest";
+            this.cmdInstallTrueTest.Size = new System.Drawing.Size(80, 13);
+            this.cmdInstallTrueTest.TabIndex = 83;
+            this.cmdInstallTrueTest.TabStop = true;
+            this.cmdInstallTrueTest.Text = "Install TrueTest";
+            this.cmdInstallTrueTest.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdInstallTrueTest_LinkClicked);
+            // 
+            // cmdBackupCurrentTT
+            // 
+            this.cmdBackupCurrentTT.AutoSize = true;
+            this.cmdBackupCurrentTT.Location = new System.Drawing.Point(207, 229);
+            this.cmdBackupCurrentTT.Name = "cmdBackupCurrentTT";
+            this.cmdBackupCurrentTT.Size = new System.Drawing.Size(127, 13);
+            this.cmdBackupCurrentTT.TabIndex = 82;
+            this.cmdBackupCurrentTT.TabStop = true;
+            this.cmdBackupCurrentTT.Text = "Backup Current TrueTest";
+            this.cmdBackupCurrentTT.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdBackupCurrentTT_LinkClicked);
+            // 
+            // cmdOneclickSetupTrueTestSettings
+            // 
+            this.cmdOneclickSetupTrueTestSettings.AutoSize = true;
+            this.cmdOneclickSetupTrueTestSettings.LinkColor = System.Drawing.Color.Red;
+            this.cmdOneclickSetupTrueTestSettings.Location = new System.Drawing.Point(6, 185);
+            this.cmdOneclickSetupTrueTestSettings.Name = "cmdOneclickSetupTrueTestSettings";
+            this.cmdOneclickSetupTrueTestSettings.Size = new System.Drawing.Size(171, 13);
+            this.cmdOneclickSetupTrueTestSettings.TabIndex = 81;
+            this.cmdOneclickSetupTrueTestSettings.TabStop = true;
+            this.cmdOneclickSetupTrueTestSettings.Text = "One Click Setup TrueTest Settings";
+            this.cmdOneclickSetupTrueTestSettings.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOneclickSetupTrueTestSettings_LinkClicked);
             // 
             // cmdSetTTPermission
             // 
@@ -684,10 +738,30 @@ namespace EZAE
             this.cmdCopyDISettings.Text = "Copy DI Settings";
             this.cmdCopyDISettings.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCopyDISettings_LinkClicked);
             // 
+            // cbTrueTestInstallerList
+            // 
+            this.cbTrueTestInstallerList.FormattingEnabled = true;
+            this.cbTrueTestInstallerList.Items.AddRange(new object[] {
+            "",
+            "Dove2p0 CH1",
+            "Dove2p0 CH2",
+            "Dove2p0 CH3",
+            "Dove2p0 CH4",
+            "Emu2p0 CH1",
+            "Emu2p0 CH2",
+            "Emu2p0 CH3",
+            "Emu2p0 CH4"});
+            this.cbTrueTestInstallerList.Location = new System.Drawing.Point(99, 250);
+            this.cbTrueTestInstallerList.Name = "cbTrueTestInstallerList";
+            this.cbTrueTestInstallerList.Size = new System.Drawing.Size(541, 21);
+            this.cbTrueTestInstallerList.TabIndex = 32;
+            this.cbTrueTestInstallerList.DropDown += new System.EventHandler(this.cbTrueTestInstallerList_DropDown);
+            // 
             // cbDIList
             // 
             this.cbDIList.FormattingEnabled = true;
             this.cbDIList.Items.AddRange(new object[] {
+            "",
             "Dove2p0 CH1",
             "Dove2p0 CH2",
             "Dove2p0 CH3",
@@ -698,7 +772,7 @@ namespace EZAE
             "Emu2p0 CH4"});
             this.cbDIList.Location = new System.Drawing.Point(99, 226);
             this.cbDIList.Name = "cbDIList";
-            this.cbDIList.Size = new System.Drawing.Size(129, 21);
+            this.cbDIList.Size = new System.Drawing.Size(102, 21);
             this.cbDIList.TabIndex = 32;
             // 
             // cmdCreateOTPandResult
@@ -776,12 +850,12 @@ namespace EZAE
             "Counterclockwise90"});
             this.cbCameraRotation.Location = new System.Drawing.Point(93, 112);
             this.cbCameraRotation.Name = "cbCameraRotation";
-            this.cbCameraRotation.Size = new System.Drawing.Size(184, 21);
+            this.cbCameraRotation.Size = new System.Drawing.Size(148, 21);
             this.cbCameraRotation.TabIndex = 22;
             // 
             // btnApply
             // 
-            this.btnApply.Location = new System.Drawing.Point(283, 58);
+            this.btnApply.Location = new System.Drawing.Point(247, 58);
             this.btnApply.Name = "btnApply";
             this.btnApply.Size = new System.Drawing.Size(91, 102);
             this.btnApply.TabIndex = 25;
@@ -822,19 +896,20 @@ namespace EZAE
             ""});
             this.cbFocusDistance.Location = new System.Drawing.Point(93, 85);
             this.cbFocusDistance.Name = "cbFocusDistance";
-            this.cbFocusDistance.Size = new System.Drawing.Size(184, 21);
+            this.cbFocusDistance.Size = new System.Drawing.Size(148, 21);
             this.cbFocusDistance.TabIndex = 20;
             // 
             // cbSubframe
             // 
             this.cbSubframe.FormattingEnabled = true;
             this.cbSubframe.Items.AddRange(new object[] {
+            "",
             "800,450,2784,5676",
             "700,250,2984,6076",
             "1000,1300,4576,1784"});
             this.cbSubframe.Location = new System.Drawing.Point(93, 58);
             this.cbSubframe.Name = "cbSubframe";
-            this.cbSubframe.Size = new System.Drawing.Size(184, 21);
+            this.cbSubframe.Size = new System.Drawing.Size(148, 21);
             this.cbSubframe.TabIndex = 14;
             // 
             // lblCalibrationIDs
@@ -859,36 +934,14 @@ namespace EZAE
             // 
             this.cbCalBox.FormattingEnabled = true;
             this.cbCalBox.Items.AddRange(new object[] {
+            "",
             "Copy from first step",
             "1,1,1,1"});
             this.cbCalBox.Location = new System.Drawing.Point(93, 139);
             this.cbCalBox.Name = "cbCalBox";
-            this.cbCalBox.Size = new System.Drawing.Size(184, 21);
+            this.cbCalBox.Size = new System.Drawing.Size(148, 21);
             this.cbCalBox.TabIndex = 24;
             this.cbCalBox.Text = "Copy from first step";
-            // 
-            // cmdOneclickSetupTrueTest
-            // 
-            this.cmdOneclickSetupTrueTest.AutoSize = true;
-            this.cmdOneclickSetupTrueTest.LinkColor = System.Drawing.Color.Red;
-            this.cmdOneclickSetupTrueTest.Location = new System.Drawing.Point(6, 185);
-            this.cmdOneclickSetupTrueTest.Name = "cmdOneclickSetupTrueTest";
-            this.cmdOneclickSetupTrueTest.Size = new System.Drawing.Size(130, 13);
-            this.cmdOneclickSetupTrueTest.TabIndex = 81;
-            this.cmdOneclickSetupTrueTest.TabStop = true;
-            this.cmdOneclickSetupTrueTest.Text = "One Click Setup TrueTest";
-            this.cmdOneclickSetupTrueTest.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOneclickSetupTrueTest_LinkClicked);
-            // 
-            // cmdBackupCurrentTT
-            // 
-            this.cmdBackupCurrentTT.AutoSize = true;
-            this.cmdBackupCurrentTT.Location = new System.Drawing.Point(6, 250);
-            this.cmdBackupCurrentTT.Name = "cmdBackupCurrentTT";
-            this.cmdBackupCurrentTT.Size = new System.Drawing.Size(127, 13);
-            this.cmdBackupCurrentTT.TabIndex = 82;
-            this.cmdBackupCurrentTT.TabStop = true;
-            this.cmdBackupCurrentTT.Text = "Backup Current TrueTest";
-            this.cmdBackupCurrentTT.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdBackupCurrentTT_LinkClicked);
             // 
             // MainForm
             // 
@@ -965,9 +1018,6 @@ namespace EZAE
         private System.Windows.Forms.LinkLabel cmdShareD;
         private System.Windows.Forms.LinkLabel cmdShareE;
         private System.Windows.Forms.LinkLabel cmdShareRVSData;
-        private System.Windows.Forms.LinkLabel cmdShareCProgram;
-        private System.Windows.Forms.LinkLabel cmdShareDProgram;
-        private System.Windows.Forms.LinkLabel cmdShareEProgram;
         private System.Windows.Forms.LinkLabel cmdCreateOTPandResult;
         private System.Windows.Forms.LinkLabel cmdSetTTPermission;
         private System.Windows.Forms.GroupBox groupBox1;
@@ -982,8 +1032,14 @@ namespace EZAE
         private System.Windows.Forms.LinkLabel cmdUseLastModifiedSequence;
         private System.Windows.Forms.LinkLabel cmdOneclickSetupCameraPC;
         private System.Windows.Forms.LinkLabel cmdOneclickSetupFixturePC;
-        private System.Windows.Forms.LinkLabel cmdOneclickSetupTrueTest;
+        private System.Windows.Forms.LinkLabel cmdOneclickSetupTrueTestSettings;
         private System.Windows.Forms.LinkLabel cmdBackupCurrentTT;
+        private System.Windows.Forms.ComboBox cbFixture;
+        private System.Windows.Forms.ComboBox cbProgramFolder;
+        private System.Windows.Forms.LinkLabel cmdShareProgram;
+        private System.Windows.Forms.LinkLabel cmdOpenEngineerMode;
+        private System.Windows.Forms.LinkLabel cmdInstallTrueTest;
+        private System.Windows.Forms.ComboBox cbTrueTestInstallerList;
     }
 }
 
