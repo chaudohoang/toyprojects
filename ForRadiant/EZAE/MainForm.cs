@@ -964,9 +964,9 @@ namespace EZAE
 
         private void cmdBackupCurrentTT_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\backupCurrentTT.bat"))
+            if (File.Exists(@"Tools\backupCurrentTT.vbs"))
             {
-                ExecuteAsAdmin(@"Tools\backupCurrentTT.bat");
+                Process.Start(@"Tools\backupCurrentTT.vbs");
             }
         }
 
@@ -1000,7 +1000,7 @@ namespace EZAE
         {
             cbTrueTestInstallerList.Items.Clear();
             String[] exes =
-            Directory.GetFiles(@"TrueTest Setup\", "*.EXE", SearchOption.AllDirectories)
+            Directory.GetFiles(@"TrueTest Setup", "*.EXE", SearchOption.AllDirectories)
             .Select(fileName => Path.GetFileName(fileName))
             .Where(fileName => Path.GetFileNameWithoutExtension(fileName).StartsWith("TrueTest"))
             .ToArray();
@@ -1012,13 +1012,13 @@ namespace EZAE
         }
         private void cmdInstallTrueTest_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\backupCurrentTT.bat"))
+            if (File.Exists(@"Tools\backupCurrentTT.vbs"))
             {
-                ExecuteAsAdmin(@"Tools\backupCurrentTT.bat");
+                Process.Start(@"Tools\backupCurrentTT.vbs");
             }
-            if (File.Exists(cbTrueTestInstallerList.Text))
+            if (File.Exists(@"TrueTest Setup\" + cbTrueTestInstallerList.Text))
             {
-                ExecuteAsAdmin(cbTrueTestInstallerList.Text);
+                ExecuteAsAdmin(@"TrueTest Setup\" + cbTrueTestInstallerList.Text);
             }
         }
     }
