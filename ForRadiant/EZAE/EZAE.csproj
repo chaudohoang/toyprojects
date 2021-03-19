@@ -89,11 +89,5 @@
   <ItemGroup>
     <Content Include="Gear.ico" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ErroBox\ErrorBox.csproj">
-      <Project>{83306080-fc60-4dfc-a254-cbf43428b44a}</Project>
-      <Name>ErrorBox</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
