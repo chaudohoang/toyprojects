@@ -9,6 +9,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
@@ -21,8 +22,10 @@ using System.Windows.Forms;
 
 namespace ErrorBox
 {
+    
     internal class ErrorBox : Form
     {
+        BackgroundWorker blinker;
         // Bóng đổ
         private const int CS_DROPSHADOW = 0x00020000;
 
@@ -56,6 +59,8 @@ namespace ErrorBox
 
         private ErrorBox()
         {
+            blinker = new BackgroundWorker();
+            blinker.DoWork += blinker_DoWork;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.BackColor = Color.Red;
             this.StartPosition = FormStartPosition.CenterScreen;
@@ -74,6 +79,7 @@ namespace ErrorBox
             _lblMessage.ForeColor = Color.White;
             _lblMessage.Font = new System.Drawing.Font("Segoe UI", 20);
             _lblMessage.Dock = DockStyle.Fill;
+            _lblMessage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
 
             _flpButtons.FlowDirection = FlowDirection.RightToLeft;
             _flpButtons.Dock = DockStyle.Fill;
@@ -102,14 +108,51 @@ namespace ErrorBox
             this.Controls.Add(_plHeader);
             this.Controls.Add(_plIcon);
             this.Controls.Add(_plFooter);
+
+            if (blinker.IsBusy == false)
+            {
+                blinker.RunWorkerAsync();
+            }
+
         }
 
+        private void blink()
+        {
+            if (_plFooter.BackColor == Color.Red)
+                _plFooter.BackColor = Color.Black;
+            else
+                _plFooter.BackColor = Color.Red;
+
+            if (this.BackColor == Color.Red)
+                this.BackColor = Color.Black;
+            else
+                this.BackColor = Color.Red;
+        }
+
+        private void blinker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            while (true)
+            {
+                System.Threading.Thread.Sleep(500); // Set fast to slow.
+
+                if (this.InvokeRequired)
+                {
+                    this.Invoke((Action)blink);
+                }
+                else
+                {
+                    blink();
+                }
+            }
+            
+        }
         public static void Show(string message)
         {
             _errorBox = new ErrorBox();
             _errorBox._lblMessage.Text = message;
             _errorBox.ShowDialog();
             MessageBeep(0);
+        
         }
 
         public static void Show(string message, string title)
@@ -120,7 +163,8 @@ namespace ErrorBox
             _errorBox.Size = ErrorBox.MessageSize(message);
             _errorBox.ShowDialog();
             MessageBeep(0);
-            
+           
+
         }
 
         public static DialogResult Show(string message, string title, Buttons buttons)
@@ -454,7 +498,7 @@ namespace ErrorBox
         {
             Graphics g = _errorBox.CreateGraphics();
             int width = Screen.PrimaryScreen.Bounds.Width;
-            int height = 460;
+            int height = 600;
 
             //SizeF size = g.MeasureString(message, new System.Drawing.Font("Segoe UI", 10));
 
