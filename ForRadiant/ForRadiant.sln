@@ -29,7 +29,7 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFC", "PanelFFC\PanelF
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IPListBuilder", "IPListBuilder\IPListBuilder.csproj", "{568FDE4F-08A1-4464-B615-5C627B81B133}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ErrorBox", "ErrorBox\ErrorBox.csproj", "{74D170FC-2774-46B9-9CD6-039AAD524B09}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomPopup", "CustomPopup\CustomPopup\CustomPopup.csproj", "{2125CF25-F41E-4CA7-AE61-FEB636F3017A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -89,10 +89,10 @@ Global
 		{568FDE4F-08A1-4464-B615-5C627B81B133}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{568FDE4F-08A1-4464-B615-5C627B81B133}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{568FDE4F-08A1-4464-B615-5C627B81B133}.Release|Any CPU.Build.0 = Release|Any CPU
-		{74D170FC-2774-46B9-9CD6-039AAD524B09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{74D170FC-2774-46B9-9CD6-039AAD524B09}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{74D170FC-2774-46B9-9CD6-039AAD524B09}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{74D170FC-2774-46B9-9CD6-039AAD524B09}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2125CF25-F41E-4CA7-AE61-FEB636F3017A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2125CF25-F41E-4CA7-AE61-FEB636F3017A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2125CF25-F41E-4CA7-AE61-FEB636F3017A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2125CF25-F41E-4CA7-AE61-FEB636F3017A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
