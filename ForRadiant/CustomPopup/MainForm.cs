@@ -94,12 +94,13 @@ namespace CustomPopup
             errobox.Height = Screen.PrimaryScreen.Bounds.Height / 2;
             errobox._MinButton.Location = new Point(errobox.Width - errobox._MinButton.Width- errobox._CloseButton.Width, 0);
             errobox._CloseButton.Location = new Point(errobox.Width - errobox._CloseButton.Width, 0);
+            
             Label lblMessage = new Label();
             lblMessage.ForeColor = Color.White;
             lblMessage.Font = new System.Drawing.Font("Segoe UI", 20);
             lblMessage.Dock = DockStyle.Fill;
             lblMessage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            
+            lblMessage.Padding= new Padding(20, 20, 20, 20);
             lblMessage.Text = message;
             errobox.Controls.Add(lblMessage);
             errobox.Show();
