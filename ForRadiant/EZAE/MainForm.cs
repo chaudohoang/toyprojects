@@ -304,7 +304,7 @@ namespace EZAE
         private void cmdCreateFFC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             string filepath = @"FFC_Database_Template\Generabe FFC Database.vbs";
-            if (File.Exists(filepath)) ;
+            if (File.Exists(filepath))
             {
                 Process.Start(filepath);
             }
