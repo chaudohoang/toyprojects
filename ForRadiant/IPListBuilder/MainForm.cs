@@ -116,5 +116,25 @@ namespace IPListBuilder
 
             }
         }
+
+        private void btnGenerate4_Click(object sender, EventArgs e)
+        {
+            string[] files = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.csv");
+            List<string> result = new List<string>();
+            foreach (string file in files)
+            {
+                string[] lines = File.ReadAllLines(file);
+                List<string> newfile = new List<string>();
+                foreach (string line in lines)
+                {
+                    newfile.Add(line.Split(',')[1]);
+                }
+                string filename = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(file), System.IO.Path.GetFileNameWithoutExtension(file)+".txt");
+                result.Add(filename);
+                File.WriteAllLines(filename, newfile);
+            }
+            MessageBox.Show("Generated: "+ Environment.NewLine +string.Join(Environment.NewLine, result));
+            
+        }
     }
 }
