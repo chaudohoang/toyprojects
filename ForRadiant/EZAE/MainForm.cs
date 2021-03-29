@@ -239,7 +239,7 @@ namespace EZAE
 
         private void cmdPinEngineerMode_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string filepath = @"Tools\pinEngineerModeToTaskBar.bat";
+            string filepath = @"pinEngineerModeToTaskBar.bat";
             if (File.Exists(filepath))
             {
                 Process.Start(filepath);
@@ -527,57 +527,57 @@ namespace EZAE
 
         private void cmdShareC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\ShareC.bat"))
+            if (File.Exists(@"ShareC.bat"))
             {
-                ExecuteAsAdmin(@"Tools\ShareC.bat");
+                ExecuteAsAdmin(@"ShareC.bat");
             }
         }
 
         private void cmdShareD_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\ShareD.bat"))
+            if (File.Exists(@"ShareD.bat"))
             {
-                ExecuteAsAdmin(@"Tools\ShareD.bat");
+                ExecuteAsAdmin(@"ShareD.bat");
             }
         }
 
         private void cmdShareE_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\ShareE.bat"))
+            if (File.Exists(@"ShareE.bat"))
             {
-                ExecuteAsAdmin(@"Tools\ShareE.bat");
+                ExecuteAsAdmin(@"ShareE.bat");
             }
         }
 
         private void cmdShareRVSData_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\ShareRadiantVisionSystemsData.bat"))
+            if (File.Exists(@"ShareRadiantVisionSystemsData.bat"))
             {
-                ExecuteAsAdmin(@"Tools\ShareRadiantVisionSystemsData.bat");
+                ExecuteAsAdmin(@"ShareRadiantVisionSystemsData.bat");
             }
         }
 
         private void cmdShareCProgram_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if ( File.Exists(@"Tools\ShareCProgram.bat") && cbProgramFolder.Text == @"C:\Program" )
+            if ( File.Exists(@"ShareCProgram.bat") && cbProgramFolder.Text == @"C:\Program" )
             {
-                ExecuteAsAdmin(@"Tools\ShareCProgram.bat");
+                ExecuteAsAdmin(@"ShareCProgram.bat");
             }
         }
 
         private void cmdShareDProgram_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\ShareDProgram.bat"))
+            if (File.Exists(@"ShareDProgram.bat"))
             {
-                ExecuteAsAdmin(@"Tools\ShareDProgram.bat");
+                ExecuteAsAdmin(@"ShareDProgram.bat");
             }
         }
 
         private void cmdShareEProgram_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\ShareEProgram.bat"))
+            if (File.Exists(@"ShareEProgram.bat"))
             {
-                ExecuteAsAdmin(@"Tools\ShareEProgram.bat");
+                ExecuteAsAdmin(@"ShareEProgram.bat");
             }
         }
 
@@ -592,9 +592,9 @@ namespace EZAE
 
         private void cmdSetTTPermission_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\updatePermission.bat"))
+            if (File.Exists(@"updatePermission.bat"))
             {
-                ExecuteAsAdmin(@"Tools\updatePermission.bat");
+                ExecuteAsAdmin(@"updatePermission.bat");
             }
         }
 
@@ -609,42 +609,42 @@ namespace EZAE
 
         private void cmdPinFixturePcFolders_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (cbFixture.Text == @"Dooone" && File.Exists(@"Tools\pinDoooneFixturePCFolders.bat") && File.Exists(@"Tools\pinDoooneFixturePCFolders.ps1"))
+            if (cbFixture.Text == @"Dooone" && File.Exists(@"pinDoooneFixturePCFolders.bat") && File.Exists(@"pinDoooneFixturePCFolders.ps1"))
             {
-                ExecuteAsAdmin(@"Tools\pinDoooneFixturePCFolders.bat");
+                ExecuteAsAdmin(@"pinDoooneFixturePCFolders.bat");
             }
-            else if (cbFixture.Text == @"Gooil" && File.Exists(@"Tools\pinGooilFixturePCFolders.bat") && File.Exists(@"Tools\pinGooilFixturePCFolders.ps1"))
+            else if (cbFixture.Text == @"Gooil" && File.Exists(@"pinGooilFixturePCFolders.bat") && File.Exists(@"pinGooilFixturePCFolders.ps1"))
             {
-                ExecuteAsAdmin(@"Tools\pinGooilFixturePCFolders.bat");
+                ExecuteAsAdmin(@"pinGooilFixturePCFolders.bat");
             }
         }
 
         private void cmdPinCameraPcFolders_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if ( cbFixture.Text==@"Dooone" && File.Exists(@"Tools\pinDoooneCameraPCFolders.bat") && File.Exists(@"Tools\pinDoooneCameraPCFolders.ps1"))
+            if ( cbFixture.Text==@"Dooone" && File.Exists(@"pinDoooneCameraPCFolders.bat") && File.Exists(@"pinDoooneCameraPCFolders.ps1"))
             {
-                ExecuteAsAdmin(@"Tools\pinDoooneCameraPCFolders.bat");
+                ExecuteAsAdmin(@"pinDoooneCameraPCFolders.bat");
             }
-            else if (cbFixture.Text == @"Gooil" && File.Exists(@"Tools\pinGooilCameraPCFolders.bat") && File.Exists(@"Tools\pinGooilCameraPCFolders.ps1"))
+            else if (cbFixture.Text == @"Gooil" && File.Exists(@"pinGooilCameraPCFolders.bat") && File.Exists(@"pinGooilCameraPCFolders.ps1"))
             {
-                ExecuteAsAdmin(@"Tools\pinGooilCameraPCFolders.bat");
+                ExecuteAsAdmin(@"pinGooilCameraPCFolders.bat");
             }
 
         }
 
         private void cmdUACOff_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\disableUAC.bat"))
+            if (File.Exists(@"disableUAC.bat"))
             {
-                ExecuteAsAdmin(@"Tools\disableUAC.bat");
+                ExecuteAsAdmin(@"disableUAC.bat");
             }
         }
 
         private void cmdFirewallOff_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\FirewallOff.bat"))
+            if (File.Exists(@"FirewallOff.bat"))
             {
-                ExecuteAsAdmin(@"Tools\FirewallOff.bat");
+                ExecuteAsAdmin(@"FirewallOff.bat");
             }
         }
 
@@ -684,62 +684,62 @@ namespace EZAE
 
         private void cmdPasswordSharingOff_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\PasswordSharingOff.bat"))
+            if (File.Exists(@"PasswordSharingOff.bat"))
             {
-                ExecuteAsAdmin(@"Tools\PasswordSharingOff.bat");
+                ExecuteAsAdmin(@"PasswordSharingOff.bat");
             }
         }
 
         private void cmdOneclickSetupCameraPC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\disableUAC.bat"))
+            if (File.Exists(@"disableUAC.bat"))
             {
-                ExecuteAsAdmin(@"Tools\disableUAC.bat");
+                ExecuteAsAdmin(@"disableUAC.bat");
             }
 
-            if (File.Exists(@"Tools\PasswordSharingOff.bat"))
+            if (File.Exists(@"PasswordSharingOff.bat"))
             {
-                ExecuteAsAdmin(@"Tools\PasswordSharingOff.bat");
+                ExecuteAsAdmin(@"PasswordSharingOff.bat");
             }
 
-            if (File.Exists(@"Tools\FirewallOff.bat"))
+            if (File.Exists(@"FirewallOff.bat"))
             {
-                ExecuteAsAdmin(@"Tools\FirewallOff.bat");
+                ExecuteAsAdmin(@"FirewallOff.bat");
             }
 
-            if (File.Exists(@"Tools\ShareC.bat"))
+            if (File.Exists(@"ShareC.bat"))
             {
-                ExecuteAsAdmin(@"Tools\ShareC.bat");
+                ExecuteAsAdmin(@"ShareC.bat");
             }
 
-            if (File.Exists(@"Tools\ShareD.bat"))
+            if (File.Exists(@"ShareD.bat"))
             {
-                ExecuteAsAdmin(@"Tools\ShareD.bat");
+                ExecuteAsAdmin(@"ShareD.bat");
             }
 
-            if (File.Exists(@"Tools\ShareE.bat"))
+            if (File.Exists(@"ShareE.bat"))
             {
-                ExecuteAsAdmin(@"Tools\ShareE.bat");
+                ExecuteAsAdmin(@"ShareE.bat");
             }
 
-            if (File.Exists(@"Tools\ShareCProgram.bat") && cbProgramFolder.Text == @"C:\Program")
+            if (File.Exists(@"ShareCProgram.bat") && cbProgramFolder.Text == @"C:\Program")
             {
-                ExecuteAsAdmin(@"Tools\ShareCProgram.bat");
+                ExecuteAsAdmin(@"ShareCProgram.bat");
             }
 
-            else if (File.Exists(@"Tools\ShareDProgram.bat") && cbProgramFolder.Text == @"D:\Program")
+            else if (File.Exists(@"ShareDProgram.bat") && cbProgramFolder.Text == @"D:\Program")
             {
-                ExecuteAsAdmin(@"Tools\ShareDProgram.bat");
+                ExecuteAsAdmin(@"ShareDProgram.bat");
             }
 
-            else if (File.Exists(@"Tools\ShareEProgram.bat") && cbProgramFolder.Text == @"E:\Program")
+            else if (File.Exists(@"ShareEProgram.bat") && cbProgramFolder.Text == @"E:\Program")
             {
-                ExecuteAsAdmin(@"Tools\ShareEProgram.bat");
+                ExecuteAsAdmin(@"ShareEProgram.bat");
             }
 
-            if (File.Exists(@"Tools\ShareRadiantVisionSystemsData.bat"))
+            if (File.Exists(@"ShareRadiantVisionSystemsData.bat"))
             {
-                ExecuteAsAdmin(@"Tools\ShareRadiantVisionSystemsData.bat");
+                ExecuteAsAdmin(@"ShareRadiantVisionSystemsData.bat");
             }
 
             if ((cbTightVNCPath.Text == @"C:\Program") && File.Exists(@"Installer\tightvncCProgram.exe"))
@@ -755,13 +755,13 @@ namespace EZAE
                 ExecuteAsAdmin(@"Installer\tightvncEProgram.exe");
             }
 
-            if (cbFixture.Text == @"Dooone" && File.Exists(@"Tools\pinDoooneFixturePCFolders.bat") && File.Exists(@"Tools\pinDoooneFixturePCFolders.ps1"))
+            if (cbFixture.Text == @"Dooone" && File.Exists(@"pinDoooneFixturePCFolders.bat") && File.Exists(@"pinDoooneFixturePCFolders.ps1"))
             {
-                ExecuteAsAdmin(@"Tools\pinDoooneFixturePCFolders.bat");
+                ExecuteAsAdmin(@"pinDoooneFixturePCFolders.bat");
             }
-            else if (cbFixture.Text == @"Gooil" && File.Exists(@"Tools\pinGooilFixturePCFolders.bat") && File.Exists(@"Tools\pinGooilFixturePCFolders.ps1"))
+            else if (cbFixture.Text == @"Gooil" && File.Exists(@"pinGooilFixturePCFolders.bat") && File.Exists(@"pinGooilFixturePCFolders.ps1"))
             {
-                ExecuteAsAdmin(@"Tools\pinGooilFixturePCFolders.bat");
+                ExecuteAsAdmin(@"pinGooilFixturePCFolders.bat");
             }
 
             if (File.Exists(@"Installer\Visual C++ 2012\VC2012_silent_install.bat"))
@@ -802,49 +802,49 @@ namespace EZAE
 
         private void cmdOneclickSetupFixturePC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\disableUAC.bat"))
+            if (File.Exists(@"disableUAC.bat"))
             {
-                ExecuteAsAdmin(@"Tools\disableUAC.bat");
+                ExecuteAsAdmin(@"disableUAC.bat");
             }
 
-            if (File.Exists(@"Tools\PasswordSharingOff.bat"))
+            if (File.Exists(@"PasswordSharingOff.bat"))
             {
-                ExecuteAsAdmin(@"Tools\PasswordSharingOff.bat");
+                ExecuteAsAdmin(@"PasswordSharingOff.bat");
             }
 
-            if (File.Exists(@"Tools\FirewallOff.bat"))
+            if (File.Exists(@"FirewallOff.bat"))
             {
-                ExecuteAsAdmin(@"Tools\FirewallOff.bat");
+                ExecuteAsAdmin(@"FirewallOff.bat");
             }
 
-            if (File.Exists(@"Tools\ShareC.bat"))
+            if (File.Exists(@"ShareC.bat"))
             {
-                ExecuteAsAdmin(@"Tools\ShareC.bat");
+                ExecuteAsAdmin(@"ShareC.bat");
             }
 
-            if (File.Exists(@"Tools\ShareD.bat"))
+            if (File.Exists(@"ShareD.bat"))
             {
-                ExecuteAsAdmin(@"Tools\ShareD.bat");
+                ExecuteAsAdmin(@"ShareD.bat");
             }
 
-            if (File.Exists(@"Tools\ShareE.bat"))
+            if (File.Exists(@"ShareE.bat"))
             {
-                ExecuteAsAdmin(@"Tools\ShareE.bat");
+                ExecuteAsAdmin(@"ShareE.bat");
             }
 
-            if (File.Exists(@"Tools\ShareCProgram.bat") && cbProgramFolder.Text == @"C:\Program")
+            if (File.Exists(@"ShareCProgram.bat") && cbProgramFolder.Text == @"C:\Program")
             {
-                ExecuteAsAdmin(@"Tools\ShareCProgram.bat");
+                ExecuteAsAdmin(@"ShareCProgram.bat");
             }
 
-            else if (File.Exists(@"Tools\ShareDProgram.bat") && cbProgramFolder.Text == @"D:\Program")
+            else if (File.Exists(@"ShareDProgram.bat") && cbProgramFolder.Text == @"D:\Program")
             {
-                ExecuteAsAdmin(@"Tools\ShareDProgram.bat");
+                ExecuteAsAdmin(@"ShareDProgram.bat");
             }
 
-            else if (File.Exists(@"Tools\ShareEProgram.bat") && cbProgramFolder.Text == @"E:\Program")
+            else if (File.Exists(@"ShareEProgram.bat") && cbProgramFolder.Text == @"E:\Program")
             {
-                ExecuteAsAdmin(@"Tools\ShareEProgram.bat");
+                ExecuteAsAdmin(@"ShareEProgram.bat");
             }
 
             if ((cbTightVNCPath.Text == @"C:\Program") && File.Exists(@"Installer\tightvncCProgram.exe"))
@@ -860,13 +860,13 @@ namespace EZAE
                 ExecuteAsAdmin(@"Installer\tightvncEProgram.exe");
             }
 
-            if (cbFixture.Text == @"Dooone" && File.Exists(@"Tools\pinDoooneCameraPCFolders.bat") && File.Exists(@"Tools\pinDoooneCameraPCFolders.ps1"))
+            if (cbFixture.Text == @"Dooone" && File.Exists(@"pinDoooneCameraPCFolders.bat") && File.Exists(@"pinDoooneCameraPCFolders.ps1"))
             {
-                ExecuteAsAdmin(@"Tools\pinDoooneCameraPCFolders.bat");
+                ExecuteAsAdmin(@"pinDoooneCameraPCFolders.bat");
             }
-            else if (cbFixture.Text == @"Gooil" && File.Exists(@"Tools\pinGooilCameraPCFolders.bat") && File.Exists(@"Tools\pinGooilCameraPCFolders.ps1"))
+            else if (cbFixture.Text == @"Gooil" && File.Exists(@"pinGooilCameraPCFolders.bat") && File.Exists(@"pinGooilCameraPCFolders.ps1"))
             {
-                ExecuteAsAdmin(@"Tools\pinGooilCameraPCFolders.bat");
+                ExecuteAsAdmin(@"pinGooilCameraPCFolders.bat");
             }
 
             if (File.Exists(@"Installer\Visual C++ 2012\VC2012_silent_install.bat"))
@@ -902,9 +902,9 @@ namespace EZAE
                 Process.Start(@"Installer\CopyOTP.vbs");
             }
 
-            if (File.Exists(@"Tools\updatePermission.bat"))
+            if (File.Exists(@"updatePermission.bat"))
             {
-                ExecuteAsAdmin(@"Tools\updatePermission.bat");
+                ExecuteAsAdmin(@"updatePermission.bat");
             }
 
             switch (cbDIList.Text)
@@ -964,33 +964,33 @@ namespace EZAE
 
         private void cmdBackupCurrentTT_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\backupCurrentTT.vbs"))
+            if (File.Exists(@"backupCurrentTT.vbs"))
             {
-                Process.Start(@"Tools\backupCurrentTT.vbs");
+                Process.Start(@"backupCurrentTT.vbs");
             }
         }
 
         private void cmdShareProgram_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\ShareCProgram.bat") && cbProgramFolder.Text == @"C:\Program")
+            if (File.Exists(@"ShareCProgram.bat") && cbProgramFolder.Text == @"C:\Program")
             {
-                ExecuteAsAdmin(@"Tools\ShareCProgram.bat");
+                ExecuteAsAdmin(@"ShareCProgram.bat");
             }
 
-            else if (File.Exists(@"Tools\ShareDProgram.bat") && cbProgramFolder.Text == @"D:\Program")
+            else if (File.Exists(@"ShareDProgram.bat") && cbProgramFolder.Text == @"D:\Program")
             {
-                ExecuteAsAdmin(@"Tools\ShareDProgram.bat");
+                ExecuteAsAdmin(@"ShareDProgram.bat");
             }
 
-            else if (File.Exists(@"Tools\ShareEProgram.bat") && cbProgramFolder.Text == @"E:\Program")
+            else if (File.Exists(@"ShareEProgram.bat") && cbProgramFolder.Text == @"E:\Program")
             {
-                ExecuteAsAdmin(@"Tools\ShareEProgram.bat");
+                ExecuteAsAdmin(@"ShareEProgram.bat");
             }
         }
 
         private void cmdOpenEngineerMode_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string filepath = @"Tools\EngineerMode.exe";
+            string filepath = @"EngineerMode.exe";
             if (File.Exists(filepath))
             {
                 Process.Start(filepath);
@@ -1012,9 +1012,9 @@ namespace EZAE
         }
         private void cmdInstallTrueTest_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\backupCurrentTT.vbs"))
+            if (File.Exists(@"backupCurrentTT.vbs"))
             {
-                Process.Start(@"Tools\backupCurrentTT.vbs");
+                Process.Start(@"backupCurrentTT.vbs");
             }
             if (File.Exists(@"TrueTest Setup\" + cbTrueTestInstallerList.Text))
             {

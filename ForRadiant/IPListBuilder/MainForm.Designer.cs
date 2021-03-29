@@ -129,7 +129,7 @@ namespace IPListBuilder
             this.cbExtendedPath.Name = "cbExtendedPath";
             this.cbExtendedPath.Size = new System.Drawing.Size(337, 21);
             this.cbExtendedPath.TabIndex = 6;
-            this.cbExtendedPath.Text = "\\Program\\RVS";
+            this.cbExtendedPath.Text = "\\Program\\RVS\\Tools";
             // 
             // label4
             // 
