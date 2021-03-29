@@ -19,6 +19,15 @@ namespace EZAE
         {
             
             InitializeComponent();
+
+            if (File.Exists(@"addhosttointranet.bat"))
+            {
+
+                ExecuteAsAdmin(@"addhosttointranet.bat");
+                
+            }
+            
+            
         }
 
         public void ExecuteAsAdmin(string fileName)
