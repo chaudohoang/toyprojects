@@ -189,6 +189,7 @@ namespace IPListBuilder
                     batchfile.Add("            <Right>\\\\" + line.Split(',')[1] + cbExtendedDestination.Text + "</Right>");
                     batchfile.Add("        </Pair>");
                 }
+                batchfile.Add("    </FolderPairs>");
                 batchfile.Add("    <Errors Ignore=\"true\" Retry=\"0\" Delay=\"5\"/>");
                 batchfile.Add("    <PostSyncCommand Condition=\"Completion\"/>");
                 batchfile.Add("    <LogFolder/>");
