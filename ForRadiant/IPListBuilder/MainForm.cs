@@ -146,5 +146,62 @@ namespace IPListBuilder
                 cbIPList4.Items.Add(file);
             }
         }
+
+        private void btnGenerate5_Click(object sender, EventArgs e)
+        {
+            if (File.Exists(cbIPList4.Text))
+            {
+                string[] lines = File.ReadAllLines(cbIPList4.Text);
+                string filename = Path.GetFileNameWithoutExtension(cbIPList4.Text);
+                List<string> batchfile = new List<string>();
+                batchfile.Add("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+                batchfile.Add("<FreeFileSync XmlType=\"BATCH\" XmlFormat=\"17\">");
+                batchfile.Add("    <Compare>");
+                batchfile.Add("        <Variant>TimeAndSize</Variant>");
+                batchfile.Add("        <Symlinks>Exclude</Symlinks>");
+                batchfile.Add("        <IgnoreTimeShift/>");
+                batchfile.Add("    </Compare>");
+                batchfile.Add("    <Synchronize>");
+                batchfile.Add("        <Variant>Mirror</Variant>");
+                batchfile.Add("        <DetectMovedFiles>false</DetectMovedFiles>");
+                batchfile.Add("        <DeletionPolicy>RecycleBin</DeletionPolicy>");
+                batchfile.Add("        <VersioningFolder Style=\"Replace\"/>");
+                batchfile.Add("    </Synchronize>");
+                batchfile.Add("    <Filter>");
+                batchfile.Add("        <Include>");
+                batchfile.Add("            <Item>*</Item>");
+                batchfile.Add("        </Include>");
+                batchfile.Add("        <Exclude>");
+                batchfile.Add("            <Item>\\System Volume Information\\</Item>");
+                batchfile.Add("            <Item>\\$Recycle.Bin\\</Item>");
+                batchfile.Add("            <Item>\\RECYCLE?\\</Item>");
+                batchfile.Add("            <Item>*\\thumbs.db</Item>");
+                batchfile.Add("        </Exclude>");
+                batchfile.Add("        <TimeSpan Type=\"None\">0</TimeSpan>");
+                batchfile.Add("        <SizeMin Unit=\"None\">0</SizeMin>");
+                batchfile.Add("        <SizeMax Unit=\"None\">0</SizeMax>");
+                batchfile.Add("    </Filter>");
+                batchfile.Add("    <FolderPairs>");
+                foreach (string line in lines)
+                {
+                    batchfile.Add("        <Pair>");
+                    batchfile.Add("            <Left>" + cbSource1.Text + "</Left>");
+                    batchfile.Add("            <Right>\\\\" + line.Split(',')[1] + cbExtendedDestination.Text + "</Right>");
+                    batchfile.Add("        </Pair>");
+                }
+                batchfile.Add("    <Errors Ignore=\"true\" Retry=\"0\" Delay=\"5\"/>");
+                batchfile.Add("    <PostSyncCommand Condition=\"Completion\"/>");
+                batchfile.Add("    <LogFolder/>");
+                batchfile.Add("    <EmailNotification Condition=\"Always\"/>");
+                batchfile.Add("    <Batch>");
+                batchfile.Add("        <ProgressDialog Minimized=\"true\" AutoClose=\"true\"/>");
+                batchfile.Add("        <ErrorDialog>Show</ErrorDialog>");
+                batchfile.Add("        <PostSyncAction>None</PostSyncAction>");
+                batchfile.Add("    </Batch>");
+                batchfile.Add("</FreeFileSync>");
+                File.WriteAllLines(filename + ".ffs_batch", batchfile);
+                MessageBox.Show("Generated: " + Path.GetFullPath(filename + ".ffs_batch"));
+            }
+        }
     }
 }

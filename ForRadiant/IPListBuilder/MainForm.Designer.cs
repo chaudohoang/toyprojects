@@ -55,6 +55,8 @@ namespace IPListBuilder
             this.label5 = new System.Windows.Forms.Label();
             this.tabIPonly = new System.Windows.Forms.TabPage();
             this.btnGenerate4 = new System.Windows.Forms.Button();
+            this.label7 = new System.Windows.Forms.Label();
+            this.cbExtendedDestination = new System.Windows.Forms.ComboBox();
             this.tabControl1.SuspendLayout();
             this.tabIPScanner.SuspendLayout();
             this.tabCopyWhiz.SuspendLayout();
@@ -68,8 +70,8 @@ namespace IPListBuilder
             this.tabControl1.Controls.Add(this.tabIPScanner);
             this.tabControl1.Controls.Add(this.tabCopyWhiz);
             this.tabControl1.Controls.Add(this.tabRealVNC);
-            this.tabControl1.Controls.Add(this.tabFreeFileSync);
             this.tabControl1.Controls.Add(this.tabIPonly);
+            this.tabControl1.Controls.Add(this.tabFreeFileSync);
             this.tabControl1.Location = new System.Drawing.Point(12, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -223,7 +225,9 @@ namespace IPListBuilder
             this.tabFreeFileSync.Controls.Add(this.btnGenerate5);
             this.tabFreeFileSync.Controls.Add(this.cbIdleTime1);
             this.tabFreeFileSync.Controls.Add(this.label8);
+            this.tabFreeFileSync.Controls.Add(this.cbExtendedDestination);
             this.tabFreeFileSync.Controls.Add(this.cbSource1);
+            this.tabFreeFileSync.Controls.Add(this.label7);
             this.tabFreeFileSync.Controls.Add(this.label6);
             this.tabFreeFileSync.Controls.Add(this.cbIPList4);
             this.tabFreeFileSync.Controls.Add(this.label5);
@@ -236,26 +240,30 @@ namespace IPListBuilder
             // 
             // btnGenerate5
             // 
-            this.btnGenerate5.Location = new System.Drawing.Point(9, 60);
+            this.btnGenerate5.Location = new System.Drawing.Point(320, 33);
             this.btnGenerate5.Name = "btnGenerate5";
-            this.btnGenerate5.Size = new System.Drawing.Size(417, 48);
+            this.btnGenerate5.Size = new System.Drawing.Size(106, 79);
             this.btnGenerate5.TabIndex = 14;
             this.btnGenerate5.Text = "Generate";
             this.btnGenerate5.UseVisualStyleBackColor = true;
+            this.btnGenerate5.Click += new System.EventHandler(this.btnGenerate5_Click);
             // 
             // cbIdleTime1
             // 
             this.cbIdleTime1.FormattingEnabled = true;
-            this.cbIdleTime1.Location = new System.Drawing.Point(373, 33);
+            this.cbIdleTime1.Items.AddRange(new object[] {
+            "",
+            "10"});
+            this.cbIdleTime1.Location = new System.Drawing.Point(62, 87);
             this.cbIdleTime1.Name = "cbIdleTime1";
-            this.cbIdleTime1.Size = new System.Drawing.Size(51, 21);
+            this.cbIdleTime1.Size = new System.Drawing.Size(249, 21);
             this.cbIdleTime1.TabIndex = 13;
             this.cbIdleTime1.Text = "10";
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(317, 36);
+            this.label8.Location = new System.Drawing.Point(6, 90);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(50, 13);
             this.label8.TabIndex = 12;
@@ -267,7 +275,8 @@ namespace IPListBuilder
             this.cbSource1.Items.AddRange(new object[] {
             "",
             "C:\\Users\\Administrator\\RVS Sync\\RVS\\Tools",
-            "D:\\RVS Sync\\RVS\\Tools"});
+            "D:\\RVS Sync\\RVS\\Tools",
+            "\\\\127.0.0.1\\Program\\RVS\\Tools"});
             this.cbSource1.Location = new System.Drawing.Point(53, 33);
             this.cbSource1.Name = "cbSource1";
             this.cbSource1.Size = new System.Drawing.Size(258, 21);
@@ -322,11 +331,33 @@ namespace IPListBuilder
             this.btnGenerate4.UseVisualStyleBackColor = true;
             this.btnGenerate4.Click += new System.EventHandler(this.btnGenerate4_Click);
             // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(6, 63);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(108, 13);
+            this.label7.TabIndex = 8;
+            this.label7.Text = "Extended Destination";
+            // 
+            // cbExtendedDestination
+            // 
+            this.cbExtendedDestination.FormattingEnabled = true;
+            this.cbExtendedDestination.Items.AddRange(new object[] {
+            "",
+            "\\Program\\RVS\\Tools",
+            "\\Program\\RVS\\TrueTest Installers"});
+            this.cbExtendedDestination.Location = new System.Drawing.Point(120, 60);
+            this.cbExtendedDestination.Name = "cbExtendedDestination";
+            this.cbExtendedDestination.Size = new System.Drawing.Size(191, 21);
+            this.cbExtendedDestination.TabIndex = 9;
+            this.cbExtendedDestination.Text = "\\Program\\RVS\\Tools";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(467, 168);
+            this.ClientSize = new System.Drawing.Size(467, 164);
             this.Controls.Add(this.tabControl1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainForm";
@@ -372,6 +403,8 @@ namespace IPListBuilder
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.ComboBox cbIPList4;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.ComboBox cbExtendedDestination;
+        private System.Windows.Forms.Label label7;
     }
 }
 
