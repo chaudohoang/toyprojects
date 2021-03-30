@@ -136,5 +136,15 @@ namespace IPListBuilder
             MessageBox.Show("Generated: "+ Environment.NewLine +string.Join(Environment.NewLine, result));
             
         }
+
+        private void cbIPList4_DropDown(object sender, EventArgs e)
+        {
+            cbIPList4.Items.Clear();
+            string[] files = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.csv");
+            foreach (string file in files)
+            {
+                cbIPList4.Items.Add(file);
+            }
+        }
     }
 }

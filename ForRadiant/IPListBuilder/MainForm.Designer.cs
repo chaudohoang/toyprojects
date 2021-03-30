@@ -45,12 +45,21 @@ namespace IPListBuilder
             this.btnGenerate3 = new System.Windows.Forms.Button();
             this.cbIPList3 = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
+            this.tabFreeFileSync = new System.Windows.Forms.TabPage();
+            this.btnGenerate5 = new System.Windows.Forms.Button();
+            this.cbIdleTime1 = new System.Windows.Forms.ComboBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.cbSource1 = new System.Windows.Forms.ComboBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.cbIPList4 = new System.Windows.Forms.ComboBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.tabIPonly = new System.Windows.Forms.TabPage();
             this.btnGenerate4 = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabIPScanner.SuspendLayout();
             this.tabCopyWhiz.SuspendLayout();
             this.tabRealVNC.SuspendLayout();
+            this.tabFreeFileSync.SuspendLayout();
             this.tabIPonly.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -59,11 +68,12 @@ namespace IPListBuilder
             this.tabControl1.Controls.Add(this.tabIPScanner);
             this.tabControl1.Controls.Add(this.tabCopyWhiz);
             this.tabControl1.Controls.Add(this.tabRealVNC);
+            this.tabControl1.Controls.Add(this.tabFreeFileSync);
             this.tabControl1.Controls.Add(this.tabIPonly);
             this.tabControl1.Location = new System.Drawing.Point(12, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(445, 126);
+            this.tabControl1.Size = new System.Drawing.Size(445, 144);
             this.tabControl1.TabIndex = 0;
             // 
             // tabIPScanner
@@ -74,7 +84,7 @@ namespace IPListBuilder
             this.tabIPScanner.Location = new System.Drawing.Point(4, 22);
             this.tabIPScanner.Name = "tabIPScanner";
             this.tabIPScanner.Padding = new System.Windows.Forms.Padding(3);
-            this.tabIPScanner.Size = new System.Drawing.Size(437, 100);
+            this.tabIPScanner.Size = new System.Drawing.Size(437, 118);
             this.tabIPScanner.TabIndex = 0;
             this.tabIPScanner.Text = "Advance IP Scanner";
             this.tabIPScanner.UseVisualStyleBackColor = true;
@@ -83,7 +93,7 @@ namespace IPListBuilder
             // 
             this.btnGenerate1.Location = new System.Drawing.Point(9, 33);
             this.btnGenerate1.Name = "btnGenerate1";
-            this.btnGenerate1.Size = new System.Drawing.Size(417, 61);
+            this.btnGenerate1.Size = new System.Drawing.Size(417, 79);
             this.btnGenerate1.TabIndex = 2;
             this.btnGenerate1.Text = "Generate";
             this.btnGenerate1.UseVisualStyleBackColor = true;
@@ -117,7 +127,7 @@ namespace IPListBuilder
             this.tabCopyWhiz.Location = new System.Drawing.Point(4, 22);
             this.tabCopyWhiz.Name = "tabCopyWhiz";
             this.tabCopyWhiz.Padding = new System.Windows.Forms.Padding(3);
-            this.tabCopyWhiz.Size = new System.Drawing.Size(437, 100);
+            this.tabCopyWhiz.Size = new System.Drawing.Size(437, 118);
             this.tabCopyWhiz.TabIndex = 1;
             this.tabCopyWhiz.Text = "CopyWhiz";
             this.tabCopyWhiz.UseVisualStyleBackColor = true;
@@ -144,7 +154,7 @@ namespace IPListBuilder
             // 
             this.btnGenerate2.Location = new System.Drawing.Point(9, 60);
             this.btnGenerate2.Name = "btnGenerate2";
-            this.btnGenerate2.Size = new System.Drawing.Size(417, 31);
+            this.btnGenerate2.Size = new System.Drawing.Size(417, 52);
             this.btnGenerate2.TabIndex = 4;
             this.btnGenerate2.Text = "Generate";
             this.btnGenerate2.UseVisualStyleBackColor = true;
@@ -175,7 +185,7 @@ namespace IPListBuilder
             this.tabRealVNC.Controls.Add(this.label3);
             this.tabRealVNC.Location = new System.Drawing.Point(4, 22);
             this.tabRealVNC.Name = "tabRealVNC";
-            this.tabRealVNC.Size = new System.Drawing.Size(437, 100);
+            this.tabRealVNC.Size = new System.Drawing.Size(437, 118);
             this.tabRealVNC.TabIndex = 2;
             this.tabRealVNC.Text = "Real VNC";
             this.tabRealVNC.UseVisualStyleBackColor = true;
@@ -184,7 +194,7 @@ namespace IPListBuilder
             // 
             this.btnGenerate3.Location = new System.Drawing.Point(9, 33);
             this.btnGenerate3.Name = "btnGenerate3";
-            this.btnGenerate3.Size = new System.Drawing.Size(417, 61);
+            this.btnGenerate3.Size = new System.Drawing.Size(417, 79);
             this.btnGenerate3.TabIndex = 6;
             this.btnGenerate3.Text = "Generate";
             this.btnGenerate3.UseVisualStyleBackColor = true;
@@ -208,13 +218,96 @@ namespace IPListBuilder
             this.label3.TabIndex = 4;
             this.label3.Text = "IP List";
             // 
+            // tabFreeFileSync
+            // 
+            this.tabFreeFileSync.Controls.Add(this.btnGenerate5);
+            this.tabFreeFileSync.Controls.Add(this.cbIdleTime1);
+            this.tabFreeFileSync.Controls.Add(this.label8);
+            this.tabFreeFileSync.Controls.Add(this.cbSource1);
+            this.tabFreeFileSync.Controls.Add(this.label6);
+            this.tabFreeFileSync.Controls.Add(this.cbIPList4);
+            this.tabFreeFileSync.Controls.Add(this.label5);
+            this.tabFreeFileSync.Location = new System.Drawing.Point(4, 22);
+            this.tabFreeFileSync.Name = "tabFreeFileSync";
+            this.tabFreeFileSync.Size = new System.Drawing.Size(437, 118);
+            this.tabFreeFileSync.TabIndex = 4;
+            this.tabFreeFileSync.Text = "FreeFileSync";
+            this.tabFreeFileSync.UseVisualStyleBackColor = true;
+            // 
+            // btnGenerate5
+            // 
+            this.btnGenerate5.Location = new System.Drawing.Point(9, 60);
+            this.btnGenerate5.Name = "btnGenerate5";
+            this.btnGenerate5.Size = new System.Drawing.Size(417, 48);
+            this.btnGenerate5.TabIndex = 14;
+            this.btnGenerate5.Text = "Generate";
+            this.btnGenerate5.UseVisualStyleBackColor = true;
+            // 
+            // cbIdleTime1
+            // 
+            this.cbIdleTime1.FormattingEnabled = true;
+            this.cbIdleTime1.Location = new System.Drawing.Point(373, 33);
+            this.cbIdleTime1.Name = "cbIdleTime1";
+            this.cbIdleTime1.Size = new System.Drawing.Size(51, 21);
+            this.cbIdleTime1.TabIndex = 13;
+            this.cbIdleTime1.Text = "10";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(317, 36);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(50, 13);
+            this.label8.TabIndex = 12;
+            this.label8.Text = "Idle Time";
+            // 
+            // cbSource1
+            // 
+            this.cbSource1.FormattingEnabled = true;
+            this.cbSource1.Items.AddRange(new object[] {
+            "",
+            "C:\\Users\\Administrator\\RVS Sync\\RVS\\Tools",
+            "D:\\RVS Sync\\RVS\\Tools"});
+            this.cbSource1.Location = new System.Drawing.Point(53, 33);
+            this.cbSource1.Name = "cbSource1";
+            this.cbSource1.Size = new System.Drawing.Size(258, 21);
+            this.cbSource1.TabIndex = 9;
+            this.cbSource1.Text = "C:\\Users\\Administrator\\RVS Sync\\RVS\\Tools";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(6, 36);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(41, 13);
+            this.label6.TabIndex = 8;
+            this.label6.Text = "Source";
+            // 
+            // cbIPList4
+            // 
+            this.cbIPList4.FormattingEnabled = true;
+            this.cbIPList4.Location = new System.Drawing.Point(48, 6);
+            this.cbIPList4.Name = "cbIPList4";
+            this.cbIPList4.Size = new System.Drawing.Size(378, 21);
+            this.cbIPList4.TabIndex = 7;
+            this.cbIPList4.DropDown += new System.EventHandler(this.cbIPList4_DropDown);
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(6, 9);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(36, 13);
+            this.label5.TabIndex = 6;
+            this.label5.Text = "IP List";
+            // 
             // tabIPonly
             // 
             this.tabIPonly.Controls.Add(this.btnGenerate4);
             this.tabIPonly.Location = new System.Drawing.Point(4, 22);
             this.tabIPonly.Name = "tabIPonly";
             this.tabIPonly.Padding = new System.Windows.Forms.Padding(3);
-            this.tabIPonly.Size = new System.Drawing.Size(437, 100);
+            this.tabIPonly.Size = new System.Drawing.Size(437, 118);
             this.tabIPonly.TabIndex = 3;
             this.tabIPonly.Text = "IP only";
             this.tabIPonly.UseVisualStyleBackColor = true;
@@ -223,7 +316,7 @@ namespace IPListBuilder
             // 
             this.btnGenerate4.Location = new System.Drawing.Point(6, 6);
             this.btnGenerate4.Name = "btnGenerate4";
-            this.btnGenerate4.Size = new System.Drawing.Size(425, 88);
+            this.btnGenerate4.Size = new System.Drawing.Size(425, 106);
             this.btnGenerate4.TabIndex = 0;
             this.btnGenerate4.Text = "Generate";
             this.btnGenerate4.UseVisualStyleBackColor = true;
@@ -233,7 +326,7 @@ namespace IPListBuilder
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(467, 146);
+            this.ClientSize = new System.Drawing.Size(467, 168);
             this.Controls.Add(this.tabControl1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainForm";
@@ -245,6 +338,8 @@ namespace IPListBuilder
             this.tabCopyWhiz.PerformLayout();
             this.tabRealVNC.ResumeLayout(false);
             this.tabRealVNC.PerformLayout();
+            this.tabFreeFileSync.ResumeLayout(false);
+            this.tabFreeFileSync.PerformLayout();
             this.tabIPonly.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -269,6 +364,14 @@ namespace IPListBuilder
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TabPage tabIPonly;
         private System.Windows.Forms.Button btnGenerate4;
+        private System.Windows.Forms.TabPage tabFreeFileSync;
+        private System.Windows.Forms.Button btnGenerate5;
+        private System.Windows.Forms.ComboBox cbIdleTime1;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.ComboBox cbSource1;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.ComboBox cbIPList4;
+        private System.Windows.Forms.Label label5;
     }
 }
 
