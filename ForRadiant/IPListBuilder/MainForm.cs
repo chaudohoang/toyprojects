@@ -221,7 +221,7 @@ namespace IPListBuilder
                 File.WriteAllLines(@"Batch Job\\" + filename + ".ffs_real", realfile);
 
                 List<string> taskfile = new List<string>();
-                taskfile.Add("schtasks /create /TR \"'C:\\Program Files\\FreeFileSync\\RealTimeSync.exe' '%~dp0"+ filename + ".ffs_real" + "'\" /TN " + filename + " /SC ONLOGON /RL HIGHEST /F");
+                taskfile.Add("schtasks /create /TR \"'C:\\Program Files\\FreeFileSync\\RealTimeSync.exe' '%~dp0"+ filename + ".ffs_real" + "'\" /TN \"" + filename + "\" /SC ONLOGON /RL HIGHEST /F");
                 File.WriteAllLines(@"Batch Job\\" + filename + "_StartupTask.bat", taskfile);
 
                 MessageBox.Show("Generated: " + Path.GetFullPath(@"Batch Job\\" + filename + ".ffs_batch") +Environment.NewLine + Path.GetFullPath(@"Batch Job\\" + filename + ".ffs_real")+ Environment.NewLine + Path.GetFullPath(@"Batch Job\\" + filename + "_StartupTask.bat"));
