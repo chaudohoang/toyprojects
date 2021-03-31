@@ -151,6 +151,11 @@ namespace IPListBuilder
         {
             if (File.Exists(cbIPList4.Text))
             {
+                if (!Directory.Exists(@"Batch Job"))
+                {
+                    Directory.CreateDirectory(@"Batch Job");
+                }
+
                 string[] lines = File.ReadAllLines(cbIPList4.Text);
                 string iplist = Path.GetFileNameWithoutExtension(cbIPList4.Text);
                 string sourcefolder = Path.GetFileName(cbSource1.Text);
@@ -202,8 +207,24 @@ namespace IPListBuilder
                 batchfile.Add("        <PostSyncAction>None</PostSyncAction>");
                 batchfile.Add("    </Batch>");
                 batchfile.Add("</FreeFileSync>");
-                File.WriteAllLines(filename + ".ffs_batch", batchfile);
-                MessageBox.Show("Generated: " + Path.GetFullPath(filename + ".ffs_batch"));
+                File.WriteAllLines(@"Batch Job\\" + filename + ".ffs_batch", batchfile);
+
+                List<string> realfile = new List<string>();
+                realfile.Add("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+                realfile.Add("<FreeFileSync XmlType=\"REAL\" XmlFormat=\"2\">");
+                realfile.Add("    <Directories>");
+                realfile.Add("        <Item>" + cbSource1.Text +"</Item>");
+                realfile.Add("    </Directories>");
+                realfile.Add("    <Delay>10</Delay>");
+                realfile.Add("    <Commandline>\"C:\\Program Files\\FreeFileSync\\FreeFileSync.exe\" " + "\"" + Path.GetFullPath(@"Batch Job\\" + filename + ".ffs_batch") + "\" &amp; exit 0" + "</Commandline>");
+                realfile.Add("</FreeFileSync>");
+                File.WriteAllLines(@"Batch Job\\" + filename + ".ffs_real", realfile);
+
+                List<string> taskfile = new List<string>();
+                taskfile.Add("schtasks /create /TR \"'C:\\Program Files\\FreeFileSync\\RealTimeSync.exe' '%~dp0"+ filename + ".ffs_real" + "'\" /TN " + filename + " /SC ONLOGON /RL HIGHEST /F");
+                File.WriteAllLines(@"Batch Job\\" + filename + "_StartupTask.bat", taskfile);
+
+                MessageBox.Show("Generated: " + Path.GetFullPath(@"Batch Job\\" + filename + ".ffs_batch") +Environment.NewLine + Path.GetFullPath(@"Batch Job\\" + filename + ".ffs_real")+ Environment.NewLine + Path.GetFullPath(@"Batch Job\\" + filename + "_StartupTask.bat"));
             }
         }
     }
