@@ -396,7 +396,7 @@ namespace EZAE
             // cmdOneclickSetupFixturePC
             // 
             this.cmdOneclickSetupFixturePC.AutoSize = true;
-            this.cmdOneclickSetupFixturePC.LinkColor = System.Drawing.Color.Red;
+            this.cmdOneclickSetupFixturePC.LinkColor = System.Drawing.Color.Green;
             this.cmdOneclickSetupFixturePC.Location = new System.Drawing.Point(228, 10);
             this.cmdOneclickSetupFixturePC.Name = "cmdOneclickSetupFixturePC";
             this.cmdOneclickSetupFixturePC.Size = new System.Drawing.Size(135, 13);
