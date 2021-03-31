@@ -216,7 +216,14 @@ namespace IPListBuilder
                 realfile.Add("        <Item>" + cbSource1.Text +"</Item>");
                 realfile.Add("    </Directories>");
                 realfile.Add("    <Delay>10</Delay>");
-                realfile.Add("    <Commandline>\"C:\\Program Files\\FreeFileSync\\FreeFileSync.exe\" " + "\"" + Path.GetFullPath(@"Batch Job\\" + filename + ".ffs_batch") + "\" &amp; exit 0" + "</Commandline>");
+                if (cbSource1.Text.StartsWith("\\\\127.0.0.1"))
+                {
+                    realfile.Add("    <Commandline>\"C:\\Program Files\\FreeFileSync\\FreeFileSync.exe\" " + "\"" + cbSource1.Text + "\\CopyScript\\IPlist\\Batch Job\\" + filename + ".ffs_batch" + "\" &amp; exit 0" + "</Commandline>");
+                }
+                else
+                {
+                    realfile.Add("    <Commandline>\"C:\\Program Files\\FreeFileSync\\FreeFileSync.exe\" " + "\"" + Path.GetFullPath(@"Batch Job\\" + filename + ".ffs_batch") + "\" &amp; exit 0" + "</Commandline>");
+                }
                 realfile.Add("</FreeFileSync>");
                 File.WriteAllLines(@"Batch Job\\" + filename + ".ffs_real", realfile);
 
