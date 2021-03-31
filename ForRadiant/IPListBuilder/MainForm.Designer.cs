@@ -274,12 +274,13 @@ namespace IPListBuilder
             this.cbIdleTime1.FormattingEnabled = true;
             this.cbIdleTime1.Items.AddRange(new object[] {
             "",
+            "0",
             "10"});
             this.cbIdleTime1.Location = new System.Drawing.Point(62, 87);
             this.cbIdleTime1.Name = "cbIdleTime1";
             this.cbIdleTime1.Size = new System.Drawing.Size(249, 21);
             this.cbIdleTime1.TabIndex = 13;
-            this.cbIdleTime1.Text = "10";
+            this.cbIdleTime1.Text = "0";
             // 
             // label8
             // 

@@ -215,7 +215,7 @@ namespace IPListBuilder
                 realfile.Add("    <Directories>");
                 realfile.Add("        <Item>" + cbSource1.Text +"</Item>");
                 realfile.Add("    </Directories>");
-                realfile.Add("    <Delay>10</Delay>");
+                realfile.Add("    <Delay>" + cbIdleTime1.Text +"</Delay>");
                 if (cbSource1.Text.StartsWith("\\\\127.0.0.1"))
                 {
                     realfile.Add("    <Commandline>\"C:\\Program Files\\FreeFileSync\\FreeFileSync.exe\" " + "\"" + "\\\\127.0.0.1\\Program\\RVS\\Tools" + "\\CopyScript\\IPlist\\Batch Job\\" + filename + ".ffs_batch" + "\" &amp; exit 0" + "</Commandline>");
@@ -228,7 +228,7 @@ namespace IPListBuilder
                 File.WriteAllLines(@"Batch Job\\" + filename + ".ffs_real", realfile);
 
                 List<string> taskfile = new List<string>();
-                taskfile.Add("schtasks /create /TR \"'C:\\Program Files\\FreeFileSync\\RealTimeSync.exe' '%~dp0"+ filename + ".ffs_real" + "'\" /TN \"" + filename + "\" /SC ONLOGON /RL HIGHEST /F");
+                taskfile.Add("schtasks /create /TR \"'C:\\Program Files\\FreeFileSync\\RealTimeSync.exe' '%~dp0" + filename + ".ffs_real" + "'\" /TN \"" + filename + "\" /SC ONLOGON /RL HIGHEST /F");
                 File.WriteAllLines(@"Batch Job\\" + filename + "_StartupTask.bat", taskfile);
 
                 MessageBox.Show("Generated: " + Path.GetFullPath(@"Batch Job\\" + filename + ".ffs_batch") +Environment.NewLine + Path.GetFullPath(@"Batch Job\\" + filename + ".ffs_real")+ Environment.NewLine + Path.GetFullPath(@"Batch Job\\" + filename + "_StartupTask.bat"));
