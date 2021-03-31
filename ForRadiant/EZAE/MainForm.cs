@@ -19,7 +19,18 @@ namespace EZAE
         {
             
             InitializeComponent();
+            string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            string appdir = Path.GetDirectoryName(apppath);
+            string syspinpath = Path.Combine(appdir, "syspin.exe");
 
+            if (File.Exists(syspinpath))
+            {
+                ProcessStartInfo startInfo = new ProcessStartInfo(syspinpath);
+                startInfo.Arguments = "\"" +apppath + "\" 5386";
+                Process.Start(startInfo);
+
+            }
+            
             if (File.Exists(@"addhosttointranet.bat"))
             {
 
@@ -1009,7 +1020,7 @@ namespace EZAE
         {
             cbTrueTestInstallerList.Items.Clear();
             String[] exes =
-            Directory.GetFiles(@"TrueTest Setup", "*.EXE", SearchOption.AllDirectories)
+            Directory.GetFiles(@"..\TrueTest Installers", "*.EXE", SearchOption.AllDirectories)
             .Select(fileName => Path.GetFileName(fileName))
             .Where(fileName => Path.GetFileNameWithoutExtension(fileName).StartsWith("TrueTest"))
             .ToArray();
@@ -1025,9 +1036,9 @@ namespace EZAE
             {
                 Process.Start(@"backupCurrentTT.vbs");
             }
-            if (File.Exists(@"TrueTest Setup\" + cbTrueTestInstallerList.Text))
+            if (File.Exists(@"..\TrueTest Installers\" + cbTrueTestInstallerList.Text))
             {
-                ExecuteAsAdmin(@"TrueTest Setup\" + cbTrueTestInstallerList.Text);
+                ExecuteAsAdmin(@"..\TrueTest Installers\" + cbTrueTestInstallerList.Text);
             }
         }
     }

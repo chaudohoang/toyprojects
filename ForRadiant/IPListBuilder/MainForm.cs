@@ -152,7 +152,9 @@ namespace IPListBuilder
             if (File.Exists(cbIPList4.Text))
             {
                 string[] lines = File.ReadAllLines(cbIPList4.Text);
-                string filename = Path.GetFileNameWithoutExtension(cbIPList4.Text);
+                string iplist = Path.GetFileNameWithoutExtension(cbIPList4.Text);
+                string sourcefolder = Path.GetFileName(cbSource1.Text);
+                string filename = iplist + "_" + sourcefolder;
                 List<string> batchfile = new List<string>();
                 batchfile.Add("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
                 batchfile.Add("<FreeFileSync XmlType=\"BATCH\" XmlFormat=\"17\">");
