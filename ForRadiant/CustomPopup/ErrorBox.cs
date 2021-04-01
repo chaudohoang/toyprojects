@@ -88,10 +88,10 @@ namespace CustomPopup
             ErrorBox errobox = new ErrorBox();
             errobox.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             errobox.StartPosition = FormStartPosition.Manual;
-            Point start = new Point(Screen.PrimaryScreen.Bounds.Left + Screen.PrimaryScreen.Bounds.Width / 4, Screen.PrimaryScreen.Bounds.Top + Screen.PrimaryScreen.Bounds.Height / 4);
+            Point start = new Point(Screen.PrimaryScreen.Bounds.Left + Screen.PrimaryScreen.Bounds.Width / 8, Screen.PrimaryScreen.Bounds.Top + Screen.PrimaryScreen.Bounds.Height / 8);
             errobox.Location = start;
-            errobox.Width = Screen.PrimaryScreen.Bounds.Width / 2;
-            errobox.Height = Screen.PrimaryScreen.Bounds.Height / 2;
+            errobox.Width = Screen.PrimaryScreen.Bounds.Width * 3/ 4;
+            errobox.Height = Screen.PrimaryScreen.Bounds.Height * 3/ 4;
             errobox._MinButton.Location = new Point(errobox.Width - errobox._MinButton.Width- errobox._CloseButton.Width, 0);
             errobox._CloseButton.Location = new Point(errobox.Width - errobox._CloseButton.Width, 0);
             
