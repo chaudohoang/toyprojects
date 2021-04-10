@@ -381,6 +381,7 @@ namespace EZAE
             this.cbProgramFolder.Name = "cbProgramFolder";
             this.cbProgramFolder.Size = new System.Drawing.Size(80, 21);
             this.cbProgramFolder.TabIndex = 82;
+            this.cbProgramFolder.Text = "E:\\Program";
             // 
             // cmdShareProgram
             // 
@@ -648,6 +649,7 @@ namespace EZAE
             this.cbFixture.Name = "cbFixture";
             this.cbFixture.Size = new System.Drawing.Size(70, 21);
             this.cbFixture.TabIndex = 30;
+            this.cbFixture.Text = "Dooone";
             // 
             // cbTightVNCPath
             // 
@@ -661,6 +663,7 @@ namespace EZAE
             this.cbTightVNCPath.Name = "cbTightVNCPath";
             this.cbTightVNCPath.Size = new System.Drawing.Size(80, 21);
             this.cbTightVNCPath.TabIndex = 30;
+            this.cbTightVNCPath.Text = "E:\\Program";
             // 
             // tabSetSequence
             // 
@@ -911,6 +914,7 @@ namespace EZAE
             this.cbSubframe.Name = "cbSubframe";
             this.cbSubframe.Size = new System.Drawing.Size(148, 21);
             this.cbSubframe.TabIndex = 14;
+            this.cbSubframe.Text = "800,450,2784,5676";
             // 
             // lblCalibrationIDs
             // 
