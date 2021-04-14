@@ -323,10 +323,14 @@ namespace EZAE
 
         private void cmdCreateFFC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string filepath = @"FFC_Database_Template\Generabe FFC Database.vbs";
+            string filepath = Path.GetFullPath(@"FFC_Database_Template\FFCDBGenerate.exe");
             if (File.Exists(filepath))
             {
-                Process.Start(filepath);
+ 
+                ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
+                startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
+                Process.Start(startInfo);
+
             }
         }
 
