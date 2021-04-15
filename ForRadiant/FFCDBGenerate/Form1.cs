@@ -27,7 +27,7 @@ namespace FFCDBGenerate
 
             try
             {
-                output = output + "\\" + line + "#" + station + "-" + channel + " Panel FFC";
+                output = output + "\\" + System.DateTime.Now.ToString("yyyyMMdd ") + line + "#" + station + "-" + channel + " Panel FFC";
                 if (!System.IO.Directory.Exists(output))
                 {
                     System.IO.Directory.CreateDirectory(output);
