@@ -1,9 +1,0 @@
-D:\RVS Sync\GitHub\toyprojects\SlidingPuzzle\bin\Debug\Game.exe
-D:\RVS Sync\GitHub\toyprojects\SlidingPuzzle\bin\Debug\Game.pdb
-D:\RVS Sync\GitHub\toyprojects\SlidingPuzzle\obj\Debug\Game.csprojAssemblyReference.cache
-D:\RVS Sync\GitHub\toyprojects\SlidingPuzzle\obj\Debug\Tushar.SlidingPuzzle.formMain.resources
-D:\RVS Sync\GitHub\toyprojects\SlidingPuzzle\obj\Debug\Game.csproj.GenerateResource.cache
-D:\RVS Sync\GitHub\toyprojects\SlidingPuzzle\obj\Debug\Game.csproj.CoreCompileInputs.cache
-D:\RVS Sync\GitHub\toyprojects\SlidingPuzzle\obj\Debug\Game.exe
-D:\RVS Sync\GitHub\toyprojects\SlidingPuzzle\obj\Debug\Game.pdb
-D:\RVS Sync\GitHub\toyprojects\SlidingPuzzle\obj\Debug\Game.Properties.Resources.resources
