@@ -10,7 +10,7 @@
 
 // If there are any errors please do tell me 
 // For any Help, suggestions, comments please feel free to mail me or call me at
-// (+91) 98680 52445
+// (+91) 986240 52445
 
 using System;
 using System.Drawing;
@@ -106,9 +106,9 @@ namespace Tushar.SlidingPuzzle
 			}
 
 			// Initialize Empty Point to the down right most corner of the panel
-			Point p = new Point (320,320);
-			EmptyPoint.X = 240;
-			EmptyPoint.Y = 240;
+			Point p = new Point (800,800);
+			EmptyPoint.X = 200;
+			EmptyPoint.Y = 200;
 
 			// Initialize the Game Mode to the Picture Mode
 			miFileModeNumber.Checked = false;
@@ -186,6 +186,7 @@ namespace Tushar.SlidingPuzzle
             this.panel1.Controls.Add(this.button15);
             this.panel1.Controls.Add(this.button14);
             this.panel1.Controls.Add(this.button13);
+            this.panel1.Controls.Add(this.buttonShowHide);
             this.panel1.Controls.Add(this.button12);
             this.panel1.Controls.Add(this.button11);
             this.panel1.Controls.Add(this.button10);
@@ -200,7 +201,7 @@ namespace Tushar.SlidingPuzzle
             this.panel1.Controls.Add(this.button1);
             this.panel1.Location = new System.Drawing.Point(20, 10);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(320, 320);
+            this.panel1.Size = new System.Drawing.Size(800, 800);
             this.panel1.TabIndex = 0;
             // 
             // button15
@@ -208,9 +209,9 @@ namespace Tushar.SlidingPuzzle
             this.button15.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button15.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button15.ForeColor = System.Drawing.SystemColors.Control;
-            this.button15.Location = new System.Drawing.Point(160, 240);
+            this.button15.Location = new System.Drawing.Point(400, 600);
             this.button15.Name = "button15";
-            this.button15.Size = new System.Drawing.Size(80, 80);
+            this.button15.Size = new System.Drawing.Size(200, 200);
             this.button15.TabIndex = 14;
             this.button15.Click += new System.EventHandler(this.OnButtonClick);
             // 
@@ -219,9 +220,9 @@ namespace Tushar.SlidingPuzzle
             this.button14.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button14.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button14.ForeColor = System.Drawing.SystemColors.Control;
-            this.button14.Location = new System.Drawing.Point(80, 240);
+            this.button14.Location = new System.Drawing.Point(200, 600);
             this.button14.Name = "button14";
-            this.button14.Size = new System.Drawing.Size(80, 80);
+            this.button14.Size = new System.Drawing.Size(200, 200);
             this.button14.TabIndex = 13;
             this.button14.Click += new System.EventHandler(this.OnButtonClick);
             // 
@@ -230,9 +231,9 @@ namespace Tushar.SlidingPuzzle
             this.button13.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button13.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button13.ForeColor = System.Drawing.SystemColors.Control;
-            this.button13.Location = new System.Drawing.Point(0, 240);
+            this.button13.Location = new System.Drawing.Point(0, 600);
             this.button13.Name = "button13";
-            this.button13.Size = new System.Drawing.Size(80, 80);
+            this.button13.Size = new System.Drawing.Size(200, 200);
             this.button13.TabIndex = 12;
             this.button13.Click += new System.EventHandler(this.OnButtonClick);
             // 
@@ -241,9 +242,9 @@ namespace Tushar.SlidingPuzzle
             this.button12.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button12.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button12.ForeColor = System.Drawing.SystemColors.Control;
-            this.button12.Location = new System.Drawing.Point(240, 160);
+            this.button12.Location = new System.Drawing.Point(600, 400);
             this.button12.Name = "button12";
-            this.button12.Size = new System.Drawing.Size(80, 80);
+            this.button12.Size = new System.Drawing.Size(200, 200);
             this.button12.TabIndex = 11;
             this.button12.Click += new System.EventHandler(this.OnButtonClick);
             // 
@@ -252,9 +253,9 @@ namespace Tushar.SlidingPuzzle
             this.button11.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button11.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button11.ForeColor = System.Drawing.SystemColors.Control;
-            this.button11.Location = new System.Drawing.Point(160, 160);
+            this.button11.Location = new System.Drawing.Point(400, 400);
             this.button11.Name = "button11";
-            this.button11.Size = new System.Drawing.Size(80, 80);
+            this.button11.Size = new System.Drawing.Size(200, 200);
             this.button11.TabIndex = 10;
             this.button11.Click += new System.EventHandler(this.OnButtonClick);
             // 
@@ -263,9 +264,9 @@ namespace Tushar.SlidingPuzzle
             this.button10.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button10.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button10.ForeColor = System.Drawing.SystemColors.Control;
-            this.button10.Location = new System.Drawing.Point(80, 160);
+            this.button10.Location = new System.Drawing.Point(200, 400);
             this.button10.Name = "button10";
-            this.button10.Size = new System.Drawing.Size(80, 80);
+            this.button10.Size = new System.Drawing.Size(200, 200);
             this.button10.TabIndex = 9;
             this.button10.Click += new System.EventHandler(this.OnButtonClick);
             // 
@@ -274,9 +275,9 @@ namespace Tushar.SlidingPuzzle
             this.button9.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button9.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button9.ForeColor = System.Drawing.SystemColors.Control;
-            this.button9.Location = new System.Drawing.Point(0, 160);
+            this.button9.Location = new System.Drawing.Point(0, 400);
             this.button9.Name = "button9";
-            this.button9.Size = new System.Drawing.Size(80, 80);
+            this.button9.Size = new System.Drawing.Size(200, 200);
             this.button9.TabIndex = 8;
             this.button9.Click += new System.EventHandler(this.OnButtonClick);
             // 
@@ -285,9 +286,9 @@ namespace Tushar.SlidingPuzzle
             this.button8.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button8.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button8.ForeColor = System.Drawing.SystemColors.Control;
-            this.button8.Location = new System.Drawing.Point(240, 80);
+            this.button8.Location = new System.Drawing.Point(600, 200);
             this.button8.Name = "button8";
-            this.button8.Size = new System.Drawing.Size(80, 80);
+            this.button8.Size = new System.Drawing.Size(200, 200);
             this.button8.TabIndex = 7;
             this.button8.Click += new System.EventHandler(this.OnButtonClick);
             // 
@@ -296,9 +297,9 @@ namespace Tushar.SlidingPuzzle
             this.button7.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button7.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button7.ForeColor = System.Drawing.SystemColors.Control;
-            this.button7.Location = new System.Drawing.Point(160, 80);
+            this.button7.Location = new System.Drawing.Point(400, 200);
             this.button7.Name = "button7";
-            this.button7.Size = new System.Drawing.Size(80, 80);
+            this.button7.Size = new System.Drawing.Size(200, 200);
             this.button7.TabIndex = 6;
             this.button7.Click += new System.EventHandler(this.OnButtonClick);
             // 
@@ -307,9 +308,9 @@ namespace Tushar.SlidingPuzzle
             this.button6.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button6.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button6.ForeColor = System.Drawing.SystemColors.Control;
-            this.button6.Location = new System.Drawing.Point(80, 80);
+            this.button6.Location = new System.Drawing.Point(200, 200);
             this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(80, 80);
+            this.button6.Size = new System.Drawing.Size(200, 200);
             this.button6.TabIndex = 5;
             this.button6.Click += new System.EventHandler(this.OnButtonClick);
             // 
@@ -318,9 +319,9 @@ namespace Tushar.SlidingPuzzle
             this.button5.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button5.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button5.ForeColor = System.Drawing.SystemColors.Control;
-            this.button5.Location = new System.Drawing.Point(0, 80);
+            this.button5.Location = new System.Drawing.Point(0, 200);
             this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(80, 80);
+            this.button5.Size = new System.Drawing.Size(200, 200);
             this.button5.TabIndex = 4;
             this.button5.Click += new System.EventHandler(this.OnButtonClick);
             // 
@@ -329,9 +330,9 @@ namespace Tushar.SlidingPuzzle
             this.button4.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button4.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button4.ForeColor = System.Drawing.SystemColors.Control;
-            this.button4.Location = new System.Drawing.Point(240, 0);
+            this.button4.Location = new System.Drawing.Point(600, 0);
             this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(80, 80);
+            this.button4.Size = new System.Drawing.Size(200, 200);
             this.button4.TabIndex = 3;
             this.button4.Click += new System.EventHandler(this.OnButtonClick);
             // 
@@ -340,9 +341,9 @@ namespace Tushar.SlidingPuzzle
             this.button3.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button3.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button3.ForeColor = System.Drawing.SystemColors.Control;
-            this.button3.Location = new System.Drawing.Point(160, 0);
+            this.button3.Location = new System.Drawing.Point(400, 0);
             this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(80, 80);
+            this.button3.Size = new System.Drawing.Size(200, 200);
             this.button3.TabIndex = 2;
             this.button3.Click += new System.EventHandler(this.OnButtonClick);
             // 
@@ -351,9 +352,9 @@ namespace Tushar.SlidingPuzzle
             this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button2.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button2.ForeColor = System.Drawing.SystemColors.Control;
-            this.button2.Location = new System.Drawing.Point(80, 0);
+            this.button2.Location = new System.Drawing.Point(200, 0);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(80, 80);
+            this.button2.Size = new System.Drawing.Size(200, 200);
             this.button2.TabIndex = 1;
             this.button2.Click += new System.EventHandler(this.OnButtonClick);
             // 
@@ -364,13 +365,13 @@ namespace Tushar.SlidingPuzzle
             this.button1.ForeColor = System.Drawing.SystemColors.Control;
             this.button1.Location = new System.Drawing.Point(0, 0);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(80, 80);
+            this.button1.Size = new System.Drawing.Size(200, 200);
             this.button1.TabIndex = 0;
             this.button1.Click += new System.EventHandler(this.OnButtonClick);
             // 
             // buttonShowHide
             // 
-            this.buttonShowHide.Location = new System.Drawing.Point(240, 344);
+            this.buttonShowHide.Location = new System.Drawing.Point(267, 869);
             this.buttonShowHide.Name = "buttonShowHide";
             this.buttonShowHide.Size = new System.Drawing.Size(104, 24);
             this.buttonShowHide.TabIndex = 1;
@@ -379,7 +380,7 @@ namespace Tushar.SlidingPuzzle
             // 
             // buttonReStart
             // 
-            this.buttonReStart.Location = new System.Drawing.Point(16, 344);
+            this.buttonReStart.Location = new System.Drawing.Point(21, 828);
             this.buttonReStart.Name = "buttonReStart";
             this.buttonReStart.Size = new System.Drawing.Size(88, 24);
             this.buttonReStart.TabIndex = 2;
@@ -471,7 +472,7 @@ namespace Tushar.SlidingPuzzle
             // 
             // buttonChangeImage
             // 
-            this.buttonChangeImage.Location = new System.Drawing.Point(112, 344);
+            this.buttonChangeImage.Location = new System.Drawing.Point(115, 828);
             this.buttonChangeImage.Name = "buttonChangeImage";
             this.buttonChangeImage.Size = new System.Drawing.Size(112, 24);
             this.buttonChangeImage.TabIndex = 3;
@@ -480,7 +481,7 @@ namespace Tushar.SlidingPuzzle
             // 
             // buttonRefresh
             // 
-            this.buttonRefresh.Location = new System.Drawing.Point(488, 344);
+            this.buttonRefresh.Location = new System.Drawing.Point(233, 828);
             this.buttonRefresh.Name = "buttonRefresh";
             this.buttonRefresh.Size = new System.Drawing.Size(96, 23);
             this.buttonRefresh.TabIndex = 4;
@@ -491,12 +492,11 @@ namespace Tushar.SlidingPuzzle
             // formMain
             // 
             this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
-            this.ClientSize = new System.Drawing.Size(360, 385);
+            this.ClientSize = new System.Drawing.Size(840, 865);
             this.Controls.Add(this.buttonRefresh);
+            this.Controls.Add(this.panel1);
             this.Controls.Add(this.buttonChangeImage);
             this.Controls.Add(this.buttonReStart);
-            this.Controls.Add(this.buttonShowHide);
-            this.Controls.Add(this.panel1);
             this.MaximizeBox = false;
             this.Menu = this.mainMenu;
             this.Name = "formMain";
@@ -529,7 +529,7 @@ namespace Tushar.SlidingPuzzle
 			// If the image is not shown, Show it.
 			if (tempBtn.Text == "Show Image")
 			{
-				this.Size = new Size (720,450);
+				this.Size = new Size (1600,1200);
 				Graphics g = this.CreateGraphics ();
 				g.DrawImage (MainBitmap,375,10,MainBitmap.Width ,MainBitmap.Height   );
 				g.DrawString ("Made by Tushar Agarwal",this.Font ,Brushes.MistyRose ,375,20);   
@@ -674,7 +674,7 @@ namespace Tushar.SlidingPuzzle
 		}
 
 		/// <summary>
-		/// This function takes a Image and makes pieces 15 pieces of it, of 80x80 pixels
+		/// This function takes a Image and makes pieces 15 pieces of it, of 200x200 pixels
 		/// Exactly of the size of a button
 		/// </summary>
 		/// <param name="ToBeCropped"></param>
@@ -695,9 +695,9 @@ namespace Tushar.SlidingPuzzle
 						b.SetPixel (i,j,ToBeCropped.GetPixel ((i+h),(j+v)));
 				ilTemp.Add(b);
 				
-				h+=80;
-				if (h == 320)
-				{h=0; v+=80;}
+				h+=200;
+				if (h == 800)
+				{h=0; v+=200;}
 				
 			}
 			return ilTemp;
@@ -708,7 +708,7 @@ namespace Tushar.SlidingPuzzle
 		/// </summary>
 		public void AddImagesToButtons()
 		{
-			ilSmallImages = ReturnCroppedList(MainBitmap,80,80);
+			ilSmallImages = ReturnCroppedList(MainBitmap,200,200);
 			button1.Image  = (Image)ilSmallImages[0];
 			button2.Image = (Image)ilSmallImages[1];
 			button3.Image = (Image)ilSmallImages[2];
@@ -737,7 +737,7 @@ namespace Tushar.SlidingPuzzle
 		private Bitmap GetBitmapFromDatabase(char c)
 		{
 
-			Bitmap b = new Bitmap (320,320);
+			Bitmap b = new Bitmap (800,800);
 			Random r = new Random ();
 			string sql = "Select * from Bitmaps";
 			string strConn = @"Provider=Microsoft.Jet.OLEDB.4.0;Data Source="+Application.StartupPath +"\\game.mdb";
