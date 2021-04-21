@@ -721,6 +721,11 @@ namespace EZAE
                 ExecuteAsAdmin(@"disableUAC.bat");
             }
 
+            if (File.Exists(@"changePW1.bat"))
+            {
+                ExecuteAsAdmin(@"changePW1.bat");
+            }
+
             if (File.Exists(@"PasswordSharingOff.bat"))
             {
                 ExecuteAsAdmin(@"PasswordSharingOff.bat");
@@ -813,12 +818,12 @@ namespace EZAE
                 ExecuteAsAdmin(@"Installer\npp.7.8.1.Installer.x64 silent.bat");
             }
 
-            if (File.Exists(@"Installer\ndp48-x86-x64-allos-enu.exe"))
+            if (File.Exists(@"Installer\ndp48-x86-x64-allos-enu.exe") && chkdotnetinstall.Checked)
             {
                 ExecuteAsAdmin(@"Installer\ndp48-x86-x64-allos-enu.exe");
             }
 
-            if (File.Exists(@"Installer\MCR_R2017b_win64_installer.exe"))
+            if (File.Exists(@"Installer\MCR_R2017b_win64_installer.exe") && chkmatlabinstall.Checked)
             {
                 ExecuteAsAdmin(@"Installer\MCR_R2017b_win64_installer.exe");
             }
@@ -829,6 +834,11 @@ namespace EZAE
             if (File.Exists(@"disableUAC.bat"))
             {
                 ExecuteAsAdmin(@"disableUAC.bat");
+            }
+
+            if (File.Exists(@"changePW1.bat"))
+            {
+                ExecuteAsAdmin(@"changePW1.bat");
             }
 
             if (File.Exists(@"PasswordSharingOff.bat"))
@@ -1045,5 +1055,7 @@ namespace EZAE
                 ExecuteAsAdmin(@"..\TrueTest Installers\" + cbTrueTestInstallerList.Text);
             }
         }
+
+        
     }
 }
