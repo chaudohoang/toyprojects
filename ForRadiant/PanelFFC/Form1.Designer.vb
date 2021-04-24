@@ -67,7 +67,7 @@ Partial Class PanelFFC
         '
         Me.txtType.FormattingEnabled = True
         Me.txtType.Items.AddRange(New Object() {"", "RGB", "GRAY"})
-        Me.txtType.Location = New System.Drawing.Point(77, 67)
+        Me.txtType.Location = New System.Drawing.Point(95, 67)
         Me.txtType.Name = "txtType"
         Me.txtType.Size = New System.Drawing.Size(121, 21)
         Me.txtType.TabIndex = 39
@@ -77,7 +77,7 @@ Partial Class PanelFFC
         '
         Me.txtCsvPrefix.FormattingEnabled = True
         Me.txtCsvPrefix.Items.AddRange(New Object() {"", "CF", "DJ", "EP"})
-        Me.txtCsvPrefix.Location = New System.Drawing.Point(77, 94)
+        Me.txtCsvPrefix.Location = New System.Drawing.Point(95, 94)
         Me.txtCsvPrefix.Name = "txtCsvPrefix"
         Me.txtCsvPrefix.Size = New System.Drawing.Size(121, 21)
         Me.txtCsvPrefix.TabIndex = 41
@@ -96,7 +96,7 @@ Partial Class PanelFFC
         '
         Me.txtCSVSubfix.FormattingEnabled = True
         Me.txtCSVSubfix.Items.AddRange(New Object() {"", "R,G,B", "1,2,3,4,5,6"})
-        Me.txtCSVSubfix.Location = New System.Drawing.Point(77, 121)
+        Me.txtCSVSubfix.Location = New System.Drawing.Point(95, 121)
         Me.txtCSVSubfix.Name = "txtCSVSubfix"
         Me.txtCSVSubfix.Size = New System.Drawing.Size(121, 21)
         Me.txtCSVSubfix.TabIndex = 43
@@ -115,7 +115,7 @@ Partial Class PanelFFC
         '
         Me.txtXMLSubfix.FormattingEnabled = True
         Me.txtXMLSubfix.Items.AddRange(New Object() {"", "Illunis", "1,2,3", "1,2,3,4,5,6"})
-        Me.txtXMLSubfix.Location = New System.Drawing.Point(267, 94)
+        Me.txtXMLSubfix.Location = New System.Drawing.Point(285, 94)
         Me.txtXMLSubfix.Name = "txtXMLSubfix"
         Me.txtXMLSubfix.Size = New System.Drawing.Size(121, 21)
         Me.txtXMLSubfix.TabIndex = 47
@@ -124,7 +124,7 @@ Partial Class PanelFFC
         'Label30
         '
         Me.Label30.AutoSize = True
-        Me.Label30.Location = New System.Drawing.Point(204, 97)
+        Me.Label30.Location = New System.Drawing.Point(222, 97)
         Me.Label30.Name = "Label30"
         Me.Label30.Size = New System.Drawing.Size(61, 13)
         Me.Label30.TabIndex = 46
@@ -134,7 +134,7 @@ Partial Class PanelFFC
         '
         Me.txtXMLPrefix.FormattingEnabled = True
         Me.txtXMLPrefix.Items.AddRange(New Object() {"", "CF", "DJ", "EP"})
-        Me.txtXMLPrefix.Location = New System.Drawing.Point(267, 67)
+        Me.txtXMLPrefix.Location = New System.Drawing.Point(285, 67)
         Me.txtXMLPrefix.Name = "txtXMLPrefix"
         Me.txtXMLPrefix.Size = New System.Drawing.Size(121, 21)
         Me.txtXMLPrefix.TabIndex = 45
@@ -143,7 +143,7 @@ Partial Class PanelFFC
         'Label31
         '
         Me.Label31.AutoSize = True
-        Me.Label31.Location = New System.Drawing.Point(204, 70)
+        Me.Label31.Location = New System.Drawing.Point(222, 70)
         Me.Label31.Name = "Label31"
         Me.Label31.Size = New System.Drawing.Size(58, 13)
         Me.Label31.TabIndex = 44
@@ -153,7 +153,7 @@ Partial Class PanelFFC
         '
         Me.txtpanelcount.FormattingEnabled = True
         Me.txtpanelcount.Items.AddRange(New Object() {"", "1", "2", "3", "4", "5", "6", "7", "8", "9"})
-        Me.txtpanelcount.Location = New System.Drawing.Point(267, 121)
+        Me.txtpanelcount.Location = New System.Drawing.Point(285, 121)
         Me.txtpanelcount.Name = "txtpanelcount"
         Me.txtpanelcount.Size = New System.Drawing.Size(121, 21)
         Me.txtpanelcount.TabIndex = 49
@@ -162,7 +162,7 @@ Partial Class PanelFFC
         'Label32
         '
         Me.Label32.AutoSize = True
-        Me.Label32.Location = New System.Drawing.Point(204, 124)
+        Me.Label32.Location = New System.Drawing.Point(222, 124)
         Me.Label32.Name = "Label32"
         Me.Label32.Size = New System.Drawing.Size(65, 13)
         Me.Label32.TabIndex = 48
@@ -170,7 +170,7 @@ Partial Class PanelFFC
         '
         'btnRun
         '
-        Me.btnRun.Location = New System.Drawing.Point(207, 148)
+        Me.btnRun.Location = New System.Drawing.Point(225, 148)
         Me.btnRun.Name = "btnRun"
         Me.btnRun.Size = New System.Drawing.Size(181, 21)
         Me.btnRun.TabIndex = 50
@@ -189,7 +189,7 @@ Partial Class PanelFFC
         'txtinputpath
         '
         Me.txtinputpath.FormattingEnabled = True
-        Me.txtinputpath.Location = New System.Drawing.Point(77, 10)
+        Me.txtinputpath.Location = New System.Drawing.Point(95, 10)
         Me.txtinputpath.Name = "txtinputpath"
         Me.txtinputpath.Size = New System.Drawing.Size(311, 21)
         Me.txtinputpath.TabIndex = 43
@@ -197,7 +197,7 @@ Partial Class PanelFFC
         'txtoutputpath
         '
         Me.txtoutputpath.FormattingEnabled = True
-        Me.txtoutputpath.Location = New System.Drawing.Point(77, 37)
+        Me.txtoutputpath.Location = New System.Drawing.Point(95, 37)
         Me.txtoutputpath.Name = "txtoutputpath"
         Me.txtoutputpath.Size = New System.Drawing.Size(311, 21)
         Me.txtoutputpath.TabIndex = 43
@@ -223,7 +223,7 @@ Partial Class PanelFFC
         'txtCameraSN
         '
         Me.txtCameraSN.FormattingEnabled = True
-        Me.txtCameraSN.Location = New System.Drawing.Point(77, 148)
+        Me.txtCameraSN.Location = New System.Drawing.Point(95, 148)
         Me.txtCameraSN.Name = "txtCameraSN"
         Me.txtCameraSN.Size = New System.Drawing.Size(121, 21)
         Me.txtCameraSN.TabIndex = 43
@@ -233,7 +233,7 @@ Partial Class PanelFFC
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(402, 219)
+        Me.ClientSize = New System.Drawing.Size(418, 181)
         Me.Controls.Add(Me.btnRun)
         Me.Controls.Add(Me.txtpanelcount)
         Me.Controls.Add(Me.Label32)

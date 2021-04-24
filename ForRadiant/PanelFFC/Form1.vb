@@ -136,9 +136,6 @@ Public Class PanelFFC
     End Sub
 
 
-
-
-
     Private Sub btnRun_Click(sender As Object, e As EventArgs) Handles btnRun.Click
         btnRun.Enabled = False
         Dim di As DirectoryInfo = New DirectoryInfo(txtoutputpath.Text)
