@@ -33,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomPopup", "CustomPopup\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FFCDBGenerate", "FFCDBGenerate\FFCDBGenerate.csproj", "{1F58718F-6E11-4F74-898F-4E4C2AADC77A}"
 EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFC X1080", "PanelFFC X1080\PanelFFC X1080.vbproj", "{12A6FC25-B348-420F-8B0B-A46A6C26DA08}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +101,10 @@ Global
 		{1F58718F-6E11-4F74-898F-4E4C2AADC77A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F58718F-6E11-4F74-898F-4E4C2AADC77A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F58718F-6E11-4F74-898F-4E4C2AADC77A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12A6FC25-B348-420F-8B0B-A46A6C26DA08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12A6FC25-B348-420F-8B0B-A46A6C26DA08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12A6FC25-B348-420F-8B0B-A46A6C26DA08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12A6FC25-B348-420F-8B0B-A46A6C26DA08}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
