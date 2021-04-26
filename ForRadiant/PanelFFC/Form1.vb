@@ -298,6 +298,18 @@ Public Class PanelFFC
 
                     resultGray.Add(values)
                 Next
+                'For filecount As Integer = 0 To txtpanelcount.Text - 1
+                '    For row As Integer = 0 To grayrowlength - 1
+                '        Dim values As New List(Of Double)()
+                '        Dim tempvalue As New Double
+                '        For column As Integer = 0 To grayncolumnlength - 1
+                '            tempvalue += listGray(filecount)(row)(column)
+                '        Next
+                '        tempvalue = motherGray(row)(column) / tempvalue
+                '        values.Add(tempvalue)
+                '    Next
+
+                'Next
                 GenerateCSV(resultGray, txtoutputpath.Text + "\" + txtCsvPrefix.Text + "_" + txtCameraSN.Text + ".csv")
                 GenerateXML(txtXMLPrefix.Text, txtCameraSN.Text, txtoutputpath.Text + "\" + txtXMLPrefix.Text + ".xml")
             End If
