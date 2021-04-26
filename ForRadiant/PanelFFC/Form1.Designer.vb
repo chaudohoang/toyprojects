@@ -233,7 +233,7 @@ Partial Class PanelFFC
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(418, 181)
+        Me.ClientSize = New System.Drawing.Size(418, 219)
         Me.Controls.Add(Me.btnRun)
         Me.Controls.Add(Me.txtpanelcount)
         Me.Controls.Add(Me.Label32)

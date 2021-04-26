@@ -318,6 +318,7 @@ Public Class PanelFFC
     Private Sub txtinputpath_TextChanged(sender As Object, e As EventArgs) Handles txtinputpath.TextChanged
         txtoutputpath.Text = txtinputpath.Text + "\Result"
     End Sub
+
 End Class
 
 
