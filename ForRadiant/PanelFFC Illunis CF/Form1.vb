@@ -3,7 +3,7 @@ Imports System.IO
 Imports System.Drawing
 Imports System.Windows.Forms
 
-Public Class PanelFFC
+Public Class PanelFFCIllunisCF
 
     Private Sub btnGenerate_Click(sender As Object, e As EventArgs) Handles btnGenerate.Click 'button Generate function
         btnGenerate.Enabled = False

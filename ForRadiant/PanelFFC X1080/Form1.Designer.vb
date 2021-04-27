@@ -1,5 +1,5 @@
 ﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
-Partial Class PanelFFC
+Partial Class PanelFFCX10801panel
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
@@ -22,7 +22,7 @@ Partial Class PanelFFC
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
-        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(PanelFFC))
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(PanelFFCX10801panel))
         Me.btnGenerate = New System.Windows.Forms.Button()
         Me.redfilepath1 = New System.Windows.Forms.TextBox()
         Me.Label1 = New System.Windows.Forms.Label()
@@ -290,7 +290,7 @@ Partial Class PanelFFC
         Me.btnChooseOuputFolder.Text = "Choose folder"
         Me.btnChooseOuputFolder.UseVisualStyleBackColor = True
         '
-        'PanelFFC
+        'PanelFFCX10801panel
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
@@ -324,8 +324,8 @@ Partial Class PanelFFC
         Me.Controls.Add(Me.redfilepath1)
         Me.Controls.Add(Me.btnGenerate)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
-        Me.Name = "PanelFFC"
-        Me.Text = "PanelFFC X1080"
+        Me.Name = "PanelFFCX10801panel"
+        Me.Text = "PanelFFC X1080 1 panel"
         Me.ResumeLayout(False)
         Me.PerformLayout()
 

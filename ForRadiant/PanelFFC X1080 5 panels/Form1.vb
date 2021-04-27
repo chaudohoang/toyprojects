@@ -3,7 +3,7 @@ Imports System.IO
 Imports System.Drawing
 Imports System.Windows.Forms
 
-Public Class PanelFFCRadiantCF
+Public Class PanelFFCX10805panel
 
     Private Sub btnGenerate_Click(sender As Object, e As EventArgs) Handles btnGenerate.Click 'button Generate function
         btnGenerate.Enabled = False
@@ -38,12 +38,12 @@ Public Class PanelFFCRadiantCF
         DB = Calculate(B1, B2, B3, B4, B5, MB)
 
         'generate csv and xml
-        GenerateCSV(DR, outputpathbox.Text + "\CF_" + camerasn.Text + "_R.csv")
-        GenerateCSV(DG, outputpathbox.Text + "\CF_" + camerasn.Text + "_G.csv")
-        GenerateCSV(DB, outputpathbox.Text + "\CF_" + camerasn.Text + "_B.csv")
-        GenerateXML(camerasn.Text, "R", outputpathbox.Text + "\CF_1.xml")
-        GenerateXML(camerasn.Text, "G", outputpathbox.Text + "\CF_2.xml")
-        GenerateXML(camerasn.Text, "B", outputpathbox.Text + "\CF_3.xml")
+        GenerateCSV(DR, outputpathbox.Text + "\X1080_" + camerasn.Text + "_R.csv")
+        GenerateCSV(DG, outputpathbox.Text + "\X1080_" + camerasn.Text + "_G.csv")
+        GenerateCSV(DB, outputpathbox.Text + "\X1080_" + camerasn.Text + "_B.csv")
+        GenerateXML(camerasn.Text, "R", outputpathbox.Text + "\X1080_1.xml")
+        GenerateXML(camerasn.Text, "G", outputpathbox.Text + "\X1080_2.xml")
+        GenerateXML(camerasn.Text, "B", outputpathbox.Text + "\X1080_3.xml")
 
         'just create Done! text with random color when finish, just like butterfly tool
         Static m_Rnd As New Random
@@ -231,16 +231,15 @@ Public Class PanelFFCRadiantCF
         xmlfile.WriteLine("<?xml version=""1.0"" encoding=""utf-8""?>")
         xmlfile.WriteLine("<LensCosineCorrection xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">")
         xmlfile.WriteLine("  <SerialNumber>" + camerasn + "</SerialNumber>")
-        xmlfile.WriteLine("  <NormalFileName>CF_" + camerasn + "_" + color + ".csv</NormalFileName>")
+        xmlfile.WriteLine("  <NormalFileName>X1080_" + camerasn + "_" + color + ".csv</NormalFileName>")
         xmlfile.WriteLine("  <NormalFileSmoothFilter>")
         xmlfile.WriteLine("    <Width>300</Width>")
         xmlfile.WriteLine("    <Height>300</Height>")
         xmlfile.WriteLine("  </NormalFileSmoothFilter>")
         xmlfile.WriteLine("  <CosineCorrection>0, 0</CosineCorrection>")
-        xmlfile.WriteLine("  <VerticalGradient>0.5, 1</VerticalGradient>")
-        xmlfile.WriteLine("  <HorizontalGradient>0, 0</HorizontalGradient>")
-        xmlfile.WriteLine("  <Vignetting>850p, 0, 1.015</Vignetting>")
         xmlfile.WriteLine("  <BorderAttenuation>0,0,0,0,0,0,0,0</BorderAttenuation>")
+        xmlfile.WriteLine("  <HorizontalGradient>-2,0,-2.1</HorizontalGradient>")
+        xmlfile.WriteLine("  <VerticalGradient>1,0,1</VerticalGradient>")
         xmlfile.WriteLine("</LensCosineCorrection>")
         xmlfile.Close()
 

@@ -1,5 +1,5 @@
 ﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
-Partial Class PanelFFCRadiantCF
+Partial Class PanelFFCX10805panel
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
@@ -22,7 +22,7 @@ Partial Class PanelFFCRadiantCF
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
-        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(PanelFFCRadiantCF))
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(PanelFFCX10805panel))
         Me.btnGenerate = New System.Windows.Forms.Button()
         Me.redfilepath1 = New System.Windows.Forms.TextBox()
         Me.Label1 = New System.Windows.Forms.Label()
@@ -697,7 +697,7 @@ Partial Class PanelFFCRadiantCF
         Me.Controls.Add(Me.btnGenerate)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.Name = "PanelFFC"
-        Me.Text = "PanelFFC Radiant CF"
+        Me.Text = "PanelFFC X1080 5 panels"
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
