@@ -99,13 +99,13 @@
       <Project>{c002e72b-3b17-48db-a8cd-c973e5d41b92}</Project>
       <Name>PanelFFC Radiant CF</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PanelFFC X1080 1 panel\PanelFFC X1080 1panel.vbproj">
+      <Project>{12a6fc25-b348-420f-8b0b-a46a6c26da08}</Project>
+      <Name>PanelFFC X1080 1panel</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PanelFFC X1080 5 panels\PanelFFC X1080 5 panels.vbproj">
       <Project>{60e94be7-a30a-450f-9986-1fe1ab4b80c9}</Project>
       <Name>PanelFFC X1080 5 panels</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PanelFFC X1080\PanelFFC X1080 1panel.vbproj">
-      <Project>{12a6fc25-b348-420f-8b0b-a46a6c26da08}</Project>
-      <Name>PanelFFC X1080 1panel</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
