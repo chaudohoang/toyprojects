@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -87,7 +88,7 @@ namespace EZAE
                     node = xmlDoc.DocumentElement.SelectSingleNode("/Sequence/Items/SequenceItem/PatternSetupName");
                     string firstPatternName = node.InnerText;
                     nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup");
-                    for (int index = 0; index < nodes.Count - 1; index++)
+                    for (int index = 0; index <= nodes.Count - 1; index++)
                     {
                         if (nodes[index].SelectSingleNode("Name").InnerText == firstPatternName)
                         {
@@ -109,7 +110,7 @@ namespace EZAE
                 }
 
                 nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/LensDistance");
-                for (int index = 0; index < nodes.Count - 1; index++)
+                for (int index = 0; index <= nodes.Count - 1; index++)
                 {
                     if (lensdistance != "")
                     {
@@ -118,7 +119,7 @@ namespace EZAE
                 }
 
                 nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/SubFrameRegion/X");
-                for (int index = 0; index < nodes.Count - 1; index++)
+                for (int index = 0; index <= nodes.Count - 1; index++)
                 {
                     if (x != "")
                     {
@@ -127,7 +128,7 @@ namespace EZAE
                 }
 
                 nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/SubFrameRegion/Location/X");
-                for (int index = 0; index < nodes.Count - 1; index++)
+                for (int index = 0; index <= nodes.Count - 1; index++)
                 {
                     if (x != "")
                     {
@@ -136,7 +137,7 @@ namespace EZAE
                 }
 
                 nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/SubFrameRegion/Y");
-                for (int index = 0; index < nodes.Count - 1; index++)
+                for (int index = 0; index <= nodes.Count - 1; index++)
                 {
                     if (y != "")
                     {
@@ -145,7 +146,7 @@ namespace EZAE
                 }
 
                 nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/SubFrameRegion/Location/Y");
-                for (int index = 0; index < nodes.Count - 1; index++)
+                for (int index = 0; index <= nodes.Count - 1; index++)
                 {
                     if (y != "")
                     {
@@ -154,7 +155,7 @@ namespace EZAE
                 }
 
                 nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/SubFrameRegion/Width");
-                for (int index = 0; index < nodes.Count - 1; index++)
+                for (int index = 0; index <= nodes.Count - 1; index++)
                 {
                     if (width != "")
                     {
@@ -163,7 +164,7 @@ namespace EZAE
                 }
 
                 nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/SubFrameRegion/Size/Width");
-                for (int index = 0; index < nodes.Count - 1; index++)
+                for (int index = 0; index <= nodes.Count - 1; index++)
                 {
                     if (width != "")
                     {
@@ -172,7 +173,7 @@ namespace EZAE
                 }
 
                 nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/SubFrameRegion/Height");
-                for (int index = 0; index < nodes.Count - 1; index++)
+                for (int index = 0; index <= nodes.Count - 1; index++)
                 {
                     if (height != "")
                     {
@@ -181,7 +182,7 @@ namespace EZAE
                 }
 
                 nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/SubFrameRegion/Size/Height");
-                for (int index = 0; index < nodes.Count - 1; index++)
+                for (int index = 0; index <= nodes.Count - 1; index++)
                 {
                     if (height != "")
                     {
@@ -190,7 +191,7 @@ namespace EZAE
                 }
 
                 nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/ColorCalID");
-                for (int index = 0; index < nodes.Count - 1; index++)
+                for (int index = 0; index <= nodes.Count - 1; index++)
                 {
                     if (colorcalID != "")
                     {
@@ -199,7 +200,7 @@ namespace EZAE
                 }
 
                 nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/ImageScalingCalibrationID");
-                for (int index = 0; index < nodes.Count - 1; index++)
+                for (int index = 0; index <= nodes.Count - 1; index++)
                 {
                     if (imagescalingID != "")
                     {
@@ -208,7 +209,7 @@ namespace EZAE
                 }
 
                 nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/FlatFieldID");
-                for (int index = 0; index < nodes.Count - 1; index++)
+                for (int index = 0; index <= nodes.Count - 1; index++)
                 {
                     if (flatfieldID != "")
                     {
@@ -217,7 +218,7 @@ namespace EZAE
                 }
 
                 nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraRotation");
-                for (int index = 0; index < nodes.Count - 1; index++)
+                for (int index = 0; index <= nodes.Count - 1; index++)
                 {
                     if (cameraRotation != "")
                     {
@@ -304,10 +305,11 @@ namespace EZAE
 
         private void cmdOpenTools_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string folderpath = @"Tools";
-            if (Directory.Exists(folderpath))
+
+            string path = Directory.GetCurrentDirectory();
+            if (Directory.Exists(path))
             {
-                Process.Start(folderpath);
+                Process.Start(path);
             }
         }
 
