@@ -157,58 +157,58 @@ Public Class PanelFFCX10805panel
 
                 'this long loop is just to read all the file in the chosen folder, if the file name start with R and end with 1, the program will consider the file as red measurement of panel 1, and go on
                 For Each singleFile In allFiles
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("1") Then
+                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("1") Then
                         redfilepath1.Text = singleFile.FullName
                     End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("2") Then
+                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("2") Then
                         redfilepath2.Text = singleFile.FullName
                     End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("3") Then
+                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("3") Then
                         redfilepath3.Text = singleFile.FullName
                     End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("4") Then
+                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("4") Then
                         redfilepath4.Text = singleFile.FullName
                     End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("5") Then
+                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("5") Then
                         redfilepath5.Text = singleFile.FullName
                     End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("G") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("1") Then
+                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("G") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("1") Then
                         greenfilepath1.Text = singleFile.FullName
                     End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("G") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("2") Then
+                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("G") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("2") Then
                         greenfilepath2.Text = singleFile.FullName
                     End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("G") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("3") Then
+                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("G") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("3") Then
                         greenfilepath3.Text = singleFile.FullName
                     End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("G") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("4") Then
+                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("G") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("4") Then
                         greenfilepath4.Text = singleFile.FullName
                     End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("G") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("5") Then
+                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("G") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("5") Then
                         greenfilepath5.Text = singleFile.FullName
                     End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("1") Then
+                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("1") Then
                         bluefilepath1.Text = singleFile.FullName
                     End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("2") Then
+                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("2") Then
                         bluefilepath2.Text = singleFile.FullName
                     End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("3") Then
+                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("3") Then
                         bluefilepath3.Text = singleFile.FullName
                     End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("4") Then
+                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("4") Then
                         bluefilepath4.Text = singleFile.FullName
                     End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("5") Then
+                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("5") Then
                         bluefilepath5.Text = singleFile.FullName
                     End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("M") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("R") Then
+                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("M") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("R") Then
                         mredfilepath.Text = singleFile.FullName
                     End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("M") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("G") Then
+                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("M") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("G") Then
                         mgreenfilepath.Text = singleFile.FullName
                     End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("M") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("B") Then
+                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("M") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("B") Then
                         mbluefilepath.Text = singleFile.FullName
                     End If
 
@@ -238,8 +238,8 @@ Public Class PanelFFCX10805panel
         xmlfile.WriteLine("  </NormalFileSmoothFilter>")
         xmlfile.WriteLine("  <CosineCorrection>0, 0</CosineCorrection>")
         xmlfile.WriteLine("  <BorderAttenuation>0,0,0,0,0,0,0,0</BorderAttenuation>")
-        xmlfile.WriteLine("  <HorizontalGradient>-2,0,-2.1</HorizontalGradient>")
-        xmlfile.WriteLine("  <VerticalGradient>1,0,1</VerticalGradient>")
+        xmlfile.WriteLine("  <HorizontalGradient>0,0,0</HorizontalGradient>")
+        xmlfile.WriteLine("  <VerticalGradient>0,0,0</VerticalGradient>")
         xmlfile.WriteLine("</LensCosineCorrection>")
         xmlfile.Close()
 
@@ -398,58 +398,58 @@ Public Class PanelFFCX10805panel
 
         'this long loop is just to read all the file in the chosen folder, if the file name start with R and end with 1, the program will consider the file as red measurement of panel 1, and go on
         For Each singleFile In allFiles
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("1") Then
+            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("1") Then
                 redfilepath1.Text = singleFile.FullName
             End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("2") Then
+            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("2") Then
                 redfilepath2.Text = singleFile.FullName
             End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("3") Then
+            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("3") Then
                 redfilepath3.Text = singleFile.FullName
             End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("4") Then
+            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("4") Then
                 redfilepath4.Text = singleFile.FullName
             End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("5") Then
+            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("5") Then
                 redfilepath5.Text = singleFile.FullName
             End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("G") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("1") Then
+            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("G") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("1") Then
                 greenfilepath1.Text = singleFile.FullName
             End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("G") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("2") Then
+            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("G") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("2") Then
                 greenfilepath2.Text = singleFile.FullName
             End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("G") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("3") Then
+            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("G") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("3") Then
                 greenfilepath3.Text = singleFile.FullName
             End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("G") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("4") Then
+            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("G") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("4") Then
                 greenfilepath4.Text = singleFile.FullName
             End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("G") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("5") Then
+            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("G") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("5") Then
                 greenfilepath5.Text = singleFile.FullName
             End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("1") Then
+            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("1") Then
                 bluefilepath1.Text = singleFile.FullName
             End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("2") Then
+            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("2") Then
                 bluefilepath2.Text = singleFile.FullName
             End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("3") Then
+            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("3") Then
                 bluefilepath3.Text = singleFile.FullName
             End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("4") Then
+            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("4") Then
                 bluefilepath4.Text = singleFile.FullName
             End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("5") Then
+            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("5") Then
                 bluefilepath5.Text = singleFile.FullName
             End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("M") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("R") Then
+            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("M") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("R") Then
                 mredfilepath.Text = singleFile.FullName
             End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("M") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("G") Then
+            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("M") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("G") Then
                 mgreenfilepath.Text = singleFile.FullName
             End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).StartsWith("M") And Path.GetFileNameWithoutExtension(singleFile.FullName).EndsWith("B") Then
+            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("M") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("B") Then
                 mbluefilepath.Text = singleFile.FullName
             End If
 
