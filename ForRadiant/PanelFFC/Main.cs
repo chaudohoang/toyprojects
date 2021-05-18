@@ -52,5 +52,17 @@ namespace PanelFFC
             Form x1080_5 = new PanelFFCX10805panel();
             x1080_5.Show();
         }
+
+        private void btnRgbFFC_Click(object sender, EventArgs e)
+        {
+            Form rgbffc = new PanelFFCRGB();
+            rgbffc.Show();
+        }
+
+        private void btnGrayFFC_Click(object sender, EventArgs e)
+        {
+            Form grayffc = new PanelFFCGRAY();
+            grayffc.Show();
+        }
     }
 }

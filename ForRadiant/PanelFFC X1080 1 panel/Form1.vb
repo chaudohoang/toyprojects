@@ -185,8 +185,8 @@ Public Class PanelFFCX10801panel
         xmlfile.WriteLine("  </NormalFileSmoothFilter>")
         xmlfile.WriteLine("  <CosineCorrection>0, 0</CosineCorrection>")
         xmlfile.WriteLine("  <BorderAttenuation>0,0,0,0,0,0,0,0</BorderAttenuation>")
-        xmlfile.WriteLine("  <HorizontalGradient>-2,0,-2.1</HorizontalGradient>")
-        xmlfile.WriteLine("  <VerticalGradient>1,0,1</VerticalGradient>")
+        xmlfile.WriteLine("  <HorizontalGradient>0,0,0</HorizontalGradient>")
+        xmlfile.WriteLine("  <VerticalGradient>0,0,0</VerticalGradient>")
         xmlfile.WriteLine("</LensCosineCorrection>")
         xmlfile.Close()
 

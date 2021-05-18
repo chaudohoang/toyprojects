@@ -217,11 +217,6 @@ Public Class PanelFFCX10805panel
             End If
         End Using
 
-
-
-
-
-
     End Sub
 
     Private Sub GenerateXML(ByVal camerasn As String, ByVal color As String, ByVal outputfile As String) 'this function is to generate the xml based on the template below

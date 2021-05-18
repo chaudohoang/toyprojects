@@ -36,6 +36,8 @@ namespace PanelFFC
             this.btnRadiantCF = new System.Windows.Forms.Button();
             this.btnX10801panel = new System.Windows.Forms.Button();
             this.btnX10805panel = new System.Windows.Forms.Button();
+            this.btnRgbFFC = new System.Windows.Forms.Button();
+            this.btnGrayFFC = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnIllunisCF
@@ -98,16 +100,38 @@ namespace PanelFFC
             this.btnX10805panel.UseVisualStyleBackColor = true;
             this.btnX10805panel.Click += new System.EventHandler(this.btnX10805panel_Click);
             // 
+            // btnRgbFFC
+            // 
+            this.btnRgbFFC.Location = new System.Drawing.Point(12, 70);
+            this.btnRgbFFC.Name = "btnRgbFFC";
+            this.btnRgbFFC.Size = new System.Drawing.Size(75, 23);
+            this.btnRgbFFC.TabIndex = 3;
+            this.btnRgbFFC.Text = "Rgb FFC";
+            this.btnRgbFFC.UseVisualStyleBackColor = true;
+            this.btnRgbFFC.Click += new System.EventHandler(this.btnRgbFFC_Click);
+            // 
+            // btnGrayFFC
+            // 
+            this.btnGrayFFC.Location = new System.Drawing.Point(93, 70);
+            this.btnGrayFFC.Name = "btnGrayFFC";
+            this.btnGrayFFC.Size = new System.Drawing.Size(75, 23);
+            this.btnGrayFFC.TabIndex = 0;
+            this.btnGrayFFC.Text = "Gray FFC";
+            this.btnGrayFFC.UseVisualStyleBackColor = true;
+            this.btnGrayFFC.Click += new System.EventHandler(this.btnGrayFFC_Click);
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(261, 75);
+            this.ClientSize = new System.Drawing.Size(307, 118);
             this.Controls.Add(this.btnX10805panel);
             this.Controls.Add(this.btnX10801panel);
+            this.Controls.Add(this.btnRgbFFC);
             this.Controls.Add(this.btnRadiantCF);
             this.Controls.Add(this.btnIllunisEP);
             this.Controls.Add(this.btnIllunisDJ);
+            this.Controls.Add(this.btnGrayFFC);
             this.Controls.Add(this.btnIllunisCF);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Main";
@@ -124,6 +148,8 @@ namespace PanelFFC
         private System.Windows.Forms.Button btnRadiantCF;
         private System.Windows.Forms.Button btnX10801panel;
         private System.Windows.Forms.Button btnX10805panel;
+        private System.Windows.Forms.Button btnRgbFFC;
+        private System.Windows.Forms.Button btnGrayFFC;
     }
 }
 
