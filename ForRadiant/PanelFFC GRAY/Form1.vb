@@ -226,23 +226,13 @@ Public Class PanelFFCGRAY
     End Sub
 
     Private Sub GenerateXML(ByVal camerasn As String, ByVal color As String, ByVal outputfile As String) 'this function is to generate the xml based on the template below
-
+        Dim xmlstring As String = txtXmlTemplate.Text
+        xmlstring = xmlstring.Replace("camerasn", camerasn)
+        xmlstring = xmlstring.Replace("model", modelname.Text)
+        xmlstring = xmlstring.Replace("color", color)
         Dim xmlfile As New System.IO.StreamWriter(outputfile)
 
-        xmlfile.WriteLine("<?xml version=""1.0"" encoding=""utf-8""?>")
-        xmlfile.WriteLine("<LensCosineCorrection xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">")
-        xmlfile.WriteLine("  <SerialNumber>" + camerasn + "</SerialNumber>")
-        xmlfile.WriteLine("  <NormalFileName>" + modelname.Text + "_" + camerasn + ".csv</NormalFileName>")
-        xmlfile.WriteLine("  <NormalFileSmoothFilter>")
-        xmlfile.WriteLine("    <Width>300</Width>")
-        xmlfile.WriteLine("    <Height>300</Height>")
-        xmlfile.WriteLine("  </NormalFileSmoothFilter>")
-        xmlfile.WriteLine("  <CosineCorrection>0, 0</CosineCorrection>")
-        xmlfile.WriteLine("  <VerticalGradient> </VerticalGradient>")
-        xmlfile.WriteLine("  <HorizontalGradient>0, 0</HorizontalGradient>")
-        xmlfile.WriteLine("  <Vignetting> </Vignetting>")
-        xmlfile.WriteLine("  <BorderAttenuation>0,0,0,0,0,0,0,0</BorderAttenuation>")
-        xmlfile.WriteLine("</LensCosineCorrection>")
+        xmlfile.Write(xmlstring)
         xmlfile.Close()
 
     End Sub
