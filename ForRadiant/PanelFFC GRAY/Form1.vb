@@ -482,7 +482,6 @@ Public Class PanelFFCGRAY
                 txtXmlTemplate.Text = ""
                 txtXmlTemplate.Text = fileReader
             End If
-
         End If
     End Sub
 
@@ -542,6 +541,18 @@ Public Class PanelFFCGRAY
                 End If
             Next
         End Using
+    End Sub
+
+    Private Sub cbXmlTemplate_DropDownClosed(sender As Object, e As EventArgs) Handles cbXmlTemplate.DropDownClosed
+        Dim fileReader As String
+        Dim filePath As String = Path.GetFullPath(Path.Combine("XmlTemplate", cbXmlTemplate.Text + ".xml"))
+        If File.Exists(filePath) Then
+            fileReader = My.Computer.FileSystem.ReadAllText(filePath)
+            If fileReader <> "" Then
+                txtXmlTemplate.Text = ""
+                txtXmlTemplate.Text = fileReader
+            End If
+        End If
     End Sub
 End Class
 
