@@ -41,6 +41,8 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFC RGB", "PanelFFC RG
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFC GRAY", "PanelFFC GRAY\PanelFFC GRAY.vbproj", "{AB79AA70-90AA-4313-B4D4-4F299EBFDCA9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MakeSequenceFOI", "MakeSequenceFOI\MakeSequenceFOI.csproj", "{36088148-2B03-4336-B70D-EB3036B8CB64}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -123,6 +125,10 @@ Global
 		{AB79AA70-90AA-4313-B4D4-4F299EBFDCA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB79AA70-90AA-4313-B4D4-4F299EBFDCA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB79AA70-90AA-4313-B4D4-4F299EBFDCA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36088148-2B03-4336-B70D-EB3036B8CB64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36088148-2B03-4336-B70D-EB3036B8CB64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36088148-2B03-4336-B70D-EB3036B8CB64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36088148-2B03-4336-B70D-EB3036B8CB64}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
