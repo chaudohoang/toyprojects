@@ -121,4 +121,13 @@
     <None Include="App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>@echo OFF
+del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.pdb
+del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.xml
+del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.config
+
+
+</PostBuildEvent>
+  </PropertyGroup>
 </Project>

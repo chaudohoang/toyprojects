@@ -120,4 +120,11 @@
     <Content Include="PanelFFC.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>@echo OFF
+del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.pdb
+del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.xml
+del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.config
+xcopy /e /y /i $(SolutionDir)\$(ProjectName)\XmlTemplate\ $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\XmlTemplate\</PostBuildEvent>
+  </PropertyGroup>
 </Project>

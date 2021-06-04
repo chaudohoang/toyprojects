@@ -136,4 +136,10 @@
     <Content Include="PanelFFC.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>@echo OFF
+del $(SolutionDir)bin\$(ConfigurationName)\PanelFFC\*.pdb
+del $(SolutionDir)bin\$(ConfigurationName)\PanelFFC\*.xml
+del $(SolutionDir)bin\$(ConfigurationName)\PanelFFC\*.config</PostBuildEvent>
+  </PropertyGroup>
 </Project>
