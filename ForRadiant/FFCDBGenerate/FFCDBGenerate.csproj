@@ -90,6 +90,7 @@
     <PostBuildEvent>@echo OFF
 del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.pdb
 del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.xml
-del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.config</PostBuildEvent>
+del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.config
+copy /y $(SolutionDir)\$(ProjectName)\template.ttxm $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\template.ttxm</PostBuildEvent>
   </PropertyGroup>
 </Project>

@@ -1,15 +1,8 @@
 ﻿using Microsoft.VisualBasic.FileIO;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.VisualBasic.FileIO;
+using System.Diagnostics;
+using System.Data;
 
 namespace RemoteTools
 {
@@ -19,7 +12,6 @@ namespace RemoteTools
         {
             InitializeComponent();
         }
-
   
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -44,7 +36,68 @@ namespace RemoteTools
             }
 
         }
-                
-   
+        private void btnFileShare_Click(object sender, EventArgs e)
+        {
+            int rowindex = dataGridView1.CurrentCell.RowIndex;
+            int columnindex = 1;
+
+            string IP = dataGridView1.Rows[rowindex].Cells[columnindex].Value.ToString();
+            if (textBox1.Text != "")
+            {
+                try
+                {
+                    Process.Start("\\\\" + textBox1.Text);
+                }
+                catch (Exception ex)
+                {
+
+                    MessageBox.Show(ex.Message);
+                }
+            }
+            else
+            { 
+                Process.Start("\\\\"+IP);
+            }
+        }
+
+        private void btnRemoteControl_Click(object sender, EventArgs e)
+        {
+            int rowindex = dataGridView1.CurrentCell.RowIndex;
+            int columnindex = 1;
+
+
+            string IP = dataGridView1.Rows[rowindex].Cells[columnindex].Value.ToString();
+            if (textBox1.Text != "")
+            {
+                try
+                {
+                    Process.Start(@"tvnviewer.exe", textBox1.Text);
+                }
+                catch (Exception ex)
+                {
+
+                    MessageBox.Show(ex.Message);
+                }
+            }
+            else
+            {
+                Process.Start(@"tvnviewer.exe", IP);
+            }
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            
+            BindingSource bs = new BindingSource();
+            bs.DataSource = dataGridView1.DataSource;
+            bs.Filter = string.Format("CONVERT(" + dataGridView1.Columns[1].DataPropertyName + ", System.String) like '%" + textBox1.Text.Replace("'", "''") + "%'");
+            dataGridView1.DataSource = bs;
+            dataGridView1.Refresh();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            textBox1.Text = "";
+        }
     }
 }
