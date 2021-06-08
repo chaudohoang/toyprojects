@@ -41,7 +41,7 @@
             // 
             this.textBox1.Location = new System.Drawing.Point(12, 12);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(240, 20);
+            this.textBox1.Size = new System.Drawing.Size(367, 20);
             this.textBox1.TabIndex = 1;
             // 
             // button1
@@ -61,7 +61,7 @@
             this.IP});
             this.dataGridView1.Location = new System.Drawing.Point(12, 38);
             this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.Size = new System.Drawing.Size(240, 371);
+            this.dataGridView1.Size = new System.Drawing.Size(367, 371);
             this.dataGridView1.TabIndex = 4;
             // 
             // button2
@@ -73,13 +73,15 @@
             this.button2.Text = "Remote Control";
             this.button2.UseVisualStyleBackColor = true;
             // 
-            // Name
+            // PC
             // 
+            this.PC.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
             this.PC.HeaderText = "PC";
             this.PC.Name = "PC";
             // 
             // IP
             // 
+            this.IP.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
             this.IP.HeaderText = "IP";
             this.IP.Name = "IP";
             // 
@@ -105,9 +107,9 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.DataGridView dataGridView1;
+        private System.Windows.Forms.Button button2;
         private System.Windows.Forms.DataGridViewTextBoxColumn PC;
         private System.Windows.Forms.DataGridViewTextBoxColumn IP;
-        private System.Windows.Forms.Button button2;
     }
 }
 

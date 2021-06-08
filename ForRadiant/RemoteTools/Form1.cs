@@ -1,16 +1,15 @@
-﻿using CsvHelper;
-using CsvHelper.Configuration;
+﻿using Microsoft.VisualBasic.FileIO;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.VisualBasic.FileIO;
 
 namespace RemoteTools
 {
@@ -24,25 +23,28 @@ namespace RemoteTools
   
         private void Form1_Load(object sender, EventArgs e)
         {
-
-            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            var path = @"All.csv";
+            using (TextFieldParser csvParser = new TextFieldParser(path))
             {
-                HasHeaderRecord = false,
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = true;
 
-            };
-            using (var reader = new StreamReader(@"All.csv"))
-            using (var csv = new CsvReader(reader, config))
-            // Do any configuration to `CsvReader` before creating CsvDataReader.
-            using (var dr = new CsvDataReader(csv))
-            {
-                var dt = new DataTable();
-                dt.Load(dr);
-                dataGridView1.DataSource = dt;
+                // Skip the row with the column names
+                csvParser.ReadLine();
 
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+                    string PC = fields[0];
+                    string IP = fields[1];
+                    dataGridView1.Rows.Add(PC, IP);
+                }
             }
+
+        }
                 
    
-            
-        }
     }
 }
