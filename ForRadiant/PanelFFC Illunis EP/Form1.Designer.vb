@@ -262,7 +262,7 @@ Partial Class PanelFFCIllunisEP
         Me.btnChooseOuputFolder.Text = "Choose folder"
         Me.btnChooseOuputFolder.UseVisualStyleBackColor = True
         '
-        'PanelFFC
+        'PanelFFCIllunisEP
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
@@ -293,7 +293,7 @@ Partial Class PanelFFCIllunisEP
         Me.Controls.Add(Me.greenfilepath1)
         Me.Controls.Add(Me.btnGenerate)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
-        Me.Name = "PanelFFC"
+        Me.Name = "PanelFFCIllunisEP"
         Me.Text = "PanelFFC Illunis EP"
         Me.ResumeLayout(False)
         Me.PerformLayout()

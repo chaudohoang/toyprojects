@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+
 
 namespace EZAE
 {
@@ -18,7 +14,6 @@ namespace EZAE
     {
         public MainForm()
         {
-            
             InitializeComponent();
             string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
             string appdir = Path.GetDirectoryName(apppath);
@@ -40,6 +35,19 @@ namespace EZAE
             }
             
             
+        }
+
+        private void SetVersionInfo()
+        {
+            Version versionInfo = Assembly.GetExecutingAssembly().GetName().Version;
+            DateTime startDate = new DateTime(2000, 1, 1);
+            int diffDays = versionInfo.Build;
+            DateTime computedDate = startDate.AddDays(diffDays);
+            string lastBuilt = computedDate.ToShortDateString();
+            //this.Text = string.Format("{0} - {1} ({2})",
+            //            this.Text, versionInfo.ToString(), lastBuilt);
+            this.Text = string.Format("{0} - {1}",
+                        this.Text, versionInfo.ToString());
         }
 
         public void ExecuteAsAdmin(string fileName)
@@ -229,13 +237,6 @@ namespace EZAE
             }
         }
 
-
-
-     
-    
-        
-
-       
 
         private void tabSetSequence_Enter(object sender, EventArgs e)
         {
@@ -1058,6 +1059,9 @@ namespace EZAE
             }
         }
 
-        
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            SetVersionInfo();
+        }
     }
 }

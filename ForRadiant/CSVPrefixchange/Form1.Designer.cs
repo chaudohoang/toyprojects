@@ -103,7 +103,7 @@ namespace CSVPrefixchange
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(394, 89);
+            this.ClientSize = new System.Drawing.Size(450, 89);
             this.Controls.Add(this.btnRun);
             this.Controls.Add(this.txtTo);
             this.Controls.Add(this.txtFrom);
@@ -113,6 +113,7 @@ namespace CSVPrefixchange
             this.Controls.Add(this.label1);
             this.Name = "Form1";
             this.Text = "CSVPrefixchange";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

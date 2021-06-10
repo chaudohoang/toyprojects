@@ -626,7 +626,7 @@ Partial Class PanelFFCX10805panel
         Me.btnChooseOuputFolder.Text = "Choose folder"
         Me.btnChooseOuputFolder.UseVisualStyleBackColor = True
         '
-        'PanelFFC
+        'PanelFFCX10805panel
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
@@ -696,7 +696,7 @@ Partial Class PanelFFCX10805panel
         Me.Controls.Add(Me.redfilepath1)
         Me.Controls.Add(Me.btnGenerate)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
-        Me.Name = "PanelFFC"
+        Me.Name = "PanelFFCX10805panel"
         Me.Text = "PanelFFC X1080 5 panels"
         Me.ResumeLayout(False)
         Me.PerformLayout()

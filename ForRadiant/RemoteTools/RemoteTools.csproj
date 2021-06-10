@@ -11,7 +11,7 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
+    <Deterministic>false</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -95,4 +95,9 @@ del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.config
 copy /y $(SolutionDir)\$(ProjectName)\tvnviewer.exe $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\tvnviewer.exe
 copy /y $(SolutionDir)\$(ProjectName)\All.csv $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\All.csv</PostBuildEvent>
   </PropertyGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties BuildVersion_StartDate="2000/1/1" BuildVersion_UseGlobalSettings="True" BuildVersion_BuildVersioningStyle="None.None.Increment.TimeStamp" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_AssemblyInfoFilename="" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

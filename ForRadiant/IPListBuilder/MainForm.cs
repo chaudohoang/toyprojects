@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Reflection;
+
 
 namespace IPListBuilder
 {
@@ -16,6 +18,19 @@ namespace IPListBuilder
         public MainForm()
         {
             InitializeComponent();
+        }
+
+        private void SetVersionInfo()
+        {
+            Version versionInfo = Assembly.GetExecutingAssembly().GetName().Version;
+            DateTime startDate = new DateTime(2000, 1, 1);
+            int diffDays = versionInfo.Build;
+            DateTime computedDate = startDate.AddDays(diffDays);
+            string lastBuilt = computedDate.ToShortDateString();
+            //this.Text = string.Format("{0} - {1} ({2})",
+            //            this.Text, versionInfo.ToString(), lastBuilt);
+            this.Text = string.Format("{0} - {1}",
+                        this.Text, versionInfo.ToString());
         }
 
         private void cbIPList1_DropDown(object sender, EventArgs e)
@@ -233,6 +248,11 @@ namespace IPListBuilder
 
                 MessageBox.Show("Generated: " + Path.GetFullPath(@"Batch Job\\" + filename + ".ffs_batch") +Environment.NewLine + Path.GetFullPath(@"Batch Job\\" + filename + ".ffs_real")+ Environment.NewLine + Path.GetFullPath(@"Batch Job\\" + filename + "_StartupTask.bat"));
             }
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            SetVersionInfo();
         }
     }
 }

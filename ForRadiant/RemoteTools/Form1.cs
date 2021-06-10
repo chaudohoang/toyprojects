@@ -3,6 +3,7 @@ using System;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Data;
+using System.Reflection;
 
 namespace RemoteTools
 {
@@ -12,9 +13,23 @@ namespace RemoteTools
         {
             InitializeComponent();
         }
-  
+
+        private void SetVersionInfo()
+        {
+            Version versionInfo = Assembly.GetExecutingAssembly().GetName().Version;
+            DateTime startDate = new DateTime(2000, 1, 1);
+            int diffDays = versionInfo.Build;
+            DateTime computedDate = startDate.AddDays(diffDays);
+            string lastBuilt = computedDate.ToShortDateString();
+            //this.Text = string.Format("{0} - {1} ({2})",
+            //            this.Text, versionInfo.ToString(), lastBuilt);
+            this.Text = string.Format("{0} - {1}",
+                        this.Text, versionInfo.ToString());
+        }
+
         private void Form1_Load(object sender, EventArgs e)
         {
+            SetVersionInfo();
             var path = @"All.csv";
             using (TextFieldParser csvParser = new TextFieldParser(path))
             {

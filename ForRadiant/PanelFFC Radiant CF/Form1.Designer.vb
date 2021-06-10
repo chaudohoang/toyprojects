@@ -626,7 +626,7 @@ Partial Class PanelFFCRadiantCF
         Me.btnChooseOuputFolder.Text = "Choose folder"
         Me.btnChooseOuputFolder.UseVisualStyleBackColor = True
         '
-        'PanelFFC
+        'PanelFFCRadiantCF
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
@@ -696,7 +696,7 @@ Partial Class PanelFFCRadiantCF
         Me.Controls.Add(Me.redfilepath1)
         Me.Controls.Add(Me.btnGenerate)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
-        Me.Name = "PanelFFC"
+        Me.Name = "PanelFFCRadiantCF"
         Me.Text = "PanelFFC Radiant CF"
         Me.ResumeLayout(False)
         Me.PerformLayout()

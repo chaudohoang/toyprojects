@@ -50,6 +50,7 @@ namespace EZAE
             this.cmdOpenEngineerMode = new System.Windows.Forms.LinkLabel();
             this.cmdPinEngineerMode = new System.Windows.Forms.LinkLabel();
             this.tabSetupPC = new System.Windows.Forms.TabPage();
+            this.cmdChangePW1 = new System.Windows.Forms.LinkLabel();
             this.chkmatlabinstall = new System.Windows.Forms.CheckBox();
             this.chkdotnetinstall = new System.Windows.Forms.CheckBox();
             this.cbProgramFolder = new System.Windows.Forms.ComboBox();
@@ -102,7 +103,6 @@ namespace EZAE
             this.lblFocusDistance = new System.Windows.Forms.Label();
             this.cbCalBox = new System.Windows.Forms.ComboBox();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-            this.cmdChangePW1 = new System.Windows.Forms.LinkLabel();
             this.tabControl1.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabSetupPC.SuspendLayout();
@@ -374,6 +374,16 @@ namespace EZAE
             this.tabSetupPC.Text = "Setup PC";
             this.tabSetupPC.UseVisualStyleBackColor = true;
             this.tabSetupPC.Enter += new System.EventHandler(this.tabSetupPC_Enter);
+            // 
+            // cmdChangePW1
+            // 
+            this.cmdChangePW1.AutoSize = true;
+            this.cmdChangePW1.Location = new System.Drawing.Point(6, 173);
+            this.cmdChangePW1.Name = "cmdChangePW1";
+            this.cmdChangePW1.Size = new System.Drawing.Size(113, 13);
+            this.cmdChangePW1.TabIndex = 47;
+            this.cmdChangePW1.TabStop = true;
+            this.cmdChangePW1.Text = "Change password to 1";
             // 
             // chkmatlabinstall
             // 
@@ -971,16 +981,6 @@ namespace EZAE
             this.cbCalBox.TabIndex = 54;
             this.cbCalBox.Text = "Copy from first step";
             // 
-            // cmdChangePW1
-            // 
-            this.cmdChangePW1.AutoSize = true;
-            this.cmdChangePW1.Location = new System.Drawing.Point(6, 173);
-            this.cmdChangePW1.Name = "cmdChangePW1";
-            this.cmdChangePW1.Size = new System.Drawing.Size(113, 13);
-            this.cmdChangePW1.TabIndex = 47;
-            this.cmdChangePW1.TabStop = true;
-            this.cmdChangePW1.Text = "Change password to 1";
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -994,6 +994,7 @@ namespace EZAE
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "EZAE";
+            this.Load += new System.EventHandler(this.MainForm_Load);
             this.tabControl1.ResumeLayout(false);
             this.tabControl.ResumeLayout(false);
             this.tabControl.PerformLayout();

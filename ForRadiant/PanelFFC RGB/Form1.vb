@@ -3,8 +3,22 @@ Imports System.IO
 Imports System.Drawing
 Imports System.Windows.Forms
 Imports System.IO.Compression
+Imports System.Reflection
 
 Public Class PanelFFCRGB
+
+    Private Sub SetVersionInfo()
+
+        Dim ass As System.Reflection.Assembly = System.Reflection.Assembly.GetExecutingAssembly()
+        Dim ver As System.Version = ass.GetName().Version
+        Dim startDate As DateTime = New Date(2000, 1, 1)
+        Dim diffDays As Integer = ver.Build
+        Dim computedDate As DateTime = startDate.AddDays(diffDays)
+        Dim lastBuilt As String = computedDate.ToShortDateString()
+        'Me.Text = (Me.Text & " " & ver.Major & "." & ver.Minor & "." & ver.Build & "." & ver.Revision & " (" & lastBuilt & ")")
+        Me.Text = (Me.Text & " " & ver.Major & "." & ver.Minor & "." & ver.Build & "." & ver.Revision)
+
+    End Sub
 
     Private Sub btnGenerate_Click(sender As Object, e As EventArgs) Handles btnGenerate.Click 'button Generate function
         btnGenerate.Enabled = False
@@ -450,6 +464,7 @@ Public Class PanelFFCRGB
     End Sub
 
     Private Sub PanelFFCRGB_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        SetVersionInfo()
         Dim dir = "XmlTemplate"
         Dim files As New List(Of String)
         For Each file As String In System.IO.Directory.GetFiles(dir)

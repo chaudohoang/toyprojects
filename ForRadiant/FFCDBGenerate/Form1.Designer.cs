@@ -193,7 +193,7 @@ namespace FFCDBGenerate
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(254, 140);
+            this.ClientSize = new System.Drawing.Size(470, 140);
             this.Controls.Add(this.btnGenerate);
             this.Controls.Add(this.chkOpenOutput);
             this.Controls.Add(this.cbSaveTo);
@@ -207,6 +207,7 @@ namespace FFCDBGenerate
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
             this.Text = "FFCDBGenerate";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

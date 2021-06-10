@@ -290,7 +290,7 @@ Partial Class PanelFFCIllunisDJ
         Me.greenfilepath5.Size = New System.Drawing.Size(461, 20)
         Me.greenfilepath5.TabIndex = 37
         '
-        'PanelFFC
+        'PanelFFCIllunisDJ
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
@@ -324,7 +324,7 @@ Partial Class PanelFFCIllunisDJ
         Me.Controls.Add(Me.greenfilepath1)
         Me.Controls.Add(Me.btnGenerate)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
-        Me.Name = "PanelFFC"
+        Me.Name = "PanelFFCIllunisDJ"
         Me.Text = "PanelFFC Illunis DJ"
         Me.ResumeLayout(False)
         Me.PerformLayout()
