@@ -353,11 +353,10 @@ namespace EZAE
 
         private void cmdOpenTools_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-
-            string path = Directory.GetCurrentDirectory();
-            if (Directory.Exists(path))
+            string folderpath = @"..\Tools";
+            if (Directory.Exists(folderpath))
             {
-                Process.Start(path);
+                Process.Start(folderpath);
             }
         }
 
