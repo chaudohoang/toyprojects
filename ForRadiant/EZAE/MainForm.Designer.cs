@@ -83,6 +83,7 @@ namespace EZAE
             this.cbFixture = new System.Windows.Forms.ComboBox();
             this.cbTightVNCPath = new System.Windows.Forms.ComboBox();
             this.tabSetSequence = new System.Windows.Forms.TabPage();
+            this.cmdCopySequence = new System.Windows.Forms.LinkLabel();
             this.cmdInstallTrueTest = new System.Windows.Forms.LinkLabel();
             this.cmdBackupCurrentTT = new System.Windows.Forms.LinkLabel();
             this.cmdOneclickSetupTrueTestSettings = new System.Windows.Forms.LinkLabel();
@@ -92,6 +93,8 @@ namespace EZAE
             this.cbDIList = new System.Windows.Forms.ComboBox();
             this.cmdCreateOTPandResult = new System.Windows.Forms.LinkLabel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.cmdUseScript = new System.Windows.Forms.LinkLabel();
+            this.cmdUseButterfly = new System.Windows.Forms.LinkLabel();
             this.cmdBrowseSequence = new System.Windows.Forms.LinkLabel();
             this.lblSequencePath = new System.Windows.Forms.Label();
             this.cmdUseLastModifiedSequence = new System.Windows.Forms.LinkLabel();
@@ -106,9 +109,6 @@ namespace EZAE
             this.lblFocusDistance = new System.Windows.Forms.Label();
             this.cbCalBox = new System.Windows.Forms.ComboBox();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-            this.cmdUseButterfly = new System.Windows.Forms.LinkLabel();
-            this.cmdUseScript = new System.Windows.Forms.LinkLabel();
-            this.cmdCopySequence = new System.Windows.Forms.LinkLabel();
             this.tabControl1.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabSetupPC.SuspendLayout();
@@ -761,6 +761,17 @@ namespace EZAE
             this.tabSetSequence.UseVisualStyleBackColor = true;
             this.tabSetSequence.Enter += new System.EventHandler(this.tabSetSequence_Enter);
             // 
+            // cmdCopySequence
+            // 
+            this.cmdCopySequence.AutoSize = true;
+            this.cmdCopySequence.Location = new System.Drawing.Point(166, 207);
+            this.cmdCopySequence.Name = "cmdCopySequence";
+            this.cmdCopySequence.Size = new System.Drawing.Size(83, 13);
+            this.cmdCopySequence.TabIndex = 64;
+            this.cmdCopySequence.TabStop = true;
+            this.cmdCopySequence.Text = "Copy Sequence";
+            this.cmdCopySequence.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCopySequence_LinkClicked);
+            // 
             // cmdInstallTrueTest
             // 
             this.cmdInstallTrueTest.AutoSize = true;
@@ -889,6 +900,28 @@ namespace EZAE
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Set Sequence";
             // 
+            // cmdUseScript
+            // 
+            this.cmdUseScript.AutoSize = true;
+            this.cmdUseScript.Location = new System.Drawing.Point(343, 16);
+            this.cmdUseScript.Name = "cmdUseScript";
+            this.cmdUseScript.Size = new System.Drawing.Size(56, 13);
+            this.cmdUseScript.TabIndex = 58;
+            this.cmdUseScript.TabStop = true;
+            this.cmdUseScript.Text = "Use Script";
+            this.cmdUseScript.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdUseScript_LinkClicked);
+            // 
+            // cmdUseButterfly
+            // 
+            this.cmdUseButterfly.AutoSize = true;
+            this.cmdUseButterfly.Location = new System.Drawing.Point(261, 16);
+            this.cmdUseButterfly.Name = "cmdUseButterfly";
+            this.cmdUseButterfly.Size = new System.Drawing.Size(67, 13);
+            this.cmdUseButterfly.TabIndex = 57;
+            this.cmdUseButterfly.TabStop = true;
+            this.cmdUseButterfly.Text = "Use Butterfly";
+            this.cmdUseButterfly.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdUseButterfly_LinkClicked);
+            // 
             // cmdBrowseSequence
             // 
             this.cmdBrowseSequence.AutoSize = true;
@@ -925,6 +958,7 @@ namespace EZAE
             this.cbCameraRotation.FormattingEnabled = true;
             this.cbCameraRotation.Items.AddRange(new object[] {
             "",
+            "Copy from first step",
             "None",
             "Clockwise90",
             "Rotate180",
@@ -933,6 +967,7 @@ namespace EZAE
             this.cbCameraRotation.Name = "cbCameraRotation";
             this.cbCameraRotation.Size = new System.Drawing.Size(148, 21);
             this.cbCameraRotation.TabIndex = 53;
+            this.cbCameraRotation.Text = "Copy from first step";
             // 
             // btnApply
             // 
@@ -974,17 +1009,20 @@ namespace EZAE
             // 
             this.cbFocusDistance.FormattingEnabled = true;
             this.cbFocusDistance.Items.AddRange(new object[] {
-            ""});
+            "",
+            "Copy from first step"});
             this.cbFocusDistance.Location = new System.Drawing.Point(93, 85);
             this.cbFocusDistance.Name = "cbFocusDistance";
             this.cbFocusDistance.Size = new System.Drawing.Size(148, 21);
             this.cbFocusDistance.TabIndex = 52;
+            this.cbFocusDistance.Text = "Copy from first step";
             // 
             // cbSubframe
             // 
             this.cbSubframe.FormattingEnabled = true;
             this.cbSubframe.Items.AddRange(new object[] {
             "",
+            "Copy from first step",
             "800,450,2784,5676",
             "700,250,2984,6076",
             "1000,1300,4576,1784"});
@@ -992,7 +1030,7 @@ namespace EZAE
             this.cbSubframe.Name = "cbSubframe";
             this.cbSubframe.Size = new System.Drawing.Size(148, 21);
             this.cbSubframe.TabIndex = 51;
-            this.cbSubframe.Text = "800,450,2784,5676";
+            this.cbSubframe.Text = "Copy from first step";
             // 
             // lblCalibrationIDs
             // 
@@ -1024,39 +1062,6 @@ namespace EZAE
             this.cbCalBox.Size = new System.Drawing.Size(148, 21);
             this.cbCalBox.TabIndex = 54;
             this.cbCalBox.Text = "Copy from first step";
-            // 
-            // cmdUseButterfly
-            // 
-            this.cmdUseButterfly.AutoSize = true;
-            this.cmdUseButterfly.Location = new System.Drawing.Point(261, 16);
-            this.cmdUseButterfly.Name = "cmdUseButterfly";
-            this.cmdUseButterfly.Size = new System.Drawing.Size(67, 13);
-            this.cmdUseButterfly.TabIndex = 57;
-            this.cmdUseButterfly.TabStop = true;
-            this.cmdUseButterfly.Text = "Use Butterfly";
-            this.cmdUseButterfly.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdUseButterfly_LinkClicked);
-            // 
-            // cmdUseScript
-            // 
-            this.cmdUseScript.AutoSize = true;
-            this.cmdUseScript.Location = new System.Drawing.Point(343, 16);
-            this.cmdUseScript.Name = "cmdUseScript";
-            this.cmdUseScript.Size = new System.Drawing.Size(56, 13);
-            this.cmdUseScript.TabIndex = 58;
-            this.cmdUseScript.TabStop = true;
-            this.cmdUseScript.Text = "Use Script";
-            this.cmdUseScript.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdUseScript_LinkClicked);
-            // 
-            // cmdCopySequence
-            // 
-            this.cmdCopySequence.AutoSize = true;
-            this.cmdCopySequence.Location = new System.Drawing.Point(166, 207);
-            this.cmdCopySequence.Name = "cmdCopySequence";
-            this.cmdCopySequence.Size = new System.Drawing.Size(83, 13);
-            this.cmdCopySequence.TabIndex = 64;
-            this.cmdCopySequence.TabStop = true;
-            this.cmdCopySequence.Text = "Copy Sequence";
-            this.cmdCopySequence.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCopySequence_LinkClicked);
             // 
             // MainForm
             // 

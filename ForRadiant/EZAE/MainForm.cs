@@ -74,7 +74,23 @@ namespace EZAE
 
                 x = y = width = height = lensdistance = colorcalID = imagescalingID = flatfieldID = cameraRotation = "";
 
-                if (cbSubframe.Text != "")
+                if (cbSubframe.Text == "Copy from first step")
+                {
+                    node = xmlDoc.DocumentElement.SelectSingleNode("/Sequence/Items/SequenceItem/PatternSetupName");
+                    string firstPatternName = node.InnerText;
+                    nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup");
+                    for (int index = 0; index <= nodes.Count - 1; index++)
+                    {
+                        if (nodes[index].SelectSingleNode("Name").InnerText == firstPatternName)
+                        {
+                            x = nodes[index].SelectSingleNode("CameraSettingsList/CameraSettings/SubFrameRegion/X").InnerText;
+                            y = nodes[index].SelectSingleNode("CameraSettingsList/CameraSettings/SubFrameRegion/Y").InnerText;
+                            width = nodes[index].SelectSingleNode("CameraSettingsList/CameraSettings/SubFrameRegion/Width").InnerText;
+                            height = nodes[index].SelectSingleNode("CameraSettingsList/CameraSettings/SubFrameRegion/Height").InnerText;
+                        }
+                    }
+                }
+                else
                 {
                     string[] values = cbSubframe.Text.Split(',');
                     x = values[0];
@@ -83,15 +99,7 @@ namespace EZAE
                     height = values[3];
                 }
 
-                if (cbCalBox.Text != "Copy from first step")
-                {
-                    string[] values = cbCalBox.Text.Split(',');
-                    colorcalID = values[1];
-                    imagescalingID = values[2];
-                    flatfieldID = values[3];
-                }
-
-                else
+                if (cbCalBox.Text == "Copy from first step")
                 {
                     node = xmlDoc.DocumentElement.SelectSingleNode("/Sequence/Items/SequenceItem/PatternSetupName");
                     string firstPatternName = node.InnerText;
@@ -107,12 +115,46 @@ namespace EZAE
                     }
                 }
 
-                if (cbFocusDistance.Text != "")
+                else
+                {
+                    string[] values = cbCalBox.Text.Split(',');
+                    colorcalID = values[1];
+                    imagescalingID = values[2];
+                    flatfieldID = values[3];
+                }
+
+                if (cbFocusDistance.Text == "Copy from first step")
+                {
+                    node = xmlDoc.DocumentElement.SelectSingleNode("/Sequence/Items/SequenceItem/PatternSetupName");
+                    string firstPatternName = node.InnerText;
+                    nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup");
+                    for (int index = 0; index <= nodes.Count - 1; index++)
+                    {
+                        if (nodes[index].SelectSingleNode("Name").InnerText == firstPatternName)
+                        {
+                            lensdistance = nodes[index].SelectSingleNode("LensDistance").InnerText;
+                        }
+                    }
+                }
+                else
                 {
                     lensdistance = cbFocusDistance.Text;
                 }
 
-                if (cbCameraRotation.Text != "")
+                if (cbCameraRotation.Text == "Copy from first step")
+                {
+                    node = xmlDoc.DocumentElement.SelectSingleNode("/Sequence/Items/SequenceItem/PatternSetupName");
+                    string firstPatternName = node.InnerText;
+                    nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup");
+                    for (int index = 0; index <= nodes.Count - 1; index++)
+                    {
+                        if (nodes[index].SelectSingleNode("Name").InnerText == firstPatternName)
+                        {
+                            cameraRotation = nodes[index].SelectSingleNode("CameraRotation").InnerText;
+                        }
+                    }
+                }
+                else
                 {
                     cameraRotation = cbCameraRotation.Text;
                 }
@@ -236,7 +278,9 @@ namespace EZAE
 
                 XmlWriterSettings settings = new XmlWriterSettings { Indent = true };
                 XmlWriter writer = XmlWriter.Create(lblSequenceFileName.Text, settings);
-                xmlDoc.Save(lblSequenceFileName.Text);
+                xmlDoc.Save(writer);
+                if (writer != null)
+                    writer.Close();
             }
         }
 
