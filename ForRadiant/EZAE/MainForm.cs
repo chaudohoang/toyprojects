@@ -17,7 +17,8 @@ namespace EZAE
             InitializeComponent();
             string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
             string appdir = Path.GetDirectoryName(apppath);
-            string syspinpath = Path.Combine(appdir, "syspin.exe");
+            string toolsdir = appdir + "\\Tools";
+            string syspinpath = Path.Combine(toolsdir, "syspin.exe");
 
             if (File.Exists(syspinpath))
             {
@@ -27,10 +28,10 @@ namespace EZAE
 
             }
             
-            if (File.Exists(@"addhosttointranet.bat"))
+            if (File.Exists(@"Tools\addhosttointranet.bat"))
             {
 
-                ExecuteAsAdmin(@"addhosttointranet.bat");
+                ExecuteAsAdmin(@"Tools\addhosttointranet.bat");
                 
             }
             
@@ -308,7 +309,7 @@ namespace EZAE
 
         private void cmdPinEngineerMode_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string filepath = @"pinEngineerModeToTaskBar.bat";
+            string filepath = @"Tools\pinEngineerModeToTaskBar.bat";
             if (File.Exists(filepath))
             {
                 Process.Start(filepath);
@@ -317,7 +318,7 @@ namespace EZAE
 
         private void cmdOpenImageJ_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string filepath = @"ImageJ\ImageJ.exe";
+            string filepath = @"Tools\ImageJ\ImageJ.exe";
             if (File.Exists(filepath))
             {
                 Process.Start(filepath);
@@ -326,7 +327,7 @@ namespace EZAE
 
         private void cmdOpenLanSearch_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string filepath = @"lansearchpro_portable\lansearc.exe";
+            string filepath = @"Tools\lansearchpro_portable\lansearc.exe";
             if (File.Exists(filepath))
             {
                 Process.Start(filepath);
@@ -335,7 +336,7 @@ namespace EZAE
 
         private void cmdOpenUpdates_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string folderpath = @"Updates";
+            string folderpath = @"Tools\Updates";
             if (Directory.Exists(folderpath))
             {
                 Process.Start(folderpath);
@@ -344,7 +345,7 @@ namespace EZAE
 
         private void cmdOpenMTFCenter_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string filepath = @"MTF_Center\MTF.exe";
+            string filepath = @"Tools\MTF_Center\MTF.exe";
             if (File.Exists(filepath))
             {
                 Process.Start(filepath);
@@ -353,7 +354,7 @@ namespace EZAE
 
         private void cmdOpenTools_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string folderpath = @"..\Tools";
+            string folderpath = @"Tools";
             if (Directory.Exists(folderpath))
             {
                 Process.Start(folderpath);
@@ -362,8 +363,8 @@ namespace EZAE
 
         private void cmdCheckLC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string filepath = @"WPSOffice\et.exe";
-            string lcfilepath = @"License Code Combined List.xlsx";
+            string filepath = @"Tools\WPSOffice\et.exe";
+            string lcfilepath = @"Tools\License Code Combined List.xlsx";
             if (File.Exists(filepath) && File.Exists(lcfilepath))
             {
                 Process.Start(filepath, "\"" + lcfilepath + "\"");
@@ -372,7 +373,7 @@ namespace EZAE
 
         private void cmdCreateFFC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string filepath = Path.GetFullPath(@"FFC_Database_Template\FFCDBGenerate.exe");
+            string filepath = Path.GetFullPath(@"Tools\FFC_Database_Template\FFCDBGenerate.exe");
             if (File.Exists(filepath))
             {
  
@@ -459,17 +460,17 @@ namespace EZAE
 
         private void cmdInstallTightVNC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if ( (cbTightVNCPath.Text == @"C:\Program") && File.Exists(@"Installer\tightvncCProgram.exe") )
+            if ( (cbTightVNCPath.Text == @"C:\Program") && File.Exists(@"Tools\Installer\tightvncCProgram.exe") )
             {
-                ExecuteAsAdmin(@"Installer\tightvncCProgram.exe");
+                ExecuteAsAdmin(@"Tools\Installer\tightvncCProgram.exe");
             }
-            else if ((cbTightVNCPath.Text == @"D:\Program") && File.Exists(@"Installer\tightvncDProgram.exe"))
+            else if ((cbTightVNCPath.Text == @"D:\Program") && File.Exists(@"Tools\Installer\tightvncDProgram.exe"))
             {
-                ExecuteAsAdmin(@"Installer\tightvncDProgram.exe");
+                ExecuteAsAdmin(@"Tools\Installer\tightvncDProgram.exe");
             }
-            else if ((cbTightVNCPath.Text == @"E:\Program") && File.Exists(@"Installer\tightvncEProgram.exe"))
+            else if ((cbTightVNCPath.Text == @"E:\Program") && File.Exists(@"Tools\Installer\tightvncEProgram.exe"))
             {
-                ExecuteAsAdmin(@"Installer\tightvncEProgram.exe");
+                ExecuteAsAdmin(@"Tools\Installer\tightvncEProgram.exe");
             }
         }
 
@@ -483,6 +484,10 @@ namespace EZAE
             {
                 ExecuteAsAdmin(@"C:\Program\TightVNC\Remove TightVNC.bat");
             }
+            else if (File.Exists(@"E:\Program\TightVNC\Remove TightVNC.bat"))
+            {
+                ExecuteAsAdmin(@"E:\Program\TightVNC\Remove TightVNC.bat");
+            }
         }
 
         private void cmdCopyDISettings_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -490,51 +495,51 @@ namespace EZAE
             switch (cbDIList.Text)
             {
                 case "Dove2p0 CH1":
-                    if (File.Exists(@"Installer\DISettings\CopyDI DoooneCH1.vbs"))
+                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI DoooneCH1.vbs"))
                     {
-                        Process.Start(@"Installer\DISettings\CopyDI DoooneCH1.vbs");
+                        Process.Start(@"Tools\Installer\DISettings\CopyDI DoooneCH1.vbs");
                     }
                     break;
                 case "Dove2p0 CH2":
-                    if (File.Exists(@"Installer\DISettings\CopyDI DoooneCH2.vbs"))
+                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI DoooneCH2.vbs"))
                     {
-                        Process.Start(@"Installer\DISettings\CopyDI DoooneCH2.vbs");
+                        Process.Start(@"Tools\Installer\DISettings\CopyDI DoooneCH2.vbs");
                     }
                     break;
                 case "Dove2p0 CH3":
-                    if (File.Exists(@"Installer\DISettings\CopyDI DoooneCH3.vbs"))
+                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI DoooneCH3.vbs"))
                     {
-                        Process.Start(@"Installer\DISettings\CopyDI DoooneCH3.vbs");
+                        Process.Start(@"Tools\Installer\DISettings\CopyDI DoooneCH3.vbs");
                     }
                     break;
                 case "Dove2p0 CH4":
-                    if (File.Exists(@"Installer\DISettings\CopyDI DoooneCH4.vbs"))
+                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI DoooneCH4.vbs"))
                     {
-                        Process.Start(@"Installer\DISettings\CopyDI DoooneCH4.vbs");
+                        Process.Start(@"Tools\Installer\DISettings\CopyDI DoooneCH4.vbs");
                     }
                     break;
                 case "Emu2p0 CH1":
-                    if (File.Exists(@"Installer\DISettings\CopyDI GooilCH1.vbs"))
+                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI GooilCH1.vbs"))
                     {
-                        Process.Start(@"Installer\DISettings\CopyDI GooilCH1.vbs");
+                        Process.Start(@"Tools\Installer\DISettings\CopyDI GooilCH1.vbs");
                     }
                     break;
                 case "Emu2p0 CH2":
-                    if (File.Exists(@"Installer\DISettings\CopyDI GooilCH2.vbs"))
+                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI GooilCH2.vbs"))
                     {
-                        Process.Start(@"Installer\DISettings\CopyDI GooilCH2.vbs");
+                        Process.Start(@"Tools\Installer\DISettings\CopyDI GooilCH2.vbs");
                     }
                     break;
                 case "Emu2p0 CH3":
-                    if (File.Exists(@"Installer\DISettings\CopyDI GooilCH3.vbs"))
+                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI GooilCH3.vbs"))
                     {
-                        Process.Start(@"Installer\DISettings\CopyDI GooilCH3.vbs");
+                        Process.Start(@"Tools\Installer\DISettings\CopyDI GooilCH3.vbs");
                     }
                     break;
                 case "Emu2p0 CH4":
-                    if (File.Exists(@"Installer\DISettings\CopyDI GooilCH4.vbs"))
+                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI GooilCH4.vbs"))
                     {
-                        Process.Start(@"Installer\DISettings\CopyDI GooilCH4.vbs");
+                        Process.Start(@"Tools\Installer\DISettings\CopyDI GooilCH4.vbs");
                     }
                     break;
                 default:
@@ -544,180 +549,157 @@ namespace EZAE
 
         private void cmdInstallIrfanview_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Installer\iview457_x64_setup silent.bat"))
+            if (File.Exists(@"Tools\Installer\iview457_x64_setup silent.bat"))
             {
-                ExecuteAsAdmin(@"Installer\iview457_x64_setup silent.bat");
+                ExecuteAsAdmin(@"Tools\Installer\iview457_x64_setup silent.bat");
             }
         }
 
         private void cmdInstallVC12_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Installer\Visual C++ 2012\VC2012_silent_install.bat"))
+            if (File.Exists(@"Tools\Installer\Visual C++ 2012\VC2012_silent_install.bat"))
             {
-                ExecuteAsAdmin(@"Installer\Visual C++ 2012\VC2012_silent_install.bat");
+                ExecuteAsAdmin(@"Tools\Installer\Visual C++ 2012\VC2012_silent_install.bat");
             }
         }
 
         private void cmdInstallVC1519_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Installer\Visual C++ 2015-2019\VC2015-2019_silent_install.bat"))
+            if (File.Exists(@"Tools\Installer\Visual C++ 2015-2019\VC2015-2019_silent_install.bat"))
             {
-                ExecuteAsAdmin(@"Installer\Visual C++ 2015-2019\VC2015-2019_silent_install.bat");
+                ExecuteAsAdmin(@"Tools\Installer\Visual C++ 2015-2019\VC2015-2019_silent_install.bat");
             }
         }
 
         private void cmdInstallKdiff_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat"))
+            if (File.Exists(@"Tools\Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat"))
             {
-                ExecuteAsAdmin(@"Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat");
+                ExecuteAsAdmin(@"Tools\Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat");
             }
         }
 
         private void cmdInstallNPP_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Installer\npp.7.8.1.Installer.x64 silent.bat"))
+            if (File.Exists(@"Tools\Installer\npp.7.8.1.Installer.x64 silent.bat"))
             {
-                ExecuteAsAdmin(@"Installer\npp.7.8.1.Installer.x64 silent.bat");
+                ExecuteAsAdmin(@"Tools\Installer\npp.7.8.1.Installer.x64 silent.bat");
             }
         }
 
         private void cmdInstallDotnet48_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Installer\ndp48-x86-x64-allos-enu.exe"))
+            if (File.Exists(@"Tools\Installer\ndp48-x86-x64-allos-enu.exe"))
             {
-                ExecuteAsAdmin(@"Installer\ndp48-x86-x64-allos-enu.exe");
+                ExecuteAsAdmin(@"Tools\Installer\ndp48-x86-x64-allos-enu.exe");
             }
         }
 
         private void cmdInstallMatlab_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Installer\MCR_R2017b_win64_installer.exe"))
+            if (File.Exists(@"Tools\Installer\MCR_R2017b_win64_installer.exe"))
             {
-                ExecuteAsAdmin(@"Installer\MCR_R2017b_win64_installer.exe");
+                ExecuteAsAdmin(@"Tools\Installer\MCR_R2017b_win64_installer.exe");
             }
         }
 
         private void cmdShareC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"ShareC.bat"))
+            if (File.Exists(@"Tools\ShareC.bat"))
             {
-                ExecuteAsAdmin(@"ShareC.bat");
+                ExecuteAsAdmin(@"Tools\ShareC.bat");
             }
         }
 
         private void cmdShareD_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"ShareD.bat"))
+            if (File.Exists(@"Tools\ShareD.bat"))
             {
-                ExecuteAsAdmin(@"ShareD.bat");
+                ExecuteAsAdmin(@"Tools\ShareD.bat");
             }
         }
 
         private void cmdShareE_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"ShareE.bat"))
+            if (File.Exists(@"Tools\ShareE.bat"))
             {
-                ExecuteAsAdmin(@"ShareE.bat");
+                ExecuteAsAdmin(@"Tools\ShareE.bat");
             }
         }
 
         private void cmdShareRVSData_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"ShareRadiantVisionSystemsData.bat"))
+            if (File.Exists(@"Tools\ShareRadiantVisionSystemsData.bat"))
             {
-                ExecuteAsAdmin(@"ShareRadiantVisionSystemsData.bat");
+                ExecuteAsAdmin(@"Tools\ShareRadiantVisionSystemsData.bat");
             }
         }
 
-        private void cmdShareCProgram_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            if ( File.Exists(@"ShareCProgram.bat") && cbProgramFolder.Text == @"C:\Program" )
-            {
-                ExecuteAsAdmin(@"ShareCProgram.bat");
-            }
-        }
-
-        private void cmdShareDProgram_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            if (File.Exists(@"ShareDProgram.bat"))
-            {
-                ExecuteAsAdmin(@"ShareDProgram.bat");
-            }
-        }
-
-        private void cmdShareEProgram_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            if (File.Exists(@"ShareEProgram.bat"))
-            {
-                ExecuteAsAdmin(@"ShareEProgram.bat");
-            }
-        }
 
         private void cmdCreateOTPandResult_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Installer\CopyOTP.vbs"))
+            if (File.Exists(@"Tools\Installer\CopyOTP.vbs"))
             {
-                Process.Start(@"Installer\CopyOTP.vbs");
+                Process.Start(@"Tools\Installer\CopyOTP.vbs");
             }
 
         }
 
         private void cmdSetTTPermission_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"updatePermission.bat"))
+            if (File.Exists(@"Tools\updatePermission.bat"))
             {
-                ExecuteAsAdmin(@"updatePermission.bat");
+                ExecuteAsAdmin(@"Tools\updatePermission.bat");
             }
         }
 
        
         private void cmdInstallWireshark_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Installer\Wireshark-win64-3.4.3.exe"))
+            if (File.Exists(@"Tools\Installer\Wireshark-win64-3.4.3.exe"))
             {
-                ExecuteAsAdmin(@"Installer\Wireshark-win64-3.4.3.exe");
+                ExecuteAsAdmin(@"Tools\Installer\Wireshark-win64-3.4.3.exe");
             }
         }
 
         private void cmdPinFixturePcFolders_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (cbFixture.Text == @"Dooone" && File.Exists(@"pinDoooneFixturePCFolders.bat") && File.Exists(@"pinDoooneFixturePCFolders.ps1"))
+            if (cbFixture.Text == @"Dooone" && File.Exists(@"Tools\pinDoooneFixturePCFolders.bat") && File.Exists(@"Tools\pinDoooneFixturePCFolders.ps1"))
             {
-                ExecuteAsAdmin(@"pinDoooneFixturePCFolders.bat");
+                ExecuteAsAdmin(@"Tools\pinDoooneFixturePCFolders.bat");
             }
-            else if (cbFixture.Text == @"Gooil" && File.Exists(@"pinGooilFixturePCFolders.bat") && File.Exists(@"pinGooilFixturePCFolders.ps1"))
+            else if (cbFixture.Text == @"Gooil" && File.Exists(@"Tools\pinGooilFixturePCFolders.bat") && File.Exists(@"Tools\pinGooilFixturePCFolders.ps1"))
             {
-                ExecuteAsAdmin(@"pinGooilFixturePCFolders.bat");
+                ExecuteAsAdmin(@"Tools\pinGooilFixturePCFolders.bat");
             }
         }
 
         private void cmdPinCameraPcFolders_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if ( cbFixture.Text==@"Dooone" && File.Exists(@"pinDoooneCameraPCFolders.bat") && File.Exists(@"pinDoooneCameraPCFolders.ps1"))
+            if ( cbFixture.Text==@"Dooone" && File.Exists(@"Tools\pinDoooneCameraPCFolders.bat") && File.Exists(@"Tools\pinDoooneCameraPCFolders.ps1"))
             {
-                ExecuteAsAdmin(@"pinDoooneCameraPCFolders.bat");
+                ExecuteAsAdmin(@"Tools\pinDoooneCameraPCFolders.bat");
             }
-            else if (cbFixture.Text == @"Gooil" && File.Exists(@"pinGooilCameraPCFolders.bat") && File.Exists(@"pinGooilCameraPCFolders.ps1"))
+            else if (cbFixture.Text == @"Gooil" && File.Exists(@"Tools\pinGooilCameraPCFolders.bat") && File.Exists(@"Tools\pinGooilCameraPCFolders.ps1"))
             {
-                ExecuteAsAdmin(@"pinGooilCameraPCFolders.bat");
+                ExecuteAsAdmin(@"Tools\pinGooilCameraPCFolders.bat");
             }
 
         }
 
         private void cmdUACOff_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"disableUAC.bat"))
+            if (File.Exists(@"Tools\disableUAC.bat"))
             {
-                ExecuteAsAdmin(@"disableUAC.bat");
+                ExecuteAsAdmin(@"Tools\disableUAC.bat");
             }
         }
 
         private void cmdFirewallOff_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"FirewallOff.bat"))
+            if (File.Exists(@"Tools\FirewallOff.bat"))
             {
-                ExecuteAsAdmin(@"FirewallOff.bat");
+                ExecuteAsAdmin(@"Tools\FirewallOff.bat");
             }
         }
 
@@ -744,306 +726,306 @@ namespace EZAE
 
         private void cmdCopyRVStolocal_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"CopyScript\copyFilesToLocal.vbs"))
+            if (File.Exists(@"Tools\CopyScript\copyFilesToLocal.vbs"))
             {
-                Process.Start(@"CopyScript\copyFilesToLocal.vbs");
+                Process.Start(@"Tools\CopyScript\copyFilesToLocal.vbs");
             }
 
-            if (File.Exists(@"CopyScript\copyFoldesToLocal.vbs"))
+            if (File.Exists(@"Tools\CopyScript\copyFoldesToLocal.vbs"))
             {
-                Process.Start(@"CopyScript\copyFoldesToLocal.vbs");
+                Process.Start(@"Tools\CopyScript\copyFoldesToLocal.vbs");
             }
         }
 
         private void cmdPasswordSharingOff_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"PasswordSharingOff.bat"))
+            if (File.Exists(@"Tools\PasswordSharingOff.bat"))
             {
-                ExecuteAsAdmin(@"PasswordSharingOff.bat");
+                ExecuteAsAdmin(@"Tools\PasswordSharingOff.bat");
             }
         }
 
         private void cmdOneclickSetupCameraPC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"disableUAC.bat"))
+            if (File.Exists(@"Tools\disableUAC.bat"))
             {
-                ExecuteAsAdmin(@"disableUAC.bat");
+                ExecuteAsAdmin(@"Tools\disableUAC.bat");
             }
 
-            if (File.Exists(@"changePW1.bat"))
+            if (File.Exists(@"Tools\changePW1.bat"))
             {
-                ExecuteAsAdmin(@"changePW1.bat");
+                ExecuteAsAdmin(@"Tools\changePW1.bat");
             }
 
-            if (File.Exists(@"PasswordSharingOff.bat"))
+            if (File.Exists(@"Tools\PasswordSharingOff.bat"))
             {
-                ExecuteAsAdmin(@"PasswordSharingOff.bat");
+                ExecuteAsAdmin(@"Tools\PasswordSharingOff.bat");
             }
 
-            if (File.Exists(@"FirewallOff.bat"))
+            if (File.Exists(@"Tools\FirewallOff.bat"))
             {
-                ExecuteAsAdmin(@"FirewallOff.bat");
+                ExecuteAsAdmin(@"Tools\FirewallOff.bat");
             }
 
-            if (File.Exists(@"ShareC.bat"))
+            if (File.Exists(@"Tools\ShareC.bat"))
             {
-                ExecuteAsAdmin(@"ShareC.bat");
+                ExecuteAsAdmin(@"Tools\ShareC.bat");
             }
 
-            if (File.Exists(@"ShareD.bat"))
+            if (File.Exists(@"Tools\ShareD.bat"))
             {
-                ExecuteAsAdmin(@"ShareD.bat");
+                ExecuteAsAdmin(@"Tools\ShareD.bat");
             }
 
-            if (File.Exists(@"ShareE.bat"))
+            if (File.Exists(@"Tools\ShareE.bat"))
             {
-                ExecuteAsAdmin(@"ShareE.bat");
+                ExecuteAsAdmin(@"Tools\ShareE.bat");
             }
 
-            if (File.Exists(@"ShareCProgram.bat") && cbProgramFolder.Text == @"C:\Program")
+            if (File.Exists(@"Tools\ShareCProgram.bat") && cbProgramFolder.Text == @"C:\Program")
             {
-                ExecuteAsAdmin(@"ShareCProgram.bat");
+                ExecuteAsAdmin(@"Tools\ShareCProgram.bat");
             }
 
-            else if (File.Exists(@"ShareDProgram.bat") && cbProgramFolder.Text == @"D:\Program")
+            else if (File.Exists(@"Tools\ShareDProgram.bat") && cbProgramFolder.Text == @"D:\Program")
             {
-                ExecuteAsAdmin(@"ShareDProgram.bat");
+                ExecuteAsAdmin(@"Tools\ShareDProgram.bat");
             }
 
-            else if (File.Exists(@"ShareEProgram.bat") && cbProgramFolder.Text == @"E:\Program")
+            else if (File.Exists(@"Tools\ShareEProgram.bat") && cbProgramFolder.Text == @"E:\Program")
             {
-                ExecuteAsAdmin(@"ShareEProgram.bat");
+                ExecuteAsAdmin(@"Tools\ShareEProgram.bat");
             }
 
-            if (File.Exists(@"ShareRadiantVisionSystemsData.bat"))
+            if (File.Exists(@"Tools\ShareRadiantVisionSystemsData.bat"))
             {
-                ExecuteAsAdmin(@"ShareRadiantVisionSystemsData.bat");
+                ExecuteAsAdmin(@"Tools\ShareRadiantVisionSystemsData.bat");
             }
 
-            if (File.Exists(@"SharePOCB.bat"))
+            if (File.Exists(@"Tools\SharePOCB.bat"))
             {
-                ExecuteAsAdmin(@"SharePOCB.bat");
+                ExecuteAsAdmin(@"Tools\SharePOCB.bat");
             }
 
-            if ((cbTightVNCPath.Text == @"C:\Program") && File.Exists(@"Installer\tightvncCProgram.exe"))
+            if ((cbTightVNCPath.Text == @"C:\Program") && File.Exists(@"Tools\Installer\tightvncCProgram.exe"))
             {
-                ExecuteAsAdmin(@"Installer\tightvncCProgram.exe");
+                ExecuteAsAdmin(@"Tools\Installer\tightvncCProgram.exe");
             }
-            else if ((cbTightVNCPath.Text == @"D:\Program") && File.Exists(@"Installer\tightvncDProgram.exe"))
+            else if ((cbTightVNCPath.Text == @"D:\Program") && File.Exists(@"Tools\Installer\tightvncDProgram.exe"))
             {
-                ExecuteAsAdmin(@"Installer\tightvncDProgram.exe");
+                ExecuteAsAdmin(@"Tools\Installer\tightvncDProgram.exe");
             }
-            else if ((cbTightVNCPath.Text == @"E:\Program") && File.Exists(@"Installer\tightvncEProgram.exe"))
+            else if ((cbTightVNCPath.Text == @"E:\Program") && File.Exists(@"Tools\Installer\tightvncEProgram.exe"))
             {
-                ExecuteAsAdmin(@"Installer\tightvncEProgram.exe");
-            }
-
-            if (cbFixture.Text == @"Dooone" && File.Exists(@"pinDoooneFixturePCFolders.bat") && File.Exists(@"pinDoooneFixturePCFolders.ps1"))
-            {
-                ExecuteAsAdmin(@"pinDoooneFixturePCFolders.bat");
-            }
-            else if (cbFixture.Text == @"Gooil" && File.Exists(@"pinGooilFixturePCFolders.bat") && File.Exists(@"pinGooilFixturePCFolders.ps1"))
-            {
-                ExecuteAsAdmin(@"pinGooilFixturePCFolders.bat");
+                ExecuteAsAdmin(@"Tools\Installer\tightvncEProgram.exe");
             }
 
-            if (File.Exists(@"Installer\Visual C++ 2012\VC2012_silent_install.bat"))
+            if (cbFixture.Text == @"Dooone" && File.Exists(@"Tools\pinDoooneFixturePCFolders.bat") && File.Exists(@"Tools\pinDoooneFixturePCFolders.ps1"))
             {
-                ExecuteAsAdmin(@"Installer\Visual C++ 2012\VC2012_silent_install.bat");
+                ExecuteAsAdmin(@"Tools\pinDoooneFixturePCFolders.bat");
+            }
+            else if (cbFixture.Text == @"Gooil" && File.Exists(@"Tools\pinGooilFixturePCFolders.bat") && File.Exists(@"Tools\pinGooilFixturePCFolders.ps1"))
+            {
+                ExecuteAsAdmin(@"Tools\pinGooilFixturePCFolders.bat");
             }
 
-            if (File.Exists(@"Installer\Visual C++ 2015-2019\VC2015-2019_silent_install.bat"))
+            if (File.Exists(@"Tools\Installer\Visual C++ 2012\VC2012_silent_install.bat"))
             {
-                ExecuteAsAdmin(@"Installer\Visual C++ 2015-2019\VC2015-2019_silent_install.bat");
+                ExecuteAsAdmin(@"Tools\Installer\Visual C++ 2012\VC2012_silent_install.bat");
             }
 
-            if (File.Exists(@"Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat"))
+            if (File.Exists(@"Tools\Installer\Visual C++ 2015-2019\VC2015-2019_silent_install.bat"))
             {
-                ExecuteAsAdmin(@"Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat");
+                ExecuteAsAdmin(@"Tools\Installer\Visual C++ 2015-2019\VC2015-2019_silent_install.bat");
             }
 
-            if (File.Exists(@"Installer\iview457_x64_setup silent.bat"))
+            if (File.Exists(@"Tools\Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat"))
             {
-                ExecuteAsAdmin(@"Installer\iview457_x64_setup silent.bat");
+                ExecuteAsAdmin(@"Tools\Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat");
             }
 
-            if (File.Exists(@"Installer\npp.7.8.1.Installer.x64 silent.bat"))
+            if (File.Exists(@"Tools\Installer\iview457_x64_setup silent.bat"))
             {
-                ExecuteAsAdmin(@"Installer\npp.7.8.1.Installer.x64 silent.bat");
+                ExecuteAsAdmin(@"Tools\Installer\iview457_x64_setup silent.bat");
             }
 
-            if (File.Exists(@"Installer\ndp48-x86-x64-allos-enu.exe") && chkdotnetinstall.Checked)
+            if (File.Exists(@"Tools\Installer\npp.7.8.1.Installer.x64 silent.bat"))
             {
-                ExecuteAsAdmin(@"Installer\ndp48-x86-x64-allos-enu.exe");
+                ExecuteAsAdmin(@"Tools\Installer\npp.7.8.1.Installer.x64 silent.bat");
             }
 
-            if (File.Exists(@"Installer\MCR_R2017b_win64_installer.exe") && chkmatlabinstall.Checked)
+            if (File.Exists(@"Tools\Installer\ndp48-x86-x64-allos-enu.exe") && chkdotnetinstall.Checked)
             {
-                ExecuteAsAdmin(@"Installer\MCR_R2017b_win64_installer.exe");
+                ExecuteAsAdmin(@"Tools\Installer\ndp48-x86-x64-allos-enu.exe");
             }
 
-            if (File.Exists(@"Installer\MCR_R2018a_win64_installer.exe") && chkmatlab2018ainstall.Checked)
+            if (File.Exists(@"Tools\Installer\MCR_R2017b_win64_installer.exe") && chkmatlabinstall.Checked)
             {
-                ExecuteAsAdmin(@"Installer\MCR_R2018a_win64_installer.exe");
+                ExecuteAsAdmin(@"Tools\Installer\MCR_R2017b_win64_installer.exe");
+            }
+
+            if (File.Exists(@"Tools\Installer\MCR_R2018a_win64_installer.exe") && chkmatlab2018ainstall.Checked)
+            {
+                ExecuteAsAdmin(@"Tools\Installer\MCR_R2018a_win64_installer.exe");
             }
 
         }
 
         private void cmdOneclickSetupFixturePC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"disableUAC.bat"))
+            if (File.Exists(@"Tools\disableUAC.bat"))
             {
-                ExecuteAsAdmin(@"disableUAC.bat");
+                ExecuteAsAdmin(@"Tools\disableUAC.bat");
             }
 
-            if (File.Exists(@"changePW1.bat"))
+            if (File.Exists(@"Tools\changePW1.bat"))
             {
-                ExecuteAsAdmin(@"changePW1.bat");
+                ExecuteAsAdmin(@"Tools\changePW1.bat");
             }
 
-            if (File.Exists(@"PasswordSharingOff.bat"))
+            if (File.Exists(@"Tools\PasswordSharingOff.bat"))
             {
-                ExecuteAsAdmin(@"PasswordSharingOff.bat");
+                ExecuteAsAdmin(@"Tools\PasswordSharingOff.bat");
             }
 
-            if (File.Exists(@"FirewallOff.bat"))
+            if (File.Exists(@"Tools\FirewallOff.bat"))
             {
-                ExecuteAsAdmin(@"FirewallOff.bat");
+                ExecuteAsAdmin(@"Tools\FirewallOff.bat");
             }
 
-            if (File.Exists(@"ShareC.bat"))
+            if (File.Exists(@"Tools\ShareC.bat"))
             {
-                ExecuteAsAdmin(@"ShareC.bat");
+                ExecuteAsAdmin(@"Tools\ShareC.bat");
             }
 
-            if (File.Exists(@"ShareD.bat"))
+            if (File.Exists(@"Tools\ShareD.bat"))
             {
-                ExecuteAsAdmin(@"ShareD.bat");
+                ExecuteAsAdmin(@"Tools\ShareD.bat");
             }
 
-            if (File.Exists(@"ShareE.bat"))
+            if (File.Exists(@"Tools\ShareE.bat"))
             {
-                ExecuteAsAdmin(@"ShareE.bat");
+                ExecuteAsAdmin(@"Tools\ShareE.bat");
             }
 
-            if (File.Exists(@"ShareCProgram.bat") && cbProgramFolder.Text == @"C:\Program")
+            if (File.Exists(@"Tools\ShareCProgram.bat") && cbProgramFolder.Text == @"C:\Program")
             {
-                ExecuteAsAdmin(@"ShareCProgram.bat");
+                ExecuteAsAdmin(@"Tools\ShareCProgram.bat");
             }
 
-            else if (File.Exists(@"ShareDProgram.bat") && cbProgramFolder.Text == @"D:\Program")
+            else if (File.Exists(@"Tools\ShareDProgram.bat") && cbProgramFolder.Text == @"D:\Program")
             {
-                ExecuteAsAdmin(@"ShareDProgram.bat");
+                ExecuteAsAdmin(@"Tools\ShareDProgram.bat");
             }
 
-            else if (File.Exists(@"ShareEProgram.bat") && cbProgramFolder.Text == @"E:\Program")
+            else if (File.Exists(@"Tools\ShareEProgram.bat") && cbProgramFolder.Text == @"E:\Program")
             {
-                ExecuteAsAdmin(@"ShareEProgram.bat");
+                ExecuteAsAdmin(@"Tools\ShareEProgram.bat");
             }
 
-            if ((cbTightVNCPath.Text == @"C:\Program") && File.Exists(@"Installer\tightvncCProgram.exe"))
+            if ((cbTightVNCPath.Text == @"C:\Program") && File.Exists(@"Tools\Installer\tightvncCProgram.exe"))
             {
-                ExecuteAsAdmin(@"Installer\tightvncCProgram.exe");
+                ExecuteAsAdmin(@"Tools\Installer\tightvncCProgram.exe");
             }
-            else if ((cbTightVNCPath.Text == @"D:\Program") && File.Exists(@"Installer\tightvncDProgram.exe"))
+            else if ((cbTightVNCPath.Text == @"D:\Program") && File.Exists(@"Tools\Installer\tightvncDProgram.exe"))
             {
-                ExecuteAsAdmin(@"Installer\tightvncDProgram.exe");
+                ExecuteAsAdmin(@"Tools\Installer\tightvncDProgram.exe");
             }
-            else if ((cbTightVNCPath.Text == @"E:\Program") && File.Exists(@"Installer\tightvncEProgram.exe"))
+            else if ((cbTightVNCPath.Text == @"E:\Program") && File.Exists(@"Tools\Installer\tightvncEProgram.exe"))
             {
-                ExecuteAsAdmin(@"Installer\tightvncEProgram.exe");
-            }
-
-            if (cbFixture.Text == @"Dooone" && File.Exists(@"pinDoooneCameraPCFolders.bat") && File.Exists(@"pinDoooneCameraPCFolders.ps1"))
-            {
-                ExecuteAsAdmin(@"pinDoooneCameraPCFolders.bat");
-            }
-            else if (cbFixture.Text == @"Gooil" && File.Exists(@"pinGooilCameraPCFolders.bat") && File.Exists(@"pinGooilCameraPCFolders.ps1"))
-            {
-                ExecuteAsAdmin(@"pinGooilCameraPCFolders.bat");
+                ExecuteAsAdmin(@"Tools\Installer\tightvncEProgram.exe");
             }
 
-            if (File.Exists(@"Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat"))
+            if (cbFixture.Text == @"Dooone" && File.Exists(@"Tools\pinDoooneCameraPCFolders.bat") && File.Exists(@"Tools\pinDoooneCameraPCFolders.ps1"))
             {
-                ExecuteAsAdmin(@"Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat");
+                ExecuteAsAdmin(@"Tools\pinDoooneCameraPCFolders.bat");
+            }
+            else if (cbFixture.Text == @"Gooil" && File.Exists(@"Tools\pinGooilCameraPCFolders.bat") && File.Exists(@"Tools\pinGooilCameraPCFolders.ps1"))
+            {
+                ExecuteAsAdmin(@"Tools\pinGooilCameraPCFolders.bat");
             }
 
-            if (File.Exists(@"Installer\iview457_x64_setup silent.bat"))
+            if (File.Exists(@"Tools\Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat"))
             {
-                ExecuteAsAdmin(@"Installer\iview457_x64_setup silent.bat");
+                ExecuteAsAdmin(@"Tools\Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat");
             }
 
-            if (File.Exists(@"Installer\npp.7.8.1.Installer.x64 silent.bat"))
+            if (File.Exists(@"Tools\Installer\iview457_x64_setup silent.bat"))
             {
-                ExecuteAsAdmin(@"Installer\npp.7.8.1.Installer.x64 silent.bat");
+                ExecuteAsAdmin(@"Tools\Installer\iview457_x64_setup silent.bat");
+            }
+
+            if (File.Exists(@"Tools\Installer\npp.7.8.1.Installer.x64 silent.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\Installer\npp.7.8.1.Installer.x64 silent.bat");
             }
         }
 
         private void cmdOneclickSetupTrueTestSettings_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Installer\CopyOTP.vbs"))
+            if (File.Exists(@"Tools\Installer\CopyOTP.vbs"))
             {
-                Process.Start(@"Installer\CopyOTP.vbs");
+                Process.Start(@"Tools\Installer\CopyOTP.vbs");
             }
 
-            if (File.Exists(@"Installer\CopySequence.vbs"))
+            if (File.Exists(@"Tools\Installer\CopySequence.vbs"))
             {
-                Process.Start(@"Installer\CopySequence.vbs");
+                Process.Start(@"Tools\Installer\CopySequence.vbs");
             }
 
-            if (File.Exists(@"updatePermission.bat"))
+            if (File.Exists(@"Tools\updatePermission.bat"))
             {
-                ExecuteAsAdmin(@"updatePermission.bat");
+                ExecuteAsAdmin(@"Tools\updatePermission.bat");
             }
 
             switch (cbDIList.Text)
             {
                 case "Dove2p0 CH1":
-                    if (File.Exists(@"Installer\DISettings\CopyDI DoooneCH1.vbs"))
+                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI DoooneCH1.vbs"))
                     {
-                        Process.Start(@"Installer\DISettings\CopyDI DoooneCH1.vbs");
+                        Process.Start(@"Tools\Installer\DISettings\CopyDI DoooneCH1.vbs");
                     }
                     break;
                 case "Dove2p0 CH2":
-                    if (File.Exists(@"Installer\DISettings\CopyDI DoooneCH2.vbs"))
+                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI DoooneCH2.vbs"))
                     {
-                        Process.Start(@"Installer\DISettings\CopyDI DoooneCH2.vbs");
+                        Process.Start(@"Tools\Installer\DISettings\CopyDI DoooneCH2.vbs");
                     }
                     break;
                 case "Dove2p0 CH3":
-                    if (File.Exists(@"Installer\DISettings\CopyDI DoooneCH3.vbs"))
+                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI DoooneCH3.vbs"))
                     {
-                        Process.Start(@"Installer\DISettings\CopyDI DoooneCH3.vbs");
+                        Process.Start(@"Tools\Installer\DISettings\CopyDI DoooneCH3.vbs");
                     }
                     break;
                 case "Dove2p0 CH4":
-                    if (File.Exists(@"Installer\DISettings\CopyDI DoooneCH4.vbs"))
+                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI DoooneCH4.vbs"))
                     {
-                        Process.Start(@"Installer\DISettings\CopyDI DoooneCH4.vbs");
+                        Process.Start(@"Tools\Installer\DISettings\CopyDI DoooneCH4.vbs");
                     }
                     break;
                 case "Emu2p0 CH1":
-                    if (File.Exists(@"Installer\DISettings\CopyDI GooilCH1.vbs"))
+                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI GooilCH1.vbs"))
                     {
-                        Process.Start(@"Installer\DISettings\CopyDI GooilCH1.vbs");
+                        Process.Start(@"Tools\Installer\DISettings\CopyDI GooilCH1.vbs");
                     }
                     break;
                 case "Emu2p0 CH2":
-                    if (File.Exists(@"Installer\DISettings\CopyDI GooilCH2.vbs"))
+                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI GooilCH2.vbs"))
                     {
-                        Process.Start(@"Installer\DISettings\CopyDI GooilCH2.vbs");
+                        Process.Start(@"Tools\Installer\DISettings\CopyDI GooilCH2.vbs");
                     }
                     break;
                 case "Emu2p0 CH3":
-                    if (File.Exists(@"Installer\DISettings\CopyDI GooilCH3.vbs"))
+                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI GooilCH3.vbs"))
                     {
-                        Process.Start(@"Installer\DISettings\CopyDI GooilCH3.vbs");
+                        Process.Start(@"Tools\Installer\DISettings\CopyDI GooilCH3.vbs");
                     }
                     break;
                 case "Emu2p0 CH4":
-                    if (File.Exists(@"Installer\DISettings\CopyDI GooilCH4.vbs"))
+                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI GooilCH4.vbs"))
                     {
-                        Process.Start(@"Installer\DISettings\CopyDI GooilCH4.vbs");
+                        Process.Start(@"Tools\Installer\DISettings\CopyDI GooilCH4.vbs");
                     }
                     break;
                 default:
@@ -1053,33 +1035,33 @@ namespace EZAE
 
         private void cmdBackupCurrentTT_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"backupCurrentTT.vbs"))
+            if (File.Exists(@"Tools\backupCurrentTT.vbs"))
             {
-                Process.Start(@"backupCurrentTT.vbs");
+                Process.Start(@"Tools\backupCurrentTT.vbs");
             }
         }
 
         private void cmdShareProgram_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"ShareCProgram.bat") && cbProgramFolder.Text == @"C:\Program")
+            if (File.Exists(@"Tools\ShareCProgram.bat") && cbProgramFolder.Text == @"C:\Program")
             {
-                ExecuteAsAdmin(@"ShareCProgram.bat");
+                ExecuteAsAdmin(@"Tools\ShareCProgram.bat");
             }
 
-            else if (File.Exists(@"ShareDProgram.bat") && cbProgramFolder.Text == @"D:\Program")
+            else if (File.Exists(@"Tools\ShareDProgram.bat") && cbProgramFolder.Text == @"D:\Program")
             {
-                ExecuteAsAdmin(@"ShareDProgram.bat");
+                ExecuteAsAdmin(@"Tools\ShareDProgram.bat");
             }
 
-            else if (File.Exists(@"ShareEProgram.bat") && cbProgramFolder.Text == @"E:\Program")
+            else if (File.Exists(@"Tools\ShareEProgram.bat") && cbProgramFolder.Text == @"E:\Program")
             {
-                ExecuteAsAdmin(@"ShareEProgram.bat");
+                ExecuteAsAdmin(@"Tools\ShareEProgram.bat");
             }
         }
 
         private void cmdOpenEngineerMode_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string filepath = @"EngineerMode.exe";
+            string filepath = @"Tools\EngineerMode.exe";
             if (File.Exists(filepath))
             {
                 Process.Start(filepath);
@@ -1089,7 +1071,7 @@ namespace EZAE
         {
             cbTrueTestInstallerList.Items.Clear();
             String[] exes =
-            Directory.GetFiles(@"..\TrueTest Installers", "*.EXE", SearchOption.AllDirectories)
+            Directory.GetFiles(@"TrueTest Installers", "*.EXE", SearchOption.AllDirectories)
             .Select(fileName => Path.GetFileName(fileName))
             .Where(fileName => Path.GetFileNameWithoutExtension(fileName).StartsWith("TrueTest"))
             .ToArray();
@@ -1101,13 +1083,13 @@ namespace EZAE
         }
         private void cmdInstallTrueTest_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"backupCurrentTT.vbs"))
+            if (File.Exists(@"Tools\backupCurrentTT.vbs"))
             {
-                Process.Start(@"backupCurrentTT.vbs");
+                Process.Start(@"Tools\backupCurrentTT.vbs");
             }
-            if (File.Exists(@"..\TrueTest Installers\" + cbTrueTestInstallerList.Text))
+            if (File.Exists(@"TrueTest Installers\" + cbTrueTestInstallerList.Text))
             {
-                ExecuteAsAdmin(@"..\TrueTest Installers\" + cbTrueTestInstallerList.Text);
+                ExecuteAsAdmin(@"TrueTest Installers\" + cbTrueTestInstallerList.Text);
             }
         }
 
@@ -1118,50 +1100,50 @@ namespace EZAE
 
         private void cmdSharePOCB_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"SharePOCB.bat"))
+            if (File.Exists(@"Tools\SharePOCB.bat"))
             {
-                ExecuteAsAdmin(@"SharePOCB.bat");
+                ExecuteAsAdmin(@"Tools\SharePOCB.bat");
             }
         }
 
         private void cmdChangePW1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"changePW1.bat"))
+            if (File.Exists(@"Tools\changePW1.bat"))
             {
-                ExecuteAsAdmin(@"changePW1.bat");
+                ExecuteAsAdmin(@"Tools\changePW1.bat");
             }
 
         }
 
         private void cmdInstallMatlab2018a_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Installer\MCR_R2018a_win64_installer.exe"))
+            if (File.Exists(@"Tools\Installer\MCR_R2018a_win64_installer.exe"))
             {
-                ExecuteAsAdmin(@"Installer\MCR_R2018a_win64_installer.exe");
+                ExecuteAsAdmin(@"Tools\Installer\MCR_R2018a_win64_installer.exe");
             }
         }
 
         private void cmdUseButterfly_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"SetSeqx.exe"))
+            if (File.Exists(@"Tools\SetSeqx.exe"))
             {
-                Process.Start(@"SetSeqx.exe");
+                Process.Start(@"Tools\SetSeqx.exe");
             }
         }
 
         private void cmdUseScript_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Set_all_sequences.vbs"))
+            if (File.Exists(@"Tools\Set_all_sequences.vbs"))
             {
-                Process.Start(@"Set_all_sequences.vbs");
+                Process.Start(@"Tools\Set_all_sequences.vbs");
             }
         }
 
         private void cmdCopySequence_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Installer\CopySequence.vbs"))
+            if (File.Exists(@"Tools\Installer\CopySequence.vbs"))
             {
-                Process.Start(@"Installer\CopySequence.vbs");
+                Process.Start(@"Tools\Installer\CopySequence.vbs");
             }
         }
     }
