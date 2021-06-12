@@ -774,6 +774,11 @@ namespace EZAE
                 ExecuteAsAdmin(@"ShareRadiantVisionSystemsData.bat");
             }
 
+            if (File.Exists(@"SharePOCB.bat"))
+            {
+                ExecuteAsAdmin(@"SharePOCB.bat");
+            }
+
             if ((cbTightVNCPath.Text == @"C:\Program") && File.Exists(@"Installer\tightvncCProgram.exe"))
             {
                 ExecuteAsAdmin(@"Installer\tightvncCProgram.exe");
@@ -830,6 +835,12 @@ namespace EZAE
             {
                 ExecuteAsAdmin(@"Installer\MCR_R2017b_win64_installer.exe");
             }
+
+            if (File.Exists(@"Installer\MCR_R2018a_win64_installer.exe") && chkmatlab2018ainstall.Checked)
+            {
+                ExecuteAsAdmin(@"Installer\MCR_R2018a_win64_installer.exe");
+            }
+
         }
 
         private void cmdOneclickSetupFixturePC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -906,16 +917,6 @@ namespace EZAE
                 ExecuteAsAdmin(@"pinGooilCameraPCFolders.bat");
             }
 
-            if (File.Exists(@"Installer\Visual C++ 2012\VC2012_silent_install.bat"))
-            {
-                ExecuteAsAdmin(@"Installer\Visual C++ 2012\VC2012_silent_install.bat");
-            }
-
-            if (File.Exists(@"Installer\Visual C++ 2015-2019\VC2015-2019_silent_install.bat"))
-            {
-                ExecuteAsAdmin(@"Installer\Visual C++ 2015-2019\VC2015-2019_silent_install.bat");
-            }
-
             if (File.Exists(@"Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat"))
             {
                 ExecuteAsAdmin(@"Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat");
@@ -937,6 +938,11 @@ namespace EZAE
             if (File.Exists(@"Installer\CopyOTP.vbs"))
             {
                 Process.Start(@"Installer\CopyOTP.vbs");
+            }
+
+            if (File.Exists(@"Installer\CopySequence.vbs"))
+            {
+                Process.Start(@"Installer\CopySequence.vbs");
             }
 
             if (File.Exists(@"updatePermission.bat"))
@@ -1062,6 +1068,55 @@ namespace EZAE
         private void MainForm_Load(object sender, EventArgs e)
         {
             SetVersionInfo();
+        }
+
+        private void cmdSharePOCB_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"SharePOCB.bat"))
+            {
+                ExecuteAsAdmin(@"SharePOCB.bat");
+            }
+        }
+
+        private void cmdChangePW1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"changePW1.bat"))
+            {
+                ExecuteAsAdmin(@"changePW1.bat");
+            }
+
+        }
+
+        private void cmdInstallMatlab2018a_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"Installer\MCR_R2018a_win64_installer.exe"))
+            {
+                ExecuteAsAdmin(@"Installer\MCR_R2018a_win64_installer.exe");
+            }
+        }
+
+        private void cmdUseButterfly_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"SetSeqx.exe"))
+            {
+                Process.Start(@"SetSeqx.exe");
+            }
+        }
+
+        private void cmdUseScript_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"Set_all_sequences.vbs"))
+            {
+                Process.Start(@"Set_all_sequences.vbs");
+            }
+        }
+
+        private void cmdCopySequence_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"Installer\CopySequence.vbs"))
+            {
+                Process.Start(@"Installer\CopySequence.vbs");
+            }
         }
     }
 }
