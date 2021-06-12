@@ -56,4 +56,10 @@
     <Content Include="Gear.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>@echo OFF
+del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.pdb
+del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.xml
+del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.config</PostBuildEvent>
+  </PropertyGroup>
 </Project>

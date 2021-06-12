@@ -1035,9 +1035,9 @@ namespace EZAE
 
         private void cmdBackupCurrentTT_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\backupCurrentTT.vbs"))
+            if (File.Exists(@"Tools\BackupCurrentTT.exe"))
             {
-                Process.Start(@"Tools\backupCurrentTT.vbs");
+                Process.Start(@"Tools\BackupCurrentTT.exe");
             }
         }
 
@@ -1083,9 +1083,9 @@ namespace EZAE
         }
         private void cmdInstallTrueTest_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\backupCurrentTT.vbs"))
+            if (File.Exists(@"Tools\BackupCurrentTT.exe"))
             {
-                Process.Start(@"Tools\backupCurrentTT.vbs");
+                Process.Start(@"Tools\BackupCurrentTT.exe");
             }
             if (File.Exists(@"TrueTest Installers\" + cbTrueTestInstallerList.Text))
             {
