@@ -45,6 +45,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MakeSequenceFOI", "MakeSequ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteTools", "RemoteTools\RemoteTools.csproj", "{B2A11C28-48EE-4BDF-8F4B-5D60863793A7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StartProcess", "StartProcess\StartProcess.csproj", "{59BCAEE6-072E-498B-AF70-3C7D0C964C90}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -135,15 +137,19 @@ Global
 		{B2A11C28-48EE-4BDF-8F4B-5D60863793A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2A11C28-48EE-4BDF-8F4B-5D60863793A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2A11C28-48EE-4BDF-8F4B-5D60863793A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59BCAEE6-072E-498B-AF70-3C7D0C964C90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59BCAEE6-072E-498B-AF70-3C7D0C964C90}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59BCAEE6-072E-498B-AF70-3C7D0C964C90}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59BCAEE6-072E-498B-AF70-3C7D0C964C90}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {60C14AFF-CFF7-46E8-9345-65A46A64495F}
-		BuildVersion_StartDate = 2000/1/1
-		BuildVersion_BuildVersioningStyle = None.None.Increment.TimeStamp
-		BuildVersion_UpdateAssemblyVersion = True
 		BuildVersion_UseGlobalSettings = True
+		BuildVersion_UpdateAssemblyVersion = True
+		BuildVersion_BuildVersioningStyle = None.None.Increment.TimeStamp
+		BuildVersion_StartDate = 2000/1/1
+		SolutionGuid = {60C14AFF-CFF7-46E8-9345-65A46A64495F}
 	EndGlobalSection
 EndGlobal
