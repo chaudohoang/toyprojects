@@ -233,6 +233,9 @@ namespace EZAE
                         nodes[index].InnerText = cameraRotation;
                     }
                 }
+
+                XmlWriterSettings settings = new XmlWriterSettings { Indent = true };
+                XmlWriter writer = XmlWriter.Create(lblSequenceFileName.Text, settings);
                 xmlDoc.Save(lblSequenceFileName.Text);
             }
         }
