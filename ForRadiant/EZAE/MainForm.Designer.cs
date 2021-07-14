@@ -40,7 +40,6 @@ namespace EZAE
             this.cmdOpenDooone3 = new System.Windows.Forms.LinkLabel();
             this.cmdOpenDooone2 = new System.Windows.Forms.LinkLabel();
             this.cmdOpenDooone1 = new System.Windows.Forms.LinkLabel();
-            this.cmdCreateFFC = new System.Windows.Forms.LinkLabel();
             this.cmdCheckLC = new System.Windows.Forms.LinkLabel();
             this.cmdOpenTools = new System.Windows.Forms.LinkLabel();
             this.cmdOpenMTFCenter = new System.Windows.Forms.LinkLabel();
@@ -92,23 +91,13 @@ namespace EZAE
             this.cbTrueTestInstallerList = new System.Windows.Forms.ComboBox();
             this.cbDIList = new System.Windows.Forms.ComboBox();
             this.cmdCreateOTPandResult = new System.Windows.Forms.LinkLabel();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.cmdUseScript = new System.Windows.Forms.LinkLabel();
-            this.cmdUseButterfly = new System.Windows.Forms.LinkLabel();
-            this.cmdBrowseSequence = new System.Windows.Forms.LinkLabel();
-            this.lblSequencePath = new System.Windows.Forms.Label();
-            this.cmdUseLastModifiedSequence = new System.Windows.Forms.LinkLabel();
-            this.cbCameraRotation = new System.Windows.Forms.ComboBox();
-            this.btnApply = new System.Windows.Forms.Button();
-            this.lblSubframe = new System.Windows.Forms.Label();
-            this.lblCameraRotatioin = new System.Windows.Forms.Label();
-            this.lblSequenceFileName = new System.Windows.Forms.Label();
-            this.cbFocusDistance = new System.Windows.Forms.ComboBox();
-            this.cbSubframe = new System.Windows.Forms.ComboBox();
-            this.lblCalibrationIDs = new System.Windows.Forms.Label();
-            this.lblFocusDistance = new System.Windows.Forms.Label();
-            this.cbCalBox = new System.Windows.Forms.ComboBox();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.lblSequenceFileName = new System.Windows.Forms.Label();
+            this.cmdUseButterfly = new System.Windows.Forms.LinkLabel();
+            this.cmdUseScript = new System.Windows.Forms.LinkLabel();
+            this.cmdCreateFFC = new System.Windows.Forms.LinkLabel();
+            this.cmdSetSequence = new System.Windows.Forms.LinkLabel();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.tabControl1.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabSetupPC.SuspendLayout();
@@ -137,7 +126,6 @@ namespace EZAE
             this.tabControl.Controls.Add(this.cmdOpenDooone3);
             this.tabControl.Controls.Add(this.cmdOpenDooone2);
             this.tabControl.Controls.Add(this.cmdOpenDooone1);
-            this.tabControl.Controls.Add(this.cmdCreateFFC);
             this.tabControl.Controls.Add(this.cmdCheckLC);
             this.tabControl.Controls.Add(this.cmdOpenTools);
             this.tabControl.Controls.Add(this.cmdOpenMTFCenter);
@@ -242,17 +230,6 @@ namespace EZAE
             this.cmdOpenDooone1.Text = "Open Dooone1";
             this.cmdOpenDooone1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenDooone1_LinkClicked);
             // 
-            // cmdCreateFFC
-            // 
-            this.cmdCreateFFC.AutoSize = true;
-            this.cmdCreateFFC.Location = new System.Drawing.Point(118, 61);
-            this.cmdCreateFFC.Name = "cmdCreateFFC";
-            this.cmdCreateFFC.Size = new System.Drawing.Size(114, 13);
-            this.cmdCreateFFC.TabIndex = 8;
-            this.cmdCreateFFC.TabStop = true;
-            this.cmdCreateFFC.Text = "Create FFC Databases";
-            this.cmdCreateFFC.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCreateFFC_LinkClicked);
-            // 
             // cmdCheckLC
             // 
             this.cmdCheckLC.AutoSize = true;
@@ -300,7 +277,7 @@ namespace EZAE
             // cmdOpenLanSearch
             // 
             this.cmdOpenLanSearch.AutoSize = true;
-            this.cmdOpenLanSearch.Location = new System.Drawing.Point(238, 61);
+            this.cmdOpenLanSearch.Location = new System.Drawing.Point(118, 61);
             this.cmdOpenLanSearch.Name = "cmdOpenLanSearch";
             this.cmdOpenLanSearch.Size = new System.Drawing.Size(91, 13);
             this.cmdOpenLanSearch.TabIndex = 9;
@@ -743,6 +720,7 @@ namespace EZAE
             // tabSetSequence
             // 
             this.tabSetSequence.Controls.Add(this.cmdCopySequence);
+            this.tabSetSequence.Controls.Add(this.cmdCreateFFC);
             this.tabSetSequence.Controls.Add(this.cmdInstallTrueTest);
             this.tabSetSequence.Controls.Add(this.cmdBackupCurrentTT);
             this.tabSetSequence.Controls.Add(this.cmdOneclickSetupTrueTestSettings);
@@ -764,7 +742,7 @@ namespace EZAE
             // cmdCopySequence
             // 
             this.cmdCopySequence.AutoSize = true;
-            this.cmdCopySequence.Location = new System.Drawing.Point(166, 207);
+            this.cmdCopySequence.Location = new System.Drawing.Point(166, 71);
             this.cmdCopySequence.Name = "cmdCopySequence";
             this.cmdCopySequence.Size = new System.Drawing.Size(83, 13);
             this.cmdCopySequence.TabIndex = 64;
@@ -775,7 +753,7 @@ namespace EZAE
             // cmdInstallTrueTest
             // 
             this.cmdInstallTrueTest.AutoSize = true;
-            this.cmdInstallTrueTest.Location = new System.Drawing.Point(7, 253);
+            this.cmdInstallTrueTest.Location = new System.Drawing.Point(7, 117);
             this.cmdInstallTrueTest.Name = "cmdInstallTrueTest";
             this.cmdInstallTrueTest.Size = new System.Drawing.Size(80, 13);
             this.cmdInstallTrueTest.TabIndex = 62;
@@ -786,7 +764,7 @@ namespace EZAE
             // cmdBackupCurrentTT
             // 
             this.cmdBackupCurrentTT.AutoSize = true;
-            this.cmdBackupCurrentTT.Location = new System.Drawing.Point(207, 229);
+            this.cmdBackupCurrentTT.Location = new System.Drawing.Point(207, 93);
             this.cmdBackupCurrentTT.Name = "cmdBackupCurrentTT";
             this.cmdBackupCurrentTT.Size = new System.Drawing.Size(127, 13);
             this.cmdBackupCurrentTT.TabIndex = 61;
@@ -798,7 +776,7 @@ namespace EZAE
             // 
             this.cmdOneclickSetupTrueTestSettings.AutoSize = true;
             this.cmdOneclickSetupTrueTestSettings.LinkColor = System.Drawing.Color.Goldenrod;
-            this.cmdOneclickSetupTrueTestSettings.Location = new System.Drawing.Point(6, 185);
+            this.cmdOneclickSetupTrueTestSettings.Location = new System.Drawing.Point(6, 49);
             this.cmdOneclickSetupTrueTestSettings.Name = "cmdOneclickSetupTrueTestSettings";
             this.cmdOneclickSetupTrueTestSettings.Size = new System.Drawing.Size(171, 13);
             this.cmdOneclickSetupTrueTestSettings.TabIndex = 56;
@@ -809,7 +787,7 @@ namespace EZAE
             // cmdSetTTPermission
             // 
             this.cmdSetTTPermission.AutoSize = true;
-            this.cmdSetTTPermission.Location = new System.Drawing.Point(255, 207);
+            this.cmdSetTTPermission.Location = new System.Drawing.Point(255, 71);
             this.cmdSetTTPermission.Name = "cmdSetTTPermission";
             this.cmdSetTTPermission.Size = new System.Drawing.Size(166, 13);
             this.cmdSetTTPermission.TabIndex = 58;
@@ -820,7 +798,7 @@ namespace EZAE
             // cmdCopyDISettings
             // 
             this.cmdCopyDISettings.AutoSize = true;
-            this.cmdCopyDISettings.Location = new System.Drawing.Point(7, 229);
+            this.cmdCopyDISettings.Location = new System.Drawing.Point(7, 93);
             this.cmdCopyDISettings.Name = "cmdCopyDISettings";
             this.cmdCopyDISettings.Size = new System.Drawing.Size(86, 13);
             this.cmdCopyDISettings.TabIndex = 59;
@@ -841,7 +819,7 @@ namespace EZAE
             "Emu2p0 CH2",
             "Emu2p0 CH3",
             "Emu2p0 CH4"});
-            this.cbTrueTestInstallerList.Location = new System.Drawing.Point(99, 250);
+            this.cbTrueTestInstallerList.Location = new System.Drawing.Point(99, 114);
             this.cbTrueTestInstallerList.Name = "cbTrueTestInstallerList";
             this.cbTrueTestInstallerList.Size = new System.Drawing.Size(541, 21);
             this.cbTrueTestInstallerList.TabIndex = 63;
@@ -860,7 +838,7 @@ namespace EZAE
             "Emu2p0 CH2",
             "Emu2p0 CH3",
             "Emu2p0 CH4"});
-            this.cbDIList.Location = new System.Drawing.Point(99, 226);
+            this.cbDIList.Location = new System.Drawing.Point(99, 90);
             this.cbDIList.Name = "cbDIList";
             this.cbDIList.Size = new System.Drawing.Size(102, 21);
             this.cbDIList.TabIndex = 60;
@@ -868,134 +846,13 @@ namespace EZAE
             // cmdCreateOTPandResult
             // 
             this.cmdCreateOTPandResult.AutoSize = true;
-            this.cmdCreateOTPandResult.Location = new System.Drawing.Point(6, 207);
+            this.cmdCreateOTPandResult.Location = new System.Drawing.Point(6, 71);
             this.cmdCreateOTPandResult.Name = "cmdCreateOTPandResult";
             this.cmdCreateOTPandResult.Size = new System.Drawing.Size(154, 13);
             this.cmdCreateOTPandResult.TabIndex = 57;
             this.cmdCreateOTPandResult.TabStop = true;
             this.cmdCreateOTPandResult.Text = "Create OTP and Result Folders";
             this.cmdCreateOTPandResult.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCreateOTPandResult_LinkClicked);
-            // 
-            // groupBox1
-            // 
-            this.groupBox1.Controls.Add(this.cmdUseScript);
-            this.groupBox1.Controls.Add(this.cmdUseButterfly);
-            this.groupBox1.Controls.Add(this.cmdBrowseSequence);
-            this.groupBox1.Controls.Add(this.lblSequencePath);
-            this.groupBox1.Controls.Add(this.cmdUseLastModifiedSequence);
-            this.groupBox1.Controls.Add(this.cbCameraRotation);
-            this.groupBox1.Controls.Add(this.btnApply);
-            this.groupBox1.Controls.Add(this.lblSubframe);
-            this.groupBox1.Controls.Add(this.lblCameraRotatioin);
-            this.groupBox1.Controls.Add(this.lblSequenceFileName);
-            this.groupBox1.Controls.Add(this.cbFocusDistance);
-            this.groupBox1.Controls.Add(this.cbSubframe);
-            this.groupBox1.Controls.Add(this.lblCalibrationIDs);
-            this.groupBox1.Controls.Add(this.lblFocusDistance);
-            this.groupBox1.Controls.Add(this.cbCalBox);
-            this.groupBox1.Location = new System.Drawing.Point(6, 6);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(634, 172);
-            this.groupBox1.TabIndex = 29;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Set Sequence";
-            // 
-            // cmdUseScript
-            // 
-            this.cmdUseScript.AutoSize = true;
-            this.cmdUseScript.Location = new System.Drawing.Point(343, 16);
-            this.cmdUseScript.Name = "cmdUseScript";
-            this.cmdUseScript.Size = new System.Drawing.Size(56, 13);
-            this.cmdUseScript.TabIndex = 58;
-            this.cmdUseScript.TabStop = true;
-            this.cmdUseScript.Text = "Use Script";
-            this.cmdUseScript.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdUseScript_LinkClicked);
-            // 
-            // cmdUseButterfly
-            // 
-            this.cmdUseButterfly.AutoSize = true;
-            this.cmdUseButterfly.Location = new System.Drawing.Point(261, 16);
-            this.cmdUseButterfly.Name = "cmdUseButterfly";
-            this.cmdUseButterfly.Size = new System.Drawing.Size(67, 13);
-            this.cmdUseButterfly.TabIndex = 57;
-            this.cmdUseButterfly.TabStop = true;
-            this.cmdUseButterfly.Text = "Use Butterfly";
-            this.cmdUseButterfly.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdUseButterfly_LinkClicked);
-            // 
-            // cmdBrowseSequence
-            // 
-            this.cmdBrowseSequence.AutoSize = true;
-            this.cmdBrowseSequence.Location = new System.Drawing.Point(149, 16);
-            this.cmdBrowseSequence.Name = "cmdBrowseSequence";
-            this.cmdBrowseSequence.Size = new System.Drawing.Size(92, 13);
-            this.cmdBrowseSequence.TabIndex = 50;
-            this.cmdBrowseSequence.TabStop = true;
-            this.cmdBrowseSequence.Text = "Browse sequence";
-            this.cmdBrowseSequence.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdBrowseSequence_LinkClicked);
-            // 
-            // lblSequencePath
-            // 
-            this.lblSequencePath.AutoSize = true;
-            this.lblSequencePath.Location = new System.Drawing.Point(6, 38);
-            this.lblSequencePath.Name = "lblSequencePath";
-            this.lblSequencePath.Size = new System.Drawing.Size(99, 13);
-            this.lblSequencePath.TabIndex = 28;
-            this.lblSequencePath.Text = "Target Sequence : ";
-            // 
-            // cmdUseLastModifiedSequence
-            // 
-            this.cmdUseLastModifiedSequence.AutoSize = true;
-            this.cmdUseLastModifiedSequence.Location = new System.Drawing.Point(6, 16);
-            this.cmdUseLastModifiedSequence.Name = "cmdUseLastModifiedSequence";
-            this.cmdUseLastModifiedSequence.Size = new System.Drawing.Size(137, 13);
-            this.cmdUseLastModifiedSequence.TabIndex = 49;
-            this.cmdUseLastModifiedSequence.TabStop = true;
-            this.cmdUseLastModifiedSequence.Text = "Use last modified sequence";
-            this.cmdUseLastModifiedSequence.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdUseLastModifiedSequence_LinkClicked);
-            // 
-            // cbCameraRotation
-            // 
-            this.cbCameraRotation.FormattingEnabled = true;
-            this.cbCameraRotation.Items.AddRange(new object[] {
-            "",
-            "Copy from first step",
-            "None",
-            "Clockwise90",
-            "Rotate180",
-            "Counterclockwise90"});
-            this.cbCameraRotation.Location = new System.Drawing.Point(93, 112);
-            this.cbCameraRotation.Name = "cbCameraRotation";
-            this.cbCameraRotation.Size = new System.Drawing.Size(148, 21);
-            this.cbCameraRotation.TabIndex = 53;
-            this.cbCameraRotation.Text = "Copy from first step";
-            // 
-            // btnApply
-            // 
-            this.btnApply.Location = new System.Drawing.Point(247, 58);
-            this.btnApply.Name = "btnApply";
-            this.btnApply.Size = new System.Drawing.Size(91, 102);
-            this.btnApply.TabIndex = 55;
-            this.btnApply.Text = "Apply";
-            this.btnApply.UseVisualStyleBackColor = true;
-            this.btnApply.Click += new System.EventHandler(this.btnApply_Click);
-            // 
-            // lblSubframe
-            // 
-            this.lblSubframe.AutoSize = true;
-            this.lblSubframe.Location = new System.Drawing.Point(6, 61);
-            this.lblSubframe.Name = "lblSubframe";
-            this.lblSubframe.Size = new System.Drawing.Size(52, 13);
-            this.lblSubframe.TabIndex = 13;
-            this.lblSubframe.Text = "Subframe";
-            // 
-            // lblCameraRotatioin
-            // 
-            this.lblCameraRotatioin.AutoSize = true;
-            this.lblCameraRotatioin.Location = new System.Drawing.Point(6, 115);
-            this.lblCameraRotatioin.Name = "lblCameraRotatioin";
-            this.lblCameraRotatioin.Size = new System.Drawing.Size(86, 13);
-            this.lblCameraRotatioin.TabIndex = 21;
-            this.lblCameraRotatioin.Text = "Camera Rotation";
             // 
             // lblSequenceFileName
             // 
@@ -1005,63 +862,62 @@ namespace EZAE
             this.lblSequenceFileName.Size = new System.Drawing.Size(0, 13);
             this.lblSequenceFileName.TabIndex = 27;
             // 
-            // cbFocusDistance
+            // cmdUseButterfly
             // 
-            this.cbFocusDistance.FormattingEnabled = true;
-            this.cbFocusDistance.Items.AddRange(new object[] {
-            "",
-            "Copy from first step"});
-            this.cbFocusDistance.Location = new System.Drawing.Point(93, 85);
-            this.cbFocusDistance.Name = "cbFocusDistance";
-            this.cbFocusDistance.Size = new System.Drawing.Size(148, 21);
-            this.cbFocusDistance.TabIndex = 52;
-            this.cbFocusDistance.Text = "Copy from first step";
+            this.cmdUseButterfly.AutoSize = true;
+            this.cmdUseButterfly.Location = new System.Drawing.Point(84, 16);
+            this.cmdUseButterfly.Name = "cmdUseButterfly";
+            this.cmdUseButterfly.Size = new System.Drawing.Size(67, 13);
+            this.cmdUseButterfly.TabIndex = 57;
+            this.cmdUseButterfly.TabStop = true;
+            this.cmdUseButterfly.Text = "Use Butterfly";
+            this.cmdUseButterfly.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdUseButterfly_LinkClicked);
             // 
-            // cbSubframe
+            // cmdUseScript
             // 
-            this.cbSubframe.FormattingEnabled = true;
-            this.cbSubframe.Items.AddRange(new object[] {
-            "",
-            "Copy from first step",
-            "800,450,2784,5676",
-            "700,250,2984,6076",
-            "1000,1300,4576,1784"});
-            this.cbSubframe.Location = new System.Drawing.Point(93, 58);
-            this.cbSubframe.Name = "cbSubframe";
-            this.cbSubframe.Size = new System.Drawing.Size(148, 21);
-            this.cbSubframe.TabIndex = 51;
-            this.cbSubframe.Text = "Copy from first step";
+            this.cmdUseScript.AutoSize = true;
+            this.cmdUseScript.Location = new System.Drawing.Point(157, 16);
+            this.cmdUseScript.Name = "cmdUseScript";
+            this.cmdUseScript.Size = new System.Drawing.Size(56, 13);
+            this.cmdUseScript.TabIndex = 58;
+            this.cmdUseScript.TabStop = true;
+            this.cmdUseScript.Text = "Use Script";
+            this.cmdUseScript.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdUseScript_LinkClicked);
             // 
-            // lblCalibrationIDs
+            // cmdCreateFFC
             // 
-            this.lblCalibrationIDs.AutoSize = true;
-            this.lblCalibrationIDs.Location = new System.Drawing.Point(6, 142);
-            this.lblCalibrationIDs.Name = "lblCalibrationIDs";
-            this.lblCalibrationIDs.Size = new System.Drawing.Size(75, 13);
-            this.lblCalibrationIDs.TabIndex = 23;
-            this.lblCalibrationIDs.Text = "Calibration IDs";
+            this.cmdCreateFFC.AutoSize = true;
+            this.cmdCreateFFC.Location = new System.Drawing.Point(230, 22);
+            this.cmdCreateFFC.Name = "cmdCreateFFC";
+            this.cmdCreateFFC.Size = new System.Drawing.Size(114, 13);
+            this.cmdCreateFFC.TabIndex = 59;
+            this.cmdCreateFFC.TabStop = true;
+            this.cmdCreateFFC.Text = "Create FFC Databases";
+            this.cmdCreateFFC.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCreateFFC_LinkClicked);
             // 
-            // lblFocusDistance
+            // cmdSetSequence
             // 
-            this.lblFocusDistance.AutoSize = true;
-            this.lblFocusDistance.Location = new System.Drawing.Point(6, 88);
-            this.lblFocusDistance.Name = "lblFocusDistance";
-            this.lblFocusDistance.Size = new System.Drawing.Size(81, 13);
-            this.lblFocusDistance.TabIndex = 19;
-            this.lblFocusDistance.Text = "Focus Distance";
+            this.cmdSetSequence.AutoSize = true;
+            this.cmdSetSequence.Location = new System.Drawing.Point(6, 16);
+            this.cmdSetSequence.Name = "cmdSetSequence";
+            this.cmdSetSequence.Size = new System.Drawing.Size(72, 13);
+            this.cmdSetSequence.TabIndex = 60;
+            this.cmdSetSequence.TabStop = true;
+            this.cmdSetSequence.Text = "SetSequence";
+            this.cmdSetSequence.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdSetSequence_LinkClicked);
             // 
-            // cbCalBox
+            // groupBox1
             // 
-            this.cbCalBox.FormattingEnabled = true;
-            this.cbCalBox.Items.AddRange(new object[] {
-            "",
-            "Copy from first step",
-            "1,1,1,1"});
-            this.cbCalBox.Location = new System.Drawing.Point(93, 139);
-            this.cbCalBox.Name = "cbCalBox";
-            this.cbCalBox.Size = new System.Drawing.Size(148, 21);
-            this.cbCalBox.TabIndex = 54;
-            this.cbCalBox.Text = "Copy from first step";
+            this.groupBox1.Controls.Add(this.cmdSetSequence);
+            this.groupBox1.Controls.Add(this.cmdUseScript);
+            this.groupBox1.Controls.Add(this.cmdUseButterfly);
+            this.groupBox1.Controls.Add(this.lblSequenceFileName);
+            this.groupBox1.Location = new System.Drawing.Point(6, 6);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(218, 40);
+            this.groupBox1.TabIndex = 29;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Set Sequence";
             // 
             // MainForm
             // 
@@ -1094,17 +950,6 @@ namespace EZAE
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabSetSequence;
         private System.Windows.Forms.TabPage tabSetupPC;
-        private System.Windows.Forms.Label lblSequencePath;
-        private System.Windows.Forms.Label lblSubframe;
-        private System.Windows.Forms.Label lblSequenceFileName;
-        private System.Windows.Forms.ComboBox cbSubframe;
-        private System.Windows.Forms.ComboBox cbCalBox;
-        private System.Windows.Forms.Label lblFocusDistance;
-        private System.Windows.Forms.Label lblCalibrationIDs;
-        private System.Windows.Forms.ComboBox cbFocusDistance;
-        private System.Windows.Forms.Label lblCameraRotatioin;
-        private System.Windows.Forms.Button btnApply;
-        private System.Windows.Forms.ComboBox cbCameraRotation;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private System.Windows.Forms.ComboBox cbDIList;
         private System.Windows.Forms.ComboBox cbTightVNCPath;
@@ -1116,7 +961,6 @@ namespace EZAE
         private System.Windows.Forms.LinkLabel cmdOpenTools;
         private System.Windows.Forms.LinkLabel cmdOpenMTFCenter;
         private System.Windows.Forms.LinkLabel cmdOpenDooone1;
-        private System.Windows.Forms.LinkLabel cmdCreateFFC;
         private System.Windows.Forms.LinkLabel cmdCheckLC;
         private System.Windows.Forms.LinkLabel cmdOpenDooone2;
         private System.Windows.Forms.LinkLabel cmdOpenDooone3;
@@ -1141,7 +985,6 @@ namespace EZAE
         private System.Windows.Forms.LinkLabel cmdShareRVSData;
         private System.Windows.Forms.LinkLabel cmdCreateOTPandResult;
         private System.Windows.Forms.LinkLabel cmdSetTTPermission;
-        private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.LinkLabel cmdCopyRVStolocal;
         private System.Windows.Forms.LinkLabel cmdInstallWireshark;
         private System.Windows.Forms.LinkLabel cmdPinCameraPcFolders;
@@ -1149,8 +992,6 @@ namespace EZAE
         private System.Windows.Forms.LinkLabel cmdUACOff;
         private System.Windows.Forms.LinkLabel cmdFirewallOff;
         private System.Windows.Forms.LinkLabel cmdPasswordSharingOff;
-        private System.Windows.Forms.LinkLabel cmdBrowseSequence;
-        private System.Windows.Forms.LinkLabel cmdUseLastModifiedSequence;
         private System.Windows.Forms.LinkLabel cmdOneclickSetupCameraPC;
         private System.Windows.Forms.LinkLabel cmdOneclickSetupFixturePC;
         private System.Windows.Forms.LinkLabel cmdOneclickSetupTrueTestSettings;
@@ -1167,9 +1008,13 @@ namespace EZAE
         private System.Windows.Forms.LinkLabel cmdSharePOCB;
         private System.Windows.Forms.CheckBox chkmatlab2018ainstall;
         private System.Windows.Forms.LinkLabel cmdInstallMatlab2018a;
+        private System.Windows.Forms.LinkLabel cmdCopySequence;
+        private System.Windows.Forms.LinkLabel cmdCreateFFC;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.LinkLabel cmdSetSequence;
         private System.Windows.Forms.LinkLabel cmdUseScript;
         private System.Windows.Forms.LinkLabel cmdUseButterfly;
-        private System.Windows.Forms.LinkLabel cmdCopySequence;
+        private System.Windows.Forms.Label lblSequenceFileName;
     }
 }
 
