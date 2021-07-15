@@ -280,6 +280,7 @@ namespace SetSequence
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            SetVersionInfo();
             if (Directory.Exists(@"C:\Radiant Vision Systems Data\TrueTest\Sequence"))
             {
                 var latestfile = new DirectoryInfo(@"C:\Radiant Vision Systems Data\TrueTest\Sequence").GetFiles().OrderByDescending(o => o.LastWriteTime).FirstOrDefault();
