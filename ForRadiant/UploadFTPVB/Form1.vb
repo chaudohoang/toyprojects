@@ -11,6 +11,7 @@ Public Class Form1
         Dim destfile As String
         If txtSource.Text = "Current Folder" Then
             uploadlist = GetFilesRecursive(appdir)
+            uploadlist.Remove(apppath)
             For Each sourcefile In uploadlist
                 subfolder = Path.GetDirectoryName(sourcefile).Replace(appdir, "").Replace("\", "")
                 destfolder = "ftp://" & txtHost.Text & "/" & txtDest.Text & subfolder

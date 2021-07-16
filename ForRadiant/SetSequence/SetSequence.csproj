@@ -88,8 +88,8 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>@echo OFF
-del $(SolutionDir)bin\$(ConfigurationName)\SetSequence\*.pdb
-del $(SolutionDir)bin\$(ConfigurationName)\SetSequence\*.xml
-del $(SolutionDir)bin\$(ConfigurationName)\SetSequence\*.config</PostBuildEvent>
+del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.pdb
+del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.xml
+del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.config</PostBuildEvent>
   </PropertyGroup>
 </Project>
