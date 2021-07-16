@@ -29,7 +29,7 @@ Partial Class Form1
         Me.btnUpload = New System.Windows.Forms.Button()
         Me.Label4 = New System.Windows.Forms.Label()
         Me.Label5 = New System.Windows.Forms.Label()
-        Me.txtSource = New System.Windows.Forms.ComboBox()
+        Me.cbxSource = New System.Windows.Forms.ComboBox()
         Me.txtDest = New System.Windows.Forms.ComboBox()
         Me.Label6 = New System.Windows.Forms.Label()
         Me.cbxLog = New System.Windows.Forms.ListBox()
@@ -93,15 +93,15 @@ Partial Class Form1
         Me.Label5.TabIndex = 7
         Me.Label5.Text = "Source"
         '
-        'txtSource
+        'cbxSource
         '
-        Me.txtSource.FormattingEnabled = True
-        Me.txtSource.Items.AddRange(New Object() {"Current Folder"})
-        Me.txtSource.Location = New System.Drawing.Point(78, 85)
-        Me.txtSource.Name = "txtSource"
-        Me.txtSource.Size = New System.Drawing.Size(379, 21)
-        Me.txtSource.TabIndex = 9
-        Me.txtSource.Text = "Current Folder"
+        Me.cbxSource.FormattingEnabled = True
+        Me.cbxSource.Items.AddRange(New Object() {"Current Folder", "C:\POCB\INPUT", "Choose Folder"})
+        Me.cbxSource.Location = New System.Drawing.Point(78, 85)
+        Me.cbxSource.Name = "cbxSource"
+        Me.cbxSource.Size = New System.Drawing.Size(379, 21)
+        Me.cbxSource.TabIndex = 9
+        Me.cbxSource.Text = "Current Folder"
         '
         'txtDest
         '
@@ -183,7 +183,7 @@ Partial Class Form1
         Me.Controls.Add(Me.cbxLog)
         Me.Controls.Add(Me.Label6)
         Me.Controls.Add(Me.txtDest)
-        Me.Controls.Add(Me.txtSource)
+        Me.Controls.Add(Me.cbxSource)
         Me.Controls.Add(Me.Label4)
         Me.Controls.Add(Me.Label5)
         Me.Controls.Add(Me.btnUpload)
@@ -206,7 +206,7 @@ Partial Class Form1
     Friend WithEvents btnUpload As Button
     Friend WithEvents Label4 As Label
     Friend WithEvents Label5 As Label
-    Friend WithEvents txtSource As ComboBox
+    Friend WithEvents cbxSource As ComboBox
     Friend WithEvents txtDest As ComboBox
     Friend WithEvents Label6 As Label
     Friend WithEvents cbxLog As ListBox

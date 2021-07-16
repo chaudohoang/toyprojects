@@ -10,7 +10,7 @@ Public Class Form1
         Dim subfolder As String
         Dim destfolder As String
         Dim destfile As String
-        If txtSource.Text = "Current Folder" Then
+        If cbxSource.Text = "Current Folder" Then
             uploadlist = GetFilesRecursive(appdir)
             uploadlist.Remove(apppath)
             For Each sourcefile In uploadlist
@@ -25,9 +25,9 @@ Public Class Form1
                 UploadFTP(destfile, sourcefile)
             Next
         Else
-            uploadlist = GetFilesRecursive(txtSource.Text)
+            uploadlist = GetFilesRecursive(cbxSource.Text)
             For Each sourcefile In uploadlist
-                subfolder = Path.GetDirectoryName(sourcefile).Replace(txtSource.Text, "")
+                subfolder = Path.GetDirectoryName(sourcefile).Replace(cbxSource.Text, "")
                 destfolder = "ftp://" & cbxHost.Text & "/" & txtDest.Text & subfolder
                 If subfolder = "" Then
                     destfile = destfolder & Path.GetFileName(sourcefile)
@@ -119,5 +119,17 @@ Public Class Form1
 
     Private Sub btnClearlog_Click(sender As Object, e As EventArgs) Handles btnClearlog.Click
         cbxLog.Items.Clear()
+    End Sub
+
+    Private Sub cbxSource_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cbxSource.SelectedIndexChanged
+        If cbxSource.SelectedIndex = 2 Then
+            Using frm = New FolderBrowserDialog
+                If frm.ShowDialog(Me) = DialogResult.OK Then
+
+                    cbxSource.Text = frm.SelectedPath
+
+                End If
+            End Using
+        End If
     End Sub
 End Class
