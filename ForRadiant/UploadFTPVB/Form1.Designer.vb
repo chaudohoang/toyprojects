@@ -24,10 +24,7 @@ Partial Class Form1
     Private Sub InitializeComponent()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form1))
         Me.Label1 = New System.Windows.Forms.Label()
-        Me.txtHost = New System.Windows.Forms.TextBox()
-        Me.txtUsername = New System.Windows.Forms.TextBox()
         Me.Label2 = New System.Windows.Forms.Label()
-        Me.txtPassword = New System.Windows.Forms.TextBox()
         Me.Label3 = New System.Windows.Forms.Label()
         Me.btnUpload = New System.Windows.Forms.Button()
         Me.Label4 = New System.Windows.Forms.Label()
@@ -35,7 +32,11 @@ Partial Class Form1
         Me.txtSource = New System.Windows.Forms.ComboBox()
         Me.txtDest = New System.Windows.Forms.ComboBox()
         Me.Label6 = New System.Windows.Forms.Label()
-        Me.txtLog = New System.Windows.Forms.TextBox()
+        Me.cbxLog = New System.Windows.Forms.ListBox()
+        Me.btnClearlog = New System.Windows.Forms.Button()
+        Me.cbxHost = New System.Windows.Forms.ComboBox()
+        Me.cbxUsername = New System.Windows.Forms.ComboBox()
+        Me.cbxPassword = New System.Windows.Forms.ComboBox()
         Me.SuspendLayout()
         '
         'Label1
@@ -47,22 +48,6 @@ Partial Class Form1
         Me.Label1.TabIndex = 0
         Me.Label1.Text = "Host"
         '
-        'txtHost
-        '
-        Me.txtHost.Location = New System.Drawing.Point(78, 6)
-        Me.txtHost.Name = "txtHost"
-        Me.txtHost.Size = New System.Drawing.Size(228, 20)
-        Me.txtHost.TabIndex = 1
-        Me.txtHost.Text = "127.0.0.1"
-        '
-        'txtUsername
-        '
-        Me.txtUsername.Location = New System.Drawing.Point(78, 32)
-        Me.txtUsername.Name = "txtUsername"
-        Me.txtUsername.Size = New System.Drawing.Size(228, 20)
-        Me.txtUsername.TabIndex = 3
-        Me.txtUsername.Text = "admin"
-        '
         'Label2
         '
         Me.Label2.AutoSize = True
@@ -71,14 +56,6 @@ Partial Class Form1
         Me.Label2.Size = New System.Drawing.Size(55, 13)
         Me.Label2.TabIndex = 2
         Me.Label2.Text = "Username"
-        '
-        'txtPassword
-        '
-        Me.txtPassword.Location = New System.Drawing.Point(78, 58)
-        Me.txtPassword.Name = "txtPassword"
-        Me.txtPassword.Size = New System.Drawing.Size(228, 20)
-        Me.txtPassword.TabIndex = 5
-        Me.txtPassword.Text = "admin"
         '
         'Label3
         '
@@ -93,7 +70,7 @@ Partial Class Form1
         '
         Me.btnUpload.Location = New System.Drawing.Point(312, 6)
         Me.btnUpload.Name = "btnUpload"
-        Me.btnUpload.Size = New System.Drawing.Size(145, 73)
+        Me.btnUpload.Size = New System.Drawing.Size(74, 73)
         Me.btnUpload.TabIndex = 6
         Me.btnUpload.Text = "Upload"
         Me.btnUpload.UseVisualStyleBackColor = True
@@ -145,33 +122,73 @@ Partial Class Form1
         Me.Label6.TabIndex = 11
         Me.Label6.Text = "Log"
         '
-        'txtLog
+        'cbxLog
         '
-        Me.txtLog.Location = New System.Drawing.Point(15, 166)
-        Me.txtLog.Multiline = True
-        Me.txtLog.Name = "txtLog"
-        Me.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.txtLog.Size = New System.Drawing.Size(442, 239)
-        Me.txtLog.TabIndex = 12
-        Me.txtLog.WordWrap = False
+        Me.cbxLog.FormattingEnabled = True
+        Me.cbxLog.HorizontalScrollbar = True
+        Me.cbxLog.Location = New System.Drawing.Point(12, 163)
+        Me.cbxLog.Name = "cbxLog"
+        Me.cbxLog.ScrollAlwaysVisible = True
+        Me.cbxLog.Size = New System.Drawing.Size(445, 238)
+        Me.cbxLog.TabIndex = 12
+        '
+        'btnClearlog
+        '
+        Me.btnClearlog.Location = New System.Drawing.Point(392, 6)
+        Me.btnClearlog.Name = "btnClearlog"
+        Me.btnClearlog.Size = New System.Drawing.Size(66, 73)
+        Me.btnClearlog.TabIndex = 13
+        Me.btnClearlog.Text = "Clear log"
+        Me.btnClearlog.UseVisualStyleBackColor = True
+        '
+        'cbxHost
+        '
+        Me.cbxHost.FormattingEnabled = True
+        Me.cbxHost.Items.AddRange(New Object() {"127.0.0.1", "10.119.211.105", "10.119.211.32"})
+        Me.cbxHost.Location = New System.Drawing.Point(78, 6)
+        Me.cbxHost.Name = "cbxHost"
+        Me.cbxHost.Size = New System.Drawing.Size(228, 21)
+        Me.cbxHost.TabIndex = 14
+        Me.cbxHost.Text = "127.0.0.1"
+        '
+        'cbxUsername
+        '
+        Me.cbxUsername.FormattingEnabled = True
+        Me.cbxUsername.Items.AddRange(New Object() {"admin", "edc_adm01", "eqp_ftp01"})
+        Me.cbxUsername.Location = New System.Drawing.Point(78, 32)
+        Me.cbxUsername.Name = "cbxUsername"
+        Me.cbxUsername.Size = New System.Drawing.Size(228, 21)
+        Me.cbxUsername.TabIndex = 15
+        Me.cbxUsername.Text = "admin"
+        '
+        'cbxPassword
+        '
+        Me.cbxPassword.FormattingEnabled = True
+        Me.cbxPassword.Items.AddRange(New Object() {"admin", "!lgdedc00", "1q2w3e4!"})
+        Me.cbxPassword.Location = New System.Drawing.Point(78, 58)
+        Me.cbxPassword.Name = "cbxPassword"
+        Me.cbxPassword.Size = New System.Drawing.Size(228, 21)
+        Me.cbxPassword.TabIndex = 16
+        Me.cbxPassword.Text = "admin"
         '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(470, 417)
-        Me.Controls.Add(Me.txtLog)
+        Me.Controls.Add(Me.cbxPassword)
+        Me.Controls.Add(Me.cbxUsername)
+        Me.Controls.Add(Me.cbxHost)
+        Me.Controls.Add(Me.btnClearlog)
+        Me.Controls.Add(Me.cbxLog)
         Me.Controls.Add(Me.Label6)
         Me.Controls.Add(Me.txtDest)
         Me.Controls.Add(Me.txtSource)
         Me.Controls.Add(Me.Label4)
         Me.Controls.Add(Me.Label5)
         Me.Controls.Add(Me.btnUpload)
-        Me.Controls.Add(Me.txtPassword)
         Me.Controls.Add(Me.Label3)
-        Me.Controls.Add(Me.txtUsername)
         Me.Controls.Add(Me.Label2)
-        Me.Controls.Add(Me.txtHost)
         Me.Controls.Add(Me.Label1)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
@@ -184,10 +201,7 @@ Partial Class Form1
     End Sub
 
     Friend WithEvents Label1 As Label
-    Friend WithEvents txtHost As TextBox
-    Friend WithEvents txtUsername As TextBox
     Friend WithEvents Label2 As Label
-    Friend WithEvents txtPassword As TextBox
     Friend WithEvents Label3 As Label
     Friend WithEvents btnUpload As Button
     Friend WithEvents Label4 As Label
@@ -195,5 +209,9 @@ Partial Class Form1
     Friend WithEvents txtSource As ComboBox
     Friend WithEvents txtDest As ComboBox
     Friend WithEvents Label6 As Label
-    Friend WithEvents txtLog As TextBox
+    Friend WithEvents cbxLog As ListBox
+    Friend WithEvents btnClearlog As Button
+    Friend WithEvents cbxHost As ComboBox
+    Friend WithEvents cbxUsername As ComboBox
+    Friend WithEvents cbxPassword As ComboBox
 End Class

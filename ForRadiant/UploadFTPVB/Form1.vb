@@ -2,6 +2,7 @@
 Imports System.Reflection
 Public Class Form1
     Private Sub btnUpload_Click(sender As Object, e As EventArgs) Handles btnUpload.Click
+        btnUpload.Enabled = False
         Dim apppath As String = System.Reflection.Assembly.GetExecutingAssembly().Location
         Dim appdir As String = Path.GetDirectoryName(apppath)
 
@@ -13,8 +14,8 @@ Public Class Form1
             uploadlist = GetFilesRecursive(appdir)
             uploadlist.Remove(apppath)
             For Each sourcefile In uploadlist
-                subfolder = Path.GetDirectoryName(sourcefile).Replace(appdir, "").Replace("\", "")
-                destfolder = "ftp://" & txtHost.Text & "/" & txtDest.Text & subfolder
+                subfolder = Path.GetDirectoryName(sourcefile).Replace(appdir, "")
+                destfolder = "ftp://" & cbxHost.Text & "/" & txtDest.Text & subfolder
                 If subfolder = "" Then
                     destfile = destfolder & Path.GetFileName(sourcefile)
                 Else
@@ -26,8 +27,8 @@ Public Class Form1
         Else
             uploadlist = GetFilesRecursive(txtSource.Text)
             For Each sourcefile In uploadlist
-                subfolder = Path.GetDirectoryName(sourcefile).Replace(txtSource.Text, "").Replace("\", "")
-                destfolder = "ftp://" & txtHost.Text & "/" & txtDest.Text & subfolder
+                subfolder = Path.GetDirectoryName(sourcefile).Replace(txtSource.Text, "")
+                destfolder = "ftp://" & cbxHost.Text & "/" & txtDest.Text & subfolder
                 If subfolder = "" Then
                     destfile = destfolder & Path.GetFileName(sourcefile)
                 Else
@@ -37,9 +38,7 @@ Public Class Form1
                 UploadFTP(destfile, sourcefile)
             Next
         End If
-        ' Loop through and display each path.
-
-
+        btnUpload.Enabled = True
     End Sub
 
     Public Shared Function GetFilesRecursive(ByVal initial As String) As List(Of String)
@@ -75,8 +74,8 @@ Public Class Form1
     End Function
 
     Private Sub CreateFTPFolder(path As String)
-        Dim RequestFolderCreate As Net.FtpWebRequest = CType(System.Net.FtpWebRequest.Create("ftp://" & txtHost.Text & "/" & path), System.Net.FtpWebRequest)
-        RequestFolderCreate.Credentials = New System.Net.NetworkCredential(txtUsername.Text, txtPassword.Text)
+        Dim RequestFolderCreate As Net.FtpWebRequest = CType(System.Net.FtpWebRequest.Create("ftp://" & cbxHost.Text & "/" & path), System.Net.FtpWebRequest)
+        RequestFolderCreate.Credentials = New System.Net.NetworkCredential(cbxUsername.Text, cbxPassword.Text)
         RequestFolderCreate.Method = System.Net.WebRequestMethods.Ftp.MakeDirectory
 
         Try
@@ -92,7 +91,7 @@ Public Class Form1
     Public Sub UploadFTP(ByVal _UploadPath As String, ByVal _FileName As String)
         Dim _FileInfo As New System.IO.FileInfo(_FileName)
         Dim _FtpWebRequest As System.Net.FtpWebRequest = CType(System.Net.FtpWebRequest.Create(New Uri(_UploadPath)), System.Net.FtpWebRequest)
-        _FtpWebRequest.Credentials = New Net.NetworkCredential(txtUsername.Text, txtPassword.Text)
+        _FtpWebRequest.Credentials = New Net.NetworkCredential(cbxUsername.Text, cbxPassword.Text)
         _FtpWebRequest.KeepAlive = False
         _FtpWebRequest.Timeout = 200000
         _FtpWebRequest.Method = System.Net.WebRequestMethods.Ftp.UploadFile
@@ -112,10 +111,13 @@ Public Class Form1
             _Stream.Dispose()
             _FileStream.Close()
             _FileStream.Dispose()
-            txtLog.Text += "Uploaded " + _FileName + " To: " + _UploadPath + Environment.NewLine
+            cbxLog.Items.Add("Uploaded " + _FileName + " To: " + _UploadPath)
         Catch ex As Exception
-            txtLog.Text += "Upload Error: " + ex.Message
+            cbxLog.Items.Add("Upload Error: " + ex.Message)
         End Try
     End Sub
 
+    Private Sub btnClearlog_Click(sender As Object, e As EventArgs) Handles btnClearlog.Click
+        cbxLog.Items.Clear()
+    End Sub
 End Class
