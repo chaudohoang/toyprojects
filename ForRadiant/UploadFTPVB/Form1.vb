@@ -1,9 +1,10 @@
 ﻿Imports System.IO
+Imports System.Net
 Imports System.Reflection
 Public Class Form1
     Private Sub btnUpload_Click(sender As Object, e As EventArgs) Handles btnUpload.Click
         btnUpload.Enabled = False
-        Dim apppath As String = System.Reflection.Assembly.GetExecutingAssembly().Location
+        Dim apppath As String = Assembly.GetExecutingAssembly().Location
         Dim appdir As String = Path.GetDirectoryName(apppath)
 
         Dim uploadlist As New List(Of String)
@@ -41,6 +42,24 @@ Public Class Form1
         btnUpload.Enabled = True
     End Sub
 
+    Public Function FTPFolderExists(directory As String) As Boolean
+        Dim directoryExists__1 As Boolean
+
+        Dim request = DirectCast(WebRequest.Create(directory), FtpWebRequest)
+        request.Method = WebRequestMethods.Ftp.ListDirectory
+        request.Credentials = New NetworkCredential(cbxUsername.Text, cbxPassword.Text)
+
+        Try
+            Using request.GetResponse()
+                directoryExists__1 = True
+            End Using
+        Catch generatedExceptionName As WebException
+            directoryExists__1 = False
+        End Try
+
+        Return directoryExists__1
+    End Function
+
     Public Shared Function GetFilesRecursive(ByVal initial As String) As List(Of String)
         ' This list stores the results.
         Dim result As New List(Of String)
@@ -73,35 +92,47 @@ Public Class Form1
         Return result
     End Function
 
-    Private Sub CreateFTPFolder(path As String)
-        Dim RequestFolderCreate As Net.FtpWebRequest = CType(System.Net.FtpWebRequest.Create("ftp://" & cbxHost.Text & "/" & path), System.Net.FtpWebRequest)
-        RequestFolderCreate.Credentials = New System.Net.NetworkCredential(cbxUsername.Text, cbxPassword.Text)
-        RequestFolderCreate.Method = System.Net.WebRequestMethods.Ftp.MakeDirectory
+    Private Sub CreateFTPFolder(inputpath As String)
+        inputpath = inputpath.Replace("\", "/").Replace("//", "/")
+        Dim subfolders As List(Of String) = inputpath.Split("/").ToList()
+        Dim uploadpath As String = "ftp://" & cbxHost.Text
 
-        Try
-            Using response As System.Net.FtpWebResponse = DirectCast(RequestFolderCreate.GetResponse(), System.Net.FtpWebResponse)
+        Dim RequestFolderCreate As Net.FtpWebRequest
+        For i = 0 To subfolders.Count - 1
+            uploadpath = uploadpath & "/" & subfolders(i)
+            Dim uploadpathExist As Boolean = FTPFolderExists(uploadpath)
+            If Not uploadpathExist Then
+                RequestFolderCreate = CType(WebRequest.Create(uploadpath), FtpWebRequest)
+                RequestFolderCreate.Credentials = New NetworkCredential(cbxUsername.Text, cbxPassword.Text)
+                RequestFolderCreate.Method = WebRequestMethods.Ftp.MakeDirectory
+                Try
+                    Using response As FtpWebResponse = DirectCast(RequestFolderCreate.GetResponse(), FtpWebResponse)
 
-            End Using
+                    End Using
 
-        Catch ex As System.Net.WebException
-
-        End Try
+                Catch ex As WebException
+                    cbxLog.Items.Add("Create FTP Folder Error: " + ex.Message)
+                End Try
+            Else
+                Continue For
+            End If
+        Next
     End Sub
 
     Public Sub UploadFTP(ByVal _UploadPath As String, ByVal _FileName As String)
-        Dim _FileInfo As New System.IO.FileInfo(_FileName)
-        Dim _FtpWebRequest As System.Net.FtpWebRequest = CType(System.Net.FtpWebRequest.Create(New Uri(_UploadPath)), System.Net.FtpWebRequest)
+        Dim _FileInfo As New FileInfo(_FileName)
+        Dim _FtpWebRequest As FtpWebRequest = CType(FtpWebRequest.Create(New Uri(_UploadPath)), FtpWebRequest)
         _FtpWebRequest.Credentials = New Net.NetworkCredential(cbxUsername.Text, cbxPassword.Text)
         _FtpWebRequest.KeepAlive = False
         _FtpWebRequest.Timeout = 200000
-        _FtpWebRequest.Method = System.Net.WebRequestMethods.Ftp.UploadFile
+        _FtpWebRequest.Method = WebRequestMethods.Ftp.UploadFile
         _FtpWebRequest.UseBinary = True
         _FtpWebRequest.ContentLength = _FileInfo.Length
         Dim buffLength As Integer = 2048
         Dim buff(buffLength - 1) As Byte
-        Dim _FileStream As System.IO.FileStream = _FileInfo.OpenRead()
+        Dim _FileStream As FileStream = _FileInfo.OpenRead()
         Try
-            Dim _Stream As System.IO.Stream = _FtpWebRequest.GetRequestStream()
+            Dim _Stream As Stream = _FtpWebRequest.GetRequestStream()
             Dim contentLen As Integer = _FileStream.Read(buff, 0, buffLength)
             Do While contentLen <> 0
                 _Stream.Write(buff, 0, contentLen)

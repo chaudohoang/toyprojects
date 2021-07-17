@@ -129,7 +129,7 @@ Partial Class Form1
         Me.cbxLog.Location = New System.Drawing.Point(12, 163)
         Me.cbxLog.Name = "cbxLog"
         Me.cbxLog.ScrollAlwaysVisible = True
-        Me.cbxLog.Size = New System.Drawing.Size(445, 238)
+        Me.cbxLog.Size = New System.Drawing.Size(445, 381)
         Me.cbxLog.TabIndex = 12
         '
         'btnClearlog
@@ -175,7 +175,7 @@ Partial Class Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(470, 417)
+        Me.ClientSize = New System.Drawing.Size(470, 560)
         Me.Controls.Add(Me.cbxPassword)
         Me.Controls.Add(Me.cbxUsername)
         Me.Controls.Add(Me.cbxHost)
