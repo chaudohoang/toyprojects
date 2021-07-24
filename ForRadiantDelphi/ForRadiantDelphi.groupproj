@@ -1,0 +1,36 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{A20AA107-5AD3-4E78-81BE-E78ED08192FF}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="FTPIndexPathGenerator\FTPIndexPathGenerator.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="FTPIndexPathGenerator">
+        <MSBuild Projects="FTPIndexPathGenerator\FTPIndexPathGenerator.dproj"/>
+    </Target>
+    <Target Name="FTPIndexPathGenerator:Clean">
+        <MSBuild Projects="FTPIndexPathGenerator\FTPIndexPathGenerator.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="FTPIndexPathGenerator:Make">
+        <MSBuild Projects="FTPIndexPathGenerator\FTPIndexPathGenerator.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="FTPIndexPathGenerator"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="FTPIndexPathGenerator:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="FTPIndexPathGenerator:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
