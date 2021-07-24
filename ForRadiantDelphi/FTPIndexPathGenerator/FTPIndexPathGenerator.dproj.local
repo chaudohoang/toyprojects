@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <BorlandProject>
 	<Transactions>
-    <Transaction>2021/07/24 09:48:16.000.688,C:\Users\RVSK\Documents\Embarcadero\Studio\Projects\FTPIndexPathGenerator.dproj=C:\Users\RVSK\Documents\Embarcadero\Studio\Projects\Project1.dproj</Transaction>
-    <Transaction>2021/07/24 09:50:08.000.601,D:\CSync\GitHub\toyprojects\ForRadiantDelphi\Unit1.dfm=C:\Users\RVSK\Documents\Embarcadero\Studio\Projects\Unit1.dfm</Transaction>
-    <Transaction>2021/07/24 09:50:08.000.601,D:\CSync\GitHub\toyprojects\ForRadiantDelphi\Unit1.pas=C:\Users\RVSK\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
-    <Transaction>2021/07/24 09:50:21.000.499,D:\CSync\GitHub\toyprojects\ForRadiantDelphi\FTPIndexPathGenerator.dproj=C:\Users\RVSK\Documents\Embarcadero\Studio\Projects\FTPIndexPathGenerator.dproj</Transaction>
+    <Transaction>2021/07/24 09:48:16.000.688,C:\Users\RVSK\Documents\Embarcadero\Studio\Projects\Project1.dproj=C:\Users\RVSK\Documents\Embarcadero\Studio\Projects\FTPIndexPathGenerator.dproj</Transaction>
+    <Transaction>2021/07/24 09:50:08.000.601,C:\Users\RVSK\Documents\Embarcadero\Studio\Projects\Unit1.pas=D:\CSync\GitHub\toyprojects\ForRadiantDelphi\Unit1.pas</Transaction>
+    <Transaction>2021/07/24 09:50:08.000.601,C:\Users\RVSK\Documents\Embarcadero\Studio\Projects\Unit1.dfm=D:\CSync\GitHub\toyprojects\ForRadiantDelphi\Unit1.dfm</Transaction>
+    <Transaction>2021/07/24 09:50:21.000.499,C:\Users\RVSK\Documents\Embarcadero\Studio\Projects\FTPIndexPathGenerator.dproj=D:\CSync\GitHub\toyprojects\ForRadiantDelphi\FTPIndexPathGenerator.dproj</Transaction>
   </Transactions>
 </BorlandProject>
