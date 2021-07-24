@@ -67,7 +67,7 @@ namespace FTPIndexPathGenerator
             
             if (LayerCount == 1)
             {
-                lTmp = nVlue / LayerSize;
+                lTmp = Convert.ToInt32(nVlue / LayerSize - 0.49999);
                 path = lTmp.ToString("00000000");
             }
             else
@@ -77,7 +77,7 @@ namespace FTPIndexPathGenerator
                 //dTemp = nVlue / LayerSize - 0.49999 ;
                 //path = dTemp.ToString("00000000");
 
-                lTmp = nVlue / LayerSize;
+                lTmp = Convert.ToInt32(nVlue / LayerSize - 0.49999);
                 path = lTmp.ToString("00000000");
                 lTmp = nVlue % LayerSize;
                 path = path + "\\" + lTmp.ToString("00000000");
