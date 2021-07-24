@@ -119,7 +119,8 @@ Public Class Form1
         Next
     End Sub
 
-    Public Sub UploadFTP(ByVal _UploadPath As String, ByVal _FileName As String)
+    Public Function UploadFTP(ByVal _UploadPath As String, ByVal _FileName As String) As Boolean
+        Dim uploaded As Boolean
         Dim _FileInfo As New FileInfo(_FileName)
         Dim _FtpWebRequest As FtpWebRequest = CType(FtpWebRequest.Create(New Uri(_UploadPath)), FtpWebRequest)
         _FtpWebRequest.Credentials = New Net.NetworkCredential(cbxUsername.Text, cbxPassword.Text)
@@ -143,10 +144,13 @@ Public Class Form1
             _FileStream.Close()
             _FileStream.Dispose()
             cbxLog.Items.Add("Uploaded " + _FileName + " To: " + _UploadPath)
+            uploaded = True
         Catch ex As Exception
+            uploaded = False
             cbxLog.Items.Add("Upload Error: " + ex.Message)
         End Try
-    End Sub
+        Return uploaded
+    End Function
 
     Private Sub btnClearlog_Click(sender As Object, e As EventArgs) Handles btnClearlog.Click
         cbxLog.Items.Clear()
