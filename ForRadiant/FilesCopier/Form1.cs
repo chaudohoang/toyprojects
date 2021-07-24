@@ -34,11 +34,11 @@ namespace FilesCopier
 
         private void button1_Click(object sender, EventArgs e)
         {
-            List<string> sourcelist = GetFilesRecursive(comboBox1.Text);
+            List<string> sourcelist = GetFilesRecursive(cbxLog.Text);
             List<string> destlist = new List<string>();
             for (int i = 0; i < sourcelist.Count; i++)
             {
-                destlist.Add(sourcelist[i].Replace(comboBox1.Text, comboBox2.Text));
+                destlist.Add(sourcelist[i].Replace(dataGridView1.Text, dataGridView1.Text));
             }
             for (int i = 0; i < sourcelist.Count; i++)
             {
@@ -158,5 +158,7 @@ namespace FilesCopier
         {
             SetVersionInfo();
         }
+
+       
     }
 }
