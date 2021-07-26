@@ -4,6 +4,9 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Data;
 using System.Reflection;
+using System.IO;
+using System.Data.OleDb;
+using System.Globalization;
 
 namespace RemoteTools
 {
@@ -27,92 +30,99 @@ namespace RemoteTools
                         this.Text, versionInfo.ToString());
         }
 
+
         private void Form1_Load(object sender, EventArgs e)
         {
             SetVersionInfo();
-            var path = @"All.csv";
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            string CSVFilePathName = @"All.csv";
+            string[] Lines = File.ReadAllLines(CSVFilePathName);
+            string[] Fields;
+            //Fields = Lines[0].Split(new char[] { ',' });
+            Fields = "PC,IP".Split(new char[] { ',' });
+            int Cols = Fields.GetLength(0);
+            DataTable dt = new DataTable();
+
+            //1st row must be column names; force lower case to ensure matching later on.
+            for (int i = 0; i < Cols; i++)
+                dt.Columns.Add(Fields[i].ToLower(), typeof(string));
+            DataRow Row;
+            for (int i = 1; i < Lines.GetLength(0); i++)
             {
-                csvParser.CommentTokens = new string[] { "#" };
-                csvParser.SetDelimiters(new string[] { "," });
-                csvParser.HasFieldsEnclosedInQuotes = true;
-
-                // Skip the row with the column names
-                csvParser.ReadLine();
-
-                while (!csvParser.EndOfData)
-                {
-                    // Read current line fields, pointer moves to the next line.
-                    string[] fields = csvParser.ReadFields();
-                    string PC = fields[0];
-                    string IP = fields[1];
-                    dataGridView1.Rows.Add(PC, IP);
-                }
+                Fields = Lines[i].Split(new char[] { ',' });
+                Row = dt.NewRow();
+                for (int f = 0; f < Cols; f++)
+                    Row[f] = Fields[f];
+                dt.Rows.Add(Row);
             }
+            dataGridView1.DataSource = dt;
 
         }
         private void btnFileShare_Click(object sender, EventArgs e)
         {
-            int rowindex = dataGridView1.CurrentCell.RowIndex;
-            int columnindex = 1;
-
-            string IP = dataGridView1.Rows[rowindex].Cells[columnindex].Value.ToString();
-            if (textBox1.Text != "")
+            string IP;
+            if (dataGridView1.CurrentCell != null)
             {
-                try
-                {
-                    Process.Start("\\\\" + textBox1.Text);
-                }
-                catch (Exception ex)
-                {
-
-                    MessageBox.Show(ex.Message);
-                }
+                int rowindex = dataGridView1.CurrentCell.RowIndex;
+                int columnindex = 1;
+                IP = "\\\\" +dataGridView1.Rows[rowindex].Cells[columnindex].Value.ToString();
             }
             else
-            { 
-                Process.Start("\\\\"+IP);
+            {
+                IP = "\\\\" + textBox1.Text;
+            }
+
+            try
+            {
+                Process.Start(IP);
+            }
+            catch (Exception ex)
+            {
+
+                MessageBox.Show(ex.Message);
             }
         }
 
         private void btnRemoteControl_Click(object sender, EventArgs e)
         {
-            int rowindex = dataGridView1.CurrentCell.RowIndex;
-            int columnindex = 1;
-
-
-            string IP = dataGridView1.Rows[rowindex].Cells[columnindex].Value.ToString();
-            if (textBox1.Text != "")
+            string IP;
+            if (dataGridView1.CurrentCell != null)
             {
-                try
-                {
-                    Process.Start(@"tvnviewer.exe", textBox1.Text);
-                }
-                catch (Exception ex)
-                {
-
-                    MessageBox.Show(ex.Message);
-                }
+                int rowindex = dataGridView1.CurrentCell.RowIndex;
+                int columnindex = 1;
+                IP = dataGridView1.Rows[rowindex].Cells[columnindex].Value.ToString();
             }
             else
             {
+                IP = textBox1.Text;
+            }
+
+            try
+            {
                 Process.Start(@"tvnviewer.exe", IP);
             }
+            catch (Exception ex)
+            {
+
+                MessageBox.Show(ex.Message);
+            }
+
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            
+
             BindingSource bs = new BindingSource();
             bs.DataSource = dataGridView1.DataSource;
-            bs.Filter = string.Format("CONVERT(" + dataGridView1.Columns[1].DataPropertyName + ", System.String) like '%" + textBox1.Text.Replace("'", "''") + "%'");
+            bs.Filter = "pc like '%" + textBox1.Text + "%'";
             dataGridView1.DataSource = bs;
-            dataGridView1.Refresh();
+
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
             textBox1.Text = "";
         }
+
+
     }
 }

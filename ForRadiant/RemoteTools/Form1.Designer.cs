@@ -32,8 +32,6 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.btnFileShare = new System.Windows.Forms.Button();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.PC = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.IP = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.btnRemoteControl = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -45,6 +43,7 @@
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(332, 20);
             this.textBox1.TabIndex = 1;
+            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // btnFileShare
             // 
@@ -59,25 +58,10 @@
             // dataGridView1
             // 
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.PC,
-            this.IP});
             this.dataGridView1.Location = new System.Drawing.Point(12, 38);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.Size = new System.Drawing.Size(367, 371);
             this.dataGridView1.TabIndex = 4;
-            // 
-            // PC
-            // 
-            this.PC.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.PC.HeaderText = "PC";
-            this.PC.Name = "PC";
-            // 
-            // IP
-            // 
-            this.IP.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.IP.HeaderText = "IP";
-            this.IP.Name = "IP";
             // 
             // btnRemoteControl
             // 
@@ -124,8 +108,6 @@
         private System.Windows.Forms.Button btnFileShare;
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.Button btnRemoteControl;
-        private System.Windows.Forms.DataGridViewTextBoxColumn PC;
-        private System.Windows.Forms.DataGridViewTextBoxColumn IP;
         private System.Windows.Forms.Button button1;
     }
 }

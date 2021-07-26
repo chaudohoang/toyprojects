@@ -91,11 +91,13 @@
     <PostBuildEvent>@echo OFF
 del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.pdb
 del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.xml
-del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.config</PostBuildEvent>
+del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.config
+copy /Y $(SolutionDir)\$(ProjectName)\All.csv $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\All.csv
+copy /Y $(SolutionDir)\$(ProjectName)\tvnviewer.exe $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\tvnviewer.exe</PostBuildEvent>
   </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_StartDate="2000/1/1" BuildVersion_UseGlobalSettings="True" BuildVersion_BuildVersioningStyle="None.None.Increment.TimeStamp" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_AssemblyInfoFilename="" />
+      <UserProperties BuildVersion_AssemblyInfoFilename="" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.TimeStamp" BuildVersion_UseGlobalSettings="True" BuildVersion_StartDate="2000/1/1" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>
