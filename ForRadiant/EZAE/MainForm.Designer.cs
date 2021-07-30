@@ -398,7 +398,7 @@ namespace EZAE
             this.cbProgramFolder.Name = "cbProgramFolder";
             this.cbProgramFolder.Size = new System.Drawing.Size(80, 21);
             this.cbProgramFolder.TabIndex = 39;
-            this.cbProgramFolder.Text = "E:\\Program";
+            this.cbProgramFolder.Text = "D:\\Program";
             // 
             // cmdShareProgram
             // 
@@ -702,7 +702,7 @@ namespace EZAE
             this.cbTightVNCPath.Name = "cbTightVNCPath";
             this.cbTightVNCPath.Size = new System.Drawing.Size(80, 21);
             this.cbTightVNCPath.TabIndex = 23;
-            this.cbTightVNCPath.Text = "E:\\Program";
+            this.cbTightVNCPath.Text = "D:\\Program";
             // 
             // tabSetSequence
             // 
