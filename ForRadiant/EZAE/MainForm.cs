@@ -18,24 +18,24 @@ namespace EZAE
             string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
             string appdir = Path.GetDirectoryName(apppath);
             string toolsdir = appdir + "\\Tools";
-            string syspinpath = Path.Combine(toolsdir, "syspin.exe");
+            string pintotaskbarpath = Path.Combine(toolsdir, "pttb.exe");
 
-            if (File.Exists(syspinpath))
+            if (File.Exists(pintotaskbarpath))
             {
-                ProcessStartInfo startInfo = new ProcessStartInfo(syspinpath);
-                startInfo.Arguments = "\"" +apppath + "\" 5386";
+                ProcessStartInfo startInfo = new ProcessStartInfo(pintotaskbarpath);
+                startInfo.Arguments = "\"" +apppath + "\"";
                 Process.Start(startInfo);
 
             }
-            
+
             if (File.Exists(@"Tools\addhosttointranet.bat"))
             {
 
                 ExecuteAsAdmin(@"Tools\addhosttointranet.bat");
-                
+
             }
-            
-            
+
+
         }
 
         private void SetVersionInfo()
