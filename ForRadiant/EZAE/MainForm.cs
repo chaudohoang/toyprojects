@@ -82,15 +82,6 @@ namespace EZAE
         }
 
 
-        private void cmdPinEngineerMode_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            string filepath = @"Tools\pinEngineerModeToTaskBar.bat";
-            if (File.Exists(filepath))
-            {
-                Process.Start(filepath);
-            }
-        }
-
         private void cmdOpenImageJ_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             string filepath = @"Tools\ImageJ\ImageJ.exe";
@@ -496,19 +487,6 @@ namespace EZAE
             {
                 var latestfile = new DirectoryInfo(@"C:\Radiant Vision Systems Data\TrueTest\Sequence").GetFiles().OrderByDescending(o => o.LastWriteTime).FirstOrDefault();
                 lblSequenceFileName.Text = latestfile.FullName;
-            }
-        }
-
-        private void cmdCopyRVStolocal_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            if (File.Exists(@"Tools\CopyScript\copyFilesToLocal.vbs"))
-            {
-                Process.Start(@"Tools\CopyScript\copyFilesToLocal.vbs");
-            }
-
-            if (File.Exists(@"Tools\CopyScript\copyFoldesToLocal.vbs"))
-            {
-                Process.Start(@"Tools\CopyScript\copyFoldesToLocal.vbs");
             }
         }
 
@@ -932,6 +910,14 @@ namespace EZAE
                 startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
                 Process.Start(startInfo);
 
+            }
+        }
+
+        private void CmdSyncBackPro_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"Tools\SyncBackPro\SyncBackPro.exe"))
+            {
+                Process.Start(@"Tools\SyncBackPro\SyncBackPro.exe");
             }
         }
     }

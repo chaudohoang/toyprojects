@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
+using System.Windows.Forms;
 
 namespace KillProcess
 {
@@ -11,10 +13,34 @@ namespace KillProcess
     {
         static void Main(string[] args)
         {
-            foreach (var process in Process.GetProcessesByName("wfica32"))
+            string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            string appdir = Path.GetDirectoryName(apppath);
+
+            string killlistpath = Path.Combine(appdir, "KillList.txt");
+
+            string[] processes = File.ReadAllLines(killlistpath);
+            foreach (var process in processes)
+            {
+                try
+                {
+                    EndTask(process);
+                }
+                catch (Exception ex)
+                {
+
+                    MessageBox.Show(ex.Message);
+                }
+                
+            }
+        }
+
+        public static void EndTask(string taskname)
+        {
+            foreach (Process process in Process.GetProcessesByName(taskname))
             {
                 process.Kill();
             }
         }
+
     }
 }

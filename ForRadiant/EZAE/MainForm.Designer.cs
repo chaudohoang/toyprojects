@@ -47,7 +47,6 @@ namespace EZAE
             this.cmdOpenLanSearch = new System.Windows.Forms.LinkLabel();
             this.cmdOpenImageJ = new System.Windows.Forms.LinkLabel();
             this.cmdOpenEngineerMode = new System.Windows.Forms.LinkLabel();
-            this.cmdPinEngineerMode = new System.Windows.Forms.LinkLabel();
             this.tabSetupPC = new System.Windows.Forms.TabPage();
             this.cmdChangePW1 = new System.Windows.Forms.LinkLabel();
             this.chkmatlab2018ainstall = new System.Windows.Forms.CheckBox();
@@ -63,7 +62,7 @@ namespace EZAE
             this.cmdPinCameraPcFolders = new System.Windows.Forms.LinkLabel();
             this.cmdPinFixturePcFolders = new System.Windows.Forms.LinkLabel();
             this.cmdInstallWireshark = new System.Windows.Forms.LinkLabel();
-            this.cmdCopyRVStolocal = new System.Windows.Forms.LinkLabel();
+            this.cmdSyncBackPro = new System.Windows.Forms.LinkLabel();
             this.cmdSharePOCB = new System.Windows.Forms.LinkLabel();
             this.cmdShareRVSData = new System.Windows.Forms.LinkLabel();
             this.cmdShareE = new System.Windows.Forms.LinkLabel();
@@ -83,6 +82,7 @@ namespace EZAE
             this.cbTightVNCPath = new System.Windows.Forms.ComboBox();
             this.tabSetSequence = new System.Windows.Forms.TabPage();
             this.cmdCopySequence = new System.Windows.Forms.LinkLabel();
+            this.cmdCreateFFC = new System.Windows.Forms.LinkLabel();
             this.cmdInstallTrueTest = new System.Windows.Forms.LinkLabel();
             this.cmdBackupCurrentTT = new System.Windows.Forms.LinkLabel();
             this.cmdOneclickSetupTrueTestSettings = new System.Windows.Forms.LinkLabel();
@@ -91,13 +91,12 @@ namespace EZAE
             this.cbTrueTestInstallerList = new System.Windows.Forms.ComboBox();
             this.cbDIList = new System.Windows.Forms.ComboBox();
             this.cmdCreateOTPandResult = new System.Windows.Forms.LinkLabel();
-            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-            this.lblSequenceFileName = new System.Windows.Forms.Label();
-            this.cmdUseButterfly = new System.Windows.Forms.LinkLabel();
-            this.cmdUseScript = new System.Windows.Forms.LinkLabel();
-            this.cmdCreateFFC = new System.Windows.Forms.LinkLabel();
-            this.cmdSetSequence = new System.Windows.Forms.LinkLabel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.cmdSetSequence = new System.Windows.Forms.LinkLabel();
+            this.cmdUseScript = new System.Windows.Forms.LinkLabel();
+            this.cmdUseButterfly = new System.Windows.Forms.LinkLabel();
+            this.lblSequenceFileName = new System.Windows.Forms.Label();
+            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.tabControl1.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabSetupPC.SuspendLayout();
@@ -133,7 +132,6 @@ namespace EZAE
             this.tabControl.Controls.Add(this.cmdOpenLanSearch);
             this.tabControl.Controls.Add(this.cmdOpenImageJ);
             this.tabControl.Controls.Add(this.cmdOpenEngineerMode);
-            this.tabControl.Controls.Add(this.cmdPinEngineerMode);
             this.tabControl.Location = new System.Drawing.Point(4, 22);
             this.tabControl.Name = "tabControl";
             this.tabControl.Size = new System.Drawing.Size(664, 397);
@@ -288,7 +286,7 @@ namespace EZAE
             // cmdOpenImageJ
             // 
             this.cmdOpenImageJ.AutoSize = true;
-            this.cmdOpenImageJ.Location = new System.Drawing.Point(223, 10);
+            this.cmdOpenImageJ.Location = new System.Drawing.Point(120, 10);
             this.cmdOpenImageJ.Name = "cmdOpenImageJ";
             this.cmdOpenImageJ.Size = new System.Drawing.Size(70, 13);
             this.cmdOpenImageJ.TabIndex = 3;
@@ -307,17 +305,6 @@ namespace EZAE
             this.cmdOpenEngineerMode.Text = "Open Engineer Mode";
             this.cmdOpenEngineerMode.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenEngineerMode_LinkClicked);
             // 
-            // cmdPinEngineerMode
-            // 
-            this.cmdPinEngineerMode.AutoSize = true;
-            this.cmdPinEngineerMode.Location = new System.Drawing.Point(120, 10);
-            this.cmdPinEngineerMode.Name = "cmdPinEngineerMode";
-            this.cmdPinEngineerMode.Size = new System.Drawing.Size(97, 13);
-            this.cmdPinEngineerMode.TabIndex = 2;
-            this.cmdPinEngineerMode.TabStop = true;
-            this.cmdPinEngineerMode.Text = "Pin Engineer Mode";
-            this.cmdPinEngineerMode.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdPinEngineerMode_LinkClicked);
-            // 
             // tabSetupPC
             // 
             this.tabSetupPC.Controls.Add(this.cmdChangePW1);
@@ -334,7 +321,7 @@ namespace EZAE
             this.tabSetupPC.Controls.Add(this.cmdPinCameraPcFolders);
             this.tabSetupPC.Controls.Add(this.cmdPinFixturePcFolders);
             this.tabSetupPC.Controls.Add(this.cmdInstallWireshark);
-            this.tabSetupPC.Controls.Add(this.cmdCopyRVStolocal);
+            this.tabSetupPC.Controls.Add(this.cmdSyncBackPro);
             this.tabSetupPC.Controls.Add(this.cmdSharePOCB);
             this.tabSetupPC.Controls.Add(this.cmdShareRVSData);
             this.tabSetupPC.Controls.Add(this.cmdShareE);
@@ -514,16 +501,16 @@ namespace EZAE
             this.cmdInstallWireshark.Text = "Install Wireshark";
             this.cmdInstallWireshark.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdInstallWireshark_LinkClicked);
             // 
-            // cmdCopyRVStolocal
+            // cmdSyncBackPro
             // 
-            this.cmdCopyRVStolocal.AutoSize = true;
-            this.cmdCopyRVStolocal.Location = new System.Drawing.Point(239, 195);
-            this.cmdCopyRVStolocal.Name = "cmdCopyRVStolocal";
-            this.cmdCopyRVStolocal.Size = new System.Drawing.Size(122, 13);
-            this.cmdCopyRVStolocal.TabIndex = 46;
-            this.cmdCopyRVStolocal.TabStop = true;
-            this.cmdCopyRVStolocal.Text = "Copy RVS folder to local";
-            this.cmdCopyRVStolocal.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCopyRVStolocal_LinkClicked);
+            this.cmdSyncBackPro.AutoSize = true;
+            this.cmdSyncBackPro.Location = new System.Drawing.Point(239, 195);
+            this.cmdSyncBackPro.Name = "cmdSyncBackPro";
+            this.cmdSyncBackPro.Size = new System.Drawing.Size(75, 13);
+            this.cmdSyncBackPro.TabIndex = 46;
+            this.cmdSyncBackPro.TabStop = true;
+            this.cmdSyncBackPro.Text = "SyncBack Pro";
+            this.cmdSyncBackPro.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.CmdSyncBackPro_LinkClicked);
             // 
             // cmdSharePOCB
             // 
@@ -750,6 +737,17 @@ namespace EZAE
             this.cmdCopySequence.Text = "Copy Sequence";
             this.cmdCopySequence.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCopySequence_LinkClicked);
             // 
+            // cmdCreateFFC
+            // 
+            this.cmdCreateFFC.AutoSize = true;
+            this.cmdCreateFFC.Location = new System.Drawing.Point(230, 22);
+            this.cmdCreateFFC.Name = "cmdCreateFFC";
+            this.cmdCreateFFC.Size = new System.Drawing.Size(114, 13);
+            this.cmdCreateFFC.TabIndex = 59;
+            this.cmdCreateFFC.TabStop = true;
+            this.cmdCreateFFC.Text = "Create FFC Databases";
+            this.cmdCreateFFC.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCreateFFC_LinkClicked);
+            // 
             // cmdInstallTrueTest
             // 
             this.cmdInstallTrueTest.AutoSize = true;
@@ -854,58 +852,6 @@ namespace EZAE
             this.cmdCreateOTPandResult.Text = "Create OTP and Result Folders";
             this.cmdCreateOTPandResult.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCreateOTPandResult_LinkClicked);
             // 
-            // lblSequenceFileName
-            // 
-            this.lblSequenceFileName.AutoSize = true;
-            this.lblSequenceFileName.Location = new System.Drawing.Point(111, 38);
-            this.lblSequenceFileName.Name = "lblSequenceFileName";
-            this.lblSequenceFileName.Size = new System.Drawing.Size(0, 13);
-            this.lblSequenceFileName.TabIndex = 27;
-            // 
-            // cmdUseButterfly
-            // 
-            this.cmdUseButterfly.AutoSize = true;
-            this.cmdUseButterfly.Location = new System.Drawing.Point(84, 16);
-            this.cmdUseButterfly.Name = "cmdUseButterfly";
-            this.cmdUseButterfly.Size = new System.Drawing.Size(67, 13);
-            this.cmdUseButterfly.TabIndex = 57;
-            this.cmdUseButterfly.TabStop = true;
-            this.cmdUseButterfly.Text = "Use Butterfly";
-            this.cmdUseButterfly.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdUseButterfly_LinkClicked);
-            // 
-            // cmdUseScript
-            // 
-            this.cmdUseScript.AutoSize = true;
-            this.cmdUseScript.Location = new System.Drawing.Point(157, 16);
-            this.cmdUseScript.Name = "cmdUseScript";
-            this.cmdUseScript.Size = new System.Drawing.Size(56, 13);
-            this.cmdUseScript.TabIndex = 58;
-            this.cmdUseScript.TabStop = true;
-            this.cmdUseScript.Text = "Use Script";
-            this.cmdUseScript.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdUseScript_LinkClicked);
-            // 
-            // cmdCreateFFC
-            // 
-            this.cmdCreateFFC.AutoSize = true;
-            this.cmdCreateFFC.Location = new System.Drawing.Point(230, 22);
-            this.cmdCreateFFC.Name = "cmdCreateFFC";
-            this.cmdCreateFFC.Size = new System.Drawing.Size(114, 13);
-            this.cmdCreateFFC.TabIndex = 59;
-            this.cmdCreateFFC.TabStop = true;
-            this.cmdCreateFFC.Text = "Create FFC Databases";
-            this.cmdCreateFFC.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCreateFFC_LinkClicked);
-            // 
-            // cmdSetSequence
-            // 
-            this.cmdSetSequence.AutoSize = true;
-            this.cmdSetSequence.Location = new System.Drawing.Point(6, 16);
-            this.cmdSetSequence.Name = "cmdSetSequence";
-            this.cmdSetSequence.Size = new System.Drawing.Size(72, 13);
-            this.cmdSetSequence.TabIndex = 60;
-            this.cmdSetSequence.TabStop = true;
-            this.cmdSetSequence.Text = "SetSequence";
-            this.cmdSetSequence.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdSetSequence_LinkClicked);
-            // 
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.cmdSetSequence);
@@ -918,6 +864,47 @@ namespace EZAE
             this.groupBox1.TabIndex = 29;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Set Sequence";
+            // 
+            // cmdSetSequence
+            // 
+            this.cmdSetSequence.AutoSize = true;
+            this.cmdSetSequence.Location = new System.Drawing.Point(6, 16);
+            this.cmdSetSequence.Name = "cmdSetSequence";
+            this.cmdSetSequence.Size = new System.Drawing.Size(72, 13);
+            this.cmdSetSequence.TabIndex = 60;
+            this.cmdSetSequence.TabStop = true;
+            this.cmdSetSequence.Text = "SetSequence";
+            this.cmdSetSequence.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdSetSequence_LinkClicked);
+            // 
+            // cmdUseScript
+            // 
+            this.cmdUseScript.AutoSize = true;
+            this.cmdUseScript.Location = new System.Drawing.Point(157, 16);
+            this.cmdUseScript.Name = "cmdUseScript";
+            this.cmdUseScript.Size = new System.Drawing.Size(56, 13);
+            this.cmdUseScript.TabIndex = 58;
+            this.cmdUseScript.TabStop = true;
+            this.cmdUseScript.Text = "Use Script";
+            this.cmdUseScript.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdUseScript_LinkClicked);
+            // 
+            // cmdUseButterfly
+            // 
+            this.cmdUseButterfly.AutoSize = true;
+            this.cmdUseButterfly.Location = new System.Drawing.Point(84, 16);
+            this.cmdUseButterfly.Name = "cmdUseButterfly";
+            this.cmdUseButterfly.Size = new System.Drawing.Size(67, 13);
+            this.cmdUseButterfly.TabIndex = 57;
+            this.cmdUseButterfly.TabStop = true;
+            this.cmdUseButterfly.Text = "Use Butterfly";
+            this.cmdUseButterfly.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdUseButterfly_LinkClicked);
+            // 
+            // lblSequenceFileName
+            // 
+            this.lblSequenceFileName.AutoSize = true;
+            this.lblSequenceFileName.Location = new System.Drawing.Point(111, 38);
+            this.lblSequenceFileName.Name = "lblSequenceFileName";
+            this.lblSequenceFileName.Size = new System.Drawing.Size(0, 13);
+            this.lblSequenceFileName.TabIndex = 27;
             // 
             // MainForm
             // 
@@ -954,7 +941,6 @@ namespace EZAE
         private System.Windows.Forms.ComboBox cbDIList;
         private System.Windows.Forms.ComboBox cbTightVNCPath;
         private System.Windows.Forms.TabPage tabControl;
-        private System.Windows.Forms.LinkLabel cmdPinEngineerMode;
         private System.Windows.Forms.LinkLabel cmdOpenUpdates;
         private System.Windows.Forms.LinkLabel cmdOpenLanSearch;
         private System.Windows.Forms.LinkLabel cmdOpenImageJ;
@@ -985,7 +971,7 @@ namespace EZAE
         private System.Windows.Forms.LinkLabel cmdShareRVSData;
         private System.Windows.Forms.LinkLabel cmdCreateOTPandResult;
         private System.Windows.Forms.LinkLabel cmdSetTTPermission;
-        private System.Windows.Forms.LinkLabel cmdCopyRVStolocal;
+        private System.Windows.Forms.LinkLabel cmdSyncBackPro;
         private System.Windows.Forms.LinkLabel cmdInstallWireshark;
         private System.Windows.Forms.LinkLabel cmdPinCameraPcFolders;
         private System.Windows.Forms.LinkLabel cmdPinFixturePcFolders;
