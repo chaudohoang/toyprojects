@@ -23,7 +23,7 @@ namespace EZAE
             if (File.Exists(pintotaskbarpath))
             {
                 ProcessStartInfo startInfo = new ProcessStartInfo(pintotaskbarpath);
-                startInfo.Arguments = "\"" +apppath + "\"";
+                startInfo.Arguments = "\"" +apppath+ "\"";
                 Process.Start(startInfo);
 
             }
@@ -913,11 +913,32 @@ namespace EZAE
             }
         }
 
-        private void CmdSyncBackPro_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void cbCopyWhizItem_DropDown(object sender, EventArgs e)
         {
-            if (File.Exists(@"Tools\SyncBackPro\SyncBackPro.exe"))
+            cbCopyWhizItem.Items.Clear();
+            String[] czml =
+            Directory.GetFiles(@"Tools/CopyWhiz", "*.czml", SearchOption.AllDirectories)
+            .Select(fileName => Path.GetFileName(fileName))
+            .ToArray();
+
+            foreach (string file in czml)
             {
-                Process.Start(@"Tools\SyncBackPro\SyncBackPro.exe");
+                cbCopyWhizItem.Items.Add(file);
+            }
+        }
+
+        private void cmdRunCopyWhiz_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+
+            if ((cbCopyWhizItem.Text != "") && File.Exists(@"Tools\CopyWhiz\CopywhizCopy.exe"))
+            {
+                string filepath = Path.GetFullPath(@"Tools\CopyWhiz\CopywhizCopy.exe");
+                string argumentpath = Path.Combine(Path.GetDirectoryName(filepath), cbCopyWhizItem.Text);
+                ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
+                startInfo.Arguments = "\"" + argumentpath + "\"";
+                startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
+                
+                Process.Start(startInfo);
             }
         }
     }

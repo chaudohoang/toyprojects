@@ -62,7 +62,6 @@ namespace EZAE
             this.cmdPinCameraPcFolders = new System.Windows.Forms.LinkLabel();
             this.cmdPinFixturePcFolders = new System.Windows.Forms.LinkLabel();
             this.cmdInstallWireshark = new System.Windows.Forms.LinkLabel();
-            this.cmdSyncBackPro = new System.Windows.Forms.LinkLabel();
             this.cmdSharePOCB = new System.Windows.Forms.LinkLabel();
             this.cmdShareRVSData = new System.Windows.Forms.LinkLabel();
             this.cmdShareE = new System.Windows.Forms.LinkLabel();
@@ -97,6 +96,8 @@ namespace EZAE
             this.cmdUseButterfly = new System.Windows.Forms.LinkLabel();
             this.lblSequenceFileName = new System.Windows.Forms.Label();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.cbCopyWhizItem = new System.Windows.Forms.ComboBox();
+            this.cmdRunCopyWhiz = new System.Windows.Forms.LinkLabel();
             this.tabControl1.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabSetupPC.SuspendLayout();
@@ -307,6 +308,8 @@ namespace EZAE
             // 
             // tabSetupPC
             // 
+            this.tabSetupPC.Controls.Add(this.cbCopyWhizItem);
+            this.tabSetupPC.Controls.Add(this.cmdRunCopyWhiz);
             this.tabSetupPC.Controls.Add(this.cmdChangePW1);
             this.tabSetupPC.Controls.Add(this.chkmatlab2018ainstall);
             this.tabSetupPC.Controls.Add(this.chkmatlabinstall);
@@ -321,7 +324,6 @@ namespace EZAE
             this.tabSetupPC.Controls.Add(this.cmdPinCameraPcFolders);
             this.tabSetupPC.Controls.Add(this.cmdPinFixturePcFolders);
             this.tabSetupPC.Controls.Add(this.cmdInstallWireshark);
-            this.tabSetupPC.Controls.Add(this.cmdSyncBackPro);
             this.tabSetupPC.Controls.Add(this.cmdSharePOCB);
             this.tabSetupPC.Controls.Add(this.cmdShareRVSData);
             this.tabSetupPC.Controls.Add(this.cmdShareE);
@@ -351,7 +353,7 @@ namespace EZAE
             // cmdChangePW1
             // 
             this.cmdChangePW1.AutoSize = true;
-            this.cmdChangePW1.Location = new System.Drawing.Point(7, 216);
+            this.cmdChangePW1.Location = new System.Drawing.Point(240, 155);
             this.cmdChangePW1.Name = "cmdChangePW1";
             this.cmdChangePW1.Size = new System.Drawing.Size(113, 13);
             this.cmdChangePW1.TabIndex = 47;
@@ -362,7 +364,7 @@ namespace EZAE
             // chkmatlab2018ainstall
             // 
             this.chkmatlab2018ainstall.AutoSize = true;
-            this.chkmatlab2018ainstall.Location = new System.Drawing.Point(150, 106);
+            this.chkmatlab2018ainstall.Location = new System.Drawing.Point(324, 84);
             this.chkmatlab2018ainstall.Name = "chkmatlab2018ainstall";
             this.chkmatlab2018ainstall.Size = new System.Drawing.Size(15, 14);
             this.chkmatlab2018ainstall.TabIndex = 33;
@@ -371,7 +373,7 @@ namespace EZAE
             // chkmatlabinstall
             // 
             this.chkmatlabinstall.AutoSize = true;
-            this.chkmatlabinstall.Location = new System.Drawing.Point(363, 83);
+            this.chkmatlabinstall.Location = new System.Drawing.Point(152, 84);
             this.chkmatlabinstall.Name = "chkmatlabinstall";
             this.chkmatlabinstall.Size = new System.Drawing.Size(15, 14);
             this.chkmatlabinstall.TabIndex = 33;
@@ -380,7 +382,7 @@ namespace EZAE
             // chkdotnetinstall
             // 
             this.chkdotnetinstall.AutoSize = true;
-            this.chkdotnetinstall.Location = new System.Drawing.Point(195, 83);
+            this.chkdotnetinstall.Location = new System.Drawing.Point(470, 57);
             this.chkdotnetinstall.Name = "chkdotnetinstall";
             this.chkdotnetinstall.Size = new System.Drawing.Size(15, 14);
             this.chkdotnetinstall.TabIndex = 31;
@@ -394,7 +396,7 @@ namespace EZAE
             "D:\\Program",
             "C:\\Program",
             "E:\\Program"});
-            this.cbProgramFolder.Location = new System.Drawing.Point(244, 125);
+            this.cbProgramFolder.Location = new System.Drawing.Point(245, 105);
             this.cbProgramFolder.Name = "cbProgramFolder";
             this.cbProgramFolder.Size = new System.Drawing.Size(80, 21);
             this.cbProgramFolder.TabIndex = 39;
@@ -403,7 +405,7 @@ namespace EZAE
             // cmdShareProgram
             // 
             this.cmdShareProgram.AutoSize = true;
-            this.cmdShareProgram.Location = new System.Drawing.Point(161, 128);
+            this.cmdShareProgram.Location = new System.Drawing.Point(162, 108);
             this.cmdShareProgram.Name = "cmdShareProgram";
             this.cmdShareProgram.Size = new System.Drawing.Size(77, 13);
             this.cmdShareProgram.TabIndex = 38;
@@ -438,7 +440,7 @@ namespace EZAE
             // cmdFirewallOff
             // 
             this.cmdFirewallOff.AutoSize = true;
-            this.cmdFirewallOff.Location = new System.Drawing.Point(174, 195);
+            this.cmdFirewallOff.Location = new System.Drawing.Point(175, 155);
             this.cmdFirewallOff.Name = "cmdFirewallOff";
             this.cmdFirewallOff.Size = new System.Drawing.Size(59, 13);
             this.cmdFirewallOff.TabIndex = 45;
@@ -449,7 +451,7 @@ namespace EZAE
             // cmdPasswordSharingOff
             // 
             this.cmdPasswordSharingOff.AutoSize = true;
-            this.cmdPasswordSharingOff.Location = new System.Drawing.Point(59, 195);
+            this.cmdPasswordSharingOff.Location = new System.Drawing.Point(60, 155);
             this.cmdPasswordSharingOff.Name = "cmdPasswordSharingOff";
             this.cmdPasswordSharingOff.Size = new System.Drawing.Size(109, 13);
             this.cmdPasswordSharingOff.TabIndex = 44;
@@ -460,7 +462,7 @@ namespace EZAE
             // cmdUACOff
             // 
             this.cmdUACOff.AutoSize = true;
-            this.cmdUACOff.Location = new System.Drawing.Point(7, 195);
+            this.cmdUACOff.Location = new System.Drawing.Point(8, 155);
             this.cmdUACOff.Name = "cmdUACOff";
             this.cmdUACOff.Size = new System.Drawing.Size(46, 13);
             this.cmdUACOff.TabIndex = 43;
@@ -471,7 +473,7 @@ namespace EZAE
             // cmdPinCameraPcFolders
             // 
             this.cmdPinCameraPcFolders.AutoSize = true;
-            this.cmdPinCameraPcFolders.Location = new System.Drawing.Point(7, 173);
+            this.cmdPinCameraPcFolders.Location = new System.Drawing.Point(8, 133);
             this.cmdPinCameraPcFolders.Name = "cmdPinCameraPcFolders";
             this.cmdPinCameraPcFolders.Size = new System.Drawing.Size(115, 13);
             this.cmdPinCameraPcFolders.TabIndex = 40;
@@ -482,7 +484,7 @@ namespace EZAE
             // cmdPinFixturePcFolders
             // 
             this.cmdPinFixturePcFolders.AutoSize = true;
-            this.cmdPinFixturePcFolders.Location = new System.Drawing.Point(128, 173);
+            this.cmdPinFixturePcFolders.Location = new System.Drawing.Point(129, 133);
             this.cmdPinFixturePcFolders.Name = "cmdPinFixturePcFolders";
             this.cmdPinFixturePcFolders.Size = new System.Drawing.Size(110, 13);
             this.cmdPinFixturePcFolders.TabIndex = 41;
@@ -493,7 +495,7 @@ namespace EZAE
             // cmdInstallWireshark
             // 
             this.cmdInstallWireshark.AutoSize = true;
-            this.cmdInstallWireshark.Location = new System.Drawing.Point(244, 173);
+            this.cmdInstallWireshark.Location = new System.Drawing.Point(245, 133);
             this.cmdInstallWireshark.Name = "cmdInstallWireshark";
             this.cmdInstallWireshark.Size = new System.Drawing.Size(85, 13);
             this.cmdInstallWireshark.TabIndex = 42;
@@ -501,21 +503,10 @@ namespace EZAE
             this.cmdInstallWireshark.Text = "Install Wireshark";
             this.cmdInstallWireshark.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdInstallWireshark_LinkClicked);
             // 
-            // cmdSyncBackPro
-            // 
-            this.cmdSyncBackPro.AutoSize = true;
-            this.cmdSyncBackPro.Location = new System.Drawing.Point(239, 195);
-            this.cmdSyncBackPro.Name = "cmdSyncBackPro";
-            this.cmdSyncBackPro.Size = new System.Drawing.Size(75, 13);
-            this.cmdSyncBackPro.TabIndex = 46;
-            this.cmdSyncBackPro.TabStop = true;
-            this.cmdSyncBackPro.Text = "SyncBack Pro";
-            this.cmdSyncBackPro.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.CmdSyncBackPro_LinkClicked);
-            // 
             // cmdSharePOCB
             // 
             this.cmdSharePOCB.AutoSize = true;
-            this.cmdSharePOCB.Location = new System.Drawing.Point(103, 151);
+            this.cmdSharePOCB.Location = new System.Drawing.Point(427, 108);
             this.cmdSharePOCB.Name = "cmdSharePOCB";
             this.cmdSharePOCB.Size = new System.Drawing.Size(67, 13);
             this.cmdSharePOCB.TabIndex = 37;
@@ -526,7 +517,7 @@ namespace EZAE
             // cmdShareRVSData
             // 
             this.cmdShareRVSData.AutoSize = true;
-            this.cmdShareRVSData.Location = new System.Drawing.Point(7, 151);
+            this.cmdShareRVSData.Location = new System.Drawing.Point(331, 108);
             this.cmdShareRVSData.Name = "cmdShareRVSData";
             this.cmdShareRVSData.Size = new System.Drawing.Size(83, 13);
             this.cmdShareRVSData.TabIndex = 37;
@@ -537,7 +528,7 @@ namespace EZAE
             // cmdShareE
             // 
             this.cmdShareE.AutoSize = true;
-            this.cmdShareE.Location = new System.Drawing.Point(110, 128);
+            this.cmdShareE.Location = new System.Drawing.Point(111, 108);
             this.cmdShareE.Name = "cmdShareE";
             this.cmdShareE.Size = new System.Drawing.Size(45, 13);
             this.cmdShareE.TabIndex = 36;
@@ -548,7 +539,7 @@ namespace EZAE
             // cmdShareD
             // 
             this.cmdShareD.AutoSize = true;
-            this.cmdShareD.Location = new System.Drawing.Point(58, 128);
+            this.cmdShareD.Location = new System.Drawing.Point(59, 108);
             this.cmdShareD.Name = "cmdShareD";
             this.cmdShareD.Size = new System.Drawing.Size(46, 13);
             this.cmdShareD.TabIndex = 35;
@@ -559,7 +550,7 @@ namespace EZAE
             // cmdShareC
             // 
             this.cmdShareC.AutoSize = true;
-            this.cmdShareC.Location = new System.Drawing.Point(7, 128);
+            this.cmdShareC.Location = new System.Drawing.Point(8, 108);
             this.cmdShareC.Name = "cmdShareC";
             this.cmdShareC.Size = new System.Drawing.Size(45, 13);
             this.cmdShareC.TabIndex = 34;
@@ -570,7 +561,7 @@ namespace EZAE
             // cmdInstallMatlab2018a
             // 
             this.cmdInstallMatlab2018a.AutoSize = true;
-            this.cmdInstallMatlab2018a.Location = new System.Drawing.Point(6, 105);
+            this.cmdInstallMatlab2018a.Location = new System.Drawing.Point(174, 84);
             this.cmdInstallMatlab2018a.Name = "cmdInstallMatlab2018a";
             this.cmdInstallMatlab2018a.Size = new System.Drawing.Size(144, 13);
             this.cmdInstallMatlab2018a.TabIndex = 32;
@@ -581,7 +572,7 @@ namespace EZAE
             // cmdInstallMatlab
             // 
             this.cmdInstallMatlab.AutoSize = true;
-            this.cmdInstallMatlab.Location = new System.Drawing.Point(219, 82);
+            this.cmdInstallMatlab.Location = new System.Drawing.Point(8, 84);
             this.cmdInstallMatlab.Name = "cmdInstallMatlab";
             this.cmdInstallMatlab.Size = new System.Drawing.Size(138, 13);
             this.cmdInstallMatlab.TabIndex = 32;
@@ -592,7 +583,7 @@ namespace EZAE
             // cmdInstallDotnet48
             // 
             this.cmdInstallDotnet48.AutoSize = true;
-            this.cmdInstallDotnet48.Location = new System.Drawing.Point(102, 82);
+            this.cmdInstallDotnet48.Location = new System.Drawing.Point(377, 57);
             this.cmdInstallDotnet48.Name = "cmdInstallDotnet48";
             this.cmdInstallDotnet48.Size = new System.Drawing.Size(87, 13);
             this.cmdInstallDotnet48.TabIndex = 30;
@@ -603,7 +594,7 @@ namespace EZAE
             // cmdInstallNPP
             // 
             this.cmdInstallNPP.AutoSize = true;
-            this.cmdInstallNPP.Location = new System.Drawing.Point(6, 82);
+            this.cmdInstallNPP.Location = new System.Drawing.Point(281, 57);
             this.cmdInstallNPP.Name = "cmdInstallNPP";
             this.cmdInstallNPP.Size = new System.Drawing.Size(90, 13);
             this.cmdInstallNPP.TabIndex = 29;
@@ -906,6 +897,26 @@ namespace EZAE
             this.lblSequenceFileName.Size = new System.Drawing.Size(0, 13);
             this.lblSequenceFileName.TabIndex = 27;
             // 
+            // cbCopyWhizItem
+            // 
+            this.cbCopyWhizItem.FormattingEnabled = true;
+            this.cbCopyWhizItem.Location = new System.Drawing.Point(90, 173);
+            this.cbCopyWhizItem.Name = "cbCopyWhizItem";
+            this.cbCopyWhizItem.Size = new System.Drawing.Size(263, 21);
+            this.cbCopyWhizItem.TabIndex = 49;
+            this.cbCopyWhizItem.DropDown += new System.EventHandler(this.cbCopyWhizItem_DropDown);
+            // 
+            // cmdRunCopyWhiz
+            // 
+            this.cmdRunCopyWhiz.AutoSize = true;
+            this.cmdRunCopyWhiz.Location = new System.Drawing.Point(7, 176);
+            this.cmdRunCopyWhiz.Name = "cmdRunCopyWhiz";
+            this.cmdRunCopyWhiz.Size = new System.Drawing.Size(78, 13);
+            this.cmdRunCopyWhiz.TabIndex = 48;
+            this.cmdRunCopyWhiz.TabStop = true;
+            this.cmdRunCopyWhiz.Text = "Run CopyWhiz";
+            this.cmdRunCopyWhiz.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdRunCopyWhiz_LinkClicked);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -971,7 +982,6 @@ namespace EZAE
         private System.Windows.Forms.LinkLabel cmdShareRVSData;
         private System.Windows.Forms.LinkLabel cmdCreateOTPandResult;
         private System.Windows.Forms.LinkLabel cmdSetTTPermission;
-        private System.Windows.Forms.LinkLabel cmdSyncBackPro;
         private System.Windows.Forms.LinkLabel cmdInstallWireshark;
         private System.Windows.Forms.LinkLabel cmdPinCameraPcFolders;
         private System.Windows.Forms.LinkLabel cmdPinFixturePcFolders;
@@ -1001,6 +1011,8 @@ namespace EZAE
         private System.Windows.Forms.LinkLabel cmdUseScript;
         private System.Windows.Forms.LinkLabel cmdUseButterfly;
         private System.Windows.Forms.Label lblSequenceFileName;
+        private System.Windows.Forms.ComboBox cbCopyWhizItem;
+        private System.Windows.Forms.LinkLabel cmdRunCopyWhiz;
     }
 }
 
