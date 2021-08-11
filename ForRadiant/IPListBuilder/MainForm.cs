@@ -51,7 +51,7 @@ namespace IPListBuilder
                 string filename = Path.GetFileNameWithoutExtension(cbIPList2.Text);
                 List<string> newfile = new List<string>();
                 newfile.Add("<?xml version=\"1.0\"?>");
-                newfile.Add("<Copywhiz Action=\"Copy\" ShowLog=\"Never\" LogContent=\"1\" RunSilently=\"False\">");
+                newfile.Add("<Copywhiz Action=\"Copy\" ShowLog=\"Never\" LogContent=\"1\" RunSilently=\"True\">");
                 newfile.Add("   <Filter IncludeFilesMask=\"\" ExcludeFilesMask=\"\" IncludeFoldersMask=\"\" ExcludeFoldersMask=\"\" DateFilter=\"0\" FilterBySize=\"False\" CopyAllFilesToSingleFolder=\"False\" CreateFolderStructureOnly=\"False\" SkipEmptyFolders=\"False\" CreateFullFolderHierarchy=\"False\"/>");
                 newfile.Add("   <Source SourceFolder=\"\"></Source>");
                 newfile.Add("   <FileTransfer FileAlreadyExistsAction=\"1\" FileAlreadyExistsSkipIdentical=\"True\" FileAlreadyExistsSkipNewer=\"True\" FileAlreadyExistsRenameSuffix=\"\">");
