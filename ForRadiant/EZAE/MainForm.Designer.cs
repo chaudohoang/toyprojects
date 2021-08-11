@@ -48,6 +48,8 @@ namespace EZAE
             this.cmdOpenImageJ = new System.Windows.Forms.LinkLabel();
             this.cmdOpenEngineerMode = new System.Windows.Forms.LinkLabel();
             this.tabSetupPC = new System.Windows.Forms.TabPage();
+            this.cbCopyWhizItem = new System.Windows.Forms.ComboBox();
+            this.cmdRunCopyWhiz = new System.Windows.Forms.LinkLabel();
             this.cmdChangePW1 = new System.Windows.Forms.LinkLabel();
             this.chkmatlab2018ainstall = new System.Windows.Forms.CheckBox();
             this.chkmatlabinstall = new System.Windows.Forms.CheckBox();
@@ -96,8 +98,8 @@ namespace EZAE
             this.cmdUseButterfly = new System.Windows.Forms.LinkLabel();
             this.lblSequenceFileName = new System.Windows.Forms.Label();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-            this.cbCopyWhizItem = new System.Windows.Forms.ComboBox();
-            this.cmdRunCopyWhiz = new System.Windows.Forms.LinkLabel();
+            this.cmdAutostartTaskCamera = new System.Windows.Forms.LinkLabel();
+            this.cmdAutostartTaskFixture = new System.Windows.Forms.LinkLabel();
             this.tabControl1.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabSetupPC.SuspendLayout();
@@ -308,6 +310,8 @@ namespace EZAE
             // 
             // tabSetupPC
             // 
+            this.tabSetupPC.Controls.Add(this.cmdAutostartTaskFixture);
+            this.tabSetupPC.Controls.Add(this.cmdAutostartTaskCamera);
             this.tabSetupPC.Controls.Add(this.cbCopyWhizItem);
             this.tabSetupPC.Controls.Add(this.cmdRunCopyWhiz);
             this.tabSetupPC.Controls.Add(this.cmdChangePW1);
@@ -349,6 +353,26 @@ namespace EZAE
             this.tabSetupPC.Text = "Setup PC";
             this.tabSetupPC.UseVisualStyleBackColor = true;
             this.tabSetupPC.Enter += new System.EventHandler(this.tabSetupPC_Enter);
+            // 
+            // cbCopyWhizItem
+            // 
+            this.cbCopyWhizItem.FormattingEnabled = true;
+            this.cbCopyWhizItem.Location = new System.Drawing.Point(90, 173);
+            this.cbCopyWhizItem.Name = "cbCopyWhizItem";
+            this.cbCopyWhizItem.Size = new System.Drawing.Size(263, 21);
+            this.cbCopyWhizItem.TabIndex = 49;
+            this.cbCopyWhizItem.DropDown += new System.EventHandler(this.cbCopyWhizItem_DropDown);
+            // 
+            // cmdRunCopyWhiz
+            // 
+            this.cmdRunCopyWhiz.AutoSize = true;
+            this.cmdRunCopyWhiz.Location = new System.Drawing.Point(7, 176);
+            this.cmdRunCopyWhiz.Name = "cmdRunCopyWhiz";
+            this.cmdRunCopyWhiz.Size = new System.Drawing.Size(78, 13);
+            this.cmdRunCopyWhiz.TabIndex = 48;
+            this.cmdRunCopyWhiz.TabStop = true;
+            this.cmdRunCopyWhiz.Text = "Run CopyWhiz";
+            this.cmdRunCopyWhiz.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdRunCopyWhiz_LinkClicked);
             // 
             // cmdChangePW1
             // 
@@ -649,7 +673,7 @@ namespace EZAE
             // cmdRemoveTightVNC
             // 
             this.cmdRemoveTightVNC.AutoSize = true;
-            this.cmdRemoveTightVNC.Location = new System.Drawing.Point(193, 32);
+            this.cmdRemoveTightVNC.Location = new System.Drawing.Point(314, 34);
             this.cmdRemoveTightVNC.Name = "cmdRemoveTightVNC";
             this.cmdRemoveTightVNC.Size = new System.Drawing.Size(96, 13);
             this.cmdRemoveTightVNC.TabIndex = 24;
@@ -660,7 +684,7 @@ namespace EZAE
             // cmdInstallTightVNC
             // 
             this.cmdInstallTightVNC.AutoSize = true;
-            this.cmdInstallTightVNC.Location = new System.Drawing.Point(6, 32);
+            this.cmdInstallTightVNC.Location = new System.Drawing.Point(127, 34);
             this.cmdInstallTightVNC.Name = "cmdInstallTightVNC";
             this.cmdInstallTightVNC.Size = new System.Drawing.Size(95, 13);
             this.cmdInstallTightVNC.TabIndex = 22;
@@ -689,7 +713,7 @@ namespace EZAE
             "D:\\Program",
             "C:\\Program",
             "E:\\Program"});
-            this.cbTightVNCPath.Location = new System.Drawing.Point(107, 29);
+            this.cbTightVNCPath.Location = new System.Drawing.Point(228, 31);
             this.cbTightVNCPath.Name = "cbTightVNCPath";
             this.cbTightVNCPath.Size = new System.Drawing.Size(80, 21);
             this.cbTightVNCPath.TabIndex = 23;
@@ -897,25 +921,27 @@ namespace EZAE
             this.lblSequenceFileName.Size = new System.Drawing.Size(0, 13);
             this.lblSequenceFileName.TabIndex = 27;
             // 
-            // cbCopyWhizItem
+            // cmdAutostartTaskCamera
             // 
-            this.cbCopyWhizItem.FormattingEnabled = true;
-            this.cbCopyWhizItem.Location = new System.Drawing.Point(90, 173);
-            this.cbCopyWhizItem.Name = "cbCopyWhizItem";
-            this.cbCopyWhizItem.Size = new System.Drawing.Size(263, 21);
-            this.cbCopyWhizItem.TabIndex = 49;
-            this.cbCopyWhizItem.DropDown += new System.EventHandler(this.cbCopyWhizItem_DropDown);
+            this.cmdAutostartTaskCamera.AutoSize = true;
+            this.cmdAutostartTaskCamera.Location = new System.Drawing.Point(6, 34);
+            this.cmdAutostartTaskCamera.Name = "cmdAutostartTaskCamera";
+            this.cmdAutostartTaskCamera.Size = new System.Drawing.Size(115, 13);
+            this.cmdAutostartTaskCamera.TabIndex = 50;
+            this.cmdAutostartTaskCamera.TabStop = true;
+            this.cmdAutostartTaskCamera.Text = "Autostart Task Camera";
+            this.cmdAutostartTaskCamera.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdAutostartTaskCamera_LinkClicked);
             // 
-            // cmdRunCopyWhiz
+            // cmdAutostartTaskFixture
             // 
-            this.cmdRunCopyWhiz.AutoSize = true;
-            this.cmdRunCopyWhiz.Location = new System.Drawing.Point(7, 176);
-            this.cmdRunCopyWhiz.Name = "cmdRunCopyWhiz";
-            this.cmdRunCopyWhiz.Size = new System.Drawing.Size(78, 13);
-            this.cmdRunCopyWhiz.TabIndex = 48;
-            this.cmdRunCopyWhiz.TabStop = true;
-            this.cmdRunCopyWhiz.Text = "Run CopyWhiz";
-            this.cmdRunCopyWhiz.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdRunCopyWhiz_LinkClicked);
+            this.cmdAutostartTaskFixture.AutoSize = true;
+            this.cmdAutostartTaskFixture.Location = new System.Drawing.Point(416, 34);
+            this.cmdAutostartTaskFixture.Name = "cmdAutostartTaskFixture";
+            this.cmdAutostartTaskFixture.Size = new System.Drawing.Size(110, 13);
+            this.cmdAutostartTaskFixture.TabIndex = 51;
+            this.cmdAutostartTaskFixture.TabStop = true;
+            this.cmdAutostartTaskFixture.Text = "Autostart Task Fixture";
+            this.cmdAutostartTaskFixture.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdAutostartTaskFixture_LinkClicked);
             // 
             // MainForm
             // 
@@ -1013,6 +1039,8 @@ namespace EZAE
         private System.Windows.Forms.Label lblSequenceFileName;
         private System.Windows.Forms.ComboBox cbCopyWhizItem;
         private System.Windows.Forms.LinkLabel cmdRunCopyWhiz;
+        private System.Windows.Forms.LinkLabel cmdAutostartTaskFixture;
+        private System.Windows.Forms.LinkLabel cmdAutostartTaskCamera;
     }
 }
 

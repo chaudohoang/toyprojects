@@ -582,6 +582,16 @@ namespace EZAE
                 ExecuteAsAdmin(@"Tools\pinGooilFixturePCFolders.bat");
             }
 
+            if (File.Exists(@"Tools\Autostart_Camera\Task_Create_StartProcess.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\Autostart_Camera\Task_Create_StartProcess.bat");
+            }
+
+            if (File.Exists(@"Tools\Autostart_Camera\Task_Create_KillProcess.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\Autostart_Camera\Task_Create_KillProcess.bat");
+            }
+
             if (File.Exists(@"Tools\Installer\Visual C++ 2012\VC2012_silent_install.bat"))
             {
                 ExecuteAsAdmin(@"Tools\Installer\Visual C++ 2012\VC2012_silent_install.bat");
@@ -696,6 +706,16 @@ namespace EZAE
             else if (cbFixture.Text == @"Gooil" && File.Exists(@"Tools\pinGooilCameraPCFolders.bat") && File.Exists(@"Tools\pinGooilCameraPCFolders.ps1"))
             {
                 ExecuteAsAdmin(@"Tools\pinGooilCameraPCFolders.bat");
+            }
+
+            if (File.Exists(@"Tools\Autostart_Fixture\Task_Create_StartProcess.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\Autostart_Fixture\Task_Create_StartProcess.bat");
+            }
+
+            if (File.Exists(@"Tools\Autostart_Fixture\Task_Create_KillProcess.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\Autostart_Fixture\Task_Create_KillProcess.bat");
             }
 
             if (File.Exists(@"Tools\Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat"))
@@ -939,6 +959,32 @@ namespace EZAE
                 startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
                 
                 Process.Start(startInfo);
+            }
+        }
+
+        private void cmdAutostartTaskCamera_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"Tools\Autostart_Camera\Task_Create_StartProcess.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\Autostart_Camera\Task_Create_StartProcess.bat");
+            }
+
+            if(File.Exists(@"Tools\Autostart_Camera\Task_Create_KillProcess.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\Autostart_Camera\Task_Create_KillProcess.bat");
+            }
+        }
+
+        private void cmdAutostartTaskFixture_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"Tools\Autostart_Fixture\Task_Create_StartProcess.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\Autostart_Fixture\Task_Create_StartProcess.bat");
+            }
+
+            if (File.Exists(@"Tools\Autostart_Fixture\Task_Create_KillProcess.bat"))
+            {
+                ExecuteAsAdmin(@"Tools\Autostart_Fixture\Task_Create_KillProcess.bat");
             }
         }
     }
