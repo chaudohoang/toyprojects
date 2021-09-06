@@ -42,6 +42,7 @@
             this.lblCalibrationIDs = new System.Windows.Forms.Label();
             this.lblFocusDistance = new System.Windows.Forms.Label();
             this.cbCalBox = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // cmdBrowseSequence
@@ -185,11 +186,21 @@
             this.cbCalBox.TabIndex = 70;
             this.cbCalBox.Text = "Copy from first step";
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(366, 65);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(0, 55);
+            this.label1.TabIndex = 72;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(596, 166);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.cmdBrowseSequence);
             this.Controls.Add(this.lblSequencePath);
             this.Controls.Add(this.cmdUseLastModifiedSequence);
@@ -229,6 +240,7 @@
         private System.Windows.Forms.Label lblCalibrationIDs;
         private System.Windows.Forms.Label lblFocusDistance;
         private System.Windows.Forms.ComboBox cbCalBox;
+        private System.Windows.Forms.Label label1;
     }
 }
 

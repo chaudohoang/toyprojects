@@ -32,6 +32,7 @@ namespace EZAE
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabControl = new System.Windows.Forms.TabPage();
+            this.cmdRemoteTools = new System.Windows.Forms.LinkLabel();
             this.cmdOpenGooil4 = new System.Windows.Forms.LinkLabel();
             this.cmdOpenGooil3 = new System.Windows.Forms.LinkLabel();
             this.cmdOpenGooil2 = new System.Windows.Forms.LinkLabel();
@@ -48,6 +49,9 @@ namespace EZAE
             this.cmdOpenImageJ = new System.Windows.Forms.LinkLabel();
             this.cmdOpenEngineerMode = new System.Windows.Forms.LinkLabel();
             this.tabSetupPC = new System.Windows.Forms.TabPage();
+            this.cmdPinRegularApps = new System.Windows.Forms.LinkLabel();
+            this.cmdAutostartTaskFixture = new System.Windows.Forms.LinkLabel();
+            this.cmdAutostartTaskCamera = new System.Windows.Forms.LinkLabel();
             this.cbCopyWhizItem = new System.Windows.Forms.ComboBox();
             this.cmdRunCopyWhiz = new System.Windows.Forms.LinkLabel();
             this.cmdChangePW1 = new System.Windows.Forms.LinkLabel();
@@ -98,8 +102,6 @@ namespace EZAE
             this.cmdUseButterfly = new System.Windows.Forms.LinkLabel();
             this.lblSequenceFileName = new System.Windows.Forms.Label();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-            this.cmdAutostartTaskCamera = new System.Windows.Forms.LinkLabel();
-            this.cmdAutostartTaskFixture = new System.Windows.Forms.LinkLabel();
             this.tabControl1.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabSetupPC.SuspendLayout();
@@ -120,6 +122,7 @@ namespace EZAE
             // 
             // tabControl
             // 
+            this.tabControl.Controls.Add(this.cmdRemoteTools);
             this.tabControl.Controls.Add(this.cmdOpenGooil4);
             this.tabControl.Controls.Add(this.cmdOpenGooil3);
             this.tabControl.Controls.Add(this.cmdOpenGooil2);
@@ -142,6 +145,17 @@ namespace EZAE
             this.tabControl.Text = "Control";
             this.tabControl.UseVisualStyleBackColor = true;
             this.tabControl.Enter += new System.EventHandler(this.tabControl_Enter);
+            // 
+            // cmdRemoteTools
+            // 
+            this.cmdRemoteTools.AutoSize = true;
+            this.cmdRemoteTools.Location = new System.Drawing.Point(196, 10);
+            this.cmdRemoteTools.Name = "cmdRemoteTools";
+            this.cmdRemoteTools.Size = new System.Drawing.Size(73, 13);
+            this.cmdRemoteTools.TabIndex = 18;
+            this.cmdRemoteTools.TabStop = true;
+            this.cmdRemoteTools.Text = "Remote Tools";
+            this.cmdRemoteTools.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdRemoteTools_LinkClicked);
             // 
             // cmdOpenGooil4
             // 
@@ -310,6 +324,7 @@ namespace EZAE
             // 
             // tabSetupPC
             // 
+            this.tabSetupPC.Controls.Add(this.cmdPinRegularApps);
             this.tabSetupPC.Controls.Add(this.cmdAutostartTaskFixture);
             this.tabSetupPC.Controls.Add(this.cmdAutostartTaskCamera);
             this.tabSetupPC.Controls.Add(this.cbCopyWhizItem);
@@ -353,6 +368,39 @@ namespace EZAE
             this.tabSetupPC.Text = "Setup PC";
             this.tabSetupPC.UseVisualStyleBackColor = true;
             this.tabSetupPC.Enter += new System.EventHandler(this.tabSetupPC_Enter);
+            // 
+            // cmdPinRegularApps
+            // 
+            this.cmdPinRegularApps.AutoSize = true;
+            this.cmdPinRegularApps.Location = new System.Drawing.Point(240, 133);
+            this.cmdPinRegularApps.Name = "cmdPinRegularApps";
+            this.cmdPinRegularApps.Size = new System.Drawing.Size(89, 13);
+            this.cmdPinRegularApps.TabIndex = 52;
+            this.cmdPinRegularApps.TabStop = true;
+            this.cmdPinRegularApps.Text = "Pin Regular Apps";
+            this.cmdPinRegularApps.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdPinRegularApps_LinkClicked);
+            // 
+            // cmdAutostartTaskFixture
+            // 
+            this.cmdAutostartTaskFixture.AutoSize = true;
+            this.cmdAutostartTaskFixture.Location = new System.Drawing.Point(416, 34);
+            this.cmdAutostartTaskFixture.Name = "cmdAutostartTaskFixture";
+            this.cmdAutostartTaskFixture.Size = new System.Drawing.Size(110, 13);
+            this.cmdAutostartTaskFixture.TabIndex = 51;
+            this.cmdAutostartTaskFixture.TabStop = true;
+            this.cmdAutostartTaskFixture.Text = "Autostart Task Fixture";
+            this.cmdAutostartTaskFixture.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdAutostartTaskFixture_LinkClicked);
+            // 
+            // cmdAutostartTaskCamera
+            // 
+            this.cmdAutostartTaskCamera.AutoSize = true;
+            this.cmdAutostartTaskCamera.Location = new System.Drawing.Point(6, 34);
+            this.cmdAutostartTaskCamera.Name = "cmdAutostartTaskCamera";
+            this.cmdAutostartTaskCamera.Size = new System.Drawing.Size(115, 13);
+            this.cmdAutostartTaskCamera.TabIndex = 50;
+            this.cmdAutostartTaskCamera.TabStop = true;
+            this.cmdAutostartTaskCamera.Text = "Autostart Task Camera";
+            this.cmdAutostartTaskCamera.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdAutostartTaskCamera_LinkClicked);
             // 
             // cbCopyWhizItem
             // 
@@ -418,7 +466,7 @@ namespace EZAE
             this.cbProgramFolder.Items.AddRange(new object[] {
             "",
             "D:\\Program",
-            "C:\\Program",
+            "C:\\Setup\\Program",
             "E:\\Program"});
             this.cbProgramFolder.Location = new System.Drawing.Point(245, 105);
             this.cbProgramFolder.Name = "cbProgramFolder";
@@ -519,7 +567,7 @@ namespace EZAE
             // cmdInstallWireshark
             // 
             this.cmdInstallWireshark.AutoSize = true;
-            this.cmdInstallWireshark.Location = new System.Drawing.Point(245, 133);
+            this.cmdInstallWireshark.Location = new System.Drawing.Point(335, 133);
             this.cmdInstallWireshark.Name = "cmdInstallWireshark";
             this.cmdInstallWireshark.Size = new System.Drawing.Size(85, 13);
             this.cmdInstallWireshark.TabIndex = 42;
@@ -711,7 +759,7 @@ namespace EZAE
             this.cbTightVNCPath.Items.AddRange(new object[] {
             "",
             "D:\\Program",
-            "C:\\Program",
+            "C:\\Setup\\Program",
             "E:\\Program"});
             this.cbTightVNCPath.Location = new System.Drawing.Point(228, 31);
             this.cbTightVNCPath.Name = "cbTightVNCPath";
@@ -921,28 +969,6 @@ namespace EZAE
             this.lblSequenceFileName.Size = new System.Drawing.Size(0, 13);
             this.lblSequenceFileName.TabIndex = 27;
             // 
-            // cmdAutostartTaskCamera
-            // 
-            this.cmdAutostartTaskCamera.AutoSize = true;
-            this.cmdAutostartTaskCamera.Location = new System.Drawing.Point(6, 34);
-            this.cmdAutostartTaskCamera.Name = "cmdAutostartTaskCamera";
-            this.cmdAutostartTaskCamera.Size = new System.Drawing.Size(115, 13);
-            this.cmdAutostartTaskCamera.TabIndex = 50;
-            this.cmdAutostartTaskCamera.TabStop = true;
-            this.cmdAutostartTaskCamera.Text = "Autostart Task Camera";
-            this.cmdAutostartTaskCamera.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdAutostartTaskCamera_LinkClicked);
-            // 
-            // cmdAutostartTaskFixture
-            // 
-            this.cmdAutostartTaskFixture.AutoSize = true;
-            this.cmdAutostartTaskFixture.Location = new System.Drawing.Point(416, 34);
-            this.cmdAutostartTaskFixture.Name = "cmdAutostartTaskFixture";
-            this.cmdAutostartTaskFixture.Size = new System.Drawing.Size(110, 13);
-            this.cmdAutostartTaskFixture.TabIndex = 51;
-            this.cmdAutostartTaskFixture.TabStop = true;
-            this.cmdAutostartTaskFixture.Text = "Autostart Task Fixture";
-            this.cmdAutostartTaskFixture.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdAutostartTaskFixture_LinkClicked);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -953,6 +979,7 @@ namespace EZAE
             this.Controls.Add(this.tabControl1);
             this.HelpButton = true;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MaximizeBox = false;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "EZAE";
@@ -1041,6 +1068,8 @@ namespace EZAE
         private System.Windows.Forms.LinkLabel cmdRunCopyWhiz;
         private System.Windows.Forms.LinkLabel cmdAutostartTaskFixture;
         private System.Windows.Forms.LinkLabel cmdAutostartTaskCamera;
+        private System.Windows.Forms.LinkLabel cmdRemoteTools;
+        private System.Windows.Forms.LinkLabel cmdPinRegularApps;
     }
 }
 

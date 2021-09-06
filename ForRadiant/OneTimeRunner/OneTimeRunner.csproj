@@ -90,6 +90,8 @@
     <PostBuildEvent>@echo OFF
 del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.pdb
 del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.xml
-del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.config</PostBuildEvent>
+del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.config
+copy /Y $(SolutionDir)\$(ProjectName)\watchfolderlist.txt $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\watchfolderlist.txt
+copy /Y $(SolutionDir)\$(ProjectName)\watchfiletypelist.txt $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\watchfiletypelist.txt</PostBuildEvent>
   </PropertyGroup>
 </Project>

@@ -41,8 +41,6 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFC RGB", "PanelFFC RG
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFC GRAY", "PanelFFC GRAY\PanelFFC GRAY.vbproj", "{AB79AA70-90AA-4313-B4D4-4F299EBFDCA9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MakeSequenceFOI", "MakeSequenceFOI\MakeSequenceFOI.csproj", "{36088148-2B03-4336-B70D-EB3036B8CB64}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteTools", "RemoteTools\RemoteTools.csproj", "{B2A11C28-48EE-4BDF-8F4B-5D60863793A7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StartProcess", "StartProcess\StartProcess.csproj", "{59BCAEE6-072E-498B-AF70-3C7D0C964C90}"
@@ -58,6 +56,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FTPIndexPathGenerator", "FTPIndexPathGenerator\FTPIndexPathGenerator.csproj", "{642E4AD9-C252-4D7A-B039-BD49A7400165}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OneTimeRunner", "OneTimeRunner\OneTimeRunner.csproj", "{C7421142-263B-487E-831E-90A93D128D10}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StartCopyWhizFixtureToCamera", "StartCopyWhizFixtureToCamera\StartCopyWhizFixtureToCamera.csproj", "{7F6F3F17-1EFA-4AAB-813D-91031E86A7D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StartTightVNC", "StartTightVNC\StartTightVNC.csproj", "{DC77D98B-DBD7-4E27-909D-5C9F2215E234}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -141,10 +143,6 @@ Global
 		{AB79AA70-90AA-4313-B4D4-4F299EBFDCA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB79AA70-90AA-4313-B4D4-4F299EBFDCA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB79AA70-90AA-4313-B4D4-4F299EBFDCA9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{36088148-2B03-4336-B70D-EB3036B8CB64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{36088148-2B03-4336-B70D-EB3036B8CB64}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{36088148-2B03-4336-B70D-EB3036B8CB64}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{36088148-2B03-4336-B70D-EB3036B8CB64}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B2A11C28-48EE-4BDF-8F4B-5D60863793A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B2A11C28-48EE-4BDF-8F4B-5D60863793A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2A11C28-48EE-4BDF-8F4B-5D60863793A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -177,6 +175,14 @@ Global
 		{C7421142-263B-487E-831E-90A93D128D10}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7421142-263B-487E-831E-90A93D128D10}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7421142-263B-487E-831E-90A93D128D10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F6F3F17-1EFA-4AAB-813D-91031E86A7D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F6F3F17-1EFA-4AAB-813D-91031E86A7D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F6F3F17-1EFA-4AAB-813D-91031E86A7D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F6F3F17-1EFA-4AAB-813D-91031E86A7D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC77D98B-DBD7-4E27-909D-5C9F2215E234}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC77D98B-DBD7-4E27-909D-5C9F2215E234}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC77D98B-DBD7-4E27-909D-5C9F2215E234}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC77D98B-DBD7-4E27-909D-5C9F2215E234}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

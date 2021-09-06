@@ -23,7 +23,7 @@ namespace EZAE
             if (File.Exists(pintotaskbarpath))
             {
                 ProcessStartInfo startInfo = new ProcessStartInfo(pintotaskbarpath);
-                startInfo.Arguments = "\"" +apppath+ "\"";
+                startInfo.Arguments = "\"" + apppath + "\"";
                 Process.Start(startInfo);
 
             }
@@ -63,7 +63,7 @@ namespace EZAE
 
         private void tabSetSequence_Enter(object sender, EventArgs e)
         {
-          
+
             if (Directory.Exists(@"C:\Radiant Vision Systems Data\TrueTest\Sequence"))
             {
                 var latestfile = new DirectoryInfo(@"C:\Radiant Vision Systems Data\TrueTest\Sequence").GetFiles().OrderByDescending(o => o.LastWriteTime).FirstOrDefault();
@@ -73,12 +73,12 @@ namespace EZAE
 
         private void tabSetupPC_Enter(object sender, EventArgs e)
         {
-         
+
         }
 
         private void tabControl_Enter(object sender, EventArgs e)
         {
-        
+
         }
 
 
@@ -142,7 +142,7 @@ namespace EZAE
             string filepath = Path.GetFullPath(@"Tools\FFC_Database_Template\FFCDBGenerate.exe");
             if (File.Exists(filepath))
             {
- 
+
                 ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
                 startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
                 Process.Start(startInfo);
@@ -213,7 +213,7 @@ namespace EZAE
             }
         }
 
- 
+
 
         private void cmdOpenGooil4_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
@@ -226,9 +226,9 @@ namespace EZAE
 
         private void cmdInstallTightVNC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if ( (cbTightVNCPath.Text == @"C:\Program") && File.Exists(@"Tools\Installer\tightvncCProgram.exe") )
+            if ((cbTightVNCPath.Text == @"C:\Setup\Program") && File.Exists(@"Tools\Installer\tightvncCSetupProgram.exe"))
             {
-                ExecuteAsAdmin(@"Tools\Installer\tightvncCProgram.exe");
+                ExecuteAsAdmin(@"Tools\Installer\tightvncCSetupProgram.exe");
             }
             else if ((cbTightVNCPath.Text == @"D:\Program") && File.Exists(@"Tools\Installer\tightvncDProgram.exe"))
             {
@@ -419,7 +419,7 @@ namespace EZAE
             }
         }
 
-       
+
         private void cmdInstallWireshark_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (File.Exists(@"Tools\Installer\Wireshark-win64-3.4.3.exe"))
@@ -442,7 +442,7 @@ namespace EZAE
 
         private void cmdPinCameraPcFolders_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if ( cbFixture.Text==@"Dooone" && File.Exists(@"Tools\pinDoooneCameraPCFolders.bat") && File.Exists(@"Tools\pinDoooneCameraPCFolders.ps1"))
+            if (cbFixture.Text == @"Dooone" && File.Exists(@"Tools\pinDoooneCameraPCFolders.bat") && File.Exists(@"Tools\pinDoooneCameraPCFolders.ps1"))
             {
                 ExecuteAsAdmin(@"Tools\pinDoooneCameraPCFolders.bat");
             }
@@ -535,9 +535,9 @@ namespace EZAE
                 ExecuteAsAdmin(@"Tools\ShareE.bat");
             }
 
-            if (File.Exists(@"Tools\ShareCProgram.bat") && cbProgramFolder.Text == @"C:\Program")
+            if (File.Exists(@"Tools\ShareCSetupProgram.bat") && cbProgramFolder.Text == @"C:\Setup\Program")
             {
-                ExecuteAsAdmin(@"Tools\ShareCProgram.bat");
+                ExecuteAsAdmin(@"Tools\ShareCSetupProgram.bat");
             }
 
             else if (File.Exists(@"Tools\ShareDProgram.bat") && cbProgramFolder.Text == @"D:\Program")
@@ -560,9 +560,9 @@ namespace EZAE
                 ExecuteAsAdmin(@"Tools\SharePOCB.bat");
             }
 
-            if ((cbTightVNCPath.Text == @"C:\Program") && File.Exists(@"Tools\Installer\tightvncCProgram.exe"))
+            if ((cbTightVNCPath.Text == @"C:\Setup\Program") && File.Exists(@"Tools\Installer\tightvncCSetupProgram.exe"))
             {
-                ExecuteAsAdmin(@"Tools\Installer\tightvncCProgram.exe");
+                ExecuteAsAdmin(@"Tools\Installer\tightvncCSetupProgram.exe");
             }
             else if ((cbTightVNCPath.Text == @"D:\Program") && File.Exists(@"Tools\Installer\tightvncDProgram.exe"))
             {
@@ -632,6 +632,21 @@ namespace EZAE
                 ExecuteAsAdmin(@"Tools\Installer\MCR_R2018a_win64_installer.exe");
             }
 
+            if (File.Exists(@"Tools\ImageJ\pinImageJtoTaskbar.bat"))
+            {
+                Process.Start(@"Tools\ImageJ\pinImageJtoTaskbar.bat");
+            }
+
+            if (File.Exists(@"Tools\SetSequence\pinSetSequencetoTaskbar.bat"))
+            {
+                Process.Start(@"Tools\SetSequence\pinSetSequencetoTaskbar.bat");
+            }
+
+            if (File.Exists(@"Tools\FFC_Database_Template\pinFFCDBGenerateToTaskbar.bat"))
+            {
+                Process.Start(@"Tools\FFC_Database_Template\pinFFCDBGenerateToTaskbar.bat");
+            }
+
         }
 
         private void cmdOneclickSetupFixturePC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -671,9 +686,9 @@ namespace EZAE
                 ExecuteAsAdmin(@"Tools\ShareE.bat");
             }
 
-            if (File.Exists(@"Tools\ShareCProgram.bat") && cbProgramFolder.Text == @"C:\Program")
+            if (File.Exists(@"Tools\ShareCSetupProgram.bat") && cbProgramFolder.Text == @"C:\Setup\Program")
             {
-                ExecuteAsAdmin(@"Tools\ShareCProgram.bat");
+                ExecuteAsAdmin(@"Tools\ShareCSetupProgram.bat");
             }
 
             else if (File.Exists(@"Tools\ShareDProgram.bat") && cbProgramFolder.Text == @"D:\Program")
@@ -686,9 +701,9 @@ namespace EZAE
                 ExecuteAsAdmin(@"Tools\ShareEProgram.bat");
             }
 
-            if ((cbTightVNCPath.Text == @"C:\Program") && File.Exists(@"Tools\Installer\tightvncCProgram.exe"))
+            if ((cbTightVNCPath.Text == @"C:\Setup\Program") && File.Exists(@"Tools\Installer\tightvncCSetupProgram.exe"))
             {
-                ExecuteAsAdmin(@"Tools\Installer\tightvncCProgram.exe");
+                ExecuteAsAdmin(@"Tools\Installer\tightvncCSetupProgram.exe");
             }
             else if ((cbTightVNCPath.Text == @"D:\Program") && File.Exists(@"Tools\Installer\tightvncDProgram.exe"))
             {
@@ -816,9 +831,9 @@ namespace EZAE
 
         private void cmdShareProgram_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\ShareCProgram.bat") && cbProgramFolder.Text == @"C:\Program")
+            if (File.Exists(@"Tools\ShareCSetupProgram.bat") && cbProgramFolder.Text == @"C:\Setup\Program")
             {
-                ExecuteAsAdmin(@"Tools\ShareCProgram.bat");
+                ExecuteAsAdmin(@"Tools\ShareCSetupProgram.bat");
             }
 
             else if (File.Exists(@"Tools\ShareDProgram.bat") && cbProgramFolder.Text == @"D:\Program")
@@ -957,7 +972,7 @@ namespace EZAE
                 ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
                 startInfo.Arguments = "\"" + argumentpath + "\"";
                 startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
-                
+
                 Process.Start(startInfo);
             }
         }
@@ -969,7 +984,7 @@ namespace EZAE
                 ExecuteAsAdmin(@"Tools\Autostart_Camera\Task_Create_StartProcess.bat");
             }
 
-            if(File.Exists(@"Tools\Autostart_Camera\Task_Create_KillProcess.bat"))
+            if (File.Exists(@"Tools\Autostart_Camera\Task_Create_KillProcess.bat"))
             {
                 ExecuteAsAdmin(@"Tools\Autostart_Camera\Task_Create_KillProcess.bat");
             }
@@ -987,5 +1002,38 @@ namespace EZAE
                 ExecuteAsAdmin(@"Tools\Autostart_Fixture\Task_Create_KillProcess.bat");
             }
         }
+
+        private void cmdRemoteTools_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = Path.GetFullPath(@"Tools\RemoteTools\RemoteTools.exe");
+            if (File.Exists(filepath))
+            {
+
+                ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
+                startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
+                Process.Start(startInfo);
+
+            }
+        }
+
+        private void cmdPinRegularApps_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"Tools\ImageJ\pinImageJtoTaskbar.bat"))
+            {
+                Process.Start(@"Tools\ImageJ\pinImageJtoTaskbar.bat");
+            }
+
+            if (File.Exists(@"Tools\SetSequence\pinSetSequencetoTaskbar.bat"))
+            {
+                Process.Start(@"Tools\SetSequence\pinSetSequencetoTaskbar.bat");
+            }
+
+            if (File.Exists(@"Tools\FFC_Database_Template\pinFFCDBGenerateToTaskbar.bat"))
+            {
+                Process.Start(@"Tools\FFC_Database_Template\pinFFCDBGenerateToTaskbar.bat");
+            }
+        }
+
+
     }
 }

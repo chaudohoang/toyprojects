@@ -37,7 +37,7 @@ namespace SetSequence
         {
             if (Directory.Exists(@"C:\Radiant Vision Systems Data\TrueTest\Sequence"))
             {
-                var latestfile = new DirectoryInfo(@"C:\Radiant Vision Systems Data\TrueTest\Sequence").GetFiles().OrderByDescending(o => o.LastWriteTime).FirstOrDefault();
+                var latestfile = new DirectoryInfo(@"C:\Radiant Vision Systems Data\TrueTest\Sequence").GetFiles("*.*", SearchOption.AllDirectories).OrderByDescending(o => o.LastWriteTime).FirstOrDefault();
                 lblSequenceFileName.Text = latestfile.FullName;
             }
         }
@@ -56,6 +56,8 @@ namespace SetSequence
 
         private void btnApply_Click(object sender, EventArgs e)
         {
+            btnApply.Enabled = false;
+        
             XmlNode node;
             XmlNodeList nodes;
 
@@ -275,6 +277,16 @@ namespace SetSequence
                 xmlDoc.Save(writer);
                 if (writer != null)
                     writer.Close();
+
+                Random m_Rnd = new Random();
+                Color tempcolor;
+                tempcolor = label1.ForeColor;
+                while (label1.ForeColor == tempcolor)
+                {
+                    label1.ForeColor = Color.FromArgb(255, m_Rnd.Next(0, 255), m_Rnd.Next(0, 255), m_Rnd.Next(0, 255));
+                }
+                label1.Text = "Done!";
+                btnApply.Enabled = true;
             }
         }
 

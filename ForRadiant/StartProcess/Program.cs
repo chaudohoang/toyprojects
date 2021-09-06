@@ -20,7 +20,8 @@ namespace StartProcess
             List<string> startlist = GetFilesRecursive(startlistdir);
             foreach (string item in startlist)
             {
-                Process[] processes = Process.GetProcessesByName(item);
+                string item2 = Path.GetFileName(item).Replace(".exe", "");
+                Process[] processes = Process.GetProcessesByName(item2);
                 if (processes.Length < 1)
                 {
                     try
