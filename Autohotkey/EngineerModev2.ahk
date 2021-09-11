@@ -5,7 +5,7 @@ SetTitleMatchMode, 2
 Suspend
 return
 
-!F1::
+:*:unlock::
 {
 	IfWinExist, ahk_exe TrueTest.exe
 	{
