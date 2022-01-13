@@ -66,9 +66,9 @@ namespace SetSequence
             {
                 xmlDoc.Load(lblSequenceFileName.Text);
 
-                string x, y, width, height, lensdistance, colorcalID, imagescalingID, flatfieldID, cameraRotation;
+                string subframeregion, lensdistance, colorcalID, imagescalingID, flatfieldID, cameraRotation;
 
-                x = y = width = height = lensdistance = colorcalID = imagescalingID = flatfieldID = cameraRotation = "";
+                subframeregion = lensdistance = colorcalID = imagescalingID = flatfieldID = cameraRotation = "";
 
                 if (cbSubframe.Text == "Copy from first step")
                 {
@@ -79,20 +79,13 @@ namespace SetSequence
                     {
                         if (nodes[index].SelectSingleNode("Name").InnerText == firstPatternName)
                         {
-                            x = nodes[index].SelectSingleNode("CameraSettingsList/CameraSettings/SubFrameRegion/X").InnerText;
-                            y = nodes[index].SelectSingleNode("CameraSettingsList/CameraSettings/SubFrameRegion/Y").InnerText;
-                            width = nodes[index].SelectSingleNode("CameraSettingsList/CameraSettings/SubFrameRegion/Width").InnerText;
-                            height = nodes[index].SelectSingleNode("CameraSettingsList/CameraSettings/SubFrameRegion/Height").InnerText;
+                            subframeregion = nodes[index].SelectSingleNode("CameraSettingsList/CameraSettings/SubFrameRegion").InnerText;
                         }
                     }
                 }
                 else
                 {
-                    string[] values = cbSubframe.Text.Split(',');
-                    x = values[0];
-                    y = values[1];
-                    width = values[2];
-                    height = values[3];
+                    subframeregion = cbSubframe.Text;
                 }
 
                 if (cbCalBox.Text == "Copy from first step")
@@ -162,77 +155,14 @@ namespace SetSequence
                     {
                         nodes[index].InnerText = lensdistance;
                     }
-                }
+                }            
 
-                nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/SubFrameRegion/X");
+                nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/SubFrameRegion");
                 for (int index = 0; index <= nodes.Count - 1; index++)
                 {
-                    if (x != "")
+                    if (subframeregion != "")
                     {
-                        nodes[index].InnerText = x;
-                    }
-                }
-
-                nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/SubFrameRegion/Location/X");
-                for (int index = 0; index <= nodes.Count - 1; index++)
-                {
-                    if (x != "")
-                    {
-                        nodes[index].InnerText = x;
-                    }
-                }
-
-                nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/SubFrameRegion/Y");
-                for (int index = 0; index <= nodes.Count - 1; index++)
-                {
-                    if (y != "")
-                    {
-                        nodes[index].InnerText = y;
-                    }
-                }
-
-                nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/SubFrameRegion/Location/Y");
-                for (int index = 0; index <= nodes.Count - 1; index++)
-                {
-                    if (y != "")
-                    {
-                        nodes[index].InnerText = y;
-                    }
-                }
-
-                nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/SubFrameRegion/Width");
-                for (int index = 0; index <= nodes.Count - 1; index++)
-                {
-                    if (width != "")
-                    {
-                        nodes[index].InnerText = width;
-                    }
-                }
-
-                nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/SubFrameRegion/Size/Width");
-                for (int index = 0; index <= nodes.Count - 1; index++)
-                {
-                    if (width != "")
-                    {
-                        nodes[index].InnerText = width;
-                    }
-                }
-
-                nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/SubFrameRegion/Height");
-                for (int index = 0; index <= nodes.Count - 1; index++)
-                {
-                    if (height != "")
-                    {
-                        nodes[index].InnerText = height;
-                    }
-                }
-
-                nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/SubFrameRegion/Size/Height");
-                for (int index = 0; index <= nodes.Count - 1; index++)
-                {
-                    if (height != "")
-                    {
-                        nodes[index].InnerText = height;
+                        nodes[index].InnerText = subframeregion;
                     }
                 }
 
