@@ -61,6 +61,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StartCopyWhizFixtureToCamer
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StartTightVNC", "StartTightVNC\StartTightVNC.csproj", "{DC77D98B-DBD7-4E27-909D-5C9F2215E234}"
 EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFCD854Color", "PanelFFC D854 Color\PanelFFCD854Color.vbproj", "{A9167913-DF01-4183-B88B-CFCA810A5270}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFCX10803panel", "PanelFFC X1080 3 panels\PanelFFCX10803panel.vbproj", "{91C0FB9A-0527-4581-9F1D-2159DD5F1032}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -183,6 +187,14 @@ Global
 		{DC77D98B-DBD7-4E27-909D-5C9F2215E234}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC77D98B-DBD7-4E27-909D-5C9F2215E234}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC77D98B-DBD7-4E27-909D-5C9F2215E234}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9167913-DF01-4183-B88B-CFCA810A5270}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9167913-DF01-4183-B88B-CFCA810A5270}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9167913-DF01-4183-B88B-CFCA810A5270}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9167913-DF01-4183-B88B-CFCA810A5270}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91C0FB9A-0527-4581-9F1D-2159DD5F1032}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91C0FB9A-0527-4581-9F1D-2159DD5F1032}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91C0FB9A-0527-4581-9F1D-2159DD5F1032}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91C0FB9A-0527-4581-9F1D-2159DD5F1032}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

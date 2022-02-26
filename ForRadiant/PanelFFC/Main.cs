@@ -71,14 +71,23 @@ namespace PanelFFC
             }
         }
 
-		private void btnStart_Click(object sender, EventArgs e)
+        private void Start()
 		{
             string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            string appdir = Path.GetDirectoryName(apppath)+"\\"+"Apps";
-            if (File.Exists(appdir+"\\"+listBox1.SelectedItem))
+            string appdir = Path.GetDirectoryName(apppath) + "\\" + "Apps";
+            if (File.Exists(appdir + "\\" + listBox1.SelectedItem))
             {
                 Process.Start(appdir + "\\" + listBox1.SelectedItem);
             }
         }
+		private void btnStart_Click(object sender, EventArgs e)
+		{
+            Start();
+        }
+
+		private void listBox1_DoubleClick(object sender, EventArgs e)
+		{
+            Start();
+		}
 	}
 }

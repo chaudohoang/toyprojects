@@ -1,0 +1,16 @@
+D:\GitHub\toyprojects\ForRadiant\PanelFFC RGB\obj\Debug\PanelFFC.PanelFFCRGB.resources
+D:\GitHub\toyprojects\ForRadiant\PanelFFC RGB\obj\Debug\PanelFFC.Resources.resources
+D:\GitHub\toyprojects\ForRadiant\PanelFFC RGB\obj\Debug\PanelFFCRGB.vbproj.GenerateResource.cache
+D:\GitHub\toyprojects\ForRadiant\PanelFFC RGB\obj\Debug\PanelFFCRGB.vbproj.CoreCompileInputs.cache
+D:\GitHub\toyprojects\ForRadiant\bin\Debug\PanelFFC\PanelFFCRGB.dll.config
+D:\GitHub\toyprojects\ForRadiant\bin\Debug\PanelFFC\PanelFFCRGB.dll
+D:\GitHub\toyprojects\ForRadiant\bin\Debug\PanelFFC\PanelFFCRGB.pdb
+D:\GitHub\toyprojects\ForRadiant\bin\Debug\PanelFFC\PanelFFCRGB.xml
+D:\GitHub\toyprojects\ForRadiant\PanelFFC RGB\obj\Debug\PanelFFCRGB.xml
+D:\GitHub\toyprojects\ForRadiant\PanelFFC RGB\obj\Debug\PanelFFCRGB.pdb
+D:\GitHub\toyprojects\ForRadiant\bin\Debug\PanelFFC\Apps\PanelFFCRGB.exe.config
+D:\GitHub\toyprojects\ForRadiant\bin\Debug\PanelFFC\Apps\PanelFFCRGB.exe
+D:\GitHub\toyprojects\ForRadiant\bin\Debug\PanelFFC\Apps\PanelFFCRGB.pdb
+D:\GitHub\toyprojects\ForRadiant\bin\Debug\PanelFFC\Apps\PanelFFCRGB.xml
+D:\GitHub\toyprojects\ForRadiant\PanelFFC RGB\obj\Debug\PanelFFCRGB.exe
+D:\GitHub\toyprojects\ForRadiant\PanelFFC RGB\obj\Debug\PanelFFCRGB.vbproj.AssemblyReference.cache

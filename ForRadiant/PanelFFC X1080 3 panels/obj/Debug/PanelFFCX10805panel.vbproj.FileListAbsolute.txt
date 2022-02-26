@@ -1,0 +1,15 @@
+D:\GitHub\toyprojects\ForRadiant\bin\Debug\PanelFFC\PanelFFCX10805panel.dll.config
+D:\GitHub\toyprojects\ForRadiant\bin\Debug\PanelFFC\PanelFFCX10805panel.dll
+D:\GitHub\toyprojects\ForRadiant\bin\Debug\PanelFFC\PanelFFCX10805panel.pdb
+D:\GitHub\toyprojects\ForRadiant\bin\Debug\PanelFFC\PanelFFCX10805panel.xml
+D:\GitHub\toyprojects\ForRadiant\PanelFFC X1080 5 panels\obj\Debug\PanelFFC.PanelFFCX10805panel.resources
+D:\GitHub\toyprojects\ForRadiant\PanelFFC X1080 5 panels\obj\Debug\PanelFFC.Resources.resources
+D:\GitHub\toyprojects\ForRadiant\PanelFFC X1080 5 panels\obj\Debug\PanelFFCX10805panel.vbproj.GenerateResource.cache
+D:\GitHub\toyprojects\ForRadiant\PanelFFC X1080 5 panels\obj\Debug\PanelFFCX10805panel.vbproj.CoreCompileInputs.cache
+D:\GitHub\toyprojects\ForRadiant\PanelFFC X1080 5 panels\obj\Debug\PanelFFCX10805panel.xml
+D:\GitHub\toyprojects\ForRadiant\PanelFFC X1080 5 panels\obj\Debug\PanelFFCX10805panel.pdb
+D:\GitHub\toyprojects\ForRadiant\bin\Debug\PanelFFC\Apps\PanelFFCX10805panel.exe.config
+D:\GitHub\toyprojects\ForRadiant\bin\Debug\PanelFFC\Apps\PanelFFCX10805panel.exe
+D:\GitHub\toyprojects\ForRadiant\bin\Debug\PanelFFC\Apps\PanelFFCX10805panel.pdb
+D:\GitHub\toyprojects\ForRadiant\bin\Debug\PanelFFC\Apps\PanelFFCX10805panel.xml
+D:\GitHub\toyprojects\ForRadiant\PanelFFC X1080 5 panels\obj\Debug\PanelFFCX10805panel.exe

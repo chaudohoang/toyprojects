@@ -5,7 +5,7 @@ Imports System.Windows.Forms
 Imports System.IO.Compression
 Imports System.Reflection
 
-Public Class PanelFFCRGB
+Public Class PanelFFCD854Color
 
     Private Sub SetVersionInfo()
 
@@ -26,39 +26,43 @@ Public Class PanelFFCRGB
         Dim di As DirectoryInfo = New DirectoryInfo(outputpathbox.Text)
         di.Create()
 
-        Dim B1, B2, B3, B4, B5, R1, R2, R3, R4, R5, G1, G2, G3, G4, G5, MB, MR, MG, DB, DR, DG As New List(Of List(Of Double))() 'create lists
+        'Dim B1, B2, B3, B4, B5, R1, R2, R3, R4, R5, G1, G2, G3, G4, G5, MB, MR, MG, DB, DR, DG As New List(Of List(Of Double))() 'create lists
+        Dim G1, G2, G3, G4, G5, MG, DG As New List(Of List(Of Double))() 'create lists
+        'Dim G1, G2, G3, G4, MG, DG As New List(Of List(Of Double))() 'create lists
+
         'load all txt file to the lists
-        R1 = LoadFile(redfilepath1.Text)
-        R2 = LoadFile(redfilepath2.Text)
-        R3 = LoadFile(redfilepath3.Text)
-        R4 = LoadFile(redfilepath4.Text)
-        R5 = LoadFile(redfilepath5.Text)
+        'R1 = LoadFile(redfilepath1.Text)
+        'R2 = LoadFile(redfilepath2.Text)
+        'R3 = LoadFile(redfilepath3.Text)
+        'R4 = LoadFile(redfilepath4.Text)
+        'R5 = LoadFile(redfilepath5.Text)
         G1 = LoadFile(greenfilepath1.Text)
         G2 = LoadFile(greenfilepath2.Text)
         G3 = LoadFile(greenfilepath3.Text)
         G4 = LoadFile(greenfilepath4.Text)
         G5 = LoadFile(greenfilepath5.Text)
-        B1 = LoadFile(bluefilepath1.Text)
-        B2 = LoadFile(bluefilepath2.Text)
-        B3 = LoadFile(bluefilepath3.Text)
-        B4 = LoadFile(bluefilepath4.Text)
-        B5 = LoadFile(bluefilepath5.Text)
-        MR = LoadFile(mredfilepath.Text)
+        'B1 = LoadFile(bluefilepath1.Text)
+        'B2 = LoadFile(bluefilepath2.Text)
+        'B3 = LoadFile(bluefilepath3.Text)
+        'B4 = LoadFile(bluefilepath4.Text)
+        'B5 = LoadFile(bluefilepath5.Text)
+        'MR = LoadFile(mredfilepath.Text)
         MG = LoadFile(mgreenfilepath.Text)
-        MB = LoadFile(mbluefilepath.Text)
+        'MB = LoadFile(mbluefilepath.Text)
 
         'calculate result list from the file
-        DR = Calculate(R1, R2, R3, R4, R5, MR)
+        'DR = Calculate(R1, R2, R3, R4, R5, MR)
         DG = Calculate(G1, G2, G3, G4, G5, MG)
-        DB = Calculate(B1, B2, B3, B4, B5, MB)
+
+        'DB = Calculate(B1, B2, B3, B4, B5, MB)
 
         'generate csv and xml
-        GenerateCSV(DR, outputpathbox.Text + "\" + modelname.Text + "_" + camerasn.Text + "_R.csv")
-        GenerateCSV(DG, outputpathbox.Text + "\" + modelname.Text + "_" + camerasn.Text + "_G.csv")
-        GenerateCSV(DB, outputpathbox.Text + "\" + modelname.Text + "_" + camerasn.Text + "_B.csv")
-        GenerateXML(camerasn.Text, "R", outputpathbox.Text + "\" + modelname.Text + "_1.xml")
-        GenerateXML(camerasn.Text, "G", outputpathbox.Text + "\" + modelname.Text + "_2.xml")
-        GenerateXML(camerasn.Text, "B", outputpathbox.Text + "\" + modelname.Text + "_3.xml")
+        'GenerateCSV(DR, outputpathbox.Text + "\" + modelname.Text + "_" +camerasn.Text + "_R.csv")
+        GenerateCSV(DG, outputpathbox.Text + "\" + modelname.Text + "_" + camerasn.Text + ".csv")
+        'GenerateCSV(DB, outputpathbox.Text + "\" + modelname.Text + "_" + camerasn.Text + "_B.csv")
+        'GenerateXML(camerasn.Text, "R", outputpathbox.Text + "\" + modelname.Text + ".xml")
+        GenerateXML(camerasn.Text, "G", outputpathbox.Text + "\" + modelname.Text + ".xml")
+        'GenerateXML(camerasn.Text, "B", outputpathbox.Text + "\" + modelname.Text + ".xml")
 
         'just create Done! text with random color when finish, just like butterfly tool
         Static m_Rnd As New Random
@@ -92,9 +96,7 @@ Public Class PanelFFCRGB
         Return records
     End Function
 
-    Private Function Calculate(ByVal list1 As List(Of List(Of Double)), ByVal list2 As List(Of List(Of Double)), ByVal list3 As List(Of List(Of Double)), ByVal list4 As List(Of List(Of Double)), ByVal list5 As List(Of List(Of Double)), ByVal mlist As List(Of List(Of Double))) As List(Of List(Of Double))
-        'this function is to calculate the result by sum 5 lists and devide it to mother list
-
+    Private Function Calculate(list1 As List(Of List(Of Double)), list2 As List(Of List(Of Double)), list3 As List(Of List(Of Double)), list4 As List(Of List(Of Double)), list5 As List(Of List(Of Double)), mlist As List(Of List(Of Double))) As List(Of List(Of Double))
         Dim rowlength As New Integer
         Dim columnlength As New Integer
         rowlength = list1.Count
@@ -143,13 +145,11 @@ Public Class PanelFFCRGB
 
                 If inputlist(row)(column) > 1 Then
                     sw.Write(inputlist(row)(column).ToString("#.######"))
-                Else sw.Write(inputlist(row)(column).ToString("0.#######"))
+                Else sw.Write(inputlist(row)(column).ToString("#.#######"))
 
                 End If
 
-                If column < columnlength - 1 Then
-                    sw.Write(",")
-                End If
+                sw.Write(",")
 
             Next
             sw.WriteLine()
@@ -172,21 +172,21 @@ Public Class PanelFFCRGB
 
                 'this long loop is just to read all the file in the chosen folder, if the file name start with R and end with 1, the program will consider the file as red measurement of panel 1, and go on
                 For Each singleFile In allFiles
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("1") Then
-                        redfilepath1.Text = singleFile.FullName
-                    End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("2") Then
-                        redfilepath2.Text = singleFile.FullName
-                    End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("3") Then
-                        redfilepath3.Text = singleFile.FullName
-                    End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("4") Then
-                        redfilepath4.Text = singleFile.FullName
-                    End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("5") Then
-                        redfilepath5.Text = singleFile.FullName
-                    End If
+                    'If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("1") Then
+                    '    redfilepath1.Text = singleFile.FullName
+                    'End If
+                    'If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("2") Then
+                    '    redfilepath2.Text = singleFile.FullName
+                    'End If
+                    'If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("3") Then
+                    '    redfilepath3.Text = singleFile.FullName
+                    'End If
+                    'If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("4") Then
+                    '    redfilepath4.Text = singleFile.FullName
+                    'End If
+                    'if path.getfilenamewithoutextension(singlefile.fullname).ToUpper.StartsWith("r") and path.getfilenamewithoutextension(singlefile.fullname).ToUpper.EndsWith("5") then
+                    '    redfilepath5.text = singlefile.fullname
+                    'end if
                     If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("G") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("1") Then
                         greenfilepath1.Text = singleFile.FullName
                     End If
@@ -202,30 +202,30 @@ Public Class PanelFFCRGB
                     If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("G") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("5") Then
                         greenfilepath5.Text = singleFile.FullName
                     End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("1") Then
-                        bluefilepath1.Text = singleFile.FullName
-                    End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("2") Then
-                        bluefilepath2.Text = singleFile.FullName
-                    End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("3") Then
-                        bluefilepath3.Text = singleFile.FullName
-                    End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("4") Then
-                        bluefilepath4.Text = singleFile.FullName
-                    End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("5") Then
-                        bluefilepath5.Text = singleFile.FullName
-                    End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("M") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("R") Then
-                        mredfilepath.Text = singleFile.FullName
-                    End If
+                    'If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("1") Then
+                    '    bluefilepath1.Text = singleFile.FullName
+                    'End If
+                    'If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("2") Then
+                    '    bluefilepath2.Text = singleFile.FullName
+                    'End If
+                    'If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("3") Then
+                    '    bluefilepath3.Text = singleFile.FullName
+                    'End If
+                    'If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("4") Then
+                    '    bluefilepath4.Text = singleFile.FullName
+                    'End If
+                    'If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("5") Then
+                    '    bluefilepath5.Text = singleFile.FullName
+                    'End If
+                    'If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("M") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("R") Then
+                    '    mredfilepath.Text = singleFile.FullName
+                    'End If
                     If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("M") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("G") Then
                         mgreenfilepath.Text = singleFile.FullName
                     End If
-                    If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("M") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("B") Then
-                        mbluefilepath.Text = singleFile.FullName
-                    End If
+                    'If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("M") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("B") Then
+                    '    mbluefilepath.Text = singleFile.FullName
+                    'End If
 
                 Next
 
@@ -240,7 +240,6 @@ Public Class PanelFFCRGB
     End Sub
 
     Private Sub GenerateXML(ByVal camerasn As String, ByVal color As String, ByVal outputfile As String) 'this function is to generate the xml based on the template below
-
         Dim xmlstring As String = txtXmlTemplate.Text
         xmlstring = xmlstring.Replace("camerasn", camerasn)
         xmlstring = xmlstring.Replace("model", modelname.Text)
@@ -252,45 +251,45 @@ Public Class PanelFFCRGB
 
     End Sub
 
-    Private Sub btnChooseRedFile1_Click(sender As Object, e As EventArgs) Handles btnChooseRedFile1.Click
-        Using frm = New OpenFileDialog
-            If frm.ShowDialog(Me) = DialogResult.OK Then
-                redfilepath1.Text = frm.FileName
-            End If
-        End Using
-    End Sub
+    'Private Sub btnChooseRedFile1_Click(sender As Object, e As EventArgs)
+    '    Using frm = New OpenFileDialog
+    '        If frm.ShowDialog(Me) = DialogResult.OK Then
+    '            redfilepath1.Text = frm.FileName
+    '        End If
+    '    End Using
+    'End Sub
 
-    Private Sub btnChooseRedFile2_Click(sender As Object, e As EventArgs) Handles btnChooseRedFile2.Click
-        Using frm = New OpenFileDialog
-            If frm.ShowDialog(Me) = DialogResult.OK Then
-                redfilepath2.Text = frm.FileName
-            End If
-        End Using
-    End Sub
+    'Private Sub btnChooseRedFile2_Click(sender As Object, e As EventArgs)
+    '    Using frm = New OpenFileDialog
+    '        If frm.ShowDialog(Me) = DialogResult.OK Then
+    '            redfilepath2.Text = frm.FileName
+    '        End If
+    '    End Using
+    'End Sub
 
-    Private Sub btnChooseRedFile3_Click(sender As Object, e As EventArgs) Handles btnChooseRedFile3.Click
-        Using frm = New OpenFileDialog
-            If frm.ShowDialog(Me) = DialogResult.OK Then
-                redfilepath3.Text = frm.FileName
-            End If
-        End Using
-    End Sub
+    'Private Sub btnChooseRedFile3_Click(sender As Object, e As EventArgs)
+    '    Using frm = New OpenFileDialog
+    '        If frm.ShowDialog(Me) = DialogResult.OK Then
+    '            redfilepath3.Text = frm.FileName
+    '        End If
+    '    End Using
+    'End Sub
 
-    Private Sub btnChooseRedFile4_Click(sender As Object, e As EventArgs) Handles btnChooseRedFile4.Click
-        Using frm = New OpenFileDialog
-            If frm.ShowDialog(Me) = DialogResult.OK Then
-                redfilepath4.Text = frm.FileName
-            End If
-        End Using
-    End Sub
+    'Private Sub btnChooseRedFile4_Click(sender As Object, e As EventArgs)
+    '    Using frm = New OpenFileDialog
+    '        If frm.ShowDialog(Me) = DialogResult.OK Then
+    '            redfilepath4.Text = frm.FileName
+    '        End If
+    '    End Using
+    'End Sub
 
-    Private Sub btnChooseRedFile5_Click(sender As Object, e As EventArgs) Handles btnChooseRedFile5.Click
-        Using frm = New OpenFileDialog
-            If frm.ShowDialog(Me) = DialogResult.OK Then
-                redfilepath5.Text = frm.FileName
-            End If
-        End Using
-    End Sub
+    'Private Sub btnChooseRedFile5_Click(sender As Object, e As EventArgs)
+    '    Using frm = New OpenFileDialog
+    '        If frm.ShowDialog(Me) = DialogResult.OK Then
+    '            redfilepath5.Text = frm.FileName
+    '        End If
+    '    End Using
+    'End Sub
 
     Private Sub btnChooseGreenFile1_Click(sender As Object, e As EventArgs) Handles btnChooseGreenFile1.Click
         Using frm = New OpenFileDialog
@@ -332,53 +331,53 @@ Public Class PanelFFCRGB
         End Using
     End Sub
 
-    Private Sub btnChooseBlueFile1_Click(sender As Object, e As EventArgs) Handles btnChooseBlueFile1.Click
-        Using frm = New OpenFileDialog
-            If frm.ShowDialog(Me) = DialogResult.OK Then
-                bluefilepath1.Text = frm.FileName
-            End If
-        End Using
-    End Sub
+    'Private Sub btnChooseBlueFile1_Click(sender As Object, e As EventArgs)
+    '    Using frm = New OpenFileDialog
+    '        If frm.ShowDialog(Me) = DialogResult.OK Then
+    '            bluefilepath1.Text = frm.FileName
+    '        End If
+    '    End Using
+    'End Sub
 
-    Private Sub btnChooseBlueFile2_Click(sender As Object, e As EventArgs) Handles btnChooseBlueFile2.Click
-        Using frm = New OpenFileDialog
-            If frm.ShowDialog(Me) = DialogResult.OK Then
-                bluefilepath2.Text = frm.FileName
-            End If
-        End Using
-    End Sub
+    'Private Sub btnChooseBlueFile2_Click(sender As Object, e As EventArgs)
+    '    Using frm = New OpenFileDialog
+    '        If frm.ShowDialog(Me) = DialogResult.OK Then
+    '            bluefilepath2.Text = frm.FileName
+    '        End If
+    '    End Using
+    'End Sub
 
-    Private Sub btnChooseBlueFile3_Click(sender As Object, e As EventArgs) Handles btnChooseBlueFile3.Click
-        Using frm = New OpenFileDialog
-            If frm.ShowDialog(Me) = DialogResult.OK Then
-                bluefilepath3.Text = frm.FileName
-            End If
-        End Using
-    End Sub
+    'Private Sub btnChooseBlueFile3_Click(sender As Object, e As EventArgs)
+    '    Using frm = New OpenFileDialog
+    '        If frm.ShowDialog(Me) = DialogResult.OK Then
+    '            bluefilepath3.Text = frm.FileName
+    '        End If
+    '    End Using
+    'End Sub
 
-    Private Sub btnChooseBlueFile4_Click(sender As Object, e As EventArgs) Handles btnChooseBlueFile4.Click
-        Using frm = New OpenFileDialog
-            If frm.ShowDialog(Me) = DialogResult.OK Then
-                bluefilepath4.Text = frm.FileName
-            End If
-        End Using
-    End Sub
+    'Private Sub btnChooseBlueFile4_Click(sender As Object, e As EventArgs)
+    '    Using frm = New OpenFileDialog
+    '        If frm.ShowDialog(Me) = DialogResult.OK Then
+    '            bluefilepath4.Text = frm.FileName
+    '        End If
+    '    End Using
+    'End Sub
 
-    Private Sub btnChooseBlueFile5_Click(sender As Object, e As EventArgs) Handles btnChooseBlueFile5.Click
-        Using frm = New OpenFileDialog
-            If frm.ShowDialog(Me) = DialogResult.OK Then
-                bluefilepath5.Text = frm.FileName
-            End If
-        End Using
-    End Sub
+    'Private Sub btnChooseBlueFile5_Click(sender As Object, e As EventArgs)
+    '    Using frm = New OpenFileDialog
+    '        If frm.ShowDialog(Me) = DialogResult.OK Then
+    '            bluefilepath5.Text = frm.FileName
+    '        End If
+    '    End Using
+    'End Sub
 
-    Private Sub btnChooseMotherRedFile_Click(sender As Object, e As EventArgs) Handles btnChooseMotherRedFile.Click
-        Using frm = New OpenFileDialog
-            If frm.ShowDialog(Me) = DialogResult.OK Then
-                mredfilepath.Text = frm.FileName
-            End If
-        End Using
-    End Sub
+    'Private Sub btnChooseMotherRedFile_Click(sender As Object, e As EventArgs)
+    '    Using frm = New OpenFileDialog
+    '        If frm.ShowDialog(Me) = DialogResult.OK Then
+    '            mredfilepath.Text = frm.FileName
+    '        End If
+    '    End Using
+    'End Sub
 
     Private Sub btnChooseMotherGreenFile_Click(sender As Object, e As EventArgs) Handles btnChooseMotherGreenFile.Click
         Using frm = New OpenFileDialog
@@ -388,13 +387,13 @@ Public Class PanelFFCRGB
         End Using
     End Sub
 
-    Private Sub btnChooseMotherBlueFile_Click(sender As Object, e As EventArgs) Handles btnChooseMotherBlueFile.Click, btnChooseOuputFolder.Click
-        Using frm = New OpenFileDialog
-            If frm.ShowDialog(Me) = DialogResult.OK Then
-                mbluefilepath.Text = frm.FileName
-            End If
-        End Using
-    End Sub
+    'Private Sub btnChooseMotherBlueFile_Click(sender As Object, e As EventArgs) Handles btnChooseOuputFolder.Click
+    '    Using frm = New OpenFileDialog
+    '        If frm.ShowDialog(Me) = DialogResult.OK Then
+    '            mbluefilepath.Text = frm.FileName
+    '        End If
+    '    End Using
+    'End Sub
 
     Private Sub inputpathbox_TextChanged(sender As Object, e As EventArgs) Handles inputpathbox.TextChanged
         outputpathbox.Text = inputpathbox.Text + "\Result"
@@ -405,21 +404,21 @@ Public Class PanelFFCRGB
 
         'this long loop is just to read all the file in the chosen folder, if the file name start with R and end with 1, the program will consider the file as red measurement of panel 1, and go on
         For Each singleFile In allFiles
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("1") Then
-                redfilepath1.Text = singleFile.FullName
-            End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("2") Then
-                redfilepath2.Text = singleFile.FullName
-            End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("3") Then
-                redfilepath3.Text = singleFile.FullName
-            End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("4") Then
-                redfilepath4.Text = singleFile.FullName
-            End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("5") Then
-                redfilepath5.Text = singleFile.FullName
-            End If
+            'If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("1") Then
+            '    redfilepath1.Text = singleFile.FullName
+            'End If
+            'If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("2") Then
+            '    redfilepath2.Text = singleFile.FullName
+            'End If
+            'If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("3") Then
+            '    redfilepath3.Text = singleFile.FullName
+            'End If
+            'If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("4") Then
+            '    redfilepath4.Text = singleFile.FullName
+            'End If
+            'If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("R") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("5") Then
+            '    redfilepath5.Text = singleFile.FullName
+            'End If
             If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("G") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("1") Then
                 greenfilepath1.Text = singleFile.FullName
             End If
@@ -435,35 +434,35 @@ Public Class PanelFFCRGB
             If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("G") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("5") Then
                 greenfilepath5.Text = singleFile.FullName
             End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("1") Then
-                bluefilepath1.Text = singleFile.FullName
-            End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("2") Then
-                bluefilepath2.Text = singleFile.FullName
-            End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("3") Then
-                bluefilepath3.Text = singleFile.FullName
-            End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("4") Then
-                bluefilepath4.Text = singleFile.FullName
-            End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("5") Then
-                bluefilepath5.Text = singleFile.FullName
-            End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("M") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("R") Then
-                mredfilepath.Text = singleFile.FullName
-            End If
+            'If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("1") Then
+            '    bluefilepath1.Text = singleFile.FullName
+            'End If
+            'If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("2") Then
+            '    bluefilepath2.Text = singleFile.FullName
+            'End If
+            'If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("3") Then
+            '    bluefilepath3.Text = singleFile.FullName
+            'End If
+            'If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("4") Then
+            '    bluefilepath4.Text = singleFile.FullName
+            'End If
+            'If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("B") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("5") Then
+            '    bluefilepath5.Text = singleFile.FullName
+            'End If
+            'If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("M") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("R") Then
+            '    mredfilepath.Text = singleFile.FullName
+            'End If
             If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("M") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("G") Then
                 mgreenfilepath.Text = singleFile.FullName
             End If
-            If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("M") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("B") Then
-                mbluefilepath.Text = singleFile.FullName
-            End If
+            'If Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.StartsWith("M") And Path.GetFileNameWithoutExtension(singleFile.FullName).ToUpper.EndsWith("B") Then
+            '    mbluefilepath.Text = singleFile.FullName
+            'End If
 
         Next
     End Sub
 
-    Private Sub PanelFFCRGB_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+    Private Sub PanelFFCGRAY_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         SetVersionInfo()
         Dim dir = "XmlTemplate"
         Dim files As New List(Of String)
@@ -488,7 +487,6 @@ Public Class PanelFFCRGB
                 txtXmlTemplate.Text = ""
                 txtXmlTemplate.Text = fileReader
             End If
-
         End If
     End Sub
 

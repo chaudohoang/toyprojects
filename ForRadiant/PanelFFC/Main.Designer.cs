@@ -41,14 +41,15 @@ namespace PanelFFC
 			this.listBox1.Location = new System.Drawing.Point(12, 47);
 			this.listBox1.Name = "listBox1";
 			this.listBox1.ScrollAlwaysVisible = true;
-			this.listBox1.Size = new System.Drawing.Size(225, 147);
+			this.listBox1.Size = new System.Drawing.Size(260, 160);
 			this.listBox1.TabIndex = 7;
+			this.listBox1.DoubleClick += new System.EventHandler(this.listBox1_DoubleClick);
 			// 
 			// btnRefresh
 			// 
 			this.btnRefresh.Location = new System.Drawing.Point(12, 12);
 			this.btnRefresh.Name = "btnRefresh";
-			this.btnRefresh.Size = new System.Drawing.Size(110, 29);
+			this.btnRefresh.Size = new System.Drawing.Size(125, 29);
 			this.btnRefresh.TabIndex = 8;
 			this.btnRefresh.Text = "Refresh";
 			this.btnRefresh.UseVisualStyleBackColor = true;
@@ -56,9 +57,9 @@ namespace PanelFFC
 			// 
 			// btnStart
 			// 
-			this.btnStart.Location = new System.Drawing.Point(128, 12);
+			this.btnStart.Location = new System.Drawing.Point(147, 12);
 			this.btnStart.Name = "btnStart";
-			this.btnStart.Size = new System.Drawing.Size(110, 29);
+			this.btnStart.Size = new System.Drawing.Size(125, 29);
 			this.btnStart.TabIndex = 9;
 			this.btnStart.Text = "Start";
 			this.btnStart.UseVisualStyleBackColor = true;
@@ -68,7 +69,7 @@ namespace PanelFFC
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(250, 203);
+			this.ClientSize = new System.Drawing.Size(284, 218);
 			this.Controls.Add(this.btnStart);
 			this.Controls.Add(this.btnRefresh);
 			this.Controls.Add(this.listBox1);

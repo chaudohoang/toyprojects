@@ -1,0 +1,12 @@
+D:\CSync\GitHub\toyprojects\ForRadiant\bin\Debug\PanelFFC Radiant CF.dll.config
+D:\CSync\GitHub\toyprojects\ForRadiant\bin\Debug\PanelFFC Radiant CF.dll
+D:\CSync\GitHub\toyprojects\ForRadiant\bin\Debug\PanelFFC Radiant CF.pdb
+D:\CSync\GitHub\toyprojects\ForRadiant\bin\Debug\PanelFFC Radiant CF.xml
+D:\CSync\GitHub\toyprojects\ForRadiant\PanelFFC Radiant CF\obj\Debug\PanelFFC Radiant CF.vbprojAssemblyReference.cache
+D:\CSync\GitHub\toyprojects\ForRadiant\PanelFFC Radiant CF\obj\Debug\PanelFFC.PanelFFCRadiantCF.resources
+D:\CSync\GitHub\toyprojects\ForRadiant\PanelFFC Radiant CF\obj\Debug\PanelFFC.Resources.resources
+D:\CSync\GitHub\toyprojects\ForRadiant\PanelFFC Radiant CF\obj\Debug\PanelFFC Radiant CF.vbproj.GenerateResource.cache
+D:\CSync\GitHub\toyprojects\ForRadiant\PanelFFC Radiant CF\obj\Debug\PanelFFC Radiant CF.vbproj.CoreCompileInputs.cache
+D:\CSync\GitHub\toyprojects\ForRadiant\PanelFFC Radiant CF\obj\Debug\PanelFFC Radiant CF.dll
+D:\CSync\GitHub\toyprojects\ForRadiant\PanelFFC Radiant CF\obj\Debug\PanelFFC Radiant CF.xml
+D:\CSync\GitHub\toyprojects\ForRadiant\PanelFFC Radiant CF\obj\Debug\PanelFFC Radiant CF.pdb

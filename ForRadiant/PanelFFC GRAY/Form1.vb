@@ -60,9 +60,9 @@ Public Class PanelFFCGRAY
         'GenerateCSV(DR, outputpathbox.Text + "\" + modelname.Text + "_" +camerasn.Text + "_R.csv")
         GenerateCSV(DG, outputpathbox.Text + "\" + modelname.Text + "_" + camerasn.Text + ".csv")
         'GenerateCSV(DB, outputpathbox.Text + "\" + modelname.Text + "_" + camerasn.Text + "_B.csv")
-        'GenerateXML(camerasn.Text, "R", outputpathbox.Text + "\" + modelname.Text + "_Illunis.xml")
-        GenerateXML(camerasn.Text, "G", outputpathbox.Text + "\" + modelname.Text + "_Illunis.xml")
-        'GenerateXML(camerasn.Text, "B", outputpathbox.Text + "\" + modelname.Text + "_Illunis.xml")
+        'GenerateXML(camerasn.Text, "R", outputpathbox.Text + "\" + modelname.Text + ".xml")
+        GenerateXML(camerasn.Text, "G", outputpathbox.Text + "\" + modelname.Text + ".xml")
+        'GenerateXML(camerasn.Text, "B", outputpathbox.Text + "\" + modelname.Text + ".xml")
 
         'just create Done! text with random color when finish, just like butterfly tool
         Static m_Rnd As New Random
@@ -537,7 +537,7 @@ Public Class PanelFFCGRAY
     End Sub
 
     Private Sub btnDefaultTemplate_Click(sender As Object, e As EventArgs) Handles btnDefaultTemplate.Click
-        Dim dir = "XmlTemplate"
+        Dim dir = ".\XmlTemplate"
         Dim filepath As String = Path.GetFullPath(Path.Combine("XmlTemplate", "default.zip"))
         Using archive As ZipArchive = ZipFile.OpenRead(filepath)
             For Each entry As ZipArchiveEntry In archive.Entries
