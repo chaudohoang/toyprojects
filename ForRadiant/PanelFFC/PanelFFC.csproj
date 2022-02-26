@@ -83,40 +83,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PanelFFC GRAY\PanelFFC GRAY.vbproj">
-      <Project>{ab79aa70-90aa-4313-b4d4-4f299ebfdca9}</Project>
-      <Name>PanelFFC GRAY</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PanelFFC Illunis CF\PanelFFC Illunis CF.vbproj">
-      <Project>{e6ec8fca-e077-4c84-95e5-3884c5a84767}</Project>
-      <Name>PanelFFC Illunis CF</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PanelFFC Illunis DJ\PanelFFC Illunis DJ.vbproj">
-      <Project>{92bdea24-1d8f-4088-85c8-f695f414d4a3}</Project>
-      <Name>PanelFFC Illunis DJ</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PanelFFC Illunis EP\PanelFFC Illunis EP.vbproj">
-      <Project>{593b0cd8-abda-4708-989c-b9b39d3b7cf1}</Project>
-      <Name>PanelFFC Illunis EP</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PanelFFC Radiant CF\PanelFFC Radiant CF.vbproj">
-      <Project>{c002e72b-3b17-48db-a8cd-c973e5d41b92}</Project>
-      <Name>PanelFFC Radiant CF</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PanelFFC RGB\PanelFFC RGB.vbproj">
-      <Project>{d08e3d2a-c2cc-49b4-b47d-d6657ad33fb2}</Project>
-      <Name>PanelFFC RGB</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PanelFFC X1080 1 panel\PanelFFC X1080 1panel.vbproj">
-      <Project>{12a6fc25-b348-420f-8b0b-a46a6c26da08}</Project>
-      <Name>PanelFFC X1080 1panel</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PanelFFC X1080 5 panels\PanelFFC X1080 5 panels.vbproj">
-      <Project>{60e94be7-a30a-450f-9986-1fe1ab4b80c9}</Project>
-      <Name>PanelFFC X1080 5 panels</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="PanelFFC.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -129,7 +95,7 @@ xcopy /e /y /i $(SolutionDir)\$(ProjectName)\XmlTemplate $(SolutionDir)\bin\$(Co
   </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_AssemblyInfoFilename="" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.TimeStamp" BuildVersion_UseGlobalSettings="True" BuildVersion_StartDate="2000/1/1" />
+      <UserProperties BuildVersion_StartDate="2000/1/1" BuildVersion_UseGlobalSettings="True" BuildVersion_BuildVersioningStyle="None.None.Increment.TimeStamp" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_AssemblyInfoFilename="" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

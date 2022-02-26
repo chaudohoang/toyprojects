@@ -8,7 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Reflection;
-
+using System.IO;
+using System.Diagnostics;
 
 namespace PanelFFC
 {
@@ -31,57 +32,53 @@ namespace PanelFFC
                         this.Text, versionInfo.ToString());
         }
 
-        private void btnIllunisCF_Click(object sender, EventArgs e)
-        {
-            Form illuniscf = new PanelFFCIllunisCF();
-            illuniscf.Show();
-        }
-
-        private void btnIllunisDJ_Click(object sender, EventArgs e)
-        {
-            Form illunisdj = new PanelFFCIllunisDJ();
-            illunisdj.Show();
-        }
-
-        private void btnIllunisEP_Click(object sender, EventArgs e)
-        {
-            Form illunisep = new PanelFFCIllunisEP();
-            illunisep.Show();
-        }
-
-        private void btnRadiantCF_Click(object sender, EventArgs e)
-        {
-            Form radiantcf = new PanelFFCRadiantCF();
-            radiantcf.Show();
-        }
-
-        private void btnX10801panel_Click(object sender, EventArgs e)
-        {
-            Form x1080_1 = new PanelFFCX10801panel();
-            x1080_1.Show();
-        }
-
-        private void btnX10805panel_Click(object sender, EventArgs e)
-        {
-            Form x1080_5 = new PanelFFCX10805panel();
-            x1080_5.Show();
-        }
-
-        private void btnRgbFFC_Click(object sender, EventArgs e)
-        {
-            Form rgbffc = new PanelFFCRGB();
-            rgbffc.Show();
-        }
-
-        private void btnGrayFFC_Click(object sender, EventArgs e)
-        {
-            Form grayffc = new PanelFFCGRAY();
-            grayffc.Show();
-        }
+       
 
         private void Main_Load(object sender, EventArgs e)
         {
             SetVersionInfo();
+            RefreshItems();
+
         }
-    }
+
+		private void btnRefresh_Click(object sender, EventArgs e)
+		{
+            RefreshItems();
+        }
+
+        private void RefreshItems()
+		{
+            try
+            {
+                string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                string appdir = Path.GetDirectoryName(apppath);
+                String[] dlls =
+                Directory.GetFiles(appdir, "*.exe", SearchOption.AllDirectories)
+                .Select(fileName => Path.GetFileName(fileName))
+                .Where(fileName => Path.GetFileNameWithoutExtension(fileName).StartsWith("PanelFFC"))
+                .ToArray();
+                listBox1.Items.Clear();
+                foreach (string file in dlls)
+                {
+                    listBox1.Items.Add(file);
+                }
+                listBox1.Items.Remove("PanelFFC.exe");
+            }
+            catch (Exception ex)
+            {
+
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+		private void btnStart_Click(object sender, EventArgs e)
+		{
+            string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            string appdir = Path.GetDirectoryName(apppath)+"\\"+"Apps";
+            if (File.Exists(appdir+"\\"+listBox1.SelectedItem))
+            {
+                Process.Start(appdir + "\\" + listBox1.SelectedItem);
+            }
+        }
+	}
 }
