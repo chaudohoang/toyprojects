@@ -11,13 +11,13 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "JoinPanelID", "JoinPanelID\
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "MotherGrayGenerator", "MotherGrayGenerator\MotherGrayGenerator.vbproj", "{DCD64881-ECA2-400A-BFBF-901FF7354FBD}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFC Illunis CF", "PanelFFC Illunis CF\PanelFFC Illunis CF.vbproj", "{E6EC8FCA-E077-4C84-95E5-3884C5A84767}"
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFCIllunisCF", "PanelFFC Illunis CF\PanelFFCIllunisCF.vbproj", "{E6EC8FCA-E077-4C84-95E5-3884C5A84767}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFC Illunis DJ", "PanelFFC Illunis DJ\PanelFFC Illunis DJ.vbproj", "{92BDEA24-1D8F-4088-85C8-F695F414D4A3}"
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFCIllunisDJ", "PanelFFC Illunis DJ\PanelFFCIllunisDJ.vbproj", "{92BDEA24-1D8F-4088-85C8-F695F414D4A3}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFC Illunis EP", "PanelFFC Illunis EP\PanelFFC Illunis EP.vbproj", "{593B0CD8-ABDA-4708-989C-B9B39D3B7CF1}"
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFCIllunisEP", "PanelFFC Illunis EP\PanelFFCIllunisEP.vbproj", "{593B0CD8-ABDA-4708-989C-B9B39D3B7CF1}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFC Radiant CF", "PanelFFC Radiant CF\PanelFFC Radiant CF.vbproj", "{C002E72B-3B17-48DB-A8CD-C973E5D41B92}"
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFCRadiantCF", "PanelFFC Radiant CF\PanelFFCRadiantCF.vbproj", "{C002E72B-3B17-48DB-A8CD-C973E5D41B92}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KillProcess", "KillProcess\KillProcess.csproj", "{E9F5DDE3-B839-46BE-AD6D-5690C2E1251F}"
 EndProject
@@ -33,13 +33,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FFCDBGenerate", "FFCDBGener
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PanelFFC", "PanelFFC\PanelFFC.csproj", "{344311C9-6E2A-4F7D-85AE-57E0BA3AD963}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFC X1080 5 panels", "PanelFFC X1080 5 panels\PanelFFC X1080 5 panels.vbproj", "{60E94BE7-A30A-450F-9986-1FE1AB4B80C9}"
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFCX10805panel", "PanelFFC X1080 5 panels\PanelFFCX10805panel.vbproj", "{60E94BE7-A30A-450F-9986-1FE1AB4B80C9}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFC X1080 1panel", "PanelFFC X1080 1 panel\PanelFFC X1080 1panel.vbproj", "{12A6FC25-B348-420F-8B0B-A46A6C26DA08}"
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFCX10801panel", "PanelFFC X1080 1 panel\PanelFFCX10801panel.vbproj", "{12A6FC25-B348-420F-8B0B-A46A6C26DA08}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFC RGB", "PanelFFC RGB\PanelFFC RGB.vbproj", "{D08E3D2A-C2CC-49B4-B47D-D6657AD33FB2}"
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFCRGB", "PanelFFC RGB\PanelFFCRGB.vbproj", "{D08E3D2A-C2CC-49B4-B47D-D6657AD33FB2}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFC GRAY", "PanelFFC GRAY\PanelFFC GRAY.vbproj", "{AB79AA70-90AA-4313-B4D4-4F299EBFDCA9}"
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFCGRAY", "PanelFFC GRAY\PanelFFCGRAY.vbproj", "{AB79AA70-90AA-4313-B4D4-4F299EBFDCA9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteTools", "RemoteTools\RemoteTools.csproj", "{B2A11C28-48EE-4BDF-8F4B-5D60863793A7}"
 EndProject
@@ -188,10 +188,10 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		BuildVersion_UseGlobalSettings = True
-		BuildVersion_UpdateAssemblyVersion = True
-		BuildVersion_BuildVersioningStyle = None.None.Increment.TimeStamp
-		BuildVersion_StartDate = 2000/1/1
 		SolutionGuid = {60C14AFF-CFF7-46E8-9345-65A46A64495F}
+		BuildVersion_StartDate = 2000/1/1
+		BuildVersion_BuildVersioningStyle = None.None.Increment.TimeStamp
+		BuildVersion_UpdateAssemblyVersion = True
+		BuildVersion_UseGlobalSettings = True
 	EndGlobalSection
 EndGlobal
