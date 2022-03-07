@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using SuperSimpleTcp;
 
 namespace TCPServer
 {
@@ -18,13 +19,17 @@ namespace TCPServer
             InitializeComponent();
         }
 
-        SuperSimpleTcp.SimpleTcpServer server;
+        SimpleTcpServer server;
         private void btnStart_Click(object sender, EventArgs e)
         {
-            server = new SuperSimpleTcp.SimpleTcpServer(txtIP.Text);
+            server = new SimpleTcpServer(txtIP.Text);
             server.Events.ClientConnected += Events_ClientConnected;
             server.Events.ClientDisconnected += Events_ClientDisconnected;
             server.Events.DataReceived += Events_DataReceived;
+            server.Keepalive.EnableTcpKeepAlives = true;
+            server.Keepalive.TcpKeepAliveInterval = 5;      // seconds to wait before sending subsequent keepalive
+            server.Keepalive.TcpKeepAliveTime = 5;          // seconds to wait before sending a keepalive
+            server.Keepalive.TcpKeepAliveRetryCount = 5;
             server.Start();
             txtLog.Text += $"Starting...{Environment.NewLine}";
             btnStart.Enabled = false;
@@ -34,7 +39,11 @@ namespace TCPServer
         private void Form1_Load(object sender, EventArgs e)
         {
             btnSend.Enabled = false;
-            server = new SuperSimpleTcp.SimpleTcpServer(txtIP.Text);
+            server = new SimpleTcpServer(txtIP.Text);
+            server.Keepalive.EnableTcpKeepAlives = true;
+            server.Keepalive.TcpKeepAliveInterval = 5;      // seconds to wait before sending subsequent keepalive
+            server.Keepalive.TcpKeepAliveTime = 5;          // seconds to wait before sending a keepalive
+            server.Keepalive.TcpKeepAliveRetryCount = 5;
             server.Events.ClientConnected += Events_ClientConnected;
             server.Events.ClientDisconnected += Events_ClientDisconnected;
             server.Events.DataReceived += Events_DataReceived;
@@ -44,7 +53,7 @@ namespace TCPServer
         {
             this.Invoke((MethodInvoker)delegate
             {
-                txtLog.Text += $"{e.IpPort}: {Encoding.UTF8.GetString(e.Data)}{Environment.NewLine}";
+                txtLog.Text += $"{e.IpPort} : {Encoding.UTF8.GetString(e.Data)}{Environment.NewLine}";
             });
             if (Encoding.UTF8.GetString(e.Data)=="notepad")
             {
@@ -82,7 +91,7 @@ namespace TCPServer
                 if (!string.IsNullOrEmpty(txtMessage.Text) && lstClientIP.SelectedItem !=null) //check message & select client ip from listbox
                 {
                     server.Send(lstClientIP.SelectedItem.ToString(), txtMessage.Text);
-                    txtLog.Text += $"Server : {txtMessage.Text}{Environment.NewLine}";
+                    txtLog.Text += $"Server->{lstClientIP.SelectedItem.ToString()} : {txtMessage.Text}{Environment.NewLine}";
                     txtMessage.Text = string.Empty;
                 }
             }
@@ -94,11 +103,6 @@ namespace TCPServer
             {
                 btnSend_Click(this, new EventArgs());
             }
-        }
-
-        private void btnRestart_Click(object sender, EventArgs e)
-        {
-
         }
 
         private void btnSendAll_Click(object sender, EventArgs e)

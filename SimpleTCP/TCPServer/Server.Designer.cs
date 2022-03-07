@@ -39,7 +39,6 @@ namespace TCPServer
             this.btnStart = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
             this.lstClientIP = new System.Windows.Forms.ListBox();
-            this.btnRestart = new System.Windows.Forms.Button();
             this.btnSendAll = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
@@ -108,7 +107,7 @@ namespace TCPServer
             // 
             // btnStart
             // 
-            this.btnStart.Location = new System.Drawing.Point(72, 241);
+            this.btnStart.Location = new System.Drawing.Point(153, 241);
             this.btnStart.Name = "btnStart";
             this.btnStart.Size = new System.Drawing.Size(75, 23);
             this.btnStart.TabIndex = 7;
@@ -134,16 +133,6 @@ namespace TCPServer
             this.lstClientIP.Size = new System.Drawing.Size(201, 229);
             this.lstClientIP.TabIndex = 9;
             // 
-            // btnRestart
-            // 
-            this.btnRestart.Location = new System.Drawing.Point(153, 241);
-            this.btnRestart.Name = "btnRestart";
-            this.btnRestart.Size = new System.Drawing.Size(75, 23);
-            this.btnRestart.TabIndex = 10;
-            this.btnRestart.Text = "Restart";
-            this.btnRestart.UseVisualStyleBackColor = true;
-            this.btnRestart.Click += new System.EventHandler(this.btnRestart_Click);
-            // 
             // btnSendAll
             // 
             this.btnSendAll.Location = new System.Drawing.Point(315, 241);
@@ -160,7 +149,6 @@ namespace TCPServer
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(615, 274);
             this.Controls.Add(this.btnSendAll);
-            this.Controls.Add(this.btnRestart);
             this.Controls.Add(this.lstClientIP);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.btnStart);
@@ -191,7 +179,6 @@ namespace TCPServer
         private System.Windows.Forms.Button btnStart;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ListBox lstClientIP;
-        private System.Windows.Forms.Button btnRestart;
         private System.Windows.Forms.Button btnSendAll;
     }
 }

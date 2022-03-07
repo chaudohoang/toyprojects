@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using SuperSimpleTcp;
 
 namespace TCPClient
 {
@@ -18,11 +19,15 @@ namespace TCPClient
             InitializeComponent();
         }
 
-        SuperSimpleTcp.SimpleTcpClient client;
+        SimpleTcpClient client;
 
         private void Form1_Load(object sender, EventArgs e)
         {
             client = new(txtIP.Text);
+            client.Keepalive.EnableTcpKeepAlives = true;
+            client.Keepalive.TcpKeepAliveInterval = 5;
+            client.Keepalive.TcpKeepAliveTime = 5;
+            client.Keepalive.TcpKeepAliveRetryCount = 5;
             client.Events.Connected += Events_Connected;
             client.Events.DataReceived += Events_DataReceived;
             client.Events.Disconnected += Events_Disconnected;
@@ -43,7 +48,7 @@ namespace TCPClient
         {
             this.Invoke((MethodInvoker)delegate
             {
-                txtLog.Text += $"Server: {Encoding.UTF8.GetString(e.Data)}{Environment.NewLine}";
+                txtLog.Text += $"Server : {Encoding.UTF8.GetString(e.Data)}{Environment.NewLine}";
             });
             if (Encoding.UTF8.GetString(e.Data) == "notepad")
             {
@@ -70,7 +75,7 @@ namespace TCPClient
                 if (!string.IsNullOrEmpty(txtMessage.Text))
                 {
                     client.Send(txtMessage.Text);
-                    txtLog.Text += $"Me: {txtMessage.Text}{Environment.NewLine}";
+                    txtLog.Text += $"Me : {txtMessage.Text}{Environment.NewLine}";
                     txtMessage.Text = string.Empty;
                 }
             }
@@ -81,10 +86,14 @@ namespace TCPClient
             try
             {
                 client = new(txtIP.Text);
+                client.Keepalive.EnableTcpKeepAlives = true;
+                client.Keepalive.TcpKeepAliveInterval = 5;
+                client.Keepalive.TcpKeepAliveTime = 5;
+                client.Keepalive.TcpKeepAliveRetryCount = 5;
                 client.Events.Connected += Events_Connected;
                 client.Events.DataReceived += Events_DataReceived;
                 client.Events.Disconnected += Events_Disconnected;
-                client.Connect();
+                client.ConnectWithRetries(60);
                 btnSend.Enabled = true;
                 btnConnect.Enabled = false;
             }

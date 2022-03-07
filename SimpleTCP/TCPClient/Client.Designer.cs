@@ -52,7 +52,7 @@ namespace TCPClient
             // 
             this.txtIP.Location = new System.Drawing.Point(72, 6);
             this.txtIP.Name = "txtIP";
-            this.txtIP.Size = new System.Drawing.Size(322, 23);
+            this.txtIP.Size = new System.Drawing.Size(318, 23);
             this.txtIP.TabIndex = 1;
             this.txtIP.Text = "127.0.0.1:9000";
             // 
@@ -63,7 +63,7 @@ namespace TCPClient
             this.txtLog.Name = "txtLog";
             this.txtLog.ReadOnly = true;
             this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtLog.Size = new System.Drawing.Size(322, 170);
+            this.txtLog.Size = new System.Drawing.Size(318, 170);
             this.txtLog.TabIndex = 2;
             // 
             // label2
@@ -79,7 +79,7 @@ namespace TCPClient
             // 
             this.txtMessage.Location = new System.Drawing.Point(72, 211);
             this.txtMessage.Name = "txtMessage";
-            this.txtMessage.Size = new System.Drawing.Size(322, 23);
+            this.txtMessage.Size = new System.Drawing.Size(318, 23);
             this.txtMessage.TabIndex = 5;
             this.txtMessage.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtMessage_KeyDown);
             // 
@@ -112,11 +112,11 @@ namespace TCPClient
             this.btnConnect.UseVisualStyleBackColor = true;
             this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
             // 
-            // Form1
+            // Client
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(411, 274);
+            this.ClientSize = new System.Drawing.Size(406, 274);
             this.Controls.Add(this.btnConnect);
             this.Controls.Add(this.btnSend);
             this.Controls.Add(this.txtMessage);
@@ -125,7 +125,7 @@ namespace TCPClient
             this.Controls.Add(this.txtLog);
             this.Controls.Add(this.txtIP);
             this.Controls.Add(this.label1);
-            this.Name = "Form1";
+            this.Name = "Client";
             this.Text = "Client";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
