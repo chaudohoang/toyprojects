@@ -1,0 +1,28 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v3.1",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v3.1": {
+      "SuperSimpleTcp/2.6.0.5": {
+        "runtime": {
+          "lib/netcoreapp3.1/SuperSimpleTcp.dll": {
+            "assemblyVersion": "2.6.0.5",
+            "fileVersion": "2.6.0.5"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "SuperSimpleTcp/2.6.0.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-cm96mjfALq/5UTzOGphD8eprfDp7ZqFJQMY/oBawbC+ApY+PqtUXfjaThJkGXmTL7iBA/adGQ2JzktOL2b7cww==",
+      "path": "supersimpletcp/2.6.0.5",
+      "hashPath": "supersimpletcp.2.6.0.5.nupkg.sha512"
+    }
+  }
+}

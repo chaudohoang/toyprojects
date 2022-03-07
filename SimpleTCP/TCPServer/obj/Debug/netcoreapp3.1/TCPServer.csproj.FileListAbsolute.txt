@@ -1,0 +1,17 @@
+D:\GitHub\toyprojects\SimpleTCP\TCPServer\obj\Debug\netcoreapp3.1\TCPServer.csprojAssemblyReference.cache
+D:\GitHub\toyprojects\SimpleTCP\TCPServer\obj\Debug\netcoreapp3.1\TCPServer.csproj.GenerateResource.cache
+D:\GitHub\toyprojects\SimpleTCP\TCPServer\obj\Debug\netcoreapp3.1\TCPServer.AssemblyInfoInputs.cache
+D:\GitHub\toyprojects\SimpleTCP\TCPServer\obj\Debug\netcoreapp3.1\TCPServer.AssemblyInfo.cs
+D:\GitHub\toyprojects\SimpleTCP\TCPServer\obj\Debug\netcoreapp3.1\TCPServer.csproj.CoreCompileInputs.cache
+D:\GitHub\toyprojects\SimpleTCP\TCPServer\bin\Debug\netcoreapp3.1\TCPServer.exe
+D:\GitHub\toyprojects\SimpleTCP\TCPServer\bin\Debug\netcoreapp3.1\TCPServer.deps.json
+D:\GitHub\toyprojects\SimpleTCP\TCPServer\bin\Debug\netcoreapp3.1\TCPServer.runtimeconfig.json
+D:\GitHub\toyprojects\SimpleTCP\TCPServer\bin\Debug\netcoreapp3.1\TCPServer.runtimeconfig.dev.json
+D:\GitHub\toyprojects\SimpleTCP\TCPServer\bin\Debug\netcoreapp3.1\TCPServer.dll
+D:\GitHub\toyprojects\SimpleTCP\TCPServer\bin\Debug\netcoreapp3.1\TCPServer.pdb
+D:\GitHub\toyprojects\SimpleTCP\TCPServer\bin\Debug\netcoreapp3.1\SuperSimpleTcp.dll
+D:\GitHub\toyprojects\SimpleTCP\TCPServer\obj\Debug\netcoreapp3.1\TCPServer.Form1.resources
+D:\GitHub\toyprojects\SimpleTCP\TCPServer\obj\Debug\netcoreapp3.1\TCPServer.csproj.CopyComplete
+D:\GitHub\toyprojects\SimpleTCP\TCPServer\obj\Debug\netcoreapp3.1\TCPServer.dll
+D:\GitHub\toyprojects\SimpleTCP\TCPServer\obj\Debug\netcoreapp3.1\TCPServer.pdb
+D:\GitHub\toyprojects\SimpleTCP\TCPServer\obj\Debug\netcoreapp3.1\TCPServer.genruntimeconfig.cache

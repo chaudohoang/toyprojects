@@ -1,0 +1,115 @@
+{
+  "version": 3,
+  "targets": {
+    "net5.0-windows7.0": {
+      "SuperSimpleTcp/2.6.0.5": {
+        "type": "package",
+        "compile": {
+          "lib/net5.0/SuperSimpleTcp.dll": {}
+        },
+        "runtime": {
+          "lib/net5.0/SuperSimpleTcp.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "SuperSimpleTcp/2.6.0.5": {
+      "sha512": "cm96mjfALq/5UTzOGphD8eprfDp7ZqFJQMY/oBawbC+ApY+PqtUXfjaThJkGXmTL7iBA/adGQ2JzktOL2b7cww==",
+      "type": "package",
+      "path": "supersimpletcp/2.6.0.5",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.md",
+        "icon.png",
+        "lib/net461/SimpleTcp.xml",
+        "lib/net461/SuperSimpleTcp.dll",
+        "lib/net48/SuperSimpleTcp.dll",
+        "lib/net5.0/SimpleTcp.xml",
+        "lib/net5.0/SuperSimpleTcp.dll",
+        "lib/net6.0/SimpleTcp.xml",
+        "lib/net6.0/SuperSimpleTcp.dll",
+        "lib/netcoreapp3.1/SimpleTcp.xml",
+        "lib/netcoreapp3.1/SuperSimpleTcp.dll",
+        "lib/netstandard2.0/SimpleTcp.xml",
+        "lib/netstandard2.0/SuperSimpleTcp.dll",
+        "lib/netstandard2.1/SimpleTcp.xml",
+        "lib/netstandard2.1/SuperSimpleTcp.dll",
+        "supersimpletcp.2.6.0.5.nupkg.sha512",
+        "supersimpletcp.nuspec"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    "net5.0-windows7.0": [
+      "SuperSimpleTcp >= 2.6.0.5"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\Chau\\.nuget\\packages\\": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "D:\\GitHub\\toyprojects\\SimpleTCP\\TCPClient\\TCPClient.csproj",
+      "projectName": "TCPClient",
+      "projectPath": "D:\\GitHub\\toyprojects\\SimpleTCP\\TCPClient\\TCPClient.csproj",
+      "packagesPath": "C:\\Users\\Chau\\.nuget\\packages\\",
+      "outputPath": "D:\\GitHub\\toyprojects\\SimpleTCP\\TCPClient\\obj\\",
+      "projectStyle": "PackageReference",
+      "configFilePaths": [
+        "C:\\Users\\Chau\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net5.0-windows7.0"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net5.0-windows7.0": {
+          "targetAlias": "net5.0-windows",
+          "projectReferences": {}
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      }
+    },
+    "frameworks": {
+      "net5.0-windows7.0": {
+        "targetAlias": "net5.0-windows",
+        "dependencies": {
+          "SuperSimpleTcp": {
+            "target": "Package",
+            "version": "[2.6.0.5, )"
+          }
+        },
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          },
+          "Microsoft.WindowsDesktop.App.WindowsForms": {
+            "privateAssets": "none"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.100\\RuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}
