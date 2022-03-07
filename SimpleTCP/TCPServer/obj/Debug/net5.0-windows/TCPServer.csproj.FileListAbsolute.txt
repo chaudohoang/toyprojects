@@ -17,3 +17,4 @@ D:\GitHub\toyprojects\SimpleTCP\TCPServer\obj\Debug\net5.0-windows\ref\TCPServer
 D:\GitHub\toyprojects\SimpleTCP\TCPServer\obj\Debug\net5.0-windows\TCPServer.pdb
 D:\GitHub\toyprojects\SimpleTCP\TCPServer\obj\Debug\net5.0-windows\TCPServer.genruntimeconfig.cache
 D:\GitHub\toyprojects\SimpleTCP\TCPServer\obj\Debug\net5.0-windows\TCPServer.Server.resources
+D:\GitHub\toyprojects\SimpleTCP\TCPServer\obj\Debug\net5.0-windows\TCPServer.csprojAssemblyReference.cache

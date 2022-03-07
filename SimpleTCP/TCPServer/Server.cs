@@ -21,6 +21,10 @@ namespace TCPServer
         SuperSimpleTcp.SimpleTcpServer server;
         private void btnStart_Click(object sender, EventArgs e)
         {
+            server = new SuperSimpleTcp.SimpleTcpServer(txtIP.Text);
+            server.Events.ClientConnected += Events_ClientConnected;
+            server.Events.ClientDisconnected += Events_ClientDisconnected;
+            server.Events.DataReceived += Events_DataReceived;
             server.Start();
             txtLog.Text += $"Starting...{Environment.NewLine}";
             btnStart.Enabled = false;
@@ -78,7 +82,7 @@ namespace TCPServer
                 if (!string.IsNullOrEmpty(txtMessage.Text) && lstClientIP.SelectedItem !=null) //check message & select client ip from listbox
                 {
                     server.Send(lstClientIP.SelectedItem.ToString(), txtMessage.Text);
-                    txtLog.Text += $"Server: {txtMessage.Text}{Environment.NewLine}";
+                    txtLog.Text += $"Server : {txtMessage.Text}{Environment.NewLine}";
                     txtMessage.Text = string.Empty;
                 }
             }
@@ -89,6 +93,27 @@ namespace TCPServer
             if (e.KeyCode == Keys.Enter)
             {
                 btnSend_Click(this, new EventArgs());
+            }
+        }
+
+        private void btnRestart_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnSendAll_Click(object sender, EventArgs e)
+        {
+            if (server.IsListening)
+            {
+                if (!string.IsNullOrEmpty(txtMessage.Text) && (lstClientIP.Items.Count > 0)) //check message & select client ip from listbox
+                {
+                    foreach (var ip in lstClientIP.Items)
+                    {
+                        server.Send(ip.ToString(), txtMessage.Text);
+                        txtLog.Text += $"Server->{ip.ToString()} : {txtMessage.Text}{Environment.NewLine}";                        
+                    }
+                    txtMessage.Text = string.Empty;
+                }
             }
         }
     }

@@ -80,6 +80,10 @@ namespace TCPClient
         {
             try
             {
+                client = new(txtIP.Text);
+                client.Events.Connected += Events_Connected;
+                client.Events.DataReceived += Events_DataReceived;
+                client.Events.Disconnected += Events_Disconnected;
                 client.Connect();
                 btnSend.Enabled = true;
                 btnConnect.Enabled = false;

@@ -142,6 +142,7 @@ namespace TCPServer
             this.btnRestart.TabIndex = 10;
             this.btnRestart.Text = "Restart";
             this.btnRestart.UseVisualStyleBackColor = true;
+            this.btnRestart.Click += new System.EventHandler(this.btnRestart_Click);
             // 
             // btnSendAll
             // 
@@ -151,6 +152,7 @@ namespace TCPServer
             this.btnSendAll.TabIndex = 11;
             this.btnSendAll.Text = "Send All";
             this.btnSendAll.UseVisualStyleBackColor = true;
+            this.btnSendAll.Click += new System.EventHandler(this.btnSendAll_Click);
             // 
             // Server
             // 
