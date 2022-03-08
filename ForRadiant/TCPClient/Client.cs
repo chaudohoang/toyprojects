@@ -195,18 +195,25 @@ namespace TCPClient
 
         private void cbxMessage_DropDown(object sender, EventArgs e)
         {
-            string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            string appdir = Path.GetDirectoryName(apppath);
-            string messagelist = Path.Combine(appdir, "messagelist.csv");
-            var listOfLines = File.ReadAllLines(messagelist)
-                      .Skip(1)
-                      .Where(x => !string.IsNullOrWhiteSpace(x));
-            cbxMessage.Items.Clear();
-            foreach (var line in listOfLines)
+            try
             {
-                cbxMessage.Items.Add(line.Split(',')[0]);
+                string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                string appdir = Path.GetDirectoryName(apppath);
+                string messagelist = Path.Combine(appdir, "messagelist.csv");
+                var listOfLines = File.ReadAllLines(messagelist)
+                          .Skip(1)
+                          .Where(x => !string.IsNullOrWhiteSpace(x));
+                cbxMessage.Items.Clear();
+                foreach (var line in listOfLines)
+                {
+                    cbxMessage.Items.Add(line.Split(',')[0]);
+                }
             }
-            
+            catch (Exception)
+            {
+
+            }
+
         }
     }
 }

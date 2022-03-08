@@ -29,7 +29,6 @@ namespace TCPServer
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Server));
             this.label1 = new System.Windows.Forms.Label();
             this.cbxIP1 = new System.Windows.Forms.ComboBox();
@@ -71,8 +70,8 @@ namespace TCPServer
             this.btnStart4 = new System.Windows.Forms.Button();
             this.btnStart5 = new System.Windows.Forms.Button();
             this.btnRestart = new System.Windows.Forms.Button();
-            this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.notifyIcon1 = new System.Windows.Forms.NotifyIcon();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip();
             this.showToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
