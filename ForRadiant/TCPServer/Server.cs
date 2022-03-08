@@ -349,7 +349,6 @@ namespace TCPServer
             {
                 txtLog2.Text += $"{e.IpPort} disconnected.{Environment.NewLine}";
                 lstClientIP2.Items.Remove(e.IpPort);
-                lstClientIP2.SetSelected(lstClientIP2.FindString(e.IpPort), true);
             });
         }
 
@@ -394,6 +393,7 @@ namespace TCPServer
             {
                 txtLog2.Text += $"{e.IpPort} connected.{Environment.NewLine}";
                 lstClientIP2.Items.Add(e.IpPort);
+                lstClientIP2.SetSelected(lstClientIP2.FindString(e.IpPort), true);
             });
         }
 
