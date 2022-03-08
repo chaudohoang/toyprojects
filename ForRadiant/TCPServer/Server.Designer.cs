@@ -147,6 +147,7 @@ namespace TCPServer
             this.cbxMessage.Name = "cbxMessage";
             this.cbxMessage.Size = new System.Drawing.Size(237, 21);
             this.cbxMessage.TabIndex = 21;
+            this.cbxMessage.KeyDown += new System.Windows.Forms.KeyEventHandler(this.cbxMessage_KeyDown);
             // 
             // label3
             // 

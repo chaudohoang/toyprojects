@@ -598,6 +598,14 @@ namespace TCPServer
             this.WindowState = FormWindowState.Normal;
         }
 
+        private void cbxMessage_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                btnSend_Click(this, new EventArgs());
+            }
+        }
+
         private void txtLog3_TextChanged(object sender, EventArgs e)
         {
             txtLog3.SelectionStart = txtLog3.Text.Length;

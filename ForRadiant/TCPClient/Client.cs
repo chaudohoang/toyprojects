@@ -185,5 +185,13 @@ namespace TCPClient
             Activate();
             this.WindowState = FormWindowState.Normal;
         }
+
+        private void cbxMessage_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                btnSend_Click(this, new EventArgs());
+            }
+        }
     }
 }
