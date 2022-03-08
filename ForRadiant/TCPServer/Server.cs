@@ -339,6 +339,7 @@ namespace TCPServer
             {
                 txtLog1.Text += $"{e.IpPort} connected.{Environment.NewLine}";
                 lstClientIP1.Items.Add(e.IpPort);
+                lstClientIP1.SetSelected(lstClientIP1.FindString(e.IpPort), true);
             });
         }
 
@@ -348,6 +349,7 @@ namespace TCPServer
             {
                 txtLog2.Text += $"{e.IpPort} disconnected.{Environment.NewLine}";
                 lstClientIP2.Items.Remove(e.IpPort);
+                lstClientIP2.SetSelected(lstClientIP2.FindString(e.IpPort), true);
             });
         }
 
@@ -445,6 +447,7 @@ namespace TCPServer
             {
                 txtLog3.Text += $"{e.IpPort} connected.{Environment.NewLine}";
                 lstClientIP3.Items.Add(e.IpPort);
+                lstClientIP3.SetSelected(lstClientIP3.FindString(e.IpPort), true);
             });
         }
 
@@ -498,6 +501,7 @@ namespace TCPServer
             {
                 txtLog4.Text += $"{e.IpPort} connected.{Environment.NewLine}";
                 lstClientIP4.Items.Add(e.IpPort);
+                lstClientIP4.SetSelected(lstClientIP4.FindString(e.IpPort), true);
             });
         }
 
@@ -551,6 +555,7 @@ namespace TCPServer
             {
                 txtLog5.Text += $"{e.IpPort} connected.{Environment.NewLine}";
                 lstClientIP5.Items.Add(e.IpPort);
+                lstClientIP5.SetSelected(lstClientIP5.FindString(e.IpPort), true);
             });
         }
 
