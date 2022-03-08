@@ -38,53 +38,65 @@ namespace TCPServer
         {
             if (server1 != null && server1.IsListening)
             {
-                if (!string.IsNullOrEmpty(cbxMessage.Text) && lstClientIP1.SelectedItem != null) //check message & select client ip from listbox
+                if (!string.IsNullOrEmpty(cbxMessage.Text) && (lstClientIP1.SelectedItems.Count > 0)) //check message & select client ip from listbox
                 {
-                    server1.Send(lstClientIP1.SelectedItem.ToString(), cbxMessage.Text);
-                    txtLog1.Text += $"Server->{lstClientIP1.SelectedItem} : {cbxMessage.Text}{Environment.NewLine}";
-                    cbxMessage.Text = string.Empty;
+                    foreach (var ip in lstClientIP1.SelectedItems)
+                    {
+                        server1.Send(ip.ToString(), cbxMessage.Text);
+                        txtLog1.Text += $"Server->{ip} : {cbxMessage.Text}{Environment.NewLine}";
+                    }
                 }
             }
 
             if (server2 != null && server2.IsListening)
             {
-                if (!string.IsNullOrEmpty(cbxMessage.Text) && lstClientIP2.SelectedItem != null) //check message & select client ip from listbox
+                if (!string.IsNullOrEmpty(cbxMessage.Text) && (lstClientIP2.SelectedItems.Count > 0)) //check message & select client ip from listbox
                 {
-                    server2.Send(lstClientIP2.SelectedItem.ToString(), cbxMessage.Text);
-                    txtLog2.Text += $"Server->{lstClientIP2.SelectedItem} : {cbxMessage.Text}{Environment.NewLine}";
-                    cbxMessage.Text = string.Empty;
+                    foreach (var ip in lstClientIP2.SelectedItems)
+                    {
+                        server2.Send(ip.ToString(), cbxMessage.Text);
+                        txtLog2.Text += $"Server->{ip} : {cbxMessage.Text}{Environment.NewLine}";
+                    }
                 }
             }
 
             if (server3 != null && server3.IsListening)
             {
-                if (!string.IsNullOrEmpty(cbxMessage.Text) && lstClientIP3.SelectedItem != null) //check message & select client ip from listbox
+                if (!string.IsNullOrEmpty(cbxMessage.Text) && (lstClientIP3.SelectedItems.Count > 0)) //check message & select client ip from listbox
                 {
-                    server3.Send(lstClientIP3.SelectedItem.ToString(), cbxMessage.Text);
-                    txtLog3.Text += $"Server->{lstClientIP3.SelectedItem} : {cbxMessage.Text}{Environment.NewLine}";
-                    cbxMessage.Text = string.Empty;
+                    foreach (var ip in lstClientIP3.SelectedItems)
+                    {
+                        server3.Send(ip.ToString(), cbxMessage.Text);
+                        txtLog3.Text += $"Server->{ip} : {cbxMessage.Text}{Environment.NewLine}";
+                    }
                 }
             }
 
             if (server4 != null && server4.IsListening)
             {
-                if (!string.IsNullOrEmpty(cbxMessage.Text) && lstClientIP4.SelectedItem != null) //check message & select client ip from listbox
+                if (!string.IsNullOrEmpty(cbxMessage.Text) && (lstClientIP4.SelectedItems.Count > 0)) //check message & select client ip from listbox
                 {
-                    server4.Send(lstClientIP4.SelectedItem.ToString(), cbxMessage.Text);
-                    txtLog4.Text += $"Server->{lstClientIP4.SelectedItem} : {cbxMessage.Text}{Environment.NewLine}";
-                    cbxMessage.Text = string.Empty;
+                    foreach (var ip in lstClientIP4.SelectedItems)
+                    {
+                        server4.Send(ip.ToString(), cbxMessage.Text);
+                        txtLog4.Text += $"Server->{ip} : {cbxMessage.Text}{Environment.NewLine}";
+                    }
                 }
             }
 
             if (server5 != null && server5.IsListening)
             {
-                if (!string.IsNullOrEmpty(cbxMessage.Text) && lstClientIP5.SelectedItem != null) //check message & select client ip from listbox
+                if (!string.IsNullOrEmpty(cbxMessage.Text) && (lstClientIP5.SelectedItems.Count > 0)) //check message & select client ip from listbox
                 {
-                    server5.Send(lstClientIP5.SelectedItem.ToString(), cbxMessage.Text);
-                    txtLog5.Text += $"Server->{lstClientIP5.SelectedItem} : {cbxMessage.Text}{Environment.NewLine}";
-                    cbxMessage.Text = string.Empty;
+                    foreach (var ip in lstClientIP5.SelectedItems)
+                    {
+                        server5.Send(ip.ToString(), cbxMessage.Text);
+                        txtLog5.Text += $"Server->{ip} : {cbxMessage.Text}{Environment.NewLine}";
+                    }
                 }
-            }            
+            }
+
+            cbxMessage.Text = string.Empty;
         }
 
         private void btnStart1_Click(object sender, EventArgs e)

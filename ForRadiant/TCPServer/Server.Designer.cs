@@ -193,6 +193,7 @@ namespace TCPServer
             this.lstClientIP1.Location = new System.Drawing.Point(320, 90);
             this.lstClientIP1.Name = "lstClientIP1";
             this.lstClientIP1.ScrollAlwaysVisible = true;
+            this.lstClientIP1.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
             this.lstClientIP1.Size = new System.Drawing.Size(203, 56);
             this.lstClientIP1.TabIndex = 4;
             // 
@@ -202,6 +203,7 @@ namespace TCPServer
             this.lstClientIP2.Location = new System.Drawing.Point(320, 183);
             this.lstClientIP2.Name = "lstClientIP2";
             this.lstClientIP2.ScrollAlwaysVisible = true;
+            this.lstClientIP2.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
             this.lstClientIP2.Size = new System.Drawing.Size(203, 56);
             this.lstClientIP2.TabIndex = 8;
             // 
@@ -268,6 +270,7 @@ namespace TCPServer
             this.lstClientIP3.Location = new System.Drawing.Point(320, 276);
             this.lstClientIP3.Name = "lstClientIP3";
             this.lstClientIP3.ScrollAlwaysVisible = true;
+            this.lstClientIP3.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
             this.lstClientIP3.Size = new System.Drawing.Size(203, 56);
             this.lstClientIP3.TabIndex = 12;
             // 
@@ -334,6 +337,7 @@ namespace TCPServer
             this.lstClientIP4.Location = new System.Drawing.Point(320, 369);
             this.lstClientIP4.Name = "lstClientIP4";
             this.lstClientIP4.ScrollAlwaysVisible = true;
+            this.lstClientIP4.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
             this.lstClientIP4.Size = new System.Drawing.Size(203, 56);
             this.lstClientIP4.TabIndex = 16;
             // 
@@ -400,6 +404,7 @@ namespace TCPServer
             this.lstClientIP5.Location = new System.Drawing.Point(320, 462);
             this.lstClientIP5.Name = "lstClientIP5";
             this.lstClientIP5.ScrollAlwaysVisible = true;
+            this.lstClientIP5.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
             this.lstClientIP5.Size = new System.Drawing.Size(203, 56);
             this.lstClientIP5.TabIndex = 20;
             // 
