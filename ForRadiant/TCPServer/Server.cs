@@ -43,7 +43,7 @@ namespace TCPServer
                     foreach (var ip in lstClientIP1.SelectedItems)
                     {
                         server1.Send(ip.ToString(), cbxMessage.Text);
-                        txtLog1.Text += $"To {ip} : {cbxMessage.Text}{Environment.NewLine}";
+                        txtLog1.Text += $"-->{ip} : {cbxMessage.Text}{Environment.NewLine}";
                     }
                 }
             }
@@ -55,7 +55,7 @@ namespace TCPServer
                     foreach (var ip in lstClientIP2.SelectedItems)
                     {
                         server2.Send(ip.ToString(), cbxMessage.Text);
-                        txtLog2.Text += $"To {ip} : {cbxMessage.Text}{Environment.NewLine}";
+                        txtLog2.Text += $"-->{ip} : {cbxMessage.Text}{Environment.NewLine}";
                     }
                 }
             }
@@ -67,7 +67,7 @@ namespace TCPServer
                     foreach (var ip in lstClientIP3.SelectedItems)
                     {
                         server3.Send(ip.ToString(), cbxMessage.Text);
-                        txtLog3.Text += $"To {ip} : {cbxMessage.Text}{Environment.NewLine}";
+                        txtLog3.Text += $"-->{ip} : {cbxMessage.Text}{Environment.NewLine}";
                     }
                 }
             }
@@ -79,7 +79,7 @@ namespace TCPServer
                     foreach (var ip in lstClientIP4.SelectedItems)
                     {
                         server4.Send(ip.ToString(), cbxMessage.Text);
-                        txtLog4.Text += $"To {ip} : {cbxMessage.Text}{Environment.NewLine}";
+                        txtLog4.Text += $"-->{ip} : {cbxMessage.Text}{Environment.NewLine}";
                     }
                 }
             }
@@ -91,7 +91,7 @@ namespace TCPServer
                     foreach (var ip in lstClientIP5.SelectedItems)
                     {
                         server5.Send(ip.ToString(), cbxMessage.Text);
-                        txtLog5.Text += $"To {ip} : {cbxMessage.Text}{Environment.NewLine}";
+                        txtLog5.Text += $"-->{ip} : {cbxMessage.Text}{Environment.NewLine}";
                     }
                 }
             }
@@ -103,27 +103,7 @@ namespace TCPServer
         {
             try
             {
-                if (cbxIP1.Text == "Gooil")
-                {
-                    server1 = new SimpleTcpServer("192.168.0.50:9000");
-                }
-                else if (cbxIP1.Text == "Dooone1/Donga1")
-                {
-                    server1 = new SimpleTcpServer("192.168.1.1:9000");
-                }
-                else if (cbxIP1.Text == "Dooone2/Donga2")
-                {
-                    server1 = new SimpleTcpServer("192.168.2.2:9000");
-                }
-                else if (cbxIP1.Text == "Dooone3/Donga3")
-                {
-                    server1 = new SimpleTcpServer("192.168.3.3:9000");
-                }
-                else if (cbxIP1.Text == "Dooone4/Donga4")
-                {
-                    server1 = new SimpleTcpServer("192.168.4.4:9000");
-                }
-                else server1 = new SimpleTcpServer(cbxIP1.Text);
+                server1 = new SimpleTcpServer($"{cbxIP1.Text}:9000");
                 server1.Events.ClientConnected += Events_ClientConnected1;
                 server1.Events.ClientDisconnected += Events_ClientDisconnected1;
                 server1.Events.DataReceived += Events_DataReceived1;
@@ -141,27 +121,7 @@ namespace TCPServer
         {
             try
             {
-                if (cbxIP2.Text == "Gooil")
-                {
-                    server2 = new SimpleTcpServer("192.168.0.50:9000");
-                }
-                else if (cbxIP2.Text == "Dooone1/Donga1")
-                {
-                    server2 = new SimpleTcpServer("192.168.1.1:9000");
-                }
-                else if (cbxIP2.Text == "Dooone2/Donga2")
-                {
-                    server2 = new SimpleTcpServer("192.168.2.2:9000");
-                }
-                else if (cbxIP2.Text == "Dooone3/Donga3")
-                {
-                    server2 = new SimpleTcpServer("192.168.3.3:9000");
-                }
-                else if (cbxIP2.Text == "Dooone4/Donga4")
-                {
-                    server2 = new SimpleTcpServer("192.168.4.4:9000");
-                }
-                else server2 = new SimpleTcpServer(cbxIP2.Text);
+                server2 = new SimpleTcpServer($"{cbxIP2.Text}:9000");
                 server2.Events.ClientConnected += Events_ClientConnected2;
                 server2.Events.ClientDisconnected += Events_ClientDisconnected2;
                 server2.Events.DataReceived += Events_DataReceived2;
@@ -179,27 +139,7 @@ namespace TCPServer
         {
             try
             {
-                if (cbxIP3.Text == "Gooil")
-                {
-                    server3 = new SimpleTcpServer("192.168.0.50:9000");
-                }
-                else if (cbxIP3.Text == "Dooone1/Donga1")
-                {
-                    server3 = new SimpleTcpServer("192.168.1.1:9000");
-                }
-                else if (cbxIP3.Text == "Dooone2/Donga2")
-                {
-                    server3 = new SimpleTcpServer("192.168.2.2:9000");
-                }
-                else if (cbxIP3.Text == "Dooone3/Donga3")
-                {
-                    server3 = new SimpleTcpServer("192.168.3.3:9000");
-                }
-                else if (cbxIP3.Text == "Dooone4/Donga4")
-                {
-                    server3 = new SimpleTcpServer("192.168.4.4:9000");
-                }
-                else server3 = new SimpleTcpServer(cbxIP3.Text);
+                server3 = new SimpleTcpServer($"{cbxIP3.Text}:9000");
                 server3.Events.ClientConnected += Events_ClientConnected3;
                 server3.Events.ClientDisconnected += Events_ClientDisconnected3;
                 server3.Events.DataReceived += Events_DataReceived3;
@@ -217,27 +157,7 @@ namespace TCPServer
         {
             try
             {
-                if (cbxIP4.Text == "Gooil")
-                {
-                    server4 = new SimpleTcpServer("192.168.0.50:9000");
-                }
-                else if (cbxIP4.Text == "Dooone1/Donga1")
-                {
-                    server4 = new SimpleTcpServer("192.168.1.1:9000");
-                }
-                else if (cbxIP4.Text == "Dooone2/Donga2")
-                {
-                    server4 = new SimpleTcpServer("192.168.2.2:9000");
-                }
-                else if (cbxIP4.Text == "Dooone3/Donga3")
-                {
-                    server4 = new SimpleTcpServer("192.168.3.3:9000");
-                }
-                else if (cbxIP4.Text == "Dooone4/Donga4")
-                {
-                    server4 = new SimpleTcpServer("192.168.4.4:9000");
-                }
-                else server4 = new SimpleTcpServer(cbxIP4.Text);
+                server4 = new SimpleTcpServer($"{cbxIP4.Text}:9000");
                 server4.Events.ClientConnected += Events_ClientConnected4;
                 server4.Events.ClientDisconnected += Events_ClientDisconnected4;
                 server4.Events.DataReceived += Events_DataReceived4;
@@ -255,27 +175,7 @@ namespace TCPServer
         {
             try
             {
-                if (cbxIP5.Text == "Gooil")
-                {
-                    server5 = new SimpleTcpServer("192.168.0.50:9000");
-                }
-                else if (cbxIP5.Text == "Dooone1/Donga1")
-                {
-                    server5 = new SimpleTcpServer("192.168.1.1:9000");
-                }
-                else if (cbxIP5.Text == "Dooone2/Donga2")
-                {
-                    server5 = new SimpleTcpServer("192.168.2.2:9000");
-                }
-                else if (cbxIP5.Text == "Dooone3/Donga3")
-                {
-                    server5 = new SimpleTcpServer("192.168.3.3:9000");
-                }
-                else if (cbxIP5.Text == "Dooone4/Donga4")
-                {
-                    server5 = new SimpleTcpServer("192.168.4.4:9000");
-                }
-                else server5 = new SimpleTcpServer(cbxIP5.Text);
+                server5 = new SimpleTcpServer($"{cbxIP5.Text}:9000");
                 server5.Events.ClientConnected += Events_ClientConnected5;
                 server5.Events.ClientDisconnected += Events_ClientDisconnected5;
                 server5.Events.DataReceived += Events_DataReceived5;
@@ -623,6 +523,56 @@ namespace TCPServer
             }
         }
 
+        private void lstClientIP5_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label14_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lstClientIP4_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label11_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lstClientIP3_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label8_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lstClientIP2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label5_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lstClientIP1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
+
+        }
+
         private void txtLog3_TextChanged(object sender, EventArgs e)
         {
             txtLog3.SelectionStart = txtLog3.Text.Length;
@@ -650,7 +600,7 @@ namespace TCPServer
                     foreach (var ip in lstClientIP1.Items)
                     {
                         server1.Send(ip.ToString(), cbxMessage.Text);
-                        txtLog1.Text += $"To {ip} : {cbxMessage.Text}{Environment.NewLine}";
+                        txtLog1.Text += $"-->{ip} : {cbxMessage.Text}{Environment.NewLine}";
                     }
                 }
             }
@@ -662,7 +612,7 @@ namespace TCPServer
                     foreach (var ip in lstClientIP2.Items)
                     {
                         server2.Send(ip.ToString(), cbxMessage.Text);
-                        txtLog2.Text += $"To {ip} : {cbxMessage.Text}{Environment.NewLine}";
+                        txtLog2.Text += $"-->{ip} : {cbxMessage.Text}{Environment.NewLine}";
                     }
                 }
             }
@@ -674,7 +624,7 @@ namespace TCPServer
                     foreach (var ip in lstClientIP3.Items)
                     {
                         server3.Send(ip.ToString(), cbxMessage.Text);
-                        txtLog3.Text += $"To {ip} : {cbxMessage.Text}{Environment.NewLine}";
+                        txtLog3.Text += $"-->{ip} : {cbxMessage.Text}{Environment.NewLine}";
                     }
                 }
             }
@@ -686,7 +636,7 @@ namespace TCPServer
                     foreach (var ip in lstClientIP4.Items)
                     {
                         server4.Send(ip.ToString(), cbxMessage.Text);
-                        txtLog4.Text += $"To {ip} : {cbxMessage.Text}{Environment.NewLine}";
+                        txtLog4.Text += $"-->{ip} : {cbxMessage.Text}{Environment.NewLine}";
                     }
                 }
             }
@@ -698,7 +648,7 @@ namespace TCPServer
                     foreach (var ip in lstClientIP5.Items)
                     {
                         server5.Send(ip.ToString(), cbxMessage.Text);
-                        txtLog5.Text += $"To {ip} : {cbxMessage.Text}{Environment.NewLine}";
+                        txtLog5.Text += $"-->{ip} : {cbxMessage.Text}{Environment.NewLine}";
                     }
                 }
             }

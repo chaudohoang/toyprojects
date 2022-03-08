@@ -51,7 +51,7 @@ namespace TCPClient
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 66);
+            this.label1.Location = new System.Drawing.Point(24, 66);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(47, 13);
             this.label1.TabIndex = 0;
@@ -61,20 +61,17 @@ namespace TCPClient
             // 
             this.cbxIP.FormattingEnabled = true;
             this.cbxIP.Items.AddRange(new object[] {
-            "Gooil",
-            "Dooone1/Donga1",
-            "Dooone2/Donga2",
-            "Dooone3/Donga3",
-            "Dooone4/Donga4",
-            "127.0.0.1:9000",
-            "127.0.0.1:9001",
-            "127.0.0.1:9002",
-            "127.0.0.1:9003",
-            "127.0.0.1:9004"});
+            "192.168.0.50",
+            "192.168.1.1",
+            "192.168.2.2",
+            "192.168.3.3",
+            "192.168.4.4",
+            "127.0.0.1"});
             this.cbxIP.Location = new System.Drawing.Point(77, 63);
             this.cbxIP.Name = "cbxIP";
             this.cbxIP.Size = new System.Drawing.Size(237, 21);
             this.cbxIP.TabIndex = 1;
+            this.cbxIP.Text = "127.0.0.1";
             // 
             // txtLog
             // 
@@ -84,13 +81,13 @@ namespace TCPClient
             this.txtLog.ReadOnly = true;
             this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.txtLog.Size = new System.Drawing.Size(237, 57);
-            this.txtLog.TabIndex = 3;
+            this.txtLog.TabIndex = 6;
             this.txtLog.TextChanged += new System.EventHandler(this.txtLog_TextChanged);
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 93);
+            this.label2.Location = new System.Drawing.Point(37, 93);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(34, 13);
             this.label2.TabIndex = 3;
@@ -101,7 +98,7 @@ namespace TCPClient
             this.btnConnect.Location = new System.Drawing.Point(239, 33);
             this.btnConnect.Name = "btnConnect";
             this.btnConnect.Size = new System.Drawing.Size(75, 23);
-            this.btnConnect.TabIndex = 2;
+            this.btnConnect.TabIndex = 3;
             this.btnConnect.Text = "Connect";
             this.btnConnect.UseVisualStyleBackColor = true;
             this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
@@ -142,7 +139,7 @@ namespace TCPClient
             this.btnRestart.Location = new System.Drawing.Point(77, 33);
             this.btnRestart.Name = "btnRestart";
             this.btnRestart.Size = new System.Drawing.Size(75, 23);
-            this.btnRestart.TabIndex = 6;
+            this.btnRestart.TabIndex = 7;
             this.btnRestart.Text = "Restart";
             this.btnRestart.UseVisualStyleBackColor = true;
             this.btnRestart.Click += new System.EventHandler(this.btnRestart_Click);
@@ -189,7 +186,7 @@ namespace TCPClient
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(327, 158);
+            this.ClientSize = new System.Drawing.Size(334, 163);
             this.Controls.Add(this.cbxMessage);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.btnRestart);

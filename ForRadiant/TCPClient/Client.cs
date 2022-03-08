@@ -38,27 +38,7 @@ namespace TCPClient
         {            
             try
             {
-                if (cbxIP.Text == "Gooil")
-                {
-                    client = new SimpleTcpClient("192.168.0.50:9000");
-                }
-                else if (cbxIP.Text == "Dooone1/Donga1")
-                {
-                    client = new SimpleTcpClient("192.168.1.1:9000");
-                }
-                else if (cbxIP.Text == "Dooone2/Donga2")
-                {
-                    client = new SimpleTcpClient("192.168.2.2:9000");
-                }
-                else if (cbxIP.Text == "Dooone3/Donga3")
-                {
-                    client = new SimpleTcpClient("192.168.3.3:9000");
-                }
-                else if (cbxIP.Text == "Dooone4/Donga4")
-                {
-                    client = new SimpleTcpClient("192.168.4.4:9000");
-                }
-                else client = new SimpleTcpClient(cbxIP.Text);
+                client = new SimpleTcpClient($"{cbxIP.Text}:9000");
                 client.Events.Connected += Events_Connected;
                 client.Events.DataReceived += Events_DataReceived;
                 client.Events.Disconnected += Events_Disconnected;
