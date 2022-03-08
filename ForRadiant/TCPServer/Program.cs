@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace TCPClient
+namespace TCPServer
 {
     static class Program
     {
@@ -16,7 +16,7 @@ namespace TCPClient
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Client());
+            Application.Run(new Server());
         }
     }
 }
