@@ -107,19 +107,19 @@ namespace TCPServer
                 {
                     server1 = new SimpleTcpServer("192.168.0.50:9000");
                 }
-                else if (cbxIP1.Text == "Dooone1")
+                else if (cbxIP1.Text == "Dooone1/Donga1")
                 {
                     server1 = new SimpleTcpServer("192.168.1.1:9000");
                 }
-                else if (cbxIP1.Text == "Dooone2")
+                else if (cbxIP1.Text == "Dooone2/Donga2")
                 {
                     server1 = new SimpleTcpServer("192.168.2.2:9000");
                 }
-                else if (cbxIP1.Text == "Dooone3")
+                else if (cbxIP1.Text == "Dooone3/Donga3")
                 {
                     server1 = new SimpleTcpServer("192.168.3.3:9000");
                 }
-                else if (cbxIP1.Text == "Dooone4")
+                else if (cbxIP1.Text == "Dooone4/Donga4")
                 {
                     server1 = new SimpleTcpServer("192.168.4.4:9000");
                 }
@@ -145,19 +145,19 @@ namespace TCPServer
                 {
                     server2 = new SimpleTcpServer("192.168.0.50:9000");
                 }
-                else if (cbxIP2.Text == "Dooone1")
+                else if (cbxIP2.Text == "Dooone1/Donga1")
                 {
                     server2 = new SimpleTcpServer("192.168.1.1:9000");
                 }
-                else if (cbxIP2.Text == "Dooone2")
+                else if (cbxIP2.Text == "Dooone2/Donga2")
                 {
                     server2 = new SimpleTcpServer("192.168.2.2:9000");
                 }
-                else if (cbxIP2.Text == "Dooone3")
+                else if (cbxIP2.Text == "Dooone3/Donga3")
                 {
                     server2 = new SimpleTcpServer("192.168.3.3:9000");
                 }
-                else if (cbxIP2.Text == "Dooone4")
+                else if (cbxIP2.Text == "Dooone4/Donga4")
                 {
                     server2 = new SimpleTcpServer("192.168.4.4:9000");
                 }
@@ -183,19 +183,19 @@ namespace TCPServer
                 {
                     server3 = new SimpleTcpServer("192.168.0.50:9000");
                 }
-                else if (cbxIP3.Text == "Dooone1")
+                else if (cbxIP3.Text == "Dooone1/Donga1")
                 {
                     server3 = new SimpleTcpServer("192.168.1.1:9000");
                 }
-                else if (cbxIP3.Text == "Dooone2")
+                else if (cbxIP3.Text == "Dooone2/Donga2")
                 {
                     server3 = new SimpleTcpServer("192.168.2.2:9000");
                 }
-                else if (cbxIP3.Text == "Dooone3")
+                else if (cbxIP3.Text == "Dooone3/Donga3")
                 {
                     server3 = new SimpleTcpServer("192.168.3.3:9000");
                 }
-                else if (cbxIP3.Text == "Dooone4")
+                else if (cbxIP3.Text == "Dooone4/Donga4")
                 {
                     server3 = new SimpleTcpServer("192.168.4.4:9000");
                 }
@@ -221,19 +221,19 @@ namespace TCPServer
                 {
                     server4 = new SimpleTcpServer("192.168.0.50:9000");
                 }
-                else if (cbxIP4.Text == "Dooone1")
+                else if (cbxIP4.Text == "Dooone1/Donga1")
                 {
                     server4 = new SimpleTcpServer("192.168.1.1:9000");
                 }
-                else if (cbxIP4.Text == "Dooone2")
+                else if (cbxIP4.Text == "Dooone2/Donga2")
                 {
                     server4 = new SimpleTcpServer("192.168.2.2:9000");
                 }
-                else if (cbxIP4.Text == "Dooone3")
+                else if (cbxIP4.Text == "Dooone3/Donga3")
                 {
                     server4 = new SimpleTcpServer("192.168.3.3:9000");
                 }
-                else if (cbxIP4.Text == "Dooone4")
+                else if (cbxIP4.Text == "Dooone4/Donga4")
                 {
                     server4 = new SimpleTcpServer("192.168.4.4:9000");
                 }
@@ -259,19 +259,19 @@ namespace TCPServer
                 {
                     server5 = new SimpleTcpServer("192.168.0.50:9000");
                 }
-                else if (cbxIP5.Text == "Dooone1")
+                else if (cbxIP5.Text == "Dooone1/Donga1")
                 {
                     server5 = new SimpleTcpServer("192.168.1.1:9000");
                 }
-                else if (cbxIP5.Text == "Dooone2")
+                else if (cbxIP5.Text == "Dooone2/Donga2")
                 {
                     server5 = new SimpleTcpServer("192.168.2.2:9000");
                 }
-                else if (cbxIP5.Text == "Dooone3")
+                else if (cbxIP5.Text == "Dooone3/Donga3")
                 {
                     server5 = new SimpleTcpServer("192.168.3.3:9000");
                 }
-                else if (cbxIP5.Text == "Dooone4")
+                else if (cbxIP5.Text == "Dooone4/Donga4")
                 {
                     server5 = new SimpleTcpServer("192.168.4.4:9000");
                 }
