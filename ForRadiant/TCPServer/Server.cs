@@ -43,7 +43,7 @@ namespace TCPServer
                     foreach (var ip in lstClientIP1.SelectedItems)
                     {
                         server1.Send(ip.ToString(), cbxMessage.Text);
-                        txtLog1.Text += $"Server->{ip} : {cbxMessage.Text}{Environment.NewLine}";
+                        txtLog1.Text += $"To {ip} : {cbxMessage.Text}{Environment.NewLine}";
                     }
                 }
             }
@@ -55,7 +55,7 @@ namespace TCPServer
                     foreach (var ip in lstClientIP2.SelectedItems)
                     {
                         server2.Send(ip.ToString(), cbxMessage.Text);
-                        txtLog2.Text += $"Server->{ip} : {cbxMessage.Text}{Environment.NewLine}";
+                        txtLog2.Text += $"To {ip} : {cbxMessage.Text}{Environment.NewLine}";
                     }
                 }
             }
@@ -67,7 +67,7 @@ namespace TCPServer
                     foreach (var ip in lstClientIP3.SelectedItems)
                     {
                         server3.Send(ip.ToString(), cbxMessage.Text);
-                        txtLog3.Text += $"Server->{ip} : {cbxMessage.Text}{Environment.NewLine}";
+                        txtLog3.Text += $"To {ip} : {cbxMessage.Text}{Environment.NewLine}";
                     }
                 }
             }
@@ -79,7 +79,7 @@ namespace TCPServer
                     foreach (var ip in lstClientIP4.SelectedItems)
                     {
                         server4.Send(ip.ToString(), cbxMessage.Text);
-                        txtLog4.Text += $"Server->{ip} : {cbxMessage.Text}{Environment.NewLine}";
+                        txtLog4.Text += $"To {ip} : {cbxMessage.Text}{Environment.NewLine}";
                     }
                 }
             }
@@ -91,7 +91,7 @@ namespace TCPServer
                     foreach (var ip in lstClientIP5.SelectedItems)
                     {
                         server5.Send(ip.ToString(), cbxMessage.Text);
-                        txtLog5.Text += $"Server->{ip} : {cbxMessage.Text}{Environment.NewLine}";
+                        txtLog5.Text += $"To {ip} : {cbxMessage.Text}{Environment.NewLine}";
                     }
                 }
             }
@@ -645,7 +645,7 @@ namespace TCPServer
                     foreach (var ip in lstClientIP1.Items)
                     {
                         server1.Send(ip.ToString(), cbxMessage.Text);
-                        txtLog1.Text += $"Server->{ip} : {cbxMessage.Text}{Environment.NewLine}";
+                        txtLog1.Text += $"To {ip} : {cbxMessage.Text}{Environment.NewLine}";
                     }
                 }
             }
@@ -657,7 +657,7 @@ namespace TCPServer
                     foreach (var ip in lstClientIP2.Items)
                     {
                         server2.Send(ip.ToString(), cbxMessage.Text);
-                        txtLog2.Text += $"Server->{ip} : {cbxMessage.Text}{Environment.NewLine}";
+                        txtLog2.Text += $"To {ip} : {cbxMessage.Text}{Environment.NewLine}";
                     }
                 }
             }
@@ -669,7 +669,7 @@ namespace TCPServer
                     foreach (var ip in lstClientIP3.Items)
                     {
                         server3.Send(ip.ToString(), cbxMessage.Text);
-                        txtLog3.Text += $"Server->{ip} : {cbxMessage.Text}{Environment.NewLine}";
+                        txtLog3.Text += $"To {ip} : {cbxMessage.Text}{Environment.NewLine}";
                     }
                 }
             }
@@ -681,7 +681,7 @@ namespace TCPServer
                     foreach (var ip in lstClientIP4.Items)
                     {
                         server4.Send(ip.ToString(), cbxMessage.Text);
-                        txtLog4.Text += $"Server->{ip} : {cbxMessage.Text}{Environment.NewLine}";
+                        txtLog4.Text += $"To {ip} : {cbxMessage.Text}{Environment.NewLine}";
                     }
                 }
             }
@@ -693,7 +693,7 @@ namespace TCPServer
                     foreach (var ip in lstClientIP5.Items)
                     {
                         server5.Send(ip.ToString(), cbxMessage.Text);
-                        txtLog5.Text += $"Server->{ip} : {cbxMessage.Text}{Environment.NewLine}";
+                        txtLog5.Text += $"To {ip} : {cbxMessage.Text}{Environment.NewLine}";
                     }
                 }
             }
