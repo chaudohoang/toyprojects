@@ -1,0 +1,5 @@
+Message,Description
+Restart TrueTest,Restart TrueTest
+Open Notepad,Open Notepad
+cmdc explorer,Open Explorer
+cmdc explorer \\127.0.0.1,Open Explorer for localhost

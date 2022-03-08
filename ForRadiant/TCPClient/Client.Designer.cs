@@ -113,6 +113,7 @@ namespace TCPClient
             this.cbxMessage.Name = "cbxMessage";
             this.cbxMessage.Size = new System.Drawing.Size(237, 21);
             this.cbxMessage.TabIndex = 4;
+            this.cbxMessage.DropDown += new System.EventHandler(this.cbxMessage_DropDown);
             this.cbxMessage.KeyDown += new System.Windows.Forms.KeyEventHandler(this.cbxMessage_KeyDown);
             // 
             // label3

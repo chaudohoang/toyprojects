@@ -18,7 +18,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\bin\Debug\TCPServer\</OutputPath>
+    <OutputPath>..\bin\Debug\TCPClientServer\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -92,8 +92,8 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>@echo OFF
-del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.pdb
-del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.xml
-del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.config</PostBuildEvent>
+del $(SolutionDir)\bin\$(ConfigurationName)\TCPClientServer\*.pdb
+del $(SolutionDir)\bin\$(ConfigurationName)\TCPClientServer\*.xml
+del $(SolutionDir)\bin\$(ConfigurationName)\TCPClientServer\*.config</PostBuildEvent>
   </PropertyGroup>
 </Project>

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using SuperSimpleTcp;
 using System.Diagnostics;
+using System.IO;
 
 namespace TCPServer
 {
@@ -231,6 +232,24 @@ namespace TCPServer
 
                 }
             }
+            else if (Encoding.UTF8.GetString(e.Data).StartsWith("cmdc "))
+            {
+                try
+                {
+                    string command = Encoding.UTF8.GetString(e.Data).Replace("cmdc ", string.Empty);
+                    Process process = new Process();
+                    ProcessStartInfo startInfo = new ProcessStartInfo();
+                    startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                    startInfo.FileName = "cmd.exe";
+                    startInfo.Arguments = $"/C {command}";
+                    process.StartInfo = startInfo;
+                    process.Start();
+                }
+                catch (Exception)
+                {
+
+                }
+            }
         }
 
         private void Events_ClientConnected1(object sender, SuperSimpleTcp.ConnectionEventArgs e)
@@ -279,6 +298,24 @@ namespace TCPServer
                         process.Kill();
                     }
                     Process.Start("TrueTest.exe");
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+            else if (Encoding.UTF8.GetString(e.Data).StartsWith("cmdc "))
+            {
+                try
+                {
+                    string command = Encoding.UTF8.GetString(e.Data).Replace("cmdc ", string.Empty);
+                    Process process = new Process();
+                    ProcessStartInfo startInfo = new ProcessStartInfo();
+                    startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                    startInfo.FileName = "cmd.exe";
+                    startInfo.Arguments = $"/C {command}";
+                    process.StartInfo = startInfo;
+                    process.Start();
                 }
                 catch (Exception)
                 {
@@ -339,6 +376,24 @@ namespace TCPServer
 
                 }
             }
+            else if (Encoding.UTF8.GetString(e.Data).StartsWith("cmdc "))
+            {
+                try
+                {
+                    string command = Encoding.UTF8.GetString(e.Data).Replace("cmdc ", string.Empty);
+                    Process process = new Process();
+                    ProcessStartInfo startInfo = new ProcessStartInfo();
+                    startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                    startInfo.FileName = "cmd.exe";
+                    startInfo.Arguments = $"/C {command}";
+                    process.StartInfo = startInfo;
+                    process.Start();
+                }
+                catch (Exception)
+                {
+
+                }
+            }
         }
 
         private void Events_ClientConnected3(object sender, SuperSimpleTcp.ConnectionEventArgs e)
@@ -393,6 +448,24 @@ namespace TCPServer
 
                 }
             }
+            else if (Encoding.UTF8.GetString(e.Data).StartsWith("cmdc "))
+            {
+                try
+                {
+                    string command = Encoding.UTF8.GetString(e.Data).Replace("cmdc ", string.Empty);
+                    Process process = new Process();
+                    ProcessStartInfo startInfo = new ProcessStartInfo();
+                    startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                    startInfo.FileName = "cmd.exe";
+                    startInfo.Arguments = $"/C {command}";
+                    process.StartInfo = startInfo;
+                    process.Start();
+                }
+                catch (Exception)
+                {
+
+                }
+            }
         }
 
         private void Events_ClientConnected4(object sender, SuperSimpleTcp.ConnectionEventArgs e)
@@ -441,6 +514,24 @@ namespace TCPServer
                         process.Kill();
                     }
                     Process.Start("TrueTest.exe");
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+            else if (Encoding.UTF8.GetString(e.Data).StartsWith("cmdc "))
+            {
+                try
+                {
+                    string command = Encoding.UTF8.GetString(e.Data).Replace("cmdc ", string.Empty);
+                    Process process = new Process();
+                    ProcessStartInfo startInfo = new ProcessStartInfo();
+                    startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                    startInfo.FileName = "cmd.exe";
+                    startInfo.Arguments = $"/C {command}";
+                    process.StartInfo = startInfo;
+                    process.Start();
                 }
                 catch (Exception)
                 {
@@ -571,6 +662,21 @@ namespace TCPServer
         private void label4_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void cbxMessage_DropDown(object sender, EventArgs e)
+        {
+            string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            string appdir = Path.GetDirectoryName(apppath);
+            string messagelist = Path.Combine(appdir, "messagelist.csv");
+            var listOfLines = File.ReadAllLines(messagelist)
+                      .Skip(1)
+                      .Where(x => !string.IsNullOrWhiteSpace(x));
+            cbxMessage.Items.Clear();
+            foreach (var line in listOfLines)
+            {
+                cbxMessage.Items.Add(line.Split(',')[0]);
+            }
         }
 
         private void txtLog3_TextChanged(object sender, EventArgs e)
