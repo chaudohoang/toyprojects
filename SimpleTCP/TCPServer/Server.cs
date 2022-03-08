@@ -33,20 +33,6 @@ namespace TCPServer
             server.Start();
             txtLog.Text += $"Starting...{Environment.NewLine}";
             btnStart.Enabled = false;
-            btnSend.Enabled = true;
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            btnSend.Enabled = false;
-            server = new SimpleTcpServer(txtIP.Text);
-            server.Keepalive.EnableTcpKeepAlives = true;
-            server.Keepalive.TcpKeepAliveInterval = 5;      // seconds to wait before sending subsequent keepalive
-            server.Keepalive.TcpKeepAliveTime = 5;          // seconds to wait before sending a keepalive
-            server.Keepalive.TcpKeepAliveRetryCount = 5;
-            server.Events.ClientConnected += Events_ClientConnected;
-            server.Events.ClientDisconnected += Events_ClientDisconnected;
-            server.Events.DataReceived += Events_DataReceived;
         }
 
         private void Events_DataReceived(object sender, SuperSimpleTcp.DataReceivedEventArgs e)
@@ -91,7 +77,7 @@ namespace TCPServer
                 if (!string.IsNullOrEmpty(txtMessage.Text) && lstClientIP.SelectedItem !=null) //check message & select client ip from listbox
                 {
                     server.Send(lstClientIP.SelectedItem.ToString(), txtMessage.Text);
-                    txtLog.Text += $"Server->{lstClientIP.SelectedItem.ToString()} : {txtMessage.Text}{Environment.NewLine}";
+                    txtLog.Text += $"Server->{lstClientIP.SelectedItem} : {txtMessage.Text}{Environment.NewLine}";
                     txtMessage.Text = string.Empty;
                 }
             }
@@ -114,7 +100,7 @@ namespace TCPServer
                     foreach (var ip in lstClientIP.Items)
                     {
                         server.Send(ip.ToString(), txtMessage.Text);
-                        txtLog.Text += $"Server->{ip.ToString()} : {txtMessage.Text}{Environment.NewLine}";                        
+                        txtLog.Text += $"Server->{ip} : {txtMessage.Text}{Environment.NewLine}";                        
                     }
                     txtMessage.Text = string.Empty;
                 }

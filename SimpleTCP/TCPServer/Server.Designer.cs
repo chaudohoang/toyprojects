@@ -161,7 +161,6 @@ namespace TCPServer
             this.Controls.Add(this.label1);
             this.Name = "Server";
             this.Text = "Server";
-            this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

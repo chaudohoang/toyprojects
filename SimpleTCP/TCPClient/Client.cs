@@ -21,19 +21,6 @@ namespace TCPClient
 
         SimpleTcpClient client;
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            client = new(txtIP.Text);
-            client.Keepalive.EnableTcpKeepAlives = true;
-            client.Keepalive.TcpKeepAliveInterval = 5;
-            client.Keepalive.TcpKeepAliveTime = 5;
-            client.Keepalive.TcpKeepAliveRetryCount = 5;
-            client.Events.Connected += Events_Connected;
-            client.Events.DataReceived += Events_DataReceived;
-            client.Events.Disconnected += Events_Disconnected;
-            btnSend.Enabled = false;
-        }
-
         private void Events_Disconnected(object sender, SuperSimpleTcp.ConnectionEventArgs e)
         {
             this.Invoke((MethodInvoker)delegate
@@ -94,7 +81,6 @@ namespace TCPClient
                 client.Events.DataReceived += Events_DataReceived;
                 client.Events.Disconnected += Events_Disconnected;
                 client.ConnectWithRetries(60);
-                btnSend.Enabled = true;
                 btnConnect.Enabled = false;
             }
             catch (Exception ex)
