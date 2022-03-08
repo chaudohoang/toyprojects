@@ -59,10 +59,6 @@ namespace TCPClient
                     client = new SimpleTcpClient("192.168.4.4:9000");
                 }
                 else client = new SimpleTcpClient(cbxIP.Text);
-                client.Keepalive.EnableTcpKeepAlives = true;
-                client.Keepalive.TcpKeepAliveInterval = 5;
-                client.Keepalive.TcpKeepAliveTime = 5;
-                client.Keepalive.TcpKeepAliveRetryCount = 5;
                 client.Events.Connected += Events_Connected;
                 client.Events.DataReceived += Events_DataReceived;
                 client.Events.Disconnected += Events_Disconnected;

@@ -115,10 +115,6 @@ namespace TCPServer
                 server1.Events.ClientConnected += Events_ClientConnected1;
                 server1.Events.ClientDisconnected += Events_ClientDisconnected1;
                 server1.Events.DataReceived += Events_DataReceived1;
-                server1.Keepalive.EnableTcpKeepAlives = true;
-                server1.Keepalive.TcpKeepAliveInterval = 5;      // seconds to wait before sending subsequent keepalive
-                server1.Keepalive.TcpKeepAliveTime = 5;          // seconds to wait before sending a keepalive
-                server1.Keepalive.TcpKeepAliveRetryCount = 5;
                 server1.Start();
                 txtLog1.Text += $"Starting...{Environment.NewLine}";
                 btnStart1.Enabled = false;
@@ -157,10 +153,6 @@ namespace TCPServer
                 server2.Events.ClientConnected += Events_ClientConnected2;
                 server2.Events.ClientDisconnected += Events_ClientDisconnected2;
                 server2.Events.DataReceived += Events_DataReceived2;
-                server2.Keepalive.EnableTcpKeepAlives = true;
-                server2.Keepalive.TcpKeepAliveInterval = 5;      // seconds to wait before sending subsequent keepalive
-                server2.Keepalive.TcpKeepAliveTime = 5;          // seconds to wait before sending a keepalive
-                server2.Keepalive.TcpKeepAliveRetryCount = 5;
                 server2.Start();
                 txtLog2.Text += $"Starting...{Environment.NewLine}";
                 btnStart2.Enabled = false;
@@ -199,10 +191,6 @@ namespace TCPServer
                 server3.Events.ClientConnected += Events_ClientConnected3;
                 server3.Events.ClientDisconnected += Events_ClientDisconnected3;
                 server3.Events.DataReceived += Events_DataReceived3;
-                server3.Keepalive.EnableTcpKeepAlives = true;
-                server3.Keepalive.TcpKeepAliveInterval = 5;      // seconds to wait before sending subsequent keepalive
-                server3.Keepalive.TcpKeepAliveTime = 5;          // seconds to wait before sending a keepalive
-                server3.Keepalive.TcpKeepAliveRetryCount = 5;
                 server3.Start();
                 txtLog3.Text += $"Starting...{Environment.NewLine}";
                 btnStart3.Enabled = false;
@@ -241,10 +229,6 @@ namespace TCPServer
                 server4.Events.ClientConnected += Events_ClientConnected4;
                 server4.Events.ClientDisconnected += Events_ClientDisconnected4;
                 server4.Events.DataReceived += Events_DataReceived4;
-                server4.Keepalive.EnableTcpKeepAlives = true;
-                server4.Keepalive.TcpKeepAliveInterval = 5;      // seconds to wait before sending subsequent keepalive
-                server4.Keepalive.TcpKeepAliveTime = 5;          // seconds to wait before sending a keepalive
-                server4.Keepalive.TcpKeepAliveRetryCount = 5;
                 server4.Start();
                 txtLog4.Text += $"Starting...{Environment.NewLine}";
                 btnStart4.Enabled = false;
@@ -283,10 +267,6 @@ namespace TCPServer
                 server5.Events.ClientConnected += Events_ClientConnected5;
                 server5.Events.ClientDisconnected += Events_ClientDisconnected5;
                 server5.Events.DataReceived += Events_DataReceived5;
-                server5.Keepalive.EnableTcpKeepAlives = true;
-                server5.Keepalive.TcpKeepAliveInterval = 5;      // seconds to wait before sending subsequent keepalive
-                server5.Keepalive.TcpKeepAliveTime = 5;          // seconds to wait before sending a keepalive
-                server5.Keepalive.TcpKeepAliveRetryCount = 5;
                 server5.Start();
                 txtLog5.Text += $"Starting...{Environment.NewLine}";
                 btnStart5.Enabled = false;
