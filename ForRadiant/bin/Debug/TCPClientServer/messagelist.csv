@@ -1,5 +1,12 @@
 Message,Description
 Restart TrueTest,Restart TrueTest
 Open Notepad,Open Notepad
-cmdc explorer,Open Explorer
-cmdc explorer \\127.0.0.1,Open Explorer for localhost
+cmd /c explorer,Open Explorer
+cmd /c explorer \\192.168.1.1,Open Explorer for network drive
+cmd /c explorer \\192.168.2.2,Open Explorer for network drive
+cmd /c explorer \\192.168.3.3,Open Explorer for network drive
+cmd /c explorer \\192.168.4.4,Open Explorer for network drive
+cmd /c explorer \\192.168.0.50,Open Explorer for network drive
+start TrueTest,start TrueTest
+start calc,start calc
+start http://google.com,start http://google.com

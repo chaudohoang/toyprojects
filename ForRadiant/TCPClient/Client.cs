@@ -35,6 +35,67 @@ namespace TCPClient
 
         SimpleTcpClient client;
 
+        private void HandleMessage(string message)
+        {
+            if (message == "Open Notepad")
+            {
+                try
+                {
+                    Process.Start("notepad.exe");
+                }
+                catch (Exception)
+                {
+
+                }
+
+            }
+            else if (message == "Restart TrueTest")
+            {
+                try
+                {
+                    foreach (var process in Process.GetProcessesByName("TrueTest"))
+                    {
+                        process.Kill();
+                    }
+                    Process.Start("TrueTest.exe");
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+            else if (message.StartsWith("start "))
+            {
+                try
+                {
+                    string command = message.Replace("start ", string.Empty);
+                    Process.Start(command);
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+            else if (message.StartsWith("cmd "))
+            {
+                try
+                {
+                    string command = message.Replace("cmd ", string.Empty);
+                    Process process = new Process();
+                    ProcessStartInfo startInfo = new ProcessStartInfo();
+                    startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    startInfo.FileName = "cmd.exe";
+                    startInfo.Arguments = command;
+                    process.StartInfo = startInfo;
+                    process.Start();
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+        }
+
         private void btnConnect_Click(object sender, EventArgs e)
         {            
             try
@@ -67,51 +128,7 @@ namespace TCPClient
             {
                 txtLog.Text += $"Server : {Encoding.UTF8.GetString(e.Data)}{Environment.NewLine}";
             });
-            if (Encoding.UTF8.GetString(e.Data) == "Open Notepad")
-            {
-                try
-                {
-                    Process.Start("notepad.exe");
-                }
-                catch (Exception)
-                {
-
-                }
-                
-            }
-            else if (Encoding.UTF8.GetString(e.Data) == "Restart TrueTest")
-            {
-                try
-                {
-                    foreach (var process in Process.GetProcessesByName("TrueTest"))
-                    {
-                        process.Kill();
-                    }
-                    Process.Start("TrueTest.exe");
-                }
-                catch (Exception)
-                {
-
-                }
-            }
-            else if (Encoding.UTF8.GetString(e.Data).StartsWith("cmdc "))
-            {
-                try
-                {
-                    string command = Encoding.UTF8.GetString(e.Data).Replace("cmdc ",string.Empty);
-                    Process process = new Process();
-                    ProcessStartInfo startInfo = new ProcessStartInfo();
-                    startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-                    startInfo.FileName = "cmd.exe";
-                    startInfo.Arguments = $"/C {command}";
-                    process.StartInfo = startInfo;
-                    process.Start();
-                }
-                catch (Exception)
-                {
-
-                }
-            }
+            HandleMessage(Encoding.UTF8.GetString(e.Data));
         }
 
         private void Events_Connected(object sender, SuperSimpleTcp.ConnectionEventArgs e)
@@ -130,9 +147,9 @@ namespace TCPClient
                 {
                     client.Send(cbxMessage.Text);
                     txtLog.Text += $"Me : {cbxMessage.Text}{Environment.NewLine}";
-                    cbxMessage.Text = string.Empty;
                 }
             }
+            cbxMessage.SelectAll();
         }
 
         private void txtLog_TextChanged(object sender, EventArgs e)

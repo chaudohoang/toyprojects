@@ -34,6 +34,66 @@ namespace TCPServer
         }
 
         SimpleTcpServer server1,server2,server3,server4,server5;
+        private void HandleMessage(string message)
+        {
+            if (message == "Open Notepad")
+            {
+                try
+                {
+                    Process.Start("notepad.exe");
+                }
+                catch (Exception)
+                {
+
+                }
+
+            }
+            else if (message == "Restart TrueTest")
+            {
+                try
+                {
+                    foreach (var process in Process.GetProcessesByName("TrueTest"))
+                    {
+                        process.Kill();
+                    }
+                    Process.Start("TrueTest.exe");
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+            else if (message.StartsWith("start "))
+            {
+                try
+                {
+                    string command = message.Replace("start ", string.Empty);
+                    Process.Start(command);
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+            else if (message.StartsWith("cmd "))
+            {
+                try
+                {
+                    string command = message.Replace("cmd ", string.Empty);
+                    Process process = new Process();
+                    ProcessStartInfo startInfo = new ProcessStartInfo();
+                    startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    startInfo.FileName = "cmd.exe";
+                    startInfo.Arguments = command;
+                    process.StartInfo = startInfo;
+                    process.Start();
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+        }
 
         private void btnSend_Click(object sender, EventArgs e)
         {
@@ -96,8 +156,7 @@ namespace TCPServer
                     }
                 }
             }
-
-            cbxMessage.Text = string.Empty;
+            cbxMessage.SelectAll();
         }
 
         private void btnStart1_Click(object sender, EventArgs e)
@@ -205,51 +264,7 @@ namespace TCPServer
             {
                 txtLog1.Text += $"{e.IpPort} : {Encoding.UTF8.GetString(e.Data)}{Environment.NewLine}";
             });
-            if (Encoding.UTF8.GetString(e.Data) == "Open Notepad")
-            {
-                try
-                {
-                    Process.Start("notepad.exe");
-                }
-                catch (Exception)
-                {
-
-                }
-
-            }
-            else if (Encoding.UTF8.GetString(e.Data) == "Restart TrueTest")
-            {
-                try
-                {
-                    foreach (var process in Process.GetProcessesByName("TrueTest"))
-                    {
-                        process.Kill();
-                    }
-                    Process.Start("TrueTest.exe");
-                }
-                catch (Exception)
-                {
-
-                }
-            }
-            else if (Encoding.UTF8.GetString(e.Data).StartsWith("cmdc "))
-            {
-                try
-                {
-                    string command = Encoding.UTF8.GetString(e.Data).Replace("cmdc ", string.Empty);
-                    Process process = new Process();
-                    ProcessStartInfo startInfo = new ProcessStartInfo();
-                    startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-                    startInfo.FileName = "cmd.exe";
-                    startInfo.Arguments = $"/C {command}";
-                    process.StartInfo = startInfo;
-                    process.Start();
-                }
-                catch (Exception)
-                {
-
-                }
-            }
+            HandleMessage(Encoding.UTF8.GetString(e.Data));
         }
 
         private void Events_ClientConnected1(object sender, SuperSimpleTcp.ConnectionEventArgs e)
@@ -277,51 +292,7 @@ namespace TCPServer
             {
                 txtLog2.Text += $"{e.IpPort} : {Encoding.UTF8.GetString(e.Data)}{Environment.NewLine}";
             });
-            if (Encoding.UTF8.GetString(e.Data) == "Open Notepad")
-            {
-                try
-                {
-                    Process.Start("notepad.exe");
-                }
-                catch (Exception)
-                {
-
-                }
-
-            }
-            else if (Encoding.UTF8.GetString(e.Data) == "Restart TrueTest")
-            {
-                try
-                {
-                    foreach (var process in Process.GetProcessesByName("TrueTest"))
-                    {
-                        process.Kill();
-                    }
-                    Process.Start("TrueTest.exe");
-                }
-                catch (Exception)
-                {
-
-                }
-            }
-            else if (Encoding.UTF8.GetString(e.Data).StartsWith("cmdc "))
-            {
-                try
-                {
-                    string command = Encoding.UTF8.GetString(e.Data).Replace("cmdc ", string.Empty);
-                    Process process = new Process();
-                    ProcessStartInfo startInfo = new ProcessStartInfo();
-                    startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-                    startInfo.FileName = "cmd.exe";
-                    startInfo.Arguments = $"/C {command}";
-                    process.StartInfo = startInfo;
-                    process.Start();
-                }
-                catch (Exception)
-                {
-
-                }
-            }
+            HandleMessage(Encoding.UTF8.GetString(e.Data));
         }
 
         private void Events_ClientConnected2(object sender, SuperSimpleTcp.ConnectionEventArgs e)
@@ -349,51 +320,7 @@ namespace TCPServer
             {
                 txtLog3.Text += $"{e.IpPort} : {Encoding.UTF8.GetString(e.Data)}{Environment.NewLine}";
             });
-            if (Encoding.UTF8.GetString(e.Data) == "Open Notepad")
-            {
-                try
-                {
-                    Process.Start("notepad.exe");
-                }
-                catch (Exception)
-                {
-
-                }
-
-            }
-            else if (Encoding.UTF8.GetString(e.Data) == "Restart TrueTest")
-            {
-                try
-                {
-                    foreach (var process in Process.GetProcessesByName("TrueTest"))
-                    {
-                        process.Kill();
-                    }
-                    Process.Start("TrueTest.exe");
-                }
-                catch (Exception)
-                {
-
-                }
-            }
-            else if (Encoding.UTF8.GetString(e.Data).StartsWith("cmdc "))
-            {
-                try
-                {
-                    string command = Encoding.UTF8.GetString(e.Data).Replace("cmdc ", string.Empty);
-                    Process process = new Process();
-                    ProcessStartInfo startInfo = new ProcessStartInfo();
-                    startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-                    startInfo.FileName = "cmd.exe";
-                    startInfo.Arguments = $"/C {command}";
-                    process.StartInfo = startInfo;
-                    process.Start();
-                }
-                catch (Exception)
-                {
-
-                }
-            }
+            HandleMessage(Encoding.UTF8.GetString(e.Data));
         }
 
         private void Events_ClientConnected3(object sender, SuperSimpleTcp.ConnectionEventArgs e)
@@ -421,51 +348,7 @@ namespace TCPServer
             {
                 txtLog4.Text += $"{e.IpPort} : {Encoding.UTF8.GetString(e.Data)}{Environment.NewLine}";
             });
-            if (Encoding.UTF8.GetString(e.Data) == "Open Notepad")
-            {
-                try
-                {
-                    Process.Start("notepad.exe");
-                }
-                catch (Exception)
-                {
-
-                }
-
-            }
-            else if (Encoding.UTF8.GetString(e.Data) == "Restart TrueTest")
-            {
-                try
-                {
-                    foreach (var process in Process.GetProcessesByName("TrueTest"))
-                    {
-                        process.Kill();
-                    }
-                    Process.Start("TrueTest.exe");
-                }
-                catch (Exception)
-                {
-
-                }
-            }
-            else if (Encoding.UTF8.GetString(e.Data).StartsWith("cmdc "))
-            {
-                try
-                {
-                    string command = Encoding.UTF8.GetString(e.Data).Replace("cmdc ", string.Empty);
-                    Process process = new Process();
-                    ProcessStartInfo startInfo = new ProcessStartInfo();
-                    startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-                    startInfo.FileName = "cmd.exe";
-                    startInfo.Arguments = $"/C {command}";
-                    process.StartInfo = startInfo;
-                    process.Start();
-                }
-                catch (Exception)
-                {
-
-                }
-            }
+            HandleMessage(Encoding.UTF8.GetString(e.Data));
         }
 
         private void Events_ClientConnected4(object sender, SuperSimpleTcp.ConnectionEventArgs e)
@@ -493,51 +376,7 @@ namespace TCPServer
             {
                 txtLog5.Text += $"{e.IpPort} : {Encoding.UTF8.GetString(e.Data)}{Environment.NewLine}";
             });
-            if (Encoding.UTF8.GetString(e.Data) == "Open Notepad")
-            {
-                try
-                {
-                    Process.Start("notepad.exe");
-                }
-                catch (Exception)
-                {
-
-                }
-
-            }
-            else if (Encoding.UTF8.GetString(e.Data) == "Restart TrueTest")
-            {
-                try
-                {
-                    foreach (var process in Process.GetProcessesByName("TrueTest"))
-                    {
-                        process.Kill();
-                    }
-                    Process.Start("TrueTest.exe");
-                }
-                catch (Exception)
-                {
-
-                }
-            }
-            else if (Encoding.UTF8.GetString(e.Data).StartsWith("cmdc "))
-            {
-                try
-                {
-                    string command = Encoding.UTF8.GetString(e.Data).Replace("cmdc ", string.Empty);
-                    Process process = new Process();
-                    ProcessStartInfo startInfo = new ProcessStartInfo();
-                    startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-                    startInfo.FileName = "cmd.exe";
-                    startInfo.Arguments = $"/C {command}";
-                    process.StartInfo = startInfo;
-                    process.Start();
-                }
-                catch (Exception)
-                {
-
-                }
-            }
+            HandleMessage(Encoding.UTF8.GetString(e.Data));
         }
 
         private void Events_ClientConnected5(object sender, SuperSimpleTcp.ConnectionEventArgs e)
@@ -766,7 +605,7 @@ namespace TCPServer
                     }
                 }
             }
-            cbxMessage.Text = string.Empty;
+            cbxMessage.SelectAll();
         }
     }
 }
