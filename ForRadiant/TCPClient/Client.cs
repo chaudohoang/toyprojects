@@ -232,5 +232,12 @@ namespace TCPClient
             }
 
         }
+
+        private void btnNewInstance_Click(object sender, EventArgs e)
+        {
+            Process p = new Process();
+            p.StartInfo.FileName = Application.ExecutablePath;
+            p.Start();
+        }
     }
 }

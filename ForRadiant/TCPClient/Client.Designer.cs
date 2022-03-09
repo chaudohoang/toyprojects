@@ -45,6 +45,7 @@ namespace TCPClient
             this.showToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnNewInstance = new System.Windows.Forms.Button();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -95,9 +96,9 @@ namespace TCPClient
             // 
             // btnConnect
             // 
-            this.btnConnect.Location = new System.Drawing.Point(239, 33);
+            this.btnConnect.Location = new System.Drawing.Point(259, 33);
             this.btnConnect.Name = "btnConnect";
-            this.btnConnect.Size = new System.Drawing.Size(75, 23);
+            this.btnConnect.Size = new System.Drawing.Size(55, 23);
             this.btnConnect.TabIndex = 3;
             this.btnConnect.Text = "Connect";
             this.btnConnect.UseVisualStyleBackColor = true;
@@ -127,9 +128,9 @@ namespace TCPClient
             // 
             // btnSend
             // 
-            this.btnSend.Location = new System.Drawing.Point(158, 33);
+            this.btnSend.Location = new System.Drawing.Point(198, 33);
             this.btnSend.Name = "btnSend";
-            this.btnSend.Size = new System.Drawing.Size(75, 23);
+            this.btnSend.Size = new System.Drawing.Size(55, 23);
             this.btnSend.TabIndex = 5;
             this.btnSend.Text = "Send";
             this.btnSend.UseVisualStyleBackColor = true;
@@ -137,9 +138,9 @@ namespace TCPClient
             // 
             // btnRestart
             // 
-            this.btnRestart.Location = new System.Drawing.Point(77, 33);
+            this.btnRestart.Location = new System.Drawing.Point(137, 33);
             this.btnRestart.Name = "btnRestart";
-            this.btnRestart.Size = new System.Drawing.Size(75, 23);
+            this.btnRestart.Size = new System.Drawing.Size(55, 23);
             this.btnRestart.TabIndex = 7;
             this.btnRestart.Text = "Restart";
             this.btnRestart.UseVisualStyleBackColor = true;
@@ -183,6 +184,16 @@ namespace TCPClient
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
+            // btnNewInstance
+            // 
+            this.btnNewInstance.Location = new System.Drawing.Point(76, 33);
+            this.btnNewInstance.Name = "btnNewInstance";
+            this.btnNewInstance.Size = new System.Drawing.Size(55, 23);
+            this.btnNewInstance.TabIndex = 8;
+            this.btnNewInstance.Text = "New";
+            this.btnNewInstance.UseVisualStyleBackColor = true;
+            this.btnNewInstance.Click += new System.EventHandler(this.btnNewInstance_Click);
+            // 
             // Client
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -190,6 +201,7 @@ namespace TCPClient
             this.ClientSize = new System.Drawing.Size(334, 163);
             this.Controls.Add(this.cbxMessage);
             this.Controls.Add(this.label3);
+            this.Controls.Add(this.btnNewInstance);
             this.Controls.Add(this.btnRestart);
             this.Controls.Add(this.btnSend);
             this.Controls.Add(this.btnConnect);
@@ -226,6 +238,7 @@ namespace TCPClient
         private System.Windows.Forms.ToolStripMenuItem showToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem restartToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
+        private System.Windows.Forms.Button btnNewInstance;
     }
 }
 

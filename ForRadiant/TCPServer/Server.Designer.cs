@@ -29,6 +29,7 @@ namespace TCPServer
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Server));
             this.label1 = new System.Windows.Forms.Label();
             this.cbxIP1 = new System.Windows.Forms.ComboBox();
@@ -70,11 +71,12 @@ namespace TCPServer
             this.btnStart4 = new System.Windows.Forms.Button();
             this.btnStart5 = new System.Windows.Forms.Button();
             this.btnRestart = new System.Windows.Forms.Button();
-            this.notifyIcon1 = new System.Windows.Forms.NotifyIcon();
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip();
+            this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.showToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnNewInstance = new System.Windows.Forms.Button();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -157,9 +159,9 @@ namespace TCPServer
             // 
             // btnSend
             // 
-            this.btnSend.Location = new System.Drawing.Point(239, 34);
+            this.btnSend.Location = new System.Drawing.Point(259, 34);
             this.btnSend.Name = "btnSend";
-            this.btnSend.Size = new System.Drawing.Size(75, 23);
+            this.btnSend.Size = new System.Drawing.Size(55, 23);
             this.btnSend.TabIndex = 17;
             this.btnSend.Text = "Send";
             this.btnSend.UseVisualStyleBackColor = true;
@@ -167,9 +169,9 @@ namespace TCPServer
             // 
             // btnSendAll
             // 
-            this.btnSendAll.Location = new System.Drawing.Point(158, 34);
+            this.btnSendAll.Location = new System.Drawing.Point(198, 34);
             this.btnSendAll.Name = "btnSendAll";
-            this.btnSendAll.Size = new System.Drawing.Size(75, 23);
+            this.btnSendAll.Size = new System.Drawing.Size(55, 23);
             this.btnSendAll.TabIndex = 18;
             this.btnSendAll.Text = "Send All";
             this.btnSendAll.UseVisualStyleBackColor = true;
@@ -183,7 +185,6 @@ namespace TCPServer
             this.label4.Size = new System.Drawing.Size(55, 13);
             this.label4.TabIndex = 7;
             this.label4.Text = "Client IP : ";
-            this.label4.Click += new System.EventHandler(this.label4_Click);
             // 
             // lstClientIP1
             // 
@@ -194,7 +195,6 @@ namespace TCPServer
             this.lstClientIP1.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
             this.lstClientIP1.Size = new System.Drawing.Size(203, 56);
             this.lstClientIP1.TabIndex = 20;
-            this.lstClientIP1.SelectedIndexChanged += new System.EventHandler(this.lstClientIP1_SelectedIndexChanged);
             // 
             // lstClientIP2
             // 
@@ -205,7 +205,6 @@ namespace TCPServer
             this.lstClientIP2.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
             this.lstClientIP2.Size = new System.Drawing.Size(203, 56);
             this.lstClientIP2.TabIndex = 22;
-            this.lstClientIP2.SelectedIndexChanged += new System.EventHandler(this.lstClientIP2_SelectedIndexChanged);
             // 
             // label5
             // 
@@ -215,7 +214,6 @@ namespace TCPServer
             this.label5.Size = new System.Drawing.Size(55, 13);
             this.label5.TabIndex = 13;
             this.label5.Text = "Client IP : ";
-            this.label5.Click += new System.EventHandler(this.label5_Click);
             // 
             // label6
             // 
@@ -271,7 +269,6 @@ namespace TCPServer
             this.lstClientIP3.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
             this.lstClientIP3.Size = new System.Drawing.Size(203, 56);
             this.lstClientIP3.TabIndex = 24;
-            this.lstClientIP3.SelectedIndexChanged += new System.EventHandler(this.lstClientIP3_SelectedIndexChanged);
             // 
             // label8
             // 
@@ -281,7 +278,6 @@ namespace TCPServer
             this.label8.Size = new System.Drawing.Size(55, 13);
             this.label8.TabIndex = 19;
             this.label8.Text = "Client IP : ";
-            this.label8.Click += new System.EventHandler(this.label8_Click);
             // 
             // label9
             // 
@@ -337,7 +333,6 @@ namespace TCPServer
             this.lstClientIP4.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
             this.lstClientIP4.Size = new System.Drawing.Size(203, 56);
             this.lstClientIP4.TabIndex = 26;
-            this.lstClientIP4.SelectedIndexChanged += new System.EventHandler(this.lstClientIP4_SelectedIndexChanged);
             // 
             // label11
             // 
@@ -347,7 +342,6 @@ namespace TCPServer
             this.label11.Size = new System.Drawing.Size(55, 13);
             this.label11.TabIndex = 25;
             this.label11.Text = "Client IP : ";
-            this.label11.Click += new System.EventHandler(this.label11_Click);
             // 
             // label12
             // 
@@ -403,7 +397,6 @@ namespace TCPServer
             this.lstClientIP5.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
             this.lstClientIP5.Size = new System.Drawing.Size(203, 56);
             this.lstClientIP5.TabIndex = 28;
-            this.lstClientIP5.SelectedIndexChanged += new System.EventHandler(this.lstClientIP5_SelectedIndexChanged);
             // 
             // label14
             // 
@@ -413,7 +406,6 @@ namespace TCPServer
             this.label14.Size = new System.Drawing.Size(55, 13);
             this.label14.TabIndex = 31;
             this.label14.Text = "Client IP : ";
-            this.label14.Click += new System.EventHandler(this.label14_Click);
             // 
             // label15
             // 
@@ -502,9 +494,9 @@ namespace TCPServer
             // 
             // btnRestart
             // 
-            this.btnRestart.Location = new System.Drawing.Point(77, 34);
+            this.btnRestart.Location = new System.Drawing.Point(137, 34);
             this.btnRestart.Name = "btnRestart";
-            this.btnRestart.Size = new System.Drawing.Size(75, 23);
+            this.btnRestart.Size = new System.Drawing.Size(55, 23);
             this.btnRestart.TabIndex = 29;
             this.btnRestart.Text = "Restart";
             this.btnRestart.UseVisualStyleBackColor = true;
@@ -548,6 +540,16 @@ namespace TCPServer
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
+            // btnNewInstance
+            // 
+            this.btnNewInstance.Location = new System.Drawing.Point(76, 34);
+            this.btnNewInstance.Name = "btnNewInstance";
+            this.btnNewInstance.Size = new System.Drawing.Size(55, 23);
+            this.btnNewInstance.TabIndex = 30;
+            this.btnNewInstance.Text = "New";
+            this.btnNewInstance.UseVisualStyleBackColor = true;
+            this.btnNewInstance.Click += new System.EventHandler(this.btnNewInstance_Click);
+            // 
             // Server
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -585,6 +587,7 @@ namespace TCPServer
             this.Controls.Add(this.label4);
             this.Controls.Add(this.cbxMessage);
             this.Controls.Add(this.label3);
+            this.Controls.Add(this.btnNewInstance);
             this.Controls.Add(this.btnRestart);
             this.Controls.Add(this.btnSendAll);
             this.Controls.Add(this.btnSend);
@@ -653,6 +656,7 @@ namespace TCPServer
         private System.Windows.Forms.ToolStripMenuItem showToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem restartToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
+        private System.Windows.Forms.Button btnNewInstance;
     }
 }
 
