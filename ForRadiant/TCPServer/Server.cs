@@ -33,7 +33,7 @@ namespace TCPServer
                         this.Text, versionInfo.ToString());
         }
 
-        SimpleTcpServer server1,server2,server3,server4,server5;
+        SimpleTcpServer server1,server2,server3,server4,server5,server6;
         private void HandleMessage(string message)
         {
             if (message == "Open Notepad")
@@ -156,6 +156,18 @@ namespace TCPServer
                     }
                 }
             }
+
+            if (server6 != null && server6.IsListening)
+            {
+                if (!string.IsNullOrEmpty(cbxMessage.Text) && (lstClientIP6.SelectedItems.Count > 0)) //check message & select client ip from listbox
+                {
+                    foreach (var ip in lstClientIP6.SelectedItems)
+                    {
+                        server6.Send(ip.ToString(), cbxMessage.Text);
+                        txtLog6.Text += $"-->{ip} : {cbxMessage.Text}{Environment.NewLine}";
+                    }
+                }
+            }
             cbxMessage.SelectAll();
         }
 
@@ -168,8 +180,9 @@ namespace TCPServer
                 server1.Events.ClientDisconnected += Events_ClientDisconnected1;
                 server1.Events.DataReceived += Events_DataReceived1;
                 server1.Start();
-                txtLog1.Text += $"Starting...{Environment.NewLine}";
+                txtLog1.Text += $"Listening...{Environment.NewLine}";
                 btnStart1.Enabled = false;
+                btnStop1.Enabled = true;
             }
             catch (Exception)
             {
@@ -186,8 +199,9 @@ namespace TCPServer
                 server2.Events.ClientDisconnected += Events_ClientDisconnected2;
                 server2.Events.DataReceived += Events_DataReceived2;
                 server2.Start();
-                txtLog2.Text += $"Starting...{Environment.NewLine}";
+                txtLog2.Text += $"Listening...{Environment.NewLine}";
                 btnStart2.Enabled = false;
+                btnStop2.Enabled = true;
             }
             catch (Exception)
             {
@@ -204,8 +218,9 @@ namespace TCPServer
                 server3.Events.ClientDisconnected += Events_ClientDisconnected3;
                 server3.Events.DataReceived += Events_DataReceived3;
                 server3.Start();
-                txtLog3.Text += $"Starting...{Environment.NewLine}";
+                txtLog3.Text += $"Listening...{Environment.NewLine}";
                 btnStart3.Enabled = false;
+                btnStop3.Enabled = true;
             }
             catch (Exception)
             {
@@ -222,8 +237,9 @@ namespace TCPServer
                 server4.Events.ClientDisconnected += Events_ClientDisconnected4;
                 server4.Events.DataReceived += Events_DataReceived4;
                 server4.Start();
-                txtLog4.Text += $"Starting...{Environment.NewLine}";
+                txtLog4.Text += $"Listening...{Environment.NewLine}";
                 btnStart4.Enabled = false;
+                btnStop4.Enabled = true;
             }
             catch (Exception)
             {
@@ -240,8 +256,9 @@ namespace TCPServer
                 server5.Events.ClientDisconnected += Events_ClientDisconnected5;
                 server5.Events.DataReceived += Events_DataReceived5;
                 server5.Start();
-                txtLog5.Text += $"Starting...{Environment.NewLine}";
+                txtLog5.Text += $"Listening...{Environment.NewLine}";
                 btnStart5.Enabled = false;
+                btnStop5.Enabled = true;
             }
             catch (Exception)
             {
@@ -389,6 +406,34 @@ namespace TCPServer
             });
         }
 
+        private void Events_ClientDisconnected6(object sender, SuperSimpleTcp.ConnectionEventArgs e)
+        {
+            this.Invoke((MethodInvoker)delegate
+            {
+                txtLog6.Text += $"{e.IpPort} disconnected.{Environment.NewLine}";
+                lstClientIP6.Items.Remove(e.IpPort);
+            });
+        }
+
+        private void Events_DataReceived6(object sender, SuperSimpleTcp.DataReceivedEventArgs e)
+        {
+            this.Invoke((MethodInvoker)delegate
+            {
+                txtLog6.Text += $"{e.IpPort} : {Encoding.UTF8.GetString(e.Data)}{Environment.NewLine}";
+            });
+            HandleMessage(Encoding.UTF8.GetString(e.Data));
+        }
+
+        private void Events_ClientConnected6(object sender, SuperSimpleTcp.ConnectionEventArgs e)
+        {
+            this.Invoke((MethodInvoker)delegate
+            {
+                txtLog6.Text += $"{e.IpPort} connected.{Environment.NewLine}";
+                lstClientIP6.Items.Add(e.IpPort);
+                lstClientIP6.SetSelected(lstClientIP6.FindString(e.IpPort), true);
+            });
+        }
+
         private void txtLog1_TextChanged(object sender, EventArgs e)
         {
             txtLog1.SelectionStart = txtLog1.Text.Length;
@@ -410,6 +455,12 @@ namespace TCPServer
         private void Server_Load(object sender, EventArgs e)
         {
             SetVersionInfo();
+            btnStart1_Click(this, new EventArgs());
+            btnStart2_Click(this, new EventArgs());
+            btnStart3_Click(this, new EventArgs());
+            btnStart4_Click(this, new EventArgs());
+            btnStart5_Click(this, new EventArgs());
+            btnStart6_Click(this, new EventArgs());
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -481,6 +532,121 @@ namespace TCPServer
             Process p = new Process();
             p.StartInfo.FileName = Application.ExecutablePath;
             p.Start();
+        }
+
+        private void btnStop1_Click(object sender, EventArgs e)
+        {
+            try
+            {            
+                server1.Dispose();
+                txtLog1.Text += $"Stopped.{Environment.NewLine}";
+                btnStart1.Enabled = true;
+                btnStop1.Enabled = false;
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+        private void btnStop2_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                server2.Dispose();
+                txtLog2.Text += $"Stopped.{Environment.NewLine}";
+                btnStart2.Enabled = true;
+                btnStop2.Enabled = false;
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+        private void btnStop3_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                server3.Dispose();
+                txtLog3.Text += $"Stopped.{Environment.NewLine}";
+                btnStart3.Enabled = true;
+                btnStop3.Enabled = false;
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+        private void btnStop4_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                server4.Dispose();
+                txtLog4.Text += $"Stopped.{Environment.NewLine}";
+                btnStart4.Enabled = true;
+                btnStop4.Enabled = false;
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+        private void btnStop5_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                server5.Dispose();
+                txtLog5.Text += $"Stopped.{Environment.NewLine}";
+                btnStart5.Enabled = true;
+                btnStop5.Enabled = false;
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+        private void btnStop6_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                server6.Dispose();
+                txtLog6.Text += $"Stopped.{Environment.NewLine}";
+                btnStart6.Enabled = true;
+                btnStop6.Enabled = false;
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+        private void txtLog6_TextChanged(object sender, EventArgs e)
+        {
+            txtLog6.SelectionStart = txtLog6.Text.Length;
+            txtLog6.ScrollToCaret();
+        }
+
+        private void btnStart6_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                server6 = new SimpleTcpServer($"{cbxIP6.Text}:9000");
+                server6.Events.ClientConnected += Events_ClientConnected6;
+                server6.Events.ClientDisconnected += Events_ClientDisconnected6;
+                server6.Events.DataReceived += Events_DataReceived6;
+                server6.Start();
+                txtLog6.Text += $"Listening...{Environment.NewLine}";
+                btnStart6.Enabled = false;
+                btnStop6.Enabled = true;
+            }
+            catch (Exception)
+            {
+
+            }
         }
 
         private void txtLog3_TextChanged(object sender, EventArgs e)
@@ -559,6 +725,18 @@ namespace TCPServer
                     {
                         server5.Send(ip.ToString(), cbxMessage.Text);
                         txtLog5.Text += $"-->{ip} : {cbxMessage.Text}{Environment.NewLine}";
+                    }
+                }
+            }
+
+            if (server6 != null && server6.IsListening)
+            {
+                if (!string.IsNullOrEmpty(cbxMessage.Text) && (lstClientIP6.Items.Count > 0)) //check message & select client ip from listbox
+                {
+                    foreach (var ip in lstClientIP6.Items)
+                    {
+                        server6.Send(ip.ToString(), cbxMessage.Text);
+                        txtLog6.Text += $"-->{ip} : {cbxMessage.Text}{Environment.NewLine}";
                     }
                 }
             }

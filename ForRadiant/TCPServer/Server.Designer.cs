@@ -77,6 +77,19 @@ namespace TCPServer
             this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btnNewInstance = new System.Windows.Forms.Button();
+            this.btnStop1 = new System.Windows.Forms.Button();
+            this.btnStop2 = new System.Windows.Forms.Button();
+            this.btnStop3 = new System.Windows.Forms.Button();
+            this.btnStop4 = new System.Windows.Forms.Button();
+            this.btnStop5 = new System.Windows.Forms.Button();
+            this.btnStop6 = new System.Windows.Forms.Button();
+            this.btnStart6 = new System.Windows.Forms.Button();
+            this.lstClientIP6 = new System.Windows.Forms.ListBox();
+            this.label17 = new System.Windows.Forms.Label();
+            this.label18 = new System.Windows.Forms.Label();
+            this.txtLog6 = new System.Windows.Forms.TextBox();
+            this.cbxIP6 = new System.Windows.Forms.ComboBox();
+            this.label19 = new System.Windows.Forms.Label();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -113,7 +126,7 @@ namespace TCPServer
             this.txtLog1.ReadOnly = true;
             this.txtLog1.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.txtLog1.Size = new System.Drawing.Size(237, 57);
-            this.txtLog1.TabIndex = 19;
+            this.txtLog1.TabIndex = 23;
             this.txtLog1.TextChanged += new System.EventHandler(this.txtLog1_TextChanged);
             // 
             // label2
@@ -129,7 +142,7 @@ namespace TCPServer
             // 
             this.btnStart1.Location = new System.Drawing.Point(328, 61);
             this.btnStart1.Name = "btnStart1";
-            this.btnStart1.Size = new System.Drawing.Size(75, 23);
+            this.btnStart1.Size = new System.Drawing.Size(55, 23);
             this.btnStart1.TabIndex = 3;
             this.btnStart1.Text = "Start";
             this.btnStart1.UseVisualStyleBackColor = true;
@@ -144,7 +157,7 @@ namespace TCPServer
             this.cbxMessage.Location = new System.Drawing.Point(77, 6);
             this.cbxMessage.Name = "cbxMessage";
             this.cbxMessage.Size = new System.Drawing.Size(237, 21);
-            this.cbxMessage.TabIndex = 16;
+            this.cbxMessage.TabIndex = 20;
             this.cbxMessage.DropDown += new System.EventHandler(this.cbxMessage_DropDown);
             this.cbxMessage.KeyDown += new System.Windows.Forms.KeyEventHandler(this.cbxMessage_KeyDown);
             // 
@@ -162,7 +175,7 @@ namespace TCPServer
             this.btnSend.Location = new System.Drawing.Point(259, 34);
             this.btnSend.Name = "btnSend";
             this.btnSend.Size = new System.Drawing.Size(55, 23);
-            this.btnSend.TabIndex = 17;
+            this.btnSend.TabIndex = 21;
             this.btnSend.Text = "Send";
             this.btnSend.UseVisualStyleBackColor = true;
             this.btnSend.Click += new System.EventHandler(this.btnSend_Click);
@@ -172,7 +185,7 @@ namespace TCPServer
             this.btnSendAll.Location = new System.Drawing.Point(198, 34);
             this.btnSendAll.Name = "btnSendAll";
             this.btnSendAll.Size = new System.Drawing.Size(55, 23);
-            this.btnSendAll.TabIndex = 18;
+            this.btnSendAll.TabIndex = 22;
             this.btnSendAll.Text = "Send All";
             this.btnSendAll.UseVisualStyleBackColor = true;
             this.btnSendAll.Click += new System.EventHandler(this.btnSendAll_Click);
@@ -180,7 +193,7 @@ namespace TCPServer
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(409, 66);
+            this.label4.Location = new System.Drawing.Point(450, 66);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(55, 13);
             this.label4.TabIndex = 7;
@@ -194,7 +207,7 @@ namespace TCPServer
             this.lstClientIP1.ScrollAlwaysVisible = true;
             this.lstClientIP1.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
             this.lstClientIP1.Size = new System.Drawing.Size(203, 56);
-            this.lstClientIP1.TabIndex = 20;
+            this.lstClientIP1.TabIndex = 24;
             // 
             // lstClientIP2
             // 
@@ -204,12 +217,12 @@ namespace TCPServer
             this.lstClientIP2.ScrollAlwaysVisible = true;
             this.lstClientIP2.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
             this.lstClientIP2.Size = new System.Drawing.Size(203, 56);
-            this.lstClientIP2.TabIndex = 22;
+            this.lstClientIP2.TabIndex = 26;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(409, 159);
+            this.label5.Location = new System.Drawing.Point(449, 159);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(55, 13);
             this.label5.TabIndex = 13;
@@ -232,7 +245,7 @@ namespace TCPServer
             this.txtLog2.ReadOnly = true;
             this.txtLog2.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.txtLog2.Size = new System.Drawing.Size(237, 57);
-            this.txtLog2.TabIndex = 21;
+            this.txtLog2.TabIndex = 25;
             this.txtLog2.TextChanged += new System.EventHandler(this.txtLog2_TextChanged);
             // 
             // cbxIP2
@@ -248,7 +261,7 @@ namespace TCPServer
             this.cbxIP2.Location = new System.Drawing.Point(77, 156);
             this.cbxIP2.Name = "cbxIP2";
             this.cbxIP2.Size = new System.Drawing.Size(237, 21);
-            this.cbxIP2.TabIndex = 4;
+            this.cbxIP2.TabIndex = 5;
             this.cbxIP2.Text = "127.0.0.1";
             // 
             // label7
@@ -268,12 +281,12 @@ namespace TCPServer
             this.lstClientIP3.ScrollAlwaysVisible = true;
             this.lstClientIP3.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
             this.lstClientIP3.Size = new System.Drawing.Size(203, 56);
-            this.lstClientIP3.TabIndex = 24;
+            this.lstClientIP3.TabIndex = 28;
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(409, 252);
+            this.label8.Location = new System.Drawing.Point(449, 252);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(55, 13);
             this.label8.TabIndex = 19;
@@ -296,7 +309,7 @@ namespace TCPServer
             this.txtLog3.ReadOnly = true;
             this.txtLog3.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.txtLog3.Size = new System.Drawing.Size(237, 57);
-            this.txtLog3.TabIndex = 23;
+            this.txtLog3.TabIndex = 27;
             this.txtLog3.TextChanged += new System.EventHandler(this.txtLog3_TextChanged);
             // 
             // cbxIP3
@@ -312,7 +325,7 @@ namespace TCPServer
             this.cbxIP3.Location = new System.Drawing.Point(77, 249);
             this.cbxIP3.Name = "cbxIP3";
             this.cbxIP3.Size = new System.Drawing.Size(237, 21);
-            this.cbxIP3.TabIndex = 7;
+            this.cbxIP3.TabIndex = 8;
             this.cbxIP3.Text = "127.0.0.1";
             // 
             // label10
@@ -332,12 +345,12 @@ namespace TCPServer
             this.lstClientIP4.ScrollAlwaysVisible = true;
             this.lstClientIP4.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
             this.lstClientIP4.Size = new System.Drawing.Size(203, 56);
-            this.lstClientIP4.TabIndex = 26;
+            this.lstClientIP4.TabIndex = 30;
             // 
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(409, 345);
+            this.label11.Location = new System.Drawing.Point(449, 345);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(55, 13);
             this.label11.TabIndex = 25;
@@ -360,7 +373,7 @@ namespace TCPServer
             this.txtLog4.ReadOnly = true;
             this.txtLog4.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.txtLog4.Size = new System.Drawing.Size(237, 57);
-            this.txtLog4.TabIndex = 25;
+            this.txtLog4.TabIndex = 29;
             this.txtLog4.TextChanged += new System.EventHandler(this.txtLog4_TextChanged);
             // 
             // cbxIP4
@@ -376,7 +389,7 @@ namespace TCPServer
             this.cbxIP4.Location = new System.Drawing.Point(77, 342);
             this.cbxIP4.Name = "cbxIP4";
             this.cbxIP4.Size = new System.Drawing.Size(237, 21);
-            this.cbxIP4.TabIndex = 10;
+            this.cbxIP4.TabIndex = 11;
             this.cbxIP4.Text = "127.0.0.1";
             // 
             // label13
@@ -396,12 +409,12 @@ namespace TCPServer
             this.lstClientIP5.ScrollAlwaysVisible = true;
             this.lstClientIP5.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
             this.lstClientIP5.Size = new System.Drawing.Size(203, 56);
-            this.lstClientIP5.TabIndex = 28;
+            this.lstClientIP5.TabIndex = 32;
             // 
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(409, 438);
+            this.label14.Location = new System.Drawing.Point(449, 438);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(55, 13);
             this.label14.TabIndex = 31;
@@ -424,7 +437,7 @@ namespace TCPServer
             this.txtLog5.ReadOnly = true;
             this.txtLog5.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.txtLog5.Size = new System.Drawing.Size(237, 57);
-            this.txtLog5.TabIndex = 27;
+            this.txtLog5.TabIndex = 31;
             this.txtLog5.TextChanged += new System.EventHandler(this.txtLog5_TextChanged);
             // 
             // cbxIP5
@@ -440,7 +453,7 @@ namespace TCPServer
             this.cbxIP5.Location = new System.Drawing.Point(77, 435);
             this.cbxIP5.Name = "cbxIP5";
             this.cbxIP5.Size = new System.Drawing.Size(237, 21);
-            this.cbxIP5.TabIndex = 13;
+            this.cbxIP5.TabIndex = 14;
             this.cbxIP5.Text = "127.0.0.1";
             // 
             // label16
@@ -456,7 +469,7 @@ namespace TCPServer
             // 
             this.btnStart2.Location = new System.Drawing.Point(328, 154);
             this.btnStart2.Name = "btnStart2";
-            this.btnStart2.Size = new System.Drawing.Size(75, 23);
+            this.btnStart2.Size = new System.Drawing.Size(55, 23);
             this.btnStart2.TabIndex = 6;
             this.btnStart2.Text = "Start";
             this.btnStart2.UseVisualStyleBackColor = true;
@@ -466,7 +479,7 @@ namespace TCPServer
             // 
             this.btnStart3.Location = new System.Drawing.Point(328, 247);
             this.btnStart3.Name = "btnStart3";
-            this.btnStart3.Size = new System.Drawing.Size(75, 23);
+            this.btnStart3.Size = new System.Drawing.Size(55, 23);
             this.btnStart3.TabIndex = 9;
             this.btnStart3.Text = "Start";
             this.btnStart3.UseVisualStyleBackColor = true;
@@ -476,7 +489,7 @@ namespace TCPServer
             // 
             this.btnStart4.Location = new System.Drawing.Point(328, 340);
             this.btnStart4.Name = "btnStart4";
-            this.btnStart4.Size = new System.Drawing.Size(75, 23);
+            this.btnStart4.Size = new System.Drawing.Size(55, 23);
             this.btnStart4.TabIndex = 12;
             this.btnStart4.Text = "Start";
             this.btnStart4.UseVisualStyleBackColor = true;
@@ -486,7 +499,7 @@ namespace TCPServer
             // 
             this.btnStart5.Location = new System.Drawing.Point(328, 433);
             this.btnStart5.Name = "btnStart5";
-            this.btnStart5.Size = new System.Drawing.Size(75, 23);
+            this.btnStart5.Size = new System.Drawing.Size(55, 23);
             this.btnStart5.TabIndex = 15;
             this.btnStart5.Text = "Start";
             this.btnStart5.UseVisualStyleBackColor = true;
@@ -497,7 +510,7 @@ namespace TCPServer
             this.btnRestart.Location = new System.Drawing.Point(137, 34);
             this.btnRestart.Name = "btnRestart";
             this.btnRestart.Size = new System.Drawing.Size(55, 23);
-            this.btnRestart.TabIndex = 29;
+            this.btnRestart.TabIndex = 33;
             this.btnRestart.Text = "Restart";
             this.btnRestart.UseVisualStyleBackColor = true;
             this.btnRestart.Click += new System.EventHandler(this.btnRestart_Click);
@@ -545,16 +558,168 @@ namespace TCPServer
             this.btnNewInstance.Location = new System.Drawing.Point(76, 34);
             this.btnNewInstance.Name = "btnNewInstance";
             this.btnNewInstance.Size = new System.Drawing.Size(55, 23);
-            this.btnNewInstance.TabIndex = 30;
+            this.btnNewInstance.TabIndex = 34;
             this.btnNewInstance.Text = "New";
             this.btnNewInstance.UseVisualStyleBackColor = true;
             this.btnNewInstance.Click += new System.EventHandler(this.btnNewInstance_Click);
+            // 
+            // btnStop1
+            // 
+            this.btnStop1.Enabled = false;
+            this.btnStop1.Location = new System.Drawing.Point(389, 61);
+            this.btnStop1.Name = "btnStop1";
+            this.btnStop1.Size = new System.Drawing.Size(55, 23);
+            this.btnStop1.TabIndex = 4;
+            this.btnStop1.Text = "Stop";
+            this.btnStop1.UseVisualStyleBackColor = true;
+            this.btnStop1.Click += new System.EventHandler(this.btnStop1_Click);
+            // 
+            // btnStop2
+            // 
+            this.btnStop2.Enabled = false;
+            this.btnStop2.Location = new System.Drawing.Point(389, 154);
+            this.btnStop2.Name = "btnStop2";
+            this.btnStop2.Size = new System.Drawing.Size(55, 23);
+            this.btnStop2.TabIndex = 7;
+            this.btnStop2.Text = "Stop";
+            this.btnStop2.UseVisualStyleBackColor = true;
+            this.btnStop2.Click += new System.EventHandler(this.btnStop2_Click);
+            // 
+            // btnStop3
+            // 
+            this.btnStop3.Enabled = false;
+            this.btnStop3.Location = new System.Drawing.Point(388, 247);
+            this.btnStop3.Name = "btnStop3";
+            this.btnStop3.Size = new System.Drawing.Size(55, 23);
+            this.btnStop3.TabIndex = 10;
+            this.btnStop3.Text = "Stop";
+            this.btnStop3.UseVisualStyleBackColor = true;
+            this.btnStop3.Click += new System.EventHandler(this.btnStop3_Click);
+            // 
+            // btnStop4
+            // 
+            this.btnStop4.Enabled = false;
+            this.btnStop4.Location = new System.Drawing.Point(389, 340);
+            this.btnStop4.Name = "btnStop4";
+            this.btnStop4.Size = new System.Drawing.Size(55, 23);
+            this.btnStop4.TabIndex = 13;
+            this.btnStop4.Text = "Stop";
+            this.btnStop4.UseVisualStyleBackColor = true;
+            this.btnStop4.Click += new System.EventHandler(this.btnStop4_Click);
+            // 
+            // btnStop5
+            // 
+            this.btnStop5.Enabled = false;
+            this.btnStop5.Location = new System.Drawing.Point(389, 433);
+            this.btnStop5.Name = "btnStop5";
+            this.btnStop5.Size = new System.Drawing.Size(55, 23);
+            this.btnStop5.TabIndex = 16;
+            this.btnStop5.Text = "Stop";
+            this.btnStop5.UseVisualStyleBackColor = true;
+            this.btnStop5.Click += new System.EventHandler(this.btnStop5_Click);
+            // 
+            // btnStop6
+            // 
+            this.btnStop6.Enabled = false;
+            this.btnStop6.Location = new System.Drawing.Point(389, 527);
+            this.btnStop6.Name = "btnStop6";
+            this.btnStop6.Size = new System.Drawing.Size(55, 23);
+            this.btnStop6.TabIndex = 19;
+            this.btnStop6.Text = "Stop";
+            this.btnStop6.UseVisualStyleBackColor = true;
+            this.btnStop6.Click += new System.EventHandler(this.btnStop6_Click);
+            // 
+            // btnStart6
+            // 
+            this.btnStart6.Location = new System.Drawing.Point(328, 527);
+            this.btnStart6.Name = "btnStart6";
+            this.btnStart6.Size = new System.Drawing.Size(55, 23);
+            this.btnStart6.TabIndex = 18;
+            this.btnStart6.Text = "Start";
+            this.btnStart6.UseVisualStyleBackColor = true;
+            this.btnStart6.Click += new System.EventHandler(this.btnStart6_Click);
+            // 
+            // lstClientIP6
+            // 
+            this.lstClientIP6.FormattingEnabled = true;
+            this.lstClientIP6.Location = new System.Drawing.Point(328, 556);
+            this.lstClientIP6.Name = "lstClientIP6";
+            this.lstClientIP6.ScrollAlwaysVisible = true;
+            this.lstClientIP6.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
+            this.lstClientIP6.Size = new System.Drawing.Size(203, 56);
+            this.lstClientIP6.TabIndex = 37;
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(449, 532);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(55, 13);
+            this.label17.TabIndex = 39;
+            this.label17.Text = "Client IP : ";
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Location = new System.Drawing.Point(24, 559);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(34, 13);
+            this.label18.TabIndex = 38;
+            this.label18.Text = "Log : ";
+            // 
+            // txtLog6
+            // 
+            this.txtLog6.Location = new System.Drawing.Point(77, 556);
+            this.txtLog6.Multiline = true;
+            this.txtLog6.Name = "txtLog6";
+            this.txtLog6.ReadOnly = true;
+            this.txtLog6.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txtLog6.Size = new System.Drawing.Size(237, 57);
+            this.txtLog6.TabIndex = 36;
+            this.txtLog6.TextChanged += new System.EventHandler(this.txtLog6_TextChanged);
+            // 
+            // cbxIP6
+            // 
+            this.cbxIP6.FormattingEnabled = true;
+            this.cbxIP6.Items.AddRange(new object[] {
+            "192.168.0.50",
+            "192.168.1.1",
+            "192.168.2.2",
+            "192.168.3.3",
+            "192.168.4.4",
+            "127.0.0.1"});
+            this.cbxIP6.Location = new System.Drawing.Point(77, 529);
+            this.cbxIP6.Name = "cbxIP6";
+            this.cbxIP6.Size = new System.Drawing.Size(237, 21);
+            this.cbxIP6.TabIndex = 17;
+            this.cbxIP6.Text = "127.0.0.1";
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Location = new System.Drawing.Point(24, 532);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(47, 13);
+            this.label19.TabIndex = 35;
+            this.label19.Text = "Server : ";
             // 
             // Server
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(548, 534);
+            this.ClientSize = new System.Drawing.Size(548, 624);
+            this.Controls.Add(this.btnStop6);
+            this.Controls.Add(this.btnStart6);
+            this.Controls.Add(this.lstClientIP6);
+            this.Controls.Add(this.label17);
+            this.Controls.Add(this.label18);
+            this.Controls.Add(this.txtLog6);
+            this.Controls.Add(this.cbxIP6);
+            this.Controls.Add(this.label19);
+            this.Controls.Add(this.btnStop5);
+            this.Controls.Add(this.btnStop4);
+            this.Controls.Add(this.btnStop3);
+            this.Controls.Add(this.btnStop2);
             this.Controls.Add(this.btnStart5);
             this.Controls.Add(this.btnStart4);
             this.Controls.Add(this.btnStart3);
@@ -591,6 +756,7 @@ namespace TCPServer
             this.Controls.Add(this.btnRestart);
             this.Controls.Add(this.btnSendAll);
             this.Controls.Add(this.btnSend);
+            this.Controls.Add(this.btnStop1);
             this.Controls.Add(this.btnStart1);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.txtLog1);
@@ -657,6 +823,19 @@ namespace TCPServer
         private System.Windows.Forms.ToolStripMenuItem restartToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.Button btnNewInstance;
+        private System.Windows.Forms.Button btnStop1;
+        private System.Windows.Forms.Button btnStop2;
+        private System.Windows.Forms.Button btnStop3;
+        private System.Windows.Forms.Button btnStop4;
+        private System.Windows.Forms.Button btnStop5;
+        private System.Windows.Forms.Button btnStop6;
+        private System.Windows.Forms.Button btnStart6;
+        private System.Windows.Forms.ListBox lstClientIP6;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.TextBox txtLog6;
+        private System.Windows.Forms.ComboBox cbxIP6;
+        private System.Windows.Forms.Label label19;
     }
 }
 

@@ -1,0 +1,12 @@
+Server1IP=
+Server2IP=
+Server3IP=
+Server4IP=
+Server5IP=
+Server6IP=
+Server1AutoStart=
+Server2AutoStart=
+Server3AutoStart=
+Server4AutoStart=
+Server5AutoStart=
+Server6AutoStart=
