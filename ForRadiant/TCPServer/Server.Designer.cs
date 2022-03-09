@@ -132,7 +132,7 @@ namespace TCPServer
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(24, 93);
+            this.label2.Location = new System.Drawing.Point(37, 93);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(34, 13);
             this.label2.TabIndex = 3;
@@ -231,7 +231,7 @@ namespace TCPServer
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(24, 186);
+            this.label6.Location = new System.Drawing.Point(37, 186);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(34, 13);
             this.label6.TabIndex = 12;
@@ -295,7 +295,7 @@ namespace TCPServer
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(24, 279);
+            this.label9.Location = new System.Drawing.Point(37, 279);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(34, 13);
             this.label9.TabIndex = 18;
@@ -359,7 +359,7 @@ namespace TCPServer
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(24, 372);
+            this.label12.Location = new System.Drawing.Point(37, 372);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(34, 13);
             this.label12.TabIndex = 24;
@@ -423,7 +423,7 @@ namespace TCPServer
             // label15
             // 
             this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(24, 465);
+            this.label15.Location = new System.Drawing.Point(37, 465);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(34, 13);
             this.label15.TabIndex = 30;

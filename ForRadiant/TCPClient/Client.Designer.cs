@@ -96,7 +96,7 @@ namespace TCPClient
             // 
             // btnConnect
             // 
-            this.btnConnect.Location = new System.Drawing.Point(259, 33);
+            this.btnConnect.Location = new System.Drawing.Point(259, 34);
             this.btnConnect.Name = "btnConnect";
             this.btnConnect.Size = new System.Drawing.Size(55, 23);
             this.btnConnect.TabIndex = 3;
@@ -128,7 +128,7 @@ namespace TCPClient
             // 
             // btnSend
             // 
-            this.btnSend.Location = new System.Drawing.Point(198, 33);
+            this.btnSend.Location = new System.Drawing.Point(198, 34);
             this.btnSend.Name = "btnSend";
             this.btnSend.Size = new System.Drawing.Size(55, 23);
             this.btnSend.TabIndex = 5;
@@ -138,7 +138,7 @@ namespace TCPClient
             // 
             // btnRestart
             // 
-            this.btnRestart.Location = new System.Drawing.Point(137, 33);
+            this.btnRestart.Location = new System.Drawing.Point(137, 34);
             this.btnRestart.Name = "btnRestart";
             this.btnRestart.Size = new System.Drawing.Size(55, 23);
             this.btnRestart.TabIndex = 7;
@@ -186,7 +186,7 @@ namespace TCPClient
             // 
             // btnNewInstance
             // 
-            this.btnNewInstance.Location = new System.Drawing.Point(76, 33);
+            this.btnNewInstance.Location = new System.Drawing.Point(76, 34);
             this.btnNewInstance.Name = "btnNewInstance";
             this.btnNewInstance.Size = new System.Drawing.Size(55, 23);
             this.btnNewInstance.TabIndex = 8;

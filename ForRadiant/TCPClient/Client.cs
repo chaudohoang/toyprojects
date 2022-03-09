@@ -117,7 +117,7 @@ namespace TCPClient
         {
             this.Invoke((MethodInvoker)delegate
             {
-                txtLog.Text += $"Server disconnected.{Environment.NewLine}";
+                txtLog.Text += $"Server disconnected.{Environment.NewLine}"; 
                 btnConnect.Enabled = true;
             });
         }

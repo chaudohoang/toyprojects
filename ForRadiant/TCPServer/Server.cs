@@ -455,12 +455,69 @@ namespace TCPServer
         private void Server_Load(object sender, EventArgs e)
         {
             SetVersionInfo();
-            btnStart1_Click(this, new EventArgs());
-            btnStart2_Click(this, new EventArgs());
-            btnStart3_Click(this, new EventArgs());
-            btnStart4_Click(this, new EventArgs());
-            btnStart5_Click(this, new EventArgs());
-            btnStart6_Click(this, new EventArgs());
+            try
+            {
+                string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                string appdir = Path.GetDirectoryName(apppath);
+                string settings = Path.Combine(appdir, "settings.txt");
+                var listOfLines = File.ReadAllLines(settings)
+                          .Where(x => !string.IsNullOrWhiteSpace(x));
+                foreach (var line in listOfLines)
+                {
+                    if (line.StartsWith("Server1IP") && !string.IsNullOrEmpty(line.Split('=')[1]))
+                    {
+                        cbxIP1.Text = line.Split('=')[1];
+                    }
+                    else if (line.StartsWith("Server2IP") && !string.IsNullOrEmpty(line.Split('=')[1]))
+                    {
+                        cbxIP2.Text = line.Split('=')[1];
+                    }
+                    else if (line.StartsWith("Server3IP") && !string.IsNullOrEmpty(line.Split('=')[1]))
+                    {
+                        cbxIP3.Text = line.Split('=')[1];
+                    }
+                    else if (line.StartsWith("Server4IP") && !string.IsNullOrEmpty(line.Split('=')[1]))
+                    {
+                        cbxIP4.Text = line.Split('=')[1];
+                    }
+                    else if (line.StartsWith("Server5IP") && !string.IsNullOrEmpty(line.Split('=')[1]))
+                    {
+                        cbxIP5.Text = line.Split('=')[1];
+                    }
+                    else if (line.StartsWith("Server6IP") && !string.IsNullOrEmpty(line.Split('=')[1]))
+                    {
+                        cbxIP6.Text = line.Split('=')[1];
+                    }
+                    else if (line.StartsWith("Server1AutoStart") && line.Split('=')[1].ToLower() == "true")
+                    {
+                        btnStart1_Click(this, new EventArgs());
+                    }
+                    else if (line.StartsWith("Server2AutoStart") && line.Split('=')[1].ToLower() == "true")
+                    {
+                        btnStart2_Click(this, new EventArgs());
+                    }
+                    else if (line.StartsWith("Server3AutoStart") && line.Split('=')[1].ToLower() == "true")
+                    {
+                        btnStart3_Click(this, new EventArgs());
+                    }
+                    else if (line.StartsWith("Server4AutoStart") && line.Split('=')[1].ToLower() == "true")
+                    {
+                        btnStart4_Click(this, new EventArgs());
+                    }
+                    else if (line.StartsWith("Server5AutoStart") && line.Split('=')[1].ToLower() == "true")
+                    {
+                        btnStart5_Click(this, new EventArgs());
+                    }
+                    else if (line.StartsWith("Server6AutoStart") && line.Split('=')[1].ToLower() == "true")
+                    {
+                        btnStart6_Click(this, new EventArgs());
+                    }
+                }
+            }
+            catch (Exception)
+            {
+
+            }          
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -537,7 +594,7 @@ namespace TCPServer
         private void btnStop1_Click(object sender, EventArgs e)
         {
             try
-            {            
+            {
                 server1.Dispose();
                 txtLog1.Text += $"Stopped.{Environment.NewLine}";
                 btnStart1.Enabled = true;
