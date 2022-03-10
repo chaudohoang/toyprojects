@@ -73,6 +73,7 @@ namespace TCPClient
             this.cbxIP.Size = new System.Drawing.Size(237, 21);
             this.cbxIP.TabIndex = 1;
             this.cbxIP.Text = "127.0.0.1";
+            this.cbxIP.DropDown += new System.EventHandler(this.cbxIP_DropDown);
             // 
             // txtLog
             // 

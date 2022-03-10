@@ -100,7 +100,11 @@ namespace TCPClient
         {            
             try
             {
-                client = new SimpleTcpClient($"{cbxIP.Text}:9000");
+                if (cbxIP.Text.Contains(","))
+                {
+                    client = new SimpleTcpClient($"{cbxIP.Text.Split(',')[1]}:9000");
+                }
+                else client = new SimpleTcpClient($"{cbxIP.Text}:9000");
                 client.Events.Connected += Events_Connected;
                 client.Events.DataReceived += Events_DataReceived;
                 client.Events.Disconnected += Events_Disconnected;
@@ -238,6 +242,33 @@ namespace TCPClient
             Process p = new Process();
             p.StartInfo.FileName = Application.ExecutablePath;
             p.Start();
+        }
+
+        private void cbxIP_DropDown(object sender, EventArgs e)
+        {
+            try
+            {
+                string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                string appdir = Path.GetDirectoryName(apppath);
+                string messagelist = Path.Combine(appdir, "serverlist.csv");
+                var listOfLines = File.ReadAllLines(messagelist)
+                          .Where(x => !string.IsNullOrWhiteSpace(x));
+                cbxIP.Items.Clear();
+                cbxIP.Items.Add("192.168.0.50");
+                cbxIP.Items.Add("192.168.1.1");
+                cbxIP.Items.Add("192.168.2.2");
+                cbxIP.Items.Add("192.168.3.3");
+                cbxIP.Items.Add("192.168.4.4");
+                cbxIP.Items.Add("127.0.0.1");
+                foreach (var line in listOfLines)
+                {                                    
+                    cbxIP.Items.Add(line);
+                }
+            }
+            catch (Exception)
+            {
+
+            }
         }
     }
 }
