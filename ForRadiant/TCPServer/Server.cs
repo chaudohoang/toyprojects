@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using SuperSimpleTcp;
 using System.Diagnostics;
 using System.IO;
+using System.Net.NetworkInformation;
 
 namespace TCPServer
 {
@@ -462,6 +463,17 @@ namespace TCPServer
                 string settings = Path.Combine(appdir, "settings.txt");
                 var listOfLines = File.ReadAllLines(settings)
                           .Where(x => !string.IsNullOrWhiteSpace(x));
+                foreach (NetworkInterface netInterface in NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    IPInterfaceProperties ipProps = netInterface.GetIPProperties();
+                    foreach (UnicastIPAddressInformation addr in ipProps.UnicastAddresses)
+                    {
+                        if (addr.Address.ToString().StartsWith("192.168") || addr.Address.ToString().StartsWith("10.119") || addr.Address.ToString().StartsWith("10.121"))
+                        {
+                            cbxIP6.Text = addr.Address.ToString();
+                        }
+                    }
+                }
                 foreach (var line in listOfLines)
                 {
                     if (line.StartsWith("Server1IP") && !string.IsNullOrEmpty(line.Split('=')[1]))
@@ -512,7 +524,7 @@ namespace TCPServer
                     {
                         btnStart6_Click(this, new EventArgs());
                     }
-                }
+                }                
             }
             catch (Exception)
             {
