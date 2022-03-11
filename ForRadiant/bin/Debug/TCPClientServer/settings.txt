@@ -1,4 +1,4 @@
-Server1IP=192.168.0.50
+Server1IP=192.168.0.100
 Server2IP=192.168.1.1
 Server3IP=192.168.2.2
 Server4IP=192.168.3.3

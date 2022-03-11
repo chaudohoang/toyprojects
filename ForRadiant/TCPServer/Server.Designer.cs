@@ -106,7 +106,7 @@ namespace TCPServer
             // 
             this.cbxIP1.FormattingEnabled = true;
             this.cbxIP1.Items.AddRange(new object[] {
-            "192.168.0.50",
+            "192.168.0.100",
             "192.168.1.1",
             "192.168.2.2",
             "192.168.3.3",
@@ -252,7 +252,7 @@ namespace TCPServer
             // 
             this.cbxIP2.FormattingEnabled = true;
             this.cbxIP2.Items.AddRange(new object[] {
-            "192.168.0.50",
+            "192.168.0.100",
             "192.168.1.1",
             "192.168.2.2",
             "192.168.3.3",
@@ -316,7 +316,7 @@ namespace TCPServer
             // 
             this.cbxIP3.FormattingEnabled = true;
             this.cbxIP3.Items.AddRange(new object[] {
-            "192.168.0.50",
+            "192.168.0.100",
             "192.168.1.1",
             "192.168.2.2",
             "192.168.3.3",
@@ -380,7 +380,7 @@ namespace TCPServer
             // 
             this.cbxIP4.FormattingEnabled = true;
             this.cbxIP4.Items.AddRange(new object[] {
-            "192.168.0.50",
+            "192.168.0.100",
             "192.168.1.1",
             "192.168.2.2",
             "192.168.3.3",
@@ -444,7 +444,7 @@ namespace TCPServer
             // 
             this.cbxIP5.FormattingEnabled = true;
             this.cbxIP5.Items.AddRange(new object[] {
-            "192.168.0.50",
+            "192.168.0.100",
             "192.168.1.1",
             "192.168.2.2",
             "192.168.3.3",
@@ -682,7 +682,7 @@ namespace TCPServer
             // 
             this.cbxIP6.FormattingEnabled = true;
             this.cbxIP6.Items.AddRange(new object[] {
-            "192.168.0.50",
+            "192.168.0.100",
             "192.168.1.1",
             "192.168.2.2",
             "192.168.3.3",

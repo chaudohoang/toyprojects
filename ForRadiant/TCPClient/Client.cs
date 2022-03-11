@@ -254,7 +254,7 @@ namespace TCPClient
                 var listOfLines = File.ReadAllLines(messagelist)
                           .Where(x => !string.IsNullOrWhiteSpace(x));
                 cbxIP.Items.Clear();
-                cbxIP.Items.Add("192.168.0.50");
+                cbxIP.Items.Add("192.168.0.100");
                 cbxIP.Items.Add("192.168.1.1");
                 cbxIP.Items.Add("192.168.2.2");
                 cbxIP.Items.Add("192.168.3.3");

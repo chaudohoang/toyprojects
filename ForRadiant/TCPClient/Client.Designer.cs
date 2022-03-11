@@ -62,7 +62,7 @@ namespace TCPClient
             // 
             this.cbxIP.FormattingEnabled = true;
             this.cbxIP.Items.AddRange(new object[] {
-            "192.168.0.50",
+            "192.168.0.100",
             "192.168.1.1",
             "192.168.2.2",
             "192.168.3.3",
