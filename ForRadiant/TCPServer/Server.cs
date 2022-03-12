@@ -468,9 +468,20 @@ namespace TCPServer
                     IPInterfaceProperties ipProps = netInterface.GetIPProperties();
                     foreach (UnicastIPAddressInformation addr in ipProps.UnicastAddresses)
                     {
-                        if (addr.Address.ToString().StartsWith("192.168") || addr.Address.ToString().StartsWith("10.119") || addr.Address.ToString().StartsWith("10.121"))
+                        if (addr.Address.ToString().StartsWith("10.119"))
                         {
                             cbxIP6.Text = addr.Address.ToString();
+                            btnStart6_Click(this, new EventArgs());
+                        }
+                        else if (addr.Address.ToString().StartsWith("10.121"))
+                        {
+                            cbxIP6.Text = addr.Address.ToString();
+                            btnStart6_Click(this, new EventArgs());
+                        }
+                        else if (addr.Address.ToString().StartsWith("192.168"))
+                        {
+                            cbxIP6.Text = addr.Address.ToString();
+                            btnStart6_Click(this, new EventArgs());
                         }
                     }
                 }
