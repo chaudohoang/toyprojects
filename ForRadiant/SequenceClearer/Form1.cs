@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -17,6 +18,19 @@ namespace SequenceCleaner
 		public Form1()
 		{
 			InitializeComponent();
+		}
+
+		private void SetVersionInfo()
+		{
+			Version versionInfo = Assembly.GetExecutingAssembly().GetName().Version;
+			DateTime startDate = new DateTime(2000, 1, 1);
+			int diffDays = versionInfo.Build;
+			DateTime computedDate = startDate.AddDays(diffDays);
+			string lastBuilt = computedDate.ToShortDateString();
+			//this.Text = string.Format("{0} - {1} ({2})",
+			//            this.Text, versionInfo.ToString(), lastBuilt);
+			this.Text = string.Format("{0} - {1}",
+						this.Text, versionInfo.ToString());
 		}
 
 		private void cmdBrowseSequence_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -105,6 +119,11 @@ namespace SequenceCleaner
 			}
 			lblDone.Text = "Done!";
 			}
+		}
+
+		private void Form1_Load(object sender, EventArgs e)
+		{
+			SetVersionInfo();
 		}
 	}
 }

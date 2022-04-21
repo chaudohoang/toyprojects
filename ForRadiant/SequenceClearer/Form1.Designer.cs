@@ -29,6 +29,7 @@ namespace SequenceCleaner
 		/// </summary>
 		private void InitializeComponent()
 		{
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
 			this.cmdBrowseSequence = new System.Windows.Forms.LinkLabel();
 			this.label1 = new System.Windows.Forms.Label();
 			this.txtSequenceFilePath = new System.Windows.Forms.TextBox();
@@ -162,8 +163,10 @@ namespace SequenceCleaner
 			this.Controls.Add(this.txtSequenceFilePath);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.cmdBrowseSequence);
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "Form1";
 			this.Text = "Sequence Clearer";
+			this.Load += new System.EventHandler(this.Form1_Load);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
