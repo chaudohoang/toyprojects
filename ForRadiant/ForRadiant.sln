@@ -69,6 +69,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TCPClient", "TCPClient\TCPC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TCPServer", "TCPServer\TCPServer.csproj", "{A99AEF35-3F02-47B3-B984-627BBF8C6FD2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SequenceClearer", "SequenceClearer\SequenceClearer.csproj", "{8A709522-7896-412D-9650-04E580299BC4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -207,6 +209,10 @@ Global
 		{A99AEF35-3F02-47B3-B984-627BBF8C6FD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A99AEF35-3F02-47B3-B984-627BBF8C6FD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A99AEF35-3F02-47B3-B984-627BBF8C6FD2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A709522-7896-412D-9650-04E580299BC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A709522-7896-412D-9650-04E580299BC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A709522-7896-412D-9650-04E580299BC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A709522-7896-412D-9650-04E580299BC4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -41,5 +41,11 @@ namespace CustomPopup
         {
             SetVersionInfo();
         }
-    }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            CustomForm customform = new CustomForm();
+            customform.Show();
+        }
+	}
 }
