@@ -26,43 +26,20 @@ Public Class PanelFFCGRAY
         Dim di As DirectoryInfo = New DirectoryInfo(outputpathbox.Text)
         di.Create()
 
-        'Dim B1, B2, B3, B4, B5, R1, R2, R3, R4, R5, G1, G2, G3, G4, G5, MB, MR, MG, DB, DR, DG As New List(Of List(Of Double))() 'create lists
         Dim G1, G2, G3, G4, G5, MG, DG As New List(Of List(Of Double))() 'create lists
-        'Dim G1, G2, G3, G4, MG, DG As New List(Of List(Of Double))() 'create lists
 
         'load all txt file to the lists
-        'R1 = LoadFile(redfilepath1.Text)
-        'R2 = LoadFile(redfilepath2.Text)
-        'R3 = LoadFile(redfilepath3.Text)
-        'R4 = LoadFile(redfilepath4.Text)
-        'R5 = LoadFile(redfilepath5.Text)
-        G1 = LoadFile(greenfilepath1.Text)
-        G2 = LoadFile(greenfilepath2.Text)
-        G3 = LoadFile(greenfilepath3.Text)
-        G4 = LoadFile(greenfilepath4.Text)
-        G5 = LoadFile(greenfilepath5.Text)
-        'B1 = LoadFile(bluefilepath1.Text)
-        'B2 = LoadFile(bluefilepath2.Text)
-        'B3 = LoadFile(bluefilepath3.Text)
-        'B4 = LoadFile(bluefilepath4.Text)
-        'B5 = LoadFile(bluefilepath5.Text)
-        'MR = LoadFile(mredfilepath.Text)
-        MG = LoadFile(mgreenfilepath.Text)
-        'MB = LoadFile(mbluefilepath.Text)
-
+        If Not String.IsNullOrEmpty(greenfilepath1.Text) AndAlso File.Exists(greenfilepath1.Text) Then G1 = LoadFile(greenfilepath1.Text)
+        If Not String.IsNullOrEmpty(greenfilepath2.Text) AndAlso File.Exists(greenfilepath2.Text) Then G2 = LoadFile(greenfilepath2.Text)
+        If Not String.IsNullOrEmpty(greenfilepath3.Text) AndAlso File.Exists(greenfilepath3.Text) Then G3 = LoadFile(greenfilepath3.Text)
+        If Not String.IsNullOrEmpty(greenfilepath4.Text) AndAlso File.Exists(greenfilepath4.Text) Then G4 = LoadFile(greenfilepath4.Text)
+        If Not String.IsNullOrEmpty(greenfilepath5.Text) AndAlso File.Exists(greenfilepath5.Text) Then G5 = LoadFile(greenfilepath5.Text)
+        If Not String.IsNullOrEmpty(mgreenfilepath.Text) AndAlso File.Exists(mgreenfilepath.Text) Then MG = LoadFile(mgreenfilepath.Text)
         'calculate result list from the file
-        'DR = Calculate(R1, R2, R3, R4, R5, MR)
         DG = Calculate(G1, G2, G3, G4, G5, MG)
-
-        'DB = Calculate(B1, B2, B3, B4, B5, MB)
-
         'generate csv and xml
-        'GenerateCSV(DR, outputpathbox.Text + "\" + modelname.Text + "_" +camerasn.Text + "_R.csv")
         GenerateCSV(DG, outputpathbox.Text + "\" + modelname.Text + "_" + camerasn.Text + ".csv")
-        'GenerateCSV(DB, outputpathbox.Text + "\" + modelname.Text + "_" + camerasn.Text + "_B.csv")
-        'GenerateXML(camerasn.Text, "R", outputpathbox.Text + "\" + modelname.Text + ".xml")
         GenerateXML(camerasn.Text, "G", outputpathbox.Text + "\" + modelname.Text + ".xml")
-        'GenerateXML(camerasn.Text, "B", outputpathbox.Text + "\" + modelname.Text + ".xml")
 
         'just create Done! text with random color when finish, just like butterfly tool
         Static m_Rnd As New Random
@@ -108,8 +85,14 @@ Public Class PanelFFCGRAY
             Dim values As New List(Of Double)() ' define row list
             Dim tempvalue As New Double
             For column As Integer = 0 To columnlength - 1
-
-                tempvalue = mlist(row)(column) / (list1(row)(column) + list2(row)(column) + list3(row)(column) + list4(row)(column) + list5(row)(column))
+                Dim mValue As Double = mlist(row)(column)
+                Dim panelValue As Double = 0
+                If list1.Count > 0 Then panelValue += list1(row)(column)
+                If list2.Count > 0 Then panelValue += list2(row)(column)
+                If list3.Count > 0 Then panelValue += list3(row)(column)
+                If list4.Count > 0 Then panelValue += list4(row)(column)
+                If list5.Count > 0 Then panelValue += list5(row)(column)
+                tempvalue = mValue / panelValue
                 values.Add(tempvalue)
             Next
 

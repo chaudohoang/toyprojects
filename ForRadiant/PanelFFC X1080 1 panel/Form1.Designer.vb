@@ -323,7 +323,9 @@ Partial Class PanelFFCX10801panel
         Me.Controls.Add(Me.Label1)
         Me.Controls.Add(Me.redfilepath1)
         Me.Controls.Add(Me.btnGenerate)
+        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
+        Me.MaximizeBox = False
         Me.Name = "PanelFFCX10801panel"
         Me.Text = "PanelFFC X1080 1 panel"
         Me.ResumeLayout(False)

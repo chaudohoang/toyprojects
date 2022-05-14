@@ -323,7 +323,9 @@ Partial Class PanelFFCIllunisDJ
         Me.Controls.Add(Me.Label6)
         Me.Controls.Add(Me.greenfilepath1)
         Me.Controls.Add(Me.btnGenerate)
+        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
+        Me.MaximizeBox = False
         Me.Name = "PanelFFCIllunisDJ"
         Me.Text = "PanelFFC Illunis DJ"
         Me.ResumeLayout(False)

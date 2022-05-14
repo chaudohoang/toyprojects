@@ -695,7 +695,9 @@ Partial Class PanelFFCRadiantCF
         Me.Controls.Add(Me.Label1)
         Me.Controls.Add(Me.redfilepath1)
         Me.Controls.Add(Me.btnGenerate)
+        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
+        Me.MaximizeBox = False
         Me.Name = "PanelFFCRadiantCF"
         Me.Text = "PanelFFC Radiant CF"
         Me.ResumeLayout(False)

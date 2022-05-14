@@ -28,24 +28,24 @@ Public Class PanelFFCRGB
 
         Dim B1, B2, B3, B4, B5, R1, R2, R3, R4, R5, G1, G2, G3, G4, G5, MB, MR, MG, DB, DR, DG As New List(Of List(Of Double))() 'create lists
         'load all txt file to the lists
-        R1 = LoadFile(redfilepath1.Text)
-        R2 = LoadFile(redfilepath2.Text)
-        R3 = LoadFile(redfilepath3.Text)
-        R4 = LoadFile(redfilepath4.Text)
-        R5 = LoadFile(redfilepath5.Text)
-        G1 = LoadFile(greenfilepath1.Text)
-        G2 = LoadFile(greenfilepath2.Text)
-        G3 = LoadFile(greenfilepath3.Text)
-        G4 = LoadFile(greenfilepath4.Text)
-        G5 = LoadFile(greenfilepath5.Text)
-        B1 = LoadFile(bluefilepath1.Text)
-        B2 = LoadFile(bluefilepath2.Text)
-        B3 = LoadFile(bluefilepath3.Text)
-        B4 = LoadFile(bluefilepath4.Text)
-        B5 = LoadFile(bluefilepath5.Text)
-        MR = LoadFile(mredfilepath.Text)
-        MG = LoadFile(mgreenfilepath.Text)
-        MB = LoadFile(mbluefilepath.Text)
+        If Not String.IsNullOrEmpty(redfilepath1.Text) AndAlso File.Exists(redfilepath1.Text) Then R1 = LoadFile(redfilepath1.Text)
+        If Not String.IsNullOrEmpty(redfilepath2.Text) AndAlso File.Exists(redfilepath2.Text) Then R2 = LoadFile(redfilepath2.Text)
+        If Not String.IsNullOrEmpty(redfilepath3.Text) AndAlso File.Exists(redfilepath3.Text) Then R3 = LoadFile(redfilepath3.Text)
+        If Not String.IsNullOrEmpty(redfilepath4.Text) AndAlso File.Exists(redfilepath4.Text) Then R4 = LoadFile(redfilepath4.Text)
+        If Not String.IsNullOrEmpty(redfilepath5.Text) AndAlso File.Exists(redfilepath5.Text) Then R5 = LoadFile(redfilepath5.Text)
+        If Not String.IsNullOrEmpty(greenfilepath1.Text) AndAlso File.Exists(greenfilepath1.Text) Then G1 = LoadFile(greenfilepath1.Text)
+        If Not String.IsNullOrEmpty(greenfilepath2.Text) AndAlso File.Exists(greenfilepath2.Text) Then G2 = LoadFile(greenfilepath2.Text)
+        If Not String.IsNullOrEmpty(greenfilepath3.Text) AndAlso File.Exists(greenfilepath3.Text) Then G3 = LoadFile(greenfilepath3.Text)
+        If Not String.IsNullOrEmpty(greenfilepath4.Text) AndAlso File.Exists(greenfilepath4.Text) Then G4 = LoadFile(greenfilepath4.Text)
+        If Not String.IsNullOrEmpty(greenfilepath5.Text) AndAlso File.Exists(greenfilepath5.Text) Then G5 = LoadFile(greenfilepath5.Text)
+        If Not String.IsNullOrEmpty(bluefilepath1.Text) AndAlso File.Exists(bluefilepath1.Text) Then B1 = LoadFile(bluefilepath1.Text)
+        If Not String.IsNullOrEmpty(bluefilepath2.Text) AndAlso File.Exists(bluefilepath2.Text) Then B2 = LoadFile(bluefilepath2.Text)
+        If Not String.IsNullOrEmpty(bluefilepath3.Text) AndAlso File.Exists(bluefilepath3.Text) Then B3 = LoadFile(bluefilepath3.Text)
+        If Not String.IsNullOrEmpty(bluefilepath4.Text) AndAlso File.Exists(bluefilepath4.Text) Then B4 = LoadFile(bluefilepath4.Text)
+        If Not String.IsNullOrEmpty(bluefilepath5.Text) AndAlso File.Exists(bluefilepath5.Text) Then B5 = LoadFile(bluefilepath5.Text)
+        If Not String.IsNullOrEmpty(mredfilepath.Text) AndAlso File.Exists(mredfilepath.Text) Then MR = LoadFile(mredfilepath.Text)
+        If Not String.IsNullOrEmpty(mgreenfilepath.Text) AndAlso File.Exists(mgreenfilepath.Text) Then MG = LoadFile(mgreenfilepath.Text)
+        If Not String.IsNullOrEmpty(mbluefilepath.Text) AndAlso File.Exists(mbluefilepath.Text) Then MB = LoadFile(mbluefilepath.Text)
 
         'calculate result list from the file
         DR = Calculate(R1, R2, R3, R4, R5, MR)
@@ -106,8 +106,14 @@ Public Class PanelFFCRGB
             Dim values As New List(Of Double)() ' define row list
             Dim tempvalue As New Double
             For column As Integer = 0 To columnlength - 1
-
-                tempvalue = mlist(row)(column) / (list1(row)(column) + list2(row)(column) + list3(row)(column) + list4(row)(column) + list5(row)(column))
+                Dim mValue As Double = mlist(row)(column)
+                Dim panelValue As Double = 0
+                If list1.Count > 0 Then panelValue += list1(row)(column)
+                If list2.Count > 0 Then panelValue += list2(row)(column)
+                If list3.Count > 0 Then panelValue += list3(row)(column)
+                If list4.Count > 0 Then panelValue += list4(row)(column)
+                If list5.Count > 0 Then panelValue += list5(row)(column)
+                tempvalue = mValue / panelValue
                 values.Add(tempvalue)
             Next
 
