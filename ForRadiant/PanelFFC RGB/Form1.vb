@@ -465,7 +465,8 @@ Public Class PanelFFCRGB
 
     Private Sub PanelFFCRGB_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         SetVersionInfo()
-        Dim dir = "XmlTemplate"
+        Dim rootpath As String = Assembly.GetEntryAssembly().Location
+        Dim dir = Directory.GetParent(Directory.GetParent(rootpath).ToString()).ToString() + "\XmlTemplate"
         Dim files As New List(Of String)
         For Each file As String In System.IO.Directory.GetFiles(dir)
             If IO.Path.GetExtension(file) = ".xml" Then
@@ -480,8 +481,10 @@ Public Class PanelFFCRGB
     End Sub
 
     Private Sub cbXmlTemplate_TextChanged(sender As Object, e As EventArgs) Handles cbXmlTemplate.TextChanged
+        Dim rootpath As String = Assembly.GetEntryAssembly().Location
+        Dim dir = Directory.GetParent(Directory.GetParent(rootpath).ToString()).ToString() + "\XmlTemplate"
         Dim fileReader As String
-        Dim filePath As String = Path.GetFullPath(Path.Combine("XmlTemplate", cbXmlTemplate.Text + ".xml"))
+        Dim filePath As String = Path.GetFullPath(Path.Combine(dir, cbXmlTemplate.Text + ".xml"))
         If File.Exists(filePath) Then
             fileReader = My.Computer.FileSystem.ReadAllText(filePath)
             If fileReader <> "" Then
@@ -493,13 +496,16 @@ Public Class PanelFFCRGB
     End Sub
 
     Private Sub btnSaveXmlTemplate_Click(sender As Object, e As EventArgs) Handles btnSaveXmlTemplate.Click
-        Dim filePath As String = Path.GetFullPath(Path.Combine("XmlTemplate", cbXmlTemplate.Text + ".xml"))
+        Dim rootpath As String = Assembly.GetEntryAssembly().Location
+        Dim dir = Directory.GetParent(Directory.GetParent(rootpath).ToString()).ToString() + "\XmlTemplate"
+        Dim filePath As String = Path.GetFullPath(Path.Combine(dir, cbXmlTemplate.Text + ".xml"))
         Dim text As String = txtXmlTemplate.Text
         File.WriteAllText(filePath, text)
     End Sub
 
     Private Sub cbXmlTemplate_DropDown(sender As Object, e As EventArgs) Handles cbXmlTemplate.DropDown
-        Dim dir = "XmlTemplate"
+        Dim rootpath As String = Assembly.GetEntryAssembly().Location
+        Dim dir = Directory.GetParent(Directory.GetParent(rootpath).ToString()).ToString() + "\XmlTemplate"
         Dim files As New List(Of String)
         For Each file As String In System.IO.Directory.GetFiles(dir)
             If IO.Path.GetExtension(file) = ".xml" Then
@@ -514,11 +520,12 @@ Public Class PanelFFCRGB
     End Sub
 
     Private Sub btnDelXmlTemplate_Click(sender As Object, e As EventArgs) Handles btnDelXmlTemplate.Click
-        Dim filepath As String = Path.GetFullPath(Path.Combine("XmlTemplate", cbXmlTemplate.Text + ".xml"))
+        Dim rootpath As String = Assembly.GetEntryAssembly().Location
+        Dim dir = Directory.GetParent(Directory.GetParent(rootpath).ToString()).ToString() + "\XmlTemplate"
+        Dim filepath As String = Path.GetFullPath(Path.Combine(dir, cbXmlTemplate.Text + ".xml"))
         If IO.File.Exists(filepath) Then
             IO.File.Delete(filepath)
         End If
-        Dim dir = "XmlTemplate"
         Dim files As New List(Of String)
         For Each file As String In System.IO.Directory.GetFiles(dir)
             If IO.Path.GetExtension(file) = ".xml" Then
@@ -539,8 +546,9 @@ Public Class PanelFFCRGB
     End Sub
 
     Private Sub btnDefaultTemplate_Click(sender As Object, e As EventArgs) Handles btnDefaultTemplate.Click
-        Dim dir = ".\XmlTemplate"
-        Dim filepath As String = Path.GetFullPath(Path.Combine("XmlTemplate", "default.zip"))
+        Dim rootpath As String = Assembly.GetEntryAssembly().Location
+        Dim dir = Directory.GetParent(Directory.GetParent(rootpath).ToString()).ToString() + "\XmlTemplate"
+        Dim filepath As String = Path.GetFullPath(Path.Combine(dir, "default.zip"))
         Using archive As ZipArchive = ZipFile.OpenRead(filepath)
             For Each entry As ZipArchiveEntry In archive.Entries
                 If Not File.Exists(Path.Combine(dir, entry.FullName)) Then
@@ -551,8 +559,10 @@ Public Class PanelFFCRGB
     End Sub
 
     Private Sub cbXmlTemplate_DropDownClosed(sender As Object, e As EventArgs) Handles cbXmlTemplate.DropDownClosed
+        Dim rootpath As String = Assembly.GetEntryAssembly().Location
+        Dim dir = Directory.GetParent(Directory.GetParent(rootpath).ToString()).ToString() + "\XmlTemplate"
         Dim fileReader As String
-        Dim filePath As String = Path.GetFullPath(Path.Combine("XmlTemplate", cbXmlTemplate.Text + ".xml"))
+        Dim filePath As String = Path.GetFullPath(Path.Combine(dir, cbXmlTemplate.Text + ".xml"))
         If File.Exists(filePath) Then
             fileReader = My.Computer.FileSystem.ReadAllText(filePath)
             If fileReader <> "" Then
