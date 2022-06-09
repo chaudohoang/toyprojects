@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using SuperSimpleTcp;
 using System.Diagnostics;
 using System.IO;
+using System.Net.NetworkInformation;
 
 namespace TCPClient
 {
@@ -263,6 +264,18 @@ namespace TCPClient
                 foreach (var line in listOfLines)
                 {                                    
                     cbxIP.Items.Add(line);
+                }
+                foreach (NetworkInterface netInterface in NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    IPInterfaceProperties ipProps = netInterface.GetIPProperties();
+                    foreach (UnicastIPAddressInformation addr in ipProps.UnicastAddresses)
+                    {
+                        if (addr.Address.ToString().StartsWith("192.168"))
+                        {
+                            cbxIP.Items.Add(addr.Address.ToString());
+                        }
+                        
+                    }
                 }
             }
             catch (Exception)
