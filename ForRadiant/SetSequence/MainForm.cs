@@ -66,9 +66,9 @@ namespace SetSequence
             {
                 xmlDoc.Load(lblSequenceFileName.Text);
 
-                string subframeregion, lensdistance, colorcalID, imagescalingID, flatfieldID, cameraRotation;
+                string subframeregion, lensdistance,fnumber, colorcalID, imagescalingID, flatfieldID, cameraRotation;
 
-                subframeregion = lensdistance = colorcalID = imagescalingID = flatfieldID = cameraRotation = "";
+                subframeregion = lensdistance =fnumber= colorcalID = imagescalingID = flatfieldID = cameraRotation = "";
 
                 if (cbSubframe.Text == "Copy from first step")
                 {
@@ -130,6 +130,24 @@ namespace SetSequence
                     lensdistance = cbFocusDistance.Text;
                 }
 
+                if (cbFNumber.Text == "Copy from first step")
+                {
+                    node = xmlDoc.DocumentElement.SelectSingleNode("/Sequence/Items/SequenceItem/PatternSetupName");
+                    string firstPatternName = node.InnerText;
+                    nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup");
+                    for (int index = 0; index <= nodes.Count - 1; index++)
+                    {
+                        if (nodes[index].SelectSingleNode("Name").InnerText == firstPatternName)
+                        {
+                            fnumber = nodes[index].SelectSingleNode("LensfStop").InnerText;
+                        }
+                    }
+                }
+                else
+                {
+                    fnumber = cbFNumber.Text;
+                }
+
                 if (cbCameraRotation.Text == "Copy from first step")
                 {
                     node = xmlDoc.DocumentElement.SelectSingleNode("/Sequence/Items/SequenceItem/PatternSetupName");
@@ -155,7 +173,16 @@ namespace SetSequence
                     {
                         nodes[index].InnerText = lensdistance;
                     }
-                }            
+                }
+
+                nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/LensfStop");
+                for (int index = 0; index <= nodes.Count - 1; index++)
+                {
+                    if (fnumber != "")
+                    {
+                        nodes[index].InnerText = fnumber;
+                    }
+                }
 
                 nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/SubFrameRegion");
                 for (int index = 0; index <= nodes.Count - 1; index++)

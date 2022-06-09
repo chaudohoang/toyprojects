@@ -256,68 +256,11 @@ namespace EZAE
             }
         }
 
-        private void cmdCopyDISettings_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            switch (cbDIList.Text)
-            {
-                case "Dove2p0 CH1":
-                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI DoooneCH1.vbs"))
-                    {
-                        Process.Start(@"Tools\Installer\DISettings\CopyDI DoooneCH1.vbs");
-                    }
-                    break;
-                case "Dove2p0 CH2":
-                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI DoooneCH2.vbs"))
-                    {
-                        Process.Start(@"Tools\Installer\DISettings\CopyDI DoooneCH2.vbs");
-                    }
-                    break;
-                case "Dove2p0 CH3":
-                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI DoooneCH3.vbs"))
-                    {
-                        Process.Start(@"Tools\Installer\DISettings\CopyDI DoooneCH3.vbs");
-                    }
-                    break;
-                case "Dove2p0 CH4":
-                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI DoooneCH4.vbs"))
-                    {
-                        Process.Start(@"Tools\Installer\DISettings\CopyDI DoooneCH4.vbs");
-                    }
-                    break;
-                case "Emu2p0 CH1":
-                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI GooilCH1.vbs"))
-                    {
-                        Process.Start(@"Tools\Installer\DISettings\CopyDI GooilCH1.vbs");
-                    }
-                    break;
-                case "Emu2p0 CH2":
-                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI GooilCH2.vbs"))
-                    {
-                        Process.Start(@"Tools\Installer\DISettings\CopyDI GooilCH2.vbs");
-                    }
-                    break;
-                case "Emu2p0 CH3":
-                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI GooilCH3.vbs"))
-                    {
-                        Process.Start(@"Tools\Installer\DISettings\CopyDI GooilCH3.vbs");
-                    }
-                    break;
-                case "Emu2p0 CH4":
-                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI GooilCH4.vbs"))
-                    {
-                        Process.Start(@"Tools\Installer\DISettings\CopyDI GooilCH4.vbs");
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-
         private void cmdInstallIrfanview_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\Installer\iview457_x64_setup silent.bat"))
+            if (File.Exists(@"Tools\Installer\iview457_x64_setup.exe"))
             {
-                ExecuteAsAdmin(@"Tools\Installer\iview457_x64_setup silent.bat");
+                ExecuteAsAdmin(@"Tools\Installer\iview457_x64_setup.exe");
             }
         }
 
@@ -339,17 +282,17 @@ namespace EZAE
 
         private void cmdInstallKdiff_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat"))
+            if (File.Exists(@"Tools\Installer\KDiff3-64bit-Setup_0.9.98-2.exe"))
             {
-                ExecuteAsAdmin(@"Tools\Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat");
+                ExecuteAsAdmin(@"Tools\Installer\KDiff3-64bit-Setup_0.9.98-2.exe");
             }
         }
 
         private void cmdInstallNPP_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\Installer\npp.7.8.1.Installer.x64 silent.bat"))
+            if (File.Exists(@"Tools\Installer\npp.7.8.1.Installer.x64.exe"))
             {
-                ExecuteAsAdmin(@"Tools\Installer\npp.7.8.1.Installer.x64 silent.bat");
+                ExecuteAsAdmin(@"Tools\Installer\npp.7.8.1.Installer.x64.exe");
             }
         }
 
@@ -363,9 +306,9 @@ namespace EZAE
 
         private void cmdInstallMatlab_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\Installer\MCR_R2017b_win64_installer.exe"))
+            if (File.Exists(@"Tools\Installer\MATLAB_Runtime_R2021b_Update_2_win64\setup.exe"))
             {
-                ExecuteAsAdmin(@"Tools\Installer\MCR_R2017b_win64_installer.exe");
+                ExecuteAsAdmin(@"Tools\Installer\MATLAB_Runtime_R2021b_Update_2_win64\setup.exe");
             }
         }
 
@@ -401,15 +344,6 @@ namespace EZAE
             }
         }
 
-
-        private void cmdCreateOTPandResult_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            if (File.Exists(@"Tools\Installer\CopyOTP.vbs"))
-            {
-                Process.Start(@"Tools\Installer\CopyOTP.vbs");
-            }
-
-        }
 
         private void cmdSetTTPermission_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
@@ -555,11 +489,6 @@ namespace EZAE
                 ExecuteAsAdmin(@"Tools\ShareRadiantVisionSystemsData.bat");
             }
 
-            if (File.Exists(@"Tools\SharePOCB.bat"))
-            {
-                ExecuteAsAdmin(@"Tools\SharePOCB.bat");
-            }
-
             if ((cbTightVNCPath.Text == @"C:\Setup\Program") && File.Exists(@"Tools\Installer\tightvncCSetupProgram.exe"))
             {
                 ExecuteAsAdmin(@"Tools\Installer\tightvncCSetupProgram.exe");
@@ -602,19 +531,19 @@ namespace EZAE
                 ExecuteAsAdmin(@"Tools\Installer\Visual C++ 2015-2019\VC2015-2019_silent_install.bat");
             }
 
-            if (File.Exists(@"Tools\Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat"))
+            if (File.Exists(@"Tools\Installer\KDiff3-64bit-Setup_0.9.98-2.exe"))
             {
-                ExecuteAsAdmin(@"Tools\Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat");
+                ExecuteAsAdmin(@"Tools\Installer\KDiff3-64bit-Setup_0.9.98-2.exe");
             }
 
-            if (File.Exists(@"Tools\Installer\iview457_x64_setup silent.bat"))
+            if (File.Exists(@"Tools\Installer\iview457_x64_setup.exe"))
             {
-                ExecuteAsAdmin(@"Tools\Installer\iview457_x64_setup silent.bat");
+                ExecuteAsAdmin(@"Tools\Installer\iview457_x64_setup.exe");
             }
 
-            if (File.Exists(@"Tools\Installer\npp.7.8.1.Installer.x64 silent.bat"))
+            if (File.Exists(@"Tools\Installer\npp.7.8.1.Installer.x64.exe"))
             {
-                ExecuteAsAdmin(@"Tools\Installer\npp.7.8.1.Installer.x64 silent.bat");
+                ExecuteAsAdmin(@"Tools\Installer\npp.7.8.1.Installer.x64.exe");
             }
 
             if (File.Exists(@"Tools\Installer\ndp48-x86-x64-allos-enu.exe") && chkdotnetinstall.Checked)
@@ -622,14 +551,9 @@ namespace EZAE
                 ExecuteAsAdmin(@"Tools\Installer\ndp48-x86-x64-allos-enu.exe");
             }
 
-            if (File.Exists(@"Tools\Installer\MCR_R2017b_win64_installer.exe") && chkmatlabinstall.Checked)
+            if (File.Exists(@"Tools\Installer\MATLAB_Runtime_R2021b_Update_2_win64\setup.exe") && chkmatlabinstall.Checked)
             {
-                ExecuteAsAdmin(@"Tools\Installer\MCR_R2017b_win64_installer.exe");
-            }
-
-            if (File.Exists(@"Tools\Installer\MCR_R2018a_win64_installer.exe") && chkmatlab2018ainstall.Checked)
-            {
-                ExecuteAsAdmin(@"Tools\Installer\MCR_R2018a_win64_installer.exe");
+                ExecuteAsAdmin(@"Tools\Installer\MATLAB_Runtime_R2021b_Update_2_win64\setup.exe");
             }
 
             if (File.Exists(@"Tools\ImageJ\pinImageJtoTaskbar.bat"))
@@ -637,9 +561,14 @@ namespace EZAE
                 Process.Start(@"Tools\ImageJ\pinImageJtoTaskbar.bat");
             }
 
-            if (File.Exists(@"Tools\SetSequence\pinSetSequencetoTaskbar.bat"))
+            if (File.Exists(@"Tools\SetSequence\pinSetSequenceToTaskbar.bat"))
             {
-                Process.Start(@"Tools\SetSequence\pinSetSequencetoTaskbar.bat");
+                Process.Start(@"Tools\SetSequence\pinSetSequenceToTaskbar.bat");
+            }
+
+            if (File.Exists(@"Tools\SetSequence\pinSetSeqxToTaskbar.bat"))
+            {
+                Process.Start(@"Tools\SetSequence\pinSetSeqxToTaskbar.bat");
             }
 
             if (File.Exists(@"Tools\FFC_Database_Template\pinFFCDBGenerateToTaskbar.bat"))
@@ -733,91 +662,19 @@ namespace EZAE
                 ExecuteAsAdmin(@"Tools\Autostart_Fixture\Task_Create_KillProcess.bat");
             }
 
-            if (File.Exists(@"Tools\Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat"))
+            if (File.Exists(@"Tools\Installer\KDiff3-64bit-Setup_0.9.98-2.exe"))
             {
-                ExecuteAsAdmin(@"Tools\Installer\KDiff3-64bit-Setup_0.9.98-2 silent.bat");
+                ExecuteAsAdmin(@"Tools\Installer\KDiff3-64bit-Setup_0.9.98-2.exe");
             }
 
-            if (File.Exists(@"Tools\Installer\iview457_x64_setup silent.bat"))
+            if (File.Exists(@"Tools\Installer\iview457_x64_setup.exe"))
             {
-                ExecuteAsAdmin(@"Tools\Installer\iview457_x64_setup silent.bat");
+                ExecuteAsAdmin(@"Tools\Installer\iview457_x64_setup.exe");
             }
 
-            if (File.Exists(@"Tools\Installer\npp.7.8.1.Installer.x64 silent.bat"))
+            if (File.Exists(@"Tools\Installer\npp.7.8.1.Installer.x64.exe"))
             {
-                ExecuteAsAdmin(@"Tools\Installer\npp.7.8.1.Installer.x64 silent.bat");
-            }
-        }
-
-        private void cmdOneclickSetupTrueTestSettings_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            if (File.Exists(@"Tools\Installer\CopyOTP.vbs"))
-            {
-                Process.Start(@"Tools\Installer\CopyOTP.vbs");
-            }
-
-            if (File.Exists(@"Tools\Installer\CopySequence.vbs"))
-            {
-                Process.Start(@"Tools\Installer\CopySequence.vbs");
-            }
-
-            if (File.Exists(@"Tools\updatePermission.bat"))
-            {
-                ExecuteAsAdmin(@"Tools\updatePermission.bat");
-            }
-
-            switch (cbDIList.Text)
-            {
-                case "Dove2p0 CH1":
-                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI DoooneCH1.vbs"))
-                    {
-                        Process.Start(@"Tools\Installer\DISettings\CopyDI DoooneCH1.vbs");
-                    }
-                    break;
-                case "Dove2p0 CH2":
-                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI DoooneCH2.vbs"))
-                    {
-                        Process.Start(@"Tools\Installer\DISettings\CopyDI DoooneCH2.vbs");
-                    }
-                    break;
-                case "Dove2p0 CH3":
-                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI DoooneCH3.vbs"))
-                    {
-                        Process.Start(@"Tools\Installer\DISettings\CopyDI DoooneCH3.vbs");
-                    }
-                    break;
-                case "Dove2p0 CH4":
-                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI DoooneCH4.vbs"))
-                    {
-                        Process.Start(@"Tools\Installer\DISettings\CopyDI DoooneCH4.vbs");
-                    }
-                    break;
-                case "Emu2p0 CH1":
-                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI GooilCH1.vbs"))
-                    {
-                        Process.Start(@"Tools\Installer\DISettings\CopyDI GooilCH1.vbs");
-                    }
-                    break;
-                case "Emu2p0 CH2":
-                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI GooilCH2.vbs"))
-                    {
-                        Process.Start(@"Tools\Installer\DISettings\CopyDI GooilCH2.vbs");
-                    }
-                    break;
-                case "Emu2p0 CH3":
-                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI GooilCH3.vbs"))
-                    {
-                        Process.Start(@"Tools\Installer\DISettings\CopyDI GooilCH3.vbs");
-                    }
-                    break;
-                case "Emu2p0 CH4":
-                    if (File.Exists(@"Tools\Installer\DISettings\CopyDI GooilCH4.vbs"))
-                    {
-                        Process.Start(@"Tools\Installer\DISettings\CopyDI GooilCH4.vbs");
-                    }
-                    break;
-                default:
-                    break;
+                ExecuteAsAdmin(@"Tools\Installer\npp.7.8.1.Installer.x64.exe");
             }
         }
 
@@ -927,13 +784,6 @@ namespace EZAE
             }
         }
 
-        private void cmdCopySequence_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            if (File.Exists(@"Tools\Installer\CopySequence.vbs"))
-            {
-                Process.Start(@"Tools\Installer\CopySequence.vbs");
-            }
-        }
 
         private void cmdSetSequence_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
@@ -1028,12 +878,16 @@ namespace EZAE
                 Process.Start(@"Tools\SetSequence\pinSetSequencetoTaskbar.bat");
             }
 
+            if (File.Exists(@"Tools\SetSequence\pinSetSeqxToTaskbar.bat"))
+            {
+                Process.Start(@"Tools\SetSequence\pinSetSeqxToTaskbar.bat");
+            }
+
             if (File.Exists(@"Tools\FFC_Database_Template\pinFFCDBGenerateToTaskbar.bat"))
             {
                 Process.Start(@"Tools\FFC_Database_Template\pinFFCDBGenerateToTaskbar.bat");
             }
         }
 
-
-    }
+	}
 }
