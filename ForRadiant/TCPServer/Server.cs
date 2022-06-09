@@ -176,12 +176,18 @@ namespace TCPServer
         {
             try
             {
-                server1 = new SimpleTcpServer($"{cbxIP1.Text}:9000");
+                string ip;
+                if (cbxIP1.Text.Contains(","))
+                {
+                    ip = cbxIP1.Text.Split(',')[1];
+                }
+                else ip = cbxIP1.Text;
+                server1 = new SimpleTcpServer($"{ip}:9000");
                 server1.Events.ClientConnected += Events_ClientConnected1;
                 server1.Events.ClientDisconnected += Events_ClientDisconnected1;
                 server1.Events.DataReceived += Events_DataReceived1;
                 server1.Start();
-                txtLog1.Text += $"Listening...{Environment.NewLine}";
+                txtLog1.Text += $"Listening on {ip}...{Environment.NewLine}";
                 btnStart1.Enabled = false;
                 btnStop1.Enabled = true;
             }
@@ -195,12 +201,18 @@ namespace TCPServer
         {
             try
             {
-                server2 = new SimpleTcpServer($"{cbxIP2.Text}:9000");
+                string ip;
+                if (cbxIP2.Text.Contains(","))
+                {
+                    ip = cbxIP2.Text.Split(',')[1];
+                }
+                else ip = cbxIP2.Text;
+                server2 = new SimpleTcpServer($"{ip}:9000");
                 server2.Events.ClientConnected += Events_ClientConnected2;
                 server2.Events.ClientDisconnected += Events_ClientDisconnected2;
                 server2.Events.DataReceived += Events_DataReceived2;
                 server2.Start();
-                txtLog2.Text += $"Listening...{Environment.NewLine}";
+                txtLog2.Text += $"Listening on {ip}...{Environment.NewLine}";
                 btnStart2.Enabled = false;
                 btnStop2.Enabled = true;
             }
@@ -214,12 +226,18 @@ namespace TCPServer
         {
             try
             {
-                server3 = new SimpleTcpServer($"{cbxIP3.Text}:9000");
+                string ip;
+                if (cbxIP3.Text.Contains(","))
+                {
+                    ip = cbxIP3.Text.Split(',')[1];
+                }
+                else ip = cbxIP3.Text;
+                server3 = new SimpleTcpServer($"{ip}:9000");
                 server3.Events.ClientConnected += Events_ClientConnected3;
                 server3.Events.ClientDisconnected += Events_ClientDisconnected3;
                 server3.Events.DataReceived += Events_DataReceived3;
                 server3.Start();
-                txtLog3.Text += $"Listening...{Environment.NewLine}";
+                txtLog3.Text += $"Listening on {ip}...{Environment.NewLine}";
                 btnStart3.Enabled = false;
                 btnStop3.Enabled = true;
             }
@@ -233,12 +251,18 @@ namespace TCPServer
         {
             try
             {
-                server4 = new SimpleTcpServer($"{cbxIP4.Text}:9000");
+                string ip;
+                if (cbxIP4.Text.Contains(","))
+                {
+                    ip = cbxIP4.Text.Split(',')[1];
+                }
+                else ip = cbxIP4.Text;
+                server4 = new SimpleTcpServer($"{ip}:9000");
                 server4.Events.ClientConnected += Events_ClientConnected4;
                 server4.Events.ClientDisconnected += Events_ClientDisconnected4;
                 server4.Events.DataReceived += Events_DataReceived4;
                 server4.Start();
-                txtLog4.Text += $"Listening...{Environment.NewLine}";
+                txtLog4.Text += $"Listening on {ip}...{Environment.NewLine}";
                 btnStart4.Enabled = false;
                 btnStop4.Enabled = true;
             }
@@ -252,12 +276,18 @@ namespace TCPServer
         {
             try
             {
-                server5 = new SimpleTcpServer($"{cbxIP5.Text}:9000");
+                string ip;
+                if (cbxIP5.Text.Contains(","))
+                {
+                    ip = cbxIP5.Text.Split(',')[1];
+                }
+                else ip = cbxIP5.Text;
+                server5 = new SimpleTcpServer($"{ip}:9000");
                 server5.Events.ClientConnected += Events_ClientConnected5;
                 server5.Events.ClientDisconnected += Events_ClientDisconnected5;
                 server5.Events.DataReceived += Events_DataReceived5;
                 server5.Start();
-                txtLog5.Text += $"Listening...{Environment.NewLine}";
+                txtLog5.Text += $"Listening on {ip}...{Environment.NewLine}";
                 btnStart5.Enabled = false;
                 btnStop5.Enabled = true;
             }
@@ -710,16 +740,262 @@ namespace TCPServer
             txtLog6.ScrollToCaret();
         }
 
-        private void btnStart6_Click(object sender, EventArgs e)
+		private void cbxIP1_DropDown(object sender, EventArgs e)
+		{
+            try
+            {
+                string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                string appdir = Path.GetDirectoryName(apppath);
+                string messagelist = Path.Combine(appdir, "serverlist.csv");
+                var listOfLines = File.ReadAllLines(messagelist)
+                          .Where(x => !string.IsNullOrWhiteSpace(x));
+                cbxIP1.Items.Clear();
+                cbxIP1.Items.Add("192.168.0.100");
+                cbxIP1.Items.Add("192.168.1.1");
+                cbxIP1.Items.Add("192.168.2.2");
+                cbxIP1.Items.Add("192.168.3.3");
+                cbxIP1.Items.Add("192.168.4.4");
+                cbxIP1.Items.Add("127.0.0.1");
+                foreach (NetworkInterface netInterface in NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    IPInterfaceProperties ipProps = netInterface.GetIPProperties();
+                    foreach (UnicastIPAddressInformation addr in ipProps.UnicastAddresses)
+                    {
+                        if (addr.Address.ToString().StartsWith("192.168"))
+                        {
+                            cbxIP1.Items.Add(addr.Address.ToString());
+                        }
+
+                    }
+                }
+                foreach (var line in listOfLines)
+                {
+                    cbxIP1.Items.Add(line);
+                }
+
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+		private void cbxIP2_DropDown(object sender, EventArgs e)
+		{
+            try
+            {
+                string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                string appdir = Path.GetDirectoryName(apppath);
+                string messagelist = Path.Combine(appdir, "serverlist.csv");
+                var listOfLines = File.ReadAllLines(messagelist)
+                          .Where(x => !string.IsNullOrWhiteSpace(x));
+                cbxIP2.Items.Clear();
+                cbxIP2.Items.Add("192.168.0.100");
+                cbxIP2.Items.Add("192.168.1.1");
+                cbxIP2.Items.Add("192.168.2.2");
+                cbxIP2.Items.Add("192.168.3.3");
+                cbxIP2.Items.Add("192.168.4.4");
+                cbxIP2.Items.Add("127.0.0.1");
+                foreach (NetworkInterface netInterface in NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    IPInterfaceProperties ipProps = netInterface.GetIPProperties();
+                    foreach (UnicastIPAddressInformation addr in ipProps.UnicastAddresses)
+                    {
+                        if (addr.Address.ToString().StartsWith("192.168"))
+                        {
+                            cbxIP2.Items.Add(addr.Address.ToString());
+                        }
+
+                    }
+                }
+                foreach (var line in listOfLines)
+                {
+                    cbxIP2.Items.Add(line);
+                }
+
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+		private void cbxIP3_DropDown(object sender, EventArgs e)
+		{
+            try
+            {
+                string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                string appdir = Path.GetDirectoryName(apppath);
+                string messagelist = Path.Combine(appdir, "serverlist.csv");
+                var listOfLines = File.ReadAllLines(messagelist)
+                          .Where(x => !string.IsNullOrWhiteSpace(x));
+                cbxIP3.Items.Clear();
+                cbxIP3.Items.Add("192.168.0.100");
+                cbxIP3.Items.Add("192.168.1.1");
+                cbxIP3.Items.Add("192.168.2.2");
+                cbxIP3.Items.Add("192.168.3.3");
+                cbxIP3.Items.Add("192.168.4.4");
+                cbxIP3.Items.Add("127.0.0.1");
+                foreach (NetworkInterface netInterface in NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    IPInterfaceProperties ipProps = netInterface.GetIPProperties();
+                    foreach (UnicastIPAddressInformation addr in ipProps.UnicastAddresses)
+                    {
+                        if (addr.Address.ToString().StartsWith("192.168"))
+                        {
+                            cbxIP3.Items.Add(addr.Address.ToString());
+                        }
+
+                    }
+                }
+                foreach (var line in listOfLines)
+                {
+                    cbxIP3.Items.Add(line);
+                }
+
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+		private void cbxIP4_DropDown(object sender, EventArgs e)
+		{
+            try
+            {
+                string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                string appdir = Path.GetDirectoryName(apppath);
+                string messagelist = Path.Combine(appdir, "serverlist.csv");
+                var listOfLines = File.ReadAllLines(messagelist)
+                          .Where(x => !string.IsNullOrWhiteSpace(x));
+                cbxIP4.Items.Clear();
+                cbxIP4.Items.Add("192.168.0.100");
+                cbxIP4.Items.Add("192.168.1.1");
+                cbxIP4.Items.Add("192.168.2.2");
+                cbxIP4.Items.Add("192.168.3.3");
+                cbxIP4.Items.Add("192.168.4.4");
+                cbxIP4.Items.Add("127.0.0.1");
+                foreach (NetworkInterface netInterface in NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    IPInterfaceProperties ipProps = netInterface.GetIPProperties();
+                    foreach (UnicastIPAddressInformation addr in ipProps.UnicastAddresses)
+                    {
+                        if (addr.Address.ToString().StartsWith("192.168"))
+                        {
+                            cbxIP4.Items.Add(addr.Address.ToString());
+                        }
+
+                    }
+                }
+                foreach (var line in listOfLines)
+                {
+                    cbxIP4.Items.Add(line);
+                }
+
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+		private void cbxIP5_DropDown(object sender, EventArgs e)
+		{
+            try
+            {
+                string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                string appdir = Path.GetDirectoryName(apppath);
+                string messagelist = Path.Combine(appdir, "serverlist.csv");
+                var listOfLines = File.ReadAllLines(messagelist)
+                          .Where(x => !string.IsNullOrWhiteSpace(x));
+                cbxIP5.Items.Clear();
+                cbxIP5.Items.Add("192.168.0.100");
+                cbxIP5.Items.Add("192.168.1.1");
+                cbxIP5.Items.Add("192.168.2.2");
+                cbxIP5.Items.Add("192.168.3.3");
+                cbxIP5.Items.Add("192.168.4.4");
+                cbxIP5.Items.Add("127.0.0.1");
+                foreach (NetworkInterface netInterface in NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    IPInterfaceProperties ipProps = netInterface.GetIPProperties();
+                    foreach (UnicastIPAddressInformation addr in ipProps.UnicastAddresses)
+                    {
+                        if (addr.Address.ToString().StartsWith("192.168"))
+                        {
+                            cbxIP5.Items.Add(addr.Address.ToString());
+                        }
+
+                    }
+                }
+                foreach (var line in listOfLines)
+                {
+                    cbxIP5.Items.Add(line);
+                }
+
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+		private void cbxIP6_DropDown(object sender, EventArgs e)
+		{
+            try
+            {
+                string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                string appdir = Path.GetDirectoryName(apppath);
+                string messagelist = Path.Combine(appdir, "serverlist.csv");
+                var listOfLines = File.ReadAllLines(messagelist)
+                          .Where(x => !string.IsNullOrWhiteSpace(x));
+                cbxIP6.Items.Clear();
+                cbxIP6.Items.Add("192.168.0.100");
+                cbxIP6.Items.Add("192.168.1.1");
+                cbxIP6.Items.Add("192.168.2.2");
+                cbxIP6.Items.Add("192.168.3.3");
+                cbxIP6.Items.Add("192.168.4.4");
+                cbxIP6.Items.Add("127.0.0.1");
+                foreach (NetworkInterface netInterface in NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    IPInterfaceProperties ipProps = netInterface.GetIPProperties();
+                    foreach (UnicastIPAddressInformation addr in ipProps.UnicastAddresses)
+                    {
+                        if (addr.Address.ToString().StartsWith("192.168"))
+                        {
+                            cbxIP6.Items.Add(addr.Address.ToString());
+                        }
+
+                    }
+                }
+                foreach (var line in listOfLines)
+                {
+                    cbxIP6.Items.Add(line);
+                }
+
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+		private void btnStart6_Click(object sender, EventArgs e)
         {
             try
             {
-                server6 = new SimpleTcpServer($"{cbxIP6.Text}:9000");
+                string ip;
+                if (cbxIP6.Text.Contains(","))
+                {
+                    ip = cbxIP6.Text.Split(',')[1];
+                }
+                else ip = cbxIP6.Text;
+                server6 = new SimpleTcpServer($"{ip}:9000");
                 server6.Events.ClientConnected += Events_ClientConnected6;
                 server6.Events.ClientDisconnected += Events_ClientDisconnected6;
                 server6.Events.DataReceived += Events_DataReceived6;
                 server6.Start();
-                txtLog6.Text += $"Listening...{Environment.NewLine}";
+                txtLog6.Text += $"Listening on {ip}...{Environment.NewLine}";
                 btnStart6.Enabled = false;
                 btnStop6.Enabled = true;
             }

@@ -261,10 +261,6 @@ namespace TCPClient
                 cbxIP.Items.Add("192.168.3.3");
                 cbxIP.Items.Add("192.168.4.4");
                 cbxIP.Items.Add("127.0.0.1");
-                foreach (var line in listOfLines)
-                {                                    
-                    cbxIP.Items.Add(line);
-                }
                 foreach (NetworkInterface netInterface in NetworkInterface.GetAllNetworkInterfaces())
                 {
                     IPInterfaceProperties ipProps = netInterface.GetIPProperties();
@@ -274,9 +270,14 @@ namespace TCPClient
                         {
                             cbxIP.Items.Add(addr.Address.ToString());
                         }
-                        
+
                     }
                 }
+                foreach (var line in listOfLines)
+                {                                    
+                    cbxIP.Items.Add(line);
+                }
+                
             }
             catch (Exception)
             {
