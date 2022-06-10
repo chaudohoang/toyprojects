@@ -493,6 +493,7 @@ namespace TCPServer
                 string settings = Path.Combine(appdir, "settings.txt");
                 var listOfLines = File.ReadAllLines(settings)
                           .Where(x => !string.IsNullOrWhiteSpace(x));
+                bool listened = false;
                 foreach (NetworkInterface netInterface in NetworkInterface.GetAllNetworkInterfaces())
                 {
                     IPInterfaceProperties ipProps = netInterface.GetIPProperties();
@@ -502,18 +503,28 @@ namespace TCPServer
                         {
                             cbxIP6.Text = addr.Address.ToString();
                             btnStart6_Click(this, new EventArgs());
+                            listened = true;
+                            break;
                         }
                         else if (addr.Address.ToString().StartsWith("10.121"))
                         {
                             cbxIP6.Text = addr.Address.ToString();
                             btnStart6_Click(this, new EventArgs());
+                            listened = true;
+                            break;
                         }
                         else if (addr.Address.ToString().StartsWith("192.168"))
                         {
                             cbxIP6.Text = addr.Address.ToString();
                             btnStart6_Click(this, new EventArgs());
+                            listened = true;
+                            break;
                         }
                     }
+					if (listened)
+					{
+                        break;
+					}
                 }
                 foreach (var line in listOfLines)
                 {
