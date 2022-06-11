@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using Shell32;
 
 namespace StartProcess
 {
-    class Program
+	class Program
     {
+        [STAThread]
         static void Main(string[] args)
         {
             string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
@@ -20,7 +19,14 @@ namespace StartProcess
             List<string> startlist = GetFilesRecursive(startlistdir);
             foreach (string item in startlist)
             {
-                string item2 = Path.GetFileName(item).Replace(".exe", "");
+                string item2;
+				if (Path.GetExtension(item)==".lnk")
+				{
+                    item2 = GetShortcutTargetFile(item).Replace(".exe","");
+
+                }
+                else item2 = Path.GetFileName(item).Replace(".exe", "");
+
                 Process[] processes = Process.GetProcessesByName(item2);
                 if (processes.Length < 1)
                 {
@@ -65,10 +71,38 @@ namespace StartProcess
                 catch (Exception ex)
                 {
                 }
+                try
+                {
+                    // Add all immediate file paths
+                    result.AddRange(Directory.GetFiles(dir, "*.lnk"));
+                    foreach (var directoryName in Directory.GetDirectories(dir))
+                        stack.Push(directoryName);
+                }
+                catch (Exception ex)
+                {
+                }
             }
 
             // Return the list
             return result;
         }
+
+        public static string GetShortcutTargetFile(string shortcutFilename)
+        {
+            string pathOnly = System.IO.Path.GetDirectoryName(shortcutFilename);
+            string filenameOnly = System.IO.Path.GetFileName(shortcutFilename);
+
+            Shell shell = new Shell();
+            Folder folder = shell.NameSpace(pathOnly);
+            FolderItem folderItem = folder.ParseName(filenameOnly);
+            if (folderItem != null)
+            {
+                Shell32.ShellLinkObject link = (Shell32.ShellLinkObject)folderItem.GetLink;
+                return link.Path;
+            }
+
+            return string.Empty;
+        }
+
     }
 }
