@@ -188,6 +188,7 @@ namespace OneTimeRunner
             Process process = new Process();
             process.StartInfo.FileName = inputfile;
             var tryrun = Int32.Parse(comRetryCount.Text);
+
             while (true)
             {
                 try

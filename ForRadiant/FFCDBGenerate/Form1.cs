@@ -46,9 +46,25 @@ namespace FFCDBGenerate
                 {
                     System.IO.Directory.CreateDirectory(output);
                 }
-                for (int i = 1; i <= 5; i++)
-                {
-                    string dbfilename = station + "-" + channel + "-" + i+ ".ttxm";
+                List<string> panelNumberList = new List<string>(cbxPanelNumberList.Text.Split(','));
+                //for (int i = 1; i <= 5; i++)
+                //{
+                //    string dbfilename = station + "-" + channel + "-" + i+ ".ttxm";
+                //    try
+                //    {
+                //        System.IO.File.Copy(@"template.ttxm", System.IO.Path.Combine(output, dbfilename));
+                //    }
+                //    catch (Exception ex)
+                //    {
+
+                //        MessageBox.Show(ex.Message);
+                //    }
+                    
+                //}
+
+				foreach (string item in panelNumberList)
+				{
+                    string dbfilename = station + "-" + channel + "-" + item + ".ttxm";
                     try
                     {
                         System.IO.File.Copy(@"template.ttxm", System.IO.Path.Combine(output, dbfilename));
@@ -58,8 +74,8 @@ namespace FFCDBGenerate
 
                         MessageBox.Show(ex.Message);
                     }
-                    
                 }
+
                 if (System.IO.Directory.Exists(output) && openoutput)
                 {
                     System.Diagnostics.Process.Start(output);
@@ -76,5 +92,30 @@ namespace FFCDBGenerate
         {
             SetVersionInfo();
         }
-    }
+
+
+
+		private void cbxNoOfPanels_SelectedIndexChanged(object sender, EventArgs e)
+		{
+          
+            try
+			{
+                int numberOfPanels;
+                numberOfPanels = int.Parse(cbxNoOfPanels.Text);
+                string panelNumberList = "";
+                for (int i = 1; i < numberOfPanels + 1; i++)
+                {
+                    panelNumberList += i + ",";
+
+                }
+                panelNumberList = panelNumberList.Remove(panelNumberList.Length - 1);
+                cbxPanelNumberList.Text = panelNumberList;
+            }
+			catch (Exception ex)
+			{
+                MessageBox.Show(ex.Message);
+			}
+                  
+        }
+	}
 }

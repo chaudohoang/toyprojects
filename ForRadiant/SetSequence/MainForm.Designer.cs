@@ -53,7 +53,7 @@
 			this.cmdBrowseSequence.Location = new System.Drawing.Point(155, 9);
 			this.cmdBrowseSequence.Name = "cmdBrowseSequence";
 			this.cmdBrowseSequence.Size = new System.Drawing.Size(92, 13);
-			this.cmdBrowseSequence.TabIndex = 66;
+			this.cmdBrowseSequence.TabIndex = 2;
 			this.cmdBrowseSequence.TabStop = true;
 			this.cmdBrowseSequence.Text = "Browse sequence";
 			this.cmdBrowseSequence.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdBrowseSequence_LinkClicked);
@@ -73,7 +73,7 @@
 			this.cmdUseLastModifiedSequence.Location = new System.Drawing.Point(12, 9);
 			this.cmdUseLastModifiedSequence.Name = "cmdUseLastModifiedSequence";
 			this.cmdUseLastModifiedSequence.Size = new System.Drawing.Size(137, 13);
-			this.cmdUseLastModifiedSequence.TabIndex = 65;
+			this.cmdUseLastModifiedSequence.TabIndex = 1;
 			this.cmdUseLastModifiedSequence.TabStop = true;
 			this.cmdUseLastModifiedSequence.Text = "Use last modified sequence";
 			this.cmdUseLastModifiedSequence.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdUseLastModifiedSequence_LinkClicked);
@@ -91,7 +91,7 @@
 			this.cbCameraRotation.Location = new System.Drawing.Point(99, 132);
 			this.cbCameraRotation.Name = "cbCameraRotation";
 			this.cbCameraRotation.Size = new System.Drawing.Size(148, 21);
-			this.cbCameraRotation.TabIndex = 69;
+			this.cbCameraRotation.TabIndex = 6;
 			this.cbCameraRotation.Text = "Copy from first step";
 			// 
 			// btnApply
@@ -99,7 +99,7 @@
 			this.btnApply.Location = new System.Drawing.Point(253, 51);
 			this.btnApply.Name = "btnApply";
 			this.btnApply.Size = new System.Drawing.Size(91, 129);
-			this.btnApply.TabIndex = 71;
+			this.btnApply.TabIndex = 8;
 			this.btnApply.Text = "Apply";
 			this.btnApply.UseVisualStyleBackColor = true;
 			this.btnApply.Click += new System.EventHandler(this.btnApply_Click);
@@ -139,7 +139,7 @@
 			this.cbFocusDistance.Location = new System.Drawing.Point(99, 78);
 			this.cbFocusDistance.Name = "cbFocusDistance";
 			this.cbFocusDistance.Size = new System.Drawing.Size(148, 21);
-			this.cbFocusDistance.TabIndex = 68;
+			this.cbFocusDistance.TabIndex = 4;
 			this.cbFocusDistance.Text = "Copy from first step";
 			// 
 			// cbSubframe
@@ -154,7 +154,7 @@
 			this.cbSubframe.Location = new System.Drawing.Point(99, 51);
 			this.cbSubframe.Name = "cbSubframe";
 			this.cbSubframe.Size = new System.Drawing.Size(148, 21);
-			this.cbSubframe.TabIndex = 67;
+			this.cbSubframe.TabIndex = 3;
 			this.cbSubframe.Text = "Copy from first step";
 			// 
 			// lblCalibrationIDs
@@ -185,7 +185,7 @@
 			this.cbCalBox.Location = new System.Drawing.Point(99, 159);
 			this.cbCalBox.Name = "cbCalBox";
 			this.cbCalBox.Size = new System.Drawing.Size(148, 21);
-			this.cbCalBox.TabIndex = 70;
+			this.cbCalBox.TabIndex = 7;
 			this.cbCalBox.Text = "Copy from first step";
 			// 
 			// label1
@@ -207,7 +207,7 @@
 			this.cbFNumber.Location = new System.Drawing.Point(99, 105);
 			this.cbFNumber.Name = "cbFNumber";
 			this.cbFNumber.Size = new System.Drawing.Size(148, 21);
-			this.cbFNumber.TabIndex = 74;
+			this.cbFNumber.TabIndex = 5;
 			this.cbFNumber.Text = "Copy from first step";
 			// 
 			// lblFNumber
