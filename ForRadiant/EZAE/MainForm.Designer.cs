@@ -48,13 +48,15 @@ namespace EZAE
 			this.cmdOpenImageJ = new System.Windows.Forms.LinkLabel();
 			this.cmdOpenEngineerMode = new System.Windows.Forms.LinkLabel();
 			this.tabSetupPC = new System.Windows.Forms.TabPage();
+			this.chkmatlabinstall = new System.Windows.Forms.CheckBox();
+			this.cmdInstallMatlab = new System.Windows.Forms.LinkLabel();
 			this.cmdPinRegularApps = new System.Windows.Forms.LinkLabel();
 			this.cmdAutostartTaskFixture = new System.Windows.Forms.LinkLabel();
 			this.cmdAutostartTaskCamera = new System.Windows.Forms.LinkLabel();
 			this.cbCopyWhizItem = new System.Windows.Forms.ComboBox();
 			this.cmdRunCopyWhiz = new System.Windows.Forms.LinkLabel();
 			this.cmdChangePW1 = new System.Windows.Forms.LinkLabel();
-			this.chkmatlabinstall = new System.Windows.Forms.CheckBox();
+			this.chkmatlabinstall2017b = new System.Windows.Forms.CheckBox();
 			this.chkdotnetinstall = new System.Windows.Forms.CheckBox();
 			this.cbProgramFolder = new System.Windows.Forms.ComboBox();
 			this.cmdShareProgram = new System.Windows.Forms.LinkLabel();
@@ -71,7 +73,7 @@ namespace EZAE
 			this.cmdShareE = new System.Windows.Forms.LinkLabel();
 			this.cmdShareD = new System.Windows.Forms.LinkLabel();
 			this.cmdShareC = new System.Windows.Forms.LinkLabel();
-			this.cmdInstallMatlab = new System.Windows.Forms.LinkLabel();
+			this.cmdInstallMatlab2017b = new System.Windows.Forms.LinkLabel();
 			this.cmdInstallDotnet48 = new System.Windows.Forms.LinkLabel();
 			this.cmdInstallNPP = new System.Windows.Forms.LinkLabel();
 			this.cmdInstallKdiff = new System.Windows.Forms.LinkLabel();
@@ -304,13 +306,15 @@ namespace EZAE
 			// 
 			// tabSetupPC
 			// 
+			this.tabSetupPC.Controls.Add(this.chkmatlabinstall);
+			this.tabSetupPC.Controls.Add(this.cmdInstallMatlab);
 			this.tabSetupPC.Controls.Add(this.cmdPinRegularApps);
 			this.tabSetupPC.Controls.Add(this.cmdAutostartTaskFixture);
 			this.tabSetupPC.Controls.Add(this.cmdAutostartTaskCamera);
 			this.tabSetupPC.Controls.Add(this.cbCopyWhizItem);
 			this.tabSetupPC.Controls.Add(this.cmdRunCopyWhiz);
 			this.tabSetupPC.Controls.Add(this.cmdChangePW1);
-			this.tabSetupPC.Controls.Add(this.chkmatlabinstall);
+			this.tabSetupPC.Controls.Add(this.chkmatlabinstall2017b);
 			this.tabSetupPC.Controls.Add(this.chkdotnetinstall);
 			this.tabSetupPC.Controls.Add(this.cbProgramFolder);
 			this.tabSetupPC.Controls.Add(this.cmdShareProgram);
@@ -327,7 +331,7 @@ namespace EZAE
 			this.tabSetupPC.Controls.Add(this.cmdShareE);
 			this.tabSetupPC.Controls.Add(this.cmdShareD);
 			this.tabSetupPC.Controls.Add(this.cmdShareC);
-			this.tabSetupPC.Controls.Add(this.cmdInstallMatlab);
+			this.tabSetupPC.Controls.Add(this.cmdInstallMatlab2017b);
 			this.tabSetupPC.Controls.Add(this.cmdInstallDotnet48);
 			this.tabSetupPC.Controls.Add(this.cmdInstallNPP);
 			this.tabSetupPC.Controls.Add(this.cmdInstallKdiff);
@@ -346,6 +350,26 @@ namespace EZAE
 			this.tabSetupPC.Text = "Setup PC";
 			this.tabSetupPC.UseVisualStyleBackColor = true;
 			this.tabSetupPC.Enter += new System.EventHandler(this.tabSetupPC_Enter);
+			// 
+			// chkmatlabinstall
+			// 
+			this.chkmatlabinstall.AutoSize = true;
+			this.chkmatlabinstall.Location = new System.Drawing.Point(325, 83);
+			this.chkmatlabinstall.Name = "chkmatlabinstall";
+			this.chkmatlabinstall.Size = new System.Drawing.Size(15, 14);
+			this.chkmatlabinstall.TabIndex = 54;
+			this.chkmatlabinstall.UseVisualStyleBackColor = true;
+			// 
+			// cmdInstallMatlab
+			// 
+			this.cmdInstallMatlab.AutoSize = true;
+			this.cmdInstallMatlab.Location = new System.Drawing.Point(175, 83);
+			this.cmdInstallMatlab.Name = "cmdInstallMatlab";
+			this.cmdInstallMatlab.Size = new System.Drawing.Size(144, 13);
+			this.cmdInstallMatlab.TabIndex = 53;
+			this.cmdInstallMatlab.TabStop = true;
+			this.cmdInstallMatlab.Text = "Install Matlab Runtime 2021b";
+			this.cmdInstallMatlab.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdInstallMatlab_LinkClicked);
 			// 
 			// cmdPinRegularApps
 			// 
@@ -411,19 +435,19 @@ namespace EZAE
 			this.cmdChangePW1.Text = "Change password to 1";
 			this.cmdChangePW1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdChangePW1_LinkClicked);
 			// 
-			// chkmatlabinstall
+			// chkmatlabinstall2017b
 			// 
-			this.chkmatlabinstall.AutoSize = true;
-			this.chkmatlabinstall.Location = new System.Drawing.Point(152, 84);
-			this.chkmatlabinstall.Name = "chkmatlabinstall";
-			this.chkmatlabinstall.Size = new System.Drawing.Size(15, 14);
-			this.chkmatlabinstall.TabIndex = 33;
-			this.chkmatlabinstall.UseVisualStyleBackColor = true;
+			this.chkmatlabinstall2017b.AutoSize = true;
+			this.chkmatlabinstall2017b.Location = new System.Drawing.Point(154, 84);
+			this.chkmatlabinstall2017b.Name = "chkmatlabinstall2017b";
+			this.chkmatlabinstall2017b.Size = new System.Drawing.Size(15, 14);
+			this.chkmatlabinstall2017b.TabIndex = 33;
+			this.chkmatlabinstall2017b.UseVisualStyleBackColor = true;
 			// 
 			// chkdotnetinstall
 			// 
 			this.chkdotnetinstall.AutoSize = true;
-			this.chkdotnetinstall.Location = new System.Drawing.Point(266, 84);
+			this.chkdotnetinstall.Location = new System.Drawing.Point(439, 83);
 			this.chkdotnetinstall.Name = "chkdotnetinstall";
 			this.chkdotnetinstall.Size = new System.Drawing.Size(15, 14);
 			this.chkdotnetinstall.TabIndex = 31;
@@ -599,21 +623,21 @@ namespace EZAE
 			this.cmdShareC.Text = "Share C";
 			this.cmdShareC.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdShareC_LinkClicked);
 			// 
-			// cmdInstallMatlab
+			// cmdInstallMatlab2017b
 			// 
-			this.cmdInstallMatlab.AutoSize = true;
-			this.cmdInstallMatlab.Location = new System.Drawing.Point(8, 84);
-			this.cmdInstallMatlab.Name = "cmdInstallMatlab";
-			this.cmdInstallMatlab.Size = new System.Drawing.Size(144, 13);
-			this.cmdInstallMatlab.TabIndex = 32;
-			this.cmdInstallMatlab.TabStop = true;
-			this.cmdInstallMatlab.Text = "Install Matlab Runtime 2021b";
-			this.cmdInstallMatlab.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdInstallMatlab_LinkClicked);
+			this.cmdInstallMatlab2017b.AutoSize = true;
+			this.cmdInstallMatlab2017b.Location = new System.Drawing.Point(3, 84);
+			this.cmdInstallMatlab2017b.Name = "cmdInstallMatlab2017b";
+			this.cmdInstallMatlab2017b.Size = new System.Drawing.Size(144, 13);
+			this.cmdInstallMatlab2017b.TabIndex = 32;
+			this.cmdInstallMatlab2017b.TabStop = true;
+			this.cmdInstallMatlab2017b.Text = "Install Matlab Runtime 2017b";
+			this.cmdInstallMatlab2017b.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdInstallMatlab2017b_LinkClicked);
 			// 
 			// cmdInstallDotnet48
 			// 
 			this.cmdInstallDotnet48.AutoSize = true;
-			this.cmdInstallDotnet48.Location = new System.Drawing.Point(173, 84);
+			this.cmdInstallDotnet48.Location = new System.Drawing.Point(346, 83);
 			this.cmdInstallDotnet48.Name = "cmdInstallDotnet48";
 			this.cmdInstallDotnet48.Size = new System.Drawing.Size(87, 13);
 			this.cmdInstallDotnet48.TabIndex = 30;
@@ -904,7 +928,7 @@ namespace EZAE
         private System.Windows.Forms.LinkLabel cmdInstallKdiff;
         private System.Windows.Forms.LinkLabel cmdInstallNPP;
         private System.Windows.Forms.LinkLabel cmdInstallDotnet48;
-        private System.Windows.Forms.LinkLabel cmdInstallMatlab;
+        private System.Windows.Forms.LinkLabel cmdInstallMatlab2017b;
         private System.Windows.Forms.LinkLabel cmdShareC;
         private System.Windows.Forms.LinkLabel cmdShareD;
         private System.Windows.Forms.LinkLabel cmdShareE;
@@ -925,7 +949,7 @@ namespace EZAE
         private System.Windows.Forms.LinkLabel cmdOpenEngineerMode;
         private System.Windows.Forms.LinkLabel cmdInstallTrueTest;
         private System.Windows.Forms.ComboBox cbTrueTestInstallerList;
-        private System.Windows.Forms.CheckBox chkmatlabinstall;
+        private System.Windows.Forms.CheckBox chkmatlabinstall2017b;
         private System.Windows.Forms.CheckBox chkdotnetinstall;
         private System.Windows.Forms.LinkLabel cmdChangePW1;
         private System.Windows.Forms.LinkLabel cmdSharePOCB;
@@ -942,6 +966,8 @@ namespace EZAE
         private System.Windows.Forms.LinkLabel cmdRemoteTools;
         private System.Windows.Forms.LinkLabel cmdPinRegularApps;
 		private System.ComponentModel.BackgroundWorker backgroundWorker1;
+		private System.Windows.Forms.CheckBox chkmatlabinstall;
+		private System.Windows.Forms.LinkLabel cmdInstallMatlab;
 	}
 }
 

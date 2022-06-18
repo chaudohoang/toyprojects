@@ -304,15 +304,8 @@ namespace EZAE
             }
         }
 
-        private void cmdInstallMatlab_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            if (File.Exists(@"Tools\Installer\MATLAB_Runtime_R2021b_Update_2_win64\setup.exe"))
-            {
-                ExecuteAsAdmin(@"Tools\Installer\MATLAB_Runtime_R2021b_Update_2_win64\setup.exe");
-            }
-        }
 
-        private void cmdShareC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		private void cmdShareC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (File.Exists(@"Tools\ShareC.bat"))
             {
@@ -551,9 +544,14 @@ namespace EZAE
                 ExecuteAsAdmin(@"Tools\Installer\ndp48-x86-x64-allos-enu.exe");
             }
 
-            if (File.Exists(@"Tools\Installer\MATLAB_Runtime_R2021b_Update_2_win64\setup.exe") && chkmatlabinstall.Checked)
+            if (File.Exists(@"Tools\Installer\MATLAB_Runtime_R2021b_Update_2_win64.exe") && chkmatlabinstall.Checked)
             {
-                ExecuteAsAdmin(@"Tools\Installer\MATLAB_Runtime_R2021b_Update_2_win64\setup.exe");
+                ExecuteAsAdmin(@"Tools\Installer\MATLAB_Runtime_R2021b_Update_2_win64.exe");
+            }
+
+            if (File.Exists(@"Tools\Installer\MCR_R2017b_win64_installer.exe") && chkmatlabinstall2017b.Checked)
+            {
+                ExecuteAsAdmin(@"Tools\Installer\MCR_R2017b_win64_installer.exe");
             }
 
             if (File.Exists(@"Tools\ImageJ\pinImageJtoTaskbar.bat"))
@@ -889,5 +887,20 @@ namespace EZAE
             }
         }
 
-	}
+		private void cmdInstallMatlab2017b_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+            if (File.Exists(@"Tools\Installer\MCR_R2017b_win64_installer.exe"))
+            {
+                ExecuteAsAdmin(@"Tools\Installer\MCR_R2017b_win64_installer.exe");
+            }
+        }
+
+        private void cmdInstallMatlab_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"Tools\Installer\MATLAB_Runtime_R2021b_Update_2_win64.exe"))
+            {
+                ExecuteAsAdmin(@"Tools\Installer\MATLAB_Runtime_R2021b_Update_2_win64.exe");
+            }
+        }
+    }
 }
