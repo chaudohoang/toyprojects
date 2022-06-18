@@ -71,6 +71,8 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFCX10805panel", "Pane
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PanelFFCRadiantCF", "PanelFFC Radiant CF\PanelFFCRadiantCF.vbproj", "{C002E72B-3B17-48DB-A8CD-C973E5D41B92}"
 EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "ImageEnlarger", "ImageEnlarger\ImageEnlarger.vbproj", "{6C6D6205-75A0-422C-B35D-49BCFBB83295}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -213,15 +215,19 @@ Global
 		{C002E72B-3B17-48DB-A8CD-C973E5D41B92}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C002E72B-3B17-48DB-A8CD-C973E5D41B92}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C002E72B-3B17-48DB-A8CD-C973E5D41B92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C6D6205-75A0-422C-B35D-49BCFBB83295}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C6D6205-75A0-422C-B35D-49BCFBB83295}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C6D6205-75A0-422C-B35D-49BCFBB83295}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C6D6205-75A0-422C-B35D-49BCFBB83295}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		BuildVersion_UseGlobalSettings = True
-		BuildVersion_UpdateAssemblyVersion = True
-		BuildVersion_BuildVersioningStyle = None.None.Increment.TimeStamp
-		BuildVersion_StartDate = 2000/1/1
 		SolutionGuid = {60C14AFF-CFF7-46E8-9345-65A46A64495F}
+		BuildVersion_StartDate = 2000/1/1
+		BuildVersion_BuildVersioningStyle = None.None.Increment.TimeStamp
+		BuildVersion_UpdateAssemblyVersion = True
+		BuildVersion_UseGlobalSettings = True
 	EndGlobalSection
 EndGlobal
