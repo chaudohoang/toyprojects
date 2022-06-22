@@ -73,9 +73,9 @@ Public Class PanelFFCX10803panel
             Dim values As New List(Of Double)()
             For Each field As String In line.Split(New String() {ControlChars.Tab}, StringSplitOptions.None)
                 Double.TryParse(field, tempvalue)
-                If tempvalue <> 0 Then
-                    values.Add(tempvalue)
-                End If
+                'If tempvalue <> 0 Then
+                values.Add(tempvalue)
+                'End If
             Next
             If values.Count <> 0 Then
                 records.Add(values)
