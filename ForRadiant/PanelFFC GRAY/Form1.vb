@@ -60,6 +60,7 @@ Public Class PanelFFCGRAY
         For Each line As String In File.ReadAllLines(filePath)
             Dim values As New List(Of Double)()
             For Each field As String In line.Split(New String() {ControlChars.Tab}, StringSplitOptions.None)
+                If String.IsNullOrEmpty(field) Then Continue For
                 Double.TryParse(field, tempvalue)
                 'If tempvalue <> 0 Then
                 values.Add(tempvalue)
@@ -70,6 +71,7 @@ Public Class PanelFFCGRAY
             End If
 
         Next
+        records.RemoveRange(0, 8)
         Return records
     End Function
 
