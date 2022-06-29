@@ -143,11 +143,11 @@ Public Class Form1
             _Stream.Dispose()
             _FileStream.Close()
             _FileStream.Dispose()
-            cbxLog.Items.Add("Uploaded " + _FileName + " To: " + _UploadPath)
+            cbxLog.Items.Add("Uploaded Succeeded: " + _FileName + " To: " + _UploadPath)
             uploaded = True
         Catch ex As Exception
             uploaded = False
-            cbxLog.Items.Add("Upload Error: " + ex.Message)
+            cbxLog.Items.Add("Upload Failed: " + ex.Message)
         End Try
         Return uploaded
     End Function
