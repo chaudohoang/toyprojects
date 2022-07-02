@@ -105,6 +105,7 @@ Public Class Form1
                 RequestFolderCreate = CType(WebRequest.Create(uploadpath), FtpWebRequest)
                 RequestFolderCreate.Credentials = New NetworkCredential(cbxUsername.Text, cbxPassword.Text)
                 RequestFolderCreate.Method = WebRequestMethods.Ftp.MakeDirectory
+                RequestFolderCreate.Timeout = 20000
                 Try
                     Using response As FtpWebResponse = DirectCast(RequestFolderCreate.GetResponse(), FtpWebResponse)
 
@@ -125,11 +126,11 @@ Public Class Form1
         Dim _FtpWebRequest As FtpWebRequest = CType(FtpWebRequest.Create(New Uri(_UploadPath)), FtpWebRequest)
         _FtpWebRequest.Credentials = New Net.NetworkCredential(cbxUsername.Text, cbxPassword.Text)
         _FtpWebRequest.KeepAlive = False
-        _FtpWebRequest.Timeout = 200000
+        _FtpWebRequest.Timeout = 20000
         _FtpWebRequest.Method = WebRequestMethods.Ftp.UploadFile
         _FtpWebRequest.UseBinary = True
         _FtpWebRequest.ContentLength = _FileInfo.Length
-        Dim buffLength As Integer = 2048
+        Dim buffLength As Integer = 4096
         Dim buff(buffLength - 1) As Byte
         Dim _FileStream As FileStream = _FileInfo.OpenRead()
         Try
