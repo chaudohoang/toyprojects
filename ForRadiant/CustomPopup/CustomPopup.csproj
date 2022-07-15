@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{8BE64A06-6BB0-45B4-858C-A76CE0E9982D}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CustomPopup</RootNamespace>
     <AssemblyName>CustomPopup</AssemblyName>
@@ -54,12 +54,6 @@
     <Compile Include="ButtonZ.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="CustomForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="CustomForm.Designer.cs">
-      <DependentUpon>CustomForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="ErrorBox.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -73,15 +67,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Testform.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Testform.Designer.cs">
-      <DependentUpon>Testform.cs</DependentUpon>
-    </Compile>
-    <EmbeddedResource Include="CustomForm.resx">
-      <DependentUpon>CustomForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="ErrorBox.resx">
       <DependentUpon>ErrorBox.cs</DependentUpon>
     </EmbeddedResource>
@@ -89,9 +74,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Testform.resx">
-      <DependentUpon>Testform.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -116,7 +98,7 @@ del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.config</PostBuildEv
   </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_AssemblyInfoFilename="" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.TimeStamp" BuildVersion_UseGlobalSettings="True" BuildVersion_StartDate="2000/1/1" />
+      <UserProperties BuildVersion_StartDate="2000/1/1" BuildVersion_UseGlobalSettings="True" BuildVersion_BuildVersioningStyle="None.None.Increment.TimeStamp" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_AssemblyInfoFilename="" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

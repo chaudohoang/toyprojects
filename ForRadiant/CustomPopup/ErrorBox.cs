@@ -12,9 +12,9 @@ namespace CustomPopup
 {
     public partial class ErrorBox : Form
     {
+        public string initialMessage;
         public ErrorBox()
         {
-            
             InitializeComponent();
             BackgroundWorker blinker;
             blinker = new BackgroundWorker();
@@ -23,6 +23,36 @@ namespace CustomPopup
             {
                 blinker.RunWorkerAsync();
             }
+
+        }
+        public ErrorBox(string message)
+        {
+            this.initialMessage = message;
+            InitializeComponent();
+            BackgroundWorker blinker;
+            blinker = new BackgroundWorker();
+            blinker.DoWork += blinker_DoWork;
+            if (blinker.IsBusy == false)
+            {
+                blinker.RunWorkerAsync();
+            }
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.StartPosition = FormStartPosition.Manual;
+            Point start = new Point(Screen.PrimaryScreen.Bounds.Left + Screen.PrimaryScreen.Bounds.Width * 3 / 8, Screen.PrimaryScreen.Bounds.Top + Screen.PrimaryScreen.Bounds.Height * 3 / 8);
+            this.Location = start;
+            this.Width = Screen.PrimaryScreen.Bounds.Width * 1 / 4;
+            this.Height = Screen.PrimaryScreen.Bounds.Height * 1 / 4;
+            this._MinButton.Location = new Point(this.Width - this._MinButton.Width - this._CloseButton.Width, 0);
+            this._CloseButton.Location = new Point(this.Width - this._CloseButton.Width, 0);
+
+            Label lblMessage = new Label();
+            lblMessage.ForeColor = Color.White;
+            lblMessage.Font = new System.Drawing.Font("Segoe UI", 20);
+            lblMessage.Dock = DockStyle.Fill;
+            lblMessage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            lblMessage.Padding = new Padding(20, 20, 20, 20);
+            lblMessage.Text = this.initialMessage;
+            this.Controls.Add(lblMessage);            
 
         }
         private void blink()
@@ -83,30 +113,6 @@ namespace CustomPopup
             }
         }
 
-        public static void Show(string message)
-        {
-            ErrorBox errobox = new ErrorBox();
-            errobox.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            errobox.StartPosition = FormStartPosition.Manual;
-            Point start = new Point(Screen.PrimaryScreen.Bounds.Left + Screen.PrimaryScreen.Bounds.Width / 8, Screen.PrimaryScreen.Bounds.Top + Screen.PrimaryScreen.Bounds.Height / 8);
-            errobox.Location = start;
-            errobox.Width = Screen.PrimaryScreen.Bounds.Width * 3/ 4;
-            errobox.Height = Screen.PrimaryScreen.Bounds.Height * 3/ 4;
-            errobox._MinButton.Location = new Point(errobox.Width - errobox._MinButton.Width- errobox._CloseButton.Width, 0);
-            errobox._CloseButton.Location = new Point(errobox.Width - errobox._CloseButton.Width, 0);
-            
-            Label lblMessage = new Label();
-            lblMessage.ForeColor = Color.White;
-            lblMessage.Font = new System.Drawing.Font("Segoe UI", 20);
-            lblMessage.Dock = DockStyle.Fill;
-            lblMessage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            lblMessage.Padding= new Padding(20, 20, 20, 20);
-            lblMessage.Text = message;
-            errobox.Controls.Add(lblMessage);
-            errobox.Show();
-            
-        }
-
         private void TopPanel_MouseUp(object sender, MouseEventArgs e)
         {
             isTopPanelDragged = false;
@@ -136,8 +142,6 @@ namespace CustomPopup
         {
             this.WindowState = FormWindowState.Minimized;
         }
-
-
         
 
         private void buttonZ1_Click(object sender, EventArgs e)

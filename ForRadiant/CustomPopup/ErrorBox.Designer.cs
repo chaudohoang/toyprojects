@@ -35,8 +35,8 @@ namespace CustomPopup
         {
             this.TopPanel = new System.Windows.Forms.Panel();
             this.WindowTextLabel = new System.Windows.Forms.Label();
-            this._MinButton = new CustomPopup.ButtonZ();
-            this._CloseButton = new CustomPopup.ButtonZ();
+            this._MinButton = new global::CustomPopup.ButtonZ();
+            this._CloseButton = new global::CustomPopup.ButtonZ();
             this.panel1 = new System.Windows.Forms.Panel();
             this.panel2 = new System.Windows.Forms.Panel();
             this.panel3 = new System.Windows.Forms.Panel();
