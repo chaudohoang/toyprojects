@@ -902,5 +902,18 @@ namespace EZAE
                 ExecuteAsAdmin(@"Tools\Installer\MATLAB_Runtime_R2021b_Update_2_win64.exe");
             }
         }
-    }
+
+		private void cmdOpenLINQPad_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+            string filepath = Path.GetFullPath(@"Tools\LINQPad7\LINQPad7.exe");
+            if (File.Exists(filepath))
+            {
+
+                ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
+                startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
+                Process.Start(startInfo);
+
+            }
+        }
+	}
 }

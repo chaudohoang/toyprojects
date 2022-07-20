@@ -96,6 +96,7 @@ namespace EZAE
 			this.cmdUseButterfly = new System.Windows.Forms.LinkLabel();
 			this.lblSequenceFileName = new System.Windows.Forms.Label();
 			this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+			this.cmdOpenLINQPad = new System.Windows.Forms.LinkLabel();
 			this.tabControl1.SuspendLayout();
 			this.tabControl.SuspendLayout();
 			this.tabSetupPC.SuspendLayout();
@@ -116,6 +117,7 @@ namespace EZAE
 			// 
 			// tabControl
 			// 
+			this.tabControl.Controls.Add(this.cmdOpenLINQPad);
 			this.tabControl.Controls.Add(this.cmdRemoteTools);
 			this.tabControl.Controls.Add(this.cmdOpenGooil4);
 			this.tabControl.Controls.Add(this.cmdOpenGooil3);
@@ -873,6 +875,17 @@ namespace EZAE
 			this.lblSequenceFileName.Size = new System.Drawing.Size(0, 13);
 			this.lblSequenceFileName.TabIndex = 27;
 			// 
+			// cmdOpenLINQPad
+			// 
+			this.cmdOpenLINQPad.AutoSize = true;
+			this.cmdOpenLINQPad.Location = new System.Drawing.Point(172, 34);
+			this.cmdOpenLINQPad.Name = "cmdOpenLINQPad";
+			this.cmdOpenLINQPad.Size = new System.Drawing.Size(80, 13);
+			this.cmdOpenLINQPad.TabIndex = 19;
+			this.cmdOpenLINQPad.TabStop = true;
+			this.cmdOpenLINQPad.Text = "Open LINQPad";
+			this.cmdOpenLINQPad.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenLINQPad_LinkClicked);
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -968,6 +981,7 @@ namespace EZAE
 		private System.ComponentModel.BackgroundWorker backgroundWorker1;
 		private System.Windows.Forms.CheckBox chkmatlabinstall;
 		private System.Windows.Forms.LinkLabel cmdInstallMatlab;
+		private System.Windows.Forms.LinkLabel cmdOpenLINQPad;
 	}
 }
 
