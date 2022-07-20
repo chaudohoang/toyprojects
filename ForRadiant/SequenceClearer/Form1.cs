@@ -100,7 +100,7 @@ namespace SequenceCleaner
 					nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/Items/SequenceItem/Analysis/SaveToDatabase");
 					for (int index = 0; index <= nodes.Count - 1; index++)
 					{
-						nodes[index].InnerText = "False";
+						nodes[index].InnerText = "false";
 					}
 				}          
 
