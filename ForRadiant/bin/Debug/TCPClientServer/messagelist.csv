@@ -6,7 +6,12 @@ cmd /c explorer \\192.168.1.1,Open Explorer for network drive
 cmd /c explorer \\192.168.2.2,Open Explorer for network drive
 cmd /c explorer \\192.168.3.3,Open Explorer for network drive
 cmd /c explorer \\192.168.4.4,Open Explorer for network drive
-cmd /c explorer \\192.168.0.50,Open Explorer for network drive
+cmd /c explorer \\192.168.0.100,Open Explorer for network drive
+cmd /c robocopy /e /is \\192.168.1.1\Program\RVS\Source \\127.0.0.1\Program\RVS\Destination,Copy Folder from Source to Destination
+cmd /c robocopy /e /is \\192.168.2.2\Program\RVS\Source \\127.0.0.1\Program\RVS\Destination,Copy Folder from Source to Destination
+cmd /c robocopy /e /is \\192.168.3.3\Program\RVS\Source \\127.0.0.1\Program\RVS\Destination,Copy Folder from Source to Destination
+cmd /c robocopy /e /is \\192.168.4.4\Program\RVS\Source \\127.0.0.1\Program\RVS\Destination,Copy Folder from Source to Destination
+cmd /c robocopy /e /is \\192.168.0.100\Program\RVS\Source \\127.0.0.1\Program\RVS\Destination,Copy Folder from Source to Destination
 start TrueTest,start TrueTest
 start calc,start calc
 start http://google.com,start http://google.com

