@@ -915,5 +915,57 @@ namespace EZAE
 
             }
         }
+
+		private void cmdOpenTCPServer_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+            string filepath = Path.GetFullPath(@"Tools\TCPClientServer\TCPServer.exe");
+            if (File.Exists(filepath))
+            {
+
+                ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
+                startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
+                Process.Start(startInfo);
+
+            }
+        }
+
+		private void cmdOpenTCPClient_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+            string filepath = Path.GetFullPath(@"Tools\TCPClientServer\TCPClient.exe");
+            if (File.Exists(filepath))
+            {
+
+                ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
+                startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
+                Process.Start(startInfo);
+
+            }
+        }
+
+		private void cmdOpenCopywhiz_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+            string filepath = Path.GetFullPath(@"Tools\Copywhiz\Copywhiz.exe");
+            if (File.Exists(filepath))
+            {
+
+                ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
+                startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
+                Process.Start(startInfo);
+
+            }
+        }
+
+		private void cmdCompareSequence_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+            string filepath = Path.GetFullPath(@"Tools\SequenceCompare.exe");
+            if (File.Exists(filepath))
+            {
+
+                ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
+                startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
+                Process.Start(startInfo);
+
+            }
+        }
 	}
 }

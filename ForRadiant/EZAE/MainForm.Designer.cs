@@ -32,6 +32,10 @@ namespace EZAE
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
 			this.tabControl1 = new System.Windows.Forms.TabControl();
 			this.tabControl = new System.Windows.Forms.TabPage();
+			this.cmdOpenCopywhiz = new System.Windows.Forms.LinkLabel();
+			this.cmdOpenTCPClient = new System.Windows.Forms.LinkLabel();
+			this.cmdOpenTCPServer = new System.Windows.Forms.LinkLabel();
+			this.cmdOpenLINQPad = new System.Windows.Forms.LinkLabel();
 			this.cmdRemoteTools = new System.Windows.Forms.LinkLabel();
 			this.cmdOpenGooil4 = new System.Windows.Forms.LinkLabel();
 			this.cmdOpenGooil3 = new System.Windows.Forms.LinkLabel();
@@ -96,7 +100,7 @@ namespace EZAE
 			this.cmdUseButterfly = new System.Windows.Forms.LinkLabel();
 			this.lblSequenceFileName = new System.Windows.Forms.Label();
 			this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-			this.cmdOpenLINQPad = new System.Windows.Forms.LinkLabel();
+			this.cmdCompareSequence = new System.Windows.Forms.LinkLabel();
 			this.tabControl1.SuspendLayout();
 			this.tabControl.SuspendLayout();
 			this.tabSetupPC.SuspendLayout();
@@ -117,6 +121,9 @@ namespace EZAE
 			// 
 			// tabControl
 			// 
+			this.tabControl.Controls.Add(this.cmdOpenCopywhiz);
+			this.tabControl.Controls.Add(this.cmdOpenTCPClient);
+			this.tabControl.Controls.Add(this.cmdOpenTCPServer);
 			this.tabControl.Controls.Add(this.cmdOpenLINQPad);
 			this.tabControl.Controls.Add(this.cmdRemoteTools);
 			this.tabControl.Controls.Add(this.cmdOpenGooil4);
@@ -140,6 +147,50 @@ namespace EZAE
 			this.tabControl.Text = "Control";
 			this.tabControl.UseVisualStyleBackColor = true;
 			this.tabControl.Enter += new System.EventHandler(this.tabControl_Enter);
+			// 
+			// cmdOpenCopywhiz
+			// 
+			this.cmdOpenCopywhiz.AutoSize = true;
+			this.cmdOpenCopywhiz.Location = new System.Drawing.Point(275, 10);
+			this.cmdOpenCopywhiz.Name = "cmdOpenCopywhiz";
+			this.cmdOpenCopywhiz.Size = new System.Drawing.Size(81, 13);
+			this.cmdOpenCopywhiz.TabIndex = 22;
+			this.cmdOpenCopywhiz.TabStop = true;
+			this.cmdOpenCopywhiz.Text = "Open Copywhiz";
+			this.cmdOpenCopywhiz.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenCopywhiz_LinkClicked);
+			// 
+			// cmdOpenTCPClient
+			// 
+			this.cmdOpenTCPClient.AutoSize = true;
+			this.cmdOpenTCPClient.Location = new System.Drawing.Point(309, 61);
+			this.cmdOpenTCPClient.Name = "cmdOpenTCPClient";
+			this.cmdOpenTCPClient.Size = new System.Drawing.Size(83, 13);
+			this.cmdOpenTCPClient.TabIndex = 21;
+			this.cmdOpenTCPClient.TabStop = true;
+			this.cmdOpenTCPClient.Text = "Open TCPClient";
+			this.cmdOpenTCPClient.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenTCPClient_LinkClicked);
+			// 
+			// cmdOpenTCPServer
+			// 
+			this.cmdOpenTCPServer.AutoSize = true;
+			this.cmdOpenTCPServer.Location = new System.Drawing.Point(215, 61);
+			this.cmdOpenTCPServer.Name = "cmdOpenTCPServer";
+			this.cmdOpenTCPServer.Size = new System.Drawing.Size(88, 13);
+			this.cmdOpenTCPServer.TabIndex = 20;
+			this.cmdOpenTCPServer.TabStop = true;
+			this.cmdOpenTCPServer.Text = "Open TCPServer";
+			this.cmdOpenTCPServer.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenTCPServer_LinkClicked);
+			// 
+			// cmdOpenLINQPad
+			// 
+			this.cmdOpenLINQPad.AutoSize = true;
+			this.cmdOpenLINQPad.Location = new System.Drawing.Point(172, 34);
+			this.cmdOpenLINQPad.Name = "cmdOpenLINQPad";
+			this.cmdOpenLINQPad.Size = new System.Drawing.Size(80, 13);
+			this.cmdOpenLINQPad.TabIndex = 19;
+			this.cmdOpenLINQPad.TabStop = true;
+			this.cmdOpenLINQPad.Text = "Open LINQPad";
+			this.cmdOpenLINQPad.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenLINQPad_LinkClicked);
 			// 
 			// cmdRemoteTools
 			// 
@@ -753,6 +804,7 @@ namespace EZAE
 			// 
 			// tabSetSequence
 			// 
+			this.tabSetSequence.Controls.Add(this.cmdCompareSequence);
 			this.tabSetSequence.Controls.Add(this.cmdCreateFFC);
 			this.tabSetSequence.Controls.Add(this.cmdInstallTrueTest);
 			this.tabSetSequence.Controls.Add(this.cmdBackupCurrentTT);
@@ -782,7 +834,7 @@ namespace EZAE
 			// cmdInstallTrueTest
 			// 
 			this.cmdInstallTrueTest.AutoSize = true;
-			this.cmdInstallTrueTest.Location = new System.Drawing.Point(12, 66);
+			this.cmdInstallTrueTest.Location = new System.Drawing.Point(12, 95);
 			this.cmdInstallTrueTest.Name = "cmdInstallTrueTest";
 			this.cmdInstallTrueTest.Size = new System.Drawing.Size(80, 13);
 			this.cmdInstallTrueTest.TabIndex = 62;
@@ -793,7 +845,7 @@ namespace EZAE
 			// cmdBackupCurrentTT
 			// 
 			this.cmdBackupCurrentTT.AutoSize = true;
-			this.cmdBackupCurrentTT.Location = new System.Drawing.Point(184, 44);
+			this.cmdBackupCurrentTT.Location = new System.Drawing.Point(184, 72);
 			this.cmdBackupCurrentTT.Name = "cmdBackupCurrentTT";
 			this.cmdBackupCurrentTT.Size = new System.Drawing.Size(127, 13);
 			this.cmdBackupCurrentTT.TabIndex = 61;
@@ -804,7 +856,7 @@ namespace EZAE
 			// cmdSetTTPermission
 			// 
 			this.cmdSetTTPermission.AutoSize = true;
-			this.cmdSetTTPermission.Location = new System.Drawing.Point(12, 44);
+			this.cmdSetTTPermission.Location = new System.Drawing.Point(12, 72);
 			this.cmdSetTTPermission.Name = "cmdSetTTPermission";
 			this.cmdSetTTPermission.Size = new System.Drawing.Size(166, 13);
 			this.cmdSetTTPermission.TabIndex = 58;
@@ -815,7 +867,7 @@ namespace EZAE
 			// cbTrueTestInstallerList
 			// 
 			this.cbTrueTestInstallerList.FormattingEnabled = true;
-			this.cbTrueTestInstallerList.Location = new System.Drawing.Point(104, 63);
+			this.cbTrueTestInstallerList.Location = new System.Drawing.Point(98, 92);
 			this.cbTrueTestInstallerList.Name = "cbTrueTestInstallerList";
 			this.cbTrueTestInstallerList.Size = new System.Drawing.Size(441, 21);
 			this.cbTrueTestInstallerList.TabIndex = 63;
@@ -875,16 +927,16 @@ namespace EZAE
 			this.lblSequenceFileName.Size = new System.Drawing.Size(0, 13);
 			this.lblSequenceFileName.TabIndex = 27;
 			// 
-			// cmdOpenLINQPad
+			// cmdCompareSequence
 			// 
-			this.cmdOpenLINQPad.AutoSize = true;
-			this.cmdOpenLINQPad.Location = new System.Drawing.Point(172, 34);
-			this.cmdOpenLINQPad.Name = "cmdOpenLINQPad";
-			this.cmdOpenLINQPad.Size = new System.Drawing.Size(80, 13);
-			this.cmdOpenLINQPad.TabIndex = 19;
-			this.cmdOpenLINQPad.TabStop = true;
-			this.cmdOpenLINQPad.Text = "Open LINQPad";
-			this.cmdOpenLINQPad.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenLINQPad_LinkClicked);
+			this.cmdCompareSequence.AutoSize = true;
+			this.cmdCompareSequence.Location = new System.Drawing.Point(12, 49);
+			this.cmdCompareSequence.Name = "cmdCompareSequence";
+			this.cmdCompareSequence.Size = new System.Drawing.Size(106, 13);
+			this.cmdCompareSequence.TabIndex = 64;
+			this.cmdCompareSequence.TabStop = true;
+			this.cmdCompareSequence.Text = "Compare Sequences";
+			this.cmdCompareSequence.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCompareSequence_LinkClicked);
 			// 
 			// MainForm
 			// 
@@ -982,6 +1034,10 @@ namespace EZAE
 		private System.Windows.Forms.CheckBox chkmatlabinstall;
 		private System.Windows.Forms.LinkLabel cmdInstallMatlab;
 		private System.Windows.Forms.LinkLabel cmdOpenLINQPad;
+		private System.Windows.Forms.LinkLabel cmdOpenTCPClient;
+		private System.Windows.Forms.LinkLabel cmdOpenTCPServer;
+		private System.Windows.Forms.LinkLabel cmdOpenCopywhiz;
+		private System.Windows.Forms.LinkLabel cmdCompareSequence;
 	}
 }
 
