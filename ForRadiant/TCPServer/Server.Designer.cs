@@ -29,7 +29,6 @@ namespace TCPServer
         /// </summary>
         private void InitializeComponent()
         {
-			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Server));
 			this.label1 = new System.Windows.Forms.Label();
 			this.cbxIP1 = new System.Windows.Forms.ComboBox();
@@ -71,12 +70,6 @@ namespace TCPServer
 			this.btnStart4 = new System.Windows.Forms.Button();
 			this.btnStart5 = new System.Windows.Forms.Button();
 			this.btnRestart = new System.Windows.Forms.Button();
-			this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
-			this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-			this.showToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.btnNewInstance = new System.Windows.Forms.Button();
 			this.btnStop1 = new System.Windows.Forms.Button();
 			this.btnStop2 = new System.Windows.Forms.Button();
 			this.btnStop3 = new System.Windows.Forms.Button();
@@ -97,7 +90,6 @@ namespace TCPServer
 			this.tabPage4 = new System.Windows.Forms.TabPage();
 			this.tabPage5 = new System.Windows.Forms.TabPage();
 			this.tabPage6 = new System.Windows.Forms.TabPage();
-			this.contextMenuStrip1.SuspendLayout();
 			this.tabControl1.SuspendLayout();
 			this.tabPage1.SuspendLayout();
 			this.tabPage2.SuspendLayout();
@@ -187,7 +179,7 @@ namespace TCPServer
 			// 
 			// btnSend
 			// 
-			this.btnSend.Location = new System.Drawing.Point(256, 40);
+			this.btnSend.Location = new System.Drawing.Point(231, 40);
 			this.btnSend.Name = "btnSend";
 			this.btnSend.Size = new System.Drawing.Size(55, 23);
 			this.btnSend.TabIndex = 21;
@@ -197,7 +189,7 @@ namespace TCPServer
 			// 
 			// btnSendAll
 			// 
-			this.btnSendAll.Location = new System.Drawing.Point(195, 40);
+			this.btnSendAll.Location = new System.Drawing.Point(170, 40);
 			this.btnSendAll.Name = "btnSendAll";
 			this.btnSendAll.Size = new System.Drawing.Size(55, 23);
 			this.btnSendAll.TabIndex = 22;
@@ -526,61 +518,13 @@ namespace TCPServer
 			// 
 			// btnRestart
 			// 
-			this.btnRestart.Location = new System.Drawing.Point(134, 40);
+			this.btnRestart.Location = new System.Drawing.Point(74, 40);
 			this.btnRestart.Name = "btnRestart";
-			this.btnRestart.Size = new System.Drawing.Size(55, 23);
+			this.btnRestart.Size = new System.Drawing.Size(90, 23);
 			this.btnRestart.TabIndex = 33;
-			this.btnRestart.Text = "Restart";
+			this.btnRestart.Text = "Restart Server";
 			this.btnRestart.UseVisualStyleBackColor = true;
 			this.btnRestart.Click += new System.EventHandler(this.btnRestart_Click);
-			// 
-			// notifyIcon1
-			// 
-			this.notifyIcon1.ContextMenuStrip = this.contextMenuStrip1;
-			this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
-			this.notifyIcon1.Text = "Server";
-			this.notifyIcon1.Visible = true;
-			this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
-			// 
-			// contextMenuStrip1
-			// 
-			this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.showToolStripMenuItem,
-            this.restartToolStripMenuItem,
-            this.exitToolStripMenuItem});
-			this.contextMenuStrip1.Name = "contextMenuStrip1";
-			this.contextMenuStrip1.Size = new System.Drawing.Size(111, 70);
-			// 
-			// showToolStripMenuItem
-			// 
-			this.showToolStripMenuItem.Name = "showToolStripMenuItem";
-			this.showToolStripMenuItem.Size = new System.Drawing.Size(110, 22);
-			this.showToolStripMenuItem.Text = "Show";
-			this.showToolStripMenuItem.Click += new System.EventHandler(this.showToolStripMenuItem_Click);
-			// 
-			// restartToolStripMenuItem
-			// 
-			this.restartToolStripMenuItem.Name = "restartToolStripMenuItem";
-			this.restartToolStripMenuItem.Size = new System.Drawing.Size(110, 22);
-			this.restartToolStripMenuItem.Text = "Restart";
-			this.restartToolStripMenuItem.Click += new System.EventHandler(this.restartToolStripMenuItem_Click);
-			// 
-			// exitToolStripMenuItem
-			// 
-			this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-			this.exitToolStripMenuItem.Size = new System.Drawing.Size(110, 22);
-			this.exitToolStripMenuItem.Text = "Exit";
-			this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
-			// 
-			// btnNewInstance
-			// 
-			this.btnNewInstance.Location = new System.Drawing.Point(73, 40);
-			this.btnNewInstance.Name = "btnNewInstance";
-			this.btnNewInstance.Size = new System.Drawing.Size(55, 23);
-			this.btnNewInstance.TabIndex = 34;
-			this.btnNewInstance.Text = "New";
-			this.btnNewInstance.UseVisualStyleBackColor = true;
-			this.btnNewInstance.Click += new System.EventHandler(this.btnNewInstance_Click);
 			// 
 			// btnStop1
 			// 
@@ -853,7 +797,6 @@ namespace TCPServer
 			this.Controls.Add(this.tabControl1);
 			this.Controls.Add(this.cbxMessage);
 			this.Controls.Add(this.label3);
-			this.Controls.Add(this.btnNewInstance);
 			this.Controls.Add(this.btnRestart);
 			this.Controls.Add(this.btnSendAll);
 			this.Controls.Add(this.btnSend);
@@ -863,8 +806,6 @@ namespace TCPServer
 			this.Name = "Server";
 			this.Text = "Server";
 			this.Load += new System.EventHandler(this.Server_Load);
-			this.Resize += new System.EventHandler(this.Server_Resize);
-			this.contextMenuStrip1.ResumeLayout(false);
 			this.tabControl1.ResumeLayout(false);
 			this.tabPage1.ResumeLayout(false);
 			this.tabPage1.PerformLayout();
@@ -925,12 +866,6 @@ namespace TCPServer
         private System.Windows.Forms.Button btnStart4;
         private System.Windows.Forms.Button btnStart5;
         private System.Windows.Forms.Button btnRestart;
-        private System.Windows.Forms.NotifyIcon notifyIcon1;
-        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem showToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem restartToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
-        private System.Windows.Forms.Button btnNewInstance;
         private System.Windows.Forms.Button btnStop1;
         private System.Windows.Forms.Button btnStop2;
         private System.Windows.Forms.Button btnStop3;

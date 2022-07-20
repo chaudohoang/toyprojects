@@ -21,6 +21,27 @@ namespace TCPClient
             InitializeComponent();
         }
 
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == NativeMethods.WM_SHOWME)
+            {
+                ShowMe();
+            }
+            base.WndProc(ref m);
+        }
+        private void ShowMe()
+        {
+            if (WindowState == FormWindowState.Minimized)
+            {
+                WindowState = FormWindowState.Normal;
+            }
+            // get our current "TopMost" value (ours will always be false though)
+            bool top = TopMost;
+            // make our form jump to the top of everything
+            TopMost = true;
+            // set it back to whatever it was
+            TopMost = top;
+        }
         private void SetVersionInfo()
         {
             Version versionInfo = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
@@ -174,39 +195,6 @@ namespace TCPClient
             SetVersionInfo();
         }
 
-        private void showToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Show();
-            Activate();
-            this.WindowState = FormWindowState.Normal;
-        }
-
-        private void restartToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Application.Restart();
-            Environment.Exit(0);
-        }
-
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Application.Exit();
-        }
-
-        private void Client_Resize(object sender, EventArgs e)
-        {
-            if (this.WindowState == FormWindowState.Minimized)
-            {
-                Hide();
-            }
-        }
-
-        private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            Show();
-            Activate();
-            this.WindowState = FormWindowState.Normal;
-        }
-
         private void cbxMessage_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
@@ -238,12 +226,6 @@ namespace TCPClient
 
         }
 
-        private void btnNewInstance_Click(object sender, EventArgs e)
-        {
-            Process p = new Process();
-            p.StartInfo.FileName = Application.ExecutablePath;
-            p.Start();
-        }
 
         private void cbxIP_DropDown(object sender, EventArgs e)
         {
