@@ -119,7 +119,7 @@ namespace TCPServer
 
         private void btnSend_Click(object sender, EventArgs e)
         {
-            if (server1 != null && server1.IsListening)
+            if (tabControl1.SelectedTab == tabPage1 && server1 != null && server1.IsListening)
             {
                 if (!string.IsNullOrEmpty(cbxMessage.Text) && (lstClientIP1.SelectedItems.Count > 0)) //check message & select client ip from listbox
                 {
@@ -131,7 +131,7 @@ namespace TCPServer
                 }
             }
 
-            if (server2 != null && server2.IsListening)
+            else if (tabControl1.SelectedTab == tabPage2 && server2 != null && server2.IsListening)
             {
                 if (!string.IsNullOrEmpty(cbxMessage.Text) && (lstClientIP2.SelectedItems.Count > 0)) //check message & select client ip from listbox
                 {
@@ -143,7 +143,7 @@ namespace TCPServer
                 }
             }
 
-            if (server3 != null && server3.IsListening)
+            else if (tabControl1.SelectedTab == tabPage3 && server3 != null && server3.IsListening)
             {
                 if (!string.IsNullOrEmpty(cbxMessage.Text) && (lstClientIP3.SelectedItems.Count > 0)) //check message & select client ip from listbox
                 {
@@ -155,7 +155,7 @@ namespace TCPServer
                 }
             }
 
-            if (server4 != null && server4.IsListening)
+            else if (tabControl1.SelectedTab == tabPage4 && server4 != null && server4.IsListening)
             {
                 if (!string.IsNullOrEmpty(cbxMessage.Text) && (lstClientIP4.SelectedItems.Count > 0)) //check message & select client ip from listbox
                 {
@@ -167,7 +167,7 @@ namespace TCPServer
                 }
             }
 
-            if (server5 != null && server5.IsListening)
+            else if (tabControl1.SelectedTab == tabPage5 && server5 != null && server5.IsListening)
             {
                 if (!string.IsNullOrEmpty(cbxMessage.Text) && (lstClientIP5.SelectedItems.Count > 0)) //check message & select client ip from listbox
                 {
@@ -179,7 +179,7 @@ namespace TCPServer
                 }
             }
 
-            if (server6 != null && server6.IsListening)
+            else if (tabControl1.SelectedTab == tabPage6 && server6 != null && server6.IsListening)
             {
                 if (!string.IsNullOrEmpty(cbxMessage.Text) && (lstClientIP6.SelectedItems.Count > 0)) //check message & select client ip from listbox
                 {
@@ -534,13 +534,7 @@ namespace TCPServer
                             listened = true;
                             break;
                         }
-                        else if (addr.Address.ToString().StartsWith("192.168"))
-                        {
-                            cbxIP6.Text = addr.Address.ToString();
-                            btnStart6_Click(this, new EventArgs());
-                            listened = true;
-                            break;
-                        }
+
                     }
 					if (listened)
 					{
