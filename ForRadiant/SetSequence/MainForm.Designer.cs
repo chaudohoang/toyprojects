@@ -45,6 +45,7 @@
 			this.label1 = new System.Windows.Forms.Label();
 			this.cbFNumber = new System.Windows.Forms.ComboBox();
 			this.lblFNumber = new System.Windows.Forms.Label();
+			this.lblAbout = new System.Windows.Forms.Label();
 			this.SuspendLayout();
 			// 
 			// cmdBrowseSequence
@@ -217,13 +218,24 @@
 			this.lblFNumber.Name = "lblFNumber";
 			this.lblFNumber.Size = new System.Drawing.Size(53, 13);
 			this.lblFNumber.TabIndex = 73;
-			this.lblFNumber.Text = "F Number";
+			this.lblFNumber.Text = "F-Number";
+			// 
+			// lblAbout
+			// 
+			this.lblAbout.AutoSize = true;
+			this.lblAbout.Location = new System.Drawing.Point(571, 9);
+			this.lblAbout.Name = "lblAbout";
+			this.lblAbout.Size = new System.Drawing.Size(13, 13);
+			this.lblAbout.TabIndex = 74;
+			this.lblAbout.Text = "?";
+			this.lblAbout.Click += new System.EventHandler(this.btnAbout_Click);
 			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(596, 191);
+			this.Controls.Add(this.lblAbout);
 			this.Controls.Add(this.cbFNumber);
 			this.Controls.Add(this.lblFNumber);
 			this.Controls.Add(this.label1);
@@ -269,6 +281,7 @@
         private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.ComboBox cbFNumber;
 		private System.Windows.Forms.Label lblFNumber;
+		private System.Windows.Forms.Label lblAbout;
 	}
 }
 

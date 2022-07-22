@@ -145,7 +145,11 @@ namespace SetSequence
                 }
                 else
                 {
-                    fnumber = cbFNumber.Text;
+					if (cbFNumber.Text =="8")
+					{
+                        fnumber = "6";
+                    }
+                    
                 }
 
                 if (cbCameraRotation.Text == "Copy from first step")
@@ -256,5 +260,11 @@ namespace SetSequence
                 lblSequenceFileName.Text = latestfile.FullName;
             }
         }
-    }
+
+		private void btnAbout_Click(object sender, EventArgs e)
+		{
+            Form AboutForm = new About();
+            AboutForm.ShowDialog();
+		}
+	}
 }
