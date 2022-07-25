@@ -38,7 +38,7 @@ namespace SetSequence
             if (Directory.Exists(@"C:\Radiant Vision Systems Data\TrueTest\Sequence"))
             {
                 var latestfile = new DirectoryInfo(@"C:\Radiant Vision Systems Data\TrueTest\Sequence").GetFiles("*.*", SearchOption.AllDirectories).OrderByDescending(o => o.LastWriteTime).FirstOrDefault();
-                lblSequenceFileName.Text = latestfile.FullName;
+                lblSequencePath.Text = latestfile.FullName;
             }
         }
 
@@ -49,7 +49,7 @@ namespace SetSequence
                 dialog.InitialDirectory = @"C:\Radiant Vision Systems Data\TrueTest\Sequence";
                 if (dialog.ShowDialog(this) == DialogResult.OK)
                 {
-                    lblSequenceFileName.Text = dialog.FileName;
+                    lblSequencePath.Text = dialog.FileName;
                 }
             }
         }
@@ -62,9 +62,9 @@ namespace SetSequence
             XmlNodeList nodes;
 
             var xmlDoc = new XmlDocument();
-            if (File.Exists(@lblSequenceFileName.Text))
+            if (File.Exists(@lblSequencePath.Text))
             {
-                xmlDoc.Load(lblSequenceFileName.Text);
+                xmlDoc.Load(lblSequencePath.Text);
 
                 string subframeregion, lensdistance,fnumber, colorcalID, imagescalingID, flatfieldID, cameraRotation;
 
@@ -234,10 +234,26 @@ namespace SetSequence
                 }
 
                 XmlWriterSettings settings = new XmlWriterSettings { Indent = true };
-                XmlWriter writer = XmlWriter.Create(lblSequenceFileName.Text, settings);
+                XmlWriter writer = XmlWriter.Create(lblSequencePath.Text, settings);
                 xmlDoc.Save(writer);
                 if (writer != null)
                     writer.Close();
+				try
+				{
+                    string[] additionalTargets;
+                    additionalTargets = txtAdditionalSequence.Text.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (string item in additionalTargets)
+                    {
+                        XmlWriter additionalWriter = XmlWriter.Create(item, settings);
+                        xmlDoc.Save(additionalWriter);
+                        if (additionalWriter != null)
+                            additionalWriter.Close();
+                    }
+                }
+				catch (Exception)
+				{
+				}
+                
 
                 Random m_Rnd = new Random();
                 Color tempcolor;
@@ -257,14 +273,49 @@ namespace SetSequence
             if (Directory.Exists(@"C:\Radiant Vision Systems Data\TrueTest\Sequence"))
             {
                 var latestfile = new DirectoryInfo(@"C:\Radiant Vision Systems Data\TrueTest\Sequence").GetFiles().OrderByDescending(o => o.LastWriteTime).FirstOrDefault();
-                lblSequenceFileName.Text = latestfile.FullName;
+                lblSequencePath.Text = latestfile.FullName;
             }
         }
 
-		private void btnAbout_Click(object sender, EventArgs e)
+		private void btnBrowseAdditional_Click(object sender, EventArgs e)
+		{
+            using (OpenFileDialog dialog = new OpenFileDialog())
+            {
+                dialog.InitialDirectory = @"C:\Radiant Vision Systems Data\TrueTest\Sequence";
+                dialog.Multiselect = true;
+                if (dialog.ShowDialog(this) == DialogResult.OK)
+                {
+                    string[] files = dialog.FileNames;
+					foreach (string file in files)
+					{
+                        txtAdditionalSequence.Text += file + "\r\n";
+                    }
+                }
+            }
+        }
+
+		private void txtAdditionalSequence_DragDrop(object sender, DragEventArgs e)
+		{
+            e.Effect = DragDropEffects.Copy;
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            if (files != null && files.Length != 0)
+            {
+                foreach (string file in files)
+                {
+                    txtAdditionalSequence.Text += file+"\r\n";
+                }
+            }
+        }
+
+		private void txtAdditionalSequence_DragEnter(object sender, DragEventArgs e)
+		{
+            e.Effect = DragDropEffects.Copy;
+        }
+
+		private void lblAbout_DoubleClick(object sender, EventArgs e)
 		{
             Form AboutForm = new About();
             AboutForm.ShowDialog();
-		}
+        }
 	}
 }
