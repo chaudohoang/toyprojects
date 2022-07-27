@@ -234,7 +234,7 @@ Public Class Form1
 		ListBox2.TopIndex = ListBox2.Items.Count - 1
 	End Sub
 
-	Private Sub btnClearlog2_Click(sender As Object, e As EventArgs) Handles btnClearlog.Click, btnClearlog2.Click
+	Private Sub btnClearlog2_Click(sender As Object, e As EventArgs) Handles btnClearlog2.Click
 		ListBox2.Items.Clear()
 	End Sub
 
