@@ -77,7 +77,7 @@ Partial Class Form1
 		'
 		'btnBrowse1
 		'
-		Me.btnBrowse1.Location = New System.Drawing.Point(773, 9)
+		Me.btnBrowse1.Location = New System.Drawing.Point(776, 9)
 		Me.btnBrowse1.Name = "btnBrowse1"
 		Me.btnBrowse1.Size = New System.Drawing.Size(75, 23)
 		Me.btnBrowse1.TabIndex = 2
@@ -86,7 +86,7 @@ Partial Class Form1
 		'
 		'btnBrowse2
 		'
-		Me.btnBrowse2.Location = New System.Drawing.Point(773, 37)
+		Me.btnBrowse2.Location = New System.Drawing.Point(776, 37)
 		Me.btnBrowse2.Name = "btnBrowse2"
 		Me.btnBrowse2.Size = New System.Drawing.Size(75, 23)
 		Me.btnBrowse2.TabIndex = 5
@@ -113,7 +113,7 @@ Partial Class Form1
 		'
 		'btnCompare
 		'
-		Me.btnCompare.Location = New System.Drawing.Point(854, 9)
+		Me.btnCompare.Location = New System.Drawing.Point(857, 9)
 		Me.btnCompare.Name = "btnCompare"
 		Me.btnCompare.Size = New System.Drawing.Size(88, 51)
 		Me.btnCompare.TabIndex = 6
@@ -127,7 +127,7 @@ Partial Class Form1
 		Me.ListBox1.Location = New System.Drawing.Point(77, 97)
 		Me.ListBox1.Name = "ListBox1"
 		Me.ListBox1.ScrollAlwaysVisible = True
-		Me.ListBox1.Size = New System.Drawing.Size(865, 381)
+		Me.ListBox1.Size = New System.Drawing.Size(868, 381)
 		Me.ListBox1.TabIndex = 7
 		'
 		'Label3
@@ -195,7 +195,7 @@ Partial Class Form1
 		'
 		Me.btnUseDefaultMaster.Location = New System.Drawing.Point(681, 37)
 		Me.btnUseDefaultMaster.Name = "btnUseDefaultMaster"
-		Me.btnUseDefaultMaster.Size = New System.Drawing.Size(86, 23)
+		Me.btnUseDefaultMaster.Size = New System.Drawing.Size(89, 23)
 		Me.btnUseDefaultMaster.TabIndex = 12
 		Me.btnUseDefaultMaster.Text = "Default Master"
 		Me.btnUseDefaultMaster.UseVisualStyleBackColor = True
@@ -204,7 +204,7 @@ Partial Class Form1
 		'
 		Me.btnUseLastModified1.Location = New System.Drawing.Point(681, 9)
 		Me.btnUseLastModified1.Name = "btnUseLastModified1"
-		Me.btnUseLastModified1.Size = New System.Drawing.Size(86, 23)
+		Me.btnUseLastModified1.Size = New System.Drawing.Size(89, 23)
 		Me.btnUseLastModified1.TabIndex = 11
 		Me.btnUseLastModified1.Text = "Last Modified"
 		Me.btnUseLastModified1.UseVisualStyleBackColor = True
@@ -354,7 +354,7 @@ Partial Class Form1
 		'
 		Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
 		Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-		Me.ClientSize = New System.Drawing.Size(1006, 529)
+		Me.ClientSize = New System.Drawing.Size(978, 529)
 		Me.Controls.Add(Me.TabControl1)
 		Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
 		Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
