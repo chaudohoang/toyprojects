@@ -89,6 +89,7 @@ namespace EZAE
 			this.cbFixture = new System.Windows.Forms.ComboBox();
 			this.cbTightVNCPath = new System.Windows.Forms.ComboBox();
 			this.tabSetSequence = new System.Windows.Forms.TabPage();
+			this.cmdCheckSequence = new System.Windows.Forms.LinkLabel();
 			this.cmdCreateFFC = new System.Windows.Forms.LinkLabel();
 			this.cmdInstallTrueTest = new System.Windows.Forms.LinkLabel();
 			this.cmdBackupCurrentTT = new System.Windows.Forms.LinkLabel();
@@ -100,7 +101,6 @@ namespace EZAE
 			this.cmdUseButterfly = new System.Windows.Forms.LinkLabel();
 			this.lblSequenceFileName = new System.Windows.Forms.Label();
 			this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-			this.cmdCompareSequence = new System.Windows.Forms.LinkLabel();
 			this.tabControl1.SuspendLayout();
 			this.tabControl.SuspendLayout();
 			this.tabSetupPC.SuspendLayout();
@@ -804,7 +804,7 @@ namespace EZAE
 			// 
 			// tabSetSequence
 			// 
-			this.tabSetSequence.Controls.Add(this.cmdCompareSequence);
+			this.tabSetSequence.Controls.Add(this.cmdCheckSequence);
 			this.tabSetSequence.Controls.Add(this.cmdCreateFFC);
 			this.tabSetSequence.Controls.Add(this.cmdInstallTrueTest);
 			this.tabSetSequence.Controls.Add(this.cmdBackupCurrentTT);
@@ -819,6 +819,17 @@ namespace EZAE
 			this.tabSetSequence.Text = "Setup TrueTest";
 			this.tabSetSequence.UseVisualStyleBackColor = true;
 			this.tabSetSequence.Enter += new System.EventHandler(this.tabSetSequence_Enter);
+			// 
+			// cmdCheckSequence
+			// 
+			this.cmdCheckSequence.AutoSize = true;
+			this.cmdCheckSequence.Location = new System.Drawing.Point(12, 49);
+			this.cmdCheckSequence.Name = "cmdCheckSequence";
+			this.cmdCheckSequence.Size = new System.Drawing.Size(90, 13);
+			this.cmdCheckSequence.TabIndex = 64;
+			this.cmdCheckSequence.TabStop = true;
+			this.cmdCheckSequence.Text = "Check Sequence";
+			this.cmdCheckSequence.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCheckSequence_LinkClicked);
 			// 
 			// cmdCreateFFC
 			// 
@@ -927,17 +938,6 @@ namespace EZAE
 			this.lblSequenceFileName.Size = new System.Drawing.Size(0, 13);
 			this.lblSequenceFileName.TabIndex = 27;
 			// 
-			// cmdCompareSequence
-			// 
-			this.cmdCompareSequence.AutoSize = true;
-			this.cmdCompareSequence.Location = new System.Drawing.Point(12, 49);
-			this.cmdCompareSequence.Name = "cmdCompareSequence";
-			this.cmdCompareSequence.Size = new System.Drawing.Size(106, 13);
-			this.cmdCompareSequence.TabIndex = 64;
-			this.cmdCompareSequence.TabStop = true;
-			this.cmdCompareSequence.Text = "Compare Sequences";
-			this.cmdCompareSequence.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCompareSequence_LinkClicked);
-			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1037,7 +1037,7 @@ namespace EZAE
 		private System.Windows.Forms.LinkLabel cmdOpenTCPClient;
 		private System.Windows.Forms.LinkLabel cmdOpenTCPServer;
 		private System.Windows.Forms.LinkLabel cmdOpenCopywhiz;
-		private System.Windows.Forms.LinkLabel cmdCompareSequence;
+		private System.Windows.Forms.LinkLabel cmdCheckSequence;
 	}
 }
 

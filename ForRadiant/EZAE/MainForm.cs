@@ -955,9 +955,9 @@ namespace EZAE
             }
         }
 
-		private void cmdCompareSequence_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		private void cmdCheckSequence_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
 		{
-            string filepath = Path.GetFullPath(@"Tools\SequenceCompare.exe");
+            string filepath = Path.GetFullPath(@"Tools\SequenceCheck\SequenceCheck.exe");
             if (File.Exists(filepath))
             {
 

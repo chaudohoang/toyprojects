@@ -145,11 +145,18 @@ namespace SetSequence
                 }
                 else
                 {
-					if (cbFNumber.Text =="8")
-					{
-                        fnumber = "6";
+                    switch (cbFNumber.Text)
+                    {
+                        case ("8.0"):
+                            fnumber = "6";
+
+                            break;
+
+                        default:
+                            fnumber = cbFNumber.Text;
+                            break;
                     }
-                    
+
                 }
 
                 if (cbCameraRotation.Text == "Copy from first step")

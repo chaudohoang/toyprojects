@@ -24,6 +24,13 @@ Public Class Form1
 
 	Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 		SetVersionInfo()
+		If Directory.Exists("C:\Radiant Vision Systems Data\TrueTest\Sequence") Then
+			Dim latestfile = New DirectoryInfo("C:\Radiant Vision Systems Data\TrueTest\Sequence").GetFiles().OrderByDescending(Function(o) o.LastWriteTime).FirstOrDefault()
+			txtFile1.Text = latestfile.FullName
+			txtFile3.Text = latestfile.FullName
+			Dim defaultMasterSequence = latestfile.DirectoryName + "\Master\" + latestfile.Name
+			txtFile2.Text = defaultMasterSequence
+		End If
 	End Sub
 
 	Private Sub txtFile1_DragOver(sender As Object, e As DragEventArgs) Handles txtFile1.DragOver
@@ -53,7 +60,7 @@ Public Class Form1
 		btnCompare.Enabled = False
 
 		CheckForMatchingSequenceParameters(txtFile1.Text, txtFile2.Text)
-
+		CommLogUpdateText(vbCrLf)
 		btnCompare.Enabled = True
 	End Sub
 
@@ -255,6 +262,9 @@ Public Class Form1
 
 		CheckSequence()
 
+		If ListBox2.Items.Count > 0 AndAlso ListBox2.Items(ListBox2.Items.Count - 1).ToString() <> vbCrLf Then
+			CommLogUpdateText2(vbCrLf)
+		End If
 		btnCheck.Enabled = True
 
 	End Sub
@@ -365,6 +375,7 @@ Public Class Form1
 	Private Sub btnShowSettings_Click(sender As Object, e As EventArgs) Handles btnShowSettings.Click
 		btnShowSettings.Enabled = False
 		ShowMeasSettings()
+		CommLogUpdateText2(vbCrLf)
 		btnShowSettings.Enabled = True
 	End Sub
 
@@ -384,7 +395,42 @@ Public Class Form1
 		For index = 0 To nodes3.Count - 1
 			If sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
 				Dim FocusDistance = nodes3(index).SelectSingleNode("LensDistance").InnerText
-				Dim FNumber = nodes3(index).SelectSingleNode("LensfStop").InnerText.Replace("2.5", "2.3").Replace("3", "2.8").Replace("3.5", "3.3").Replace("4.5", "4.7").Replace("5", "5.6").Replace("5.5", "6.7").Replace("6", "8.0").Replace("6.5", "9.5").Replace("7", "11").Replace("7.5", "13").Replace("8", "16").Replace("8.5", "19").Replace("9", "22")
+				Dim FNumber = nodes3(index).SelectSingleNode("LensfStop").InnerText
+				Select Case FNumber
+					Case "2"
+						FNumber = "2.0"
+					Case "2.5"
+						FNumber = "2.3"
+					Case "3"
+						FNumber = "2.8"
+					Case "3.5"
+						FNumber = "4.0"
+					Case "4"
+						FNumber = "3.3"
+					Case "4.5"
+						FNumber = "4.7"
+					Case "5"
+						FNumber = "5.6"
+					Case "5.5"
+						FNumber = "6.7"
+					Case "6"
+						FNumber = "8.0"
+					Case "6.5"
+						FNumber = "9.5"
+					Case "7"
+						FNumber = "11"
+					Case "7.5"
+						FNumber = "13"
+					Case "8"
+						FNumber = "16"
+					Case "8.5"
+						FNumber = "19"
+					Case "9"
+						FNumber = "22"
+
+					Case Else
+
+				End Select
 				Dim CameraRotation = nodes3(index).SelectSingleNode("CameraRotation").InnerText
 				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
 				For Each childNode As XmlNode In node3.ChildNodes
@@ -400,5 +446,27 @@ Public Class Form1
 				CommLogUpdateText2("SN : " + SN + " , Step : " + nodes3(index).SelectSingleNode("Name").InnerText + " , Focus : " + FocusDistance + " , F-number : " + FNumber + " , Rotation : " + CameraRotation + " , Subframe : " + subframe + " , ColorCalID : " + CCID + " , ImageScalingID : " + IMCID + " , FlatFieldID : " + FFID)
 			End If
 		Next
+	End Sub
+
+	Private Sub btnUseLastModified1_Click(sender As Object, e As EventArgs) Handles btnUseLastModified1.Click
+		If Directory.Exists("C:\Radiant Vision Systems Data\TrueTest\Sequence") Then
+			Dim latestfile = New DirectoryInfo("C:\Radiant Vision Systems Data\TrueTest\Sequence").GetFiles().OrderByDescending(Function(o) o.LastWriteTime).FirstOrDefault()
+			txtFile1.Text = latestfile.FullName
+		End If
+	End Sub
+
+	Private Sub btnUseDefaultMaster_Click(sender As Object, e As EventArgs) Handles btnUseDefaultMaster.Click
+		If Directory.Exists("C:\Radiant Vision Systems Data\TrueTest\Sequence") Then
+			Dim latestfile = New DirectoryInfo("C:\Radiant Vision Systems Data\TrueTest\Sequence").GetFiles().OrderByDescending(Function(o) o.LastWriteTime).FirstOrDefault()
+			Dim defaultMasterSequence = latestfile.DirectoryName + "\Master\" + latestfile.Name
+			txtFile2.Text = defaultMasterSequence
+		End If
+	End Sub
+
+	Private Sub btnUseLastModified3_Click(sender As Object, e As EventArgs) Handles btnUseLastModified3.Click
+		If Directory.Exists("C:\Radiant Vision Systems Data\TrueTest\Sequence") Then
+			Dim latestfile = New DirectoryInfo("C:\Radiant Vision Systems Data\TrueTest\Sequence").GetFiles().OrderByDescending(Function(o) o.LastWriteTime).FirstOrDefault()
+			txtFile3.Text = latestfile.FullName
+		End If
 	End Sub
 End Class

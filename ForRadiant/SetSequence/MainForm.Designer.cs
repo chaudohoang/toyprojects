@@ -199,7 +199,7 @@
 			this.cbFNumber.Items.AddRange(new object[] {
             "",
             "Copy from first step",
-            "8"});
+            "8.0"});
 			this.cbFNumber.Location = new System.Drawing.Point(99, 205);
 			this.cbFNumber.Name = "cbFNumber";
 			this.cbFNumber.Size = new System.Drawing.Size(148, 21);

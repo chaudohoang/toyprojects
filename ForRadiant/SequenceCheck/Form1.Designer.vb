@@ -36,7 +36,13 @@ Partial Class Form1
 		Me.Label4 = New System.Windows.Forms.Label()
 		Me.TabControl1 = New System.Windows.Forms.TabControl()
 		Me.TabPage1 = New System.Windows.Forms.TabPage()
+		Me.btnUseDefaultMaster = New System.Windows.Forms.Button()
+		Me.btnUseLastModified1 = New System.Windows.Forms.Button()
+		Me.cbxIgnoreList = New System.Windows.Forms.ComboBox()
 		Me.TabPage2 = New System.Windows.Forms.TabPage()
+		Me.btnUseLastModified3 = New System.Windows.Forms.Button()
+		Me.btnShowSettings = New System.Windows.Forms.Button()
+		Me.btnClearlog2 = New System.Windows.Forms.Button()
 		Me.btnCheck = New System.Windows.Forms.Button()
 		Me.chkCalNone = New System.Windows.Forms.CheckBox()
 		Me.cbxSubframe = New System.Windows.Forms.ComboBox()
@@ -46,9 +52,6 @@ Partial Class Form1
 		Me.Label5 = New System.Windows.Forms.Label()
 		Me.txtFile3 = New System.Windows.Forms.TextBox()
 		Me.btnBrowse3 = New System.Windows.Forms.Button()
-		Me.cbxIgnoreList = New System.Windows.Forms.ComboBox()
-		Me.btnClearlog2 = New System.Windows.Forms.Button()
-		Me.btnShowSettings = New System.Windows.Forms.Button()
 		Me.TabControl1.SuspendLayout()
 		Me.TabPage1.SuspendLayout()
 		Me.TabPage2.SuspendLayout()
@@ -74,7 +77,7 @@ Partial Class Form1
 		'
 		'btnBrowse1
 		'
-		Me.btnBrowse1.Location = New System.Drawing.Point(681, 9)
+		Me.btnBrowse1.Location = New System.Drawing.Point(773, 9)
 		Me.btnBrowse1.Name = "btnBrowse1"
 		Me.btnBrowse1.Size = New System.Drawing.Size(75, 23)
 		Me.btnBrowse1.TabIndex = 2
@@ -83,7 +86,7 @@ Partial Class Form1
 		'
 		'btnBrowse2
 		'
-		Me.btnBrowse2.Location = New System.Drawing.Point(681, 37)
+		Me.btnBrowse2.Location = New System.Drawing.Point(773, 37)
 		Me.btnBrowse2.Name = "btnBrowse2"
 		Me.btnBrowse2.Size = New System.Drawing.Size(75, 23)
 		Me.btnBrowse2.TabIndex = 5
@@ -110,9 +113,9 @@ Partial Class Form1
 		'
 		'btnCompare
 		'
-		Me.btnCompare.Location = New System.Drawing.Point(762, 9)
+		Me.btnCompare.Location = New System.Drawing.Point(854, 9)
 		Me.btnCompare.Name = "btnCompare"
-		Me.btnCompare.Size = New System.Drawing.Size(99, 23)
+		Me.btnCompare.Size = New System.Drawing.Size(88, 51)
 		Me.btnCompare.TabIndex = 6
 		Me.btnCompare.Text = "Compare"
 		Me.btnCompare.UseVisualStyleBackColor = True
@@ -124,7 +127,7 @@ Partial Class Form1
 		Me.ListBox1.Location = New System.Drawing.Point(77, 97)
 		Me.ListBox1.Name = "ListBox1"
 		Me.ListBox1.ScrollAlwaysVisible = True
-		Me.ListBox1.Size = New System.Drawing.Size(790, 381)
+		Me.ListBox1.Size = New System.Drawing.Size(865, 381)
 		Me.ListBox1.TabIndex = 7
 		'
 		'Label3
@@ -138,9 +141,9 @@ Partial Class Form1
 		'
 		'btnClearlog
 		'
-		Me.btnClearlog.Location = New System.Drawing.Point(762, 37)
+		Me.btnClearlog.Location = New System.Drawing.Point(6, 135)
 		Me.btnClearlog.Name = "btnClearlog"
-		Me.btnClearlog.Size = New System.Drawing.Size(99, 23)
+		Me.btnClearlog.Size = New System.Drawing.Size(65, 79)
 		Me.btnClearlog.TabIndex = 9
 		Me.btnClearlog.Text = "Clear log"
 		Me.btnClearlog.UseVisualStyleBackColor = True
@@ -161,11 +164,13 @@ Partial Class Form1
 		Me.TabControl1.Location = New System.Drawing.Point(12, 12)
 		Me.TabControl1.Name = "TabControl1"
 		Me.TabControl1.SelectedIndex = 0
-		Me.TabControl1.Size = New System.Drawing.Size(881, 511)
+		Me.TabControl1.Size = New System.Drawing.Size(959, 511)
 		Me.TabControl1.TabIndex = 10
 		'
 		'TabPage1
 		'
+		Me.TabPage1.Controls.Add(Me.btnUseDefaultMaster)
+		Me.TabPage1.Controls.Add(Me.btnUseLastModified1)
 		Me.TabPage1.Controls.Add(Me.cbxIgnoreList)
 		Me.TabPage1.Controls.Add(Me.Label2)
 		Me.TabPage1.Controls.Add(Me.Label1)
@@ -181,13 +186,41 @@ Partial Class Form1
 		Me.TabPage1.Location = New System.Drawing.Point(4, 22)
 		Me.TabPage1.Name = "TabPage1"
 		Me.TabPage1.Padding = New System.Windows.Forms.Padding(3)
-		Me.TabPage1.Size = New System.Drawing.Size(873, 485)
+		Me.TabPage1.Size = New System.Drawing.Size(951, 485)
 		Me.TabPage1.TabIndex = 0
 		Me.TabPage1.Text = "Compare Sequence Analyses"
 		Me.TabPage1.UseVisualStyleBackColor = True
 		'
+		'btnUseDefaultMaster
+		'
+		Me.btnUseDefaultMaster.Location = New System.Drawing.Point(681, 37)
+		Me.btnUseDefaultMaster.Name = "btnUseDefaultMaster"
+		Me.btnUseDefaultMaster.Size = New System.Drawing.Size(86, 23)
+		Me.btnUseDefaultMaster.TabIndex = 12
+		Me.btnUseDefaultMaster.Text = "Default Master"
+		Me.btnUseDefaultMaster.UseVisualStyleBackColor = True
+		'
+		'btnUseLastModified1
+		'
+		Me.btnUseLastModified1.Location = New System.Drawing.Point(681, 9)
+		Me.btnUseLastModified1.Name = "btnUseLastModified1"
+		Me.btnUseLastModified1.Size = New System.Drawing.Size(86, 23)
+		Me.btnUseLastModified1.TabIndex = 11
+		Me.btnUseLastModified1.Text = "Last Modified"
+		Me.btnUseLastModified1.UseVisualStyleBackColor = True
+		'
+		'cbxIgnoreList
+		'
+		Me.cbxIgnoreList.FormattingEnabled = True
+		Me.cbxIgnoreList.Items.AddRange(New Object() {"", "Notes,DllOutputPath,DllDefFolder"})
+		Me.cbxIgnoreList.Location = New System.Drawing.Point(77, 65)
+		Me.cbxIgnoreList.Name = "cbxIgnoreList"
+		Me.cbxIgnoreList.Size = New System.Drawing.Size(598, 21)
+		Me.cbxIgnoreList.TabIndex = 10
+		'
 		'TabPage2
 		'
+		Me.TabPage2.Controls.Add(Me.btnUseLastModified3)
 		Me.TabPage2.Controls.Add(Me.btnShowSettings)
 		Me.TabPage2.Controls.Add(Me.btnClearlog2)
 		Me.TabPage2.Controls.Add(Me.btnCheck)
@@ -202,14 +235,41 @@ Partial Class Form1
 		Me.TabPage2.Location = New System.Drawing.Point(4, 22)
 		Me.TabPage2.Name = "TabPage2"
 		Me.TabPage2.Padding = New System.Windows.Forms.Padding(3)
-		Me.TabPage2.Size = New System.Drawing.Size(873, 485)
+		Me.TabPage2.Size = New System.Drawing.Size(951, 485)
 		Me.TabPage2.TabIndex = 1
 		Me.TabPage2.Text = "Check Sequence Measurement"
 		Me.TabPage2.UseVisualStyleBackColor = True
 		'
+		'btnUseLastModified3
+		'
+		Me.btnUseLastModified3.Location = New System.Drawing.Point(672, 8)
+		Me.btnUseLastModified3.Name = "btnUseLastModified3"
+		Me.btnUseLastModified3.Size = New System.Drawing.Size(87, 23)
+		Me.btnUseLastModified3.TabIndex = 17
+		Me.btnUseLastModified3.Text = "Last Modified"
+		Me.btnUseLastModified3.UseVisualStyleBackColor = True
+		'
+		'btnShowSettings
+		'
+		Me.btnShowSettings.Location = New System.Drawing.Point(846, 35)
+		Me.btnShowSettings.Name = "btnShowSettings"
+		Me.btnShowSettings.Size = New System.Drawing.Size(99, 23)
+		Me.btnShowSettings.TabIndex = 16
+		Me.btnShowSettings.Text = "Show all settings"
+		Me.btnShowSettings.UseVisualStyleBackColor = True
+		'
+		'btnClearlog2
+		'
+		Me.btnClearlog2.Location = New System.Drawing.Point(6, 135)
+		Me.btnClearlog2.Name = "btnClearlog2"
+		Me.btnClearlog2.Size = New System.Drawing.Size(65, 79)
+		Me.btnClearlog2.TabIndex = 15
+		Me.btnClearlog2.Text = "Clear log"
+		Me.btnClearlog2.UseVisualStyleBackColor = True
+		'
 		'btnCheck
 		'
-		Me.btnCheck.Location = New System.Drawing.Point(753, 8)
+		Me.btnCheck.Location = New System.Drawing.Point(846, 8)
 		Me.btnCheck.Name = "btnCheck"
 		Me.btnCheck.Size = New System.Drawing.Size(99, 23)
 		Me.btnCheck.TabIndex = 14
@@ -251,7 +311,7 @@ Partial Class Form1
 		Me.ListBox2.Location = New System.Drawing.Point(77, 97)
 		Me.ListBox2.Name = "ListBox2"
 		Me.ListBox2.ScrollAlwaysVisible = True
-		Me.ListBox2.Size = New System.Drawing.Size(790, 381)
+		Me.ListBox2.Size = New System.Drawing.Size(868, 381)
 		Me.ListBox2.TabIndex = 9
 		'
 		'Label6
@@ -283,45 +343,18 @@ Partial Class Form1
 		'
 		'btnBrowse3
 		'
-		Me.btnBrowse3.Location = New System.Drawing.Point(672, 8)
+		Me.btnBrowse3.Location = New System.Drawing.Point(765, 8)
 		Me.btnBrowse3.Name = "btnBrowse3"
 		Me.btnBrowse3.Size = New System.Drawing.Size(75, 23)
 		Me.btnBrowse3.TabIndex = 5
 		Me.btnBrowse3.Text = "Browse"
 		Me.btnBrowse3.UseVisualStyleBackColor = True
 		'
-		'cbxIgnoreList
-		'
-		Me.cbxIgnoreList.FormattingEnabled = True
-		Me.cbxIgnoreList.Items.AddRange(New Object() {"", "Notes,DllOutputPath,DllDefFolder"})
-		Me.cbxIgnoreList.Location = New System.Drawing.Point(77, 65)
-		Me.cbxIgnoreList.Name = "cbxIgnoreList"
-		Me.cbxIgnoreList.Size = New System.Drawing.Size(598, 21)
-		Me.cbxIgnoreList.TabIndex = 10
-		'
-		'btnClearlog2
-		'
-		Me.btnClearlog2.Location = New System.Drawing.Point(672, 35)
-		Me.btnClearlog2.Name = "btnClearlog2"
-		Me.btnClearlog2.Size = New System.Drawing.Size(75, 23)
-		Me.btnClearlog2.TabIndex = 15
-		Me.btnClearlog2.Text = "Clear log"
-		Me.btnClearlog2.UseVisualStyleBackColor = True
-		'
-		'btnShowSettings
-		'
-		Me.btnShowSettings.Location = New System.Drawing.Point(753, 35)
-		Me.btnShowSettings.Name = "btnShowSettings"
-		Me.btnShowSettings.Size = New System.Drawing.Size(99, 23)
-		Me.btnShowSettings.TabIndex = 16
-		Me.btnShowSettings.Text = "Show all settings"
-		Me.btnShowSettings.UseVisualStyleBackColor = True
-		'
 		'Form1
 		'
 		Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
 		Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-		Me.ClientSize = New System.Drawing.Size(903, 529)
+		Me.ClientSize = New System.Drawing.Size(1006, 529)
 		Me.Controls.Add(Me.TabControl1)
 		Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
 		Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
@@ -363,4 +396,7 @@ Partial Class Form1
 	Friend WithEvents cbxIgnoreList As ComboBox
 	Friend WithEvents btnClearlog2 As Button
 	Friend WithEvents btnShowSettings As Button
+	Friend WithEvents btnUseDefaultMaster As Button
+	Friend WithEvents btnUseLastModified1 As Button
+	Friend WithEvents btnUseLastModified3 As Button
 End Class
