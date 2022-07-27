@@ -16,11 +16,6 @@ Public Class Form1
 
 	End Sub
 
-	'Chau added
-	'Added ability to drag and drop files to input box
-	Private Sub InputTextBox_DragEnter(sender As Object, e As DragEventArgs)
-
-	End Sub
 
 	Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 		SetVersionInfo()
