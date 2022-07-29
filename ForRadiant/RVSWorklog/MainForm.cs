@@ -64,6 +64,7 @@ namespace RVSWorklog
 					txtWorklog.Text = File.ReadAllText(logPath);
 				}				
 				btnAdd.Enabled = true;
+				btnExport.Enabled = true;
 			}
 		}
 
@@ -135,6 +136,29 @@ namespace RVSWorklog
 			if (File.Exists(logPath))
 			{
 				txtWorklog.Text = File.ReadAllText(logPath);
+			}
+		}
+
+		private void btnExport_Click(object sender, EventArgs e)
+		{
+			if (txtWorklog.Text=="")
+			{
+				MessageBox.Show("Empty Log !!!");
+			}
+			else
+			{
+				SaveFileDialog savefile = new SaveFileDialog();
+				// set a default file name
+				savefile.FileName = Path.GetFileName(logPath);
+				// set filters - this can be done in properties as well
+				savefile.Filter = "Text files (*.txt)|*.txt";
+				savefile.InitialDirectory = appdir;
+
+				if (savefile.ShowDialog() == DialogResult.OK)
+				{
+					using (StreamWriter sw = new StreamWriter(savefile.FileName))
+						sw.Write(txtWorklog.Text);
+				}
 			}
 		}
 	}

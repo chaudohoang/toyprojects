@@ -42,8 +42,9 @@ namespace RVSWorklog
 
 		private void Add_KeyDown(object sender, KeyEventArgs e)
 		{
-			if (e.Modifiers == Keys.Control && e.KeyCode == Keys.Enter)
+			if (e.Modifiers == Keys.Control && e.KeyCode == Keys.S)
 				btnSave_Click(this, new EventArgs());
 		}
+
 	}
 }

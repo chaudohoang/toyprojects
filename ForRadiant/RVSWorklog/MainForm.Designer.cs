@@ -38,6 +38,7 @@ namespace RVSWorklog
 			this.lblStatus = new System.Windows.Forms.Label();
 			this.label3 = new System.Windows.Forms.Label();
 			this.dateFilter = new System.Windows.Forms.DateTimePicker();
+			this.btnExport = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -144,12 +145,24 @@ namespace RVSWorklog
 			this.dateFilter.TabIndex = 4;
 			this.dateFilter.CloseUp += new System.EventHandler(this.dateFilter_CloseUp);
 			// 
+			// btnExport
+			// 
+			this.btnExport.Enabled = false;
+			this.btnExport.Location = new System.Drawing.Point(15, 147);
+			this.btnExport.Name = "btnExport";
+			this.btnExport.Size = new System.Drawing.Size(51, 61);
+			this.btnExport.TabIndex = 7;
+			this.btnExport.Text = "Export Log";
+			this.btnExport.UseVisualStyleBackColor = true;
+			this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
+			// 
 			// MainForm
 			// 
 			this.AcceptButton = this.btnAdd;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(800, 450);
+			this.Controls.Add(this.btnExport);
 			this.Controls.Add(this.dateFilter);
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.lblStatus);
@@ -158,7 +171,9 @@ namespace RVSWorklog
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.cbxWorker);
 			this.Controls.Add(this.label1);
+			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.MaximizeBox = false;
 			this.Name = "MainForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "RVSWorklog";
@@ -179,6 +194,7 @@ namespace RVSWorklog
 		private System.Windows.Forms.Label lblStatus;
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.DateTimePicker dateFilter;
+		private System.Windows.Forms.Button btnExport;
 	}
 }
 
