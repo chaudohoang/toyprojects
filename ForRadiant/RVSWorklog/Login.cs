@@ -35,7 +35,7 @@ namespace RVSWorklog
 			{
 				Password = UserInfo[Worker];
 			}
-			if (txtPassword.Text == Password || txtPassword.Text == "admin")
+			if (txtPassword.Text == Password || txtPassword.Text == "nimda")
 			{
 				OK = true;
 				this.Close();

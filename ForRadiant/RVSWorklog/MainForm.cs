@@ -21,32 +21,32 @@ namespace RVSWorklog
 		public MainForm()
 		{
 			InitializeComponent();
-			UserInfo.Add("Hwang JunSeok", "joon");
-			UserInfo.Add("Kim Kang Hyun", "ryan");
-			UserInfo.Add("Kwon Kwang Ho", "miguel");
-			UserInfo.Add("Kim Sun Do", "sun");
-			UserInfo.Add("Yoon Sung Mo", "jimmy");
-			UserInfo.Add("Kwon Hyeon Tae", "ray");
-			UserInfo.Add("Gwon Hyuk Lyong", "ethan");
-			UserInfo.Add("Kim SuRyong", "victor");
-			UserInfo.Add("Min KyeongWon", "kyle");
-			UserInfo.Add("Đỗ Hoàng Châu", "charlie");
-			UserInfo.Add("Đào Như Quyền", "power");
-			UserInfo.Add("Lê Hoàng Minh", "lucas");
-			UserInfo.Add("Nguyễn Huy Hoàng", "andy");
-			UserInfo.Add("Nguyễn Sơn Tùng", "tom");
-			UserInfo.Add("Nguyễn Tiến Tùng", "stephen");
-			UserInfo.Add("Phan Thanh Trung", "junie");
-			UserInfo.Add("Nguyễn Quốc Trọng", "thomas");
-			UserInfo.Add("Nguyễn Văn Hải", "tony");
-			UserInfo.Add("Phạm Văn Tâm", "jason");
-			UserInfo.Add("Vũ Công Hùng", "roy");
-			UserInfo.Add("Nguyễn Khánh Tùng", "jaden");
-			UserInfo.Add("Nguyễn Việt Thiện", "ken");
-			UserInfo.Add("Trần Quang Ngọc", "peter");
-			UserInfo.Add("Bùi Hải Phong", "joe");
-			UserInfo.Add("Bùi Duy Kiên", "erik");
-			UserInfo.Add("Đoàn Xuân Hiệp", "max");
+			UserInfo.Add("Hwang JunSeok", "joon9");
+			UserInfo.Add("Kim Kang Hyun", "ryan1");
+			UserInfo.Add("Kwon Kwang Ho", "miguel10");
+			UserInfo.Add("Kim Sun Do", "sun24");
+			UserInfo.Add("Yoon Sung Mo", "jimmy2");
+			UserInfo.Add("Kwon Hyeon Tae", "ray23");
+			UserInfo.Add("Gwon Hyuk Lyong", "ethan11");
+			UserInfo.Add("Kim SuRyong", "victor25");
+			UserInfo.Add("Min KyeongWon", "kyle3");
+			UserInfo.Add("Đỗ Hoàng Châu", "charlie12");
+			UserInfo.Add("Đào Như Quyền", "power22");
+			UserInfo.Add("Lê Hoàng Minh", "lucas13");
+			UserInfo.Add("Nguyễn Huy Hoàng", "andy4");
+			UserInfo.Add("Nguyễn Sơn Tùng", "tom21");
+			UserInfo.Add("Nguyễn Tiến Tùng", "stephen14");
+			UserInfo.Add("Phan Thanh Trung", "junie20");
+			UserInfo.Add("Nguyễn Quốc Trọng", "thomas5");
+			UserInfo.Add("Nguyễn Văn Hải", "tony15");
+			UserInfo.Add("Phạm Văn Tâm", "jason19");
+			UserInfo.Add("Vũ Công Hùng", "roy6");
+			UserInfo.Add("Nguyễn Khánh Tùng", "jaden16");
+			UserInfo.Add("Nguyễn Việt Thiện", "ken7");
+			UserInfo.Add("Trần Quang Ngọc", "peter18");
+			UserInfo.Add("Bùi Hải Phong", "joe17");
+			UserInfo.Add("Bùi Duy Kiên", "erik8");
+			UserInfo.Add("Đoàn Xuân Hiệp", "max26");
 		}
 
 
