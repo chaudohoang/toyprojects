@@ -56,7 +56,8 @@ namespace RVSWorklog
 			login.ShowDialog();
 			if (login.OK)
 			{
-				logPath = Path.Combine(appdir + "\\log", DateTime.Now.ToString("yyyyMMdd")+"_" +cbxWorker.Text + ".txt");
+				//logPath = Path.Combine(appdir + "\\log", DateTime.Now.ToString("yyyyMMdd")+"_" +cbxWorker.Text + ".txt");
+				logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\RVSWorklog", DateTime.Now.ToString("yyyyMMdd") + "_" + cbxWorker.Text + ".txt");
 				txtWorklog.Text = "";
 				if (File.Exists(logPath))
 				{
@@ -72,12 +73,14 @@ namespace RVSWorklog
 			add.ShowDialog();
 			if (add.saved)
 			{
-				logPath = Path.Combine(appdir + "\\log", add.date+ "_" + cbxWorker.Text + ".txt");
+				//logPath = Path.Combine(appdir + "\\log", add.date+ "_" + cbxWorker.Text + ".txt");
+				logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\RVSWorklog", add.date + "_" + cbxWorker.Text + ".txt");
 				txtWorklog.Text = "";
 				if (!File.Exists(logPath))
 				{
 					// Create a file to write to.
-					Directory.CreateDirectory(appdir + "\\log");
+					//Directory.CreateDirectory(appdir + "\\log");
+					Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\RVSWorklog");
 					using (StreamWriter sw = File.CreateText(logPath))
 					{
 
@@ -126,7 +129,8 @@ namespace RVSWorklog
 
 		private void dateFilter_CloseUp(object sender, EventArgs e)
 		{
-			logPath = Path.Combine(appdir + "\\log", dateFilter.Value.ToString("yyyyMMdd") + "_" + cbxWorker.Text + ".txt");
+			//logPath = Path.Combine(appdir + "\\log", dateFilter.Value.ToString("yyyyMMdd") + "_" + cbxWorker.Text + ".txt");
+			logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\RVSWorklog", dateFilter.Value.ToString("yyyyMMdd") + "_" + cbxWorker.Text + ".txt");
 			txtWorklog.Text = "";
 			if (File.Exists(logPath))
 			{
