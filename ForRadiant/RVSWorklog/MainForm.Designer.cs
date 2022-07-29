@@ -142,7 +142,7 @@ namespace RVSWorklog
 			this.dateFilter.Name = "dateFilter";
 			this.dateFilter.Size = new System.Drawing.Size(103, 20);
 			this.dateFilter.TabIndex = 4;
-			this.dateFilter.ValueChanged += new System.EventHandler(this.dateFilter_ValueChanged);
+			this.dateFilter.CloseUp += new System.EventHandler(this.dateFilter_CloseUp);
 			// 
 			// MainForm
 			// 

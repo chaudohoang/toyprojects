@@ -100,16 +100,6 @@ namespace RVSWorklog
 				btnAdd_Click(this, new EventArgs());
 		}
 
-		private void dateFilter_ValueChanged(object sender, EventArgs e)
-		{
-			logPath = Path.Combine(appdir + "\\log", dateFilter.Value.ToString("yyyyMMdd") + "_" + cbxWorker.Text + ".txt");
-			txtWorklog.Text = "";
-			if (File.Exists(logPath))
-			{				
-				txtWorklog.Text = File.ReadAllText(logPath);
-			}
-		}
-
 		private void txtWorklog_TextChanged(object sender, EventArgs e)
 		{
 			txtWorklog.SelectionStart = txtWorklog.Text.Length;
@@ -132,6 +122,16 @@ namespace RVSWorklog
 			//            this.Text, versionInfo.ToString(), lastBuilt);
 			this.Text = string.Format("{0} - {1}",
 						this.Text, versionInfo.ToString());
+		}
+
+		private void dateFilter_CloseUp(object sender, EventArgs e)
+		{
+			logPath = Path.Combine(appdir + "\\log", dateFilter.Value.ToString("yyyyMMdd") + "_" + cbxWorker.Text + ".txt");
+			txtWorklog.Text = "";
+			if (File.Exists(logPath))
+			{
+				txtWorklog.Text = File.ReadAllText(logPath);
+			}
 		}
 	}
 }
