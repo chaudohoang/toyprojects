@@ -15,6 +15,14 @@ namespace SetSequence
 {
     public partial class MainForm : Form
     {
+        private string subframeregion = "";
+        private string lensdistance = "";
+        private string fnumber = "";
+        private string colorcalID = "";
+        private string imagescalingID = "";
+        private string flatfieldID = "";
+        private string cameraRotation = "";
+
         public MainForm()
         {
             InitializeComponent();
@@ -57,20 +65,99 @@ namespace SetSequence
         private void btnApply_Click(object sender, EventArgs e)
         {
             btnApply.Enabled = false;
-        
+
+            GetValues(lblSequencePath.Text,cbSubframe.Text,cbCalBox.Text,cbFocusDistance.Text,cbFNumber.Text,cbCameraRotation.Text);
+            SetValues(lblSequencePath.Text);
+
+            
+            try
+            {
+                string[] additionalTargets;
+                additionalTargets = txtAdditionalSequence.Text.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string item in additionalTargets)
+                {
+                    SetValues(item);
+                }
+            }
+            catch (Exception)
+            {
+            }
+
+
+            Random m_Rnd = new Random();
+            Color tempcolor;
+            tempcolor = label1.ForeColor;
+            while (label1.ForeColor == tempcolor)
+            {
+                label1.ForeColor = Color.FromArgb(255, m_Rnd.Next(0, 255), m_Rnd.Next(0, 255), m_Rnd.Next(0, 255));
+            }
+            label1.Text = "Done!";
+            btnApply.Enabled = true;
+        }
+
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            SetVersionInfo();
+            if (Directory.Exists(@"C:\Radiant Vision Systems Data\TrueTest\Sequence"))
+            {
+                var latestfile = new DirectoryInfo(@"C:\Radiant Vision Systems Data\TrueTest\Sequence").GetFiles().OrderByDescending(o => o.LastWriteTime).FirstOrDefault();
+                lblSequencePath.Text = latestfile.FullName;
+            }
+        }
+
+        private void btnBrowseAdditional_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog dialog = new OpenFileDialog())
+            {
+                dialog.InitialDirectory = @"C:\Radiant Vision Systems Data\TrueTest\Sequence";
+                dialog.Multiselect = true;
+                if (dialog.ShowDialog(this) == DialogResult.OK)
+                {
+                    string[] files = dialog.FileNames;
+                    foreach (string file in files)
+                    {
+                        txtAdditionalSequence.Text += file + "\r\n";
+                    }
+                }
+            }
+        }
+
+        private void txtAdditionalSequence_DragDrop(object sender, DragEventArgs e)
+        {
+            e.Effect = DragDropEffects.Copy;
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            if (files != null && files.Length != 0)
+            {
+                foreach (string file in files)
+                {
+                    txtAdditionalSequence.Text += file + "\r\n";
+                }
+            }
+        }
+
+        private void txtAdditionalSequence_DragEnter(object sender, DragEventArgs e)
+        {
+            e.Effect = DragDropEffects.Copy;
+        }
+
+        private void lblAbout_DoubleClick(object sender, EventArgs e)
+        {
+            Form AboutForm = new About();
+            AboutForm.ShowDialog();
+        }
+
+        private void GetValues(string xmlFile, string subframeSetting, string calSetting, string focusSetting, string fNumberSetting, string rotationSetting)
+        {
             XmlNode node;
             XmlNodeList nodes;
 
             var xmlDoc = new XmlDocument();
-            if (File.Exists(@lblSequencePath.Text))
+            if (File.Exists(@xmlFile))
             {
-                xmlDoc.Load(lblSequencePath.Text);
+                xmlDoc.Load(xmlFile);
 
-                string subframeregion, lensdistance,fnumber, colorcalID, imagescalingID, flatfieldID, cameraRotation;
-
-                subframeregion = lensdistance =fnumber= colorcalID = imagescalingID = flatfieldID = cameraRotation = "";
-
-                if (cbSubframe.Text == "Copy from first step")
+                if (subframeSetting == "Copy from first step")
                 {
                     node = xmlDoc.DocumentElement.SelectSingleNode("/Sequence/Items/SequenceItem/PatternSetupName");
                     string firstPatternName = node.InnerText;
@@ -85,10 +172,10 @@ namespace SetSequence
                 }
                 else
                 {
-                    subframeregion = cbSubframe.Text;
+                    subframeregion = subframeSetting;
                 }
 
-                if (cbCalBox.Text == "Copy from first step")
+                if (calSetting == "Copy from first step")
                 {
                     node = xmlDoc.DocumentElement.SelectSingleNode("/Sequence/Items/SequenceItem/PatternSetupName");
                     string firstPatternName = node.InnerText;
@@ -106,13 +193,13 @@ namespace SetSequence
 
                 else
                 {
-                    string[] values = cbCalBox.Text.Split(',');
+                    string[] values = calSetting.Split(',');
                     colorcalID = values[1];
                     imagescalingID = values[2];
                     flatfieldID = values[3];
                 }
 
-                if (cbFocusDistance.Text == "Copy from first step")
+                if (focusSetting == "Copy from first step")
                 {
                     node = xmlDoc.DocumentElement.SelectSingleNode("/Sequence/Items/SequenceItem/PatternSetupName");
                     string firstPatternName = node.InnerText;
@@ -127,10 +214,10 @@ namespace SetSequence
                 }
                 else
                 {
-                    lensdistance = cbFocusDistance.Text;
+                    lensdistance = focusSetting;
                 }
 
-                if (cbFNumber.Text == "Copy from first step")
+                if (fNumberSetting == "Copy from first step")
                 {
                     node = xmlDoc.DocumentElement.SelectSingleNode("/Sequence/Items/SequenceItem/PatternSetupName");
                     string firstPatternName = node.InnerText;
@@ -145,7 +232,7 @@ namespace SetSequence
                 }
                 else
                 {
-                    switch (cbFNumber.Text)
+                    switch (fNumberSetting)
                     {
                         case ("8.0"):
                             fnumber = "6";
@@ -159,7 +246,7 @@ namespace SetSequence
 
                 }
 
-                if (cbCameraRotation.Text == "Copy from first step")
+                if (rotationSetting == "Copy from first step")
                 {
                     node = xmlDoc.DocumentElement.SelectSingleNode("/Sequence/Items/SequenceItem/PatternSetupName");
                     string firstPatternName = node.InnerText;
@@ -174,9 +261,21 @@ namespace SetSequence
                 }
                 else
                 {
-                    cameraRotation = cbCameraRotation.Text;
+                    cameraRotation = rotationSetting;
                 }
 
+            }
+
+        }
+
+        private void SetValues(string xmlFile)
+		{
+            XmlNodeList nodes;
+
+            var xmlDoc = new XmlDocument();
+            if (File.Exists(@xmlFile))
+            {
+                xmlDoc.Load(xmlFile);
                 nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/LensDistance");
                 for (int index = 0; index <= nodes.Count - 1; index++)
                 {
@@ -241,88 +340,14 @@ namespace SetSequence
                 }
 
                 XmlWriterSettings settings = new XmlWriterSettings { Indent = true };
-                XmlWriter writer = XmlWriter.Create(lblSequencePath.Text, settings);
+                XmlWriter writer = XmlWriter.Create(xmlFile, settings);
                 xmlDoc.Save(writer);
                 if (writer != null)
                     writer.Close();
-				try
-				{
-                    string[] additionalTargets;
-                    additionalTargets = txtAdditionalSequence.Text.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                    foreach (string item in additionalTargets)
-                    {
-                        XmlWriter additionalWriter = XmlWriter.Create(item, settings);
-                        xmlDoc.Save(additionalWriter);
-                        if (additionalWriter != null)
-                            additionalWriter.Close();
-                    }
-                }
-				catch (Exception)
-				{
-				}
-                
 
-                Random m_Rnd = new Random();
-                Color tempcolor;
-                tempcolor = label1.ForeColor;
-                while (label1.ForeColor == tempcolor)
-                {
-                    label1.ForeColor = Color.FromArgb(255, m_Rnd.Next(0, 255), m_Rnd.Next(0, 255), m_Rnd.Next(0, 255));
-                }
-                label1.Text = "Done!";
-                btnApply.Enabled = true;
+
             }
         }
+    }
 
-        private void MainForm_Load(object sender, EventArgs e)
-        {
-            SetVersionInfo();
-            if (Directory.Exists(@"C:\Radiant Vision Systems Data\TrueTest\Sequence"))
-            {
-                var latestfile = new DirectoryInfo(@"C:\Radiant Vision Systems Data\TrueTest\Sequence").GetFiles().OrderByDescending(o => o.LastWriteTime).FirstOrDefault();
-                lblSequencePath.Text = latestfile.FullName;
-            }
-        }
-
-		private void btnBrowseAdditional_Click(object sender, EventArgs e)
-		{
-            using (OpenFileDialog dialog = new OpenFileDialog())
-            {
-                dialog.InitialDirectory = @"C:\Radiant Vision Systems Data\TrueTest\Sequence";
-                dialog.Multiselect = true;
-                if (dialog.ShowDialog(this) == DialogResult.OK)
-                {
-                    string[] files = dialog.FileNames;
-					foreach (string file in files)
-					{
-                        txtAdditionalSequence.Text += file + "\r\n";
-                    }
-                }
-            }
-        }
-
-		private void txtAdditionalSequence_DragDrop(object sender, DragEventArgs e)
-		{
-            e.Effect = DragDropEffects.Copy;
-            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            if (files != null && files.Length != 0)
-            {
-                foreach (string file in files)
-                {
-                    txtAdditionalSequence.Text += file+"\r\n";
-                }
-            }
-        }
-
-		private void txtAdditionalSequence_DragEnter(object sender, DragEventArgs e)
-		{
-            e.Effect = DragDropEffects.Copy;
-        }
-
-		private void lblAbout_DoubleClick(object sender, EventArgs e)
-		{
-            Form AboutForm = new About();
-            AboutForm.ShowDialog();
-        }
-	}
 }

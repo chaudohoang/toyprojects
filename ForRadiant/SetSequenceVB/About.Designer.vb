@@ -1,7 +1,7 @@
 ﻿
 Imports System
 
-Namespace SetSequence
+Namespace SetSequenceVB
 	Partial Class About
 		''' <summary>
 		''' Required designer variable.

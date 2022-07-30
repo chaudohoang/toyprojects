@@ -7,9 +7,17 @@ Imports System.Reflection
 Imports System.Windows.Forms
 Imports System.Xml
 
-Namespace SetSequence
-	Public Partial Class MainForm
+Namespace SetSequenceVB
+	Partial Public Class MainForm
 		Inherits Form
+
+		Private subframeregion As String = ""
+		Private lensdistance As String = ""
+		Private fnumber As String = ""
+		Private colorcalID As String = ""
+		Private imagescalingID As String = ""
+		Private flatfieldID As String = ""
+		Private cameraRotation As String = ""
 		Public Sub New()
 			InitializeComponent()
 		End Sub
@@ -67,24 +75,57 @@ Namespace SetSequence
 		Private Sub btnApply_Click(sender As Object, e As EventArgs) Handles btnApply.Click
 			btnApply.Enabled = False
 
+			GetValues(lblSequencePath.Text, cbSubframe.Text, cbCalBox.Text, cbFocusDistance.Text, cbFNumber.Text, cbCameraRotation.Text)
+			SetValues(lblSequencePath.Text)
+
+			Try
+				Dim additionalTargets As String()
+				additionalTargets = txtAdditionalSequence.Text.Split(New Char() {Microsoft.VisualBasic.Strings.ChrW(13), Microsoft.VisualBasic.Strings.ChrW(10)}, StringSplitOptions.RemoveEmptyEntries)
+				For Each item In additionalTargets
+					SetValues(item)
+				Next
+			Catch ex As Exception
+
+			End Try
+
+			Dim m_Rnd As Random = New Random()
+			Dim tempcolor As Color
+			tempcolor = label1.ForeColor
+			While label1.ForeColor = tempcolor
+				label1.ForeColor = Color.FromArgb(255, m_Rnd.Next(0, 255), m_Rnd.Next(0, 255), m_Rnd.Next(0, 255))
+			End While
+			label1.Text = "Done!"
+			btnApply.Enabled = True
+
+		End Sub
+
+		Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+			SetVersionInfo()
+			If Directory.Exists("C:\Radiant Vision Systems Data\TrueTest\Sequence") Then
+				Dim latestfile = New DirectoryInfo("C:\Radiant Vision Systems Data\TrueTest\Sequence").GetFiles().OrderByDescending(Function(o) o.LastWriteTime).FirstOrDefault()
+				lblSequencePath.Text = latestfile.FullName
+			End If
+		End Sub
+
+		Private Sub txtAdditionalSequence_DragDrop(sender As Object, e As DragEventArgs) Handles txtAdditionalSequence.DragDrop
+			e.Effect = DragDropEffects.Copy
+			Dim files = CType(e.Data.GetData(DataFormats.FileDrop), String())
+			If files IsNot Nothing AndAlso files.Length <> 0 Then
+				For Each file In files
+					txtAdditionalSequence.Text += file & Microsoft.VisualBasic.Constants.vbCrLf
+				Next
+			End If
+		End Sub
+
+		Private Sub GetValues(xmlFile As String, subframeSetting As String, calSetting As String, focusSetting As String, fNumberSetting As String, rotationSetting As String)
 			Dim node As XmlNode
 			Dim nodes As XmlNodeList
 
 			Dim xmlDoc = New XmlDocument()
-			If File.Exists(lblSequencePath.Text) Then
-				xmlDoc.Load(lblSequencePath.Text)
+			If File.Exists(xmlFile) Then
+				xmlDoc.Load(xmlFile)
 
-				Dim subframeregion, lensdistance, fnumber, colorcalID, imagescalingID, flatfieldID, cameraRotation As String
-
-				subframeregion = ""
-				lensdistance = ""
-				fnumber = ""
-				colorcalID = ""
-				imagescalingID = ""
-				flatfieldID = ""
-				cameraRotation = ""
-
-				If Equals(cbSubframe.Text, "Copy from first step") Then
+				If Equals(subframeSetting, "Copy from first step") Then
 					node = xmlDoc.DocumentElement.SelectSingleNode("/Sequence/Items/SequenceItem/PatternSetupName")
 					Dim firstPatternName = node.InnerText
 					nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
@@ -94,10 +135,10 @@ Namespace SetSequence
 						End If
 					Next
 				Else
-					subframeregion = cbSubframe.Text
+					subframeregion = subframeSetting
 				End If
 
-				If Equals(cbCalBox.Text, "Copy from first step") Then
+				If Equals(calSetting, "Copy from first step") Then
 					node = xmlDoc.DocumentElement.SelectSingleNode("/Sequence/Items/SequenceItem/PatternSetupName")
 					Dim firstPatternName = node.InnerText
 					nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
@@ -109,13 +150,13 @@ Namespace SetSequence
 						End If
 					Next
 				Else
-					Dim values = cbCalBox.Text.Split(","c)
+					Dim values = calSetting.Split(","c)
 					colorcalID = values(1)
 					imagescalingID = values(2)
 					flatfieldID = values(3)
 				End If
 
-				If Equals(cbFocusDistance.Text, "Copy from first step") Then
+				If Equals(focusSetting, "Copy from first step") Then
 					node = xmlDoc.DocumentElement.SelectSingleNode("/Sequence/Items/SequenceItem/PatternSetupName")
 					Dim firstPatternName = node.InnerText
 					nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
@@ -125,10 +166,10 @@ Namespace SetSequence
 						End If
 					Next
 				Else
-					lensdistance = cbFocusDistance.Text
+					lensdistance = focusSetting
 				End If
 
-				If Equals(cbFNumber.Text, "Copy from first step") Then
+				If Equals(fNumberSetting, "Copy from first step") Then
 					node = xmlDoc.DocumentElement.SelectSingleNode("/Sequence/Items/SequenceItem/PatternSetupName")
 					Dim firstPatternName = node.InnerText
 					nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
@@ -138,16 +179,16 @@ Namespace SetSequence
 						End If
 					Next
 				Else
-					Select Case cbFNumber.Text
+					Select Case fNumberSetting
 						Case "8.0"
 							fnumber = "6"
 						Case Else
-							fnumber = cbFNumber.Text
+							fnumber = fNumberSetting
 					End Select
 
 				End If
 
-				If Equals(cbCameraRotation.Text, "Copy from first step") Then
+				If Equals(rotationSetting, "Copy from first step") Then
 					node = xmlDoc.DocumentElement.SelectSingleNode("/Sequence/Items/SequenceItem/PatternSetupName")
 					Dim firstPatternName = node.InnerText
 					nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
@@ -157,9 +198,18 @@ Namespace SetSequence
 						End If
 					Next
 				Else
-					cameraRotation = cbCameraRotation.Text
+					cameraRotation = rotationSetting
 				End If
+			End If
+		End Sub
 
+		Private Sub SetValues(xmlFile As String)
+
+			Dim nodes As XmlNodeList
+
+			Dim xmlDoc = New XmlDocument()
+			If File.Exists(xmlFile) Then
+				xmlDoc.Load(xmlFile)
 				nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/LensDistance")
 				For index = 0 To nodes.Count - 1
 					If Not Equals(lensdistance, "") Then
@@ -212,48 +262,12 @@ Namespace SetSequence
 				Dim settings As XmlWriterSettings = New XmlWriterSettings With {
 					.Indent = True
 				}
-				Dim writer = XmlWriter.Create(lblSequencePath.Text, settings)
+				Dim writer = XmlWriter.Create(xmlFile, settings)
 				xmlDoc.Save(writer)
 				If writer IsNot Nothing Then writer.Close()
-				Try
-					Dim additionalTargets As String()
-					additionalTargets = txtAdditionalSequence.Text.Split(New Char() {Microsoft.VisualBasic.Strings.ChrW(13), Microsoft.VisualBasic.Strings.ChrW(10)}, StringSplitOptions.RemoveEmptyEntries)
-					For Each item In additionalTargets
-						Dim additionalWriter = XmlWriter.Create(item, settings)
-						xmlDoc.Save(additionalWriter)
-						If additionalWriter IsNot Nothing Then additionalWriter.Close()
-					Next
-				Catch __unusedException1__ As Exception
-				End Try
 
-
-				Dim m_Rnd As Random = New Random()
-				Dim tempcolor As Color
-				tempcolor = label1.ForeColor
-				While label1.ForeColor = tempcolor
-					label1.ForeColor = Color.FromArgb(255, m_Rnd.Next(0, 255), m_Rnd.Next(0, 255), m_Rnd.Next(0, 255))
-				End While
-				label1.Text = "Done!"
-				btnApply.Enabled = True
 			End If
 		End Sub
 
-		Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-			SetVersionInfo()
-			If Directory.Exists("C:\Radiant Vision Systems Data\TrueTest\Sequence") Then
-				Dim latestfile = New DirectoryInfo("C:\Radiant Vision Systems Data\TrueTest\Sequence").GetFiles().OrderByDescending(Function(o) o.LastWriteTime).FirstOrDefault()
-				lblSequencePath.Text = latestfile.FullName
-			End If
-		End Sub
-
-		Private Sub txtAdditionalSequence_DragDrop(sender As Object, e As DragEventArgs) Handles txtAdditionalSequence.DragDrop
-			e.Effect = DragDropEffects.Copy
-			Dim files = CType(e.Data.GetData(DataFormats.FileDrop), String())
-			If files IsNot Nothing AndAlso files.Length <> 0 Then
-				For Each file In files
-					txtAdditionalSequence.Text += file & Microsoft.VisualBasic.Constants.vbCrLf
-				Next
-			End If
-		End Sub
 	End Class
 End Namespace

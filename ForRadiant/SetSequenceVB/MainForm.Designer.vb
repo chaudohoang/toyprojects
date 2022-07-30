@@ -1,6 +1,6 @@
 ﻿Imports System
 
-Namespace SetSequence
+Namespace SetSequenceVB
 	Partial Class MainForm
 		''' <summary>
 		''' Required designer variable.
@@ -264,7 +264,7 @@ Namespace SetSequence
 			Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
 			Me.MaximizeBox = False
 			Me.Name = "MainForm"
-			Me.Text = "SetSequence"
+			Me.Text = "SetSequenceVB"
 			Me.ResumeLayout(False)
 			Me.PerformLayout()
 

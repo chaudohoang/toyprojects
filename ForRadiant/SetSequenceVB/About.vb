@@ -1,7 +1,7 @@
 ﻿Imports System.Windows.Forms
 
-Namespace SetSequence
-	Public Partial Class About
+Namespace SetSequenceVB
+	Partial Public Class About
 		Inherits Form
 		Public Sub New()
 			InitializeComponent()

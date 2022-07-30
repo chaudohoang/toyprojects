@@ -1,17 +1,17 @@
-﻿Imports System.Reflection
+﻿Imports System
+Imports System.Reflection
 Imports System.Runtime.InteropServices
 
 ' General Information about an assembly is controlled through the following
 ' set of attributes. Change these attribute values to modify the information
 ' associated with an assembly.
-<Assembly: AssemblyTitle("SetSequence")>
+<Assembly: AssemblyTitle("SetSequenceVB")>
 <Assembly: AssemblyDescription("")>
 <Assembly: AssemblyConfiguration("")>
 <Assembly: AssemblyCompany("")>
-<Assembly: AssemblyProduct("SetSequence")>
+<Assembly: AssemblyProduct("SetSequenceVB")>
 <Assembly: AssemblyCopyright("Copyright ©  2021")>
 <Assembly: AssemblyTrademark("")>
-<Assembly: AssemblyCulture("")>
 
 ' Setting ComVisible to false makes the types in this assembly not visible
 ' to COM components.  If you need to access a type in this assembly from
@@ -31,5 +31,5 @@ Imports System.Runtime.InteropServices
 ' You can specify all the values or you can default the Build and Revision Numbers
 ' by using the '*' as shown below:
 ' [assembly: AssemblyVersion("1.0.*")]
-<Assembly: AssemblyVersion("1.0.0.7")>
-<Assembly: AssemblyFileVersion("1.0.0.7")>
+<Assembly: AssemblyVersion("1.0.0.9")>
+<Assembly: AssemblyFileVersion("1.0.0.9")>

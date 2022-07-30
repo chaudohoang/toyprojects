@@ -1,7 +1,7 @@
 ﻿Imports System
 Imports System.Windows.Forms
 
-Namespace SetSequence
+Namespace SetSequenceVB
 	Friend Module Program
 		''' <summary>
 		''' The main entry point for the application.
