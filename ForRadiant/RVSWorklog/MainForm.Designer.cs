@@ -39,6 +39,7 @@ namespace RVSWorklog
 			this.label3 = new System.Windows.Forms.Label();
 			this.dateFilter = new System.Windows.Forms.DateTimePicker();
 			this.btnExport = new System.Windows.Forms.Button();
+			this.btnAdmin = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -113,7 +114,7 @@ namespace RVSWorklog
 			this.btnAdd.Name = "btnAdd";
 			this.btnAdd.Size = new System.Drawing.Size(51, 61);
 			this.btnAdd.TabIndex = 6;
-			this.btnAdd.Text = "Add Log";
+			this.btnAdd.Text = "Write Log";
 			this.btnAdd.UseVisualStyleBackColor = true;
 			this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
 			this.btnAdd.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
@@ -156,12 +157,23 @@ namespace RVSWorklog
 			this.btnExport.UseVisualStyleBackColor = true;
 			this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
 			// 
+			// btnAdmin
+			// 
+			this.btnAdmin.Location = new System.Drawing.Point(735, 12);
+			this.btnAdmin.Name = "btnAdmin";
+			this.btnAdmin.Size = new System.Drawing.Size(53, 23);
+			this.btnAdmin.TabIndex = 8;
+			this.btnAdmin.Text = "Admin";
+			this.btnAdmin.UseVisualStyleBackColor = true;
+			this.btnAdmin.Click += new System.EventHandler(this.btnAdmin_Click);
+			// 
 			// MainForm
 			// 
 			this.AcceptButton = this.btnAdd;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(800, 450);
+			this.Controls.Add(this.btnAdmin);
 			this.Controls.Add(this.btnExport);
 			this.Controls.Add(this.dateFilter);
 			this.Controls.Add(this.label3);
@@ -195,6 +207,7 @@ namespace RVSWorklog
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.DateTimePicker dateFilter;
 		private System.Windows.Forms.Button btnExport;
+		private System.Windows.Forms.Button btnAdmin;
 	}
 }
 

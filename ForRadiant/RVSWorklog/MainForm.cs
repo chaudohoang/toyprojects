@@ -18,9 +18,11 @@ namespace RVSWorklog
 		public static string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
 		public static string appdir = Path.GetDirectoryName(apppath);
 		public string logPath;
+		public Admin admin = null;
 		public MainForm()
 		{
 			InitializeComponent();
+			UserInfo.Add("admin", "nimda");
 			UserInfo.Add("Hwang JunSeok", "joon9");
 			UserInfo.Add("Kim Kang Hyun", "ryan1");
 			UserInfo.Add("Kwon Kwang Ho", "miguel10");
@@ -159,6 +161,29 @@ namespace RVSWorklog
 					using (StreamWriter sw = new StreamWriter(savefile.FileName))
 						sw.Write(txtWorklog.Text);
 				}
+			}
+		}
+
+		private void btnAdmin_Click(object sender, EventArgs e)
+		{
+			Login login = new Login("Admin", UserInfo);
+			login.ShowDialog();
+			
+			if (login.OK)
+			{
+
+				if (admin == null)
+				{
+					admin = new Admin();
+					admin.FormClosed += delegate { admin = null; };
+					admin.Show();
+				}
+				else
+				{
+					admin.Focus();
+				}
+				
+
 			}
 		}
 	}
