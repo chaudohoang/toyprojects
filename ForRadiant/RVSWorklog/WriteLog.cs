@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace RVSWorklog
 {
-	public partial class Add : Form
+	public partial class WriteLog : Form
 	{
 		public string log;
 		public string date;
@@ -20,7 +20,7 @@ namespace RVSWorklog
 		public string chanel;
 		public string type;
 		public bool saved = false;
-		public Add()
+		public WriteLog()
 		{
 			InitializeComponent();
 			lblToday.Text = DateTime.Now.ToString();
@@ -44,6 +44,10 @@ namespace RVSWorklog
 		{
 			if (e.Modifiers == Keys.Control && e.KeyCode == Keys.S)
 				btnSave_Click(this, new EventArgs());
+			if (e.KeyCode == Keys.Escape)
+			{
+				this.Close();
+			}
 		}
 
 	}
