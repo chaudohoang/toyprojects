@@ -18,6 +18,8 @@ namespace RVSWorklog
 		public static string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
 		public static string appdir = Path.GetDirectoryName(apppath);
 		public string logPath;
+		public string logDir;
+		public string[] filePaths;
 		public Admin admin = null;
 		public MainForm()
 		{
@@ -66,7 +68,8 @@ namespace RVSWorklog
 					txtWorklog.Text = File.ReadAllText(logPath);
 				}				
 				btnAdd.Enabled = true;
-				btnExport.Enabled = true;
+				btnExportAll.Enabled = true;
+				btnExportCurrent.Enabled = true;
 			}
 		}
 
@@ -113,8 +116,15 @@ namespace RVSWorklog
 			txtWorklog.Refresh();
 		}
 
+		private void Refresh()
+		{
+			logDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\RVSWorklog";
+			filePaths = Directory.GetFiles(logDir, "*.txt",
+										 SearchOption.TopDirectoryOnly);
+		}
 		private void MainForm_Load(object sender, EventArgs e)
 		{
+			Refresh();
 			SetVersionInfo();
 		}
 		private void SetVersionInfo()
@@ -141,29 +151,6 @@ namespace RVSWorklog
 			}
 		}
 
-		private void btnExport_Click(object sender, EventArgs e)
-		{
-			if (txtWorklog.Text=="")
-			{
-				MessageBox.Show("Empty Log !!!");
-			}
-			else
-			{
-				SaveFileDialog savefile = new SaveFileDialog();
-				// set a default file name
-				savefile.FileName = Path.GetFileName(logPath);
-				// set filters - this can be done in properties as well
-				savefile.Filter = "Text files (*.txt)|*.txt";
-				savefile.InitialDirectory = appdir;
-
-				if (savefile.ShowDialog() == DialogResult.OK)
-				{
-					using (StreamWriter sw = new StreamWriter(savefile.FileName))
-						sw.Write(txtWorklog.Text);
-				}
-			}
-		}
-
 		private void btnAdmin_Click(object sender, EventArgs e)
 		{
 			Login login = new Login("Admin", UserInfo);
@@ -184,6 +171,57 @@ namespace RVSWorklog
 				}
 				
 
+			}
+		}
+
+		private void btnExportCurrent_Click(object sender, EventArgs e)
+		{
+			if (txtWorklog.Text == "")
+			{
+				MessageBox.Show("Empty Log !!!");
+			}
+			else
+			{
+				SaveFileDialog savefile = new SaveFileDialog();
+				// set a default file name
+				savefile.FileName = Path.GetFileName(logPath);
+				// set filters - this can be done in properties as well
+				savefile.Filter = "Text files (*.txt)|*.txt";
+				savefile.InitialDirectory = appdir;
+
+				if (savefile.ShowDialog() == DialogResult.OK)
+				{
+					using (StreamWriter sw = new StreamWriter(savefile.FileName))
+						sw.Write(txtWorklog.Text);
+				}
+			}
+		}
+
+		private void btnExportAll_Click(object sender, EventArgs e)
+		{
+			Refresh();
+			string dummyFileName = "Save Here";
+
+			SaveFileDialog sf = new SaveFileDialog();
+			// Feed the dummy name to the save dialog
+			sf.FileName = dummyFileName;
+			sf.CheckFileExists = false;
+			sf.Filter = "Directory | directory";
+
+			if (sf.ShowDialog() == DialogResult.OK)
+			{
+				// Now here's our save folder
+				string savePath = Path.GetDirectoryName(sf.FileName);
+				foreach (string item in filePaths)
+				{					
+					if (item.Contains(cbxWorker.Text))
+					{
+						string dest = Path.Combine(savePath, Path.GetFileName(item));
+						File.Copy(item, dest, true);
+					}			
+
+				}
+				// Do whatever
 			}
 		}
 	}

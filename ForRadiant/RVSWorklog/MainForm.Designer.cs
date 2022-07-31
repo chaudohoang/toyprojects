@@ -38,8 +38,9 @@ namespace RVSWorklog
 			this.lblStatus = new System.Windows.Forms.Label();
 			this.label3 = new System.Windows.Forms.Label();
 			this.dateFilter = new System.Windows.Forms.DateTimePicker();
-			this.btnExport = new System.Windows.Forms.Button();
+			this.btnExportAll = new System.Windows.Forms.Button();
 			this.btnAdmin = new System.Windows.Forms.Button();
+			this.btnExportCurrent = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -146,16 +147,16 @@ namespace RVSWorklog
 			this.dateFilter.TabIndex = 4;
 			this.dateFilter.CloseUp += new System.EventHandler(this.dateFilter_CloseUp);
 			// 
-			// btnExport
+			// btnExportAll
 			// 
-			this.btnExport.Enabled = false;
-			this.btnExport.Location = new System.Drawing.Point(15, 147);
-			this.btnExport.Name = "btnExport";
-			this.btnExport.Size = new System.Drawing.Size(51, 61);
-			this.btnExport.TabIndex = 7;
-			this.btnExport.Text = "Export Log";
-			this.btnExport.UseVisualStyleBackColor = true;
-			this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
+			this.btnExportAll.Enabled = false;
+			this.btnExportAll.Location = new System.Drawing.Point(15, 147);
+			this.btnExportAll.Name = "btnExportAll";
+			this.btnExportAll.Size = new System.Drawing.Size(51, 61);
+			this.btnExportAll.TabIndex = 7;
+			this.btnExportAll.Text = "Export All Log";
+			this.btnExportAll.UseVisualStyleBackColor = true;
+			this.btnExportAll.Click += new System.EventHandler(this.btnExportAll_Click);
 			// 
 			// btnAdmin
 			// 
@@ -167,14 +168,26 @@ namespace RVSWorklog
 			this.btnAdmin.UseVisualStyleBackColor = true;
 			this.btnAdmin.Click += new System.EventHandler(this.btnAdmin_Click);
 			// 
+			// btnExportCurrent
+			// 
+			this.btnExportCurrent.Enabled = false;
+			this.btnExportCurrent.Location = new System.Drawing.Point(15, 214);
+			this.btnExportCurrent.Name = "btnExportCurrent";
+			this.btnExportCurrent.Size = new System.Drawing.Size(51, 61);
+			this.btnExportCurrent.TabIndex = 9;
+			this.btnExportCurrent.Text = "Export Current";
+			this.btnExportCurrent.UseVisualStyleBackColor = true;
+			this.btnExportCurrent.Click += new System.EventHandler(this.btnExportCurrent_Click);
+			// 
 			// MainForm
 			// 
 			this.AcceptButton = this.btnAdd;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(800, 450);
+			this.Controls.Add(this.btnExportCurrent);
 			this.Controls.Add(this.btnAdmin);
-			this.Controls.Add(this.btnExport);
+			this.Controls.Add(this.btnExportAll);
 			this.Controls.Add(this.dateFilter);
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.lblStatus);
@@ -206,8 +219,9 @@ namespace RVSWorklog
 		private System.Windows.Forms.Label lblStatus;
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.DateTimePicker dateFilter;
-		private System.Windows.Forms.Button btnExport;
+		private System.Windows.Forms.Button btnExportAll;
 		private System.Windows.Forms.Button btnAdmin;
+		private System.Windows.Forms.Button btnExportCurrent;
 	}
 }
 
