@@ -46,6 +46,12 @@ namespace RVSWorklog
 		{
 			if (e.KeyCode == Keys.Enter)
 				btnLogin_Click(this, new EventArgs());
+
+			if (e.KeyCode == Keys.Escape)
+			{
+				this.Close();
+			}
+		
 		}
 	}
 }

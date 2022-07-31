@@ -69,6 +69,7 @@ namespace RVSWorklog
 				{					
 					txtWorklog.Text = File.ReadAllText(logPath);
 				}
+				ReloadFiles();
 				RefreshDateWithFilter();
 				string date = Path.GetFileName(logPath).Split('_')[0];
 				int dateIndex = lstDate.Items.IndexOf(date);
@@ -86,12 +87,12 @@ namespace RVSWorklog
 
 		private void btnAdd_Click(object sender, EventArgs e)
 		{
-			Add add = new Add();
-			add.ShowDialog();
-			if (add.saved)
+			WriteLog writeLogForm = new WriteLog();
+			writeLogForm.ShowDialog();
+			if (writeLogForm.saved)
 			{
 				//logPath = Path.Combine(appdir + "\\log", add.date+ "_" + cbxWorker.Text + ".txt");
-				logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\RVSWorklog", add.date + "_" + cbxWorker.Text + ".txt");
+				logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\RVSWorklog", writeLogForm.date + "_" + cbxWorker.Text + ".txt");
 				txtWorklog.Text = "";
 				if (!File.Exists(logPath))
 				{
@@ -105,19 +106,33 @@ namespace RVSWorklog
 
 				}		
 
-				File.AppendAllText(logPath, add.datetime + " " + (add.line != "" ? add.line + "#" : "") + (add.station != "" ? add.station + "-" : "") + (add.chanel != "" ? add.chanel + "-" : "") + (add.type != "" ? add.type : ""));
+				File.AppendAllText(logPath, writeLogForm.datetime + " " + (writeLogForm.line != "" ? writeLogForm.line + "#" : "") + (writeLogForm.station != "" ? writeLogForm.station + "-" : "") + (writeLogForm.chanel != "" ? writeLogForm.chanel + "-" : "") + (writeLogForm.type != "" ? writeLogForm.type : ""));
 				File.AppendAllText(logPath, Environment.NewLine + "Worker : " + cbxWorker.Text);
-				File.AppendAllText(logPath, Environment.NewLine + add.log);
+				File.AppendAllText(logPath, Environment.NewLine + writeLogForm.log);
 				File.AppendAllText(logPath, Environment.NewLine);
 				File.AppendAllText(logPath, Environment.NewLine);
 
 				txtWorklog.Text = File.ReadAllText(logPath);
+				ReloadFiles();
+				RefreshDateWithFilter();
+				string date = Path.GetFileName(logPath).Split('_')[0];
+				int dateIndex = lstDate.Items.IndexOf(date);
+				if (dateIndex != -1)
+				{
+					lstDate.SetSelected(dateIndex, true);
+				}
 			}
 		}
 		private void MainForm_KeyDown(object sender, KeyEventArgs e)
 		{
-			if (e.KeyCode == Keys.Enter)
-				btnAdd_Click(this, new EventArgs());
+			if (e.KeyCode == Keys.F1 && btnAdd.Enabled)
+				btnAdd_Click(this, new EventArgs());			
+			if (e.KeyCode == Keys.F2 && btnExportCurrent.Enabled)
+				btnExportCurrent_Click(this, new EventArgs());
+			if (e.KeyCode == Keys.F3 && btnExportAll.Enabled)
+				btnExportAll_Click(this, new EventArgs());
+			if (e.KeyCode == Keys.F5)
+				btnAdmin_Click(this, new EventArgs());
 		}
 
 		private void txtWorklog_TextChanged(object sender, EventArgs e)
@@ -268,5 +283,26 @@ namespace RVSWorklog
 			}
 			lstDatePreviousIndex = lstDate.SelectedIndex;
 		}
-    }
+		protected override void WndProc(ref Message m)
+		{
+			if (m.Msg == NativeMethods.WM_SHOWME)
+			{
+				ShowMe();
+			}
+			base.WndProc(ref m);
+		}
+		private void ShowMe()
+		{
+			if (WindowState == FormWindowState.Minimized)
+			{
+				WindowState = FormWindowState.Normal;
+			}
+			// get our current "TopMost" value (ours will always be false though)
+			bool top = TopMost;
+			// make our form jump to the top of everything
+			TopMost = true;
+			// set it back to whatever it was
+			TopMost = top;
+		}
+	}
 }

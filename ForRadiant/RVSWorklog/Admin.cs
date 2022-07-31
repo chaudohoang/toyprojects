@@ -30,12 +30,24 @@ namespace RVSWorklog
 			ReloadFiles();
 			RefreshDateWithFilter();
 			RefreshWorkerWithFilter();
+			string date = DateTime.Now.ToString("yyyyMMdd");
+			int dateIndex = lstDate.Items.IndexOf(date);
+			if (dateIndex != -1)
+			{
+				lstDate.SetSelected(dateIndex, true);
+			}
 		}
 
 		private void Admin_Load(object sender, EventArgs e)
 		{
 			ReloadFiles();
 			RefreshDateWithFilter();
+			string date = DateTime.Now.ToString("yyyyMMdd");
+			int dateIndex = lstDate.Items.IndexOf(date);
+			if (dateIndex != -1)
+			{
+				lstDate.SetSelected(dateIndex, true);
+			}
 
 		}
 		private void ReloadFiles()
@@ -190,5 +202,17 @@ namespace RVSWorklog
 			txtWorklog.ScrollToCaret();
 			txtWorklog.Refresh();
 		}
-    }
+
+		private void Admin_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.KeyCode == Keys.F1)
+				btnExportCurrent_Click(this, new EventArgs());
+			if (e.KeyCode == Keys.F2 && btnExportAll.Enabled)
+				btnExportDay_Click(this, new EventArgs());
+			if (e.KeyCode == Keys.F3 && btnExportAll.Enabled)
+				btnExportAll_Click(this, new EventArgs());
+			if (e.KeyCode == Keys.F4)
+				btnRefresh_Click(this, new EventArgs());
+		}
+	}
 }
