@@ -161,8 +161,8 @@ namespace RVSWorklog
 			}
 		}
 
-		private void button1_Click(object sender, EventArgs e)
-		{
+        private void btnExportCurrent_Click(object sender, EventArgs e)
+        {
 			if (txtWorklog.Text == "")
 			{
 				MessageBox.Show("Empty Log !!!");
@@ -183,5 +183,12 @@ namespace RVSWorklog
 				}
 			}
 		}
-	}
+
+        private void txtWorklog_TextChanged(object sender, EventArgs e)
+        {
+			txtWorklog.SelectionStart = txtWorklog.Text.Length;
+			txtWorklog.ScrollToCaret();
+			txtWorklog.Refresh();
+		}
+    }
 }

@@ -20,6 +20,7 @@ namespace RVSWorklog
 		public string logPath;
 		public string logDir;
 		public string[] filePaths;
+		public int lstDatePreviousIndex = -1;
 		public Admin admin = null;
 		public MainForm()
 		{
@@ -60,16 +61,26 @@ namespace RVSWorklog
 			login.ShowDialog();
 			if (login.OK)
 			{
+				lblStatus.Text = cbxWorker.Text + " logged in.";
 				//logPath = Path.Combine(appdir + "\\log", DateTime.Now.ToString("yyyyMMdd")+"_" +cbxWorker.Text + ".txt");
 				logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\RVSWorklog", DateTime.Now.ToString("yyyyMMdd") + "_" + cbxWorker.Text + ".txt");
 				txtWorklog.Text = "";
 				if (File.Exists(logPath))
-				{
+				{					
 					txtWorklog.Text = File.ReadAllText(logPath);
+				}
+				RefreshDateWithFilter();
+				string date = Path.GetFileName(logPath).Split('_')[0];
+				int dateIndex = lstDate.Items.IndexOf(date);
+                if (dateIndex != -1)
+                {
+					lstDate.SetSelected(dateIndex, true);
 				}				
 				btnAdd.Enabled = true;
 				btnExportAll.Enabled = true;
 				btnExportCurrent.Enabled = true;
+				txtDateSearch.ReadOnly = false;
+				lstDate.Enabled = true;
 			}
 		}
 
@@ -116,15 +127,20 @@ namespace RVSWorklog
 			txtWorklog.Refresh();
 		}
 
-		private void Refresh()
+		private void ReloadFiles()
 		{
 			logDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\RVSWorklog";
+            if (!Directory.Exists(logDir))
+            {
+				Directory.CreateDirectory(logDir);
+            }
 			filePaths = Directory.GetFiles(logDir, "*.txt",
 										 SearchOption.TopDirectoryOnly);
 		}
 		private void MainForm_Load(object sender, EventArgs e)
 		{
-			Refresh();
+			lblToday.Text = DateTime.Now.ToShortDateString();
+			ReloadFiles();
 			SetVersionInfo();
 		}
 		private void SetVersionInfo()
@@ -138,17 +154,6 @@ namespace RVSWorklog
 			//            this.Text, versionInfo.ToString(), lastBuilt);
 			this.Text = string.Format("{0} - {1}",
 						this.Text, versionInfo.ToString());
-		}
-
-		private void dateFilter_CloseUp(object sender, EventArgs e)
-		{
-			//logPath = Path.Combine(appdir + "\\log", dateFilter.Value.ToString("yyyyMMdd") + "_" + cbxWorker.Text + ".txt");
-			logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\RVSWorklog", dateFilter.Value.ToString("yyyyMMdd") + "_" + cbxWorker.Text + ".txt");
-			txtWorklog.Text = "";
-			if (File.Exists(logPath))
-			{
-				txtWorklog.Text = File.ReadAllText(logPath);
-			}
 		}
 
 		private void btnAdmin_Click(object sender, EventArgs e)
@@ -199,7 +204,7 @@ namespace RVSWorklog
 
 		private void btnExportAll_Click(object sender, EventArgs e)
 		{
-			Refresh();
+			ReloadFiles();
 			string dummyFileName = "Save Here";
 
 			SaveFileDialog sf = new SaveFileDialog();
@@ -224,5 +229,44 @@ namespace RVSWorklog
 				// Do whatever
 			}
 		}
-	}
+
+		private void RefreshDateWithFilter()
+        {
+			lstDate.Items.Clear();
+			foreach (string item in filePaths)
+			{
+				string date = Path.GetFileName(item).Split('_')[0];
+				if (!lstDate.Items.Contains(date) && item.Contains(txtDateSearch.Text) && item.Contains(cbxWorker.Text))
+				{
+					lstDate.Items.Add(date);
+				}
+
+			}
+		}
+		private void RefreshLogtWithDate()
+        {
+			txtWorklog.Text = "";
+			foreach (string item in filePaths)
+			{
+				if (File.Exists(item) && lstDate.SelectedItem != null && item.Contains(lstDate.SelectedItem.ToString()) && item.Contains(cbxWorker.Text) )
+				{
+					txtWorklog.Text = File.ReadAllText(item);
+				}
+			}
+		}
+        private void txtDateSearch_TextChanged(object sender, EventArgs e)
+        {
+			RefreshDateWithFilter();
+			RefreshLogtWithDate();
+		}
+
+        private void lstDate_SelectedIndexChanged(object sender, EventArgs e)
+        {
+			if (lstDate.SelectedIndex != lstDatePreviousIndex || txtWorklog.Text =="")
+			{
+				RefreshLogtWithDate();
+			}
+			lstDatePreviousIndex = lstDate.SelectedIndex;
+		}
+    }
 }

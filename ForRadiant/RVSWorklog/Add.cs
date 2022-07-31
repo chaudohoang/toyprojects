@@ -23,7 +23,7 @@ namespace RVSWorklog
 		public Add()
 		{
 			InitializeComponent();
-			txtDate.Text = DateTime.Now.ToString();
+			lblToday.Text = DateTime.Now.ToString();
 			txtLog.Text = "Things to do : " + Environment.NewLine + "Issue : " + Environment.NewLine + "Troubleshooting : " + Environment.NewLine + "Status : ";
 		}
 
@@ -31,7 +31,7 @@ namespace RVSWorklog
 		{
 			saved = true;
 			date = DateTime.Now.ToString("yyyyMMdd");
-			datetime = txtDate.Text;
+			datetime = lblToday.Text;
 			log = txtLog.Text;
 			line = cbxLine.Text;
 			station = cbxStation.Text;
