@@ -44,15 +44,16 @@ namespace FFCDBGenerate
 			this.label5 = new System.Windows.Forms.Label();
 			this.cbxPanelNumberList = new System.Windows.Forms.ComboBox();
 			this.label6 = new System.Windows.Forms.Label();
+			this.cbCameraType = new System.Windows.Forms.ComboBox();
+			this.label7 = new System.Windows.Forms.Label();
 			this.SuspendLayout();
 			// 
 			// label1
 			// 
 			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(38, 26);
-			this.label1.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
+			this.label1.Location = new System.Drawing.Point(12, 9);
 			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(77, 37);
+			this.label1.Size = new System.Drawing.Size(27, 13);
 			this.label1.TabIndex = 0;
 			this.label1.Text = "Line";
 			// 
@@ -88,10 +89,9 @@ namespace FFCDBGenerate
             "H24F PGIB",
             "H25F MGIB",
             "H25F PGIB"});
-			this.cbLine.Location = new System.Drawing.Point(184, 17);
-			this.cbLine.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
+			this.cbLine.Location = new System.Drawing.Point(58, 6);
 			this.cbLine.Name = "cbLine";
-			this.cbLine.Size = new System.Drawing.Size(185, 45);
+			this.cbLine.Size = new System.Drawing.Size(61, 21);
 			this.cbLine.TabIndex = 1;
 			this.cbLine.Text = "504";
 			// 
@@ -112,20 +112,18 @@ namespace FFCDBGenerate
             "10",
             "11",
             "12"});
-			this.cbStation.Location = new System.Drawing.Point(184, 94);
-			this.cbStation.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
+			this.cbStation.Location = new System.Drawing.Point(58, 33);
 			this.cbStation.Name = "cbStation";
-			this.cbStation.Size = new System.Drawing.Size(185, 45);
+			this.cbStation.Size = new System.Drawing.Size(61, 21);
 			this.cbStation.TabIndex = 2;
 			this.cbStation.Text = "1";
 			// 
 			// label2
 			// 
 			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(38, 102);
-			this.label2.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
+			this.label2.Location = new System.Drawing.Point(12, 36);
 			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(117, 37);
+			this.label2.Size = new System.Drawing.Size(40, 13);
 			this.label2.TabIndex = 2;
 			this.label2.Text = "Station";
 			// 
@@ -138,20 +136,18 @@ namespace FFCDBGenerate
             "2",
             "3",
             "4"});
-			this.cbChannel.Location = new System.Drawing.Point(184, 171);
-			this.cbChannel.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
+			this.cbChannel.Location = new System.Drawing.Point(58, 60);
 			this.cbChannel.Name = "cbChannel";
-			this.cbChannel.Size = new System.Drawing.Size(185, 45);
+			this.cbChannel.Size = new System.Drawing.Size(61, 21);
 			this.cbChannel.TabIndex = 3;
 			this.cbChannel.Text = "1";
 			// 
 			// label3
 			// 
 			this.label3.AutoSize = true;
-			this.label3.Location = new System.Drawing.Point(38, 179);
-			this.label3.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
+			this.label3.Location = new System.Drawing.Point(12, 63);
 			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(136, 37);
+			this.label3.Size = new System.Drawing.Size(46, 13);
 			this.label3.TabIndex = 4;
 			this.label3.Text = "Channel";
 			// 
@@ -161,20 +157,18 @@ namespace FFCDBGenerate
 			this.cbSaveTo.Items.AddRange(new object[] {
             "D:\\Program\\RVS\\Log",
             "E:\\Program\\RVS\\Log"});
-			this.cbSaveTo.Location = new System.Drawing.Point(184, 410);
-			this.cbSaveTo.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
+			this.cbSaveTo.Location = new System.Drawing.Point(66, 168);
 			this.cbSaveTo.Name = "cbSaveTo";
-			this.cbSaveTo.Size = new System.Drawing.Size(666, 45);
+			this.cbSaveTo.Size = new System.Drawing.Size(213, 21);
 			this.cbSaveTo.TabIndex = 6;
 			this.cbSaveTo.Text = "E:\\Program\\RVS\\Log";
 			// 
 			// label4
 			// 
 			this.label4.AutoSize = true;
-			this.label4.Location = new System.Drawing.Point(38, 418);
-			this.label4.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
+			this.label4.Location = new System.Drawing.Point(12, 171);
 			this.label4.Name = "label4";
-			this.label4.Size = new System.Drawing.Size(135, 37);
+			this.label4.Size = new System.Drawing.Size(48, 13);
 			this.label4.TabIndex = 6;
 			this.label4.Text = "Save To";
 			// 
@@ -183,20 +177,18 @@ namespace FFCDBGenerate
 			this.chkOpenOutput.AutoSize = true;
 			this.chkOpenOutput.Checked = true;
 			this.chkOpenOutput.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.chkOpenOutput.Location = new System.Drawing.Point(48, 487);
-			this.chkOpenOutput.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
+			this.chkOpenOutput.Location = new System.Drawing.Point(15, 195);
 			this.chkOpenOutput.Name = "chkOpenOutput";
-			this.chkOpenOutput.Size = new System.Drawing.Size(559, 41);
+			this.chkOpenOutput.Size = new System.Drawing.Size(200, 17);
 			this.chkOpenOutput.TabIndex = 7;
 			this.chkOpenOutput.Text = "Open generated folder when finished";
 			this.chkOpenOutput.UseVisualStyleBackColor = true;
 			// 
 			// btnGenerate
 			// 
-			this.btnGenerate.Location = new System.Drawing.Point(396, 14);
-			this.btnGenerate.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
+			this.btnGenerate.Location = new System.Drawing.Point(125, 5);
 			this.btnGenerate.Name = "btnGenerate";
-			this.btnGenerate.Size = new System.Drawing.Size(374, 213);
+			this.btnGenerate.Size = new System.Drawing.Size(118, 75);
 			this.btnGenerate.TabIndex = 8;
 			this.btnGenerate.Text = "Generate";
 			this.btnGenerate.UseVisualStyleBackColor = true;
@@ -212,10 +204,9 @@ namespace FFCDBGenerate
             "6",
             "7",
             "8"});
-			this.cbxNoOfPanels.Location = new System.Drawing.Point(345, 248);
-			this.cbxNoOfPanels.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
+			this.cbxNoOfPanels.Location = new System.Drawing.Point(109, 87);
 			this.cbxNoOfPanels.Name = "cbxNoOfPanels";
-			this.cbxNoOfPanels.Size = new System.Drawing.Size(185, 45);
+			this.cbxNoOfPanels.Size = new System.Drawing.Size(61, 21);
 			this.cbxNoOfPanels.TabIndex = 4;
 			this.cbxNoOfPanels.Text = "5";
 			this.cbxNoOfPanels.SelectedIndexChanged += new System.EventHandler(this.cbxNoOfPanels_SelectedIndexChanged);
@@ -223,38 +214,58 @@ namespace FFCDBGenerate
 			// label5
 			// 
 			this.label5.AutoSize = true;
-			this.label5.Location = new System.Drawing.Point(38, 256);
-			this.label5.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
+			this.label5.Location = new System.Drawing.Point(12, 90);
 			this.label5.Name = "label5";
-			this.label5.Size = new System.Drawing.Size(271, 37);
+			this.label5.Size = new System.Drawing.Size(91, 13);
 			this.label5.TabIndex = 11;
 			this.label5.Text = "How many panels";
 			// 
 			// cbxPanelNumberList
 			// 
 			this.cbxPanelNumberList.FormattingEnabled = true;
-			this.cbxPanelNumberList.Location = new System.Drawing.Point(345, 324);
-			this.cbxPanelNumberList.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
+			this.cbxPanelNumberList.Location = new System.Drawing.Point(117, 114);
 			this.cbxPanelNumberList.Name = "cbxPanelNumberList";
-			this.cbxPanelNumberList.Size = new System.Drawing.Size(504, 45);
+			this.cbxPanelNumberList.Size = new System.Drawing.Size(162, 21);
 			this.cbxPanelNumberList.TabIndex = 5;
 			this.cbxPanelNumberList.Text = "1,2,3,4,5";
 			// 
 			// label6
 			// 
 			this.label6.AutoSize = true;
-			this.label6.Location = new System.Drawing.Point(38, 333);
-			this.label6.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
+			this.label6.Location = new System.Drawing.Point(12, 117);
 			this.label6.Name = "label6";
-			this.label6.Size = new System.Drawing.Size(238, 37);
+			this.label6.Size = new System.Drawing.Size(79, 13);
 			this.label6.TabIndex = 13;
 			this.label6.Text = "Panel Numbers";
 			// 
-			// Form1
+			// cbCameraType
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(19F, 37F);
+			this.cbCameraType.FormattingEnabled = true;
+			this.cbCameraType.Items.AddRange(new object[] {
+            "",
+            "Mono",
+            "Color"});
+			this.cbCameraType.Location = new System.Drawing.Point(117, 141);
+			this.cbCameraType.Name = "cbCameraType";
+			this.cbCameraType.Size = new System.Drawing.Size(162, 21);
+			this.cbCameraType.TabIndex = 14;
+			// 
+			// label7
+			// 
+			this.label7.AutoSize = true;
+			this.label7.Location = new System.Drawing.Point(12, 144);
+			this.label7.Name = "label7";
+			this.label7.Size = new System.Drawing.Size(70, 13);
+			this.label7.TabIndex = 15;
+			this.label7.Text = "Camera Type";
+			// 
+			// MainForm
+			// 
+			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(1488, 569);
+			this.ClientSize = new System.Drawing.Size(470, 223);
+			this.Controls.Add(this.cbCameraType);
+			this.Controls.Add(this.label7);
 			this.Controls.Add(this.cbxPanelNumberList);
 			this.Controls.Add(this.label6);
 			this.Controls.Add(this.cbxNoOfPanels);
@@ -270,9 +281,8 @@ namespace FFCDBGenerate
 			this.Controls.Add(this.cbLine);
 			this.Controls.Add(this.label1);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-			this.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
 			this.MaximizeBox = false;
-			this.Name = "Form1";
+			this.Name = "MainForm";
 			this.Text = "FFCDBGenerate";
 			this.Load += new System.EventHandler(this.Form1_Load);
 			this.ResumeLayout(false);
@@ -296,6 +306,8 @@ namespace FFCDBGenerate
 		private System.Windows.Forms.Label label5;
 		private System.Windows.Forms.ComboBox cbxPanelNumberList;
 		private System.Windows.Forms.Label label6;
+		private System.Windows.Forms.ComboBox cbCameraType;
+		private System.Windows.Forms.Label label7;
 	}
 }
 

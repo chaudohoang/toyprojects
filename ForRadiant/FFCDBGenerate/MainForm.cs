@@ -37,11 +37,18 @@ namespace FFCDBGenerate
             string station = cbStation.Text;
             string channel = cbChannel.Text;
             string output = cbSaveTo.Text;
+            string cameraType = cbCameraType.Text;
+            string dbfilename;
             bool openoutput = chkOpenOutput.Checked;
 
             try
             {
-                output = output + "\\" + System.DateTime.Now.ToString("yyyyMMdd ") + line + "#" + station + "-" + channel + " Panel FFC";
+				if (cameraType !="")
+				{
+                    output = output + "\\" + System.DateTime.Now.ToString("yyyyMMdd ") + line + "#" + station + "-" + channel + "-" +cameraType+ " Panel FFC";
+                }
+                else output = output + "\\" + System.DateTime.Now.ToString("yyyyMMdd ") + line + "#" + station + "-" + channel + " Panel FFC";
+
                 if (!System.IO.Directory.Exists(output))
                 {
                     System.IO.Directory.CreateDirectory(output);
@@ -64,7 +71,12 @@ namespace FFCDBGenerate
 
 				foreach (string item in panelNumberList)
 				{
-                    string dbfilename = station + "-" + channel + "-" + item + ".ttxm";
+					if (cameraType != "")
+					{
+                       dbfilename = station + "-" + channel + "-" + item + "-" + cameraType +".ttxm";
+                    }
+                    else dbfilename = station + "-" + channel + "-" + item + ".ttxm";
+
                     try
                     {
                         System.IO.File.Copy(@"template.ttxm", System.IO.Path.Combine(output, dbfilename));
