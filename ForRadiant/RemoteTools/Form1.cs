@@ -46,7 +46,7 @@ namespace RemoteTools
             for (int i = 0; i < Cols; i++)
                 dt.Columns.Add(Fields[i].ToLower(), typeof(string));
             DataRow Row;
-            for (int i = 1; i < Lines.GetLength(0); i++)
+            for (int i = 0; i < Lines.GetLength(0); i++)
             {
                 Fields = Lines[i].Split(new char[] { ',' });
                 Row = dt.NewRow();
