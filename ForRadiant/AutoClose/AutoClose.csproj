@@ -4,21 +4,21 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B2A11C28-48EE-4BDF-8F4B-5D60863793A7}</ProjectGuid>
+    <ProjectGuid>{FA2D9DA8-2F86-48A9-A241-3C69A3066339}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>RemoteTools</RootNamespace>
-    <AssemblyName>RemoteTools</AssemblyName>
+    <RootNamespace>AutoClose</RootNamespace>
+    <AssemblyName>AutoClose</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>false</Deterministic>
+    <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\bin\Debug\RemoteTools\</OutputPath>
+    <OutputPath>..\bin\Debug\AutoClose\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -33,10 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>remotetools.ico</ApplicationIcon>
+    <ApplicationIcon>autoclose.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -50,16 +49,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Form1.cs">
+    <Compile Include="AutoClose.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="AutoClose.Designer.cs">
+      <DependentUpon>AutoClose.cs</DependentUpon>
     </Compile>
+    <Compile Include="NativeMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="AutoClose.resx">
+      <DependentUpon>AutoClose.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -84,20 +84,13 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="remotetools.ico" />
+    <Content Include="autoclose.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>@echo OFF
 del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.pdb
 del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.xml
-del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.config
-copy /Y $(SolutionDir)\$(ProjectName)\All.csv $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\All.csv
-copy /Y $(SolutionDir)\$(ProjectName)\tvnviewer.exe $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\tvnviewer.exe</PostBuildEvent>
+del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.config</PostBuildEvent>
   </PropertyGroup>
-  <ProjectExtensions>
-    <VisualStudio>
-      <UserProperties BuildVersion_StartDate="2000/1/1" BuildVersion_UseGlobalSettings="True" BuildVersion_BuildVersioningStyle="None.None.Increment.TimeStamp" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_AssemblyInfoFilename="" />
-    </VisualStudio>
-  </ProjectExtensions>
 </Project>

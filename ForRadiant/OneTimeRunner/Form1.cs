@@ -33,7 +33,7 @@ namespace OneTimeRunner
             this.Text = string.Format("{0} - {1}",
                         this.Text, versionInfo.ToString());
         }
-        private bool allowVisible;
+        private bool allowVisible = true;
 
         protected override void SetVisibleCore(bool value)
         {

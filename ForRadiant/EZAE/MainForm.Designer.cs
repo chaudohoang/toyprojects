@@ -32,6 +32,7 @@ namespace EZAE
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
 			this.tabControl1 = new System.Windows.Forms.TabControl();
 			this.tabControl = new System.Windows.Forms.TabPage();
+			this.cmdOpenWorklog = new System.Windows.Forms.LinkLabel();
 			this.cmdOpenCopywhiz = new System.Windows.Forms.LinkLabel();
 			this.cmdOpenTCPClient = new System.Windows.Forms.LinkLabel();
 			this.cmdOpenTCPServer = new System.Windows.Forms.LinkLabel();
@@ -101,7 +102,7 @@ namespace EZAE
 			this.cmdUseButterfly = new System.Windows.Forms.LinkLabel();
 			this.lblSequenceFileName = new System.Windows.Forms.Label();
 			this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-			this.cmdOpenWorklog = new System.Windows.Forms.LinkLabel();
+			this.cmdOpenAutoClose = new System.Windows.Forms.LinkLabel();
 			this.tabControl1.SuspendLayout();
 			this.tabControl.SuspendLayout();
 			this.tabSetupPC.SuspendLayout();
@@ -122,6 +123,7 @@ namespace EZAE
 			// 
 			// tabControl
 			// 
+			this.tabControl.Controls.Add(this.cmdOpenAutoClose);
 			this.tabControl.Controls.Add(this.cmdOpenWorklog);
 			this.tabControl.Controls.Add(this.cmdOpenCopywhiz);
 			this.tabControl.Controls.Add(this.cmdOpenTCPClient);
@@ -149,6 +151,17 @@ namespace EZAE
 			this.tabControl.Text = "Control";
 			this.tabControl.UseVisualStyleBackColor = true;
 			this.tabControl.Enter += new System.EventHandler(this.tabControl_Enter);
+			// 
+			// cmdOpenWorklog
+			// 
+			this.cmdOpenWorklog.AutoSize = true;
+			this.cmdOpenWorklog.Location = new System.Drawing.Point(258, 34);
+			this.cmdOpenWorklog.Name = "cmdOpenWorklog";
+			this.cmdOpenWorklog.Size = new System.Drawing.Size(98, 13);
+			this.cmdOpenWorklog.TabIndex = 23;
+			this.cmdOpenWorklog.TabStop = true;
+			this.cmdOpenWorklog.Text = "Open RVSWorklog";
+			this.cmdOpenWorklog.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenWorklog_LinkClicked);
 			// 
 			// cmdOpenCopywhiz
 			// 
@@ -940,16 +953,16 @@ namespace EZAE
 			this.lblSequenceFileName.Size = new System.Drawing.Size(0, 13);
 			this.lblSequenceFileName.TabIndex = 27;
 			// 
-			// cmdOpenWorklog
+			// cmdOpenAutoClose
 			// 
-			this.cmdOpenWorklog.AutoSize = true;
-			this.cmdOpenWorklog.Location = new System.Drawing.Point(258, 34);
-			this.cmdOpenWorklog.Name = "cmdOpenWorklog";
-			this.cmdOpenWorklog.Size = new System.Drawing.Size(98, 13);
-			this.cmdOpenWorklog.TabIndex = 23;
-			this.cmdOpenWorklog.TabStop = true;
-			this.cmdOpenWorklog.Text = "Open RVSWorklog";
-			this.cmdOpenWorklog.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenWorklog_LinkClicked);
+			this.cmdOpenAutoClose.AutoSize = true;
+			this.cmdOpenAutoClose.Location = new System.Drawing.Point(362, 10);
+			this.cmdOpenAutoClose.Name = "cmdOpenAutoClose";
+			this.cmdOpenAutoClose.Size = new System.Drawing.Size(84, 13);
+			this.cmdOpenAutoClose.TabIndex = 24;
+			this.cmdOpenAutoClose.TabStop = true;
+			this.cmdOpenAutoClose.Text = "Open AutoClose";
+			this.cmdOpenAutoClose.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenAutoClose_LinkClicked);
 			// 
 			// MainForm
 			// 
@@ -1052,6 +1065,7 @@ namespace EZAE
 		private System.Windows.Forms.LinkLabel cmdOpenCopywhiz;
 		private System.Windows.Forms.LinkLabel cmdCheckSequence;
 		private System.Windows.Forms.LinkLabel cmdOpenWorklog;
+		private System.Windows.Forms.LinkLabel cmdOpenAutoClose;
 	}
 }
 
