@@ -28,7 +28,6 @@ namespace KillProcess
                 catch (Exception ex)
                 {
 
-                    MessageBox.Show(ex.Message);
                 }
                 
             }

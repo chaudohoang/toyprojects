@@ -37,7 +37,6 @@ namespace StartProcess
                     catch (Exception ex)
                     {
 
-                        MessageBox.Show(ex.Message);
                     }
                     
                 }    
