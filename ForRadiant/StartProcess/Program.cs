@@ -19,15 +19,12 @@ namespace StartProcess
             List<string> startlist = GetFilesRecursive(startlistdir);
             foreach (string item in startlist)
             {
-                string item2;
-				if (Path.GetExtension(item)==".lnk")
-				{
-                    item2 = GetShortcutTargetFile(item).Replace(".exe","");
+                string ext = Path.GetExtension(item);
+                string process;
 
-                }
-                else item2 = Path.GetFileName(item).Replace(".exe", "");
+                process = Path.GetFileName(item).Replace(ext, "");
 
-                Process[] processes = Process.GetProcessesByName(item2);
+                Process[] processes = Process.GetProcessesByName(process);
                 if (processes.Length < 1)
                 {
                     try
