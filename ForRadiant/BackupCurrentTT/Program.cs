@@ -18,7 +18,8 @@ namespace BackupCurrentTT
                 process.Kill();
             }
             var versionInfo = FileVersionInfo.GetVersionInfo(@"C:\Program Files\Radiant Vision Systems\TrueTest 1.8\TrueTest.exe");
-            string version = versionInfo.ProductVersion;
+            string version = versionInfo.FileVersion.Replace(versionInfo.FilePrivatePart.ToString(),"");
+            version = version.Remove(version.Length - 1);
             string sourcefolder = @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8";
             string destfolder = @"C:\Program Files\Radiant Vision Systems\TrueTest " + version;
             CopyFolder(sourcefolder, destfolder);
