@@ -7,3 +7,4 @@ D:\GitHub\toyprojects\ForRadiant\AutoClose\obj\Debug\AutoClose.csproj.GenerateRe
 D:\GitHub\toyprojects\ForRadiant\AutoClose\obj\Debug\AutoClose.csproj.CoreCompileInputs.cache
 D:\GitHub\toyprojects\ForRadiant\AutoClose\obj\Debug\AutoClose.exe
 D:\GitHub\toyprojects\ForRadiant\AutoClose\obj\Debug\AutoClose.pdb
+D:\GitHub\toyprojects\ForRadiant\AutoClose\obj\Debug\AutoClose.csproj.AssemblyReference.cache
