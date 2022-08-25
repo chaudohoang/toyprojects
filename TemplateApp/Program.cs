@@ -20,7 +20,7 @@ namespace TemplateApp
             {
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                Application.Run(new TemplateApp());
+                Application.Run(new MainForm());
                 mutex.ReleaseMutex();
             }
             else
