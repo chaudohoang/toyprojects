@@ -135,7 +135,7 @@ namespace AutoClose
 				{
 					txtProgramList.Text = File.ReadAllText(killlistpath);
 				}
-				else MessageBox.Show("Kill List not existed !");
+				else MessageBox.Show("KillList.txt not existed !");
 			}
 			catch (Exception)
 			{

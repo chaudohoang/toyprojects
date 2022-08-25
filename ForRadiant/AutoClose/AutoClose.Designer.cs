@@ -65,7 +65,7 @@ namespace AutoClose
 			this.txtInterval.Name = "txtInterval";
 			this.txtInterval.Size = new System.Drawing.Size(167, 20);
 			this.txtInterval.TabIndex = 1;
-			this.txtInterval.Text = "300";
+			this.txtInterval.Text = "60";
 			// 
 			// label2
 			// 
