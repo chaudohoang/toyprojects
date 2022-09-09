@@ -23,6 +23,8 @@ namespace EZAE
             if (File.Exists(pintotaskbarpath))
             {
                 ProcessStartInfo startInfo = new ProcessStartInfo(pintotaskbarpath);
+                startInfo.UseShellExecute = false;
+                startInfo.CreateNoWindow = true;
                 startInfo.Arguments = "\"" + apppath + "\"";
                 Process.Start(startInfo);
 

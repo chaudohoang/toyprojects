@@ -32,6 +32,7 @@ namespace EZAE
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
 			this.tabControl1 = new System.Windows.Forms.TabControl();
 			this.tabControl = new System.Windows.Forms.TabPage();
+			this.cmdOpenAutoClose = new System.Windows.Forms.LinkLabel();
 			this.cmdOpenWorklog = new System.Windows.Forms.LinkLabel();
 			this.cmdOpenCopywhiz = new System.Windows.Forms.LinkLabel();
 			this.cmdOpenTCPClient = new System.Windows.Forms.LinkLabel();
@@ -102,7 +103,6 @@ namespace EZAE
 			this.cmdUseButterfly = new System.Windows.Forms.LinkLabel();
 			this.lblSequenceFileName = new System.Windows.Forms.Label();
 			this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-			this.cmdOpenAutoClose = new System.Windows.Forms.LinkLabel();
 			this.tabControl1.SuspendLayout();
 			this.tabControl.SuspendLayout();
 			this.tabSetupPC.SuspendLayout();
@@ -151,6 +151,17 @@ namespace EZAE
 			this.tabControl.Text = "Control";
 			this.tabControl.UseVisualStyleBackColor = true;
 			this.tabControl.Enter += new System.EventHandler(this.tabControl_Enter);
+			// 
+			// cmdOpenAutoClose
+			// 
+			this.cmdOpenAutoClose.AutoSize = true;
+			this.cmdOpenAutoClose.Location = new System.Drawing.Point(362, 10);
+			this.cmdOpenAutoClose.Name = "cmdOpenAutoClose";
+			this.cmdOpenAutoClose.Size = new System.Drawing.Size(84, 13);
+			this.cmdOpenAutoClose.TabIndex = 24;
+			this.cmdOpenAutoClose.TabStop = true;
+			this.cmdOpenAutoClose.Text = "Open AutoClose";
+			this.cmdOpenAutoClose.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenAutoClose_LinkClicked);
 			// 
 			// cmdOpenWorklog
 			// 
@@ -952,17 +963,6 @@ namespace EZAE
 			this.lblSequenceFileName.Name = "lblSequenceFileName";
 			this.lblSequenceFileName.Size = new System.Drawing.Size(0, 13);
 			this.lblSequenceFileName.TabIndex = 27;
-			// 
-			// cmdOpenAutoClose
-			// 
-			this.cmdOpenAutoClose.AutoSize = true;
-			this.cmdOpenAutoClose.Location = new System.Drawing.Point(362, 10);
-			this.cmdOpenAutoClose.Name = "cmdOpenAutoClose";
-			this.cmdOpenAutoClose.Size = new System.Drawing.Size(84, 13);
-			this.cmdOpenAutoClose.TabIndex = 24;
-			this.cmdOpenAutoClose.TabStop = true;
-			this.cmdOpenAutoClose.Text = "Open AutoClose";
-			this.cmdOpenAutoClose.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenAutoClose_LinkClicked);
 			// 
 			// MainForm
 			// 
