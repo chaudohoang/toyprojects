@@ -52,6 +52,8 @@ Partial Class Form1
 		Me.Label5 = New System.Windows.Forms.Label()
 		Me.txtFile3 = New System.Windows.Forms.TextBox()
 		Me.btnBrowse3 = New System.Windows.Forms.Button()
+		Me.btnExportAnalysesCompareLog = New System.Windows.Forms.Button()
+		Me.btnExportMeasurementsCompareLog = New System.Windows.Forms.Button()
 		Me.TabControl1.SuspendLayout()
 		Me.TabPage1.SuspendLayout()
 		Me.TabPage2.SuspendLayout()
@@ -169,6 +171,7 @@ Partial Class Form1
 		'
 		'TabPage1
 		'
+		Me.TabPage1.Controls.Add(Me.btnExportAnalysesCompareLog)
 		Me.TabPage1.Controls.Add(Me.btnUseDefaultMaster)
 		Me.TabPage1.Controls.Add(Me.btnUseLastModified1)
 		Me.TabPage1.Controls.Add(Me.cbxIgnoreList)
@@ -220,6 +223,7 @@ Partial Class Form1
 		'
 		'TabPage2
 		'
+		Me.TabPage2.Controls.Add(Me.btnExportMeasurementsCompareLog)
 		Me.TabPage2.Controls.Add(Me.btnUseLastModified3)
 		Me.TabPage2.Controls.Add(Me.btnShowSettings)
 		Me.TabPage2.Controls.Add(Me.btnClearlog2)
@@ -350,6 +354,24 @@ Partial Class Form1
 		Me.btnBrowse3.Text = "Browse"
 		Me.btnBrowse3.UseVisualStyleBackColor = True
 		'
+		'btnExportAnalysesCompareLog
+		'
+		Me.btnExportAnalysesCompareLog.Location = New System.Drawing.Point(6, 220)
+		Me.btnExportAnalysesCompareLog.Name = "btnExportAnalysesCompareLog"
+		Me.btnExportAnalysesCompareLog.Size = New System.Drawing.Size(65, 79)
+		Me.btnExportAnalysesCompareLog.TabIndex = 13
+		Me.btnExportAnalysesCompareLog.Text = "Export log"
+		Me.btnExportAnalysesCompareLog.UseVisualStyleBackColor = True
+		'
+		'btnExportMeasurementsCompareLog
+		'
+		Me.btnExportMeasurementsCompareLog.Location = New System.Drawing.Point(6, 220)
+		Me.btnExportMeasurementsCompareLog.Name = "btnExportMeasurementsCompareLog"
+		Me.btnExportMeasurementsCompareLog.Size = New System.Drawing.Size(65, 79)
+		Me.btnExportMeasurementsCompareLog.TabIndex = 18
+		Me.btnExportMeasurementsCompareLog.Text = "Export log"
+		Me.btnExportMeasurementsCompareLog.UseVisualStyleBackColor = True
+		'
 		'Form1
 		'
 		Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -399,4 +421,6 @@ Partial Class Form1
 	Friend WithEvents btnUseDefaultMaster As Button
 	Friend WithEvents btnUseLastModified1 As Button
 	Friend WithEvents btnUseLastModified3 As Button
+	Friend WithEvents btnExportAnalysesCompareLog As Button
+	Friend WithEvents btnExportMeasurementsCompareLog As Button
 End Class

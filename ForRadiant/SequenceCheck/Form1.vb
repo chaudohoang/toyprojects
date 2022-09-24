@@ -2,7 +2,7 @@
 Imports System.Xml
 
 Public Class Form1
-
+	Dim exePath As String = My.Application.Info.DirectoryPath
 	Private Sub SetVersionInfo()
 
 		Dim ass As System.Reflection.Assembly = System.Reflection.Assembly.GetExecutingAssembly()
@@ -462,6 +462,60 @@ Public Class Form1
 		If Directory.Exists("C:\Radiant Vision Systems Data\TrueTest\Sequence") Then
 			Dim latestfile = New DirectoryInfo("C:\Radiant Vision Systems Data\TrueTest\Sequence").GetFiles().OrderByDescending(Function(o) o.LastWriteTime).FirstOrDefault()
 			txtFile3.Text = latestfile.FullName
+		End If
+	End Sub
+
+	Private Sub btnExportAnalysesCompareLog_Click(sender As Object, e As EventArgs) Handles btnExportAnalysesCompareLog.Click
+		Dim logPath = Path.Combine(exePath, Now.ToString("yyyyMMddHHmmss") + ".txt")
+		If ListBox1.Items.Count = 0 Then
+			MessageBox.Show("Empty Log !!!")
+		Else
+			Dim savefile As SaveFileDialog = New SaveFileDialog()
+			' set a default file name
+			savefile.FileName = Path.GetFileName(logPath)
+			' set filters - this can be done in properties as well
+			savefile.Filter = "Text files (*.txt)|*.txt"
+			savefile.InitialDirectory = exePath
+
+			If savefile.ShowDialog() = DialogResult.OK Then
+				Using sw As StreamWriter = New StreamWriter(savefile.FileName)
+					sw.WriteLine("Sequence 1 : " + txtFile1.Text)
+					sw.WriteLine("Sequence 2 : " + txtFile2.Text)
+					sw.WriteLine("Ignore List : " + cbxIgnoreList.Text)
+
+					For index = 0 To ListBox1.Items.Count - 1
+						sw.WriteLine(ListBox1.Items(index))
+					Next
+				End Using
+			End If
+			Process.Start("notepad", savefile.FileName)
+		End If
+	End Sub
+
+	Private Sub btnExportMeasurementsCompareLog_Click(sender As Object, e As EventArgs) Handles btnExportMeasurementsCompareLog.Click
+		Dim logPath = Path.Combine(exePath, Now.ToString("yyyyMMddHHmmss") + ".txt")
+		If ListBox2.Items.Count = 0 Then
+			MessageBox.Show("Empty Log !!!")
+		Else
+			Dim savefile As SaveFileDialog = New SaveFileDialog()
+			' set a default file name
+			savefile.FileName = Path.GetFileName(logPath)
+			' set filters - this can be done in properties as well
+			savefile.Filter = "Text files (*.txt)|*.txt"
+			savefile.InitialDirectory = exePath
+
+			If savefile.ShowDialog() = DialogResult.OK Then
+				Using sw As StreamWriter = New StreamWriter(savefile.FileName)
+					sw.WriteLine("Sequence : " + txtFile3.Text)
+					sw.WriteLine("Subframe : " + cbxSubframe.Text)
+					sw.WriteLine("Check Calibration NONE : " + If(chkCalNone.Checked, "yes", "no"))
+
+					For index = 0 To ListBox2.Items.Count - 1
+						sw.WriteLine(ListBox2.Items(index))
+					Next
+				End Using
+			End If
+			Process.Start("notepad", savefile.FileName)
 		End If
 	End Sub
 End Class
