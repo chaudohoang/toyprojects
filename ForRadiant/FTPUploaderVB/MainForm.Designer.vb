@@ -62,12 +62,12 @@ Namespace FTPUploaderVB
 			'
 			Me.contextMenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.exit2ToolStripMenuItem})
 			Me.contextMenuStrip1.Name = "contextMenuStrip1"
-			Me.contextMenuStrip1.Size = New System.Drawing.Size(181, 48)
+			Me.contextMenuStrip1.Size = New System.Drawing.Size(94, 26)
 			'
 			'exit2ToolStripMenuItem
 			'
 			Me.exit2ToolStripMenuItem.Name = "exit2ToolStripMenuItem"
-			Me.exit2ToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+			Me.exit2ToolStripMenuItem.Size = New System.Drawing.Size(93, 22)
 			Me.exit2ToolStripMenuItem.Text = "Exit"
 			'
 			'menuStrip1
@@ -160,7 +160,7 @@ Namespace FTPUploaderVB
 			Me.txtUploadListPath.Name = "txtUploadListPath"
 			Me.txtUploadListPath.Size = New System.Drawing.Size(242, 20)
 			Me.txtUploadListPath.TabIndex = 1
-			Me.txtUploadListPath.Text = "D:\Program\RVS\UploadList"
+			Me.txtUploadListPath.Text = "D:\Program\RVS\UploadQueue"
 			'
 			'Label3
 			'
