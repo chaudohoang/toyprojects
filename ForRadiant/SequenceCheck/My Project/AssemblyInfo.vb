@@ -8,10 +8,10 @@ Imports System.Runtime.InteropServices
 
 ' Review the values of the assembly attributes
 
-<Assembly: AssemblyTitle("CSVNormalization")>
+<Assembly: AssemblyTitle("SequenceCheck")>
 <Assembly: AssemblyDescription("")>
 <Assembly: AssemblyCompany("HP Inc.")>
-<Assembly: AssemblyProduct("CSVNormalization")>
+<Assembly: AssemblyProduct("SequenceCheck")>
 <Assembly: AssemblyCopyright("Copyright © HP Inc. 2020")>
 <Assembly: AssemblyTrademark("")>
 
