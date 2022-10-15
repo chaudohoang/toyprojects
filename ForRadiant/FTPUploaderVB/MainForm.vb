@@ -174,10 +174,19 @@ Namespace FTPUploaderVB
 								 lblStatus.Text = "Uploading files ..."
 							 End Sub)
 			IsUploading = True
+			Dim count As Integer = 1
 			Dim uploadList As IEnumerable(Of String) = IO.Directory.EnumerateFiles(txtUploadListPath.Text, "*.txt")
 
 			For Each info As String In uploadList
+				If count > Int32.Parse(txtMaximumUpload.Text) Then
+					lblStatus.Invoke(Sub()
+										 lblStatus.Text = "Uploading finished !"
+									 End Sub)
+					IsUploading = False
+					Exit Sub
+				End If
 				Upload(info)
+				count += 1
 			Next
 			lblStatus.Invoke(Sub()
 								 lblStatus.Text = "Uploading finished !"

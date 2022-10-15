@@ -47,6 +47,8 @@ Namespace FTPUploaderVB
 			Me.Label3 = New System.Windows.Forms.Label()
 			Me.lblStatus = New System.Windows.Forms.Label()
 			Me.lblAutoUpload = New System.Windows.Forms.Label()
+			Me.txtMaximumUpload = New System.Windows.Forms.TextBox()
+			Me.Label2 = New System.Windows.Forms.Label()
 			Me.contextMenuStrip1.SuspendLayout()
 			Me.menuStrip1.SuspendLayout()
 			Me.SuspendLayout()
@@ -175,7 +177,7 @@ Namespace FTPUploaderVB
 			'
 			Me.lblStatus.AutoSize = True
 			Me.lblStatus.ForeColor = System.Drawing.Color.Blue
-			Me.lblStatus.Location = New System.Drawing.Point(12, 105)
+			Me.lblStatus.Location = New System.Drawing.Point(12, 129)
 			Me.lblStatus.Name = "lblStatus"
 			Me.lblStatus.Size = New System.Drawing.Size(0, 13)
 			Me.lblStatus.TabIndex = 6
@@ -184,17 +186,36 @@ Namespace FTPUploaderVB
 			'
 			Me.lblAutoUpload.AutoSize = True
 			Me.lblAutoUpload.ForeColor = System.Drawing.Color.Red
-			Me.lblAutoUpload.Location = New System.Drawing.Point(12, 80)
+			Me.lblAutoUpload.Location = New System.Drawing.Point(12, 104)
 			Me.lblAutoUpload.Name = "lblAutoUpload"
 			Me.lblAutoUpload.Size = New System.Drawing.Size(109, 13)
 			Me.lblAutoUpload.TabIndex = 5
 			Me.lblAutoUpload.Text = "Auto Upload Stopped"
 			'
+			'txtMaximumUpload
+			'
+			Me.txtMaximumUpload.Location = New System.Drawing.Point(170, 76)
+			Me.txtMaximumUpload.Name = "txtMaximumUpload"
+			Me.txtMaximumUpload.Size = New System.Drawing.Size(242, 20)
+			Me.txtMaximumUpload.TabIndex = 7
+			Me.txtMaximumUpload.Text = "50"
+			'
+			'Label2
+			'
+			Me.Label2.AutoSize = True
+			Me.Label2.Location = New System.Drawing.Point(12, 79)
+			Me.Label2.Name = "Label2"
+			Me.Label2.Size = New System.Drawing.Size(135, 13)
+			Me.Label2.TabIndex = 8
+			Me.Label2.Text = "Maximum Uploads Per Run"
+			'
 			'MainForm
 			'
 			Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
 			Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-			Me.ClientSize = New System.Drawing.Size(424, 128)
+			Me.ClientSize = New System.Drawing.Size(424, 156)
+			Me.Controls.Add(Me.txtMaximumUpload)
+			Me.Controls.Add(Me.Label2)
 			Me.Controls.Add(Me.lblAutoUpload)
 			Me.Controls.Add(Me.lblStatus)
 			Me.Controls.Add(Me.txtUploadListPath)
@@ -237,5 +258,7 @@ Namespace FTPUploaderVB
 		Private WithEvents lblStatus As Windows.Forms.Label
 		Friend WithEvents StopAutoUploadToolStripMenuItem As Windows.Forms.ToolStripMenuItem
 		Private WithEvents lblAutoUpload As Windows.Forms.Label
+		Private WithEvents txtMaximumUpload As Windows.Forms.TextBox
+		Private WithEvents Label2 As Windows.Forms.Label
 	End Class
 End Namespace
