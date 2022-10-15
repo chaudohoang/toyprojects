@@ -26,6 +26,7 @@ Partial Class Apps
 		Me.TabPage3 = New System.Windows.Forms.TabPage()
 		Me.TabPage2 = New System.Windows.Forms.TabPage()
 		Me.TabPage1 = New System.Windows.Forms.TabPage()
+		Me.cmdFTPUploader = New System.Windows.Forms.LinkLabel()
 		Me.cmdCheckSequence = New System.Windows.Forms.LinkLabel()
 		Me.Label1 = New System.Windows.Forms.Label()
 		Me.cmdFFCDBGenerate = New System.Windows.Forms.LinkLabel()
@@ -57,6 +58,7 @@ Partial Class Apps
 		'
 		'TabPage1
 		'
+		Me.TabPage1.Controls.Add(Me.cmdFTPUploader)
 		Me.TabPage1.Controls.Add(Me.cmdCheckSequence)
 		Me.TabPage1.Controls.Add(Me.Label1)
 		Me.TabPage1.Controls.Add(Me.cmdFFCDBGenerate)
@@ -69,6 +71,16 @@ Partial Class Apps
 		Me.TabPage1.TabIndex = 0
 		Me.TabPage1.Text = "TabPage1"
 		Me.TabPage1.UseVisualStyleBackColor = True
+		'
+		'cmdFTPUploader
+		'
+		Me.cmdFTPUploader.AutoSize = True
+		Me.cmdFTPUploader.Location = New System.Drawing.Point(322, 16)
+		Me.cmdFTPUploader.Name = "cmdFTPUploader"
+		Me.cmdFTPUploader.Size = New System.Drawing.Size(70, 13)
+		Me.cmdFTPUploader.TabIndex = 4
+		Me.cmdFTPUploader.TabStop = True
+		Me.cmdFTPUploader.Text = "FTPUploader"
 		'
 		'cmdCheckSequence
 		'
@@ -155,4 +167,5 @@ Partial Class Apps
 	Friend WithEvents cmdButterfly As LinkLabel
 	Friend WithEvents TabControl1 As TabControl
 	Friend WithEvents cmdCheckSequence As LinkLabel
+	Friend WithEvents cmdFTPUploader As LinkLabel
 End Class

@@ -54,4 +54,13 @@ Public Class Apps
     Private Sub Apps_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         SetVersionInfo()
     End Sub
+
+    Private Sub cmdFTPUploader_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdFTPUploader.LinkClicked
+        startinfo.WorkingDirectory = exePath
+        startinfo.FileName = System.IO.Path.Combine(exePath, "FTPUploaderVB.exe")
+        If File.Exists(startinfo.FileName) Then
+            Process.Start(startinfo)
+        End If
+    End Sub
+
 End Class

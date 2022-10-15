@@ -103,6 +103,7 @@ namespace EZAE
 			this.cmdUseButterfly = new System.Windows.Forms.LinkLabel();
 			this.lblSequenceFileName = new System.Windows.Forms.Label();
 			this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+			this.cmdFTPUploader = new System.Windows.Forms.LinkLabel();
 			this.tabControl1.SuspendLayout();
 			this.tabControl.SuspendLayout();
 			this.tabSetupPC.SuspendLayout();
@@ -123,6 +124,7 @@ namespace EZAE
 			// 
 			// tabControl
 			// 
+			this.tabControl.Controls.Add(this.cmdFTPUploader);
 			this.tabControl.Controls.Add(this.cmdOpenAutoClose);
 			this.tabControl.Controls.Add(this.cmdOpenWorklog);
 			this.tabControl.Controls.Add(this.cmdOpenCopywhiz);
@@ -964,6 +966,17 @@ namespace EZAE
 			this.lblSequenceFileName.Size = new System.Drawing.Size(0, 13);
 			this.lblSequenceFileName.TabIndex = 27;
 			// 
+			// cmdFTPUploader
+			// 
+			this.cmdFTPUploader.AutoSize = true;
+			this.cmdFTPUploader.Location = new System.Drawing.Point(362, 34);
+			this.cmdFTPUploader.Name = "cmdFTPUploader";
+			this.cmdFTPUploader.Size = new System.Drawing.Size(70, 13);
+			this.cmdFTPUploader.TabIndex = 25;
+			this.cmdFTPUploader.TabStop = true;
+			this.cmdFTPUploader.Text = "FTPUploader";
+			this.cmdFTPUploader.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdFTPUploader_LinkClicked);
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1066,6 +1079,7 @@ namespace EZAE
 		private System.Windows.Forms.LinkLabel cmdCheckSequence;
 		private System.Windows.Forms.LinkLabel cmdOpenWorklog;
 		private System.Windows.Forms.LinkLabel cmdOpenAutoClose;
+		private System.Windows.Forms.LinkLabel cmdFTPUploader;
 	}
 }
 

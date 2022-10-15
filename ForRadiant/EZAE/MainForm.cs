@@ -995,5 +995,18 @@ namespace EZAE
 
             }
         }
+
+		private void cmdFTPUploader_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+            string filepath = Path.GetFullPath(@"Tools\FTPUploaderVB\FTPUploaderVB.exe");
+            if (File.Exists(filepath))
+            {
+
+                ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
+                startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
+                Process.Start(startInfo);
+
+            }
+        }
 	}
 }
