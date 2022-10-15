@@ -81,6 +81,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RVSWorklog", "RVSWorklog\RV
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoClose", "AutoClose\AutoClose.csproj", "{FA2D9DA8-2F86-48A9-A241-3C69A3066339}"
 EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "FTPUploaderVB", "FTPUploaderVB\FTPUploaderVB.vbproj", "{485E88D7-C55D-4124-9753-576F37932B3C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -243,15 +245,19 @@ Global
 		{FA2D9DA8-2F86-48A9-A241-3C69A3066339}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FA2D9DA8-2F86-48A9-A241-3C69A3066339}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FA2D9DA8-2F86-48A9-A241-3C69A3066339}.Release|Any CPU.Build.0 = Release|Any CPU
+		{485E88D7-C55D-4124-9753-576F37932B3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{485E88D7-C55D-4124-9753-576F37932B3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{485E88D7-C55D-4124-9753-576F37932B3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{485E88D7-C55D-4124-9753-576F37932B3C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		BuildVersion_UseGlobalSettings = True
-		BuildVersion_UpdateAssemblyVersion = True
-		BuildVersion_BuildVersioningStyle = None.None.Increment.TimeStamp
-		BuildVersion_StartDate = 2000/1/1
 		SolutionGuid = {60C14AFF-CFF7-46E8-9345-65A46A64495F}
+		BuildVersion_StartDate = 2000/1/1
+		BuildVersion_BuildVersioningStyle = None.None.Increment.TimeStamp
+		BuildVersion_UpdateAssemblyVersion = True
+		BuildVersion_UseGlobalSettings = True
 	EndGlobalSection
 EndGlobal
