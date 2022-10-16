@@ -175,6 +175,15 @@ Namespace FTPUploaderVB
 							 End Sub)
 			IsUploading = True
 			Dim count As Integer = 1
+
+			If Not Directory.Exists(txtUploadListPath.Text) Then
+				lblStatus.Invoke(Sub()
+									 lblStatus.Text = "Queue Folder not existed, try again ..."
+								 End Sub)
+				IsUploading = False
+				Exit Sub
+			End If
+
 			Dim uploadList As IEnumerable(Of String) = IO.Directory.EnumerateFiles(txtUploadListPath.Text, "*.txt")
 
 			For Each info As String In uploadList
@@ -222,7 +231,6 @@ Namespace FTPUploaderVB
 				timer.Stop()
 				timer = Nothing
 			End If
-			RemoveHandler timer.Elapsed, AddressOf timer_Elapsed
 		End Sub
 	End Class
 End Namespace
