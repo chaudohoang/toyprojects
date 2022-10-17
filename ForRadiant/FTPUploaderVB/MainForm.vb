@@ -198,14 +198,14 @@ Namespace FTPUploaderVB
 				End Using
 				uploaded = True
 				lblFileUploadStatus.Invoke(Sub()
-											   lblFileUploadStatus.Text = "succeeded "
+											   lblFileUploadStatus.Text = "Succeeded "
 										   End Sub)
 				IsUploading = False
 				logContent = "Upload succeeded " + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
 				File.AppendAllText(succeedLogPath, logContent)
 			Catch e As Exception
 				lblFileUploadStatus.Invoke(Sub()
-											   lblFileUploadStatus.Text = "failed "
+											   lblFileUploadStatus.Text = "Failed "
 										   End Sub)
 				IsUploading = False
 				logContent = "Upload failed with exception : " + e.Message + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
