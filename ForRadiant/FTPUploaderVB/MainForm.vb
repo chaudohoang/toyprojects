@@ -226,7 +226,8 @@ Namespace FTPUploaderVB
 			DisableAutoUpload()
 		End Sub
 		Private Sub DisableAutoUpload()
-			lblAutoUpload.Text = "Auto Upload Disabled"
+			lblAutoUpload.ForeColor = System.Drawing.Color.Red
+			lblAutoUpload.Text = "Auto Upload Stopped"
 			If timer IsNot Nothing Then
 				timer.Stop()
 				timer = Nothing
