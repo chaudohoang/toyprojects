@@ -8,6 +8,7 @@ Imports System.Collections.Generic
 Imports System.Diagnostics
 Imports Microsoft.VisualBasic
 Imports System.Linq
+Imports System.Drawing
 
 Namespace FTPUploaderVB
 	Partial Public Class MainForm
@@ -103,18 +104,63 @@ Namespace FTPUploaderVB
 			WindowState = FormWindowState.Normal
 		End Sub
 
+		Public Function IsMaximumFail(InfoFile As String) As Boolean
+			Dim queueName = Path.GetFileName(InfoFile)
+			Dim maximuFailed As Boolean = False
+			Dim lines = File.ReadAllLines(InfoFile)
+			Dim fileName = Path.GetFileName(lines(7))
+			Dim failLogPath = lines(6)
+			Dim logContent() As String
+			Dim failCount As Integer = 0
+			If File.Exists(failLogPath) Then
+				logContent = File.ReadAllLines(failLogPath)
+				For Each line As String In logContent
+
+					If line.Contains("ftp") AndAlso line.Contains(fileName) Then
+						failCount += 1
+					End If
+
+					If failCount = Int32.Parse(txtMaximumFailCount.Text) Then
+						maximuFailed = True
+						lblFileStatus.Invoke(Sub()
+												 lblFileStatus.Text = queueName + " : maximum fail reached, try again next day..."
+											 End Sub)
+						IsUploading = False
+						Exit For
+					End If
+
+				Next
+			End If
+			Return maximuFailed
+		End Function
 		Public Function Upload(InfoFile As String) As Boolean
+
 			Dim uploaded = False
-			Dim uploadLog As String = ""
+			Dim logContent As String = ""
 			Dim lines = File.ReadAllLines(InfoFile)
 			Dim host = lines(0)
 			Dim username = lines(1)
 			Dim password = lines(2)
 			Dim exePath = lines(3)
 			Dim sessionLogPath = lines(4)
-			Dim operationLogPath = lines(5)
-			Dim sourceFile = lines(6)
-			Dim destFile = lines(7)
+			Dim succeedLogPath = lines(5)
+			Dim failLogPath = lines(6)
+			Dim sourceFile = lines(7)
+			Dim destFile = lines(8)
+
+			Static m_Rnd As New Random
+			Dim tempcolor As Color
+			tempcolor = lblFileUploadStatus.ForeColor
+			Do While lblFileUploadStatus.ForeColor = tempcolor
+				lblFileUploadStatus.ForeColor = Color.FromArgb(255, m_Rnd.Next(0, 255), m_Rnd.Next(0, 255), m_Rnd.Next(0, 255))
+			Loop
+
+
+			lblFileStatus.Invoke(Sub()
+									 lblFileStatus.Text = "Uploading " + Path.GetFileNameWithoutExtension(InfoFile) + " ..."
+								 End Sub)
+			IsUploading = False
+
 			Try
 				' Setup session options
 				Dim sessionOptions As New SessionOptions
@@ -151,11 +197,19 @@ Namespace FTPUploaderVB
 					Next
 				End Using
 				uploaded = True
-				uploadLog = "Upload succeeded " + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
-				File.AppendAllText(operationLogPath, uploadLog)
+				lblFileUploadStatus.Invoke(Sub()
+											   lblFileUploadStatus.Text = "succeeded "
+										   End Sub)
+				IsUploading = False
+				logContent = "Upload succeeded " + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
+				File.AppendAllText(succeedLogPath, logContent)
 			Catch e As Exception
-				uploadLog = "Upload failed with exception : " + e.Message + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
-				File.AppendAllText(operationLogPath, uploadLog)
+				lblFileUploadStatus.Invoke(Sub()
+											   lblFileUploadStatus.Text = "failed "
+										   End Sub)
+				IsUploading = False
+				logContent = "Upload failed with exception : " + e.Message + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
+				File.AppendAllText(failLogPath, logContent)
 			End Try
 			If uploaded Then
 				File.Delete(InfoFile)
@@ -178,8 +232,12 @@ Namespace FTPUploaderVB
 			Dim count As Integer = 1
 
 			If Not Directory.Exists(txtUploadListPath.Text) Then
+				lblFileStatus.Invoke(Sub()
+										 lblFileStatus.Text = "Queue Folder not existed, try again ..."
+									 End Sub)
+				IsUploading = False
 				lblStatus.Invoke(Sub()
-									 lblStatus.Text = "Queue Folder not existed, try again ..."
+									 lblStatus.Text = "Uploading finished !"
 								 End Sub)
 				IsUploading = False
 				Exit Sub
@@ -199,7 +257,11 @@ Namespace FTPUploaderVB
 					IsUploading = False
 					Exit Sub
 				End If
-				Upload(info)
+				If IsMaximumFail(info) Then
+					Continue For
+				Else
+					Upload(info)
+				End If
 				count += 1
 			Next
 			lblStatus.Invoke(Sub()

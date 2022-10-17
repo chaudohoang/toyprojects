@@ -49,6 +49,10 @@ Namespace FTPUploaderVB
 			Me.lblAutoUpload = New System.Windows.Forms.Label()
 			Me.txtMaximumUpload = New System.Windows.Forms.TextBox()
 			Me.Label2 = New System.Windows.Forms.Label()
+			Me.txtMaximumFailCount = New System.Windows.Forms.TextBox()
+			Me.Label4 = New System.Windows.Forms.Label()
+			Me.lblFileStatus = New System.Windows.Forms.Label()
+			Me.lblFileUploadStatus = New System.Windows.Forms.Label()
 			Me.contextMenuStrip1.SuspendLayout()
 			Me.menuStrip1.SuspendLayout()
 			Me.SuspendLayout()
@@ -77,7 +81,7 @@ Namespace FTPUploaderVB
 			Me.menuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.commandToolStripMenuItem, Me.settingsToolStripMenuItem, Me.helpToolStripMenuItem})
 			Me.menuStrip1.Location = New System.Drawing.Point(0, 0)
 			Me.menuStrip1.Name = "menuStrip1"
-			Me.menuStrip1.Size = New System.Drawing.Size(424, 24)
+			Me.menuStrip1.Size = New System.Drawing.Size(478, 24)
 			Me.menuStrip1.TabIndex = 1
 			Me.menuStrip1.Text = "menuStrip1"
 			'
@@ -143,7 +147,7 @@ Namespace FTPUploaderVB
 			'
 			Me.txtInterval.Location = New System.Drawing.Point(170, 50)
 			Me.txtInterval.Name = "txtInterval"
-			Me.txtInterval.Size = New System.Drawing.Size(242, 20)
+			Me.txtInterval.Size = New System.Drawing.Size(296, 20)
 			Me.txtInterval.TabIndex = 3
 			Me.txtInterval.Text = "60"
 			'
@@ -160,7 +164,7 @@ Namespace FTPUploaderVB
 			'
 			Me.txtUploadListPath.Location = New System.Drawing.Point(170, 24)
 			Me.txtUploadListPath.Name = "txtUploadListPath"
-			Me.txtUploadListPath.Size = New System.Drawing.Size(242, 20)
+			Me.txtUploadListPath.Size = New System.Drawing.Size(296, 20)
 			Me.txtUploadListPath.TabIndex = 1
 			Me.txtUploadListPath.Text = "D:\Program\RVS\UploadQueue"
 			'
@@ -177,7 +181,7 @@ Namespace FTPUploaderVB
 			'
 			Me.lblStatus.AutoSize = True
 			Me.lblStatus.ForeColor = System.Drawing.Color.Blue
-			Me.lblStatus.Location = New System.Drawing.Point(12, 129)
+			Me.lblStatus.Location = New System.Drawing.Point(12, 175)
 			Me.lblStatus.Name = "lblStatus"
 			Me.lblStatus.Size = New System.Drawing.Size(0, 13)
 			Me.lblStatus.TabIndex = 6
@@ -186,7 +190,7 @@ Namespace FTPUploaderVB
 			'
 			Me.lblAutoUpload.AutoSize = True
 			Me.lblAutoUpload.ForeColor = System.Drawing.Color.Red
-			Me.lblAutoUpload.Location = New System.Drawing.Point(12, 104)
+			Me.lblAutoUpload.Location = New System.Drawing.Point(12, 131)
 			Me.lblAutoUpload.Name = "lblAutoUpload"
 			Me.lblAutoUpload.Size = New System.Drawing.Size(109, 13)
 			Me.lblAutoUpload.TabIndex = 5
@@ -196,7 +200,7 @@ Namespace FTPUploaderVB
 			'
 			Me.txtMaximumUpload.Location = New System.Drawing.Point(170, 76)
 			Me.txtMaximumUpload.Name = "txtMaximumUpload"
-			Me.txtMaximumUpload.Size = New System.Drawing.Size(242, 20)
+			Me.txtMaximumUpload.Size = New System.Drawing.Size(296, 20)
 			Me.txtMaximumUpload.TabIndex = 7
 			Me.txtMaximumUpload.Text = "50"
 			'
@@ -209,11 +213,50 @@ Namespace FTPUploaderVB
 			Me.Label2.TabIndex = 8
 			Me.Label2.Text = "Maximum Uploads Per Run"
 			'
+			'txtMaximumFailCount
+			'
+			Me.txtMaximumFailCount.Location = New System.Drawing.Point(170, 102)
+			Me.txtMaximumFailCount.Name = "txtMaximumFailCount"
+			Me.txtMaximumFailCount.Size = New System.Drawing.Size(296, 20)
+			Me.txtMaximumFailCount.TabIndex = 9
+			Me.txtMaximumFailCount.Text = "5"
+			'
+			'Label4
+			'
+			Me.Label4.AutoSize = True
+			Me.Label4.Location = New System.Drawing.Point(12, 105)
+			Me.Label4.Name = "Label4"
+			Me.Label4.Size = New System.Drawing.Size(143, 13)
+			Me.Label4.TabIndex = 10
+			Me.Label4.Text = "Maximum Fail Count Per Item"
+			'
+			'lblFileStatus
+			'
+			Me.lblFileStatus.AutoSize = True
+			Me.lblFileStatus.ForeColor = System.Drawing.Color.Purple
+			Me.lblFileStatus.Location = New System.Drawing.Point(12, 154)
+			Me.lblFileStatus.Name = "lblFileStatus"
+			Me.lblFileStatus.Size = New System.Drawing.Size(0, 13)
+			Me.lblFileStatus.TabIndex = 11
+			'
+			'lblFileUploadStatus
+			'
+			Me.lblFileUploadStatus.AutoSize = True
+			Me.lblFileUploadStatus.ForeColor = System.Drawing.Color.Purple
+			Me.lblFileUploadStatus.Location = New System.Drawing.Point(406, 154)
+			Me.lblFileUploadStatus.Name = "lblFileUploadStatus"
+			Me.lblFileUploadStatus.Size = New System.Drawing.Size(0, 13)
+			Me.lblFileUploadStatus.TabIndex = 12
+			'
 			'MainForm
 			'
 			Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
 			Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-			Me.ClientSize = New System.Drawing.Size(424, 156)
+			Me.ClientSize = New System.Drawing.Size(478, 197)
+			Me.Controls.Add(Me.lblFileUploadStatus)
+			Me.Controls.Add(Me.lblFileStatus)
+			Me.Controls.Add(Me.txtMaximumFailCount)
+			Me.Controls.Add(Me.Label4)
 			Me.Controls.Add(Me.txtMaximumUpload)
 			Me.Controls.Add(Me.Label2)
 			Me.Controls.Add(Me.lblAutoUpload)
@@ -260,5 +303,9 @@ Namespace FTPUploaderVB
 		Private WithEvents lblAutoUpload As Windows.Forms.Label
 		Private WithEvents txtMaximumUpload As Windows.Forms.TextBox
 		Private WithEvents Label2 As Windows.Forms.Label
+		Private WithEvents txtMaximumFailCount As Windows.Forms.TextBox
+		Private WithEvents Label4 As Windows.Forms.Label
+		Private WithEvents lblFileStatus As Windows.Forms.Label
+		Private WithEvents lblFileUploadStatus As Windows.Forms.Label
 	End Class
 End Namespace
