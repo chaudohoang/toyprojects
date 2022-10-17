@@ -81,7 +81,7 @@ Namespace FTPUploaderVB
 			Me.menuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.commandToolStripMenuItem, Me.settingsToolStripMenuItem, Me.helpToolStripMenuItem})
 			Me.menuStrip1.Location = New System.Drawing.Point(0, 0)
 			Me.menuStrip1.Name = "menuStrip1"
-			Me.menuStrip1.Size = New System.Drawing.Size(412, 24)
+			Me.menuStrip1.Size = New System.Drawing.Size(450, 24)
 			Me.menuStrip1.TabIndex = 1
 			Me.menuStrip1.Text = "menuStrip1"
 			'
@@ -147,7 +147,7 @@ Namespace FTPUploaderVB
 			'
 			Me.txtInterval.Location = New System.Drawing.Point(170, 50)
 			Me.txtInterval.Name = "txtInterval"
-			Me.txtInterval.Size = New System.Drawing.Size(231, 20)
+			Me.txtInterval.Size = New System.Drawing.Size(268, 20)
 			Me.txtInterval.TabIndex = 3
 			Me.txtInterval.Text = "60"
 			'
@@ -164,7 +164,7 @@ Namespace FTPUploaderVB
 			'
 			Me.txtUploadListPath.Location = New System.Drawing.Point(170, 24)
 			Me.txtUploadListPath.Name = "txtUploadListPath"
-			Me.txtUploadListPath.Size = New System.Drawing.Size(231, 20)
+			Me.txtUploadListPath.Size = New System.Drawing.Size(268, 20)
 			Me.txtUploadListPath.TabIndex = 1
 			Me.txtUploadListPath.Text = "D:\Program\RVS\UploadQueue"
 			'
@@ -200,7 +200,7 @@ Namespace FTPUploaderVB
 			'
 			Me.txtMaximumUpload.Location = New System.Drawing.Point(170, 76)
 			Me.txtMaximumUpload.Name = "txtMaximumUpload"
-			Me.txtMaximumUpload.Size = New System.Drawing.Size(231, 20)
+			Me.txtMaximumUpload.Size = New System.Drawing.Size(268, 20)
 			Me.txtMaximumUpload.TabIndex = 7
 			Me.txtMaximumUpload.Text = "50"
 			'
@@ -217,7 +217,7 @@ Namespace FTPUploaderVB
 			'
 			Me.txtMaximumFailCount.Location = New System.Drawing.Point(170, 102)
 			Me.txtMaximumFailCount.Name = "txtMaximumFailCount"
-			Me.txtMaximumFailCount.Size = New System.Drawing.Size(231, 20)
+			Me.txtMaximumFailCount.Size = New System.Drawing.Size(268, 20)
 			Me.txtMaximumFailCount.TabIndex = 9
 			Me.txtMaximumFailCount.Text = "5"
 			'
@@ -252,7 +252,7 @@ Namespace FTPUploaderVB
 			'
 			Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
 			Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-			Me.ClientSize = New System.Drawing.Size(412, 211)
+			Me.ClientSize = New System.Drawing.Size(450, 211)
 			Me.Controls.Add(Me.lblFileUploadStatus)
 			Me.Controls.Add(Me.lblFileStatus)
 			Me.Controls.Add(Me.txtMaximumFailCount)
