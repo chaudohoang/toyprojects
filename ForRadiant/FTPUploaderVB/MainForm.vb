@@ -7,6 +7,7 @@ Imports WinSCP
 Imports System.Collections.Generic
 Imports System.Diagnostics
 Imports Microsoft.VisualBasic
+Imports System.Linq
 
 Namespace FTPUploaderVB
 	Partial Public Class MainForm
@@ -184,10 +185,14 @@ Namespace FTPUploaderVB
 				Exit Sub
 			End If
 
-			Dim uploadList As IEnumerable(Of String) = IO.Directory.EnumerateFiles(txtUploadListPath.Text, "*.txt")
+			Dim root As String = txtUploadListPath.Text
+			Dim maximumUpload As Integer = Int32.Parse(txtMaximumUpload.Text)
+			Dim uploadList As IEnumerable(Of String) = IO.Directory.EnumerateFiles(root, "*.txt") _
+												  .OrderByDescending(Of Date)(Function(x As String) IO.File.GetCreationTime(x)) _
+												  .Take(maximumUpload)
 
 			For Each info As String In uploadList
-				If count > Int32.Parse(txtMaximumUpload.Text) Then
+				If count > maximumUpload Then
 					lblStatus.Invoke(Sub()
 										 lblStatus.Text = "Uploading finished !"
 									 End Sub)
