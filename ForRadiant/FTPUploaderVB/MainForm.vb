@@ -9,6 +9,8 @@ Imports System.Diagnostics
 Imports Microsoft.VisualBasic
 Imports System.Linq
 Imports System.Drawing
+Imports System.Threading
+Imports System.Threading.Tasks
 
 Namespace FTPUploaderVB
 	Partial Public Class MainForm
@@ -16,10 +18,9 @@ Namespace FTPUploaderVB
 		Public apppath As String
 		Public appdir As String
 		Public IsUploading As Boolean
-		Public uploadProcess As Process
-		Public startinfo As System.Diagnostics.ProcessStartInfo
-		Public seconds As Integer = 1   ' change 5 into the count of minutes
-		Public timer As System.Timers.Timer
+		Public uploadTask As Tasks.Task
+		Public TasksCancellationTokenSource As New CancellationTokenSource
+		Public sw As Stopwatch
 		Private allowVisible As Boolean = True
 
 		<DllImport("User32.dll")>
@@ -77,7 +78,7 @@ Namespace FTPUploaderVB
 		End Sub
 		Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 			SetVersionInfo()
-			EnableAutoUpload()
+			RestartTask()
 		End Sub
 
 		Private Sub aboutToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles aboutToolStripMenuItem.Click
@@ -103,37 +104,103 @@ Namespace FTPUploaderVB
 			Activate()
 			WindowState = FormWindowState.Normal
 		End Sub
-
-		Public Function IsMaximumFail(InfoFile As String) As Boolean
-			Dim queueName = Path.GetFileName(InfoFile)
-			Dim maximuFailed As Boolean = False
-			Dim lines = File.ReadAllLines(InfoFile)
-			Dim fileName = Path.GetFileName(lines(7))
-			Dim failLogPath = lines(6)
-			Dim logContent() As String
-			Dim failCount As Integer = 0
-			If File.Exists(failLogPath) Then
-				logContent = File.ReadAllLines(failLogPath)
-				For Each line As String In logContent
-
-					If line.Contains("ftp") AndAlso line.Contains(fileName) Then
-						failCount += 1
-					End If
-
-					If failCount = Int32.Parse(txtMaximumFailCount.Text) Then
-						maximuFailed = True
-						lblFileStatus.Invoke(Sub()
-												 lblFileStatus.Text = queueName + " : maximum fail reached, try again next day..."
-											 End Sub)
-						IsUploading = False
-						Exit For
-					End If
-
-				Next
-			End If
-			Return maximuFailed
-		End Function
 		Public Function Upload(InfoFile As String) As Boolean
+			If Not File.Exists(InfoFile) Then
+				Return False
+				Exit Function
+			End If
+
+			Dim uploaded = False
+			Dim logContent As String = ""
+			Dim lines = File.ReadAllLines(InfoFile)
+			Dim host = lines(0)
+			Dim username = lines(1)
+			Dim password = lines(2)
+			Dim exePath = lines(3)
+			Dim sessionLogPath = lines(4)
+			Dim succeedLogPath = lines(5)
+			Dim failLogPath = lines(6)
+			Dim sourceFile = lines(7)
+			Dim destFile = lines(8)
+			Dim sourceIndexFile = lines(10)
+			Dim sourceHostFile = lines(13)
+
+			Static m_Rnd As New Random
+			Dim tempcolor As Color
+			tempcolor = lblFileUploadStatus.ForeColor
+			Do While lblFileUploadStatus.ForeColor = tempcolor
+				lblFileUploadStatus.ForeColor = Color.FromArgb(255, m_Rnd.Next(0, 255), m_Rnd.Next(0, 255), m_Rnd.Next(0, 255))
+			Loop
+
+
+			lblFileStatus.Invoke(Sub()
+									 lblFileStatus.Text = "Uploading " + sourceFile + " ..."
+								 End Sub)
+
+
+			Try
+				' Setup session options
+				Dim sessionOptions As New SessionOptions
+				With sessionOptions
+					.Protocol = Protocol.Ftp
+					.HostName = host
+					.UserName = username
+					.Password = password
+					.TimeoutInMilliseconds = 20000
+				End With
+				Using session As New Session
+					session.ExecutablePath = exePath
+					If Not Directory.Exists(Path.GetDirectoryName(sessionLogPath)) Then
+						Directory.CreateDirectory(Path.GetDirectoryName(sessionLogPath))
+					End If
+					session.SessionLogPath = sessionLogPath
+					' Connect
+					session.Open(sessionOptions)
+
+					' Upload files
+					Dim transferOptions As New TransferOptions
+					transferOptions.TransferMode = TransferMode.Binary
+
+					Dim transferResult As TransferOperationResult
+					transferResult =
+					session.PutFiles(sourceFile, destFile, False, transferOptions)
+
+					' Throw on any error
+					transferResult.Check()
+
+					' Print results
+					For Each transfer In transferResult.Transfers
+					Next
+				End Using
+				uploaded = True
+				lblFileUploadStatus.Invoke(Sub()
+											   lblFileUploadStatus.Text = "Succeeded "
+										   End Sub)
+
+				logContent = Now.ToString("HH:mm:ss.fff") + vbTab + "Upload succeeded " + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
+				File.AppendAllText(succeedLogPath, logContent)
+				File.AppendAllText(sourceIndexFile, destFile + System.Environment.NewLine)
+				File.AppendAllText(sourceHostFile, destFile + System.Environment.NewLine)
+				CreateIndexAndHostQueue(InfoFile)
+			Catch e As Exception
+				lblFileUploadStatus.Invoke(Sub()
+											   lblFileUploadStatus.Text = "Failed "
+										   End Sub)
+
+				logContent = Now.ToString("HH:mm:ss.fff") + vbTab + "Upload failed with exception : " + e.Message + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
+				File.AppendAllText(failLogPath, logContent)
+			End Try
+			If uploaded Then
+				File.Delete(InfoFile)
+			End If
+			Return uploaded
+		End Function
+
+		Private Function UploadIndexAndHost(InfoFile As String) As Boolean
+			If Not File.Exists(InfoFile) Then
+				Return False
+				Exit Function
+			End If
 
 			Dim uploaded = False
 			Dim logContent As String = ""
@@ -157,9 +224,9 @@ Namespace FTPUploaderVB
 
 
 			lblFileStatus.Invoke(Sub()
-									 lblFileStatus.Text = "Uploading " + Path.GetFileNameWithoutExtension(InfoFile) + " ..."
+									 lblFileStatus.Text = "Uploading " + sourceFile + " ..."
 								 End Sub)
-			IsUploading = False
+
 
 			Try
 				' Setup session options
@@ -200,15 +267,16 @@ Namespace FTPUploaderVB
 				lblFileUploadStatus.Invoke(Sub()
 											   lblFileUploadStatus.Text = "Succeeded "
 										   End Sub)
-				IsUploading = False
-				logContent = "Upload succeeded " + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
+
+				logContent = Now.ToString("HH:mm:ss.fff") + vbTab + "Upload succeeded " + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
 				File.AppendAllText(succeedLogPath, logContent)
+
 			Catch e As Exception
 				lblFileUploadStatus.Invoke(Sub()
 											   lblFileUploadStatus.Text = "Failed "
 										   End Sub)
-				IsUploading = False
-				logContent = "Upload failed with exception : " + e.Message + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
+
+				logContent = Now.ToString("HH:mm:ss.fff") + vbTab + "Upload failed with exception : " + e.Message + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
 				File.AppendAllText(failLogPath, logContent)
 			End Try
 			If uploaded Then
@@ -217,88 +285,122 @@ Namespace FTPUploaderVB
 			Return uploaded
 		End Function
 
-		Private Sub UploadToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles UploadToolStripMenuItem.Click
-			UploadAll()
-		End Sub
+		Private Function CreateIndexAndHostQueue(InfoFile As String) As Boolean
+			If Not File.Exists(InfoFile) Then
+				Return False
+				Exit Function
+			End If
+			Dim lines = File.ReadAllLines(InfoFile)
+
+			Dim OutputIndexInfoFile = lines(9)
+			Dim OutputHostInfoFile = lines(12)
+			If Not File.Exists(OutputIndexInfoFile) AndAlso OutputIndexInfoFile <> InfoFile Then
+				lines(7) = lines(10)
+				lines(8) = lines(11)
+				File.WriteAllLines(OutputIndexInfoFile, lines)
+			End If
+			UploadIndexAndHost(OutputIndexInfoFile)
+			If Not File.Exists(OutputHostInfoFile) AndAlso OutputHostInfoFile <> InfoFile Then
+				lines(7) = lines(13)
+				lines(8) = lines(14)
+				File.WriteAllLines(OutputHostInfoFile, lines)
+			End If
+			UploadIndexAndHost(OutputHostInfoFile)
+		End Function
 
 		Private Sub UploadAll()
-			If IsUploading Then
-				Exit Sub
-			End If
-			lblStatus.Invoke(Sub()
-								 lblStatus.Text = "Uploading files ..."
-							 End Sub)
-			IsUploading = True
-			Dim count As Integer = 1
 
 			If Not Directory.Exists(txtUploadListPath.Text) Then
 				lblFileStatus.Invoke(Sub()
 										 lblFileStatus.Text = "Queue Folder not existed, try again ..."
 									 End Sub)
-				IsUploading = False
-				lblStatus.Invoke(Sub()
-									 lblStatus.Text = "Uploading finished !"
-								 End Sub)
-				IsUploading = False
 				Exit Sub
 			End If
 
-			Dim root As String = txtUploadListPath.Text
-			Dim maximumUpload As Integer = Int32.Parse(txtMaximumUpload.Text)
-			Dim uploadList As IEnumerable(Of String) = IO.Directory.EnumerateFiles(root, "*.txt") _
-												  .OrderByDescending(Of Date)(Function(x As String) IO.File.GetCreationTime(x)) _
-												  .Take(maximumUpload)
 
-			For Each info As String In uploadList
-				If count > maximumUpload Then
+			While Not TasksCancellationTokenSource.IsCancellationRequested
+
+				Try
+					lblStatus.Invoke(Sub()
+										 lblStatus.Text = "Uploading files ..."
+									 End Sub)
+
+					Dim root As String = txtUploadListPath.Text
+					Dim maximumUpload As Integer = Int32.Parse(txtMaximumUpload.Text)
+					Dim uploadList As IEnumerable(Of String) = IO.Directory.EnumerateFiles(root, "*.txt") _
+															.OrderByDescending(Of Date)(Function(x As String) IO.File.GetCreationTime(x)) _
+															.Take(maximumUpload)
+
+					For Each info As String In uploadList
+						If TasksCancellationTokenSource.IsCancellationRequested Then
+
+							Exit Sub
+						End If
+						Upload(info)
+
+					Next
+
 					lblStatus.Invoke(Sub()
 										 lblStatus.Text = "Uploading finished !"
 									 End Sub)
-					IsUploading = False
-					Exit Sub
+
+				Catch ex As Exception
+					lblStatus.Invoke(Sub()
+										 lblStatus.Text = "Error uploading : " + ex.Message
+									 End Sub)
+
+				Finally
+					lblStatus.Invoke(Sub()
+										 lblStatus.Text = "Reset timer for uploading ."
+									 End Sub)
+
+				End Try
+				Dim checkTime As New Integer
+				If Not Int32.TryParse(txtInterval.Text, checkTime) Then
+					checkTime = 1
 				End If
-				If IsMaximumFail(info) Then
-					Continue For
-				Else
-					Upload(info)
-				End If
-				count += 1
-			Next
-			lblStatus.Invoke(Sub()
-								 lblStatus.Text = "Uploading finished !"
-							 End Sub)
-			IsUploading = False
-		End Sub
-		Private Sub AutoUploadTaskToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles AutoUploadTaskToolStripMenuItem.Click
-			EnableAutoUpload()
-		End Sub
-		Private Sub EnableAutoUpload()
-			lblAutoUpload.ForeColor = System.Drawing.Color.Green
-			lblAutoUpload.Text = "Auto Upload Started"
-			seconds = 1000 * Int32.Parse(txtInterval.Text)   ' change 5 into the count of minutes
-			If timer IsNot Nothing Then
-				timer.Stop()
-				timer = Nothing
-			End If
-			timer = New System.Timers.Timer(seconds)
-			RemoveHandler timer.Elapsed, AddressOf timer_Elapsed
-			AddHandler timer.Elapsed, AddressOf timer_Elapsed
-			timer.Start()
-		End Sub
-		Private Sub timer_Elapsed(sender As Object, e As System.Timers.ElapsedEventArgs)
-			UploadAll()
+
+				sw = New Stopwatch
+				sw.Start()
+				While sw.ElapsedMilliseconds < 1000 * checkTime
+					If TasksCancellationTokenSource.IsCancellationRequested Then
+
+						Exit Sub
+					End If
+					System.Threading.Thread.Sleep(100)
+				End While
+			End While
+
 		End Sub
 
-		Private Sub StopAutoUploadToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles StopAutoUploadToolStripMenuItem.Click
-			DisableAutoUpload()
+		Private Sub RestartTask()
+			TasksCancellationTokenSource = New CancellationTokenSource
+			uploadTask = New Tasks.Task(New Action(Sub() UploadAll()), TasksCancellationTokenSource.Token)
+			uploadTask.Start()
+			cmdStartUpload.Enabled = False
+			cmdStopUpload.Enabled = True
+			txtInterval.Enabled = False
+			txtMaximumUpload.Enabled = False
+			txtUploadListPath.Enabled = False
 		End Sub
-		Private Sub DisableAutoUpload()
-			lblAutoUpload.ForeColor = System.Drawing.Color.Red
-			lblAutoUpload.Text = "Auto Upload Stopped"
-			If timer IsNot Nothing Then
-				timer.Stop()
-				timer = Nothing
+		Private Sub StopTask()
+			If TasksCancellationTokenSource IsNot Nothing Then
+				TasksCancellationTokenSource.Cancel()
 			End If
+			cmdStartUpload.Enabled = True
+			cmdStopUpload.Enabled = False
+			txtInterval.Enabled = True
+			txtMaximumUpload.Enabled = True
+			txtUploadListPath.Enabled = True
+		End Sub
+
+		Private Sub cmdStartUpload_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdStartUpload.LinkClicked
+			RestartTask()
+		End Sub
+
+		Private Sub cmdStopUpload_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdStopUpload.LinkClicked
+			StopTask()
+
 		End Sub
 	End Class
 End Namespace
