@@ -139,6 +139,14 @@ Namespace FTPUploaderVB
 
 
 			Try
+				If TasksCancellationTokenSource.IsCancellationRequested Then
+					Return False
+					Exit Function
+				End If
+				If sourceFile = sourceIndexFile Or sourceFile = sourceHostFile Then
+					Return False
+					Exit Function
+				End If
 				' Setup session options
 				Dim sessionOptions As New SessionOptions
 				With sessionOptions
@@ -179,6 +187,10 @@ Namespace FTPUploaderVB
 
 				logContent = Now.ToString("HH:mm:ss.fff") + vbTab + "Upload succeeded " + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
 				File.AppendAllText(succeedLogPath, logContent)
+				If TasksCancellationTokenSource.IsCancellationRequested Then
+					Return False
+					Exit Function
+				End If
 				File.AppendAllText(sourceIndexFile, destFile + System.Environment.NewLine)
 				File.AppendAllText(sourceHostFile, destFile + System.Environment.NewLine)
 				CreateIndexAndHostQueue(InfoFile)
@@ -229,6 +241,10 @@ Namespace FTPUploaderVB
 
 
 			Try
+				If TasksCancellationTokenSource.IsCancellationRequested Then
+					Return False
+					Exit Function
+				End If
 				' Setup session options
 				Dim sessionOptions As New SessionOptions
 				With sessionOptions
@@ -294,6 +310,10 @@ Namespace FTPUploaderVB
 
 			Dim OutputIndexInfoFile = lines(9)
 			Dim OutputHostInfoFile = lines(12)
+			If TasksCancellationTokenSource.IsCancellationRequested Then
+				Return False
+				Exit Function
+			End If
 			If Not File.Exists(OutputIndexInfoFile) AndAlso OutputIndexInfoFile <> InfoFile Then
 				lines(7) = lines(10)
 				lines(8) = lines(11)
@@ -386,6 +406,23 @@ Namespace FTPUploaderVB
 		Private Sub StopTask()
 			If TasksCancellationTokenSource IsNot Nothing Then
 				TasksCancellationTokenSource.Cancel()
+			End If
+			If uploadTask IsNot Nothing Then
+				If uploadTask.Status <> TaskStatus.RanToCompletion Then
+					'Wait a little longer
+					Dim sw As New Stopwatch
+					sw.Start()
+					Do Until uploadTask.Status = TaskStatus.RanToCompletion
+						If uploadTask.Status = TaskStatus.Canceled Then Exit Do
+						If uploadTask.Status = TaskStatus.Faulted Then Exit Do
+						If sw.ElapsedMilliseconds > 1000 Then Exit Do
+					Loop
+					sw.Stop()
+				End If
+				If uploadTask.IsCompleted OrElse uploadTask.IsCanceled OrElse uploadTask.IsFaulted Then
+					uploadTask.Dispose()
+				End If
+				uploadTask = Nothing
 			End If
 			cmdStartUpload.Enabled = True
 			cmdStopUpload.Enabled = False
