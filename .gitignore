@@ -1,0 +1,50 @@
+
+*.cache
+ForRadiant/.vs/ForRadiant/v16/.suo
+ForRadiant/AutoClose/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.cs
+ForRadiant/BackupCurrentTT/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.cs
+ForRadiant/BackupCurrentTT/obj/Debug/Interop.IWshRuntimeLibrary.dll
+ForRadiant/CSVAverage/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.vb
+ForRadiant/CSVNormalization/obj/Debug/.NETFramework,Version=v4.6.1.AssemblyAttributes.vb
+ForRadiant/CSVPrefixchange/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.cs
+ForRadiant/CustomPopup/obj/Debug/.NETFramework,Version=v4.5.AssemblyAttributes.cs
+ForRadiant/DoubleResolution/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.vb
+ForRadiant/EZAE/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.cs
+ForRadiant/EZAE/obj/Debug/EZAE.csproj.FileListAbsolute.txt
+ForRadiant/EZAE/obj/Debug/EZAE.exe
+ForRadiant/EZAE/obj/Debug/EZAE.MainForm.resources
+ForRadiant/EZAE/obj/Debug/EZAE.pdb
+ForRadiant/EZAE/obj/Debug/EZAE.Properties.Resources.resources
+ForRadiant/FFCDBGenerate/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.cs
+ForRadiant/FTPIndexPathGenerator/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.cs
+ForRadiant/FTPUploaderVB/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.vb
+ForRadiant/IPListBuilder/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.cs
+ForRadiant/JoinPanelID/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.vb
+ForRadiant/KillProcess/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.cs
+ForRadiant/LGDVHCustomApps/obj/Debug/.NETFramework,Version=v4.6.1.AssemblyAttributes.vb
+ForRadiant/MotherGrayGenerator/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.vb
+ForRadiant/OneTimeRunner/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.cs
+ForRadiant/PanelFFC D854 Color/obj/Debug/.NETFramework,Version=v4.5.AssemblyAttributes.vb
+ForRadiant/PanelFFC GRAY/obj/Debug/.NETFramework,Version=v4.5.AssemblyAttributes.vb
+ForRadiant/PanelFFC Illunis CF/obj/Debug/.NETFramework,Version=v4.5.AssemblyAttributes.vb
+ForRadiant/PanelFFC Illunis DJ/obj/Debug/.NETFramework,Version=v4.5.AssemblyAttributes.vb
+ForRadiant/PanelFFC Illunis EP/obj/Debug/.NETFramework,Version=v4.5.AssemblyAttributes.vb
+ForRadiant/PanelFFC Radiant CF/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.vb
+ForRadiant/PanelFFC RGB/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.vb
+ForRadiant/PanelFFC X1080 1 panel/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.vb
+ForRadiant/PanelFFC X1080 3 panels/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.vb
+ForRadiant/PanelFFC X1080 5 panels/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.vb
+ForRadiant/PanelFFC/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.cs
+ForRadiant/RemoteTools/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.cs
+ForRadiant/RVSWorklog/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.cs
+ForRadiant/SequenceCheck/obj/Debug/.NETFramework,Version=v4.6.1.AssemblyAttributes.vb
+ForRadiant/SequenceClearer/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.cs
+ForRadiant/SetSequence/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.cs
+ForRadiant/SetSequenceVB/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.vb
+ForRadiant/StartCopyWhizFixtureToCamera/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.cs
+ForRadiant/StartProcess/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.cs
+ForRadiant/StartProcess/obj/Debug/Interop.Shell32.dll
+ForRadiant/StartTightVNC/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.cs
+ForRadiant/TCPClient/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.cs
+ForRadiant/TCPServer/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.cs
+ForRadiant/UploadFTPVB/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.vb
