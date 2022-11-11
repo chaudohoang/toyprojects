@@ -91,7 +91,7 @@ Namespace FTPUploaderVB
 			'exitToolStripMenuItem
 			'
 			Me.exitToolStripMenuItem.Name = "exitToolStripMenuItem"
-			Me.exitToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+			Me.exitToolStripMenuItem.Size = New System.Drawing.Size(93, 22)
 			Me.exitToolStripMenuItem.Text = "Exit"
 			'
 			'settingsToolStripMenuItem
@@ -127,7 +127,7 @@ Namespace FTPUploaderVB
 			Me.txtInterval.Name = "txtInterval"
 			Me.txtInterval.Size = New System.Drawing.Size(365, 20)
 			Me.txtInterval.TabIndex = 3
-			Me.txtInterval.Text = "60"
+			Me.txtInterval.Text = "30"
 			'
 			'label1
 			'
@@ -170,7 +170,7 @@ Namespace FTPUploaderVB
 			Me.txtMaximumUpload.Name = "txtMaximumUpload"
 			Me.txtMaximumUpload.Size = New System.Drawing.Size(365, 20)
 			Me.txtMaximumUpload.TabIndex = 7
-			Me.txtMaximumUpload.Text = "50"
+			Me.txtMaximumUpload.Text = "60"
 			'
 			'Label2
 			'
