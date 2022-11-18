@@ -186,12 +186,13 @@ Namespace RestartTT
 								End If
 
 								If RunCount.ToString = txtRunCount.Text Then
+									Dim waitTime As New Integer
+									If Not Int32.TryParse(txtWait.Text, waitTime) Then
+										waitTime = 1
+									End If
+									Thread.Sleep(waitTime * 1000)
 									Try
-										Dim waitTime As New Integer
-										If Not Int32.TryParse(txtWait.Text, waitTime * 1000) Then
-											waitTime = 1000
-										End If
-										Thread.Sleep(waitTime)
+
 										RunCount = 0
 										lblRunCount.Invoke(Sub()
 															   lblRunCount.Text = RunCount.ToString
