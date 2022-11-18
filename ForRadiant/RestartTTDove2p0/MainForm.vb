@@ -91,7 +91,6 @@ Namespace RestartTT
 			If startMinimizedToolStripMenuItem.Checked = True Then
 				Me.WindowState = FormWindowState.Minimized
 			End If
-
 			StartMonitor()
 			selfRestartTask = New Tasks.Task(New Action(Sub() CheckForSelfRestart()))
 			selfRestartTask.Start()
