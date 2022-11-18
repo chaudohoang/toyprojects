@@ -188,8 +188,8 @@ Namespace RestartTT
 								If RunCount.ToString = txtRunCount.Text Then
 									Try
 										Dim waitTime As New Integer
-										If Not Int32.TryParse(txtWait.Text, waitTime) Then
-											waitTime = 1
+										If Not Int32.TryParse(txtWait.Text, waitTime * 1000) Then
+											waitTime = 1000
 										End If
 										Thread.Sleep(waitTime)
 										RunCount = 0
