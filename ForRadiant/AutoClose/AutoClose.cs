@@ -177,6 +177,7 @@ namespace AutoClose
 			if (chkHideTaskbarIcon.Checked == true && this.WindowState == FormWindowState.Minimized)
 			{
 				Hide();
+				ShowInTaskbar = false;
 			}
 		}
 
@@ -185,6 +186,7 @@ namespace AutoClose
 			allowVisible = true;
 			Show();
 			Activate();
+			ShowInTaskbar = true;
 			this.WindowState = FormWindowState.Normal;
 		}
 

@@ -331,10 +331,14 @@ Namespace FTPUploaderVB
 		Private Sub UploadAll()
 
 			If Not Directory.Exists(txtUploadListPath.Text) Then
-				lblFileStatus.Invoke(Sub()
-										 lblFileStatus.Text = "Queue Folder not existed, try again ..."
-									 End Sub)
-				Exit Sub
+				Try
+					Directory.CreateDirectory(txtUploadListPath.Text)
+				Catch ex As Exception
+					lblFileStatus.Invoke(Sub()
+											 lblFileStatus.Text = "Queue Folder not existed, try again ..."
+										 End Sub)
+					Exit Sub
+				End Try
 			End If
 
 
