@@ -32,6 +32,8 @@ namespace EZAE
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
 			this.tabControl1 = new System.Windows.Forms.TabControl();
 			this.tabControl = new System.Windows.Forms.TabPage();
+			this.cmdRestartTTDove2p0 = new System.Windows.Forms.LinkLabel();
+			this.cmdFTPUploader = new System.Windows.Forms.LinkLabel();
 			this.cmdOpenAutoClose = new System.Windows.Forms.LinkLabel();
 			this.cmdOpenWorklog = new System.Windows.Forms.LinkLabel();
 			this.cmdOpenCopywhiz = new System.Windows.Forms.LinkLabel();
@@ -103,7 +105,7 @@ namespace EZAE
 			this.cmdUseButterfly = new System.Windows.Forms.LinkLabel();
 			this.lblSequenceFileName = new System.Windows.Forms.Label();
 			this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-			this.cmdFTPUploader = new System.Windows.Forms.LinkLabel();
+			this.cmdShareX = new System.Windows.Forms.LinkLabel();
 			this.tabControl1.SuspendLayout();
 			this.tabControl.SuspendLayout();
 			this.tabSetupPC.SuspendLayout();
@@ -124,6 +126,8 @@ namespace EZAE
 			// 
 			// tabControl
 			// 
+			this.tabControl.Controls.Add(this.cmdShareX);
+			this.tabControl.Controls.Add(this.cmdRestartTTDove2p0);
 			this.tabControl.Controls.Add(this.cmdFTPUploader);
 			this.tabControl.Controls.Add(this.cmdOpenAutoClose);
 			this.tabControl.Controls.Add(this.cmdOpenWorklog);
@@ -153,6 +157,28 @@ namespace EZAE
 			this.tabControl.Text = "Control";
 			this.tabControl.UseVisualStyleBackColor = true;
 			this.tabControl.Enter += new System.EventHandler(this.tabControl_Enter);
+			// 
+			// cmdRestartTTDove2p0
+			// 
+			this.cmdRestartTTDove2p0.AutoSize = true;
+			this.cmdRestartTTDove2p0.Location = new System.Drawing.Point(6, 89);
+			this.cmdRestartTTDove2p0.Name = "cmdRestartTTDove2p0";
+			this.cmdRestartTTDove2p0.Size = new System.Drawing.Size(99, 13);
+			this.cmdRestartTTDove2p0.TabIndex = 26;
+			this.cmdRestartTTDove2p0.TabStop = true;
+			this.cmdRestartTTDove2p0.Text = "RestartTTDove2p0";
+			this.cmdRestartTTDove2p0.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdRestartTTDove2p0_LinkClicked);
+			// 
+			// cmdFTPUploader
+			// 
+			this.cmdFTPUploader.AutoSize = true;
+			this.cmdFTPUploader.Location = new System.Drawing.Point(362, 34);
+			this.cmdFTPUploader.Name = "cmdFTPUploader";
+			this.cmdFTPUploader.Size = new System.Drawing.Size(70, 13);
+			this.cmdFTPUploader.TabIndex = 25;
+			this.cmdFTPUploader.TabStop = true;
+			this.cmdFTPUploader.Text = "FTPUploader";
+			this.cmdFTPUploader.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdFTPUploader_LinkClicked);
 			// 
 			// cmdOpenAutoClose
 			// 
@@ -234,7 +260,7 @@ namespace EZAE
 			// cmdOpenGooil4
 			// 
 			this.cmdOpenGooil4.AutoSize = true;
-			this.cmdOpenGooil4.Location = new System.Drawing.Point(222, 114);
+			this.cmdOpenGooil4.Location = new System.Drawing.Point(222, 139);
 			this.cmdOpenGooil4.Name = "cmdOpenGooil4";
 			this.cmdOpenGooil4.Size = new System.Drawing.Size(66, 13);
 			this.cmdOpenGooil4.TabIndex = 17;
@@ -245,7 +271,7 @@ namespace EZAE
 			// cmdOpenGooil3
 			// 
 			this.cmdOpenGooil3.AutoSize = true;
-			this.cmdOpenGooil3.Location = new System.Drawing.Point(150, 114);
+			this.cmdOpenGooil3.Location = new System.Drawing.Point(150, 139);
 			this.cmdOpenGooil3.Name = "cmdOpenGooil3";
 			this.cmdOpenGooil3.Size = new System.Drawing.Size(66, 13);
 			this.cmdOpenGooil3.TabIndex = 16;
@@ -256,7 +282,7 @@ namespace EZAE
 			// cmdOpenGooil2
 			// 
 			this.cmdOpenGooil2.AutoSize = true;
-			this.cmdOpenGooil2.Location = new System.Drawing.Point(78, 114);
+			this.cmdOpenGooil2.Location = new System.Drawing.Point(78, 139);
 			this.cmdOpenGooil2.Name = "cmdOpenGooil2";
 			this.cmdOpenGooil2.Size = new System.Drawing.Size(66, 13);
 			this.cmdOpenGooil2.TabIndex = 15;
@@ -267,7 +293,7 @@ namespace EZAE
 			// cmdOpenGooil1
 			// 
 			this.cmdOpenGooil1.AutoSize = true;
-			this.cmdOpenGooil1.Location = new System.Drawing.Point(6, 114);
+			this.cmdOpenGooil1.Location = new System.Drawing.Point(6, 139);
 			this.cmdOpenGooil1.Name = "cmdOpenGooil1";
 			this.cmdOpenGooil1.Size = new System.Drawing.Size(66, 13);
 			this.cmdOpenGooil1.TabIndex = 14;
@@ -278,7 +304,7 @@ namespace EZAE
 			// cmdOpenDooone4
 			// 
 			this.cmdOpenDooone4.AutoSize = true;
-			this.cmdOpenDooone4.Location = new System.Drawing.Point(264, 89);
+			this.cmdOpenDooone4.Location = new System.Drawing.Point(264, 114);
 			this.cmdOpenDooone4.Name = "cmdOpenDooone4";
 			this.cmdOpenDooone4.Size = new System.Drawing.Size(80, 13);
 			this.cmdOpenDooone4.TabIndex = 13;
@@ -289,7 +315,7 @@ namespace EZAE
 			// cmdOpenDooone3
 			// 
 			this.cmdOpenDooone3.AutoSize = true;
-			this.cmdOpenDooone3.Location = new System.Drawing.Point(178, 89);
+			this.cmdOpenDooone3.Location = new System.Drawing.Point(178, 114);
 			this.cmdOpenDooone3.Name = "cmdOpenDooone3";
 			this.cmdOpenDooone3.Size = new System.Drawing.Size(80, 13);
 			this.cmdOpenDooone3.TabIndex = 12;
@@ -300,7 +326,7 @@ namespace EZAE
 			// cmdOpenDooone2
 			// 
 			this.cmdOpenDooone2.AutoSize = true;
-			this.cmdOpenDooone2.Location = new System.Drawing.Point(92, 89);
+			this.cmdOpenDooone2.Location = new System.Drawing.Point(92, 114);
 			this.cmdOpenDooone2.Name = "cmdOpenDooone2";
 			this.cmdOpenDooone2.Size = new System.Drawing.Size(80, 13);
 			this.cmdOpenDooone2.TabIndex = 11;
@@ -311,7 +337,7 @@ namespace EZAE
 			// cmdOpenDooone1
 			// 
 			this.cmdOpenDooone1.AutoSize = true;
-			this.cmdOpenDooone1.Location = new System.Drawing.Point(6, 89);
+			this.cmdOpenDooone1.Location = new System.Drawing.Point(6, 114);
 			this.cmdOpenDooone1.Name = "cmdOpenDooone1";
 			this.cmdOpenDooone1.Size = new System.Drawing.Size(80, 13);
 			this.cmdOpenDooone1.TabIndex = 10;
@@ -966,16 +992,16 @@ namespace EZAE
 			this.lblSequenceFileName.Size = new System.Drawing.Size(0, 13);
 			this.lblSequenceFileName.TabIndex = 27;
 			// 
-			// cmdFTPUploader
+			// cmdShareX
 			// 
-			this.cmdFTPUploader.AutoSize = true;
-			this.cmdFTPUploader.Location = new System.Drawing.Point(362, 34);
-			this.cmdFTPUploader.Name = "cmdFTPUploader";
-			this.cmdFTPUploader.Size = new System.Drawing.Size(70, 13);
-			this.cmdFTPUploader.TabIndex = 25;
-			this.cmdFTPUploader.TabStop = true;
-			this.cmdFTPUploader.Text = "FTPUploader";
-			this.cmdFTPUploader.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdFTPUploader_LinkClicked);
+			this.cmdShareX.AutoSize = true;
+			this.cmdShareX.Location = new System.Drawing.Point(111, 89);
+			this.cmdShareX.Name = "cmdShareX";
+			this.cmdShareX.Size = new System.Drawing.Size(42, 13);
+			this.cmdShareX.TabIndex = 27;
+			this.cmdShareX.TabStop = true;
+			this.cmdShareX.Text = "ShareX";
+			this.cmdShareX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdShareX_LinkClicked);
 			// 
 			// MainForm
 			// 
@@ -1080,6 +1106,8 @@ namespace EZAE
 		private System.Windows.Forms.LinkLabel cmdOpenWorklog;
 		private System.Windows.Forms.LinkLabel cmdOpenAutoClose;
 		private System.Windows.Forms.LinkLabel cmdFTPUploader;
+		private System.Windows.Forms.LinkLabel cmdRestartTTDove2p0;
+		private System.Windows.Forms.LinkLabel cmdShareX;
 	}
 }
 

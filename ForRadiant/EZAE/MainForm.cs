@@ -1008,5 +1008,31 @@ namespace EZAE
 
             }
         }
+
+		private void cmdRestartTTDove2p0_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+			string filepath = Path.GetFullPath(@"Tools\RestartTTDove2p0\RestartTTDove2p0.exe");
+			if (File.Exists(filepath))
+			{
+
+				ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
+				startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
+				Process.Start(startInfo);
+
+			}
+		}
+
+		private void cmdShareX_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+			string filepath = Path.GetFullPath(@"Tools\ShareX\RunShareX.exe");
+			if (File.Exists(filepath))
+			{
+
+				ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
+				startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
+				Process.Start(startInfo);
+
+			}
+		}
 	}
 }
