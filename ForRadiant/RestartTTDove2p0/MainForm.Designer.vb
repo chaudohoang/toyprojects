@@ -44,9 +44,10 @@ Namespace RestartTT
 			Me.label2 = New System.Windows.Forms.Label()
 			Me.cmdSaveSettings = New System.Windows.Forms.LinkLabel()
 			Me.lblRunCount = New System.Windows.Forms.Label()
-			Me.chkResetCount = New System.Windows.Forms.CheckBox()
 			Me.txtWait = New System.Windows.Forms.TextBox()
 			Me.Label3 = New System.Windows.Forms.Label()
+			Me.cmdResetRunCount = New System.Windows.Forms.LinkLabel()
+			Me.cmdRestartTTNow = New System.Windows.Forms.LinkLabel()
 			Me.contextMenuStrip1.SuspendLayout()
 			Me.menuStrip1.SuspendLayout()
 			Me.SuspendLayout()
@@ -173,16 +174,6 @@ Namespace RestartTT
 			Me.lblRunCount.TabIndex = 15
 			Me.lblRunCount.Text = "0"
 			'
-			'chkResetCount
-			'
-			Me.chkResetCount.AutoSize = True
-			Me.chkResetCount.Location = New System.Drawing.Point(86, 71)
-			Me.chkResetCount.Name = "chkResetCount"
-			Me.chkResetCount.Size = New System.Drawing.Size(130, 17)
-			Me.chkResetCount.TabIndex = 16
-			Me.chkResetCount.Text = "Reset Count On Save"
-			Me.chkResetCount.UseVisualStyleBackColor = True
-			'
 			'txtWait
 			'
 			Me.txtWait.Location = New System.Drawing.Point(211, 46)
@@ -196,18 +187,41 @@ Namespace RestartTT
 			Me.Label3.AutoSize = True
 			Me.Label3.Location = New System.Drawing.Point(12, 49)
 			Me.Label3.Name = "Label3"
-			Me.Label3.Size = New System.Drawing.Size(113, 13)
+			Me.Label3.Size = New System.Drawing.Size(130, 13)
 			Me.Label3.TabIndex = 18
-			Me.Label3.Text = "Wait before Restart (s)"
+			Me.Label3.Text = "Wait before Restart TT (s)"
+			'
+			'cmdResetRunCount
+			'
+			Me.cmdResetRunCount.AutoSize = True
+			Me.cmdResetRunCount.LinkColor = System.Drawing.Color.Green
+			Me.cmdResetRunCount.Location = New System.Drawing.Point(86, 71)
+			Me.cmdResetRunCount.Name = "cmdResetRunCount"
+			Me.cmdResetRunCount.Size = New System.Drawing.Size(89, 13)
+			Me.cmdResetRunCount.TabIndex = 19
+			Me.cmdResetRunCount.TabStop = True
+			Me.cmdResetRunCount.Text = "Reset Run Count"
+			'
+			'cmdRestartTTNow
+			'
+			Me.cmdRestartTTNow.AutoSize = True
+			Me.cmdRestartTTNow.LinkColor = System.Drawing.Color.MediumVioletRed
+			Me.cmdRestartTTNow.Location = New System.Drawing.Point(181, 71)
+			Me.cmdRestartTTNow.Name = "cmdRestartTTNow"
+			Me.cmdRestartTTNow.Size = New System.Drawing.Size(83, 13)
+			Me.cmdRestartTTNow.TabIndex = 20
+			Me.cmdRestartTTNow.TabStop = True
+			Me.cmdRestartTTNow.Text = "Restart TT Now"
 			'
 			'MainForm
 			'
 			Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
 			Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
 			Me.ClientSize = New System.Drawing.Size(349, 118)
+			Me.Controls.Add(Me.cmdRestartTTNow)
+			Me.Controls.Add(Me.cmdResetRunCount)
 			Me.Controls.Add(Me.txtWait)
 			Me.Controls.Add(Me.Label3)
-			Me.Controls.Add(Me.chkResetCount)
 			Me.Controls.Add(Me.lblRunCount)
 			Me.Controls.Add(Me.cmdSaveSettings)
 			Me.Controls.Add(Me.label2)
@@ -245,9 +259,10 @@ Namespace RestartTT
 		Private WithEvents label2 As Windows.Forms.Label
 		Friend WithEvents cmdSaveSettings As Windows.Forms.LinkLabel
 		Private WithEvents lblRunCount As Windows.Forms.Label
-		Friend WithEvents chkResetCount As Windows.Forms.CheckBox
 		Friend WithEvents startMinimizedToolStripMenuItem As Windows.Forms.ToolStripMenuItem
 		Private WithEvents txtWait As Windows.Forms.TextBox
 		Private WithEvents Label3 As Windows.Forms.Label
+		Friend WithEvents cmdResetRunCount As Windows.Forms.LinkLabel
+		Friend WithEvents cmdRestartTTNow As Windows.Forms.LinkLabel
 	End Class
 End Namespace

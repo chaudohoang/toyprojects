@@ -32,6 +32,7 @@ namespace EZAE
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
 			this.tabControl1 = new System.Windows.Forms.TabControl();
 			this.tabControl = new System.Windows.Forms.TabPage();
+			this.cmdShareX = new System.Windows.Forms.LinkLabel();
 			this.cmdRestartTTDove2p0 = new System.Windows.Forms.LinkLabel();
 			this.cmdFTPUploader = new System.Windows.Forms.LinkLabel();
 			this.cmdOpenAutoClose = new System.Windows.Forms.LinkLabel();
@@ -105,7 +106,7 @@ namespace EZAE
 			this.cmdUseButterfly = new System.Windows.Forms.LinkLabel();
 			this.lblSequenceFileName = new System.Windows.Forms.Label();
 			this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-			this.cmdShareX = new System.Windows.Forms.LinkLabel();
+			this.cmdMakeProcessFile2 = new System.Windows.Forms.LinkLabel();
 			this.tabControl1.SuspendLayout();
 			this.tabControl.SuspendLayout();
 			this.tabSetupPC.SuspendLayout();
@@ -126,6 +127,7 @@ namespace EZAE
 			// 
 			// tabControl
 			// 
+			this.tabControl.Controls.Add(this.cmdMakeProcessFile2);
 			this.tabControl.Controls.Add(this.cmdShareX);
 			this.tabControl.Controls.Add(this.cmdRestartTTDove2p0);
 			this.tabControl.Controls.Add(this.cmdFTPUploader);
@@ -157,6 +159,17 @@ namespace EZAE
 			this.tabControl.Text = "Control";
 			this.tabControl.UseVisualStyleBackColor = true;
 			this.tabControl.Enter += new System.EventHandler(this.tabControl_Enter);
+			// 
+			// cmdShareX
+			// 
+			this.cmdShareX.AutoSize = true;
+			this.cmdShareX.Location = new System.Drawing.Point(111, 89);
+			this.cmdShareX.Name = "cmdShareX";
+			this.cmdShareX.Size = new System.Drawing.Size(42, 13);
+			this.cmdShareX.TabIndex = 27;
+			this.cmdShareX.TabStop = true;
+			this.cmdShareX.Text = "ShareX";
+			this.cmdShareX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdShareX_LinkClicked);
 			// 
 			// cmdRestartTTDove2p0
 			// 
@@ -992,16 +1005,16 @@ namespace EZAE
 			this.lblSequenceFileName.Size = new System.Drawing.Size(0, 13);
 			this.lblSequenceFileName.TabIndex = 27;
 			// 
-			// cmdShareX
+			// cmdMakeProcessFile2
 			// 
-			this.cmdShareX.AutoSize = true;
-			this.cmdShareX.Location = new System.Drawing.Point(111, 89);
-			this.cmdShareX.Name = "cmdShareX";
-			this.cmdShareX.Size = new System.Drawing.Size(42, 13);
-			this.cmdShareX.TabIndex = 27;
-			this.cmdShareX.TabStop = true;
-			this.cmdShareX.Text = "ShareX";
-			this.cmdShareX.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdShareX_LinkClicked);
+			this.cmdMakeProcessFile2.AutoSize = true;
+			this.cmdMakeProcessFile2.Location = new System.Drawing.Point(159, 89);
+			this.cmdMakeProcessFile2.Name = "cmdMakeProcessFile2";
+			this.cmdMakeProcessFile2.Size = new System.Drawing.Size(94, 13);
+			this.cmdMakeProcessFile2.TabIndex = 28;
+			this.cmdMakeProcessFile2.TabStop = true;
+			this.cmdMakeProcessFile2.Text = "MakeProcessFile2";
+			this.cmdMakeProcessFile2.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdMakeProcessFile2_LinkClicked);
 			// 
 			// MainForm
 			// 
@@ -1108,6 +1121,7 @@ namespace EZAE
 		private System.Windows.Forms.LinkLabel cmdFTPUploader;
 		private System.Windows.Forms.LinkLabel cmdRestartTTDove2p0;
 		private System.Windows.Forms.LinkLabel cmdShareX;
+		private System.Windows.Forms.LinkLabel cmdMakeProcessFile2;
 	}
 }
 

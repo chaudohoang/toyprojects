@@ -10,6 +10,7 @@ Imports System.Linq
 Imports System.Drawing
 Imports System.Threading
 Imports System.Threading.Tasks
+Imports System.Text
 
 Namespace RestartTT
 	Partial Public Class MainForm
@@ -17,17 +18,13 @@ Namespace RestartTT
 		Public apppath As String
 		Public appdir As String
 		Public settingPath As String
-		Public checkLastLineTask As Tasks.Task
 		Public monitorTask As Tasks.Task
 		Public selfRestartTask As Tasks.Task
-		Public checkLastLineTasksCancellationTokenSource As New CancellationTokenSource
 		Public monitorTaskTasksCancellationTokenSource As New CancellationTokenSource
 		Public RunCount As Integer = 0
-		Public offset As Long = 0
-		Public checkingLastLine As Boolean = False
 		Private allowVisible As Boolean = True
 		Public today As String = Now.ToString("yyyyMMdd")
-		Public logPath As String = "C:\Radiant Vision Systems Data\TrueTest\AppData\" + today + " Operation Log.txt"
+		Public logPath As String = ""
 		Public sw As Stopwatch
 
 		<DllImport("User32.dll")>
@@ -85,12 +82,16 @@ Namespace RestartTT
 			MyBase.SetVisibleCore(value)
 		End Sub
 		Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-
+			logPath = "C:\Radiant Vision Systems Data\TrueTest\AppData\" + today + " Operation Log.txt"
+			If Not File.Exists(logPath) Then
+				File.WriteAllText(logPath, "")
+			End If
 			SetVersionInfo()
 			LoadSettings()
 			If startMinimizedToolStripMenuItem.Checked = True Then
 				Me.WindowState = FormWindowState.Minimized
 			End If
+
 			StartMonitor()
 			selfRestartTask = New Tasks.Task(New Action(Sub() CheckForSelfRestart()))
 			selfRestartTask.Start()
@@ -144,184 +145,79 @@ Namespace RestartTT
 
 		Private Sub StartMonitor()
 
-			checkLastLineTasksCancellationTokenSource = New CancellationTokenSource
-			checkLastLineTask = New Tasks.Task(New Action(Sub() GetLastLine()), checkLastLineTasksCancellationTokenSource.Token)
-			checkLastLineTask.Start()
 			monitorTaskTasksCancellationTokenSource = New CancellationTokenSource
-			monitorTask = New Tasks.Task(New Action(Sub() ReadFromFile()), monitorTaskTasksCancellationTokenSource.Token)
+			monitorTask = New Tasks.Task(New Action(Sub() MonitorTailOfFile()), monitorTaskTasksCancellationTokenSource.Token)
 			monitorTask.Start()
 
 		End Sub
-		Private Sub ReCheckLastLine()
-			If checkLastLineTasksCancellationTokenSource IsNot Nothing Then
-				checkLastLineTasksCancellationTokenSource.Cancel()
-			End If
-			If checkLastLineTask IsNot Nothing Then
-				If checkLastLineTask.Status <> TaskStatus.RanToCompletion Then
-					'Wait a little longer
-					Dim sw As New Stopwatch
-					sw.Start()
-					Do Until checkLastLineTask.Status = TaskStatus.RanToCompletion
-						If checkLastLineTask.Status = TaskStatus.Canceled Then Exit Do
-						If checkLastLineTask.Status = TaskStatus.Faulted Then Exit Do
-						If sw.ElapsedMilliseconds > 1000 Then Exit Do
-					Loop
-					sw.Stop()
-				End If
-				If checkLastLineTask.IsCompleted OrElse checkLastLineTask.IsCanceled OrElse checkLastLineTask.IsFaulted Then
-					checkLastLineTask.Dispose()
-				End If
-				checkLastLineTask = Nothing
-			End If
-			If chkResetCount.Checked Then
-				RunCount = 0
-				lblRunCount.Invoke(Sub()
-									   lblRunCount.Text = RunCount.ToString
-								   End Sub)
-			End If
-			checkLastLineTasksCancellationTokenSource = New CancellationTokenSource
-			checkLastLineTask = New Tasks.Task(New Action(Sub() GetLastLine()), checkLastLineTasksCancellationTokenSource.Token)
-			checkLastLineTask.Start()
-		End Sub
-		Private Sub GetLastLine()
-			checkingLastLine = True
-			If checkLastLineTasksCancellationTokenSource.IsCancellationRequested Then
-				Exit Sub
-			End If
-			If Not File.Exists(logPath) Then
-				File.WriteAllText(logPath, "")
-			End If
-			Dim fsw As New FileSystemWatcher
-			fsw.Path = "C:\Radiant Vision Systems Data\TrueTest\AppData"
-			fsw.Filter = "*.*"
 
-			Dim file__1 As FileStream = File.Open(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
+		Public Sub MonitorTailOfFile()
+			Dim initialFileSize = New FileInfo(logPath).Length
+			Dim lastReadLength = initialFileSize - 1024
+			If lastReadLength < 0 Then lastReadLength = 0
 
-			Dim reader As New StreamReader(file__1)
-			Do
-				If checkLastLineTasksCancellationTokenSource.IsCancellationRequested Then
-					Exit Sub
-				End If
-				reader.ReadLine()
-				If reader.EndOfStream Then
-					offset = file__1.Position
-					checkingLastLine = False
-					Exit Sub
-				End If
-			Loop While Not reader.EndOfStream
-		End Sub
-		Private Sub ReadFromFile()
-			While checkingLastLine
+			While True
 				If monitorTaskTasksCancellationTokenSource.IsCancellationRequested Then
 					Exit Sub
 				End If
-				Thread.Sleep(5)
-				If Not checkingLastLine Then
-					Exit While
-				End If
+				Try
+					Dim fileSize = New FileInfo(logPath).Length
+
+					If fileSize > lastReadLength Then
+
+						Using fs = New FileStream(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
+							fs.Seek(lastReadLength, SeekOrigin.Begin)
+							Dim buffer = New Byte(1023) {}
+
+							While True
+								If monitorTaskTasksCancellationTokenSource.IsCancellationRequested Then
+									Exit Sub
+								End If
+								Dim bytesRead = fs.Read(buffer, 0, buffer.Length)
+								lastReadLength += bytesRead
+								If bytesRead = 0 Then Exit While
+								Dim text = ASCIIEncoding.ASCII.GetString(buffer, 0, bytesRead)
+
+								If text.Contains("Sent : RESULT") Then
+									RunCount += 1
+									lblRunCount.Invoke(Sub()
+														   lblRunCount.Text = RunCount.ToString
+													   End Sub)
+								End If
+
+								If RunCount.ToString = txtRunCount.Text Then
+									Try
+										Dim waitTime As New Integer
+										If Not Int32.TryParse(txtWait.Text, waitTime) Then
+											waitTime = 1
+										End If
+										Thread.Sleep(waitTime)
+										RunCount = 0
+										lblRunCount.Invoke(Sub()
+															   lblRunCount.Text = RunCount.ToString
+														   End Sub)
+										For Each process As Process In Process.GetProcessesByName("TrueTest")
+											process.Kill()
+											Process.Start("TrueTest")
+										Next
+									Catch ex As Exception
+
+									End Try
+								End If
+								File.AppendAllText("log.txt", text)
+							End While
+						End Using
+					End If
+
+				Catch
+				End Try
+
+				Thread.Sleep(1000)
 			End While
-			RunCount = 0
-			Dim fsw As New FileSystemWatcher
-			fsw.Path = "C:\Radiant Vision Systems Data\TrueTest\AppData"
-			fsw.Filter = "*.*"
-			If monitorTaskTasksCancellationTokenSource.IsCancellationRequested Then
-				Exit Sub
-			End If
-			Dim file__1 As FileStream = File.Open(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
-
-			Dim reader As New StreamReader(file__1)
-			While Not monitorTaskTasksCancellationTokenSource.IsCancellationRequested
-				If monitorTaskTasksCancellationTokenSource.IsCancellationRequested Then
-					Exit Sub
-				End If
-				fsw.WaitForChanged(WatcherChangeTypes.Changed)
-
-				file__1.Seek(offset, SeekOrigin.Begin)
-
-				If Not reader.EndOfStream Then
-					Do
-						If monitorTaskTasksCancellationTokenSource.IsCancellationRequested Then
-							Exit Sub
-						End If
-						Dim checkString As String = reader.ReadLine()
-						If checkString.Contains("Sent : RESULT") Then
-							RunCount += 1
-							lblRunCount.Invoke(Sub()
-												   lblRunCount.Text = RunCount.ToString
-											   End Sub)
-						End If
-						If RunCount.ToString = txtRunCount.Text Then
-							Try
-								Thread.Sleep(3000)
-								RunCount = 0
-								lblRunCount.Invoke(Sub()
-													   lblRunCount.Text = RunCount.ToString
-												   End Sub)
-								For Each process As Process In Process.GetProcessesByName("TrueTest")
-									process.Kill()
-									Process.Start("TrueTest")
-								Next
-							Catch ex As Exception
-
-							End Try
-						End If
-
-					Loop While Not reader.EndOfStream
-
-					offset = file__1.Position
-
-				End If
-			End While
-		End Sub
-		Private Sub StopMonitor()
-
-			If checkLastLineTasksCancellationTokenSource IsNot Nothing Then
-				checkLastLineTasksCancellationTokenSource.Cancel()
-			End If
-			If monitorTaskTasksCancellationTokenSource IsNot Nothing Then
-				monitorTaskTasksCancellationTokenSource.Cancel()
-			End If
-			If checkLastLineTask IsNot Nothing Then
-				If checkLastLineTask.Status <> TaskStatus.RanToCompletion Then
-					'Wait a little longer
-					Dim sw As New Stopwatch
-					sw.Start()
-					Do Until checkLastLineTask.Status = TaskStatus.RanToCompletion
-						If checkLastLineTask.Status = TaskStatus.Canceled Then Exit Do
-						If checkLastLineTask.Status = TaskStatus.Faulted Then Exit Do
-						If sw.ElapsedMilliseconds > 1000 Then Exit Do
-					Loop
-					sw.Stop()
-				End If
-				If checkLastLineTask.IsCompleted OrElse checkLastLineTask.IsCanceled OrElse checkLastLineTask.IsFaulted Then
-					checkLastLineTask.Dispose()
-				End If
-				checkLastLineTask = Nothing
-			End If
-
-			If monitorTask IsNot Nothing Then
-				If monitorTask.Status <> TaskStatus.RanToCompletion Then
-					'Wait a little longer
-					Dim sw As New Stopwatch
-					sw.Start()
-					Do Until monitorTask.Status = TaskStatus.RanToCompletion
-						If monitorTask.Status = TaskStatus.Canceled Then Exit Do
-						If monitorTask.Status = TaskStatus.Faulted Then Exit Do
-						If sw.ElapsedMilliseconds > 1000 Then Exit Do
-					Loop
-					sw.Stop()
-				End If
-				If monitorTask.IsCompleted OrElse monitorTask.IsCanceled OrElse monitorTask.IsFaulted Then
-					monitorTask.Dispose()
-				End If
-				monitorTask = Nothing
-			End If
-
 		End Sub
 
 		Private Sub cmdSaveSettings_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdSaveSettings.LinkClicked
 			SaveSettings()
-			ReCheckLastLine()
 		End Sub
 		Private Sub SaveSettings()
 			Dim settings As New Dictionary(Of String, String)
@@ -337,11 +233,6 @@ Namespace RestartTT
 			End If
 			settings.Add("numruns", txtRunCount.Text)
 			settings.Add("waitsec", txtWait.Text)
-			If chkResetCount.Checked = True Then
-				settings.Add("resetcountonsave", "true")
-			Else
-				settings.Add("resetcountonsave", "false")
-			End If
 			Dim settingContent As String = ""
 			Dim keys() As String = settings.Keys.ToArray
 			For Each k As String In keys
@@ -368,8 +259,6 @@ Namespace RestartTT
 							txtRunCount.Text = value
 						ElseIf setting = "waitsec" Then
 							txtWait.Text = value
-						ElseIf setting = "resetcountonsave" Then
-							chkResetCount.Checked = If(value = "true", True, False)
 						End If
 					Next
 				End If
@@ -378,10 +267,26 @@ Namespace RestartTT
 			End Try
 		End Sub
 
-		Private Sub cmdStopUpload_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs)
-			StopMonitor()
-
+		Private Sub MainForm_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
+			SaveSettings()
 		End Sub
 
+		Private Sub cmdResetRunCount_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdResetRunCount.LinkClicked
+			RunCount = 0
+			lblRunCount.Invoke(Sub()
+								   lblRunCount.Text = RunCount.ToString
+							   End Sub)
+		End Sub
+
+		Private Sub cmdRestartTTNow_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdRestartTTNow.LinkClicked
+			Try
+				For Each process As Process In Process.GetProcessesByName("TrueTest")
+					process.Kill()
+					Process.Start("TrueTest")
+				Next
+			Catch ex As Exception
+
+			End Try
+		End Sub
 	End Class
 End Namespace

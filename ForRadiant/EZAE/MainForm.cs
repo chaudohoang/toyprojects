@@ -1034,5 +1034,18 @@ namespace EZAE
 
 			}
 		}
+
+		private void cmdMakeProcessFile2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+			string filepath = Path.GetFullPath(@"Tools\MakeProcessFile2.exe");
+			if (File.Exists(filepath))
+			{
+
+				ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
+				startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
+				Process.Start(startInfo);
+
+			}
+		}
 	}
 }
