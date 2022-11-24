@@ -36,10 +36,13 @@ Partial Class Form1
 		Me.Label4 = New System.Windows.Forms.Label()
 		Me.TabControl1 = New System.Windows.Forms.TabControl()
 		Me.TabPage1 = New System.Windows.Forms.TabPage()
+		Me.btnExportAnalysesCompareLog = New System.Windows.Forms.Button()
 		Me.btnUseDefaultMaster = New System.Windows.Forms.Button()
 		Me.btnUseLastModified1 = New System.Windows.Forms.Button()
 		Me.cbxIgnoreList = New System.Windows.Forms.ComboBox()
 		Me.TabPage2 = New System.Windows.Forms.TabPage()
+		Me.btnShowCalSettings = New System.Windows.Forms.Button()
+		Me.btnExportMeasurementsCompareLog = New System.Windows.Forms.Button()
 		Me.btnUseLastModified3 = New System.Windows.Forms.Button()
 		Me.btnShowSettings = New System.Windows.Forms.Button()
 		Me.btnClearlog2 = New System.Windows.Forms.Button()
@@ -52,8 +55,6 @@ Partial Class Form1
 		Me.Label5 = New System.Windows.Forms.Label()
 		Me.txtFile3 = New System.Windows.Forms.TextBox()
 		Me.btnBrowse3 = New System.Windows.Forms.Button()
-		Me.btnExportAnalysesCompareLog = New System.Windows.Forms.Button()
-		Me.btnExportMeasurementsCompareLog = New System.Windows.Forms.Button()
 		Me.TabControl1.SuspendLayout()
 		Me.TabPage1.SuspendLayout()
 		Me.TabPage2.SuspendLayout()
@@ -194,6 +195,15 @@ Partial Class Form1
 		Me.TabPage1.Text = "Compare Sequence Analyses"
 		Me.TabPage1.UseVisualStyleBackColor = True
 		'
+		'btnExportAnalysesCompareLog
+		'
+		Me.btnExportAnalysesCompareLog.Location = New System.Drawing.Point(6, 220)
+		Me.btnExportAnalysesCompareLog.Name = "btnExportAnalysesCompareLog"
+		Me.btnExportAnalysesCompareLog.Size = New System.Drawing.Size(65, 79)
+		Me.btnExportAnalysesCompareLog.TabIndex = 13
+		Me.btnExportAnalysesCompareLog.Text = "Export log"
+		Me.btnExportAnalysesCompareLog.UseVisualStyleBackColor = True
+		'
 		'btnUseDefaultMaster
 		'
 		Me.btnUseDefaultMaster.Location = New System.Drawing.Point(681, 37)
@@ -223,6 +233,7 @@ Partial Class Form1
 		'
 		'TabPage2
 		'
+		Me.TabPage2.Controls.Add(Me.btnShowCalSettings)
 		Me.TabPage2.Controls.Add(Me.btnExportMeasurementsCompareLog)
 		Me.TabPage2.Controls.Add(Me.btnUseLastModified3)
 		Me.TabPage2.Controls.Add(Me.btnShowSettings)
@@ -243,6 +254,24 @@ Partial Class Form1
 		Me.TabPage2.TabIndex = 1
 		Me.TabPage2.Text = "Check Sequence Measurement"
 		Me.TabPage2.UseVisualStyleBackColor = True
+		'
+		'btnShowCalSettings
+		'
+		Me.btnShowCalSettings.Location = New System.Drawing.Point(801, 64)
+		Me.btnShowCalSettings.Name = "btnShowCalSettings"
+		Me.btnShowCalSettings.Size = New System.Drawing.Size(144, 23)
+		Me.btnShowCalSettings.TabIndex = 20
+		Me.btnShowCalSettings.Text = "Show Calibration Settings"
+		Me.btnShowCalSettings.UseVisualStyleBackColor = True
+		'
+		'btnExportMeasurementsCompareLog
+		'
+		Me.btnExportMeasurementsCompareLog.Location = New System.Drawing.Point(6, 220)
+		Me.btnExportMeasurementsCompareLog.Name = "btnExportMeasurementsCompareLog"
+		Me.btnExportMeasurementsCompareLog.Size = New System.Drawing.Size(65, 79)
+		Me.btnExportMeasurementsCompareLog.TabIndex = 18
+		Me.btnExportMeasurementsCompareLog.Text = "Export log"
+		Me.btnExportMeasurementsCompareLog.UseVisualStyleBackColor = True
 		'
 		'btnUseLastModified3
 		'
@@ -354,24 +383,6 @@ Partial Class Form1
 		Me.btnBrowse3.Text = "Browse"
 		Me.btnBrowse3.UseVisualStyleBackColor = True
 		'
-		'btnExportAnalysesCompareLog
-		'
-		Me.btnExportAnalysesCompareLog.Location = New System.Drawing.Point(6, 220)
-		Me.btnExportAnalysesCompareLog.Name = "btnExportAnalysesCompareLog"
-		Me.btnExportAnalysesCompareLog.Size = New System.Drawing.Size(65, 79)
-		Me.btnExportAnalysesCompareLog.TabIndex = 13
-		Me.btnExportAnalysesCompareLog.Text = "Export log"
-		Me.btnExportAnalysesCompareLog.UseVisualStyleBackColor = True
-		'
-		'btnExportMeasurementsCompareLog
-		'
-		Me.btnExportMeasurementsCompareLog.Location = New System.Drawing.Point(6, 220)
-		Me.btnExportMeasurementsCompareLog.Name = "btnExportMeasurementsCompareLog"
-		Me.btnExportMeasurementsCompareLog.Size = New System.Drawing.Size(65, 79)
-		Me.btnExportMeasurementsCompareLog.TabIndex = 18
-		Me.btnExportMeasurementsCompareLog.Text = "Export log"
-		Me.btnExportMeasurementsCompareLog.UseVisualStyleBackColor = True
-		'
 		'Form1
 		'
 		Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -423,4 +434,5 @@ Partial Class Form1
 	Friend WithEvents btnUseLastModified3 As Button
 	Friend WithEvents btnExportAnalysesCompareLog As Button
 	Friend WithEvents btnExportMeasurementsCompareLog As Button
+	Friend WithEvents btnShowCalSettings As Button
 End Class

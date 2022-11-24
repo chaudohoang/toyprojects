@@ -266,7 +266,7 @@ Public Class Form1
 
 	Public Sub CheckSequence()
 		Dim subframeMatch As Boolean = True
-		Dim calMatch As Boolean = True
+		Dim CalIsNONE As Boolean = False
 		Dim logSubframe As New List(Of String)
 		Dim logCal As New List(Of String)
 		Dim sequenceAnaList As New List(Of String)
@@ -317,15 +317,15 @@ Public Class Form1
 				Dim SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
 				Dim log As String = ""
 				If CCID = 0 Then
-					calMatch = False
+					CalIsNONE = True
 					log += " , ColorCalID : " + CCID
 				End If
 				If IMCID = 0 Then
-					calMatch = False
+					CalIsNONE = True
 					log += " , ImageScalingID : " + IMCID
 				End If
 				If FFID = 0 Then
-					calMatch = False
+					CalIsNONE = True
 					log += " , FlatFieldID : " + FFID
 				End If
 				If log <> "" Then
@@ -335,8 +335,6 @@ Public Class Form1
 
 
 		Next
-
-
 
 		If cbxSubframe.Text <> "" AndAlso subframeMatch Then
 			CommLogUpdateText2("SUBFRAME MATCH ALL !!!")
@@ -350,9 +348,9 @@ Public Class Form1
 			CommLogUpdateText2(logSubframe(i))
 		Next
 
-		If chkCalNone.Checked = True AndAlso calMatch Then
+		If chkCalNone.Checked = True AndAlso Not CalIsNONE Then
 			CommLogUpdateText2("CALIBRATION ALL SET !!!")
-		ElseIf chkCalNone.Checked = True AndAlso Not calMatch Then
+		ElseIf chkCalNone.Checked = True AndAlso CalIsNONE Then
 			CommLogUpdateText2("CALIBRATION NONE DETECTED !!!")
 		Else
 		End If
@@ -443,6 +441,38 @@ Public Class Form1
 		Next
 	End Sub
 
+	Public Sub ShowCalSettings()
+		Dim sequenceAnaList As New List(Of String)
+		Dim node3 As XmlNode
+		Dim nodes3 As XmlNodeList
+		Dim xmlDoc3 = New XmlDocument()
+		xmlDoc3.Load(txtFile3.Text)
+		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/Items/SequenceItem")
+		For i = 0 To nodes3.Count - 1
+			If nodes3(i).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
+				sequenceAnaList.Add(nodes3(i).SelectSingleNode("PatternSetupName").InnerText)
+			End If
+		Next
+		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
+		For index = 0 To nodes3.Count - 1
+			If sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
+
+				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
+				For Each childNode As XmlNode In node3.ChildNodes
+					Dim lastChild As XmlNode = node3.LastChild.Clone()
+					node3.RemoveAll()
+					node3.AppendChild(lastChild)
+				Next
+				Dim CCID = node3.SelectSingleNode("CameraSettings/ColorCalID").InnerText
+				Dim IMCID = node3.SelectSingleNode("CameraSettings/ImageScalingCalibrationID").InnerText
+				Dim FFID = node3.SelectSingleNode("CameraSettings/FlatFieldID").InnerText
+				Dim SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
+				CommLogUpdateText2("SN : " + SN + " , Step : " + nodes3(index).SelectSingleNode("Name").InnerText + " , ColorCalID : " + CCID + " , ImageScalingID : " + IMCID + " , FlatFieldID : " + FFID)
+
+			End If
+		Next
+	End Sub
+
 	Private Sub btnUseLastModified1_Click(sender As Object, e As EventArgs) Handles btnUseLastModified1.Click
 		If Directory.Exists("C:\Radiant Vision Systems Data\TrueTest\Sequence") Then
 			Dim latestfile = New DirectoryInfo("C:\Radiant Vision Systems Data\TrueTest\Sequence").GetFiles().OrderByDescending(Function(o) o.LastWriteTime).FirstOrDefault()
@@ -517,5 +547,12 @@ Public Class Form1
 			End If
 			Process.Start("notepad", savefile.FileName)
 		End If
+	End Sub
+
+	Private Sub btnShowLowLevelsCalSettings_Click(sender As Object, e As EventArgs) Handles btnShowCalSettings.Click
+		btnShowCalSettings.Enabled = False
+		ShowCalSettings()
+		CommLogUpdateText2(vbCrLf)
+		btnShowCalSettings.Enabled = True
 	End Sub
 End Class
