@@ -26,7 +26,7 @@ Partial Class CalRef
 		Me.txtColorCalID = New System.Windows.Forms.TextBox()
 		Me.Label2 = New System.Windows.Forms.Label()
 		Me.txtColorCalDescription = New System.Windows.Forms.TextBox()
-		Me.CalReferenceBox = New System.Windows.Forms.ListBox()
+		Me.CalRefBox = New System.Windows.Forms.ListBox()
 		Me.Label4 = New System.Windows.Forms.Label()
 		Me.btnAddColorCalRef = New System.Windows.Forms.Button()
 		Me.Label3 = New System.Windows.Forms.Label()
@@ -78,12 +78,12 @@ Partial Class CalRef
 		'
 		'CalReferenceBox
 		'
-		Me.CalReferenceBox.FormattingEnabled = True
-		Me.CalReferenceBox.Location = New System.Drawing.Point(401, 22)
-		Me.CalReferenceBox.Name = "CalReferenceBox"
-		Me.CalReferenceBox.ScrollAlwaysVisible = True
-		Me.CalReferenceBox.Size = New System.Drawing.Size(318, 134)
-		Me.CalReferenceBox.TabIndex = 6
+		Me.CalRefBox.FormattingEnabled = True
+		Me.CalRefBox.Location = New System.Drawing.Point(401, 22)
+		Me.CalRefBox.Name = "CalReferenceBox"
+		Me.CalRefBox.ScrollAlwaysVisible = True
+		Me.CalRefBox.Size = New System.Drawing.Size(318, 134)
+		Me.CalRefBox.TabIndex = 6
 		'
 		'Label4
 		'
@@ -236,7 +236,7 @@ Partial Class CalRef
 		Me.Controls.Add(Me.Label3)
 		Me.Controls.Add(Me.btnAddColorCalRef)
 		Me.Controls.Add(Me.Label4)
-		Me.Controls.Add(Me.CalReferenceBox)
+		Me.Controls.Add(Me.CalRefBox)
 		Me.Controls.Add(Me.txtColorCalDescription)
 		Me.Controls.Add(Me.Label2)
 		Me.Controls.Add(Me.txtColorCalID)
@@ -253,7 +253,7 @@ Partial Class CalRef
 	Friend WithEvents txtColorCalID As TextBox
 	Friend WithEvents Label2 As Label
 	Friend WithEvents txtColorCalDescription As TextBox
-	Friend WithEvents CalReferenceBox As ListBox
+	Friend WithEvents CalRefBox As ListBox
 	Friend WithEvents Label4 As Label
 	Friend WithEvents btnAddColorCalRef As Button
 	Friend WithEvents Label3 As Label
