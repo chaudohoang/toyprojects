@@ -1,5 +1,0 @@
-ColorCalID,-1,(Factory)
-ColorCalID,0,(None)
-ColorCalID,1,300nit 10g
-ColorCalID,2,155nit 10g
-ColorCalID,3,10nit 42g

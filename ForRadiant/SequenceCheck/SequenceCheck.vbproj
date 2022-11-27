@@ -54,6 +54,10 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.SqlServerCe, Version=3.5.1.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Microsoft SQL Server Compact Edition\v3.5\Desktop\System.Data.SqlServerCe.dll</HintPath>
+    </Reference>
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
@@ -77,12 +81,6 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CalRef.Designer.vb">
-      <DependentUpon>CalRef.vb</DependentUpon>
-    </Compile>
-    <Compile Include="CalRef.vb">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="MainForm.vb">
       <SubType>Form</SubType>
     </Compile>
@@ -108,9 +106,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="CalRef.resx">
-      <DependentUpon>CalRef.vb</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.vb</DependentUpon>
     </EmbeddedResource>
@@ -145,7 +140,7 @@ del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.config</PostBuildEv
   </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_StartDate="2000/1/1" BuildVersion_UseGlobalSettings="True" BuildVersion_BuildVersioningStyle="None.None.Increment.TimeStamp" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_AssemblyInfoFilename="" />
+      <UserProperties BuildVersion_AssemblyInfoFilename="" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.TimeStamp" BuildVersion_UseGlobalSettings="True" BuildVersion_StartDate="2000/1/1" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>
