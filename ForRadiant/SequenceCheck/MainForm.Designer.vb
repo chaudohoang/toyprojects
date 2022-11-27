@@ -41,7 +41,7 @@ Partial Class MainForm
 		Me.btnUseLastModified1 = New System.Windows.Forms.Button()
 		Me.cbxIgnoreList = New System.Windows.Forms.ComboBox()
 		Me.TabPage2 = New System.Windows.Forms.TabPage()
-		Me.chkCheckCalWithRef = New System.Windows.Forms.CheckBox()
+		Me.btnShowCalSettings = New System.Windows.Forms.Button()
 		Me.btnExportMeasurementsCompareLog = New System.Windows.Forms.Button()
 		Me.btnUseLastModified3 = New System.Windows.Forms.Button()
 		Me.btnShowSettings = New System.Windows.Forms.Button()
@@ -55,7 +55,6 @@ Partial Class MainForm
 		Me.Label5 = New System.Windows.Forms.Label()
 		Me.txtFile3 = New System.Windows.Forms.TextBox()
 		Me.btnBrowse3 = New System.Windows.Forms.Button()
-		Me.btnEditCalRef = New System.Windows.Forms.Button()
 		Me.TabControl1.SuspendLayout()
 		Me.TabPage1.SuspendLayout()
 		Me.TabPage2.SuspendLayout()
@@ -234,8 +233,7 @@ Partial Class MainForm
 		'
 		'TabPage2
 		'
-		Me.TabPage2.Controls.Add(Me.btnEditCalRef)
-		Me.TabPage2.Controls.Add(Me.chkCheckCalWithRef)
+		Me.TabPage2.Controls.Add(Me.btnShowCalSettings)
 		Me.TabPage2.Controls.Add(Me.btnExportMeasurementsCompareLog)
 		Me.TabPage2.Controls.Add(Me.btnUseLastModified3)
 		Me.TabPage2.Controls.Add(Me.btnShowSettings)
@@ -257,15 +255,14 @@ Partial Class MainForm
 		Me.TabPage2.Text = "Check Sequence Measurement"
 		Me.TabPage2.UseVisualStyleBackColor = True
 		'
-		'chkCheckCalWithRef
+		'btnShowCalSettings
 		'
-		Me.chkCheckCalWithRef.AutoSize = True
-		Me.chkCheckCalWithRef.Location = New System.Drawing.Point(513, 39)
-		Me.chkCheckCalWithRef.Name = "chkCheckCalWithRef"
-		Me.chkCheckCalWithRef.Size = New System.Drawing.Size(190, 17)
-		Me.chkCheckCalWithRef.TabIndex = 21
-		Me.chkCheckCalWithRef.Text = "Check Calibration With Referrence"
-		Me.chkCheckCalWithRef.UseVisualStyleBackColor = True
+		Me.btnShowCalSettings.Location = New System.Drawing.Point(709, 35)
+		Me.btnShowCalSettings.Name = "btnShowCalSettings"
+		Me.btnShowCalSettings.Size = New System.Drawing.Size(131, 23)
+		Me.btnShowCalSettings.TabIndex = 23
+		Me.btnShowCalSettings.Text = "Show Cal Settings"
+		Me.btnShowCalSettings.UseVisualStyleBackColor = True
 		'
 		'btnExportMeasurementsCompareLog
 		'
@@ -386,15 +383,6 @@ Partial Class MainForm
 		Me.btnBrowse3.Text = "Browse"
 		Me.btnBrowse3.UseVisualStyleBackColor = True
 		'
-		'btnEditCalRef
-		'
-		Me.btnEditCalRef.Location = New System.Drawing.Point(709, 35)
-		Me.btnEditCalRef.Name = "btnEditCalRef"
-		Me.btnEditCalRef.Size = New System.Drawing.Size(131, 23)
-		Me.btnEditCalRef.TabIndex = 22
-		Me.btnEditCalRef.Text = "Edit Cal Reference"
-		Me.btnEditCalRef.UseVisualStyleBackColor = True
-		'
 		'MainForm
 		'
 		Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -446,6 +434,5 @@ Partial Class MainForm
 	Friend WithEvents btnUseLastModified3 As Button
 	Friend WithEvents btnExportAnalysesCompareLog As Button
 	Friend WithEvents btnExportMeasurementsCompareLog As Button
-	Friend WithEvents chkCheckCalWithRef As CheckBox
-	Friend WithEvents btnEditCalRef As Button
+	Friend WithEvents btnShowCalSettings As Button
 End Class

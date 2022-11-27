@@ -1,7 +1,12 @@
-﻿Imports System.IO
+﻿Imports System.Data.SqlServerCe
+Imports System.IO
 Imports System.Xml
 
+
 Public Class MainForm
+
+	Dim conn As SqlCeConnection
+	Dim CameraSN As String
 	Dim exePath As String = My.Application.Info.DirectoryPath
 	Private Sub SetVersionInfo()
 
@@ -27,6 +32,19 @@ Public Class MainForm
 			txtFile2.Text = defaultMasterSequence
 		End If
 	End Sub
+	Public Function GetConnect(ByVal CameraSN)
+		Dim calFile1 As String = Path.Combine("C:\Radiant Vision Systems Data\Camera Data\Calibration Files", CameraSN + "_CalibrationDB.calx")
+		Dim calFile2 As String = Path.Combine("C:\Radiant Vision Systems Data\Camera Data\Calibration Files", "0" + CameraSN + "_CalibrationDB.calx")
+		If File.Exists(calFile1) Then
+			conn = New SqlCeConnection("Data Source=" + calFile1)
+		ElseIf File.Exists(calFile2) Then
+			conn = New SqlCeConnection("Data Source=" + calFile2)
+		Else
+			conn = New SqlCeConnection("Data Source=C:\Radiant Vision Systems Data\Camera Data\Calibration Files\PM Calibration Demo Camera.calx")
+		End If
+
+		Return conn
+	End Function
 
 	Private Sub txtFile1_DragOver(sender As Object, e As DragEventArgs) Handles txtFile1.DragOver
 
@@ -267,15 +285,12 @@ Public Class MainForm
 	Public Sub CheckSequence()
 		Dim subframeMatch As Boolean = True
 		Dim CalIsNONE As Boolean = False
-		Dim CalNG As Boolean = False
 		Dim logSubframe As New List(Of String)
 		Dim logCal As New List(Of String)
 		Dim sequenceAnaList As New List(Of String)
 		Dim node3 As XmlNode
 		Dim nodes3 As XmlNodeList
 		Dim xmlDoc3 = New XmlDocument()
-		Dim calRefDict As New Dictionary(Of String, String)
-		Dim calRuleDict As New Dictionary(Of String, String)
 		xmlDoc3.Load(txtFile3.Text)
 		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/Items/SequenceItem")
 		For i = 0 To nodes3.Count - 1
@@ -284,24 +299,6 @@ Public Class MainForm
 			End If
 		Next
 		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
-
-		Dim calRefFile = Path.Combine(exePath, "calreference.txt")
-		Dim calRuleFile = Path.Combine(exePath, "calrule.txt")
-		If File.Exists(calRefFile) AndAlso File.Exists(calRuleFile) AndAlso chkCheckCalWithRef.Checked Then
-			Dim calRef As String() = File.ReadAllLines(calRefFile)
-			Dim calRule As String() = File.ReadAllLines(calRuleFile)
-
-			For Each line As String In calRef
-				Dim ID As String = line.Split(",")(1)
-				Dim Description As String = line.Split(",")(2)
-				calRefDict.Add(ID, Description)
-			Next
-			For Each line As String In calRule
-				Dim stepRef As String = line.Split(",")(0)
-				Dim calIDRef As String = line.Split(",")(1)
-				calRuleDict.Add(stepRef, calIDRef)
-			Next
-		End If
 
 		For index = 0 To nodes3.Count - 1
 
@@ -356,35 +353,6 @@ Public Class MainForm
 
 		Next
 
-		For index = 0 To nodes3.Count - 1
-			If chkCheckCalWithRef.Checked = True AndAlso sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
-				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
-				For Each childNode As XmlNode In node3.ChildNodes
-					Dim lastChild As XmlNode = node3.LastChild.Clone()
-					node3.RemoveAll()
-					node3.AppendChild(lastChild)
-				Next
-				Dim CCID = node3.SelectSingleNode("CameraSettings/ColorCalID").InnerText
-				Dim IMCID = node3.SelectSingleNode("CameraSettings/ImageScalingCalibrationID").InnerText
-				Dim FFID = node3.SelectSingleNode("CameraSettings/FlatFieldID").InnerText
-				Dim SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
-				Dim log As String = ""
-				Dim CurrentStep As String = nodes3(index).SelectSingleNode("Name").InnerText
-				If calRuleDict.ContainsKey(CurrentStep) Then
-					If CCID <> calRuleDict(CurrentStep) Then
-						CalNG = True
-						log += " , NG ColorCalID : " + CCID + " , NG ColorCalDescription : " + calRefDict(CCID) + " , Correct ColorCalID : " + calRuleDict(CurrentStep) + " , Correct ColorCalDescription : " + calRefDict(calRuleDict(CurrentStep))
-					End If
-				End If
-
-				If log <> "" Then
-					logCal.Add("SN : " + SN + " , Step : " + nodes3(index).SelectSingleNode("Name").InnerText + log)
-				End If
-			End If
-
-
-		Next
-
 		If cbxSubframe.Text <> "" AndAlso subframeMatch Then
 			CommLogUpdateText2("SUBFRAME MATCH ALL !!!")
 		ElseIf cbxSubframe.Text <> "" AndAlso Not subframeMatch Then
@@ -401,13 +369,6 @@ Public Class MainForm
 			CommLogUpdateText2("CALIBRATION ALL SET !!!")
 		ElseIf chkCalNone.Checked = True AndAlso CalIsNONE Then
 			CommLogUpdateText2("CALIBRATION NONE DETECTED !!!")
-		Else
-		End If
-
-		If chkCheckCalWithRef.Checked = True AndAlso Not CalNG Then
-			CommLogUpdateText2("CALIBRATION ALL OK !!!")
-		ElseIf chkCheckCalWithRef.Checked = True AndAlso CalNG Then
-			CommLogUpdateText2("CALIBRATION NG DETECTED !!!")
 		Else
 		End If
 
@@ -441,6 +402,7 @@ Public Class MainForm
 			End If
 		Next
 		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
+		CommLogUpdateText2("ALL SETTINGS :")
 		For index = 0 To nodes3.Count - 1
 			If sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
 				Dim FocusDistance = nodes3(index).SelectSingleNode("LensDistance").InnerText
@@ -495,6 +457,63 @@ Public Class MainForm
 				CommLogUpdateText2("SN : " + SN + " , Step : " + nodes3(index).SelectSingleNode("Name").InnerText + " , Focus : " + FocusDistance + " , F-number : " + FNumber + " , Rotation : " + CameraRotation + " , Subframe : " + subframe + " , ColorCalID : " + CCID + " , ImageScalingID : " + IMCID + " , FlatFieldID : " + FFID)
 			End If
 		Next
+	End Sub
+
+	Public Sub ShowColorCalSettings()
+		Dim conn As SqlCeConnection
+		Dim cmdStudent As New SqlCeCommand
+		Dim daStudent As New SqlCeDataAdapter
+		Dim dsStudent As New DataSet
+		Dim dtStudent As New DataTable
+		Dim SN As String = ""
+		Dim sequenceAnaList As New List(Of String)
+		Dim node3 As XmlNode
+		Dim nodes3 As XmlNodeList
+		Dim xmlDoc3 = New XmlDocument()
+		xmlDoc3.Load(txtFile3.Text)
+		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/Items/SequenceItem")
+		For i = 0 To nodes3.Count - 1
+			If nodes3(i).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
+				sequenceAnaList.Add(nodes3(i).SelectSingleNode("PatternSetupName").InnerText)
+			End If
+		Next
+		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
+		CommLogUpdateText2("CALIBRATION SETTINGS :")
+		For index = 0 To nodes3.Count - 1
+			If sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
+
+				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
+				For Each childNode As XmlNode In node3.ChildNodes
+					Dim lastChild As XmlNode = node3.LastChild.Clone()
+					node3.RemoveAll()
+					node3.AppendChild(lastChild)
+				Next
+
+				Dim CCID = node3.SelectSingleNode("CameraSettings/ColorCalID").InnerText
+				SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
+				CommLogUpdateText2("SN : " + SN + " , Step : " + nodes3(index).SelectSingleNode("Name").InnerText + " , ColorCalID : " + CCID)
+			End If
+		Next
+		CommLogUpdateText2("CALIBRATION REFERENCES :")
+		Try
+			conn = GetConnect(SN)
+			cmdStudent = conn.CreateCommand
+			cmdStudent.CommandText = "SELECT ColorCalibrationID, Description FROM ColorCalibrations"
+
+			daStudent.SelectCommand = cmdStudent
+			daStudent.Fill(dsStudent, "ColorCalibrations")
+			Dim CalRefString As String = ""
+
+			For Each row As DataRow In dsStudent.Tables("ColorCalibrations").Rows
+				CommLogUpdateText2("SN : " + SN + " , ColorCalibrationID : " & row("ColorCalibrationID") & " , Description : " & row("Description"))
+
+			Next
+
+		Catch ex As Exception
+			MsgBox("Error: " & ex.Source & ": " & ex.Message, MsgBoxStyle.OkOnly, "Connection Error !!")
+		End Try
+
+
 	End Sub
 
 	Private Sub btnUseLastModified1_Click(sender As Object, e As EventArgs) Handles btnUseLastModified1.Click
@@ -573,9 +592,11 @@ Public Class MainForm
 		End If
 	End Sub
 
-	Private Sub btnEditCalRef_Click(sender As Object, e As EventArgs) Handles btnEditCalRef.Click
-		Dim calRefForm = New CalRef
-		calRefForm.Show()
-	End Sub
+	Private Sub btnShowCalSettings_Click(sender As Object, e As EventArgs) Handles btnShowCalSettings.Click
+		btnShowCalSettings.Enabled = False
+		ShowColorCalSettings()
+		CommLogUpdateText2(vbCrLf)
+		btnShowCalSettings.Enabled = True
 
+	End Sub
 End Class
