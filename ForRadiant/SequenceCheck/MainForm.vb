@@ -1,5 +1,6 @@
 ﻿Imports System.Data.SqlServerCe
 Imports System.IO
+Imports System.Runtime.Remoting.Metadata.W3cXsd2001
 Imports System.Xml
 
 
@@ -285,12 +286,29 @@ Public Class MainForm
 	Public Sub CheckSequence()
 		Dim subframeMatch As Boolean = True
 		Dim CalIsNONE As Boolean = False
+		Dim CallNG As Boolean = False
 		Dim logSubframe As New List(Of String)
 		Dim logCal As New List(Of String)
 		Dim sequenceAnaList As New List(Of String)
 		Dim node3 As XmlNode
 		Dim nodes3 As XmlNodeList
 		Dim xmlDoc3 = New XmlDocument()
+
+		Dim CalRuleFilaName As String = Path.GetFileNameWithoutExtension(txtFile3.Text) + ".txt"
+		Dim CalRuleFilePath As String = Path.Combine(exePath, CalRuleFilaName)
+
+		Dim CalRulesDict As New Dictionary(Of String, String)
+
+		If File.Exists(CalRuleFilePath) Then
+			Dim CalRuleContent As String() = File.ReadAllLines(CalRuleFilePath)
+			For Each line As String In CalRuleContent
+				Dim StepName As String = line.Split(",")(0)
+				Dim CalID As String = line.Split(",")(1)
+				CalRulesDict.Add(StepName, CalID)
+			Next
+
+		End If
+
 		xmlDoc3.Load(txtFile3.Text)
 		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/Items/SequenceItem")
 		For i = 0 To nodes3.Count - 1
@@ -310,10 +328,11 @@ Public Class MainForm
 					node3.AppendChild(lastChild)
 				Next
 				Dim subframe = node3.SelectSingleNode("CameraSettings/SubFrameRegion").InnerText
+				Dim StepName = nodes3(index).SelectSingleNode("Name").InnerText
 				Dim SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
 				If subframe <> cbxSubframe.Text Then
 					subframeMatch = False
-					logSubframe.Add("SN : " + SN + " , Step : " + nodes3(index).SelectSingleNode("Name").InnerText + ", Subframe : " + subframe)
+					logSubframe.Add("SN : " + SN + " , Step : " + StepName + ", Subframe : " + subframe)
 				End If
 
 			End If
@@ -332,6 +351,7 @@ Public Class MainForm
 				Dim CCID = node3.SelectSingleNode("CameraSettings/ColorCalID").InnerText
 				Dim IMCID = node3.SelectSingleNode("CameraSettings/ImageScalingCalibrationID").InnerText
 				Dim FFID = node3.SelectSingleNode("CameraSettings/FlatFieldID").InnerText
+				Dim StepName = nodes3(index).SelectSingleNode("Name").InnerText
 				Dim SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
 				Dim log As String = ""
 				If CCID = 0 Then
@@ -347,7 +367,35 @@ Public Class MainForm
 					log += " , FlatFieldID : " + FFID
 				End If
 				If log <> "" Then
-					logCal.Add("SN : " + SN + " , Step : " + nodes3(index).SelectSingleNode("Name").InnerText + log)
+					logCal.Add("SN : " + SN + " , Step : " + StepName + log)
+				End If
+			End If
+
+		Next
+
+		For index = 0 To nodes3.Count - 1
+			If chkCalSettings.Checked = True AndAlso sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
+				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
+				For Each childNode As XmlNode In node3.ChildNodes
+					Dim lastChild As XmlNode = node3.LastChild.Clone()
+					node3.RemoveAll()
+					node3.AppendChild(lastChild)
+				Next
+
+				Dim CCID = node3.SelectSingleNode("CameraSettings/ColorCalID").InnerText
+				Dim StepName = nodes3(index).SelectSingleNode("Name").InnerText
+				Dim SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
+				Dim log As String = ""
+				If CalRulesDict.ContainsKey(StepName) AndAlso CalRulesDict(StepName) <> CCID Then
+					CallNG = True
+					log += " , ColorCalID : " + CCID + " , Correct ColorCalID : " + CalRulesDict(StepName)
+				ElseIf Not CalRulesDict.ContainsKey(StepName) Then
+					CallNG = True
+					log += " , ColorCalID : " + CCID + " , This step has no calibration rules "
+				End If
+
+				If log <> "" Then
+					logCal.Add("SN : " + SN + " , Step : " + StepName + log)
 				End If
 			End If
 
@@ -369,14 +417,16 @@ Public Class MainForm
 			CommLogUpdateText2("CALIBRATION ALL SET !!!")
 		ElseIf chkCalNone.Checked = True AndAlso CalIsNONE Then
 			CommLogUpdateText2("CALIBRATION NONE DETECTED !!!")
+		ElseIf chkCalSettings.Checked = True AndAlso Not CallNG Then
+			CommLogUpdateText2("CALIBRATION ALL OK !!!")
+		ElseIf chkCalSettings.Checked = True AndAlso CallNG Then
+			CommLogUpdateText2("CALIBRATION NG DETECTED !!!")
 		Else
 		End If
 
 		For i = 0 To logCal.Count - 1
 			CommLogUpdateText2(logCal(i))
 		Next
-
-
 
 
 	End Sub
@@ -461,10 +511,10 @@ Public Class MainForm
 
 	Public Sub ShowColorCalSettings()
 		Dim conn As SqlCeConnection
-		Dim cmdStudent As New SqlCeCommand
-		Dim daStudent As New SqlCeDataAdapter
-		Dim dsStudent As New DataSet
-		Dim dtStudent As New DataTable
+		Dim cmdCalibration As New SqlCeCommand
+		Dim daCalibration As New SqlCeDataAdapter
+		Dim dsCalibration As New DataSet
+		Dim dtCalibration As New DataTable
 		Dim SN As String = ""
 		Dim sequenceAnaList As New List(Of String)
 		Dim node3 As XmlNode
@@ -497,14 +547,14 @@ Public Class MainForm
 		CommLogUpdateText2("CALIBRATION REFERENCES :")
 		Try
 			conn = GetConnect(SN)
-			cmdStudent = conn.CreateCommand
-			cmdStudent.CommandText = "SELECT ColorCalibrationID, Description FROM ColorCalibrations"
+			cmdCalibration = conn.CreateCommand
+			cmdCalibration.CommandText = "SELECT ColorCalibrationID, Description FROM ColorCalibrations"
 
-			daStudent.SelectCommand = cmdStudent
-			daStudent.Fill(dsStudent, "ColorCalibrations")
+			daCalibration.SelectCommand = cmdCalibration
+			daCalibration.Fill(dsCalibration, "ColorCalibrations")
 			Dim CalRefString As String = ""
 
-			For Each row As DataRow In dsStudent.Tables("ColorCalibrations").Rows
+			For Each row As DataRow In dsCalibration.Tables("ColorCalibrations").Rows
 				CommLogUpdateText2("SN : " + SN + " , ColorCalibrationID : " & row("ColorCalibrationID") & " , Description : " & row("Description"))
 
 			Next
@@ -599,4 +649,9 @@ Public Class MainForm
 		btnShowCalSettings.Enabled = True
 
 	End Sub
+
+	Private Sub btnEditCalRule_Click(sender As Object, e As EventArgs) Handles btnEditCalRule.Click
+		CalRule.Show()
+	End Sub
+
 End Class
