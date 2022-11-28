@@ -55,6 +55,8 @@ Partial Class MainForm
 		Me.Label5 = New System.Windows.Forms.Label()
 		Me.txtFile3 = New System.Windows.Forms.TextBox()
 		Me.btnBrowse3 = New System.Windows.Forms.Button()
+		Me.chkCalSettings = New System.Windows.Forms.CheckBox()
+		Me.btnEditCalRule = New System.Windows.Forms.Button()
 		Me.TabControl1.SuspendLayout()
 		Me.TabPage1.SuspendLayout()
 		Me.TabPage2.SuspendLayout()
@@ -233,6 +235,8 @@ Partial Class MainForm
 		'
 		'TabPage2
 		'
+		Me.TabPage2.Controls.Add(Me.btnEditCalRule)
+		Me.TabPage2.Controls.Add(Me.chkCalSettings)
 		Me.TabPage2.Controls.Add(Me.btnShowCalSettings)
 		Me.TabPage2.Controls.Add(Me.btnExportMeasurementsCompareLog)
 		Me.TabPage2.Controls.Add(Me.btnUseLastModified3)
@@ -257,11 +261,11 @@ Partial Class MainForm
 		'
 		'btnShowCalSettings
 		'
-		Me.btnShowCalSettings.Location = New System.Drawing.Point(709, 35)
+		Me.btnShowCalSettings.Location = New System.Drawing.Point(846, 64)
 		Me.btnShowCalSettings.Name = "btnShowCalSettings"
-		Me.btnShowCalSettings.Size = New System.Drawing.Size(131, 23)
+		Me.btnShowCalSettings.Size = New System.Drawing.Size(99, 23)
 		Me.btnShowCalSettings.TabIndex = 23
-		Me.btnShowCalSettings.Text = "Show Cal Settings"
+		Me.btnShowCalSettings.Text = "Show cal settings"
 		Me.btnShowCalSettings.UseVisualStyleBackColor = True
 		'
 		'btnExportMeasurementsCompareLog
@@ -383,6 +387,25 @@ Partial Class MainForm
 		Me.btnBrowse3.Text = "Browse"
 		Me.btnBrowse3.UseVisualStyleBackColor = True
 		'
+		'chkCalSettings
+		'
+		Me.chkCalSettings.AutoSize = True
+		Me.chkCalSettings.Location = New System.Drawing.Point(513, 39)
+		Me.chkCalSettings.Name = "chkCalSettings"
+		Me.chkCalSettings.Size = New System.Drawing.Size(150, 17)
+		Me.chkCalSettings.TabIndex = 24
+		Me.chkCalSettings.Text = "Check Calibration Settings"
+		Me.chkCalSettings.UseVisualStyleBackColor = True
+		'
+		'btnEditCalRule
+		'
+		Me.btnEditCalRule.Location = New System.Drawing.Point(669, 35)
+		Me.btnEditCalRule.Name = "btnEditCalRule"
+		Me.btnEditCalRule.Size = New System.Drawing.Size(90, 23)
+		Me.btnEditCalRule.TabIndex = 25
+		Me.btnEditCalRule.Text = "Edit cal rules"
+		Me.btnEditCalRule.UseVisualStyleBackColor = True
+		'
 		'MainForm
 		'
 		Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -435,4 +458,6 @@ Partial Class MainForm
 	Friend WithEvents btnExportAnalysesCompareLog As Button
 	Friend WithEvents btnExportMeasurementsCompareLog As Button
 	Friend WithEvents btnShowCalSettings As Button
+	Friend WithEvents btnEditCalRule As Button
+	Friend WithEvents chkCalSettings As CheckBox
 End Class
