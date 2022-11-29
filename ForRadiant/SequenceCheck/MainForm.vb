@@ -290,6 +290,7 @@ Public Class MainForm
 		Dim logSubframe As New List(Of String)
 		Dim logCal As New List(Of String)
 		Dim sequenceAnaList As New List(Of String)
+		Dim demuraStepList As New List(Of String)
 		Dim node3 As XmlNode
 		Dim nodes3 As XmlNodeList
 		Dim xmlDoc3 = New XmlDocument()
@@ -315,11 +316,14 @@ Public Class MainForm
 			If nodes3(i).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
 				sequenceAnaList.Add(nodes3(i).SelectSingleNode("PatternSetupName").InnerText)
 			End If
+			If nodes3(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDCustomerAnalysis") Or nodes3(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDNCustomerAnalysis") Then
+				demuraStepList.Add(nodes3(i).SelectSingleNode("PatternSetupName").InnerText)
+			End If
 		Next
 		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
 
 		For index = 0 To nodes3.Count - 1
-
+			If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
 			If cbxSubframe.Text <> "" AndAlso sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
 				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
 				For Each childNode As XmlNode In node3.ChildNodes
@@ -340,6 +344,7 @@ Public Class MainForm
 		Next
 
 		For index = 0 To nodes3.Count - 1
+			If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
 			If chkCalNone.Checked = True AndAlso sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
 				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
 				For Each childNode As XmlNode In node3.ChildNodes
@@ -374,6 +379,7 @@ Public Class MainForm
 		Next
 
 		For index = 0 To nodes3.Count - 1
+			If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
 			If chkCalSettings.Checked = True AndAlso sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
 				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
 				For Each childNode As XmlNode In node3.ChildNodes
@@ -441,19 +447,25 @@ Public Class MainForm
 
 	Public Sub ShowMeasSettings()
 		Dim sequenceAnaList As New List(Of String)
+		Dim demuraStepList As New List(Of String)
 		Dim node3 As XmlNode
 		Dim nodes3 As XmlNodeList
 		Dim xmlDoc3 = New XmlDocument()
 		xmlDoc3.Load(txtFile3.Text)
 		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/Items/SequenceItem")
+
 		For i = 0 To nodes3.Count - 1
 			If nodes3(i).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
 				sequenceAnaList.Add(nodes3(i).SelectSingleNode("PatternSetupName").InnerText)
+			End If
+			If nodes3(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDCustomerAnalysis") Or nodes3(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDNCustomerAnalysis") Then
+				demuraStepList.Add(nodes3(i).SelectSingleNode("PatternSetupName").InnerText)
 			End If
 		Next
 		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
 		CommLogUpdateText2("ALL SETTINGS :")
 		For index = 0 To nodes3.Count - 1
+			If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
 			If sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
 				Dim FocusDistance = nodes3(index).SelectSingleNode("LensDistance").InnerText
 				Dim FNumber = nodes3(index).SelectSingleNode("LensfStop").InnerText
@@ -517,6 +529,7 @@ Public Class MainForm
 		Dim dtCalibration As New DataTable
 		Dim SN As String = ""
 		Dim sequenceAnaList As New List(Of String)
+		Dim demuraStepList As New List(Of String)
 		Dim node3 As XmlNode
 		Dim nodes3 As XmlNodeList
 		Dim xmlDoc3 = New XmlDocument()
@@ -526,10 +539,14 @@ Public Class MainForm
 			If nodes3(i).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
 				sequenceAnaList.Add(nodes3(i).SelectSingleNode("PatternSetupName").InnerText)
 			End If
+			If nodes3(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDCustomerAnalysis") Or nodes3(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDNCustomerAnalysis") Then
+				demuraStepList.Add(nodes3(i).SelectSingleNode("PatternSetupName").InnerText)
+			End If
 		Next
 		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
 		CommLogUpdateText2("CALIBRATION SETTINGS :")
 		For index = 0 To nodes3.Count - 1
+			If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
 			If sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
 
 				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
