@@ -432,7 +432,7 @@ Public Class MainForm
 					log += " , ColorCalID : " + CCID + " , Correct ColorCalID : " + ColorCalRulesDict(StepName)
 				ElseIf Not ColorCalRulesDict.ContainsKey(StepName) Then
 					ColorCalNG = True
-					log += " , ColorCalID : " + CCID + " , This step has no calibration rules "
+					log += " , ColorCalID : " + CCID + " , This step has no calibration rule "
 				End If
 
 				If log <> "" Then
@@ -461,7 +461,7 @@ Public Class MainForm
 					log += " , FlatFieldID : " + FFID + " , Correct FlatFieldID : " + FlatFieldCalRulesDict(StepName)
 				ElseIf Not FlatFieldCalRulesDict.ContainsKey(StepName) Then
 					FlatFieldCalNG = True
-					log += " , FlatFieldID : " + FFID + " , This step has no calibration rules "
+					log += " , FlatFieldID : " + FFID + " , This step has no calibration rule "
 				End If
 
 				If log <> "" Then
@@ -490,7 +490,7 @@ Public Class MainForm
 					log += " , ImageScalingCalibration : " + ISCID + " , Correct ImageScalingCalibration : " + ImgScaleCalRulesDict(StepName)
 				ElseIf Not ImgScaleCalRulesDict.ContainsKey(StepName) Then
 					ImgScaleCalNG = True
-					log += " , ImageScalingCalibration : " + ISCID + " , This step has no calibration rules "
+					log += " , ImageScalingCalibration : " + ISCID + " , This step has no calibration rule "
 				End If
 
 				If log <> "" Then
