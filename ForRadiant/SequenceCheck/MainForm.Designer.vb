@@ -41,6 +41,8 @@ Partial Class MainForm
 		Me.btnUseLastModified1 = New System.Windows.Forms.Button()
 		Me.cbxIgnoreList = New System.Windows.Forms.ComboBox()
 		Me.TabPage2 = New System.Windows.Forms.TabPage()
+		Me.btnEditCalRule = New System.Windows.Forms.Button()
+		Me.chkColorCalSettings = New System.Windows.Forms.CheckBox()
 		Me.btnShowCalSettings = New System.Windows.Forms.Button()
 		Me.btnExportMeasurementsCompareLog = New System.Windows.Forms.Button()
 		Me.btnUseLastModified3 = New System.Windows.Forms.Button()
@@ -55,8 +57,8 @@ Partial Class MainForm
 		Me.Label5 = New System.Windows.Forms.Label()
 		Me.txtFile3 = New System.Windows.Forms.TextBox()
 		Me.btnBrowse3 = New System.Windows.Forms.Button()
-		Me.chkCalSettings = New System.Windows.Forms.CheckBox()
-		Me.btnEditCalRule = New System.Windows.Forms.Button()
+		Me.chkFlatFieldCalSettings = New System.Windows.Forms.CheckBox()
+		Me.chkImgScaleCalSettings = New System.Windows.Forms.CheckBox()
 		Me.TabControl1.SuspendLayout()
 		Me.TabPage1.SuspendLayout()
 		Me.TabPage2.SuspendLayout()
@@ -235,8 +237,10 @@ Partial Class MainForm
 		'
 		'TabPage2
 		'
+		Me.TabPage2.Controls.Add(Me.chkImgScaleCalSettings)
+		Me.TabPage2.Controls.Add(Me.chkFlatFieldCalSettings)
 		Me.TabPage2.Controls.Add(Me.btnEditCalRule)
-		Me.TabPage2.Controls.Add(Me.chkCalSettings)
+		Me.TabPage2.Controls.Add(Me.chkColorCalSettings)
 		Me.TabPage2.Controls.Add(Me.btnShowCalSettings)
 		Me.TabPage2.Controls.Add(Me.btnExportMeasurementsCompareLog)
 		Me.TabPage2.Controls.Add(Me.btnUseLastModified3)
@@ -258,6 +262,25 @@ Partial Class MainForm
 		Me.TabPage2.TabIndex = 1
 		Me.TabPage2.Text = "Check Sequence Measurement"
 		Me.TabPage2.UseVisualStyleBackColor = True
+		'
+		'btnEditCalRule
+		'
+		Me.btnEditCalRule.Location = New System.Drawing.Point(669, 35)
+		Me.btnEditCalRule.Name = "btnEditCalRule"
+		Me.btnEditCalRule.Size = New System.Drawing.Size(90, 23)
+		Me.btnEditCalRule.TabIndex = 25
+		Me.btnEditCalRule.Text = "Edit cal rules"
+		Me.btnEditCalRule.UseVisualStyleBackColor = True
+		'
+		'chkColorCalSettings
+		'
+		Me.chkColorCalSettings.AutoSize = True
+		Me.chkColorCalSettings.Location = New System.Drawing.Point(513, 39)
+		Me.chkColorCalSettings.Name = "chkColorCalSettings"
+		Me.chkColorCalSettings.Size = New System.Drawing.Size(143, 17)
+		Me.chkColorCalSettings.TabIndex = 24
+		Me.chkColorCalSettings.Text = "Check Color Cal Settings"
+		Me.chkColorCalSettings.UseVisualStyleBackColor = True
 		'
 		'btnShowCalSettings
 		'
@@ -387,24 +410,25 @@ Partial Class MainForm
 		Me.btnBrowse3.Text = "Browse"
 		Me.btnBrowse3.UseVisualStyleBackColor = True
 		'
-		'chkCalSettings
+		'chkFlatFieldCalSettings
 		'
-		Me.chkCalSettings.AutoSize = True
-		Me.chkCalSettings.Location = New System.Drawing.Point(513, 39)
-		Me.chkCalSettings.Name = "chkCalSettings"
-		Me.chkCalSettings.Size = New System.Drawing.Size(150, 17)
-		Me.chkCalSettings.TabIndex = 24
-		Me.chkCalSettings.Text = "Check Calibration Settings"
-		Me.chkCalSettings.UseVisualStyleBackColor = True
+		Me.chkFlatFieldCalSettings.AutoSize = True
+		Me.chkFlatFieldCalSettings.Location = New System.Drawing.Point(513, 57)
+		Me.chkFlatFieldCalSettings.Name = "chkFlatFieldCalSettings"
+		Me.chkFlatFieldCalSettings.Size = New System.Drawing.Size(158, 17)
+		Me.chkFlatFieldCalSettings.TabIndex = 26
+		Me.chkFlatFieldCalSettings.Text = "Check FlatField Cal Settings"
+		Me.chkFlatFieldCalSettings.UseVisualStyleBackColor = True
 		'
-		'btnEditCalRule
+		'chkImgScaleCalSettings
 		'
-		Me.btnEditCalRule.Location = New System.Drawing.Point(669, 35)
-		Me.btnEditCalRule.Name = "btnEditCalRule"
-		Me.btnEditCalRule.Size = New System.Drawing.Size(90, 23)
-		Me.btnEditCalRule.TabIndex = 25
-		Me.btnEditCalRule.Text = "Edit cal rules"
-		Me.btnEditCalRule.UseVisualStyleBackColor = True
+		Me.chkImgScaleCalSettings.AutoSize = True
+		Me.chkImgScaleCalSettings.Location = New System.Drawing.Point(513, 75)
+		Me.chkImgScaleCalSettings.Name = "chkImgScaleCalSettings"
+		Me.chkImgScaleCalSettings.Size = New System.Drawing.Size(163, 17)
+		Me.chkImgScaleCalSettings.TabIndex = 27
+		Me.chkImgScaleCalSettings.Text = "Check ImgScale Cal Settings"
+		Me.chkImgScaleCalSettings.UseVisualStyleBackColor = True
 		'
 		'MainForm
 		'
@@ -459,5 +483,7 @@ Partial Class MainForm
 	Friend WithEvents btnExportMeasurementsCompareLog As Button
 	Friend WithEvents btnShowCalSettings As Button
 	Friend WithEvents btnEditCalRule As Button
-	Friend WithEvents chkCalSettings As CheckBox
+	Friend WithEvents chkColorCalSettings As CheckBox
+	Friend WithEvents chkImgScaleCalSettings As CheckBox
+	Friend WithEvents chkFlatFieldCalSettings As CheckBox
 End Class

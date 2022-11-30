@@ -286,25 +286,61 @@ Public Class MainForm
 	Public Sub CheckSequence()
 		Dim subframeMatch As Boolean = True
 		Dim CalIsNONE As Boolean = False
-		Dim CallNG As Boolean = False
+		Dim ColorCalNG As Boolean = False
+		Dim FlatFieldCalNG As Boolean = False
+		Dim ImgScaleCalNG As Boolean = False
 		Dim logSubframe As New List(Of String)
-		Dim logCal As New List(Of String)
+		Dim logCalNone As New List(Of String)
+		Dim logColorCal As New List(Of String)
+		Dim logFlatFieldCal As New List(Of String)
+		Dim logImgScaleCal As New List(Of String)
 		Dim sequenceAnaList As New List(Of String)
+		Dim demuraStepList As New List(Of String)
 		Dim node3 As XmlNode
 		Dim nodes3 As XmlNodeList
 		Dim xmlDoc3 = New XmlDocument()
 
-		Dim CalRuleFilaName As String = Path.GetFileNameWithoutExtension(txtFile3.Text) + ".txt"
-		Dim CalRuleFilePath As String = Path.Combine(exePath, CalRuleFilaName)
+		Dim ColorCalRuleFilaName As String = Path.GetFileNameWithoutExtension(txtFile3.Text) + "_colorcal.txt"
+		Dim ColorCalRuleFilePath As String = Path.Combine(exePath, ColorCalRuleFilaName)
 
-		Dim CalRulesDict As New Dictionary(Of String, String)
+		Dim ColorCalRulesDict As New Dictionary(Of String, String)
 
-		If File.Exists(CalRuleFilePath) Then
-			Dim CalRuleContent As String() = File.ReadAllLines(CalRuleFilePath)
+		If File.Exists(ColorCalRuleFilePath) Then
+			Dim CalRuleContent As String() = File.ReadAllLines(ColorCalRuleFilePath)
 			For Each line As String In CalRuleContent
 				Dim StepName As String = line.Split(",")(0)
 				Dim CalID As String = line.Split(",")(1)
-				CalRulesDict.Add(StepName, CalID)
+				ColorCalRulesDict.Add(StepName, CalID)
+			Next
+
+		End If
+
+		Dim FlatFieldCalRuleFilaName As String = Path.GetFileNameWithoutExtension(txtFile3.Text) + "_flatfieldcal.txt"
+		Dim FlatFieldCalRuleFilePath As String = Path.Combine(exePath, FlatFieldCalRuleFilaName)
+
+		Dim FlatFieldCalRulesDict As New Dictionary(Of String, String)
+
+		If File.Exists(FlatFieldCalRuleFilePath) Then
+			Dim CalRuleContent As String() = File.ReadAllLines(FlatFieldCalRuleFilePath)
+			For Each line As String In CalRuleContent
+				Dim StepName As String = line.Split(",")(0)
+				Dim CalID As String = line.Split(",")(1)
+				FlatFieldCalRulesDict.Add(StepName, CalID)
+			Next
+
+		End If
+
+		Dim ImgScaleCalRuleFilaName As String = Path.GetFileNameWithoutExtension(txtFile3.Text) + "_imgscalecal.txt"
+		Dim ImgScaleCalRuleFilePath As String = Path.Combine(exePath, ImgScaleCalRuleFilaName)
+
+		Dim ImgScaleCalRulesDict As New Dictionary(Of String, String)
+
+		If File.Exists(ImgScaleCalRuleFilePath) Then
+			Dim CalRuleContent As String() = File.ReadAllLines(ImgScaleCalRuleFilePath)
+			For Each line As String In CalRuleContent
+				Dim StepName As String = line.Split(",")(0)
+				Dim CalID As String = line.Split(",")(1)
+				ImgScaleCalRulesDict.Add(StepName, CalID)
 			Next
 
 		End If
@@ -315,11 +351,14 @@ Public Class MainForm
 			If nodes3(i).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
 				sequenceAnaList.Add(nodes3(i).SelectSingleNode("PatternSetupName").InnerText)
 			End If
+			If nodes3(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDCustomerAnalysis") Or nodes3(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDNCustomerAnalysis") Then
+				demuraStepList.Add(nodes3(i).SelectSingleNode("PatternSetupName").InnerText)
+			End If
 		Next
 		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
 
 		For index = 0 To nodes3.Count - 1
-
+			If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
 			If cbxSubframe.Text <> "" AndAlso sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
 				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
 				For Each childNode As XmlNode In node3.ChildNodes
@@ -340,6 +379,7 @@ Public Class MainForm
 		Next
 
 		For index = 0 To nodes3.Count - 1
+			If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
 			If chkCalNone.Checked = True AndAlso sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
 				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
 				For Each childNode As XmlNode In node3.ChildNodes
@@ -367,14 +407,15 @@ Public Class MainForm
 					log += " , FlatFieldID : " + FFID
 				End If
 				If log <> "" Then
-					logCal.Add("SN : " + SN + " , Step : " + StepName + log)
+					logCalNone.Add("SN : " + SN + " , Step : " + StepName + log)
 				End If
 			End If
 
 		Next
 
 		For index = 0 To nodes3.Count - 1
-			If chkCalSettings.Checked = True AndAlso sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
+			If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
+			If chkColorCalSettings.Checked = True AndAlso sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
 				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
 				For Each childNode As XmlNode In node3.ChildNodes
 					Dim lastChild As XmlNode = node3.LastChild.Clone()
@@ -386,16 +427,74 @@ Public Class MainForm
 				Dim StepName = nodes3(index).SelectSingleNode("Name").InnerText
 				Dim SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
 				Dim log As String = ""
-				If CalRulesDict.ContainsKey(StepName) AndAlso CalRulesDict(StepName) <> CCID Then
-					CallNG = True
-					log += " , ColorCalID : " + CCID + " , Correct ColorCalID : " + CalRulesDict(StepName)
-				ElseIf Not CalRulesDict.ContainsKey(StepName) Then
-					CallNG = True
-					log += " , ColorCalID : " + CCID + " , This step has no calibration rules "
+				If ColorCalRulesDict.ContainsKey(StepName) AndAlso ColorCalRulesDict(StepName) <> CCID Then
+					ColorCalNG = True
+					log += " , ColorCalID : " + CCID + " , Correct ColorCalID : " + ColorCalRulesDict(StepName)
+				ElseIf Not ColorCalRulesDict.ContainsKey(StepName) Then
+					ColorCalNG = True
+					log += " , ColorCalID : " + CCID + " , This step has no calibration rule "
 				End If
 
 				If log <> "" Then
-					logCal.Add("SN : " + SN + " , Step : " + StepName + log)
+					logColorCal.Add("SN : " + SN + " , Step : " + StepName + log)
+				End If
+			End If
+
+		Next
+
+		For index = 0 To nodes3.Count - 1
+			If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
+			If chkFlatFieldCalSettings.Checked = True AndAlso sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
+				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
+				For Each childNode As XmlNode In node3.ChildNodes
+					Dim lastChild As XmlNode = node3.LastChild.Clone()
+					node3.RemoveAll()
+					node3.AppendChild(lastChild)
+				Next
+
+				Dim FFID = node3.SelectSingleNode("CameraSettings/FlatFieldID").InnerText
+				Dim StepName = nodes3(index).SelectSingleNode("Name").InnerText
+				Dim SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
+				Dim log As String = ""
+				If FlatFieldCalRulesDict.ContainsKey(StepName) AndAlso FlatFieldCalRulesDict(StepName) <> FFID Then
+					FlatFieldCalNG = True
+					log += " , FlatFieldID : " + FFID + " , Correct FlatFieldID : " + FlatFieldCalRulesDict(StepName)
+				ElseIf Not FlatFieldCalRulesDict.ContainsKey(StepName) Then
+					FlatFieldCalNG = True
+					log += " , FlatFieldID : " + FFID + " , This step has no calibration rule "
+				End If
+
+				If log <> "" Then
+					logFlatFieldCal.Add("SN : " + SN + " , Step : " + StepName + log)
+				End If
+			End If
+
+		Next
+
+		For index = 0 To nodes3.Count - 1
+			If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
+			If chkImgScaleCalSettings.Checked = True AndAlso sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
+				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
+				For Each childNode As XmlNode In node3.ChildNodes
+					Dim lastChild As XmlNode = node3.LastChild.Clone()
+					node3.RemoveAll()
+					node3.AppendChild(lastChild)
+				Next
+
+				Dim ISCID = node3.SelectSingleNode("CameraSettings/FlatFieldID").InnerText
+				Dim StepName = nodes3(index).SelectSingleNode("Name").InnerText
+				Dim SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
+				Dim log As String = ""
+				If ImgScaleCalRulesDict.ContainsKey(StepName) AndAlso ImgScaleCalRulesDict(StepName) <> ISCID Then
+					ImgScaleCalNG = True
+					log += " , ImageScalingCalibration : " + ISCID + " , Correct ImageScalingCalibration : " + ImgScaleCalRulesDict(StepName)
+				ElseIf Not ImgScaleCalRulesDict.ContainsKey(StepName) Then
+					ImgScaleCalNG = True
+					log += " , ImageScalingCalibration : " + ISCID + " , This step has no calibration rule "
+				End If
+
+				If log <> "" Then
+					logImgScaleCal.Add("SN : " + SN + " , Step : " + StepName + log)
 				End If
 			End If
 
@@ -417,15 +516,44 @@ Public Class MainForm
 			CommLogUpdateText2("CALIBRATION ALL SET !!!")
 		ElseIf chkCalNone.Checked = True AndAlso CalIsNONE Then
 			CommLogUpdateText2("CALIBRATION NONE DETECTED !!!")
-		ElseIf chkCalSettings.Checked = True AndAlso Not CallNG Then
-			CommLogUpdateText2("CALIBRATION ALL OK !!!")
-		ElseIf chkCalSettings.Checked = True AndAlso CallNG Then
-			CommLogUpdateText2("CALIBRATION NG DETECTED !!!")
 		Else
 		End If
 
-		For i = 0 To logCal.Count - 1
-			CommLogUpdateText2(logCal(i))
+		For i = 0 To logCalNone.Count - 1
+			CommLogUpdateText2(logCalNone(i))
+		Next
+
+		If chkColorCalSettings.Checked = True AndAlso Not ColorCalNG Then
+			CommLogUpdateText2("COLOR CALIBRATION ALL OK !!!")
+		ElseIf chkColorCalSettings.Checked = True AndAlso ColorCalNG Then
+			CommLogUpdateText2("NG COLOR CALIBRATION DETECTED !!!")
+		Else
+		End If
+
+		For i = 0 To logColorCal.Count - 1
+			CommLogUpdateText2(logColorCal(i))
+		Next
+
+		If chkFlatFieldCalSettings.Checked = True AndAlso Not FlatFieldCalNG Then
+			CommLogUpdateText2("FLAT FIELD CALIBRATION ALL OK !!!")
+		ElseIf chkFlatFieldCalSettings.Checked = True AndAlso FlatFieldCalNG Then
+			CommLogUpdateText2("NG FLAT FIELD CALIBRATION DETECTED !!!")
+		Else
+		End If
+
+		For i = 0 To logFlatFieldCal.Count - 1
+			CommLogUpdateText2(logFlatFieldCal(i))
+		Next
+
+		If chkImgScaleCalSettings.Checked = True AndAlso Not ImgScaleCalNG Then
+			CommLogUpdateText2("IMAGE SCALING CALIBRATION ALL OK !!!")
+		ElseIf chkImgScaleCalSettings.Checked = True AndAlso ImgScaleCalNG Then
+			CommLogUpdateText2("NG IMAGE SCALING CALIBRATION DETECTED !!!")
+		Else
+		End If
+
+		For i = 0 To logImgScaleCal.Count - 1
+			CommLogUpdateText2(logImgScaleCal(i))
 		Next
 
 
@@ -441,19 +569,25 @@ Public Class MainForm
 
 	Public Sub ShowMeasSettings()
 		Dim sequenceAnaList As New List(Of String)
+		Dim demuraStepList As New List(Of String)
 		Dim node3 As XmlNode
 		Dim nodes3 As XmlNodeList
 		Dim xmlDoc3 = New XmlDocument()
 		xmlDoc3.Load(txtFile3.Text)
 		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/Items/SequenceItem")
+
 		For i = 0 To nodes3.Count - 1
 			If nodes3(i).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
 				sequenceAnaList.Add(nodes3(i).SelectSingleNode("PatternSetupName").InnerText)
+			End If
+			If nodes3(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDCustomerAnalysis") Or nodes3(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDNCustomerAnalysis") Then
+				demuraStepList.Add(nodes3(i).SelectSingleNode("PatternSetupName").InnerText)
 			End If
 		Next
 		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
 		CommLogUpdateText2("ALL SETTINGS :")
 		For index = 0 To nodes3.Count - 1
+			If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
 			If sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
 				Dim FocusDistance = nodes3(index).SelectSingleNode("LensDistance").InnerText
 				Dim FNumber = nodes3(index).SelectSingleNode("LensfStop").InnerText
@@ -517,6 +651,7 @@ Public Class MainForm
 		Dim dtCalibration As New DataTable
 		Dim SN As String = ""
 		Dim sequenceAnaList As New List(Of String)
+		Dim demuraStepList As New List(Of String)
 		Dim node3 As XmlNode
 		Dim nodes3 As XmlNodeList
 		Dim xmlDoc3 = New XmlDocument()
@@ -526,10 +661,14 @@ Public Class MainForm
 			If nodes3(i).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
 				sequenceAnaList.Add(nodes3(i).SelectSingleNode("PatternSetupName").InnerText)
 			End If
+			If nodes3(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDCustomerAnalysis") Or nodes3(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDNCustomerAnalysis") Then
+				demuraStepList.Add(nodes3(i).SelectSingleNode("PatternSetupName").InnerText)
+			End If
 		Next
 		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
 		CommLogUpdateText2("CALIBRATION SETTINGS :")
 		For index = 0 To nodes3.Count - 1
+			If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
 			If sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
 
 				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
