@@ -697,7 +697,7 @@ Public Class MainForm
 				CommLogUpdateText2("SN : " + SN + " : No user created calibrations ")
 			Else
 				For Each row As DataRow In dsCalibration.Tables("ColorCalibrations").Rows
-					CommLogUpdateText2("SN : " + SN + " , ColorCalibrationID : " & row("ColorCalibrationID") & " , Description : " & row("Description"))
+					CommLogUpdateText2("SN : " + SN + " , ColorCalID : " & row("ColorCalibrationID") & " , Description : " & row("Description"))
 				Next
 			End If
 
