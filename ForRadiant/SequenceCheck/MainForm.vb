@@ -299,9 +299,11 @@ Public Class MainForm
 		Dim node3 As XmlNode
 		Dim nodes3 As XmlNodeList
 		Dim xmlDoc3 = New XmlDocument()
-
+		If Not Directory.Exists("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules") Then
+			Directory.CreateDirectory("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules")
+		End If
 		Dim ColorCalRuleFilaName As String = Path.GetFileNameWithoutExtension(txtFile3.Text) + "_colorcal.txt"
-		Dim ColorCalRuleFilePath As String = Path.Combine(exePath, ColorCalRuleFilaName)
+		Dim ColorCalRuleFilePath As String = Path.Combine("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules", ColorCalRuleFilaName)
 
 		Dim ColorCalRulesDict As New Dictionary(Of String, String)
 
@@ -316,7 +318,7 @@ Public Class MainForm
 		End If
 
 		Dim FlatFieldCalRuleFilaName As String = Path.GetFileNameWithoutExtension(txtFile3.Text) + "_flatfieldcal.txt"
-		Dim FlatFieldCalRuleFilePath As String = Path.Combine(exePath, FlatFieldCalRuleFilaName)
+		Dim FlatFieldCalRuleFilePath As String = Path.Combine("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules", FlatFieldCalRuleFilaName)
 
 		Dim FlatFieldCalRulesDict As New Dictionary(Of String, String)
 
@@ -331,7 +333,7 @@ Public Class MainForm
 		End If
 
 		Dim ImgScaleCalRuleFilaName As String = Path.GetFileNameWithoutExtension(txtFile3.Text) + "_imgscalecal.txt"
-		Dim ImgScaleCalRuleFilePath As String = Path.Combine(exePath, ImgScaleCalRuleFilaName)
+		Dim ImgScaleCalRuleFilePath As String = Path.Combine("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules", ImgScaleCalRuleFilaName)
 
 		Dim ImgScaleCalRulesDict As New Dictionary(Of String, String)
 

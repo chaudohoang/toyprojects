@@ -28,11 +28,11 @@ Public Class CalRule
 		Dim calFile1 As String = Path.Combine("C:\Radiant Vision Systems Data\Camera Data\Calibration Files", CameraSN + "_CalibrationDB.calx")
 		Dim calFile2 As String = Path.Combine("C:\Radiant Vision Systems Data\Camera Data\Calibration Files", "0" + CameraSN + "_CalibrationDB.calx")
 		If File.Exists(calFile1) Then
-			conn = New SqlCeConnection("Data Source=" + calFile1)
+			conn = New SqlCeConnection("Data Source=" + calFile1 + ";Max Database Size=4091")
 		ElseIf File.Exists(calFile2) Then
-			conn = New SqlCeConnection("Data Source=" + calFile2)
+			conn = New SqlCeConnection("Data Source=" + calFile2 + ";Max Database Size=4091")
 		Else
-			conn = New SqlCeConnection("Data Source=C:\Radiant Vision Systems Data\Camera Data\Calibration Files\PM Calibration Demo Camera.calx")
+			conn = New SqlCeConnection("Data Source=C:\Radiant Vision Systems Data\Camera Data\Calibration Files\PM Calibration Demo Camera.calx;Max Database Size=4091")
 		End If
 
 		Return conn
@@ -216,9 +216,11 @@ Public Class CalRule
 		ShowImgScaleCalRefs()
 	End Sub
 	Private Sub ReloadColorCalRule()
-
+		If Not Directory.Exists("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules") Then
+			Directory.CreateDirectory("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules")
+		End If
 		Dim ColorCalRuleFilaName As String = Path.GetFileNameWithoutExtension(txtFile3.Text) + "_colorcal.txt"
-		Dim ColorCalRuleFilePath As String = Path.Combine(exePath, ColorCalRuleFilaName)
+		Dim ColorCalRuleFilePath As String = Path.Combine("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules", ColorCalRuleFilaName)
 
 		Dim Fields As String()
 		Fields = "Step,ColorCalibrationID".Split(",")
@@ -248,9 +250,11 @@ Public Class CalRule
 		ColorCalDataGridView2.AllowUserToResizeColumns = True
 	End Sub
 	Private Sub ReloadFlatFieldCalRule()
-
+		If Not Directory.Exists("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules") Then
+			Directory.CreateDirectory("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules")
+		End If
 		Dim FlatFieldCalRuleFilaName As String = Path.GetFileNameWithoutExtension(txtFile3.Text) + "_flatfieldcal.txt"
-		Dim FlatFieldCalRuleFilePath As String = Path.Combine(exePath, FlatFieldCalRuleFilaName)
+		Dim FlatFieldCalRuleFilePath As String = Path.Combine("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules", FlatFieldCalRuleFilaName)
 
 		Dim Fields As String()
 		Fields = "Step,CalibrationID".Split(",")
@@ -280,9 +284,11 @@ Public Class CalRule
 		FlatFieldCalDataGridView2.AllowUserToResizeColumns = True
 	End Sub
 	Private Sub ReloadImgScaleCalRule()
-
+		If Not Directory.Exists("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules") Then
+			Directory.CreateDirectory("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules")
+		End If
 		Dim ImgScaleCalRuleFilaName As String = Path.GetFileNameWithoutExtension(txtFile3.Text) + "_imgscalecal.txt"
-		Dim ImgScaleCalRuleFilePath As String = Path.Combine(exePath, ImgScaleCalRuleFilaName)
+		Dim ImgScaleCalRuleFilePath As String = Path.Combine("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules", ImgScaleCalRuleFilaName)
 
 		Dim Fields As String()
 		Fields = "Step,ImageScalingCalibrationID".Split(",")
@@ -313,8 +319,11 @@ Public Class CalRule
 	End Sub
 
 	Private Sub btnColorCalSaveCalRules_Click(sender As Object, e As EventArgs) Handles btnColorCalSaveCalRules.Click
+		If Not Directory.Exists("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules") Then
+			Directory.CreateDirectory("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules")
+		End If
 		Dim ColorCalRuleFilaName As String = Path.GetFileNameWithoutExtension(txtFile3.Text) + "_colorcal.txt"
-		Dim ColorCalRuleFilePath As String = Path.Combine(exePath, ColorCalRuleFilaName)
+		Dim ColorCalRuleFilePath As String = Path.Combine("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules", ColorCalRuleFilaName)
 		Dim rows = From row As DataGridViewRow In ColorCalDataGridView2.Rows.Cast(Of DataGridViewRow)()
 				   Where Not row.IsNewRow
 				   Select Array.ConvertAll(row.Cells.Cast(Of DataGridViewCell).ToArray, Function(c) If(c.Value IsNot Nothing, c.Value.ToString, ""))
@@ -488,8 +497,11 @@ Public Class CalRule
 	End Sub
 
 	Private Sub btnFlatFieldCalSaveCalRules_Click(sender As Object, e As EventArgs) Handles btnFlatFieldCalSaveCalRules.Click
+		If Not Directory.Exists("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules") Then
+			Directory.CreateDirectory("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules")
+		End If
 		Dim FlatFieldCalRuleFilaName As String = Path.GetFileNameWithoutExtension(txtFile3.Text) + "_flatfieldcal.txt"
-		Dim FlatFieldCalRuleFilePath As String = Path.Combine(exePath, FlatFieldCalRuleFilaName)
+		Dim FlatFieldCalRuleFilePath As String = Path.Combine("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules", FlatFieldCalRuleFilaName)
 		Dim rows = From row As DataGridViewRow In FlatFieldCalDataGridView2.Rows.Cast(Of DataGridViewRow)()
 				   Where Not row.IsNewRow
 				   Select Array.ConvertAll(row.Cells.Cast(Of DataGridViewCell).ToArray, Function(c) If(c.Value IsNot Nothing, c.Value.ToString, ""))
@@ -537,8 +549,11 @@ Public Class CalRule
 	End Sub
 
 	Private Sub btnImgScaleCalSaveCalRules_Click(sender As Object, e As EventArgs) Handles btnImgScaleCalSaveCalRules.Click
+		If Not Directory.Exists("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules") Then
+			Directory.CreateDirectory("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules")
+		End If
 		Dim ImgScaleCalRuleFilaName As String = Path.GetFileNameWithoutExtension(txtFile3.Text) + "_imgscalecal.txt"
-		Dim ImgScaleCalRuleFilePath As String = Path.Combine(exePath, ImgScaleCalRuleFilaName)
+		Dim ImgScaleCalRuleFilePath As String = Path.Combine("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules", ImgScaleCalRuleFilaName)
 		Dim rows = From row As DataGridViewRow In ImgScaleCalDataGridView2.Rows.Cast(Of DataGridViewRow)()
 				   Where Not row.IsNewRow
 				   Select Array.ConvertAll(row.Cells.Cast(Of DataGridViewCell).ToArray, Function(c) If(c.Value IsNot Nothing, c.Value.ToString, ""))
