@@ -37,11 +37,11 @@ Public Class MainForm
 		Dim calFile1 As String = Path.Combine("C:\Radiant Vision Systems Data\Camera Data\Calibration Files", CameraSN + "_CalibrationDB.calx")
 		Dim calFile2 As String = Path.Combine("C:\Radiant Vision Systems Data\Camera Data\Calibration Files", "0" + CameraSN + "_CalibrationDB.calx")
 		If File.Exists(calFile1) Then
-			conn = New SqlCeConnection("Data Source=" + calFile1)
+			conn = New SqlCeConnection("Data Source=" + calFile1 + ";Max Database Size=4091")
 		ElseIf File.Exists(calFile2) Then
-			conn = New SqlCeConnection("Data Source=" + calFile2)
+			conn = New SqlCeConnection("Data Source=" + calFile2 + ";Max Database Size=4091")
 		Else
-			conn = New SqlCeConnection("Data Source=C:\Radiant Vision Systems Data\Camera Data\Calibration Files\PM Calibration Demo Camera.calx")
+			conn = New SqlCeConnection("Data Source=C:\Radiant Vision Systems Data\Camera Data\Calibration Files\PM Calibration Demo Camera.calx;Max Database Size=4091")
 		End If
 
 		Return conn
@@ -299,9 +299,11 @@ Public Class MainForm
 		Dim node3 As XmlNode
 		Dim nodes3 As XmlNodeList
 		Dim xmlDoc3 = New XmlDocument()
-
+		If Not Directory.Exists("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules") Then
+			Directory.CreateDirectory("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules")
+		End If
 		Dim ColorCalRuleFilaName As String = Path.GetFileNameWithoutExtension(txtFile3.Text) + "_colorcal.txt"
-		Dim ColorCalRuleFilePath As String = Path.Combine(exePath, ColorCalRuleFilaName)
+		Dim ColorCalRuleFilePath As String = Path.Combine("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules", ColorCalRuleFilaName)
 
 		Dim ColorCalRulesDict As New Dictionary(Of String, String)
 
@@ -316,7 +318,7 @@ Public Class MainForm
 		End If
 
 		Dim FlatFieldCalRuleFilaName As String = Path.GetFileNameWithoutExtension(txtFile3.Text) + "_flatfieldcal.txt"
-		Dim FlatFieldCalRuleFilePath As String = Path.Combine(exePath, FlatFieldCalRuleFilaName)
+		Dim FlatFieldCalRuleFilePath As String = Path.Combine("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules", FlatFieldCalRuleFilaName)
 
 		Dim FlatFieldCalRulesDict As New Dictionary(Of String, String)
 
@@ -331,7 +333,7 @@ Public Class MainForm
 		End If
 
 		Dim ImgScaleCalRuleFilaName As String = Path.GetFileNameWithoutExtension(txtFile3.Text) + "_imgscalecal.txt"
-		Dim ImgScaleCalRuleFilePath As String = Path.Combine(exePath, ImgScaleCalRuleFilaName)
+		Dim ImgScaleCalRuleFilePath As String = Path.Combine("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules", ImgScaleCalRuleFilaName)
 
 		Dim ImgScaleCalRulesDict As New Dictionary(Of String, String)
 
@@ -666,7 +668,7 @@ Public Class MainForm
 			End If
 		Next
 		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
-		CommLogUpdateText2("CALIBRATION SETTINGS :")
+		CommLogUpdateText2("COLOR CALIBRATION SETTINGS :")
 		For index = 0 To nodes3.Count - 1
 			If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
 			If sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
@@ -683,7 +685,7 @@ Public Class MainForm
 				CommLogUpdateText2("SN : " + SN + " , Step : " + nodes3(index).SelectSingleNode("Name").InnerText + " , ColorCalID : " + CCID)
 			End If
 		Next
-		CommLogUpdateText2("CALIBRATION REFERENCES :")
+		CommLogUpdateText2("COLOR CALIBRATION REFERENCES :")
 		Try
 			conn = GetConnect(SN)
 			cmdCalibration = conn.CreateCommand
@@ -691,12 +693,141 @@ Public Class MainForm
 
 			daCalibration.SelectCommand = cmdCalibration
 			daCalibration.Fill(dsCalibration, "ColorCalibrations")
-			Dim CalRefString As String = ""
+			If dsCalibration.Tables("ColorCalibrations").Rows.Count = 0 Then
+				CommLogUpdateText2("SN : " + SN + " : No user created calibrations ")
+			Else
+				For Each row As DataRow In dsCalibration.Tables("ColorCalibrations").Rows
+					CommLogUpdateText2("SN : " + SN + " , ColorCalibrationID : " & row("ColorCalibrationID") & " , Description : " & row("Description"))
+				Next
+			End If
 
-			For Each row As DataRow In dsCalibration.Tables("ColorCalibrations").Rows
-				CommLogUpdateText2("SN : " + SN + " , ColorCalibrationID : " & row("ColorCalibrationID") & " , Description : " & row("Description"))
+		Catch ex As Exception
+			MsgBox("Error: " & ex.Source & ": " & ex.Message, MsgBoxStyle.OkOnly, "Connection Error !!")
+		End Try
 
-			Next
+
+	End Sub
+	Public Sub ShowFlatFieldCalRefs()
+		Dim conn As SqlCeConnection
+		Dim cmdCalibration As New SqlCeCommand
+		Dim daCalibration As New SqlCeDataAdapter
+		Dim dsCalibration As New DataSet
+		Dim dtCalibration As New DataTable
+		Dim SN As String = ""
+		Dim sequenceAnaList As New List(Of String)
+		Dim demuraStepList As New List(Of String)
+		Dim node3 As XmlNode
+		Dim nodes3 As XmlNodeList
+		Dim xmlDoc3 = New XmlDocument()
+		xmlDoc3.Load(txtFile3.Text)
+		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/Items/SequenceItem")
+		For i = 0 To nodes3.Count - 1
+			If nodes3(i).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
+				sequenceAnaList.Add(nodes3(i).SelectSingleNode("PatternSetupName").InnerText)
+			End If
+			If nodes3(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDCustomerAnalysis") Or nodes3(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDNCustomerAnalysis") Then
+				demuraStepList.Add(nodes3(i).SelectSingleNode("PatternSetupName").InnerText)
+			End If
+		Next
+		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
+		CommLogUpdateText2("FLAT FIELD CALIBRATION SETTINGS :")
+		For index = 0 To nodes3.Count - 1
+			If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
+			If sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
+
+				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
+				For Each childNode As XmlNode In node3.ChildNodes
+					Dim lastChild As XmlNode = node3.LastChild.Clone()
+					node3.RemoveAll()
+					node3.AppendChild(lastChild)
+				Next
+
+				Dim FFID = node3.SelectSingleNode("CameraSettings/FlatFieldID").InnerText
+				SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
+				CommLogUpdateText2("SN : " + SN + " , Step : " + nodes3(index).SelectSingleNode("Name").InnerText + " , FlatFieldID : " + FFID)
+			End If
+		Next
+		CommLogUpdateText2("FLAT FIELD CALIBRATION REFERENCES :")
+		Try
+			conn = GetConnect(SN)
+			cmdCalibration = conn.CreateCommand
+			cmdCalibration.CommandText = "SELECT CalibrationID, CalibrationDesc FROM FlatFieldCalibration"
+
+			daCalibration.SelectCommand = cmdCalibration
+			daCalibration.Fill(dsCalibration, "FlatFieldCalibration")
+
+			If dsCalibration.Tables("FlatFieldCalibration").Rows.Count = 0 Then
+				CommLogUpdateText2("SN : " + SN + " : No user created calibrations ")
+			Else
+				For Each row As DataRow In dsCalibration.Tables("FlatFieldCalibration").Rows
+					CommLogUpdateText2("SN : " + SN + " , FlatFieldID : " & row("CalibrationID") & " , Description : " & row("CalibrationDesc"))
+				Next
+			End If
+
+
+		Catch ex As Exception
+			MsgBox("Error: " & ex.Source & ": " & ex.Message, MsgBoxStyle.OkOnly, "Connection Error !!")
+		End Try
+
+
+	End Sub
+	Public Sub ShowImgScaleCalRefs()
+		Dim conn As SqlCeConnection
+		Dim cmdCalibration As New SqlCeCommand
+		Dim daCalibration As New SqlCeDataAdapter
+		Dim dsCalibration As New DataSet
+		Dim dtCalibration As New DataTable
+		Dim SN As String = ""
+		Dim sequenceAnaList As New List(Of String)
+		Dim demuraStepList As New List(Of String)
+		Dim node3 As XmlNode
+		Dim nodes3 As XmlNodeList
+		Dim xmlDoc3 = New XmlDocument()
+		xmlDoc3.Load(txtFile3.Text)
+		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/Items/SequenceItem")
+		For i = 0 To nodes3.Count - 1
+			If nodes3(i).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
+				sequenceAnaList.Add(nodes3(i).SelectSingleNode("PatternSetupName").InnerText)
+			End If
+			If nodes3(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDCustomerAnalysis") Or nodes3(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDNCustomerAnalysis") Then
+				demuraStepList.Add(nodes3(i).SelectSingleNode("PatternSetupName").InnerText)
+			End If
+		Next
+		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
+		CommLogUpdateText2("IMG SCALING CALIBRATION SETTINGS :")
+		For index = 0 To nodes3.Count - 1
+			If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
+			If sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
+
+				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
+				For Each childNode As XmlNode In node3.ChildNodes
+					Dim lastChild As XmlNode = node3.LastChild.Clone()
+					node3.RemoveAll()
+					node3.AppendChild(lastChild)
+				Next
+
+				Dim ISCID = node3.SelectSingleNode("CameraSettings/ImageScalingCalibrationID").InnerText
+				SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
+				CommLogUpdateText2("SN : " + SN + " , Step : " + nodes3(index).SelectSingleNode("Name").InnerText + " , ImageScalingCalibrationID : " + ISCID)
+			End If
+		Next
+		CommLogUpdateText2("IMG SCALING CALIBRATION REFERENCES :")
+		Try
+			conn = GetConnect(SN)
+			cmdCalibration = conn.CreateCommand
+			cmdCalibration.CommandText = "SELECT ImageScalingCalibrationID, ImageScalingCalibrationDesc FROM ImageScalingCalibration"
+
+			daCalibration.SelectCommand = cmdCalibration
+			daCalibration.Fill(dsCalibration, "ImageScalingCalibration")
+
+			If dsCalibration.Tables("ImageScalingCalibration").Rows.Count = 0 Then
+				CommLogUpdateText2("SN : " + SN + " : No user created calibrations ")
+			Else
+				For Each row As DataRow In dsCalibration.Tables("ImageScalingCalibration").Rows
+					CommLogUpdateText2("SN : " + SN + " , ImageScalingCalibrationID : " & row("ImageScalingCalibrationID") & " , Description : " & row("Description"))
+
+				Next
+			End If
 
 		Catch ex As Exception
 			MsgBox("Error: " & ex.Source & ": " & ex.Message, MsgBoxStyle.OkOnly, "Connection Error !!")
@@ -784,6 +915,8 @@ Public Class MainForm
 	Private Sub btnShowCalSettings_Click(sender As Object, e As EventArgs) Handles btnShowCalSettings.Click
 		btnShowCalSettings.Enabled = False
 		ShowColorCalSettings()
+		ShowFlatFieldCalRefs()
+		ShowImgScaleCalRefs()
 		CommLogUpdateText2(vbCrLf)
 		btnShowCalSettings.Enabled = True
 
