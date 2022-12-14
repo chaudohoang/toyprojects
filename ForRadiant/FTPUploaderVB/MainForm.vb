@@ -132,6 +132,12 @@ Namespace FTPUploaderVB
 				lblFileUploadStatus.ForeColor = Color.FromArgb(255, m_Rnd.Next(0, 255), m_Rnd.Next(0, 255), m_Rnd.Next(0, 255))
 			Loop
 
+			If Not Directory.Exists(Path.GetDirectoryName(succeedLogPath)) Then
+				Directory.CreateDirectory(Path.GetDirectoryName(succeedLogPath))
+			End If
+			If Not Directory.Exists(Path.GetDirectoryName(failLogPath)) Then
+				Directory.CreateDirectory(Path.GetDirectoryName(failLogPath))
+			End If
 
 			lblFileStatus.Invoke(Sub()
 									 lblFileStatus.Text = "Uploading " + sourceFile + " ..."
@@ -144,6 +150,19 @@ Namespace FTPUploaderVB
 					Exit Function
 				End If
 				If sourceFile = sourceIndexFile Or sourceFile = sourceHostFile Then
+					Return False
+					Exit Function
+				End If
+				If Not File.Exists(sourceFile) Then
+					lblFileUploadStatus.Invoke(Sub()
+												   lblFileUploadStatus.Text = "Failed "
+											   End Sub)
+
+					logContent = Now.ToString("HH:mm:ss.fff") + vbTab + "Upload failed : source file does not exist " + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
+					File.AppendAllText(failLogPath, logContent)
+					If chkCheckSourceFileAndDelQueue.Checked Then
+						File.Delete(InfoFile)
+					End If
 					Return False
 					Exit Function
 				End If
@@ -233,6 +252,13 @@ Namespace FTPUploaderVB
 			Do While lblFileUploadStatus.ForeColor = tempcolor
 				lblFileUploadStatus.ForeColor = Color.FromArgb(255, m_Rnd.Next(0, 255), m_Rnd.Next(0, 255), m_Rnd.Next(0, 255))
 			Loop
+
+			If Not Directory.Exists(Path.GetDirectoryName(succeedLogPath)) Then
+				Directory.CreateDirectory(Path.GetDirectoryName(succeedLogPath))
+			End If
+			If Not Directory.Exists(Path.GetDirectoryName(failLogPath)) Then
+				Directory.CreateDirectory(Path.GetDirectoryName(failLogPath))
+			End If
 
 
 			lblFileStatus.Invoke(Sub()
