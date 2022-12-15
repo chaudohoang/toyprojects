@@ -50,6 +50,7 @@ Namespace FTPUploaderVB
 			Me.cmdStartUpload = New System.Windows.Forms.LinkLabel()
 			Me.cmdStopUpload = New System.Windows.Forms.LinkLabel()
 			Me.chkCheckSourceFileAndDelQueue = New System.Windows.Forms.CheckBox()
+			Me.startMinimizedToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
 			Me.contextMenuStrip1.SuspendLayout()
 			Me.menuStrip1.SuspendLayout()
 			Me.SuspendLayout()
@@ -97,7 +98,7 @@ Namespace FTPUploaderVB
 			'
 			'settingsToolStripMenuItem
 			'
-			Me.settingsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.minimizedToTrayToolStripMenuItem})
+			Me.settingsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.startMinimizedToolStripMenuItem, Me.minimizedToTrayToolStripMenuItem})
 			Me.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem"
 			Me.settingsToolStripMenuItem.Size = New System.Drawing.Size(61, 20)
 			Me.settingsToolStripMenuItem.Text = "Settings"
@@ -233,6 +234,13 @@ Namespace FTPUploaderVB
 			Me.chkCheckSourceFileAndDelQueue.Text = "Delete queue if source files do not exist"
 			Me.chkCheckSourceFileAndDelQueue.UseVisualStyleBackColor = True
 			'
+			'startMinimizedToolStripMenuItem
+			'
+			Me.startMinimizedToolStripMenuItem.CheckOnClick = True
+			Me.startMinimizedToolStripMenuItem.Name = "startMinimizedToolStripMenuItem"
+			Me.startMinimizedToolStripMenuItem.Size = New System.Drawing.Size(226, 22)
+			Me.startMinimizedToolStripMenuItem.Text = "Start Minimized"
+			'
 			'MainForm
 			'
 			Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -289,5 +297,6 @@ Namespace FTPUploaderVB
 		Friend WithEvents cmdStartUpload As Windows.Forms.LinkLabel
 		Friend WithEvents cmdStopUpload As Windows.Forms.LinkLabel
 		Friend WithEvents chkCheckSourceFileAndDelQueue As Windows.Forms.CheckBox
+		Friend WithEvents startMinimizedToolStripMenuItem As Windows.Forms.ToolStripMenuItem
 	End Class
 End Namespace
