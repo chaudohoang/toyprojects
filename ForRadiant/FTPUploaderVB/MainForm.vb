@@ -37,7 +37,7 @@ Namespace FTPUploaderVB
 		Public Sub New()
 			apppath = Assembly.GetExecutingAssembly().Location
 			appdir = Path.GetDirectoryName(apppath)
-			settingPath = Path.Combine(appdir, "setting.txt")
+			settingPath = Path.Combine(appdir, "settingFTPUploader.txt")
 			InitializeComponent()
 		End Sub
 
