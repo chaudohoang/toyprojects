@@ -4,7 +4,7 @@ Imports System.Windows.Forms
 
 Namespace RestartTT
 	Friend Module Program
-		Private mutex As Mutex = New Mutex(True, "FTPUploaderVB")
+		Private mutex As Mutex = New Mutex(True, "RestartTTDove2p0")
 		''' <summary>
 		''' The main entry point for the application.
 		''' </summary>
