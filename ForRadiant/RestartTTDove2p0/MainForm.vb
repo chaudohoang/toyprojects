@@ -22,7 +22,10 @@ Namespace RestartTT
 		Public monitorRestartMessageTask As Tasks.Task
 		Public monitorResultMessageTaskTasksCancellationTokenSource As New CancellationTokenSource
 		Public monitorRestartMessageTaskTasksCancellationTokenSource As New CancellationTokenSource
-		Public RunCount As Integer = 0
+		Public ResultMessageCount As Integer = 0
+		Public RestartMessageCount As Integer = 0
+		Public IgnoreExistedResult As Boolean
+		Public IgnoreExistedRestart As Boolean
 		Private allowVisible As Boolean = True
 		Public today As String = Now.ToString("yyyyMMdd")
 		Public logPath As String = ""
@@ -174,6 +177,7 @@ Namespace RestartTT
 		End Sub
 
 		Private Sub StartMonitorResultMessage()
+			IgnoreExistedResult = IgnoreExistingResultMessage()
 			today = Now.ToString("yyyyMMdd")
 			logPath = "C:\Radiant Vision Systems Data\TrueTest\AppData\" + today + " Operation Log.txt"
 			File.AppendAllText("log.txt", "today = " + today + Environment.NewLine + "logPath = " + logPath + Environment.NewLine)
@@ -230,6 +234,7 @@ Namespace RestartTT
 		End Sub
 
 		Private Sub StartMonitorRestartMessage()
+			IgnoreExistedRestart = IgnoreExistingRestartMessage()
 			today = Now.ToString("yyyyMMdd")
 			logPath = "C:\Radiant Vision Systems Data\TrueTest\AppData\" + today + " Operation Log.txt"
 			File.AppendAllText("log.txt", "today = " + today + Environment.NewLine + "logPath = " + logPath + Environment.NewLine)
@@ -311,14 +316,16 @@ Namespace RestartTT
 								If bytesRead = 0 Then Exit While
 								Dim text = ASCIIEncoding.ASCII.GetString(buffer, 0, bytesRead)
 
-								If text.Contains("Sent : RESULT") Then
-									RunCount += 1
+								If text.Contains("Sent : RESULT") And IgnoreExistedResult Then
+									IgnoreExistedResult = False
+								ElseIf text.Contains("Sent : RESULT") And Not IgnoreExistedResult Then
+									ResultMessageCount += 1
 									lblRunCount.Invoke(Sub()
-														   lblRunCount.Text = RunCount.ToString
+														   lblRunCount.Text = ResultMessageCount.ToString
 													   End Sub)
 								End If
 
-								If RunCount.ToString = txtRunCount.Text Then
+								If ResultMessageCount.ToString = txtRunCount.Text Then
 									Dim waitTime As New Integer
 									If Not Int32.TryParse(txtWaitResult.Text, waitTime) Then
 										waitTime = 1
@@ -326,9 +333,9 @@ Namespace RestartTT
 									Thread.Sleep(waitTime * 1000)
 									Try
 
-										RunCount = 0
+										ResultMessageCount = 0
 										lblRunCount.Invoke(Sub()
-															   lblRunCount.Text = RunCount.ToString
+															   lblRunCount.Text = ResultMessageCount.ToString
 														   End Sub)
 										For Each process As Process In Process.GetProcessesByName("TrueTest")
 											process.Kill()
@@ -349,6 +356,76 @@ Namespace RestartTT
 				Thread.Sleep(1000)
 			End While
 		End Sub
+
+		Public Function IgnoreExistingResultMessage() As Boolean
+			Dim ignore As Boolean
+			Dim initialFileSize = New FileInfo(logPath).Length
+			Dim lastReadLength = initialFileSize - 1024
+			If lastReadLength < 0 Then lastReadLength = 0
+
+			Try
+				Dim fileSize = New FileInfo(logPath).Length
+
+				If fileSize > lastReadLength Then
+
+					Using fs = New FileStream(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
+						fs.Seek(lastReadLength, SeekOrigin.Begin)
+						Dim buffer = New Byte(1023) {}
+
+						Dim bytesRead = fs.Read(buffer, 0, buffer.Length)
+						lastReadLength += bytesRead
+						If bytesRead = 0 Then
+							ignore = False
+						End If
+						Dim text = ASCIIEncoding.ASCII.GetString(buffer, 0, bytesRead)
+
+						If text.Contains("Sent : RESULT") Then
+							ignore = True
+
+						End If
+
+					End Using
+				End If
+
+			Catch
+			End Try
+			Return ignore
+		End Function
+
+		Public Function IgnoreExistingRestartMessage() As Boolean
+			Dim ignore As Boolean
+			Dim initialFileSize = New FileInfo(logPath).Length
+			Dim lastReadLength = initialFileSize - 1024
+			If lastReadLength < 0 Then lastReadLength = 0
+
+			Try
+				Dim fileSize = New FileInfo(logPath).Length
+
+				If fileSize > lastReadLength Then
+
+					Using fs = New FileStream(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
+						fs.Seek(lastReadLength, SeekOrigin.Begin)
+						Dim buffer = New Byte(1023) {}
+
+						Dim bytesRead = fs.Read(buffer, 0, buffer.Length)
+						lastReadLength += bytesRead
+						If bytesRead = 0 Then
+							ignore = False
+						End If
+						Dim text = ASCIIEncoding.ASCII.GetString(buffer, 0, bytesRead)
+
+						If text.Contains("Sent RESTART response") Then
+							ignore = True
+
+						End If
+
+					End Using
+				End If
+
+			Catch
+			End Try
+			Return ignore
+		End Function
 
 		Public Sub MonitorTailOfFileForRestartMessage()
 			Dim initialFileSize = New FileInfo(logPath).Length
@@ -377,7 +454,9 @@ Namespace RestartTT
 								If bytesRead = 0 Then Exit While
 								Dim text = ASCIIEncoding.ASCII.GetString(buffer, 0, bytesRead)
 
-								If text.Contains("Sent RESTART response") Then
+								If text.Contains("Sent RESTART response") And IgnoreExistedRestart Then
+									IgnoreExistedRestart = False
+								ElseIf text.Contains("Sent RESTART response") And Not IgnoreExistedRestart Then
 									Dim waitTime As New Integer
 									If Not Int32.TryParse(txtWaitRestart.Text, waitTime) Then
 										waitTime = 1
@@ -461,9 +540,9 @@ Namespace RestartTT
 		End Sub
 
 		Private Sub cmdResetRunCount_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdResetRunCount.LinkClicked
-			RunCount = 0
+			ResultMessageCount = 0
 			lblRunCount.Invoke(Sub()
-								   lblRunCount.Text = RunCount.ToString
+								   lblRunCount.Text = ResultMessageCount.ToString
 							   End Sub)
 		End Sub
 
