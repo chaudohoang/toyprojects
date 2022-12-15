@@ -111,6 +111,7 @@ Namespace FTPUploaderVB
 			allowVisible = True
 			Show()
 			Activate()
+			ShowInTaskbar = True
 			WindowState = FormWindowState.Normal
 		End Sub
 		Public Function Upload(InfoFile As String) As Boolean
