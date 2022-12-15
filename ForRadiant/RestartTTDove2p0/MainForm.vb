@@ -18,9 +18,10 @@ Namespace RestartTT
 		Public apppath As String
 		Public appdir As String
 		Public settingPath As String
-		Public monitorTask As Tasks.Task
-		Public selfRestartTask As Tasks.Task
-		Public monitorTaskTasksCancellationTokenSource As New CancellationTokenSource
+		Public monitorResultMessageTask As Tasks.Task
+		Public monitorRestartMessageTask As Tasks.Task
+		Public monitorResultMessageTaskTasksCancellationTokenSource As New CancellationTokenSource
+		Public monitorRestartMessageTaskTasksCancellationTokenSource As New CancellationTokenSource
 		Public RunCount As Integer = 0
 		Private allowVisible As Boolean = True
 		Public today As String = Now.ToString("yyyyMMdd")
@@ -91,11 +92,9 @@ Namespace RestartTT
 			If startMinimizedToolStripMenuItem.Checked = True Then
 				Me.WindowState = FormWindowState.Minimized
 			End If
-			StartMonitor()
-			selfRestartTask = New Tasks.Task(New Action(Sub() CheckForSelfRestart()))
-			selfRestartTask.Start()
+
 		End Sub
-		Private Sub CheckForSelfRestart()
+		Private Sub CheckForNextDayLogResultMessage()
 			Dim startTime As DateTime = DateTime.Now
 			Dim tomorrow As DateTime
 
@@ -109,9 +108,41 @@ Namespace RestartTT
 			sw = New Stopwatch
 			sw.Start()
 			While sw.ElapsedMilliseconds <= durationInSeconds * 1000
+				If monitorResultMessageTaskTasksCancellationTokenSource.IsCancellationRequested Then
+					Exit Sub
+				End If
 				System.Threading.Thread.Sleep(100)
 			End While
-			Application.Restart()
+			StopMonitorResultMessage()
+			today = Now.ToString("yyyyMMdd")
+			logPath = "C:\Radiant Vision Systems Data\TrueTest\AppData\" + today + " Operation Log.txt"
+			StartMonitorResultMessage()
+			File.AppendAllText("log.txt", "today = " + today + "logPath = " + logPath)
+		End Sub
+
+		Private Sub CheckForNextDayLogRestartMessage()
+			Dim startTime As DateTime = DateTime.Now
+			Dim tomorrow As DateTime
+
+			tomorrow = startTime + New TimeSpan(1, 0, 0, 0, 0)
+			Dim year = tomorrow.Year
+			Dim month = tomorrow.Month
+			Dim day = tomorrow.Day
+			Dim endTime = New DateTime(year, month, day, 0, 0, 0)
+			Dim duration = endTime - startTime
+			Dim durationInSeconds = duration.TotalSeconds
+			sw = New Stopwatch
+			sw.Start()
+			While sw.ElapsedMilliseconds <= durationInSeconds * 1000
+				If monitorRestartMessageTaskTasksCancellationTokenSource.IsCancellationRequested Then
+					Exit Sub
+				End If
+				System.Threading.Thread.Sleep(100)
+			End While
+			StopMonitorRestartMessage()
+			StartMonitorRestartMessage()
+
+
 		End Sub
 
 		Private Sub aboutToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles aboutToolStripMenuItem.Click
@@ -142,21 +173,124 @@ Namespace RestartTT
 			WindowState = FormWindowState.Normal
 		End Sub
 
-		Private Sub StartMonitor()
+		Private Sub StartMonitorResultMessage()
+			today = Now.ToString("yyyyMMdd")
+			logPath = "C:\Radiant Vision Systems Data\TrueTest\AppData\" + today + " Operation Log.txt"
+			File.AppendAllText("log.txt", "today = " + today + Environment.NewLine + "logPath = " + logPath + Environment.NewLine)
+			monitorResultMessageTaskTasksCancellationTokenSource = New CancellationTokenSource
+			monitorResultMessageTask = New Tasks.Task(New Action(Sub() MonitorTailOfFileForResultMessage()), monitorResultMessageTaskTasksCancellationTokenSource.Token)
+			monitorResultMessageTask.Start()
 
-			monitorTaskTasksCancellationTokenSource = New CancellationTokenSource
-			monitorTask = New Tasks.Task(New Action(Sub() MonitorTailOfFile()), monitorTaskTasksCancellationTokenSource.Token)
-			monitorTask.Start()
+			lblResultMonitoringStatus.Invoke(Sub()
+												 lblResultMonitoringStatus.Text = "Status : Monitoring ..."
+											 End Sub)
+			cmdStartMonitorResultMessage.Invoke(Sub()
+													cmdStartMonitorResultMessage.Enabled = False
+												End Sub)
+			cmdStopMonitorResultMessage.Invoke(Sub()
+												   cmdStopMonitorResultMessage.Enabled = True
+											   End Sub)
+			Dim checkNextDayLogTask = New Tasks.Task(New Action(Sub() CheckForNextDayLogResultMessage()))
+			checkNextDayLogTask.Start()
 
 		End Sub
 
-		Public Sub MonitorTailOfFile()
+		Private Sub StopMonitorResultMessage()
+
+			If monitorResultMessageTaskTasksCancellationTokenSource IsNot Nothing Then
+				monitorResultMessageTaskTasksCancellationTokenSource.Cancel()
+			End If
+			If monitorResultMessageTask IsNot Nothing Then
+				If monitorResultMessageTask.Status <> TaskStatus.RanToCompletion Then
+					'Wait a little longer
+					Dim sw As New Stopwatch
+					sw.Start()
+					Do Until monitorResultMessageTask.Status = TaskStatus.RanToCompletion
+						If monitorResultMessageTask.Status = TaskStatus.Canceled Then Exit Do
+						If monitorResultMessageTask.Status = TaskStatus.Faulted Then Exit Do
+						If sw.ElapsedMilliseconds > 1000 Then Exit Do
+					Loop
+					sw.Stop()
+				End If
+				If monitorResultMessageTask.IsCompleted OrElse monitorResultMessageTask.IsCanceled OrElse monitorResultMessageTask.IsFaulted Then
+					monitorResultMessageTask.Dispose()
+				End If
+				monitorResultMessageTask = Nothing
+			End If
+			lblResultMonitoringStatus.Invoke(Sub()
+												 lblResultMonitoringStatus.Text = "Status : Stopped ..."
+											 End Sub)
+			cmdStartMonitorResultMessage.Invoke(Sub()
+													cmdStartMonitorResultMessage.Enabled = True
+												End Sub)
+			cmdStopMonitorResultMessage.Invoke(Sub()
+												   cmdStopMonitorResultMessage.Enabled = False
+											   End Sub)
+
+		End Sub
+
+		Private Sub StartMonitorRestartMessage()
+			today = Now.ToString("yyyyMMdd")
+			logPath = "C:\Radiant Vision Systems Data\TrueTest\AppData\" + today + " Operation Log.txt"
+			File.AppendAllText("log.txt", "today = " + today + Environment.NewLine + "logPath = " + logPath + Environment.NewLine)
+			monitorRestartMessageTaskTasksCancellationTokenSource = New CancellationTokenSource
+			monitorRestartMessageTask = New Tasks.Task(New Action(Sub() MonitorTailOfFileForRestartMessage()), monitorRestartMessageTaskTasksCancellationTokenSource.Token)
+			monitorRestartMessageTask.Start()
+			lblRestartMonitoringStatus.Invoke(Sub()
+												  lblRestartMonitoringStatus.Text = "Status : Monitoring ..."
+											  End Sub)
+			cmdStartMonitorRestartMessage.Invoke(Sub()
+													 cmdStartMonitorRestartMessage.Enabled = False
+												 End Sub)
+			cmdStopMonitorRestartMessage.Invoke(Sub()
+													cmdStopMonitorRestartMessage.Enabled = True
+												End Sub)
+			Dim checkNextDayLogTask = New Tasks.Task(New Action(Sub() CheckForNextDayLogRestartMessage()))
+			checkNextDayLogTask.Start()
+
+		End Sub
+
+		Private Sub StopMonitorRestartMessage()
+
+			If monitorRestartMessageTaskTasksCancellationTokenSource IsNot Nothing Then
+				monitorRestartMessageTaskTasksCancellationTokenSource.Cancel()
+			End If
+			If monitorRestartMessageTask IsNot Nothing Then
+				If monitorRestartMessageTask.Status <> TaskStatus.RanToCompletion Then
+					'Wait a little longer
+					Dim sw As New Stopwatch
+					sw.Start()
+					Do Until monitorRestartMessageTask.Status = TaskStatus.RanToCompletion
+						If monitorRestartMessageTask.Status = TaskStatus.Canceled Then Exit Do
+						If monitorRestartMessageTask.Status = TaskStatus.Faulted Then Exit Do
+						If sw.ElapsedMilliseconds > 1000 Then Exit Do
+					Loop
+					sw.Stop()
+				End If
+				If monitorRestartMessageTask.IsCompleted OrElse monitorRestartMessageTask.IsCanceled OrElse monitorRestartMessageTask.IsFaulted Then
+					monitorRestartMessageTask.Dispose()
+				End If
+				monitorRestartMessageTask = Nothing
+			End If
+			lblRestartMonitoringStatus.Invoke(Sub()
+												  lblRestartMonitoringStatus.Text = "Status : Stopped ..."
+											  End Sub)
+			cmdStartMonitorRestartMessage.Invoke(Sub()
+													 cmdStartMonitorRestartMessage.Enabled = True
+												 End Sub)
+			cmdStopMonitorRestartMessage.Invoke(Sub()
+													cmdStopMonitorRestartMessage.Enabled = False
+												End Sub)
+
+		End Sub
+
+		Public Sub MonitorTailOfFileForResultMessage()
 			Dim initialFileSize = New FileInfo(logPath).Length
 			Dim lastReadLength = initialFileSize - 1024
 			If lastReadLength < 0 Then lastReadLength = 0
 
 			While True
-				If monitorTaskTasksCancellationTokenSource.IsCancellationRequested Then
+				If monitorResultMessageTaskTasksCancellationTokenSource.IsCancellationRequested Then
 					Exit Sub
 				End If
 				Try
@@ -169,7 +303,7 @@ Namespace RestartTT
 							Dim buffer = New Byte(1023) {}
 
 							While True
-								If monitorTaskTasksCancellationTokenSource.IsCancellationRequested Then
+								If monitorResultMessageTaskTasksCancellationTokenSource.IsCancellationRequested Then
 									Exit Sub
 								End If
 								Dim bytesRead = fs.Read(buffer, 0, buffer.Length)
@@ -186,7 +320,7 @@ Namespace RestartTT
 
 								If RunCount.ToString = txtRunCount.Text Then
 									Dim waitTime As New Integer
-									If Not Int32.TryParse(txtWait.Text, waitTime) Then
+									If Not Int32.TryParse(txtWaitResult.Text, waitTime) Then
 										waitTime = 1
 									End If
 									Thread.Sleep(waitTime * 1000)
@@ -204,7 +338,62 @@ Namespace RestartTT
 
 									End Try
 								End If
-								File.AppendAllText("log.txt", text)
+								'File.AppendAllText("log.txt", text)
+							End While
+						End Using
+					End If
+
+				Catch
+				End Try
+
+				Thread.Sleep(1000)
+			End While
+		End Sub
+
+		Public Sub MonitorTailOfFileForRestartMessage()
+			Dim initialFileSize = New FileInfo(logPath).Length
+			Dim lastReadLength = initialFileSize - 1024
+			If lastReadLength < 0 Then lastReadLength = 0
+
+			While True
+				If monitorRestartMessageTaskTasksCancellationTokenSource.IsCancellationRequested Then
+					Exit Sub
+				End If
+				Try
+					Dim fileSize = New FileInfo(logPath).Length
+
+					If fileSize > lastReadLength Then
+
+						Using fs = New FileStream(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
+							fs.Seek(lastReadLength, SeekOrigin.Begin)
+							Dim buffer = New Byte(1023) {}
+
+							While True
+								If monitorRestartMessageTaskTasksCancellationTokenSource.IsCancellationRequested Then
+									Exit Sub
+								End If
+								Dim bytesRead = fs.Read(buffer, 0, buffer.Length)
+								lastReadLength += bytesRead
+								If bytesRead = 0 Then Exit While
+								Dim text = ASCIIEncoding.ASCII.GetString(buffer, 0, bytesRead)
+
+								If text.Contains("Sent RESTART response") Then
+									Dim waitTime As New Integer
+									If Not Int32.TryParse(txtWaitRestart.Text, waitTime) Then
+										waitTime = 1
+									End If
+									Thread.Sleep(waitTime * 1000)
+									Try
+										For Each process As Process In Process.GetProcessesByName("TrueTest")
+											process.Kill()
+											Process.Start("TrueTest")
+										Next
+									Catch ex As Exception
+
+									End Try
+								End If
+
+								'File.AppendAllText("log.txt", text)
 							End While
 						End Using
 					End If
@@ -232,7 +421,7 @@ Namespace RestartTT
 				settings.Add("minimizedtotray", "false")
 			End If
 			settings.Add("numruns", txtRunCount.Text)
-			settings.Add("waitsec", txtWait.Text)
+			settings.Add("waitsec", txtWaitResult.Text)
 			Dim settingContent As String = ""
 			Dim keys() As String = settings.Keys.ToArray
 			For Each k As String In keys
@@ -258,7 +447,7 @@ Namespace RestartTT
 						ElseIf setting = "numruns" Then
 							txtRunCount.Text = value
 						ElseIf setting = "waitsec" Then
-							txtWait.Text = value
+							txtWaitResult.Text = value
 						End If
 					Next
 				End If
@@ -278,7 +467,7 @@ Namespace RestartTT
 							   End Sub)
 		End Sub
 
-		Private Sub cmdRestartTTNow_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdRestartTTNow.LinkClicked
+		Private Sub cmdRestartTTNowResult_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdRestartTTNowResult.LinkClicked
 			Try
 				For Each process As Process In Process.GetProcessesByName("TrueTest")
 					process.Kill()
@@ -287,6 +476,34 @@ Namespace RestartTT
 			Catch ex As Exception
 
 			End Try
+		End Sub
+
+		Private Sub cmdRestartNowRestart_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdRestartNowRestart.LinkClicked
+			Try
+				For Each process As Process In Process.GetProcessesByName("TrueTest")
+					process.Kill()
+					Process.Start("TrueTest")
+				Next
+			Catch ex As Exception
+
+			End Try
+		End Sub
+
+		Private Sub cmdStartMonitorResultMessage_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdStartMonitorResultMessage.LinkClicked
+			StartMonitorResultMessage()
+		End Sub
+
+		Private Sub cmdStopMonitorResultMessage_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdStopMonitorResultMessage.LinkClicked
+			StopMonitorResultMessage()
+		End Sub
+
+		Private Sub cmdStartMonitorRestartMessage_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdStartMonitorRestartMessage.LinkClicked
+			StartMonitorRestartMessage()
+		End Sub
+
+		Private Sub cmdStopMonitorRestartMessage_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdStopMonitorRestartMessage.LinkClicked
+			StopMonitorRestartMessage()
+
 		End Sub
 	End Class
 End Namespace
