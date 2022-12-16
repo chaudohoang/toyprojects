@@ -17,6 +17,7 @@ Namespace FTPUploaderVB
 		Inherits Form
 		Public apppath As String
 		Public appdir As String
+		Public settingPath As String
 		Public IsUploading As Boolean
 		Public uploadTask As Tasks.Task
 		Public TasksCancellationTokenSource As New CancellationTokenSource
@@ -36,6 +37,7 @@ Namespace FTPUploaderVB
 		Public Sub New()
 			apppath = Assembly.GetExecutingAssembly().Location
 			appdir = Path.GetDirectoryName(apppath)
+			settingPath = Path.Combine(appdir, "settingFTPUploader.txt")
 			InitializeComponent()
 		End Sub
 
@@ -78,7 +80,11 @@ Namespace FTPUploaderVB
 		End Sub
 		Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 			SetVersionInfo()
+			LoadSettings()
 			RestartTask()
+			If startMinimizedToolStripMenuItem.Checked = True Then
+				Me.WindowState = FormWindowState.Minimized
+			End If
 		End Sub
 
 		Private Sub aboutToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles aboutToolStripMenuItem.Click
@@ -96,12 +102,16 @@ Namespace FTPUploaderVB
 		Private Sub MainForm_Resize(sender As Object, e As EventArgs) Handles MyBase.Resize
 			If minimizedToTrayToolStripMenuItem.Checked = True AndAlso WindowState = FormWindowState.Minimized Then
 				Hide()
+				ShowInTaskbar = False
+				notifyIcon1.BalloonTipText = "FTPUploader still running and minimized to tray"
+				notifyIcon1.ShowBalloonTip(100)
 			End If
 		End Sub
 		Private Sub notifyIcon1_DoubleClick(sender As Object, e As EventArgs) Handles notifyIcon1.DoubleClick
 			allowVisible = True
 			Show()
 			Activate()
+			ShowInTaskbar = True
 			WindowState = FormWindowState.Normal
 		End Sub
 		Public Function Upload(InfoFile As String) As Boolean
@@ -132,6 +142,12 @@ Namespace FTPUploaderVB
 				lblFileUploadStatus.ForeColor = Color.FromArgb(255, m_Rnd.Next(0, 255), m_Rnd.Next(0, 255), m_Rnd.Next(0, 255))
 			Loop
 
+			If Not Directory.Exists(Path.GetDirectoryName(succeedLogPath)) Then
+				Directory.CreateDirectory(Path.GetDirectoryName(succeedLogPath))
+			End If
+			If Not Directory.Exists(Path.GetDirectoryName(failLogPath)) Then
+				Directory.CreateDirectory(Path.GetDirectoryName(failLogPath))
+			End If
 
 			lblFileStatus.Invoke(Sub()
 									 lblFileStatus.Text = "Uploading " + sourceFile + " ..."
@@ -144,6 +160,19 @@ Namespace FTPUploaderVB
 					Exit Function
 				End If
 				If sourceFile = sourceIndexFile Or sourceFile = sourceHostFile Then
+					Return False
+					Exit Function
+				End If
+				If Not File.Exists(sourceFile) Then
+					lblFileUploadStatus.Invoke(Sub()
+												   lblFileUploadStatus.Text = "Failed "
+											   End Sub)
+
+					logContent = Now.ToString("HH:mm:ss.fff") + vbTab + "Upload failed : source file does not exist " + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
+					File.AppendAllText(failLogPath, logContent)
+					If chkCheckSourceFileAndDelQueue.Checked Then
+						File.Delete(InfoFile)
+					End If
 					Return False
 					Exit Function
 				End If
@@ -233,6 +262,13 @@ Namespace FTPUploaderVB
 			Do While lblFileUploadStatus.ForeColor = tempcolor
 				lblFileUploadStatus.ForeColor = Color.FromArgb(255, m_Rnd.Next(0, 255), m_Rnd.Next(0, 255), m_Rnd.Next(0, 255))
 			Loop
+
+			If Not Directory.Exists(Path.GetDirectoryName(succeedLogPath)) Then
+				Directory.CreateDirectory(Path.GetDirectoryName(succeedLogPath))
+			End If
+			If Not Directory.Exists(Path.GetDirectoryName(failLogPath)) Then
+				Directory.CreateDirectory(Path.GetDirectoryName(failLogPath))
+			End If
 
 
 			lblFileStatus.Invoke(Sub()
@@ -442,6 +478,54 @@ Namespace FTPUploaderVB
 		Private Sub cmdStopUpload_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdStopUpload.LinkClicked
 			StopTask()
 
+		End Sub
+
+		Private Sub SaveSettings()
+			Dim settings As New Dictionary(Of String, String)
+			If startMinimizedToolStripMenuItem.Checked Then
+				settings.Add("startminimized", "true")
+			Else
+				settings.Add("startminimized", "false")
+			End If
+			If minimizedToTrayToolStripMenuItem.Checked Then
+				settings.Add("minimizedtotray", "true")
+			Else
+				settings.Add("minimizedtotray", "false")
+			End If
+
+			Dim settingContent As String = ""
+			Dim keys() As String = settings.Keys.ToArray
+			For Each k As String In keys
+				settingContent += k + "=" + settings(k) + Environment.NewLine
+			Next
+			Try
+				File.WriteAllText(settingPath, settingContent)
+			Catch ex As Exception
+
+			End Try
+		End Sub
+
+		Private Sub LoadSettings()
+			Try
+				If File.Exists(settingPath) Then
+					Dim settings() As String = File.ReadAllLines(settingPath)
+					For Each line As String In settings
+						Dim setting As String = line.Split("=")(0)
+						Dim value As String = line.Split("=")(1)
+						If setting = "startminimized" Then
+							startMinimizedToolStripMenuItem.Checked = If(value = "true", True, False)
+						ElseIf setting = "minimizedtotray" Then
+							minimizedToTrayToolStripMenuItem.Checked = If(value = "true", True, False)
+						End If
+					Next
+				End If
+			Catch ex As Exception
+
+			End Try
+		End Sub
+
+		Private Sub MainForm_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
+			SaveSettings()
 		End Sub
 	End Class
 End Namespace

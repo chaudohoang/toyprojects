@@ -44,12 +44,27 @@ Namespace RestartTT
 			Me.label2 = New System.Windows.Forms.Label()
 			Me.cmdSaveSettings = New System.Windows.Forms.LinkLabel()
 			Me.lblRunCount = New System.Windows.Forms.Label()
-			Me.txtWait = New System.Windows.Forms.TextBox()
+			Me.txtWaitResult = New System.Windows.Forms.TextBox()
 			Me.Label3 = New System.Windows.Forms.Label()
 			Me.cmdResetRunCount = New System.Windows.Forms.LinkLabel()
-			Me.cmdRestartTTNow = New System.Windows.Forms.LinkLabel()
+			Me.cmdRestartTTNowResult = New System.Windows.Forms.LinkLabel()
+			Me.TabControl1 = New System.Windows.Forms.TabControl()
+			Me.TabPage1 = New System.Windows.Forms.TabPage()
+			Me.cmdStopMonitorResultMessage = New System.Windows.Forms.LinkLabel()
+			Me.cmdStartMonitorResultMessage = New System.Windows.Forms.LinkLabel()
+			Me.TabPage2 = New System.Windows.Forms.TabPage()
+			Me.cmdRestartNowRestart = New System.Windows.Forms.LinkLabel()
+			Me.txtWaitRestart = New System.Windows.Forms.TextBox()
+			Me.Label4 = New System.Windows.Forms.Label()
+			Me.cmdStopMonitorRestartMessage = New System.Windows.Forms.LinkLabel()
+			Me.cmdStartMonitorRestartMessage = New System.Windows.Forms.LinkLabel()
+			Me.lblResultMonitoringStatus = New System.Windows.Forms.Label()
+			Me.lblRestartMonitoringStatus = New System.Windows.Forms.Label()
 			Me.contextMenuStrip1.SuspendLayout()
 			Me.menuStrip1.SuspendLayout()
+			Me.TabControl1.SuspendLayout()
+			Me.TabPage1.SuspendLayout()
+			Me.TabPage2.SuspendLayout()
 			Me.SuspendLayout()
 			'
 			'notifyIcon1
@@ -76,7 +91,7 @@ Namespace RestartTT
 			Me.menuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.commandToolStripMenuItem, Me.settingsToolStripMenuItem, Me.helpToolStripMenuItem})
 			Me.menuStrip1.Location = New System.Drawing.Point(0, 0)
 			Me.menuStrip1.Name = "menuStrip1"
-			Me.menuStrip1.Size = New System.Drawing.Size(349, 24)
+			Me.menuStrip1.Size = New System.Drawing.Size(344, 24)
 			Me.menuStrip1.TabIndex = 1
 			Me.menuStrip1.Text = "menuStrip1"
 			'
@@ -129,7 +144,7 @@ Namespace RestartTT
 			'
 			'txtRunCount
 			'
-			Me.txtRunCount.Location = New System.Drawing.Point(211, 21)
+			Me.txtRunCount.Location = New System.Drawing.Point(205, 9)
 			Me.txtRunCount.Name = "txtRunCount"
 			Me.txtRunCount.Size = New System.Drawing.Size(43, 20)
 			Me.txtRunCount.TabIndex = 3
@@ -138,7 +153,7 @@ Namespace RestartTT
 			'label1
 			'
 			Me.label1.AutoSize = True
-			Me.label1.Location = New System.Drawing.Point(12, 24)
+			Me.label1.Location = New System.Drawing.Point(6, 12)
 			Me.label1.Name = "label1"
 			Me.label1.Size = New System.Drawing.Size(193, 13)
 			Me.label1.TabIndex = 4
@@ -148,7 +163,7 @@ Namespace RestartTT
 			'
 			Me.label2.AutoSize = True
 			Me.label2.ForeColor = System.Drawing.Color.Purple
-			Me.label2.Location = New System.Drawing.Point(13, 94)
+			Me.label2.Location = New System.Drawing.Point(7, 82)
 			Me.label2.Name = "label2"
 			Me.label2.Size = New System.Drawing.Size(67, 13)
 			Me.label2.TabIndex = 11
@@ -157,7 +172,7 @@ Namespace RestartTT
 			'cmdSaveSettings
 			'
 			Me.cmdSaveSettings.AutoSize = True
-			Me.cmdSaveSettings.Location = New System.Drawing.Point(12, 71)
+			Me.cmdSaveSettings.Location = New System.Drawing.Point(6, 59)
 			Me.cmdSaveSettings.Name = "cmdSaveSettings"
 			Me.cmdSaveSettings.Size = New System.Drawing.Size(68, 13)
 			Me.cmdSaveSettings.TabIndex = 13
@@ -168,24 +183,24 @@ Namespace RestartTT
 			'
 			Me.lblRunCount.AutoSize = True
 			Me.lblRunCount.ForeColor = System.Drawing.Color.Purple
-			Me.lblRunCount.Location = New System.Drawing.Point(86, 94)
+			Me.lblRunCount.Location = New System.Drawing.Point(80, 82)
 			Me.lblRunCount.Name = "lblRunCount"
 			Me.lblRunCount.Size = New System.Drawing.Size(13, 13)
 			Me.lblRunCount.TabIndex = 15
 			Me.lblRunCount.Text = "0"
 			'
-			'txtWait
+			'txtWaitResult
 			'
-			Me.txtWait.Location = New System.Drawing.Point(211, 46)
-			Me.txtWait.Name = "txtWait"
-			Me.txtWait.Size = New System.Drawing.Size(43, 20)
-			Me.txtWait.TabIndex = 17
-			Me.txtWait.Text = "3"
+			Me.txtWaitResult.Location = New System.Drawing.Point(205, 34)
+			Me.txtWaitResult.Name = "txtWaitResult"
+			Me.txtWaitResult.Size = New System.Drawing.Size(43, 20)
+			Me.txtWaitResult.TabIndex = 17
+			Me.txtWaitResult.Text = "3"
 			'
 			'Label3
 			'
 			Me.Label3.AutoSize = True
-			Me.Label3.Location = New System.Drawing.Point(12, 49)
+			Me.Label3.Location = New System.Drawing.Point(6, 37)
 			Me.Label3.Name = "Label3"
 			Me.Label3.Size = New System.Drawing.Size(130, 13)
 			Me.Label3.TabIndex = 18
@@ -195,38 +210,170 @@ Namespace RestartTT
 			'
 			Me.cmdResetRunCount.AutoSize = True
 			Me.cmdResetRunCount.LinkColor = System.Drawing.Color.Green
-			Me.cmdResetRunCount.Location = New System.Drawing.Point(86, 71)
+			Me.cmdResetRunCount.Location = New System.Drawing.Point(80, 59)
 			Me.cmdResetRunCount.Name = "cmdResetRunCount"
 			Me.cmdResetRunCount.Size = New System.Drawing.Size(89, 13)
 			Me.cmdResetRunCount.TabIndex = 19
 			Me.cmdResetRunCount.TabStop = True
 			Me.cmdResetRunCount.Text = "Reset Run Count"
 			'
-			'cmdRestartTTNow
+			'cmdRestartTTNowResult
 			'
-			Me.cmdRestartTTNow.AutoSize = True
-			Me.cmdRestartTTNow.LinkColor = System.Drawing.Color.MediumVioletRed
-			Me.cmdRestartTTNow.Location = New System.Drawing.Point(181, 71)
-			Me.cmdRestartTTNow.Name = "cmdRestartTTNow"
-			Me.cmdRestartTTNow.Size = New System.Drawing.Size(83, 13)
-			Me.cmdRestartTTNow.TabIndex = 20
-			Me.cmdRestartTTNow.TabStop = True
-			Me.cmdRestartTTNow.Text = "Restart TT Now"
+			Me.cmdRestartTTNowResult.AutoSize = True
+			Me.cmdRestartTTNowResult.LinkColor = System.Drawing.Color.MediumVioletRed
+			Me.cmdRestartTTNowResult.Location = New System.Drawing.Point(175, 59)
+			Me.cmdRestartTTNowResult.Name = "cmdRestartTTNowResult"
+			Me.cmdRestartTTNowResult.Size = New System.Drawing.Size(83, 13)
+			Me.cmdRestartTTNowResult.TabIndex = 20
+			Me.cmdRestartTTNowResult.TabStop = True
+			Me.cmdRestartTTNowResult.Text = "Restart TT Now"
+			'
+			'TabControl1
+			'
+			Me.TabControl1.Controls.Add(Me.TabPage1)
+			Me.TabControl1.Controls.Add(Me.TabPage2)
+			Me.TabControl1.Location = New System.Drawing.Point(12, 27)
+			Me.TabControl1.Name = "TabControl1"
+			Me.TabControl1.SelectedIndex = 0
+			Me.TabControl1.Size = New System.Drawing.Size(320, 178)
+			Me.TabControl1.TabIndex = 21
+			'
+			'TabPage1
+			'
+			Me.TabPage1.Controls.Add(Me.lblResultMonitoringStatus)
+			Me.TabPage1.Controls.Add(Me.cmdStopMonitorResultMessage)
+			Me.TabPage1.Controls.Add(Me.cmdStartMonitorResultMessage)
+			Me.TabPage1.Controls.Add(Me.label1)
+			Me.TabPage1.Controls.Add(Me.txtRunCount)
+			Me.TabPage1.Controls.Add(Me.cmdRestartTTNowResult)
+			Me.TabPage1.Controls.Add(Me.label2)
+			Me.TabPage1.Controls.Add(Me.cmdResetRunCount)
+			Me.TabPage1.Controls.Add(Me.cmdSaveSettings)
+			Me.TabPage1.Controls.Add(Me.txtWaitResult)
+			Me.TabPage1.Controls.Add(Me.lblRunCount)
+			Me.TabPage1.Controls.Add(Me.Label3)
+			Me.TabPage1.Location = New System.Drawing.Point(4, 22)
+			Me.TabPage1.Name = "TabPage1"
+			Me.TabPage1.Padding = New System.Windows.Forms.Padding(3)
+			Me.TabPage1.Size = New System.Drawing.Size(312, 152)
+			Me.TabPage1.TabIndex = 0
+			Me.TabPage1.Text = "Monitor Result Message"
+			Me.TabPage1.UseVisualStyleBackColor = True
+			'
+			'cmdStopMonitorResultMessage
+			'
+			Me.cmdStopMonitorResultMessage.AutoSize = True
+			Me.cmdStopMonitorResultMessage.LinkColor = System.Drawing.Color.DarkCyan
+			Me.cmdStopMonitorResultMessage.Location = New System.Drawing.Point(94, 107)
+			Me.cmdStopMonitorResultMessage.Name = "cmdStopMonitorResultMessage"
+			Me.cmdStopMonitorResultMessage.Size = New System.Drawing.Size(81, 13)
+			Me.cmdStopMonitorResultMessage.TabIndex = 22
+			Me.cmdStopMonitorResultMessage.TabStop = True
+			Me.cmdStopMonitorResultMessage.Text = "Stop Monitoring"
+			'
+			'cmdStartMonitorResultMessage
+			'
+			Me.cmdStartMonitorResultMessage.AutoSize = True
+			Me.cmdStartMonitorResultMessage.LinkColor = System.Drawing.Color.Chocolate
+			Me.cmdStartMonitorResultMessage.Location = New System.Drawing.Point(7, 107)
+			Me.cmdStartMonitorResultMessage.Name = "cmdStartMonitorResultMessage"
+			Me.cmdStartMonitorResultMessage.Size = New System.Drawing.Size(81, 13)
+			Me.cmdStartMonitorResultMessage.TabIndex = 21
+			Me.cmdStartMonitorResultMessage.TabStop = True
+			Me.cmdStartMonitorResultMessage.Text = "Start Monitoring"
+			'
+			'TabPage2
+			'
+			Me.TabPage2.Controls.Add(Me.lblRestartMonitoringStatus)
+			Me.TabPage2.Controls.Add(Me.cmdRestartNowRestart)
+			Me.TabPage2.Controls.Add(Me.txtWaitRestart)
+			Me.TabPage2.Controls.Add(Me.Label4)
+			Me.TabPage2.Controls.Add(Me.cmdStopMonitorRestartMessage)
+			Me.TabPage2.Controls.Add(Me.cmdStartMonitorRestartMessage)
+			Me.TabPage2.Location = New System.Drawing.Point(4, 22)
+			Me.TabPage2.Name = "TabPage2"
+			Me.TabPage2.Padding = New System.Windows.Forms.Padding(3)
+			Me.TabPage2.Size = New System.Drawing.Size(312, 152)
+			Me.TabPage2.TabIndex = 1
+			Me.TabPage2.Text = "Monitor Restart Message"
+			Me.TabPage2.UseVisualStyleBackColor = True
+			'
+			'cmdRestartNowRestart
+			'
+			Me.cmdRestartNowRestart.AutoSize = True
+			Me.cmdRestartNowRestart.LinkColor = System.Drawing.Color.MediumVioletRed
+			Me.cmdRestartNowRestart.Location = New System.Drawing.Point(176, 34)
+			Me.cmdRestartNowRestart.Name = "cmdRestartNowRestart"
+			Me.cmdRestartNowRestart.Size = New System.Drawing.Size(83, 13)
+			Me.cmdRestartNowRestart.TabIndex = 28
+			Me.cmdRestartNowRestart.TabStop = True
+			Me.cmdRestartNowRestart.Text = "Restart TT Now"
+			'
+			'txtWaitRestart
+			'
+			Me.txtWaitRestart.Location = New System.Drawing.Point(206, 9)
+			Me.txtWaitRestart.Name = "txtWaitRestart"
+			Me.txtWaitRestart.Size = New System.Drawing.Size(43, 20)
+			Me.txtWaitRestart.TabIndex = 26
+			Me.txtWaitRestart.Text = "3"
+			'
+			'Label4
+			'
+			Me.Label4.AutoSize = True
+			Me.Label4.Location = New System.Drawing.Point(7, 12)
+			Me.Label4.Name = "Label4"
+			Me.Label4.Size = New System.Drawing.Size(130, 13)
+			Me.Label4.TabIndex = 27
+			Me.Label4.Text = "Wait before Restart TT (s)"
+			'
+			'cmdStopMonitorRestartMessage
+			'
+			Me.cmdStopMonitorRestartMessage.AutoSize = True
+			Me.cmdStopMonitorRestartMessage.LinkColor = System.Drawing.Color.DarkCyan
+			Me.cmdStopMonitorRestartMessage.Location = New System.Drawing.Point(94, 107)
+			Me.cmdStopMonitorRestartMessage.Name = "cmdStopMonitorRestartMessage"
+			Me.cmdStopMonitorRestartMessage.Size = New System.Drawing.Size(81, 13)
+			Me.cmdStopMonitorRestartMessage.TabIndex = 24
+			Me.cmdStopMonitorRestartMessage.TabStop = True
+			Me.cmdStopMonitorRestartMessage.Text = "Stop Monitoring"
+			'
+			'cmdStartMonitorRestartMessage
+			'
+			Me.cmdStartMonitorRestartMessage.AutoSize = True
+			Me.cmdStartMonitorRestartMessage.LinkColor = System.Drawing.Color.Chocolate
+			Me.cmdStartMonitorRestartMessage.Location = New System.Drawing.Point(7, 107)
+			Me.cmdStartMonitorRestartMessage.Name = "cmdStartMonitorRestartMessage"
+			Me.cmdStartMonitorRestartMessage.Size = New System.Drawing.Size(81, 13)
+			Me.cmdStartMonitorRestartMessage.TabIndex = 23
+			Me.cmdStartMonitorRestartMessage.TabStop = True
+			Me.cmdStartMonitorRestartMessage.Text = "Start Monitoring"
+			'
+			'lblResultMonitoringStatus
+			'
+			Me.lblResultMonitoringStatus.AutoSize = True
+			Me.lblResultMonitoringStatus.ForeColor = System.Drawing.Color.Blue
+			Me.lblResultMonitoringStatus.Location = New System.Drawing.Point(7, 128)
+			Me.lblResultMonitoringStatus.Name = "lblResultMonitoringStatus"
+			Me.lblResultMonitoringStatus.Size = New System.Drawing.Size(46, 13)
+			Me.lblResultMonitoringStatus.TabIndex = 23
+			Me.lblResultMonitoringStatus.Text = "Status : "
+			'
+			'lblRestartMonitoringStatus
+			'
+			Me.lblRestartMonitoringStatus.AutoSize = True
+			Me.lblRestartMonitoringStatus.ForeColor = System.Drawing.Color.Blue
+			Me.lblRestartMonitoringStatus.Location = New System.Drawing.Point(7, 128)
+			Me.lblRestartMonitoringStatus.Name = "lblRestartMonitoringStatus"
+			Me.lblRestartMonitoringStatus.Size = New System.Drawing.Size(46, 13)
+			Me.lblRestartMonitoringStatus.TabIndex = 29
+			Me.lblRestartMonitoringStatus.Text = "Status : "
 			'
 			'MainForm
 			'
 			Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
 			Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-			Me.ClientSize = New System.Drawing.Size(349, 118)
-			Me.Controls.Add(Me.cmdRestartTTNow)
-			Me.Controls.Add(Me.cmdResetRunCount)
-			Me.Controls.Add(Me.txtWait)
-			Me.Controls.Add(Me.Label3)
-			Me.Controls.Add(Me.lblRunCount)
-			Me.Controls.Add(Me.cmdSaveSettings)
-			Me.Controls.Add(Me.label2)
-			Me.Controls.Add(Me.txtRunCount)
-			Me.Controls.Add(Me.label1)
+			Me.ClientSize = New System.Drawing.Size(344, 217)
+			Me.Controls.Add(Me.TabControl1)
 			Me.Controls.Add(Me.menuStrip1)
 			Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
 			Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
@@ -238,6 +385,11 @@ Namespace RestartTT
 			Me.contextMenuStrip1.ResumeLayout(False)
 			Me.menuStrip1.ResumeLayout(False)
 			Me.menuStrip1.PerformLayout()
+			Me.TabControl1.ResumeLayout(False)
+			Me.TabPage1.ResumeLayout(False)
+			Me.TabPage1.PerformLayout()
+			Me.TabPage2.ResumeLayout(False)
+			Me.TabPage2.PerformLayout()
 			Me.ResumeLayout(False)
 			Me.PerformLayout()
 
@@ -260,9 +412,21 @@ Namespace RestartTT
 		Friend WithEvents cmdSaveSettings As Windows.Forms.LinkLabel
 		Private WithEvents lblRunCount As Windows.Forms.Label
 		Friend WithEvents startMinimizedToolStripMenuItem As Windows.Forms.ToolStripMenuItem
-		Private WithEvents txtWait As Windows.Forms.TextBox
+		Private WithEvents txtWaitResult As Windows.Forms.TextBox
 		Private WithEvents Label3 As Windows.Forms.Label
 		Friend WithEvents cmdResetRunCount As Windows.Forms.LinkLabel
-		Friend WithEvents cmdRestartTTNow As Windows.Forms.LinkLabel
+		Friend WithEvents cmdRestartTTNowResult As Windows.Forms.LinkLabel
+		Friend WithEvents TabControl1 As Windows.Forms.TabControl
+		Friend WithEvents TabPage1 As Windows.Forms.TabPage
+		Friend WithEvents cmdStopMonitorResultMessage As Windows.Forms.LinkLabel
+		Friend WithEvents cmdStartMonitorResultMessage As Windows.Forms.LinkLabel
+		Friend WithEvents TabPage2 As Windows.Forms.TabPage
+		Friend WithEvents cmdStopMonitorRestartMessage As Windows.Forms.LinkLabel
+		Friend WithEvents cmdStartMonitorRestartMessage As Windows.Forms.LinkLabel
+		Friend WithEvents cmdRestartNowRestart As Windows.Forms.LinkLabel
+		Private WithEvents txtWaitRestart As Windows.Forms.TextBox
+		Private WithEvents Label4 As Windows.Forms.Label
+		Private WithEvents lblResultMonitoringStatus As Windows.Forms.Label
+		Private WithEvents lblRestartMonitoringStatus As Windows.Forms.Label
 	End Class
 End Namespace
