@@ -35,6 +35,7 @@ Namespace FTPUploaderVB
 			Me.commandToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
 			Me.exitToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
 			Me.settingsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+			Me.startMinimizedToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
 			Me.minimizedToTrayToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
 			Me.helpToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
 			Me.aboutToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -49,8 +50,8 @@ Namespace FTPUploaderVB
 			Me.lblFileUploadStatus = New System.Windows.Forms.Label()
 			Me.cmdStartUpload = New System.Windows.Forms.LinkLabel()
 			Me.cmdStopUpload = New System.Windows.Forms.LinkLabel()
-			Me.chkCheckSourceFileAndDelQueue = New System.Windows.Forms.CheckBox()
-			Me.startMinimizedToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+			Me.txtMaximumFailRetry = New System.Windows.Forms.TextBox()
+			Me.Label4 = New System.Windows.Forms.Label()
 			Me.contextMenuStrip1.SuspendLayout()
 			Me.menuStrip1.SuspendLayout()
 			Me.SuspendLayout()
@@ -102,6 +103,13 @@ Namespace FTPUploaderVB
 			Me.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem"
 			Me.settingsToolStripMenuItem.Size = New System.Drawing.Size(61, 20)
 			Me.settingsToolStripMenuItem.Text = "Settings"
+			'
+			'startMinimizedToolStripMenuItem
+			'
+			Me.startMinimizedToolStripMenuItem.CheckOnClick = True
+			Me.startMinimizedToolStripMenuItem.Name = "startMinimizedToolStripMenuItem"
+			Me.startMinimizedToolStripMenuItem.Size = New System.Drawing.Size(226, 22)
+			Me.startMinimizedToolStripMenuItem.Text = "Start Minimized"
 			'
 			'minimizedToTrayToolStripMenuItem
 			'
@@ -161,7 +169,7 @@ Namespace FTPUploaderVB
 			'
 			Me.lblStatus.AutoSize = True
 			Me.lblStatus.ForeColor = System.Drawing.Color.Blue
-			Me.lblStatus.Location = New System.Drawing.Point(12, 189)
+			Me.lblStatus.Location = New System.Drawing.Point(12, 191)
 			Me.lblStatus.Name = "lblStatus"
 			Me.lblStatus.Size = New System.Drawing.Size(0, 13)
 			Me.lblStatus.TabIndex = 6
@@ -187,7 +195,7 @@ Namespace FTPUploaderVB
 			'
 			Me.lblFileStatus.AutoSize = True
 			Me.lblFileStatus.ForeColor = System.Drawing.Color.Purple
-			Me.lblFileStatus.Location = New System.Drawing.Point(12, 151)
+			Me.lblFileStatus.Location = New System.Drawing.Point(12, 153)
 			Me.lblFileStatus.Name = "lblFileStatus"
 			Me.lblFileStatus.Size = New System.Drawing.Size(0, 13)
 			Me.lblFileStatus.TabIndex = 11
@@ -196,7 +204,7 @@ Namespace FTPUploaderVB
 			'
 			Me.lblFileUploadStatus.AutoSize = True
 			Me.lblFileUploadStatus.ForeColor = System.Drawing.Color.Purple
-			Me.lblFileUploadStatus.Location = New System.Drawing.Point(12, 171)
+			Me.lblFileUploadStatus.Location = New System.Drawing.Point(12, 173)
 			Me.lblFileUploadStatus.Name = "lblFileUploadStatus"
 			Me.lblFileUploadStatus.Size = New System.Drawing.Size(0, 13)
 			Me.lblFileUploadStatus.TabIndex = 12
@@ -204,7 +212,7 @@ Namespace FTPUploaderVB
 			'cmdStartUpload
 			'
 			Me.cmdStartUpload.AutoSize = True
-			Me.cmdStartUpload.Location = New System.Drawing.Point(12, 128)
+			Me.cmdStartUpload.Location = New System.Drawing.Point(12, 130)
 			Me.cmdStartUpload.Name = "cmdStartUpload"
 			Me.cmdStartUpload.Size = New System.Drawing.Size(66, 13)
 			Me.cmdStartUpload.TabIndex = 13
@@ -215,38 +223,37 @@ Namespace FTPUploaderVB
 			'
 			Me.cmdStopUpload.AutoSize = True
 			Me.cmdStopUpload.LinkColor = System.Drawing.Color.Red
-			Me.cmdStopUpload.Location = New System.Drawing.Point(84, 128)
+			Me.cmdStopUpload.Location = New System.Drawing.Point(84, 130)
 			Me.cmdStopUpload.Name = "cmdStopUpload"
 			Me.cmdStopUpload.Size = New System.Drawing.Size(66, 13)
 			Me.cmdStopUpload.TabIndex = 14
 			Me.cmdStopUpload.TabStop = True
 			Me.cmdStopUpload.Text = "Stop Upload"
 			'
-			'chkCheckSourceFileAndDelQueue
+			'txtMaximumFailRetry
 			'
-			Me.chkCheckSourceFileAndDelQueue.AutoSize = True
-			Me.chkCheckSourceFileAndDelQueue.Checked = True
-			Me.chkCheckSourceFileAndDelQueue.CheckState = System.Windows.Forms.CheckState.Checked
-			Me.chkCheckSourceFileAndDelQueue.Location = New System.Drawing.Point(15, 102)
-			Me.chkCheckSourceFileAndDelQueue.Name = "chkCheckSourceFileAndDelQueue"
-			Me.chkCheckSourceFileAndDelQueue.Size = New System.Drawing.Size(211, 17)
-			Me.chkCheckSourceFileAndDelQueue.TabIndex = 15
-			Me.chkCheckSourceFileAndDelQueue.Text = "Delete queue if source files do not exist"
-			Me.chkCheckSourceFileAndDelQueue.UseVisualStyleBackColor = True
+			Me.txtMaximumFailRetry.Location = New System.Drawing.Point(170, 102)
+			Me.txtMaximumFailRetry.Name = "txtMaximumFailRetry"
+			Me.txtMaximumFailRetry.Size = New System.Drawing.Size(365, 20)
+			Me.txtMaximumFailRetry.TabIndex = 16
+			Me.txtMaximumFailRetry.Text = "3"
 			'
-			'startMinimizedToolStripMenuItem
+			'Label4
 			'
-			Me.startMinimizedToolStripMenuItem.CheckOnClick = True
-			Me.startMinimizedToolStripMenuItem.Name = "startMinimizedToolStripMenuItem"
-			Me.startMinimizedToolStripMenuItem.Size = New System.Drawing.Size(226, 22)
-			Me.startMinimizedToolStripMenuItem.Text = "Start Minimized"
+			Me.Label4.AutoSize = True
+			Me.Label4.Location = New System.Drawing.Point(12, 105)
+			Me.Label4.Name = "Label4"
+			Me.Label4.Size = New System.Drawing.Size(98, 13)
+			Me.Label4.TabIndex = 17
+			Me.Label4.Text = "Maximum Fail Retry"
 			'
 			'MainForm
 			'
 			Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
 			Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-			Me.ClientSize = New System.Drawing.Size(547, 215)
-			Me.Controls.Add(Me.chkCheckSourceFileAndDelQueue)
+			Me.ClientSize = New System.Drawing.Size(547, 216)
+			Me.Controls.Add(Me.txtMaximumFailRetry)
+			Me.Controls.Add(Me.Label4)
 			Me.Controls.Add(Me.cmdStopUpload)
 			Me.Controls.Add(Me.cmdStartUpload)
 			Me.Controls.Add(Me.lblFileUploadStatus)
@@ -296,7 +303,8 @@ Namespace FTPUploaderVB
 		Private WithEvents lblFileUploadStatus As Windows.Forms.Label
 		Friend WithEvents cmdStartUpload As Windows.Forms.LinkLabel
 		Friend WithEvents cmdStopUpload As Windows.Forms.LinkLabel
-		Friend WithEvents chkCheckSourceFileAndDelQueue As Windows.Forms.CheckBox
 		Friend WithEvents startMinimizedToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+		Private WithEvents txtMaximumFailRetry As Windows.Forms.TextBox
+		Private WithEvents Label4 As Windows.Forms.Label
 	End Class
 End Namespace

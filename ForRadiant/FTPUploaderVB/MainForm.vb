@@ -114,10 +114,9 @@ Namespace FTPUploaderVB
 			ShowInTaskbar = True
 			WindowState = FormWindowState.Normal
 		End Sub
-		Public Function Upload(InfoFile As String) As Boolean
+		Public Sub Upload(InfoFile As String)
 			If Not File.Exists(InfoFile) Then
-				Return False
-				Exit Function
+				Exit Sub
 			End If
 
 			Dim uploaded = False
@@ -134,6 +133,10 @@ Namespace FTPUploaderVB
 			Dim destFile = lines(8)
 			Dim sourceIndexFile = lines(10)
 			Dim sourceHostFile = lines(13)
+			Dim PID = Path.GetFileNameWithoutExtension(sourceIndexFile)
+
+			Dim failCountPath = txtUploadListPath.Text + "\Fail Count\" + Path.GetFileName(InfoFile)
+			Dim summaryLogPath = txtUploadListPath.Text + "\Log\" + Now.ToString("yyyyMMdd") + "_summary.csv"
 
 			Static m_Rnd As New Random
 			Dim tempcolor As Color
@@ -156,26 +159,12 @@ Namespace FTPUploaderVB
 
 			Try
 				If TasksCancellationTokenSource.IsCancellationRequested Then
-					Return False
-					Exit Function
+					Exit Sub
 				End If
 				If sourceFile = sourceIndexFile Or sourceFile = sourceHostFile Then
-					Return False
-					Exit Function
+					Exit Sub
 				End If
-				If Not File.Exists(sourceFile) Then
-					lblFileUploadStatus.Invoke(Sub()
-												   lblFileUploadStatus.Text = "Failed "
-											   End Sub)
 
-					logContent = Now.ToString("HH:mm:ss.fff") + vbTab + "Upload failed : source file does not exist " + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
-					File.AppendAllText(failLogPath, logContent)
-					If chkCheckSourceFileAndDelQueue.Checked Then
-						File.Delete(InfoFile)
-					End If
-					Return False
-					Exit Function
-				End If
 				' Setup session options
 				Dim sessionOptions As New SessionOptions
 				With sessionOptions
@@ -217,12 +206,12 @@ Namespace FTPUploaderVB
 				logContent = Now.ToString("HH:mm:ss.fff") + vbTab + "Upload succeeded " + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
 				File.AppendAllText(succeedLogPath, logContent)
 				If TasksCancellationTokenSource.IsCancellationRequested Then
-					Return False
-					Exit Function
+					Exit Sub
 				End If
 				File.AppendAllText(sourceIndexFile, destFile + System.Environment.NewLine)
 				File.AppendAllText(sourceHostFile, destFile + System.Environment.NewLine)
 				CreateIndexAndHostQueue(InfoFile)
+
 			Catch e As Exception
 				lblFileUploadStatus.Invoke(Sub()
 											   lblFileUploadStatus.Text = "Failed "
@@ -230,17 +219,43 @@ Namespace FTPUploaderVB
 
 				logContent = Now.ToString("HH:mm:ss.fff") + vbTab + "Upload failed with exception : " + e.Message + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
 				File.AppendAllText(failLogPath, logContent)
+				If Not Directory.Exists(Path.GetDirectoryName(failCountPath)) Then
+					Directory.CreateDirectory(Path.GetDirectoryName(failCountPath))
+				End If
+				Dim failCount As Integer = 0
+				Dim failRetry As Integer = 0
+				If Not File.Exists(failCountPath) Then
+					failCount = 1
+					File.WriteAllText(failCountPath, "1")
+				Else
+					Dim failLines = File.ReadAllLines(failCountPath)
+					failCount = CInt(failLines(0))
+					failCount += 1
+					File.WriteAllText(failCountPath, failCount.ToString)
+
+				End If
+
+				If Not Int32.TryParse(txtMaximumFailRetry.Text, failRetry) Then
+					failRetry = 0
+				End If
+				If failCount >= failRetry Then
+					File.Delete(InfoFile)
+					File.Delete(failCountPath)
+					UpdateSummaryLog(summaryLogPath, PID, destFile, e.Message)
+				End If
+
 			End Try
 			If uploaded Then
 				File.Delete(InfoFile)
+				If File.Exists(failCountPath) Then
+					File.Delete(failCountPath)
+				End If
 			End If
-			Return uploaded
-		End Function
+		End Sub
 
-		Private Function UploadIndexAndHost(InfoFile As String) As Boolean
+		Private Sub UploadIndexAndHost(InfoFile As String)
 			If Not File.Exists(InfoFile) Then
-				Return False
-				Exit Function
+				Exit Sub
 			End If
 
 			Dim uploaded = False
@@ -278,8 +293,7 @@ Namespace FTPUploaderVB
 
 			Try
 				If TasksCancellationTokenSource.IsCancellationRequested Then
-					Return False
-					Exit Function
+					Exit Sub
 				End If
 				' Setup session options
 				Dim sessionOptions As New SessionOptions
@@ -331,24 +345,21 @@ Namespace FTPUploaderVB
 				logContent = Now.ToString("HH:mm:ss.fff") + vbTab + "Upload failed with exception : " + e.Message + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
 				File.AppendAllText(failLogPath, logContent)
 			End Try
-			If uploaded Then
-				File.Delete(InfoFile)
-			End If
-			Return uploaded
-		End Function
 
-		Private Function CreateIndexAndHostQueue(InfoFile As String) As Boolean
+			File.Delete(InfoFile)
+
+		End Sub
+
+		Private Sub CreateIndexAndHostQueue(InfoFile As String)
 			If Not File.Exists(InfoFile) Then
-				Return False
-				Exit Function
+				Exit Sub
 			End If
 			Dim lines = File.ReadAllLines(InfoFile)
 
 			Dim OutputIndexInfoFile = lines(9)
 			Dim OutputHostInfoFile = lines(12)
 			If TasksCancellationTokenSource.IsCancellationRequested Then
-				Return False
-				Exit Function
+				Exit Sub
 			End If
 			If Not File.Exists(OutputIndexInfoFile) AndAlso OutputIndexInfoFile <> InfoFile Then
 				lines(7) = lines(10)
@@ -362,7 +373,59 @@ Namespace FTPUploaderVB
 				File.WriteAllLines(OutputHostInfoFile, lines)
 			End If
 			UploadIndexAndHost(OutputHostInfoFile)
-		End Function
+		End Sub
+
+		Private Sub UpdateSummaryLog(summaryLogFile As String, PID As String, destFile As String, failMessage As String)
+			If Not File.Exists(summaryLogFile) Then
+				Exit Sub
+			End If
+			Dim failedFileName As String = ""
+			Dim failedFileReason As String = ""
+			failMessage = failMessage.Remove(17)
+
+			If Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("otp") Then
+				failedFileName = "OTP"
+				failedFileReason = "OTP_X"
+			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("gamma") Then
+				failedFileName = "Gamma"
+				failedFileReason = "Gamma_X"
+			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("1g1o") Then
+				failedFileName = "Hex"
+				failedFileReason = "Hex_X"
+			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("2nd") Then
+				failedFileName = "Hex_1"
+				failedFileReason = "Hex_1_X"
+			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("3rd") Then
+				failedFileName = "Hex_2"
+				failedFileReason = "Hex_2_X"
+			Else
+				failedFileName = Path.GetFileNameWithoutExtension(destFile).Replace("step2_03_", "").Replace("_imgY_Crop", "").ToUpper
+				failedFileReason = failedFileName + "_X"
+			End If
+			Dim lines = File.ReadAllLines(summaryLogFile)
+			Dim columnHeader = lines(0).Split(",")
+			Dim failedFileIndex As Integer = 0
+			Dim failedReasonIndex As Integer = 0
+			For index = 0 To columnHeader.Count - 1
+				If columnHeader(index) = failedFileName Then
+					failedFileIndex = index
+				End If
+				If columnHeader(index) = failedFileReason Then
+					failedReasonIndex = index
+				End If
+			Next
+			For i = 1 To lines.Count - 1
+				Dim newlineList = lines(i).Split(",")
+				If newlineList.Contains(PID) Then
+					newlineList(failedFileIndex) = "X"
+					newlineList(failedReasonIndex) = failMessage
+				End If
+				Dim newLine As String = String.Join(",", newlineList)
+				lines(i) = newLine
+			Next
+			File.WriteAllLines(summaryLogFile, lines)
+
+		End Sub
 
 		Private Sub UploadAll()
 
@@ -442,6 +505,7 @@ Namespace FTPUploaderVB
 			txtInterval.Enabled = False
 			txtMaximumUpload.Enabled = False
 			txtUploadListPath.Enabled = False
+			txtMaximumFailRetry.Enabled = False
 		End Sub
 		Private Sub StopTask()
 			If TasksCancellationTokenSource IsNot Nothing Then
@@ -469,6 +533,7 @@ Namespace FTPUploaderVB
 			txtInterval.Enabled = True
 			txtMaximumUpload.Enabled = True
 			txtUploadListPath.Enabled = True
+			txtMaximumFailRetry.Enabled = True
 		End Sub
 
 		Private Sub cmdStartUpload_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdStartUpload.LinkClicked
