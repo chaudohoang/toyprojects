@@ -32,6 +32,7 @@ namespace EZAE
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
 			this.tabControl1 = new System.Windows.Forms.TabControl();
 			this.tabControl = new System.Windows.Forms.TabPage();
+			this.cmdEmu2p1SequenceConvert = new System.Windows.Forms.LinkLabel();
 			this.cmdMakeProcessFile2 = new System.Windows.Forms.LinkLabel();
 			this.cmdShareX = new System.Windows.Forms.LinkLabel();
 			this.cmdRestartTTDove2p0 = new System.Windows.Forms.LinkLabel();
@@ -107,7 +108,6 @@ namespace EZAE
 			this.cmdUseButterfly = new System.Windows.Forms.LinkLabel();
 			this.lblSequenceFileName = new System.Windows.Forms.Label();
 			this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-			this.linkLabel1 = new System.Windows.Forms.LinkLabel();
 			this.tabControl1.SuspendLayout();
 			this.tabControl.SuspendLayout();
 			this.tabSetupPC.SuspendLayout();
@@ -128,7 +128,7 @@ namespace EZAE
 			// 
 			// tabControl
 			// 
-			this.tabControl.Controls.Add(this.linkLabel1);
+			this.tabControl.Controls.Add(this.cmdEmu2p1SequenceConvert);
 			this.tabControl.Controls.Add(this.cmdMakeProcessFile2);
 			this.tabControl.Controls.Add(this.cmdShareX);
 			this.tabControl.Controls.Add(this.cmdRestartTTDove2p0);
@@ -161,6 +161,17 @@ namespace EZAE
 			this.tabControl.Text = "Control";
 			this.tabControl.UseVisualStyleBackColor = true;
 			this.tabControl.Enter += new System.EventHandler(this.tabControl_Enter);
+			// 
+			// cmdEmu2p1SequenceConvert
+			// 
+			this.cmdEmu2p1SequenceConvert.AutoSize = true;
+			this.cmdEmu2p1SequenceConvert.Location = new System.Drawing.Point(259, 89);
+			this.cmdEmu2p1SequenceConvert.Name = "cmdEmu2p1SequenceConvert";
+			this.cmdEmu2p1SequenceConvert.Size = new System.Drawing.Size(132, 13);
+			this.cmdEmu2p1SequenceConvert.TabIndex = 29;
+			this.cmdEmu2p1SequenceConvert.TabStop = true;
+			this.cmdEmu2p1SequenceConvert.Text = "Emu2p1SequenceConvert";
+			this.cmdEmu2p1SequenceConvert.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdEmu2p1SequenceConvert_LinkClicked);
 			// 
 			// cmdMakeProcessFile2
 			// 
@@ -1018,16 +1029,6 @@ namespace EZAE
 			this.lblSequenceFileName.Size = new System.Drawing.Size(0, 13);
 			this.lblSequenceFileName.TabIndex = 27;
 			// 
-			// linkLabel1
-			// 
-			this.linkLabel1.AutoSize = true;
-			this.linkLabel1.Location = new System.Drawing.Point(259, 89);
-			this.linkLabel1.Name = "linkLabel1";
-			this.linkLabel1.Size = new System.Drawing.Size(94, 13);
-			this.linkLabel1.TabIndex = 29;
-			this.linkLabel1.TabStop = true;
-			this.linkLabel1.Text = "MakeProcessFile2";
-			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1134,7 +1135,7 @@ namespace EZAE
 		private System.Windows.Forms.LinkLabel cmdRestartTTDove2p0;
 		private System.Windows.Forms.LinkLabel cmdShareX;
 		private System.Windows.Forms.LinkLabel cmdMakeProcessFile2;
-		private System.Windows.Forms.LinkLabel linkLabel1;
+		private System.Windows.Forms.LinkLabel cmdEmu2p1SequenceConvert;
 	}
 }
 

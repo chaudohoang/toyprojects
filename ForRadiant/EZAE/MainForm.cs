@@ -1047,5 +1047,18 @@ namespace EZAE
 
 			}
 		}
+
+		private void cmdEmu2p1SequenceConvert_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+			string filepath = Path.GetFullPath(@"Tools\Emu2p1SequenceConvert\Emu2p1SequenceConvert.exe");
+			if (File.Exists(filepath))
+			{
+
+				ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
+				startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
+				Process.Start(startInfo);
+
+			}
+		}
 	}
 }

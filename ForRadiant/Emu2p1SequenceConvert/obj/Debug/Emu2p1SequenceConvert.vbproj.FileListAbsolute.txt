@@ -1,0 +1,14 @@
+D:\Chau\Git\toyprojects\ForRadiant\Emu2p1SequenceConvert\obj\Debug\Emu2p1SequenceConvert.vbproj.AssemblyReference.cache
+D:\Chau\Git\toyprojects\ForRadiant\Emu2p1SequenceConvert\obj\Debug\Emu2p1SequenceConvert.vbproj.SuggestedBindingRedirects.cache
+D:\Chau\Git\toyprojects\ForRadiant\Emu2p1SequenceConvert\obj\Debug\Emu2p1SequenceConvert.vbproj.GenerateResource.cache
+D:\Chau\Git\toyprojects\ForRadiant\Emu2p1SequenceConvert\obj\Debug\Emu2p1SequenceConvert.vbproj.CoreCompileInputs.cache
+D:\Chau\Git\toyprojects\ForRadiant\bin\Debug\TemplateAppVB\Emu2p1SequenceConvert.exe.config
+D:\Chau\Git\toyprojects\ForRadiant\bin\Debug\TemplateAppVB\Emu2p1SequenceConvert.exe
+D:\Chau\Git\toyprojects\ForRadiant\bin\Debug\TemplateAppVB\Emu2p1SequenceConvert.pdb
+D:\Chau\Git\toyprojects\ForRadiant\Emu2p1SequenceConvert\obj\Debug\Emu2p1SequenceConvert.TemplateAppVB.MainForm.resources
+D:\Chau\Git\toyprojects\ForRadiant\Emu2p1SequenceConvert\obj\Debug\Emu2p1SequenceConvert.Resources.resources
+D:\Chau\Git\toyprojects\ForRadiant\Emu2p1SequenceConvert\obj\Debug\Emu2p1SequenceConvert.exe
+D:\Chau\Git\toyprojects\ForRadiant\Emu2p1SequenceConvert\obj\Debug\Emu2p1SequenceConvert.pdb
+D:\Chau\Git\toyprojects\ForRadiant\bin\Debug\Emu2p1SequenceConvert\Emu2p1SequenceConvert.exe.config
+D:\Chau\Git\toyprojects\ForRadiant\bin\Debug\Emu2p1SequenceConvert\Emu2p1SequenceConvert.exe
+D:\Chau\Git\toyprojects\ForRadiant\bin\Debug\Emu2p1SequenceConvert\Emu2p1SequenceConvert.pdb
