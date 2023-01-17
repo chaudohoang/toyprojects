@@ -152,9 +152,13 @@ Public Class MainForm
 			CommLogUpdateText("Sequence 2 analyses : " + String.Join(",", sequence2AnaList))
 			Exit Sub
 		End If
-
-
-		For index = 0 To nodes1.Count - 1
+		Dim SequenceItemCount As Integer
+		If nodes1.Count < nodes2.Count Then
+			SequenceItemCount = nodes1.Count
+		Else
+			SequenceItemCount = nodes2.Count
+		End If
+		For index = 0 To SequenceItemCount - 1
 			node1 = nodes1(index).SelectSingleNode("Analysis")
 			node2 = nodes2(index).SelectSingleNode("Analysis")
 
