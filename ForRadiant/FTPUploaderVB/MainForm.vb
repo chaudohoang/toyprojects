@@ -383,6 +383,8 @@ Namespace FTPUploaderVB
 			Dim failedFileName As String = ""
 			Dim failedFileReason As String = ""
 			failMessage = failMessage.Remove(17)
+			Dim spacePos As Integer = failMessage.IndexOf(" ")
+			failMessage = failMessage.Substring(0, spacePos).ToUpper
 
 			If Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("otp") Then
 				failedFileName = "OTP"
@@ -400,7 +402,7 @@ Namespace FTPUploaderVB
 				failedFileName = "Hex_2"
 				failedFileReason = "Hex_2_X"
 			Else
-				failedFileName = Path.GetFileNameWithoutExtension(destFile).Replace("step2_03_", "").Replace("_imgY_Crop", "").ToUpper
+				failedFileName = Path.GetFileNameWithoutExtension(destFile).Replace("step2_03_", "").Replace("_imgY_Crop", "")
 				failedFileReason = failedFileName + "_X"
 			End If
 			Dim lines = File.ReadAllLines(summaryLogFile)
@@ -445,7 +447,7 @@ Namespace FTPUploaderVB
 			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("3rd") Then
 				succeededFileName = "Hex_2"
 			Else
-				succeededFileName = Path.GetFileNameWithoutExtension(destFile).Replace("step2_03_", "").Replace("_imgY_Crop", "").ToUpper
+				succeededFileName = Path.GetFileNameWithoutExtension(destFile).Replace("step2_03_", "").Replace("_imgY_Crop", "")
 			End If
 			Dim lines = File.ReadAllLines(summaryLogFile)
 			Dim columnHeader = lines(0).Split(",")
