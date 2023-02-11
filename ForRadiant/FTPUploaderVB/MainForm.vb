@@ -172,7 +172,7 @@ Namespace FTPUploaderVB
 					.HostName = host
 					.UserName = username
 					.Password = password
-					.TimeoutInMilliseconds = 20000
+					.TimeoutInMilliseconds = 10000
 				End With
 				Using session As New Session
 					session.ExecutablePath = exePath
@@ -382,7 +382,6 @@ Namespace FTPUploaderVB
 			End If
 			Dim failedFileName As String = ""
 			Dim failedFileReason As String = ""
-			failMessage = failMessage.Remove(17)
 			Dim spacePos As Integer = failMessage.IndexOf(".")
 			failMessage = failMessage.Substring(0, spacePos)
 
