@@ -383,8 +383,8 @@ Namespace FTPUploaderVB
 			Dim failedFileName As String = ""
 			Dim failedFileReason As String = ""
 			failMessage = failMessage.Remove(17)
-			Dim spacePos As Integer = failMessage.IndexOf(" ")
-			failMessage = failMessage.Substring(0, spacePos).ToUpper
+			Dim spacePos As Integer = failMessage.IndexOf(".")
+			failMessage = failMessage.Substring(0, spacePos)
 
 			If Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("otp") Then
 				failedFileName = "OTP"
