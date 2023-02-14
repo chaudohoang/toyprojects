@@ -72,9 +72,18 @@ namespace WindowsFormsApp1
                 int i = 1;
                 foreach (FileInfo fi in files)
                 {
-                    string newname = Path.Combine(fi.DirectoryName, i.ToString() +fi.Extension);
-                    File.Move(fi.FullName, newname);
-                    i++;
+                    try
+                    {
+                        string newname = Path.Combine(fi.DirectoryName, i.ToString() + fi.Extension);
+                        File.Move(fi.FullName, newname);
+                        i++;
+                    }
+                    catch (Exception ex)
+                    {
+
+                        MessageBox.Show(ex.Message);
+                    }
+                    
                 }
 
             }
