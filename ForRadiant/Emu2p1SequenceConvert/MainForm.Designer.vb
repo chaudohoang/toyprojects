@@ -121,11 +121,7 @@ Namespace TemplateAppVB
             '
             Me.btnBrowse.Location = New System.Drawing.Point(514, 49)
             Me.btnBrowse.Name = "btnBrowse"
-<<<<<<< HEAD
             Me.btnBrowse.Size = New System.Drawing.Size(70, 80)
-=======
-            Me.btnBrowse.Size = New System.Drawing.Size(70, 73)
->>>>>>> 9fbf9d569a9676377958bd9d99556df43e2371b6
             Me.btnBrowse.TabIndex = 2
             Me.btnBrowse.Text = "Browse"
             Me.btnBrowse.UseVisualStyleBackColor = True
@@ -137,11 +133,7 @@ Namespace TemplateAppVB
             Me.txtSequences.Multiline = True
             Me.txtSequences.Name = "txtSequences"
             Me.txtSequences.ScrollBars = System.Windows.Forms.ScrollBars.Both
-<<<<<<< HEAD
             Me.txtSequences.Size = New System.Drawing.Size(491, 80)
-=======
-            Me.txtSequences.Size = New System.Drawing.Size(491, 73)
->>>>>>> 9fbf9d569a9676377958bd9d99556df43e2371b6
             Me.txtSequences.TabIndex = 1
             '
             'lblAddtionalTarget
@@ -175,11 +167,7 @@ Namespace TemplateAppVB
             '
             Me.btnCopyDI.Location = New System.Drawing.Point(590, 49)
             Me.btnCopyDI.Name = "btnCopyDI"
-<<<<<<< HEAD
             Me.btnCopyDI.Size = New System.Drawing.Size(70, 80)
-=======
-            Me.btnCopyDI.Size = New System.Drawing.Size(70, 73)
->>>>>>> 9fbf9d569a9676377958bd9d99556df43e2371b6
             Me.btnCopyDI.TabIndex = 4
             Me.btnCopyDI.Text = "Copy Emu2p1 DI Settings"
             Me.btnCopyDI.UseVisualStyleBackColor = True
