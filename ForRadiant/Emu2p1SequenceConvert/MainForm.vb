@@ -5,6 +5,7 @@ Imports System.Reflection
 Imports System.IO
 Imports System.Drawing
 Imports System.Reflection.Emit
+Imports System.Linq
 
 Namespace TemplateAppVB
 	Partial Public Class MainForm
@@ -109,8 +110,9 @@ Namespace TemplateAppVB
 
 		Private Sub btnEmu2p1Convert_Click(sender As Object, e As EventArgs) Handles btnEmu2p1Convert.Click
 			btnEmu2p1Convert.Enabled = False
+			Dim Targets As String()
 			Try
-				Dim Targets As String()
+
 				Targets = txtSequences.Text.Split(New Char() {Microsoft.VisualBasic.Strings.ChrW(13), Microsoft.VisualBasic.Strings.ChrW(10)}, StringSplitOptions.RemoveEmptyEntries)
 				For Each item In Targets
 					Dim Text As String = File.ReadAllText(item)
@@ -132,7 +134,12 @@ Namespace TemplateAppVB
 			While Label1.ForeColor = tempcolor
 				Label1.ForeColor = Color.FromArgb(255, m_Rnd.Next(0, 255), m_Rnd.Next(0, 255), m_Rnd.Next(0, 255))
 			End While
-			Label1.Text = "Converted to Emu2p1, reload sequence !!!"
+			If Targets.Count = 0 Then
+				Label1.Text = "No sequences !!!"
+			Else
+				Label1.Text = "Converted to Emu2p1, reload sequence !!!"
+			End If
+
 			btnEmu2p1Convert.Enabled = True
 
 		End Sub
@@ -162,8 +169,8 @@ Namespace TemplateAppVB
 
 		Private Sub btnEmu2p0Convert_Click(sender As Object, e As EventArgs) Handles btnEmu2p0Convert.Click
 			btnEmu2p1Convert.Enabled = False
+			Dim Targets As String()
 			Try
-				Dim Targets As String()
 				Targets = txtSequences.Text.Split(New Char() {Microsoft.VisualBasic.Strings.ChrW(13), Microsoft.VisualBasic.Strings.ChrW(10)}, StringSplitOptions.RemoveEmptyEntries)
 				For Each item In Targets
 					Dim Text As String = File.ReadAllText(item)
@@ -185,7 +192,11 @@ Namespace TemplateAppVB
 			While Label1.ForeColor = tempcolor
 				Label1.ForeColor = Color.FromArgb(255, m_Rnd.Next(0, 255), m_Rnd.Next(0, 255), m_Rnd.Next(0, 255))
 			End While
-			Label1.Text = "Converted to Emu2p0, reload sequence !!!"
+			If Targets.Count = 0 Then
+				Label1.Text = "No sequences !!!"
+			Else
+				Label1.Text = "Converted to Emu2p0, reload sequence !!!"
+			End If
 			btnEmu2p1Convert.Enabled = True
 		End Sub
 	End Class
