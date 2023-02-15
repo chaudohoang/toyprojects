@@ -101,20 +101,23 @@ Namespace TemplateAppVB
 				If dialog.ShowDialog(Me) = DialogResult.OK Then
 					Dim files = dialog.FileNames
 					For Each file In files
-						txtAdditionalSequence.Text += file & Microsoft.VisualBasic.Constants.vbCrLf
+						txtSequences.Text += file & Microsoft.VisualBasic.Constants.vbCrLf
 					Next
 				End If
 			End Using
 		End Sub
 
-		Private Sub btnConvert_Click(sender As Object, e As EventArgs) Handles btnConvert.Click
-			btnConvert.Enabled = False
+		Private Sub btnEmu2p1Convert_Click(sender As Object, e As EventArgs) Handles btnEmu2p1Convert.Click
+			btnEmu2p1Convert.Enabled = False
 			Try
-				Dim additionalTargets As String()
-				additionalTargets = txtAdditionalSequence.Text.Split(New Char() {Microsoft.VisualBasic.Strings.ChrW(13), Microsoft.VisualBasic.Strings.ChrW(10)}, StringSplitOptions.RemoveEmptyEntries)
-				For Each item In additionalTargets
+				Dim Targets As String()
+				Targets = txtSequences.Text.Split(New Char() {Microsoft.VisualBasic.Strings.ChrW(13), Microsoft.VisualBasic.Strings.ChrW(10)}, StringSplitOptions.RemoveEmptyEntries)
+				For Each item In Targets
 					Dim Text As String = File.ReadAllText(item)
-					Dim backupFilename As String = Path.GetDirectoryName(item) + "\" + Path.GetFileNameWithoutExtension(item) + "_Emu2p0_backup" + ".seqxc"
+					Dim backupFilename As String = Path.GetDirectoryName(item) + "\Emu2p0_backup\" + Path.GetFileName(item)
+					If Not Directory.Exists(Path.GetDirectoryName(item) + "\Emu2p0_backup\") Then
+						Directory.CreateDirectory(Path.GetDirectoryName(item) + "\Emu2p0_backup\")
+					End If
 					File.Copy(item, backupFilename, True)
 					Text = Text.Replace("Emu2p0_PG.Emu2p0_Pattern", "Emu2p1_PG.Emu2p1_Pattern")
 					File.WriteAllText(item, Text)
@@ -125,17 +128,17 @@ Namespace TemplateAppVB
 
 			Dim m_Rnd As Random = New Random()
 			Dim tempcolor As Color
-			tempcolor = label1.ForeColor
-			While label1.ForeColor = tempcolor
-				label1.ForeColor = Color.FromArgb(255, m_Rnd.Next(0, 255), m_Rnd.Next(0, 255), m_Rnd.Next(0, 255))
+			tempcolor = Label1.ForeColor
+			While Label1.ForeColor = tempcolor
+				Label1.ForeColor = Color.FromArgb(255, m_Rnd.Next(0, 255), m_Rnd.Next(0, 255), m_Rnd.Next(0, 255))
 			End While
-			label1.Text = "Done!"
-			btnConvert.Enabled = True
+			Label1.Text = "Converted to Emu2p1, reload sequence !!!"
+			btnEmu2p1Convert.Enabled = True
 
 		End Sub
 
 		Private Sub btnCopyDI_Click(sender As Object, e As EventArgs) Handles btnCopyDI.Click
-			btnConvert.Enabled = False
+			btnCopyDI.Enabled = False
 			Try
 				Dim Emu2p0_DI As String = "C:\Radiant Vision Systems Data\TrueTest\AppData\1.8\Emu2p0_PG.Emu2p0_PG.xml"
 				Dim Emu2p1_DI As String = "C:\Radiant Vision Systems Data\TrueTest\AppData\1.8\Emu2p1_PG.Emu2p1_PG.xml"
@@ -154,7 +157,36 @@ Namespace TemplateAppVB
 				Label1.ForeColor = Color.FromArgb(255, m_Rnd.Next(0, 255), m_Rnd.Next(0, 255), m_Rnd.Next(0, 255))
 			End While
 			Label1.Text = "Done!"
-			btnConvert.Enabled = True
+			btnCopyDI.Enabled = True
+		End Sub
+
+		Private Sub btnEmu2p0Convert_Click(sender As Object, e As EventArgs) Handles btnEmu2p0Convert.Click
+			btnEmu2p1Convert.Enabled = False
+			Try
+				Dim Targets As String()
+				Targets = txtSequences.Text.Split(New Char() {Microsoft.VisualBasic.Strings.ChrW(13), Microsoft.VisualBasic.Strings.ChrW(10)}, StringSplitOptions.RemoveEmptyEntries)
+				For Each item In Targets
+					Dim Text As String = File.ReadAllText(item)
+					Dim backupFilename As String = Path.GetDirectoryName(item) + "\Emu2p1_backup\" + Path.GetFileName(item)
+					If Not Directory.Exists(Path.GetDirectoryName(item) + "\Emu2p1_backup\") Then
+						Directory.CreateDirectory(Path.GetDirectoryName(item) + "\Emu2p1_backup\")
+					End If
+					File.Copy(item, backupFilename, True)
+					Text = Text.Replace("Emu2p1_PG.Emu2p1_Pattern", "Emu2p0_PG.Emu2p0_Pattern")
+					File.WriteAllText(item, Text)
+				Next
+			Catch ex As Exception
+				MessageBox.Show(ex.Message)
+			End Try
+
+			Dim m_Rnd As Random = New Random()
+			Dim tempcolor As Color
+			tempcolor = Label1.ForeColor
+			While Label1.ForeColor = tempcolor
+				Label1.ForeColor = Color.FromArgb(255, m_Rnd.Next(0, 255), m_Rnd.Next(0, 255), m_Rnd.Next(0, 255))
+			End While
+			Label1.Text = "Converted to Emu2p0, reload sequence !!!"
+			btnEmu2p1Convert.Enabled = True
 		End Sub
 	End Class
 End Namespace
