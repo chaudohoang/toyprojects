@@ -75,8 +75,6 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "SequenceCheck", "SequenceCh
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "SetSequenceVB", "SetSequenceVB\SetSequenceVB.vbproj", "{91DB666A-CDD5-4547-8177-9ACAC2DE9AFE}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "LGDVHCustomApps", "LGDVHCustomApps\LGDVHCustomApps.vbproj", "{581F5CA4-F2A7-403D-8950-643736EB058B}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RVSWorklog", "RVSWorklog\RVSWorklog.csproj", "{561A4CAB-CF2A-4C33-B0F8-9318606D470E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoClose", "AutoClose\AutoClose.csproj", "{FA2D9DA8-2F86-48A9-A241-3C69A3066339}"
@@ -90,6 +88,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "QuickTools", "QuickTools", "{62CFD8A0-B705-4B6B-B80F-814562E4DABF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinXMLChangeIntercept", "QuickTools\BinXMLChangeIntercept\BinXMLChangeIntercept.csproj", "{EE5251E8-456E-41AA-A81A-77DABAF038C3}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "LGDCustomAppLauncher", "LGDCustomAppLauncher\LGDCustomAppLauncher.vbproj", "{268F742A-801D-4E49-9523-B3227F3DFBA7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -241,10 +241,6 @@ Global
 		{91DB666A-CDD5-4547-8177-9ACAC2DE9AFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91DB666A-CDD5-4547-8177-9ACAC2DE9AFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91DB666A-CDD5-4547-8177-9ACAC2DE9AFE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{581F5CA4-F2A7-403D-8950-643736EB058B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{581F5CA4-F2A7-403D-8950-643736EB058B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{581F5CA4-F2A7-403D-8950-643736EB058B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{581F5CA4-F2A7-403D-8950-643736EB058B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{561A4CAB-CF2A-4C33-B0F8-9318606D470E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{561A4CAB-CF2A-4C33-B0F8-9318606D470E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{561A4CAB-CF2A-4C33-B0F8-9318606D470E}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -269,6 +265,10 @@ Global
 		{EE5251E8-456E-41AA-A81A-77DABAF038C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE5251E8-456E-41AA-A81A-77DABAF038C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE5251E8-456E-41AA-A81A-77DABAF038C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{268F742A-801D-4E49-9523-B3227F3DFBA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{268F742A-801D-4E49-9523-B3227F3DFBA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{268F742A-801D-4E49-9523-B3227F3DFBA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{268F742A-801D-4E49-9523-B3227F3DFBA7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -277,10 +277,10 @@ Global
 		{EE5251E8-456E-41AA-A81A-77DABAF038C3} = {62CFD8A0-B705-4B6B-B80F-814562E4DABF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		BuildVersion_UseGlobalSettings = True
-		BuildVersion_UpdateAssemblyVersion = True
-		BuildVersion_BuildVersioningStyle = None.None.Increment.TimeStamp
-		BuildVersion_StartDate = 2000/1/1
 		SolutionGuid = {60C14AFF-CFF7-46E8-9345-65A46A64495F}
+		BuildVersion_StartDate = 2000/1/1
+		BuildVersion_BuildVersioningStyle = None.None.Increment.TimeStamp
+		BuildVersion_UpdateAssemblyVersion = True
+		BuildVersion_UseGlobalSettings = True
 	EndGlobalSection
 EndGlobal
