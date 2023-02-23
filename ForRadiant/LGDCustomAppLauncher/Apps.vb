@@ -41,4 +41,10 @@ Public Class Apps
         startinfo.FileName = System.IO.Path.Combine(exePath, "Emu2p1SequenceConvert.exe")
         Process.Start(startinfo)
     End Sub
+
+    Private Sub cmdBackupTT_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdBackupTT.LinkClicked
+        startinfo.WorkingDirectory = exePath
+        startinfo.FileName = System.IO.Path.Combine(exePath, "BackupCurrentTT.exe")
+        Process.Start(startinfo)
+    End Sub
 End Class

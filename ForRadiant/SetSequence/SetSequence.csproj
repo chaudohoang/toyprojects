@@ -93,7 +93,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="noFly.ico" />
-    <Content Include="Properties\PrivateSoftware.png" />
+    <Content Include="PrivateSoftware.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
