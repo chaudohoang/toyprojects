@@ -357,7 +357,8 @@ Public Class MainForm
 			If nodes3(i).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
 				sequenceAnaList.Add(nodes3(i).SelectSingleNode("PatternSetupName").InnerText)
 			End If
-			If nodes3(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDCustomerAnalysis") Or nodes3(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDNCustomerAnalysis") Then
+			If (nodes3(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDCustomerAnalysis") Or nodes3(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDNCustomerAnalysis")) AndAlso
+			Not nodes3(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDNPOCB4p1") Then
 				demuraStepList.Add(nodes3(i).SelectSingleNode("PatternSetupName").InnerText)
 			End If
 		Next
@@ -478,7 +479,7 @@ Public Class MainForm
 		Next
 
 		For index = 0 To nodes3.Count - 1
-			If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
+			'If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
 			If chkImgScaleCalSettings.Checked = True AndAlso sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
 				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
 				For Each childNode As XmlNode In node3.ChildNodes
@@ -593,7 +594,7 @@ Public Class MainForm
 		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
 		CommLogUpdateText2("ALL SETTINGS :")
 		For index = 0 To nodes3.Count - 1
-			If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
+			'If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
 			If sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
 				Dim FocusDistance = nodes3(index).SelectSingleNode("LensDistance").InnerText
 				Dim FNumber = nodes3(index).SelectSingleNode("LensfStop").InnerText
