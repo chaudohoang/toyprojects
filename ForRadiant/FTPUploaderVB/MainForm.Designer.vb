@@ -137,7 +137,7 @@ Namespace FTPUploaderVB
             Me.txtInterval.Name = "txtInterval"
             Me.txtInterval.Size = New System.Drawing.Size(365, 20)
             Me.txtInterval.TabIndex = 3
-            Me.txtInterval.Text = "30"
+            Me.txtInterval.Text = "10"
             '
             'label1
             '
