@@ -11,6 +11,7 @@ Imports System.Linq
 Imports System.Drawing
 Imports System.Threading
 Imports System.Threading.Tasks
+Imports System.Runtime.InteropServices.ComTypes
 
 Namespace FTPUploaderVB
 	Partial Public Class MainForm
@@ -133,6 +134,7 @@ Namespace FTPUploaderVB
 			Dim destFile = lines(8)
 			Dim sourceIndexFile = lines(10)
 			Dim sourceHostFile = lines(13)
+			Dim totalFileCount = lines(15)
 			Dim PID = Path.GetFileNameWithoutExtension(sourceIndexFile)
 
 			Dim failCountPath = txtUploadListPath.Text + "\Fail Count\" + Path.GetFileName(InfoFile)
@@ -210,7 +212,10 @@ Namespace FTPUploaderVB
 				End If
 				File.AppendAllText(sourceIndexFile, destFile + System.Environment.NewLine)
 				File.AppendAllText(sourceHostFile, destFile + System.Environment.NewLine)
-				CreateIndexAndHostQueue(InfoFile)
+				Dim uploadedCount As Integer = File.ReadAllLines(sourceHostFile).Length
+				If uploadedCount = Int32.Parse(totalFileCount) Then
+					CreateIndexAndHostQueue(InfoFile)
+				End If
 
 			Catch e As Exception
 				lblFileUploadStatus.Invoke(Sub()

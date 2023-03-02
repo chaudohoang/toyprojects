@@ -25,6 +25,7 @@ Partial Class Apps
         Me.TabPage3 = New System.Windows.Forms.TabPage()
         Me.TabPage2 = New System.Windows.Forms.TabPage()
         Me.TabPage1 = New System.Windows.Forms.TabPage()
+        Me.cmdEmu2p1SequenceConvert = New System.Windows.Forms.LinkLabel()
         Me.cmdFTPUploader = New System.Windows.Forms.LinkLabel()
         Me.cmdCheckSequence = New System.Windows.Forms.LinkLabel()
         Me.Label1 = New System.Windows.Forms.Label()
@@ -32,7 +33,7 @@ Partial Class Apps
         Me.cmdSetSequence = New System.Windows.Forms.LinkLabel()
         Me.cmdButterfly = New System.Windows.Forms.LinkLabel()
         Me.TabControl1 = New System.Windows.Forms.TabControl()
-        Me.cmdEmu2p1SequenceConvert = New System.Windows.Forms.LinkLabel()
+        Me.cmdBackupTT = New System.Windows.Forms.LinkLabel()
         Me.TabPage1.SuspendLayout()
         Me.TabControl1.SuspendLayout()
         Me.SuspendLayout()
@@ -58,6 +59,7 @@ Partial Class Apps
         '
         'TabPage1
         '
+        Me.TabPage1.Controls.Add(Me.cmdBackupTT)
         Me.TabPage1.Controls.Add(Me.cmdEmu2p1SequenceConvert)
         Me.TabPage1.Controls.Add(Me.cmdFTPUploader)
         Me.TabPage1.Controls.Add(Me.cmdCheckSequence)
@@ -72,6 +74,16 @@ Partial Class Apps
         Me.TabPage1.TabIndex = 0
         Me.TabPage1.Text = "TabPage1"
         Me.TabPage1.UseVisualStyleBackColor = True
+        '
+        'cmdEmu2p1SequenceConvert
+        '
+        Me.cmdEmu2p1SequenceConvert.AutoSize = True
+        Me.cmdEmu2p1SequenceConvert.Location = New System.Drawing.Point(8, 39)
+        Me.cmdEmu2p1SequenceConvert.Name = "cmdEmu2p1SequenceConvert"
+        Me.cmdEmu2p1SequenceConvert.Size = New System.Drawing.Size(132, 13)
+        Me.cmdEmu2p1SequenceConvert.TabIndex = 5
+        Me.cmdEmu2p1SequenceConvert.TabStop = True
+        Me.cmdEmu2p1SequenceConvert.Text = "Emu2p1SequenceConvert"
         '
         'cmdFTPUploader
         '
@@ -143,15 +155,15 @@ Partial Class Apps
         Me.TabControl1.Size = New System.Drawing.Size(519, 291)
         Me.TabControl1.TabIndex = 2
         '
-        'cmdEmu2p1SequenceConvert
+        'cmdBackupTT
         '
-        Me.cmdEmu2p1SequenceConvert.AutoSize = True
-        Me.cmdEmu2p1SequenceConvert.Location = New System.Drawing.Point(8, 39)
-        Me.cmdEmu2p1SequenceConvert.Name = "cmdEmu2p1SequenceConvert"
-        Me.cmdEmu2p1SequenceConvert.Size = New System.Drawing.Size(132, 13)
-        Me.cmdEmu2p1SequenceConvert.TabIndex = 5
-        Me.cmdEmu2p1SequenceConvert.TabStop = True
-        Me.cmdEmu2p1SequenceConvert.Text = "Emu2p1SequenceConvert"
+        Me.cmdBackupTT.AutoSize = True
+        Me.cmdBackupTT.Location = New System.Drawing.Point(146, 39)
+        Me.cmdBackupTT.Name = "cmdBackupTT"
+        Me.cmdBackupTT.Size = New System.Drawing.Size(98, 13)
+        Me.cmdBackupTT.TabIndex = 5
+        Me.cmdBackupTT.TabStop = True
+        Me.cmdBackupTT.Text = "Backup Current TT"
         '
         'Apps
         '
@@ -179,4 +191,5 @@ Partial Class Apps
 	Friend WithEvents cmdCheckSequence As LinkLabel
 	Friend WithEvents cmdFTPUploader As LinkLabel
 	Friend WithEvents cmdEmu2p1SequenceConvert As LinkLabel
+    Friend WithEvents cmdBackupTT As LinkLabel
 End Class

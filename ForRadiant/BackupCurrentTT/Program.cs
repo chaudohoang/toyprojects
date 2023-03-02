@@ -13,17 +13,23 @@ namespace BackupCurrentTT
     {
         static void Main(string[] args)
         {
-            foreach (var process in Process.GetProcessesByName("TrueTest"))
-            {
-                process.Kill();
-            }
+            //foreach (var process in Process.GetProcessesByName("TrueTest"))
+            //{
+            //    process.Kill();
+            //}
             var versionInfo = FileVersionInfo.GetVersionInfo(@"C:\Program Files\Radiant Vision Systems\TrueTest 1.8\TrueTest.exe");
             string version = versionInfo.FileVersion.Replace(versionInfo.FilePrivatePart.ToString(),"");
             version = version.Remove(version.Length - 1);
             string sourcefolder = @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8";
             string destfolder = @"C:\Program Files\Radiant Vision Systems\TrueTest " + version;
-            CopyFolder(sourcefolder, destfolder);
-            CreateShortcut("TrueTest " + version, Environment.GetFolderPath(Environment.SpecialFolder.Desktop), Path.Combine(destfolder, "TrueTest.exe"));
+            if (!Directory.Exists(destfolder))
+            {
+                Console.WriteLine("Backing up ...");
+                CopyFolder(sourcefolder, destfolder);               
+            }
+            Console.WriteLine("Backed up to : " + destfolder);
+            Console.ReadKey();
+            //CreateShortcut("TrueTest " + version, Environment.GetFolderPath(Environment.SpecialFolder.Desktop), Path.Combine(destfolder, "TrueTest.exe"));
         }
 
         public static void CopyFolder(string sourceFolder, string destFolder)
