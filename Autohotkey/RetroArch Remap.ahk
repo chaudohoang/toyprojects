@@ -3,6 +3,10 @@
 
 #ifWinActive ahk_exe retroarch.exe
 
+!`::
+Suspend
+return
+
 ~*LControl::
 	Suspend,On
 Return

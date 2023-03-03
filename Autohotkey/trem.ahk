@@ -1,13 +1,11 @@
 ﻿#SingleInstance force
 #MaxHotkeysPerInterval 500
 
+#ifWinActive ahk_exe empiresx.exe
 
 !`::
 Suspend
 return
-
-#ifWinActive Age of Empires Expansion
-
 
 w::Up
 s::Down
