@@ -7,10 +7,10 @@
 Suspend
 return
 
-~*LAlt::
+~*LControl::
 	Suspend,On
 Return
-~*LAlt Up::
+~*LControl Up::
 	Suspend,Off
 Return
 
