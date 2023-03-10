@@ -7,6 +7,13 @@
 Suspend
 return
 
+~*LControl::
+	Suspend,On
+Return
+~*LControl Up::
+	Suspend,Off
+Return
+
 *e::Up
 *d::Down
 *s::Left
