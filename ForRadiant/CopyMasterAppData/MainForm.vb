@@ -3,6 +3,10 @@ Imports System.Windows.Forms
 Imports System.Runtime.InteropServices
 Imports System.Reflection
 Imports System.IO
+Imports System.Windows.Forms.VisualStyles.VisualStyleElement
+Imports System.Diagnostics
+Imports System.Drawing
+Imports System.Reflection.Emit
 
 Namespace TemplateAppVB
 	Partial Public Class MainForm
@@ -95,30 +99,116 @@ Namespace TemplateAppVB
 		End Sub
 
 		Private Sub btnAddSdf_Click(sender As Object, e As EventArgs) Handles btnAddSdf.Click
-			Dim files = Directory.GetFiles(AppDataPath, "*.sdf")
+			Dim files = Directory.GetFiles(AppDataPath)
 			For Each item As String In files
-				If Not ListBox1.Items.Contains(item) Then
+				If Not ListBox1.Items.Contains(item) AndAlso Path.GetExtension(item) = ".sdf" Then
 					ListBox1.Items.Add(item)
 				End If
 			Next
 		End Sub
 
 		Private Sub btnAddXml_Click(sender As Object, e As EventArgs) Handles btnAddXml.Click
-			Dim files = Directory.GetFiles(AppDataPath, "*.xml")
+			Dim files = Directory.GetFiles(AppDataPath)
 			For Each item As String In files
-				If Not ListBox1.Items.Contains(item) Then
+				If Not ListBox1.Items.Contains(item) AndAlso Path.GetExtension(item) = ".xml" Then
 					ListBox1.Items.Add(item)
 				End If
 			Next
 		End Sub
 
 		Private Sub btnAddCsv_Click(sender As Object, e As EventArgs) Handles btnAddCsv.Click
-			Dim files = Directory.GetFiles(AppDataPath, "*.csv")
+			Dim files = Directory.GetFiles(AppDataPath)
 			For Each item As String In files
-				If Not ListBox1.Items.Contains(item) Then
+				If Not ListBox1.Items.Contains(item) AndAlso Path.GetExtension(item) = ".csv" Then
 					ListBox1.Items.Add(item)
 				End If
 			Next
+		End Sub
+
+		Private Sub btnAddCustom_Click(sender As Object, e As EventArgs) Handles btnAddCustom.Click
+			Using dialog As OpenFileDialog = New OpenFileDialog()
+				dialog.InitialDirectory = "C:\Radiant Vision Systems Data\TrueTest\AppData"
+				dialog.Multiselect = True
+				If dialog.ShowDialog(Me) = DialogResult.OK Then
+					Dim files = dialog.FileNames
+					For Each file In files
+						If Not ListBox1.Items.Contains(file) Then
+							ListBox1.Items.Add(file)
+						End If
+					Next
+				End If
+			End Using
+		End Sub
+
+		Private Sub btnClearList_Click(sender As Object, e As EventArgs) Handles btnClearList.Click
+			ListBox1.Items.Clear()
+		End Sub
+
+		Private Sub btnDelItems_Click(sender As Object, e As EventArgs) Handles btnDelItems.Click
+			For i As Integer = ListBox1.SelectedIndices.Count - 1 To 0 Step -1
+				ListBox1.Items.RemoveAt(ListBox1.SelectedIndices.Item(i))
+			Next
+		End Sub
+
+		Private Sub btnSaveList_Click(sender As Object, e As EventArgs) Handles btnSaveList.Click
+
+			Dim savepath = Path.Combine("C:\Radiant Vision Systems Data\TrueTest\AppData", DateTime.Now.ToString("yyyyMMdd") + "_MasterAppDataList.txt")
+			If ListBox1.Items.Count = 0 Then
+				MessageBox.Show("Empty List !!!")
+			Else
+				Dim savefile As SaveFileDialog = New SaveFileDialog()
+				' set a default file name
+				savefile.FileName = Path.GetFileName(savepath)
+				' set filters - this can be done in properties as well
+				savefile.Filter = "Text files (*.txt)|*.txt"
+				savefile.InitialDirectory = "C:\Radiant Vision Systems Data\TrueTest\AppData"
+
+				If savefile.ShowDialog() = DialogResult.OK Then
+					Using sw As StreamWriter = New StreamWriter(savefile.FileName)
+
+						For index = 0 To ListBox1.Items.Count - 1
+							sw.WriteLine(ListBox1.Items(index))
+						Next
+					End Using
+
+				End If
+
+			End If
+		End Sub
+
+		Private Sub btnLoadList_Click(sender As Object, e As EventArgs) Handles btnLoadList.Click
+			Using dialog As OpenFileDialog = New OpenFileDialog()
+				dialog.InitialDirectory = "C:\Radiant Vision Systems Data\TrueTest\AppData"
+				dialog.Multiselect = False
+				If dialog.ShowDialog(Me) = DialogResult.OK Then
+					Dim files = File.ReadAllLines(dialog.FileName)
+					ListBox1.Items.Clear()
+					For Each file In files
+						If Not ListBox1.Items.Contains(file) Then
+							ListBox1.Items.Add(file)
+						End If
+					Next
+				End If
+			End Using
+		End Sub
+		Private Sub btnCopy_Click(sender As Object, e As EventArgs) Handles btnCopy.Click
+			btnCopy.Enabled = False
+			If Not Directory.Exists("C:\Radiant Vision Systems Data\TrueTest\Master AppData") Then
+				Directory.CreateDirectory("C:\Radiant Vision Systems Data\TrueTest\Master AppData")
+			End If
+			For Each item As String In ListBox1.Items
+				Dim newPath As String = item.Replace("AppData", "Master AppData")
+				File.Copy(item, newPath, True)
+			Next
+			Static m_Rnd As New Random
+			Dim tempcolor As Color
+			tempcolor = Label1.ForeColor
+			Do While Label1.ForeColor = tempcolor
+				Label1.ForeColor = Color.FromArgb(255, m_Rnd.Next(0, 255), m_Rnd.Next(0, 255), m_Rnd.Next(0, 255))
+			Loop
+
+			Label1.Text = "DONE !"
+			btnCopy.Enabled = True
 		End Sub
 	End Class
 End Namespace

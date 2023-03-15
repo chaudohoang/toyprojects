@@ -4,11 +4,11 @@ Imports System.Runtime.InteropServices
 ' General Information about an assembly is controlled through the following
 ' set of attributes. Change these attribute values to modify the information
 ' associated with an assembly.
-<Assembly: AssemblyTitle("BackupAppData")>
+<Assembly: AssemblyTitle("CopyMasterAppData")>
 <Assembly: AssemblyDescription("")>
 <Assembly: AssemblyConfiguration("")>
 <Assembly: AssemblyCompany("")>
-<Assembly: AssemblyProduct("BackupAppData")>
+<Assembly: AssemblyProduct("CopyMasterAppData")>
 <Assembly: AssemblyCopyright("Copyright ©  2023")>
 <Assembly: AssemblyTrademark("")>
 <Assembly: AssemblyCulture("")>

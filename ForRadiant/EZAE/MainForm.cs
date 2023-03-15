@@ -1048,17 +1048,38 @@ namespace EZAE
 			}
 		}
 
-		private void cmdEmu2p1SequenceConvert_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-		{
-			string filepath = Path.GetFullPath(@"Tools\Emu2p1SequenceConvert\Emu2p1SequenceConvert.exe");
-			if (File.Exists(filepath))
-			{
+        private void cmdEmu2p1SequenceConvert_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = Path.GetFullPath(@"Tools\Emu2p1SequenceConvert\Emu2p1SequenceConvert.exe");
+            if (File.Exists(filepath))
+            {
 
-				ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
-				startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
-				Process.Start(startInfo);
+                ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
+                startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
+                Process.Start(startInfo);
 
-			}
-		}
-	}
+            }
+        }
+
+        private void cmdCopyMasterAppData_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = Path.GetFullPath(@"Tools\CopyMasterAppData\CopyMasterAppData.exe");
+            if (File.Exists(filepath))
+            {
+
+                ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
+                startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
+                Process.Start(startInfo);
+
+            }
+        }
+
+        private void cmdRenameVNTT_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"Tools\RenameVNTT.exe"))
+            {
+                Process.Start(@"Tools\RenameVNTT.exe");
+            }
+        }
+    }
 }

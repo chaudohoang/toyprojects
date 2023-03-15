@@ -47,4 +47,16 @@ Public Class Apps
         startinfo.FileName = System.IO.Path.Combine(exePath, "BackupCurrentTT.exe")
         Process.Start(startinfo)
     End Sub
+
+    Private Sub cmdCopyMasterAppData_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdCopyMasterAppData.LinkClicked
+        startinfo.WorkingDirectory = exePath
+        startinfo.FileName = System.IO.Path.Combine(exePath, "CopyMasterAppData.exe")
+        Process.Start(startinfo)
+    End Sub
+
+    Private Sub cmdRenameVNTT_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdRenameVNTT.LinkClicked
+        startinfo.WorkingDirectory = exePath
+        startinfo.FileName = System.IO.Path.Combine(exePath, "RenameVNTT.exe")
+        Process.Start(startinfo)
+    End Sub
 End Class

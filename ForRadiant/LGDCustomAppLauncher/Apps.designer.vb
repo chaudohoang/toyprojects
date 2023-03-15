@@ -25,6 +25,7 @@ Partial Class Apps
         Me.TabPage3 = New System.Windows.Forms.TabPage()
         Me.TabPage2 = New System.Windows.Forms.TabPage()
         Me.TabPage1 = New System.Windows.Forms.TabPage()
+        Me.cmdBackupTT = New System.Windows.Forms.LinkLabel()
         Me.cmdEmu2p1SequenceConvert = New System.Windows.Forms.LinkLabel()
         Me.cmdFTPUploader = New System.Windows.Forms.LinkLabel()
         Me.cmdCheckSequence = New System.Windows.Forms.LinkLabel()
@@ -33,7 +34,8 @@ Partial Class Apps
         Me.cmdSetSequence = New System.Windows.Forms.LinkLabel()
         Me.cmdButterfly = New System.Windows.Forms.LinkLabel()
         Me.TabControl1 = New System.Windows.Forms.TabControl()
-        Me.cmdBackupTT = New System.Windows.Forms.LinkLabel()
+        Me.cmdCopyMasterAppData = New System.Windows.Forms.LinkLabel()
+        Me.cmdRenameVNTT = New System.Windows.Forms.LinkLabel()
         Me.TabPage1.SuspendLayout()
         Me.TabControl1.SuspendLayout()
         Me.SuspendLayout()
@@ -59,6 +61,8 @@ Partial Class Apps
         '
         'TabPage1
         '
+        Me.TabPage1.Controls.Add(Me.cmdRenameVNTT)
+        Me.TabPage1.Controls.Add(Me.cmdCopyMasterAppData)
         Me.TabPage1.Controls.Add(Me.cmdBackupTT)
         Me.TabPage1.Controls.Add(Me.cmdEmu2p1SequenceConvert)
         Me.TabPage1.Controls.Add(Me.cmdFTPUploader)
@@ -74,6 +78,16 @@ Partial Class Apps
         Me.TabPage1.TabIndex = 0
         Me.TabPage1.Text = "TabPage1"
         Me.TabPage1.UseVisualStyleBackColor = True
+        '
+        'cmdBackupTT
+        '
+        Me.cmdBackupTT.AutoSize = True
+        Me.cmdBackupTT.Location = New System.Drawing.Point(146, 39)
+        Me.cmdBackupTT.Name = "cmdBackupTT"
+        Me.cmdBackupTT.Size = New System.Drawing.Size(98, 13)
+        Me.cmdBackupTT.TabIndex = 5
+        Me.cmdBackupTT.TabStop = True
+        Me.cmdBackupTT.Text = "Backup Current TT"
         '
         'cmdEmu2p1SequenceConvert
         '
@@ -155,15 +169,25 @@ Partial Class Apps
         Me.TabControl1.Size = New System.Drawing.Size(519, 291)
         Me.TabControl1.TabIndex = 2
         '
-        'cmdBackupTT
+        'cmdCopyMasterAppData
         '
-        Me.cmdBackupTT.AutoSize = True
-        Me.cmdBackupTT.Location = New System.Drawing.Point(146, 39)
-        Me.cmdBackupTT.Name = "cmdBackupTT"
-        Me.cmdBackupTT.Size = New System.Drawing.Size(98, 13)
-        Me.cmdBackupTT.TabIndex = 5
-        Me.cmdBackupTT.TabStop = True
-        Me.cmdBackupTT.Text = "Backup Current TT"
+        Me.cmdCopyMasterAppData.AutoSize = True
+        Me.cmdCopyMasterAppData.Location = New System.Drawing.Point(250, 39)
+        Me.cmdCopyMasterAppData.Name = "cmdCopyMasterAppData"
+        Me.cmdCopyMasterAppData.Size = New System.Drawing.Size(105, 13)
+        Me.cmdCopyMasterAppData.TabIndex = 6
+        Me.cmdCopyMasterAppData.TabStop = True
+        Me.cmdCopyMasterAppData.Text = "CopyMasterAppData"
+        '
+        'cmdRenameVNTT
+        '
+        Me.cmdRenameVNTT.AutoSize = True
+        Me.cmdRenameVNTT.Location = New System.Drawing.Point(361, 39)
+        Me.cmdRenameVNTT.Name = "cmdRenameVNTT"
+        Me.cmdRenameVNTT.Size = New System.Drawing.Size(76, 13)
+        Me.cmdRenameVNTT.TabIndex = 7
+        Me.cmdRenameVNTT.TabStop = True
+        Me.cmdRenameVNTT.Text = "RenameVNTT"
         '
         'Apps
         '
@@ -192,4 +216,6 @@ Partial Class Apps
 	Friend WithEvents cmdFTPUploader As LinkLabel
 	Friend WithEvents cmdEmu2p1SequenceConvert As LinkLabel
     Friend WithEvents cmdBackupTT As LinkLabel
+    Friend WithEvents cmdRenameVNTT As LinkLabel
+    Friend WithEvents cmdCopyMasterAppData As LinkLabel
 End Class

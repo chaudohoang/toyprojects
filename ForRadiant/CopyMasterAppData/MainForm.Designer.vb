@@ -42,6 +42,13 @@ Namespace TemplateAppVB
             Me.btnAddSdf = New System.Windows.Forms.Button()
             Me.btnAddXml = New System.Windows.Forms.Button()
             Me.btnAddCsv = New System.Windows.Forms.Button()
+            Me.btnAddCustom = New System.Windows.Forms.Button()
+            Me.btnDelItems = New System.Windows.Forms.Button()
+            Me.btnClearList = New System.Windows.Forms.Button()
+            Me.btnSaveList = New System.Windows.Forms.Button()
+            Me.btnLoadList = New System.Windows.Forms.Button()
+            Me.btnCopy = New System.Windows.Forms.Button()
+            Me.Label1 = New System.Windows.Forms.Label()
             Me.contextMenuStrip1.SuspendLayout()
             Me.menuStrip1.SuspendLayout()
             Me.SuspendLayout()
@@ -50,7 +57,7 @@ Namespace TemplateAppVB
             '
             Me.notifyIcon1.ContextMenuStrip = Me.contextMenuStrip1
             Me.notifyIcon1.Icon = CType(resources.GetObject("notifyIcon1.Icon"), System.Drawing.Icon)
-            Me.notifyIcon1.Text = "BackupAppData"
+            Me.notifyIcon1.Text = "CopyMasterAppData"
             Me.notifyIcon1.Visible = True
             '
             'contextMenuStrip1
@@ -70,7 +77,7 @@ Namespace TemplateAppVB
             Me.menuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.commandToolStripMenuItem, Me.settingsToolStripMenuItem, Me.helpToolStripMenuItem})
             Me.menuStrip1.Location = New System.Drawing.Point(0, 0)
             Me.menuStrip1.Name = "menuStrip1"
-            Me.menuStrip1.Size = New System.Drawing.Size(730, 24)
+            Me.menuStrip1.Size = New System.Drawing.Size(671, 24)
             Me.menuStrip1.TabIndex = 1
             Me.menuStrip1.Text = "menuStrip1"
             '
@@ -120,41 +127,114 @@ Namespace TemplateAppVB
             Me.ListBox1.Location = New System.Drawing.Point(12, 80)
             Me.ListBox1.Name = "ListBox1"
             Me.ListBox1.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended
-            Me.ListBox1.Size = New System.Drawing.Size(652, 381)
+            Me.ListBox1.Size = New System.Drawing.Size(652, 589)
             Me.ListBox1.TabIndex = 2
             '
             'btnAddSdf
             '
             Me.btnAddSdf.Location = New System.Drawing.Point(12, 27)
             Me.btnAddSdf.Name = "btnAddSdf"
-            Me.btnAddSdf.Size = New System.Drawing.Size(75, 23)
+            Me.btnAddSdf.Size = New System.Drawing.Size(59, 47)
             Me.btnAddSdf.TabIndex = 3
             Me.btnAddSdf.Text = "Add Sdf"
             Me.btnAddSdf.UseVisualStyleBackColor = True
             '
             'btnAddXml
             '
-            Me.btnAddXml.Location = New System.Drawing.Point(93, 27)
+            Me.btnAddXml.Location = New System.Drawing.Point(77, 27)
             Me.btnAddXml.Name = "btnAddXml"
-            Me.btnAddXml.Size = New System.Drawing.Size(75, 23)
+            Me.btnAddXml.Size = New System.Drawing.Size(59, 47)
             Me.btnAddXml.TabIndex = 4
             Me.btnAddXml.Text = "Add Xml"
             Me.btnAddXml.UseVisualStyleBackColor = True
             '
             'btnAddCsv
             '
-            Me.btnAddCsv.Location = New System.Drawing.Point(174, 27)
+            Me.btnAddCsv.Location = New System.Drawing.Point(142, 27)
             Me.btnAddCsv.Name = "btnAddCsv"
-            Me.btnAddCsv.Size = New System.Drawing.Size(75, 23)
+            Me.btnAddCsv.Size = New System.Drawing.Size(59, 47)
             Me.btnAddCsv.TabIndex = 5
             Me.btnAddCsv.Text = "Add Csv"
             Me.btnAddCsv.UseVisualStyleBackColor = True
+            '
+            'btnAddCustom
+            '
+            Me.btnAddCustom.Location = New System.Drawing.Point(207, 27)
+            Me.btnAddCustom.Name = "btnAddCustom"
+            Me.btnAddCustom.Size = New System.Drawing.Size(59, 47)
+            Me.btnAddCustom.TabIndex = 6
+            Me.btnAddCustom.Text = "Add Custom"
+            Me.btnAddCustom.UseVisualStyleBackColor = True
+            '
+            'btnDelItems
+            '
+            Me.btnDelItems.Location = New System.Drawing.Point(272, 27)
+            Me.btnDelItems.Name = "btnDelItems"
+            Me.btnDelItems.Size = New System.Drawing.Size(59, 47)
+            Me.btnDelItems.TabIndex = 7
+            Me.btnDelItems.Text = "Del Items"
+            Me.btnDelItems.UseVisualStyleBackColor = True
+            '
+            'btnClearList
+            '
+            Me.btnClearList.Location = New System.Drawing.Point(337, 27)
+            Me.btnClearList.Name = "btnClearList"
+            Me.btnClearList.Size = New System.Drawing.Size(59, 47)
+            Me.btnClearList.TabIndex = 8
+            Me.btnClearList.Text = "Clear List"
+            Me.btnClearList.UseVisualStyleBackColor = True
+            '
+            'btnSaveList
+            '
+            Me.btnSaveList.Location = New System.Drawing.Point(402, 27)
+            Me.btnSaveList.Name = "btnSaveList"
+            Me.btnSaveList.Size = New System.Drawing.Size(59, 47)
+            Me.btnSaveList.TabIndex = 9
+            Me.btnSaveList.Text = "Save List"
+            Me.btnSaveList.UseVisualStyleBackColor = True
+            '
+            'btnLoadList
+            '
+            Me.btnLoadList.Location = New System.Drawing.Point(467, 27)
+            Me.btnLoadList.Name = "btnLoadList"
+            Me.btnLoadList.Size = New System.Drawing.Size(59, 47)
+            Me.btnLoadList.TabIndex = 10
+            Me.btnLoadList.Text = "Load List"
+            Me.btnLoadList.UseVisualStyleBackColor = True
+            '
+            'btnCopy
+            '
+            Me.btnCopy.BackColor = System.Drawing.Color.AntiqueWhite
+            Me.btnCopy.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+            Me.btnCopy.ForeColor = System.Drawing.Color.Blue
+            Me.btnCopy.Location = New System.Drawing.Point(532, 27)
+            Me.btnCopy.Name = "btnCopy"
+            Me.btnCopy.Size = New System.Drawing.Size(59, 47)
+            Me.btnCopy.TabIndex = 11
+            Me.btnCopy.Text = "COPY !"
+            Me.btnCopy.UseVisualStyleBackColor = False
+            '
+            'Label1
+            '
+            Me.Label1.AutoSize = True
+            Me.Label1.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+            Me.Label1.Location = New System.Drawing.Point(606, 44)
+            Me.Label1.Name = "Label1"
+            Me.Label1.Size = New System.Drawing.Size(0, 13)
+            Me.Label1.TabIndex = 12
             '
             'MainForm
             '
             Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
             Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-            Me.ClientSize = New System.Drawing.Size(730, 468)
+            Me.ClientSize = New System.Drawing.Size(671, 675)
+            Me.Controls.Add(Me.Label1)
+            Me.Controls.Add(Me.btnCopy)
+            Me.Controls.Add(Me.btnLoadList)
+            Me.Controls.Add(Me.btnSaveList)
+            Me.Controls.Add(Me.btnClearList)
+            Me.Controls.Add(Me.btnDelItems)
+            Me.Controls.Add(Me.btnAddCustom)
             Me.Controls.Add(Me.btnAddCsv)
             Me.Controls.Add(Me.btnAddXml)
             Me.Controls.Add(Me.btnAddSdf)
@@ -166,7 +246,7 @@ Namespace TemplateAppVB
             Me.MaximizeBox = False
             Me.Name = "MainForm"
             Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
-            Me.Text = "BackupAppData"
+            Me.Text = "CopyMasterAppData"
             Me.contextMenuStrip1.ResumeLayout(False)
             Me.menuStrip1.ResumeLayout(False)
             Me.menuStrip1.PerformLayout()
@@ -190,5 +270,12 @@ Namespace TemplateAppVB
         Friend WithEvents btnAddSdf As Windows.Forms.Button
         Friend WithEvents btnAddXml As Windows.Forms.Button
         Friend WithEvents btnAddCsv As Windows.Forms.Button
+        Friend WithEvents btnAddCustom As Windows.Forms.Button
+        Friend WithEvents btnDelItems As Windows.Forms.Button
+        Friend WithEvents btnClearList As Windows.Forms.Button
+        Friend WithEvents btnSaveList As Windows.Forms.Button
+        Friend WithEvents btnLoadList As Windows.Forms.Button
+        Friend WithEvents btnCopy As Windows.Forms.Button
+        Friend WithEvents Label1 As Windows.Forms.Label
     End Class
 End Namespace

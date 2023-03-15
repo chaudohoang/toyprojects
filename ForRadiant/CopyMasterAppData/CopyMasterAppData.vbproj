@@ -7,8 +7,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{577C1CB8-7CBF-4049-90B2-87DC4D70F2F7}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>BackupAppData</RootNamespace>
-    <AssemblyName>BackupAppData</AssemblyName>
+    <RootNamespace>CopyMasterAppData</RootNamespace>
+    <AssemblyName>CopyMasterAppData</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -20,7 +20,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\bin\Debug\BackupAppData\</OutputPath>
+    <OutputPath>..\bin\Debug\CopyMasterAppData\</OutputPath>
     <DefineConstants>DEBUG,TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
