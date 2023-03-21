@@ -49,6 +49,7 @@ Namespace TemplateAppVB
             Me.btnLoadList = New System.Windows.Forms.Button()
             Me.btnCopy = New System.Windows.Forms.Button()
             Me.Label1 = New System.Windows.Forms.Label()
+            Me.btnAddRFD = New System.Windows.Forms.Button()
             Me.contextMenuStrip1.SuspendLayout()
             Me.menuStrip1.SuspendLayout()
             Me.SuspendLayout()
@@ -134,70 +135,70 @@ Namespace TemplateAppVB
             '
             Me.btnAddSdf.Location = New System.Drawing.Point(12, 27)
             Me.btnAddSdf.Name = "btnAddSdf"
-            Me.btnAddSdf.Size = New System.Drawing.Size(59, 47)
+            Me.btnAddSdf.Size = New System.Drawing.Size(48, 47)
             Me.btnAddSdf.TabIndex = 3
             Me.btnAddSdf.Text = "Add Sdf"
             Me.btnAddSdf.UseVisualStyleBackColor = True
             '
             'btnAddXml
             '
-            Me.btnAddXml.Location = New System.Drawing.Point(77, 27)
+            Me.btnAddXml.Location = New System.Drawing.Point(66, 27)
             Me.btnAddXml.Name = "btnAddXml"
-            Me.btnAddXml.Size = New System.Drawing.Size(59, 47)
+            Me.btnAddXml.Size = New System.Drawing.Size(48, 47)
             Me.btnAddXml.TabIndex = 4
             Me.btnAddXml.Text = "Add Xml"
             Me.btnAddXml.UseVisualStyleBackColor = True
             '
             'btnAddCsv
             '
-            Me.btnAddCsv.Location = New System.Drawing.Point(142, 27)
+            Me.btnAddCsv.Location = New System.Drawing.Point(120, 27)
             Me.btnAddCsv.Name = "btnAddCsv"
-            Me.btnAddCsv.Size = New System.Drawing.Size(59, 47)
+            Me.btnAddCsv.Size = New System.Drawing.Size(48, 47)
             Me.btnAddCsv.TabIndex = 5
             Me.btnAddCsv.Text = "Add Csv"
             Me.btnAddCsv.UseVisualStyleBackColor = True
             '
             'btnAddCustom
             '
-            Me.btnAddCustom.Location = New System.Drawing.Point(207, 27)
+            Me.btnAddCustom.Location = New System.Drawing.Point(229, 27)
             Me.btnAddCustom.Name = "btnAddCustom"
-            Me.btnAddCustom.Size = New System.Drawing.Size(59, 47)
+            Me.btnAddCustom.Size = New System.Drawing.Size(56, 47)
             Me.btnAddCustom.TabIndex = 6
             Me.btnAddCustom.Text = "Add Custom"
             Me.btnAddCustom.UseVisualStyleBackColor = True
             '
             'btnDelItems
             '
-            Me.btnDelItems.Location = New System.Drawing.Point(272, 27)
+            Me.btnDelItems.Location = New System.Drawing.Point(291, 27)
             Me.btnDelItems.Name = "btnDelItems"
-            Me.btnDelItems.Size = New System.Drawing.Size(59, 47)
+            Me.btnDelItems.Size = New System.Drawing.Size(48, 47)
             Me.btnDelItems.TabIndex = 7
             Me.btnDelItems.Text = "Del Items"
             Me.btnDelItems.UseVisualStyleBackColor = True
             '
             'btnClearList
             '
-            Me.btnClearList.Location = New System.Drawing.Point(337, 27)
+            Me.btnClearList.Location = New System.Drawing.Point(345, 27)
             Me.btnClearList.Name = "btnClearList"
-            Me.btnClearList.Size = New System.Drawing.Size(59, 47)
+            Me.btnClearList.Size = New System.Drawing.Size(48, 47)
             Me.btnClearList.TabIndex = 8
             Me.btnClearList.Text = "Clear List"
             Me.btnClearList.UseVisualStyleBackColor = True
             '
             'btnSaveList
             '
-            Me.btnSaveList.Location = New System.Drawing.Point(402, 27)
+            Me.btnSaveList.Location = New System.Drawing.Point(399, 27)
             Me.btnSaveList.Name = "btnSaveList"
-            Me.btnSaveList.Size = New System.Drawing.Size(59, 47)
+            Me.btnSaveList.Size = New System.Drawing.Size(48, 47)
             Me.btnSaveList.TabIndex = 9
             Me.btnSaveList.Text = "Save List"
             Me.btnSaveList.UseVisualStyleBackColor = True
             '
             'btnLoadList
             '
-            Me.btnLoadList.Location = New System.Drawing.Point(467, 27)
+            Me.btnLoadList.Location = New System.Drawing.Point(453, 27)
             Me.btnLoadList.Name = "btnLoadList"
-            Me.btnLoadList.Size = New System.Drawing.Size(59, 47)
+            Me.btnLoadList.Size = New System.Drawing.Size(48, 47)
             Me.btnLoadList.TabIndex = 10
             Me.btnLoadList.Text = "Load List"
             Me.btnLoadList.UseVisualStyleBackColor = True
@@ -207,7 +208,7 @@ Namespace TemplateAppVB
             Me.btnCopy.BackColor = System.Drawing.Color.AntiqueWhite
             Me.btnCopy.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
             Me.btnCopy.ForeColor = System.Drawing.Color.Blue
-            Me.btnCopy.Location = New System.Drawing.Point(532, 27)
+            Me.btnCopy.Location = New System.Drawing.Point(507, 27)
             Me.btnCopy.Name = "btnCopy"
             Me.btnCopy.Size = New System.Drawing.Size(59, 47)
             Me.btnCopy.TabIndex = 11
@@ -223,6 +224,15 @@ Namespace TemplateAppVB
             Me.Label1.Size = New System.Drawing.Size(0, 13)
             Me.Label1.TabIndex = 12
             '
+            'btnAddRFD
+            '
+            Me.btnAddRFD.Location = New System.Drawing.Point(174, 27)
+            Me.btnAddRFD.Name = "btnAddRFD"
+            Me.btnAddRFD.Size = New System.Drawing.Size(48, 47)
+            Me.btnAddRFD.TabIndex = 5
+            Me.btnAddRFD.Text = "Add RFD"
+            Me.btnAddRFD.UseVisualStyleBackColor = True
+            '
             'MainForm
             '
             Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -235,6 +245,7 @@ Namespace TemplateAppVB
             Me.Controls.Add(Me.btnClearList)
             Me.Controls.Add(Me.btnDelItems)
             Me.Controls.Add(Me.btnAddCustom)
+            Me.Controls.Add(Me.btnAddRFD)
             Me.Controls.Add(Me.btnAddCsv)
             Me.Controls.Add(Me.btnAddXml)
             Me.Controls.Add(Me.btnAddSdf)
@@ -277,5 +288,6 @@ Namespace TemplateAppVB
         Friend WithEvents btnLoadList As Windows.Forms.Button
         Friend WithEvents btnCopy As Windows.Forms.Button
         Friend WithEvents Label1 As Windows.Forms.Label
+        Friend WithEvents btnAddRFD As Windows.Forms.Button
     End Class
 End Namespace

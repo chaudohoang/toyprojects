@@ -32,6 +32,10 @@ namespace EZAE
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabControl = new System.Windows.Forms.TabPage();
+            this.cmdOpenGooil4Tablet = new System.Windows.Forms.LinkLabel();
+            this.cmdOpenGooil3Tablet = new System.Windows.Forms.LinkLabel();
+            this.cmdOpenGooil2Tablet = new System.Windows.Forms.LinkLabel();
+            this.cmdOpenGooil1Tablet = new System.Windows.Forms.LinkLabel();
             this.cmdMakeProcessFile2 = new System.Windows.Forms.LinkLabel();
             this.cmdShareX = new System.Windows.Forms.LinkLabel();
             this.cmdRestartTTDove2p0 = new System.Windows.Forms.LinkLabel();
@@ -51,13 +55,15 @@ namespace EZAE
             this.cmdOpenDooone3 = new System.Windows.Forms.LinkLabel();
             this.cmdOpenDooone2 = new System.Windows.Forms.LinkLabel();
             this.cmdOpenDooone1 = new System.Windows.Forms.LinkLabel();
-            this.cmdCheckLC = new System.Windows.Forms.LinkLabel();
+            this.cmdOpenWPSExcel = new System.Windows.Forms.LinkLabel();
             this.cmdOpenTools = new System.Windows.Forms.LinkLabel();
             this.cmdOpenMTFCenter = new System.Windows.Forms.LinkLabel();
             this.cmdOpenLanSearch = new System.Windows.Forms.LinkLabel();
             this.cmdOpenImageJ = new System.Windows.Forms.LinkLabel();
             this.cmdOpenEngineerMode = new System.Windows.Forms.LinkLabel();
             this.tabSetupPC = new System.Windows.Forms.TabPage();
+            this.chkmatlabinstall2022b = new System.Windows.Forms.CheckBox();
+            this.cmdInstallMatlab2022b = new System.Windows.Forms.LinkLabel();
             this.chkmatlabinstall = new System.Windows.Forms.CheckBox();
             this.cmdInstallMatlab = new System.Windows.Forms.LinkLabel();
             this.cmdPinRegularApps = new System.Windows.Forms.LinkLabel();
@@ -95,6 +101,7 @@ namespace EZAE
             this.cbFixture = new System.Windows.Forms.ComboBox();
             this.cbTightVNCPath = new System.Windows.Forms.ComboBox();
             this.tabSetSequence = new System.Windows.Forms.TabPage();
+            this.cmdRenameVNTT = new System.Windows.Forms.LinkLabel();
             this.cmdEmu2p1SequenceConvert = new System.Windows.Forms.LinkLabel();
             this.cmdCopyMasterAppData = new System.Windows.Forms.LinkLabel();
             this.cmdCheckSequence = new System.Windows.Forms.LinkLabel();
@@ -109,7 +116,6 @@ namespace EZAE
             this.cmdUseButterfly = new System.Windows.Forms.LinkLabel();
             this.lblSequenceFileName = new System.Windows.Forms.Label();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-            this.cmdRenameVNTT = new System.Windows.Forms.LinkLabel();
             this.tabControl1.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabSetupPC.SuspendLayout();
@@ -125,11 +131,15 @@ namespace EZAE
             this.tabControl1.Location = new System.Drawing.Point(2, 3);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(565, 235);
+            this.tabControl1.Size = new System.Drawing.Size(565, 270);
             this.tabControl1.TabIndex = 48;
             // 
             // tabControl
             // 
+            this.tabControl.Controls.Add(this.cmdOpenGooil4Tablet);
+            this.tabControl.Controls.Add(this.cmdOpenGooil3Tablet);
+            this.tabControl.Controls.Add(this.cmdOpenGooil2Tablet);
+            this.tabControl.Controls.Add(this.cmdOpenGooil1Tablet);
             this.tabControl.Controls.Add(this.cmdMakeProcessFile2);
             this.tabControl.Controls.Add(this.cmdShareX);
             this.tabControl.Controls.Add(this.cmdRestartTTDove2p0);
@@ -149,7 +159,7 @@ namespace EZAE
             this.tabControl.Controls.Add(this.cmdOpenDooone3);
             this.tabControl.Controls.Add(this.cmdOpenDooone2);
             this.tabControl.Controls.Add(this.cmdOpenDooone1);
-            this.tabControl.Controls.Add(this.cmdCheckLC);
+            this.tabControl.Controls.Add(this.cmdOpenWPSExcel);
             this.tabControl.Controls.Add(this.cmdOpenTools);
             this.tabControl.Controls.Add(this.cmdOpenMTFCenter);
             this.tabControl.Controls.Add(this.cmdOpenLanSearch);
@@ -157,11 +167,55 @@ namespace EZAE
             this.tabControl.Controls.Add(this.cmdOpenEngineerMode);
             this.tabControl.Location = new System.Drawing.Point(4, 22);
             this.tabControl.Name = "tabControl";
-            this.tabControl.Size = new System.Drawing.Size(557, 209);
+            this.tabControl.Size = new System.Drawing.Size(557, 244);
             this.tabControl.TabIndex = 2;
             this.tabControl.Text = "Control";
             this.tabControl.UseVisualStyleBackColor = true;
             this.tabControl.Enter += new System.EventHandler(this.tabControl_Enter);
+            // 
+            // cmdOpenGooil4Tablet
+            // 
+            this.cmdOpenGooil4Tablet.AutoSize = true;
+            this.cmdOpenGooil4Tablet.Location = new System.Drawing.Point(321, 163);
+            this.cmdOpenGooil4Tablet.Name = "cmdOpenGooil4Tablet";
+            this.cmdOpenGooil4Tablet.Size = new System.Drawing.Size(99, 13);
+            this.cmdOpenGooil4Tablet.TabIndex = 32;
+            this.cmdOpenGooil4Tablet.TabStop = true;
+            this.cmdOpenGooil4Tablet.Text = "Open Gooil4 Tablet";
+            this.cmdOpenGooil4Tablet.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenGooil4Tablet_LinkClicked);
+            // 
+            // cmdOpenGooil3Tablet
+            // 
+            this.cmdOpenGooil3Tablet.AutoSize = true;
+            this.cmdOpenGooil3Tablet.Location = new System.Drawing.Point(216, 163);
+            this.cmdOpenGooil3Tablet.Name = "cmdOpenGooil3Tablet";
+            this.cmdOpenGooil3Tablet.Size = new System.Drawing.Size(99, 13);
+            this.cmdOpenGooil3Tablet.TabIndex = 31;
+            this.cmdOpenGooil3Tablet.TabStop = true;
+            this.cmdOpenGooil3Tablet.Text = "Open Gooil3 Tablet";
+            this.cmdOpenGooil3Tablet.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenGooil3Tablet_LinkClicked);
+            // 
+            // cmdOpenGooil2Tablet
+            // 
+            this.cmdOpenGooil2Tablet.AutoSize = true;
+            this.cmdOpenGooil2Tablet.Location = new System.Drawing.Point(111, 163);
+            this.cmdOpenGooil2Tablet.Name = "cmdOpenGooil2Tablet";
+            this.cmdOpenGooil2Tablet.Size = new System.Drawing.Size(99, 13);
+            this.cmdOpenGooil2Tablet.TabIndex = 30;
+            this.cmdOpenGooil2Tablet.TabStop = true;
+            this.cmdOpenGooil2Tablet.Text = "Open Gooil2 Tablet";
+            this.cmdOpenGooil2Tablet.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenGooil2Tablet_LinkClicked);
+            // 
+            // cmdOpenGooil1Tablet
+            // 
+            this.cmdOpenGooil1Tablet.AutoSize = true;
+            this.cmdOpenGooil1Tablet.Location = new System.Drawing.Point(6, 163);
+            this.cmdOpenGooil1Tablet.Name = "cmdOpenGooil1Tablet";
+            this.cmdOpenGooil1Tablet.Size = new System.Drawing.Size(99, 13);
+            this.cmdOpenGooil1Tablet.TabIndex = 29;
+            this.cmdOpenGooil1Tablet.TabStop = true;
+            this.cmdOpenGooil1Tablet.Text = "Open Gooil1 Tablet";
+            this.cmdOpenGooil1Tablet.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenGooil1Tablet_LinkClicked);
             // 
             // cmdMakeProcessFile2
             // 
@@ -243,7 +297,7 @@ namespace EZAE
             // cmdOpenTCPClient
             // 
             this.cmdOpenTCPClient.AutoSize = true;
-            this.cmdOpenTCPClient.Location = new System.Drawing.Point(309, 61);
+            this.cmdOpenTCPClient.Location = new System.Drawing.Point(293, 61);
             this.cmdOpenTCPClient.Name = "cmdOpenTCPClient";
             this.cmdOpenTCPClient.Size = new System.Drawing.Size(83, 13);
             this.cmdOpenTCPClient.TabIndex = 21;
@@ -254,7 +308,7 @@ namespace EZAE
             // cmdOpenTCPServer
             // 
             this.cmdOpenTCPServer.AutoSize = true;
-            this.cmdOpenTCPServer.Location = new System.Drawing.Point(215, 61);
+            this.cmdOpenTCPServer.Location = new System.Drawing.Point(199, 61);
             this.cmdOpenTCPServer.Name = "cmdOpenTCPServer";
             this.cmdOpenTCPServer.Size = new System.Drawing.Size(88, 13);
             this.cmdOpenTCPServer.TabIndex = 20;
@@ -372,16 +426,16 @@ namespace EZAE
             this.cmdOpenDooone1.Text = "Open Dooone1";
             this.cmdOpenDooone1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenDooone1_LinkClicked);
             // 
-            // cmdCheckLC
+            // cmdOpenWPSExcel
             // 
-            this.cmdCheckLC.AutoSize = true;
-            this.cmdCheckLC.Location = new System.Drawing.Point(6, 61);
-            this.cmdCheckLC.Name = "cmdCheckLC";
-            this.cmdCheckLC.Size = new System.Drawing.Size(106, 13);
-            this.cmdCheckLC.TabIndex = 7;
-            this.cmdCheckLC.TabStop = true;
-            this.cmdCheckLC.Text = "Check License Code";
-            this.cmdCheckLC.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCheckLC_LinkClicked);
+            this.cmdOpenWPSExcel.AutoSize = true;
+            this.cmdOpenWPSExcel.Location = new System.Drawing.Point(6, 61);
+            this.cmdOpenWPSExcel.Name = "cmdOpenWPSExcel";
+            this.cmdOpenWPSExcel.Size = new System.Drawing.Size(90, 13);
+            this.cmdOpenWPSExcel.TabIndex = 7;
+            this.cmdOpenWPSExcel.TabStop = true;
+            this.cmdOpenWPSExcel.Text = "Open WPS Excel";
+            this.cmdOpenWPSExcel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenWPSExcel_LinkClicked);
             // 
             // cmdOpenTools
             // 
@@ -408,7 +462,7 @@ namespace EZAE
             // cmdOpenLanSearch
             // 
             this.cmdOpenLanSearch.AutoSize = true;
-            this.cmdOpenLanSearch.Location = new System.Drawing.Point(118, 61);
+            this.cmdOpenLanSearch.Location = new System.Drawing.Point(102, 61);
             this.cmdOpenLanSearch.Name = "cmdOpenLanSearch";
             this.cmdOpenLanSearch.Size = new System.Drawing.Size(91, 13);
             this.cmdOpenLanSearch.TabIndex = 9;
@@ -440,6 +494,8 @@ namespace EZAE
             // 
             // tabSetupPC
             // 
+            this.tabSetupPC.Controls.Add(this.chkmatlabinstall2022b);
+            this.tabSetupPC.Controls.Add(this.cmdInstallMatlab2022b);
             this.tabSetupPC.Controls.Add(this.chkmatlabinstall);
             this.tabSetupPC.Controls.Add(this.cmdInstallMatlab);
             this.tabSetupPC.Controls.Add(this.cmdPinRegularApps);
@@ -479,11 +535,31 @@ namespace EZAE
             this.tabSetupPC.Location = new System.Drawing.Point(4, 22);
             this.tabSetupPC.Name = "tabSetupPC";
             this.tabSetupPC.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSetupPC.Size = new System.Drawing.Size(557, 209);
+            this.tabSetupPC.Size = new System.Drawing.Size(557, 244);
             this.tabSetupPC.TabIndex = 1;
             this.tabSetupPC.Text = "Setup PC";
             this.tabSetupPC.UseVisualStyleBackColor = true;
             this.tabSetupPC.Enter += new System.EventHandler(this.tabSetupPC_Enter);
+            // 
+            // chkmatlabinstall2022b
+            // 
+            this.chkmatlabinstall2022b.AutoSize = true;
+            this.chkmatlabinstall2022b.Location = new System.Drawing.Point(496, 82);
+            this.chkmatlabinstall2022b.Name = "chkmatlabinstall2022b";
+            this.chkmatlabinstall2022b.Size = new System.Drawing.Size(15, 14);
+            this.chkmatlabinstall2022b.TabIndex = 56;
+            this.chkmatlabinstall2022b.UseVisualStyleBackColor = true;
+            // 
+            // cmdInstallMatlab2022b
+            // 
+            this.cmdInstallMatlab2022b.AutoSize = true;
+            this.cmdInstallMatlab2022b.Location = new System.Drawing.Point(346, 83);
+            this.cmdInstallMatlab2022b.Name = "cmdInstallMatlab2022b";
+            this.cmdInstallMatlab2022b.Size = new System.Drawing.Size(144, 13);
+            this.cmdInstallMatlab2022b.TabIndex = 55;
+            this.cmdInstallMatlab2022b.TabStop = true;
+            this.cmdInstallMatlab2022b.Text = "Install Matlab Runtime 2022b";
+            this.cmdInstallMatlab2022b.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdInstallMatlab2022b_LinkClicked);
             // 
             // chkmatlabinstall
             // 
@@ -508,7 +584,7 @@ namespace EZAE
             // cmdPinRegularApps
             // 
             this.cmdPinRegularApps.AutoSize = true;
-            this.cmdPinRegularApps.Location = new System.Drawing.Point(240, 133);
+            this.cmdPinRegularApps.Location = new System.Drawing.Point(240, 156);
             this.cmdPinRegularApps.Name = "cmdPinRegularApps";
             this.cmdPinRegularApps.Size = new System.Drawing.Size(89, 13);
             this.cmdPinRegularApps.TabIndex = 52;
@@ -541,7 +617,7 @@ namespace EZAE
             // cbCopyWhizItem
             // 
             this.cbCopyWhizItem.FormattingEnabled = true;
-            this.cbCopyWhizItem.Location = new System.Drawing.Point(90, 173);
+            this.cbCopyWhizItem.Location = new System.Drawing.Point(90, 196);
             this.cbCopyWhizItem.Name = "cbCopyWhizItem";
             this.cbCopyWhizItem.Size = new System.Drawing.Size(263, 21);
             this.cbCopyWhizItem.TabIndex = 49;
@@ -550,7 +626,7 @@ namespace EZAE
             // cmdRunCopyWhiz
             // 
             this.cmdRunCopyWhiz.AutoSize = true;
-            this.cmdRunCopyWhiz.Location = new System.Drawing.Point(7, 176);
+            this.cmdRunCopyWhiz.Location = new System.Drawing.Point(7, 199);
             this.cmdRunCopyWhiz.Name = "cmdRunCopyWhiz";
             this.cmdRunCopyWhiz.Size = new System.Drawing.Size(78, 13);
             this.cmdRunCopyWhiz.TabIndex = 48;
@@ -561,7 +637,7 @@ namespace EZAE
             // cmdChangePW1
             // 
             this.cmdChangePW1.AutoSize = true;
-            this.cmdChangePW1.Location = new System.Drawing.Point(240, 155);
+            this.cmdChangePW1.Location = new System.Drawing.Point(240, 178);
             this.cmdChangePW1.Name = "cmdChangePW1";
             this.cmdChangePW1.Size = new System.Drawing.Size(113, 13);
             this.cmdChangePW1.TabIndex = 47;
@@ -581,7 +657,7 @@ namespace EZAE
             // chkdotnetinstall
             // 
             this.chkdotnetinstall.AutoSize = true;
-            this.chkdotnetinstall.Location = new System.Drawing.Point(439, 83);
+            this.chkdotnetinstall.Location = new System.Drawing.Point(100, 108);
             this.chkdotnetinstall.Name = "chkdotnetinstall";
             this.chkdotnetinstall.Size = new System.Drawing.Size(15, 14);
             this.chkdotnetinstall.TabIndex = 31;
@@ -595,7 +671,7 @@ namespace EZAE
             "D:\\Program",
             "C:\\Setup\\Program",
             "E:\\Program"});
-            this.cbProgramFolder.Location = new System.Drawing.Point(245, 105);
+            this.cbProgramFolder.Location = new System.Drawing.Point(245, 128);
             this.cbProgramFolder.Name = "cbProgramFolder";
             this.cbProgramFolder.Size = new System.Drawing.Size(80, 21);
             this.cbProgramFolder.TabIndex = 39;
@@ -604,7 +680,7 @@ namespace EZAE
             // cmdShareProgram
             // 
             this.cmdShareProgram.AutoSize = true;
-            this.cmdShareProgram.Location = new System.Drawing.Point(162, 108);
+            this.cmdShareProgram.Location = new System.Drawing.Point(162, 131);
             this.cmdShareProgram.Name = "cmdShareProgram";
             this.cmdShareProgram.Size = new System.Drawing.Size(77, 13);
             this.cmdShareProgram.TabIndex = 38;
@@ -639,7 +715,7 @@ namespace EZAE
             // cmdFirewallOff
             // 
             this.cmdFirewallOff.AutoSize = true;
-            this.cmdFirewallOff.Location = new System.Drawing.Point(175, 155);
+            this.cmdFirewallOff.Location = new System.Drawing.Point(175, 178);
             this.cmdFirewallOff.Name = "cmdFirewallOff";
             this.cmdFirewallOff.Size = new System.Drawing.Size(59, 13);
             this.cmdFirewallOff.TabIndex = 45;
@@ -650,7 +726,7 @@ namespace EZAE
             // cmdPasswordSharingOff
             // 
             this.cmdPasswordSharingOff.AutoSize = true;
-            this.cmdPasswordSharingOff.Location = new System.Drawing.Point(60, 155);
+            this.cmdPasswordSharingOff.Location = new System.Drawing.Point(60, 178);
             this.cmdPasswordSharingOff.Name = "cmdPasswordSharingOff";
             this.cmdPasswordSharingOff.Size = new System.Drawing.Size(109, 13);
             this.cmdPasswordSharingOff.TabIndex = 44;
@@ -661,7 +737,7 @@ namespace EZAE
             // cmdUACOff
             // 
             this.cmdUACOff.AutoSize = true;
-            this.cmdUACOff.Location = new System.Drawing.Point(8, 155);
+            this.cmdUACOff.Location = new System.Drawing.Point(8, 178);
             this.cmdUACOff.Name = "cmdUACOff";
             this.cmdUACOff.Size = new System.Drawing.Size(46, 13);
             this.cmdUACOff.TabIndex = 43;
@@ -672,7 +748,7 @@ namespace EZAE
             // cmdPinCameraPcFolders
             // 
             this.cmdPinCameraPcFolders.AutoSize = true;
-            this.cmdPinCameraPcFolders.Location = new System.Drawing.Point(8, 133);
+            this.cmdPinCameraPcFolders.Location = new System.Drawing.Point(8, 156);
             this.cmdPinCameraPcFolders.Name = "cmdPinCameraPcFolders";
             this.cmdPinCameraPcFolders.Size = new System.Drawing.Size(115, 13);
             this.cmdPinCameraPcFolders.TabIndex = 40;
@@ -683,7 +759,7 @@ namespace EZAE
             // cmdPinFixturePcFolders
             // 
             this.cmdPinFixturePcFolders.AutoSize = true;
-            this.cmdPinFixturePcFolders.Location = new System.Drawing.Point(129, 133);
+            this.cmdPinFixturePcFolders.Location = new System.Drawing.Point(129, 156);
             this.cmdPinFixturePcFolders.Name = "cmdPinFixturePcFolders";
             this.cmdPinFixturePcFolders.Size = new System.Drawing.Size(110, 13);
             this.cmdPinFixturePcFolders.TabIndex = 41;
@@ -694,7 +770,7 @@ namespace EZAE
             // cmdInstallWireshark
             // 
             this.cmdInstallWireshark.AutoSize = true;
-            this.cmdInstallWireshark.Location = new System.Drawing.Point(335, 133);
+            this.cmdInstallWireshark.Location = new System.Drawing.Point(335, 156);
             this.cmdInstallWireshark.Name = "cmdInstallWireshark";
             this.cmdInstallWireshark.Size = new System.Drawing.Size(85, 13);
             this.cmdInstallWireshark.TabIndex = 42;
@@ -705,7 +781,7 @@ namespace EZAE
             // cmdSharePOCB
             // 
             this.cmdSharePOCB.AutoSize = true;
-            this.cmdSharePOCB.Location = new System.Drawing.Point(427, 108);
+            this.cmdSharePOCB.Location = new System.Drawing.Point(427, 131);
             this.cmdSharePOCB.Name = "cmdSharePOCB";
             this.cmdSharePOCB.Size = new System.Drawing.Size(67, 13);
             this.cmdSharePOCB.TabIndex = 37;
@@ -716,7 +792,7 @@ namespace EZAE
             // cmdShareRVSData
             // 
             this.cmdShareRVSData.AutoSize = true;
-            this.cmdShareRVSData.Location = new System.Drawing.Point(331, 108);
+            this.cmdShareRVSData.Location = new System.Drawing.Point(331, 131);
             this.cmdShareRVSData.Name = "cmdShareRVSData";
             this.cmdShareRVSData.Size = new System.Drawing.Size(83, 13);
             this.cmdShareRVSData.TabIndex = 37;
@@ -727,7 +803,7 @@ namespace EZAE
             // cmdShareE
             // 
             this.cmdShareE.AutoSize = true;
-            this.cmdShareE.Location = new System.Drawing.Point(111, 108);
+            this.cmdShareE.Location = new System.Drawing.Point(111, 131);
             this.cmdShareE.Name = "cmdShareE";
             this.cmdShareE.Size = new System.Drawing.Size(45, 13);
             this.cmdShareE.TabIndex = 36;
@@ -738,7 +814,7 @@ namespace EZAE
             // cmdShareD
             // 
             this.cmdShareD.AutoSize = true;
-            this.cmdShareD.Location = new System.Drawing.Point(59, 108);
+            this.cmdShareD.Location = new System.Drawing.Point(59, 131);
             this.cmdShareD.Name = "cmdShareD";
             this.cmdShareD.Size = new System.Drawing.Size(46, 13);
             this.cmdShareD.TabIndex = 35;
@@ -749,7 +825,7 @@ namespace EZAE
             // cmdShareC
             // 
             this.cmdShareC.AutoSize = true;
-            this.cmdShareC.Location = new System.Drawing.Point(8, 108);
+            this.cmdShareC.Location = new System.Drawing.Point(8, 131);
             this.cmdShareC.Name = "cmdShareC";
             this.cmdShareC.Size = new System.Drawing.Size(45, 13);
             this.cmdShareC.TabIndex = 34;
@@ -760,7 +836,7 @@ namespace EZAE
             // cmdInstallMatlab2017b
             // 
             this.cmdInstallMatlab2017b.AutoSize = true;
-            this.cmdInstallMatlab2017b.Location = new System.Drawing.Point(3, 84);
+            this.cmdInstallMatlab2017b.Location = new System.Drawing.Point(7, 83);
             this.cmdInstallMatlab2017b.Name = "cmdInstallMatlab2017b";
             this.cmdInstallMatlab2017b.Size = new System.Drawing.Size(144, 13);
             this.cmdInstallMatlab2017b.TabIndex = 32;
@@ -771,7 +847,7 @@ namespace EZAE
             // cmdInstallDotnet48
             // 
             this.cmdInstallDotnet48.AutoSize = true;
-            this.cmdInstallDotnet48.Location = new System.Drawing.Point(346, 83);
+            this.cmdInstallDotnet48.Location = new System.Drawing.Point(7, 108);
             this.cmdInstallDotnet48.Name = "cmdInstallDotnet48";
             this.cmdInstallDotnet48.Size = new System.Drawing.Size(87, 13);
             this.cmdInstallDotnet48.TabIndex = 30;
@@ -782,7 +858,7 @@ namespace EZAE
             // cmdInstallNPP
             // 
             this.cmdInstallNPP.AutoSize = true;
-            this.cmdInstallNPP.Location = new System.Drawing.Point(369, 57);
+            this.cmdInstallNPP.Location = new System.Drawing.Point(370, 57);
             this.cmdInstallNPP.Name = "cmdInstallNPP";
             this.cmdInstallNPP.Size = new System.Drawing.Size(90, 13);
             this.cmdInstallNPP.TabIndex = 29;
@@ -793,7 +869,7 @@ namespace EZAE
             // cmdInstallKdiff
             // 
             this.cmdInstallKdiff.AutoSize = true;
-            this.cmdInstallKdiff.Location = new System.Drawing.Point(219, 57);
+            this.cmdInstallKdiff.Location = new System.Drawing.Point(220, 57);
             this.cmdInstallKdiff.Name = "cmdInstallKdiff";
             this.cmdInstallKdiff.Size = new System.Drawing.Size(58, 13);
             this.cmdInstallKdiff.TabIndex = 27;
@@ -804,7 +880,7 @@ namespace EZAE
             // cmdInstallVC1519
             // 
             this.cmdInstallVC1519.AutoSize = true;
-            this.cmdInstallVC1519.Location = new System.Drawing.Point(99, 57);
+            this.cmdInstallVC1519.Location = new System.Drawing.Point(100, 57);
             this.cmdInstallVC1519.Name = "cmdInstallVC1519";
             this.cmdInstallVC1519.Size = new System.Drawing.Size(114, 13);
             this.cmdInstallVC1519.TabIndex = 26;
@@ -815,7 +891,7 @@ namespace EZAE
             // cmdInstallVC12
             // 
             this.cmdInstallVC12.AutoSize = true;
-            this.cmdInstallVC12.Location = new System.Drawing.Point(6, 57);
+            this.cmdInstallVC12.Location = new System.Drawing.Point(8, 57);
             this.cmdInstallVC12.Name = "cmdInstallVC12";
             this.cmdInstallVC12.Size = new System.Drawing.Size(87, 13);
             this.cmdInstallVC12.TabIndex = 25;
@@ -826,7 +902,7 @@ namespace EZAE
             // cmdInstallIrfanview
             // 
             this.cmdInstallIrfanview.AutoSize = true;
-            this.cmdInstallIrfanview.Location = new System.Drawing.Point(283, 57);
+            this.cmdInstallIrfanview.Location = new System.Drawing.Point(284, 57);
             this.cmdInstallIrfanview.Name = "cmdInstallIrfanview";
             this.cmdInstallIrfanview.Size = new System.Drawing.Size(80, 13);
             this.cmdInstallIrfanview.TabIndex = 28;
@@ -898,11 +974,22 @@ namespace EZAE
             this.tabSetSequence.Location = new System.Drawing.Point(4, 22);
             this.tabSetSequence.Name = "tabSetSequence";
             this.tabSetSequence.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSetSequence.Size = new System.Drawing.Size(557, 209);
+            this.tabSetSequence.Size = new System.Drawing.Size(557, 244);
             this.tabSetSequence.TabIndex = 0;
             this.tabSetSequence.Text = "Setup TrueTest";
             this.tabSetSequence.UseVisualStyleBackColor = true;
             this.tabSetSequence.Enter += new System.EventHandler(this.tabSetSequence_Enter);
+            // 
+            // cmdRenameVNTT
+            // 
+            this.cmdRenameVNTT.AutoSize = true;
+            this.cmdRenameVNTT.Location = new System.Drawing.Point(246, 49);
+            this.cmdRenameVNTT.Name = "cmdRenameVNTT";
+            this.cmdRenameVNTT.Size = new System.Drawing.Size(76, 13);
+            this.cmdRenameVNTT.TabIndex = 67;
+            this.cmdRenameVNTT.TabStop = true;
+            this.cmdRenameVNTT.Text = "RenameVNTT";
+            this.cmdRenameVNTT.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdRenameVNTT_LinkClicked);
             // 
             // cmdEmu2p1SequenceConvert
             // 
@@ -951,7 +1038,7 @@ namespace EZAE
             // cmdInstallTrueTest
             // 
             this.cmdInstallTrueTest.AutoSize = true;
-            this.cmdInstallTrueTest.Location = new System.Drawing.Point(12, 182);
+            this.cmdInstallTrueTest.Location = new System.Drawing.Point(12, 96);
             this.cmdInstallTrueTest.Name = "cmdInstallTrueTest";
             this.cmdInstallTrueTest.Size = new System.Drawing.Size(80, 13);
             this.cmdInstallTrueTest.TabIndex = 62;
@@ -984,7 +1071,7 @@ namespace EZAE
             // cbTrueTestInstallerList
             // 
             this.cbTrueTestInstallerList.FormattingEnabled = true;
-            this.cbTrueTestInstallerList.Location = new System.Drawing.Point(98, 179);
+            this.cbTrueTestInstallerList.Location = new System.Drawing.Point(98, 93);
             this.cbTrueTestInstallerList.Name = "cbTrueTestInstallerList";
             this.cbTrueTestInstallerList.Size = new System.Drawing.Size(441, 21);
             this.cbTrueTestInstallerList.TabIndex = 63;
@@ -1044,24 +1131,13 @@ namespace EZAE
             this.lblSequenceFileName.Size = new System.Drawing.Size(0, 13);
             this.lblSequenceFileName.TabIndex = 27;
             // 
-            // cmdRenameVNTT
-            // 
-            this.cmdRenameVNTT.AutoSize = true;
-            this.cmdRenameVNTT.Location = new System.Drawing.Point(246, 49);
-            this.cmdRenameVNTT.Name = "cmdRenameVNTT";
-            this.cmdRenameVNTT.Size = new System.Drawing.Size(76, 13);
-            this.cmdRenameVNTT.TabIndex = 67;
-            this.cmdRenameVNTT.TabStop = true;
-            this.cmdRenameVNTT.Text = "RenameVNTT";
-            this.cmdRenameVNTT.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdRenameVNTT_LinkClicked);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(572, 250);
+            this.ClientSize = new System.Drawing.Size(572, 276);
             this.Controls.Add(this.tabControl1);
             this.HelpButton = true;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -1094,7 +1170,7 @@ namespace EZAE
         private System.Windows.Forms.LinkLabel cmdOpenTools;
         private System.Windows.Forms.LinkLabel cmdOpenMTFCenter;
         private System.Windows.Forms.LinkLabel cmdOpenDooone1;
-        private System.Windows.Forms.LinkLabel cmdCheckLC;
+        private System.Windows.Forms.LinkLabel cmdOpenWPSExcel;
         private System.Windows.Forms.LinkLabel cmdOpenDooone2;
         private System.Windows.Forms.LinkLabel cmdOpenDooone3;
         private System.Windows.Forms.LinkLabel cmdOpenDooone4;
@@ -1164,6 +1240,12 @@ namespace EZAE
         private System.Windows.Forms.LinkLabel cmdEmu2p1SequenceConvert;
         private System.Windows.Forms.LinkLabel cmdCopyMasterAppData;
         private System.Windows.Forms.LinkLabel cmdRenameVNTT;
+        private System.Windows.Forms.CheckBox chkmatlabinstall2022b;
+        private System.Windows.Forms.LinkLabel cmdInstallMatlab2022b;
+        private System.Windows.Forms.LinkLabel cmdOpenGooil4Tablet;
+        private System.Windows.Forms.LinkLabel cmdOpenGooil3Tablet;
+        private System.Windows.Forms.LinkLabel cmdOpenGooil2Tablet;
+        private System.Windows.Forms.LinkLabel cmdOpenGooil1Tablet;
     }
 }
 

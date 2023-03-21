@@ -210,5 +210,14 @@ Namespace TemplateAppVB
 			Label1.Text = "DONE !"
 			btnCopy.Enabled = True
 		End Sub
+
+		Private Sub btnAddRFD_Click(sender As Object, e As EventArgs) Handles btnAddRFD.Click
+			Dim files = Directory.GetFiles(AppDataPath)
+			For Each item As String In files
+				If Not ListBox1.Items.Contains(item) AndAlso Path.GetExtension(item) = ".txt" AndAlso item.Contains("RegisterPixelsFalseDefects") Then
+					ListBox1.Items.Add(item)
+				End If
+			Next
+		End Sub
 	End Class
 End Namespace

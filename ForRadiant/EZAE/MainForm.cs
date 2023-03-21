@@ -129,13 +129,12 @@ namespace EZAE
             }
         }
 
-        private void cmdCheckLC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void cmdOpenWPSExcel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             string filepath = @"Tools\WPSOffice\et.exe";
-            string lcfilepath = @"Tools\License Code Combined List.xlsx";
-            if (File.Exists(filepath) && File.Exists(lcfilepath))
+            if (File.Exists(filepath))
             {
-                Process.Start(filepath, "\"" + lcfilepath + "\"");
+                Process.Start(filepath);
             }
         }
 
@@ -554,6 +553,11 @@ namespace EZAE
             if (File.Exists(@"Tools\Installer\MCR_R2017b_win64_installer.exe") && chkmatlabinstall2017b.Checked)
             {
                 ExecuteAsAdmin(@"Tools\Installer\MCR_R2017b_win64_installer.exe");
+            }
+
+            if (File.Exists(@"Tools\Installer\MATLAB_Runtime_R2022b_Update_5_win64.exe") && chkmatlabinstall2022b.Checked)
+            {
+                ExecuteAsAdmin(@"Tools\Installer\MATLAB_Runtime_R2022b_Update_5_win64.exe");
             }
 
             if (File.Exists(@"Tools\ImageJ\pinImageJtoTaskbar.bat"))
@@ -1079,6 +1083,50 @@ namespace EZAE
             if (File.Exists(@"Tools\RenameVNTT.exe"))
             {
                 Process.Start(@"Tools\RenameVNTT.exe");
+            }
+        }
+
+        private void cmdInstallMatlab2022b_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"Tools\Installer\MATLAB_Runtime_R2022b_Update_5_win64.exe"))
+            {
+                ExecuteAsAdmin(@"Tools\Installer\MATLAB_Runtime_R2022b_Update_5_win64.exe");
+            }
+        }
+
+        private void cmdOpenGooil1Tablet_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = @"C:\Windows\gooil1tablet.lnk";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void cmdOpenGooil2Tablet_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = @"C:\Windows\gooil2tablet.lnk";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void cmdOpenGooil3Tablet_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = @"C:\Windows\gooil3tablet.lnk";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void cmdOpenGooil4Tablet_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = @"C:\Windows\gooil4tablet.lnk";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
             }
         }
     }
