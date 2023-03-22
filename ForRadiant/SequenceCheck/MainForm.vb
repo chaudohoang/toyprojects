@@ -1324,21 +1324,36 @@ Public Class MainForm
 				CommLogUpdateText3("NG AppData file : " + runningFile + " is not existed or deleted !")
 				Continue For
 			End If
-			Dim compareProcess As Process = New Process
-			Dim startinfo As System.Diagnostics.ProcessStartInfo = New System.Diagnostics.ProcessStartInfo()
-			startinfo.FileName = System.IO.Path.Combine(My.Application.Info.DirectoryPath, "WinMergeU.exe")
-			startinfo.Arguments = "-noninteractive -minimize -enableexitcode -cfg Settings/DiffContextV2=0 " + Chr(34) + runningFile + Chr(34) + " " + Chr(34) + masterFile + Chr(34)
-			compareProcess = Process.Start(startinfo)
-			If compareProcess.WaitForExit(5000) Then
-				Dim ExitCode As Integer = compareProcess.ExitCode
-				If ExitCode <> 0 Then
+			If {"xml", "csv", "txt"}.Contains(Path.GetExtension(masterFile).Remove(0, 1)) Then
+				Dim compareProcess As Process = New Process
+				Dim startinfo As System.Diagnostics.ProcessStartInfo = New System.Diagnostics.ProcessStartInfo()
+				startinfo.FileName = System.IO.Path.Combine(My.Application.Info.DirectoryPath, "WinMergeU.exe")
+				startinfo.Arguments = "-noninteractive -minimize -enableexitcode -cfg Settings/DiffContextV2=0 " + Chr(34) + runningFile + Chr(34) + " " + Chr(34) + masterFile + Chr(34)
+				compareProcess = Process.Start(startinfo)
+
+				If compareProcess.WaitForExit(15000) Then
+					Dim ExitCode As Integer = compareProcess.ExitCode
+					If ExitCode <> 0 Then
+						ngFiles.Add(runningFile)
+					Else
+						okFiles.Add(runningFile)
+					End If
+				Else
+					CommLogUpdateText3("Timed out comparing appdata files")
+				End If
+
+			ElseIf {"sdf"}.Contains(Path.GetExtension(masterFile).Remove(0, 1)) Then
+				Dim masterInfo As FileInfo = New FileInfo(masterFile)
+				Dim runningInfo As FileInfo = New FileInfo(runningFile)
+				Dim masterSize As Long = masterInfo.Length
+				Dim runningSize As Long = runningInfo.Length
+				If masterSize <> runningSize Then
 					ngFiles.Add(runningFile)
 				Else
 					okFiles.Add(runningFile)
 				End If
-			Else
-				CommLogUpdateText3("Timed out comparing appdata files")
 			End If
+
 		Next
 		If okFiles.Count > 0 Then
 			For Each item As String In okFiles
