@@ -1302,7 +1302,8 @@ Public Class MainForm
 	End Function
 
 	Private Sub btnCompareAppdata_Click(sender As Object, e As EventArgs) Handles btnCompareAppdata.Click
-
+		Dim sw As New Stopwatch
+		sw.Start()
 		Dim AppDataFolder As String = "C:\Radiant Vision Systems Data\TrueTest\AppData"
 		Dim MasterAppDataFolder As String = "C:\Radiant Vision Systems Data\TrueTest\Master AppData"
 		If Not Directory.Exists(MasterAppDataFolder) Then
@@ -1368,6 +1369,7 @@ Public Class MainForm
 		Else
 			CommLogUpdateText3("Checking Appdata File Finished, OK")
 		End If
-
+		sw.Stop()
+		CommLogUpdateText3("Elapsed time : " + (sw.ElapsedMilliseconds / 1000).ToString + " seconds.")
 	End Sub
 End Class
