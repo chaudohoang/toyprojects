@@ -150,6 +150,18 @@ namespace RemoteTools
             {
                 process.Kill();
             }
+            foreach (var process in Process.GetProcessesByName("conhost"))
+            {
+                try
+                {
+                    process.Kill();
+                }
+                catch (Exception)
+                {
+                    
+                }
+                
+            }
 
             bw = new BackgroundWorker();
             bw.WorkerSupportsCancellation = true;
@@ -166,7 +178,7 @@ namespace RemoteTools
 
         private void cmd_DoWork(object sender, DoWorkEventArgs e)
         {
-            Process p = Process.Start(new ProcessStartInfo("ping") { Arguments = @" " + IP + " -t", RedirectStandardOutput = true, UseShellExecute = false, CreateNoWindow = true });
+            Process p = Process.Start(new ProcessStartInfo("ping") { Arguments = @" " + IP + " -n 30", RedirectStandardOutput = true, UseShellExecute = false, CreateNoWindow = true });
             if (p != null)
             {                
                 p.OutputDataReceived += ((s, ev) =>
@@ -207,5 +219,24 @@ namespace RemoteTools
                        
         }
 
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            foreach (var process in Process.GetProcessesByName("PING"))
+            {
+                process.Kill();
+            }
+            foreach (var process in Process.GetProcessesByName("conhost"))
+            {
+                try
+                {
+                    process.Kill();
+                }
+                catch (Exception)
+                {
+
+                }
+
+            }
+        }
     }
 }
