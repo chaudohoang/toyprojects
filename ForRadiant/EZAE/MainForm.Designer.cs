@@ -62,6 +62,7 @@ namespace EZAE
             this.cmdOpenImageJ = new System.Windows.Forms.LinkLabel();
             this.cmdOpenEngineerMode = new System.Windows.Forms.LinkLabel();
             this.tabSetupPC = new System.Windows.Forms.TabPage();
+            this.cmdInstallWinMerge = new System.Windows.Forms.LinkLabel();
             this.chkmatlabinstall2022b = new System.Windows.Forms.CheckBox();
             this.cmdInstallMatlab2022b = new System.Windows.Forms.LinkLabel();
             this.chkmatlabinstall = new System.Windows.Forms.CheckBox();
@@ -494,6 +495,7 @@ namespace EZAE
             // 
             // tabSetupPC
             // 
+            this.tabSetupPC.Controls.Add(this.cmdInstallWinMerge);
             this.tabSetupPC.Controls.Add(this.chkmatlabinstall2022b);
             this.tabSetupPC.Controls.Add(this.cmdInstallMatlab2022b);
             this.tabSetupPC.Controls.Add(this.chkmatlabinstall);
@@ -541,10 +543,21 @@ namespace EZAE
             this.tabSetupPC.UseVisualStyleBackColor = true;
             this.tabSetupPC.Enter += new System.EventHandler(this.tabSetupPC_Enter);
             // 
+            // cmdInstallWinMerge
+            // 
+            this.cmdInstallWinMerge.AutoSize = true;
+            this.cmdInstallWinMerge.Location = new System.Drawing.Point(8, 84);
+            this.cmdInstallWinMerge.Name = "cmdInstallWinMerge";
+            this.cmdInstallWinMerge.Size = new System.Drawing.Size(86, 13);
+            this.cmdInstallWinMerge.TabIndex = 57;
+            this.cmdInstallWinMerge.TabStop = true;
+            this.cmdInstallWinMerge.Text = "Install WinMerge";
+            this.cmdInstallWinMerge.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdInstallWinMerge_LinkClicked);
+            // 
             // chkmatlabinstall2022b
             // 
             this.chkmatlabinstall2022b.AutoSize = true;
-            this.chkmatlabinstall2022b.Location = new System.Drawing.Point(496, 82);
+            this.chkmatlabinstall2022b.Location = new System.Drawing.Point(421, 83);
             this.chkmatlabinstall2022b.Name = "chkmatlabinstall2022b";
             this.chkmatlabinstall2022b.Size = new System.Drawing.Size(15, 14);
             this.chkmatlabinstall2022b.TabIndex = 56;
@@ -553,7 +566,7 @@ namespace EZAE
             // cmdInstallMatlab2022b
             // 
             this.cmdInstallMatlab2022b.AutoSize = true;
-            this.cmdInstallMatlab2022b.Location = new System.Drawing.Point(346, 83);
+            this.cmdInstallMatlab2022b.Location = new System.Drawing.Point(271, 85);
             this.cmdInstallMatlab2022b.Name = "cmdInstallMatlab2022b";
             this.cmdInstallMatlab2022b.Size = new System.Drawing.Size(144, 13);
             this.cmdInstallMatlab2022b.TabIndex = 55;
@@ -564,7 +577,7 @@ namespace EZAE
             // chkmatlabinstall
             // 
             this.chkmatlabinstall.AutoSize = true;
-            this.chkmatlabinstall.Location = new System.Drawing.Point(325, 83);
+            this.chkmatlabinstall.Location = new System.Drawing.Point(250, 84);
             this.chkmatlabinstall.Name = "chkmatlabinstall";
             this.chkmatlabinstall.Size = new System.Drawing.Size(15, 14);
             this.chkmatlabinstall.TabIndex = 54;
@@ -573,7 +586,7 @@ namespace EZAE
             // cmdInstallMatlab
             // 
             this.cmdInstallMatlab.AutoSize = true;
-            this.cmdInstallMatlab.Location = new System.Drawing.Point(175, 83);
+            this.cmdInstallMatlab.Location = new System.Drawing.Point(100, 84);
             this.cmdInstallMatlab.Name = "cmdInstallMatlab";
             this.cmdInstallMatlab.Size = new System.Drawing.Size(144, 13);
             this.cmdInstallMatlab.TabIndex = 53;
@@ -648,7 +661,7 @@ namespace EZAE
             // chkmatlabinstall2017b
             // 
             this.chkmatlabinstall2017b.AutoSize = true;
-            this.chkmatlabinstall2017b.Location = new System.Drawing.Point(154, 84);
+            this.chkmatlabinstall2017b.Location = new System.Drawing.Point(271, 106);
             this.chkmatlabinstall2017b.Name = "chkmatlabinstall2017b";
             this.chkmatlabinstall2017b.Size = new System.Drawing.Size(15, 14);
             this.chkmatlabinstall2017b.TabIndex = 33;
@@ -836,7 +849,7 @@ namespace EZAE
             // cmdInstallMatlab2017b
             // 
             this.cmdInstallMatlab2017b.AutoSize = true;
-            this.cmdInstallMatlab2017b.Location = new System.Drawing.Point(7, 83);
+            this.cmdInstallMatlab2017b.Location = new System.Drawing.Point(121, 107);
             this.cmdInstallMatlab2017b.Name = "cmdInstallMatlab2017b";
             this.cmdInstallMatlab2017b.Size = new System.Drawing.Size(144, 13);
             this.cmdInstallMatlab2017b.TabIndex = 32;
@@ -1070,6 +1083,7 @@ namespace EZAE
             // 
             // cbTrueTestInstallerList
             // 
+            this.cbTrueTestInstallerList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbTrueTestInstallerList.FormattingEnabled = true;
             this.cbTrueTestInstallerList.Location = new System.Drawing.Point(98, 93);
             this.cbTrueTestInstallerList.Name = "cbTrueTestInstallerList";
@@ -1246,6 +1260,7 @@ namespace EZAE
         private System.Windows.Forms.LinkLabel cmdOpenGooil3Tablet;
         private System.Windows.Forms.LinkLabel cmdOpenGooil2Tablet;
         private System.Windows.Forms.LinkLabel cmdOpenGooil1Tablet;
+        private System.Windows.Forms.LinkLabel cmdInstallWinMerge;
     }
 }
 

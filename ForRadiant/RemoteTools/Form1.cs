@@ -17,19 +17,14 @@ namespace RemoteTools
 {
     public partial class Form1 : Form
     {
-        static System.Windows.Forms.Timer t;
         static BackgroundWorker bw;
         string IP;
-        static List<Thread> bgWorkersThreads;
         public Form1()
         {
             InitializeComponent();
             bw = new BackgroundWorker();
             bw.WorkerSupportsCancellation = true;
-            t = new System.Windows.Forms.Timer() { Interval = 10000 };
-            t.Tick += t_Tick;
             richTextBox1.HideSelection = false;
-            bgWorkersThreads = new List<Thread>();
         }
 
         private void SetVersionInfo()
@@ -150,12 +145,16 @@ namespace RemoteTools
             }
 
             richTextBox1.Text = "";
+
+            foreach (var process in Process.GetProcessesByName("PING"))
+            {
+                process.Kill();
+            }
+
             bw = new BackgroundWorker();
             bw.WorkerSupportsCancellation = true;
             bw.DoWork += cmd_DoWork;
             
-            t.Stop();
-            t.Start();
             if (bw.IsBusy)
                 bw.CancelAsync();
             while (bw.IsBusy)
@@ -167,8 +166,7 @@ namespace RemoteTools
 
         private void cmd_DoWork(object sender, DoWorkEventArgs e)
         {
-            bgWorkersThreads.Add(Thread.CurrentThread);
-            Process p = Process.Start(new ProcessStartInfo("cmd") { Arguments = @"/C ping " + IP + " -t", RedirectStandardOutput = true, UseShellExecute = false, CreateNoWindow = true });
+            Process p = Process.Start(new ProcessStartInfo("ping") { Arguments = @" " + IP + " -t", RedirectStandardOutput = true, UseShellExecute = false, CreateNoWindow = true });
             if (p != null)
             {                
                 p.OutputDataReceived += ((s, ev) =>
@@ -203,49 +201,11 @@ namespace RemoteTools
                     }
 
                     System.Threading.Thread.Sleep(10);
-                    if (ev.Data == null)
-                    {
-                        MessageBox.Show("ping done");
-
-                    }
                 });
                 p.BeginOutputReadLine();
             }
-         
                        
         }
 
-        private void updateCMDResult(RichTextBox richtextbox, string data)
-        {
-            richtextbox.Text += data;
-        }
-
-        private void btnStopPing_Click(object sender, EventArgs e)
-        {
-        
-                bw.CancelAsync();
-            bw.Dispose();
-            bw = null;
-
-            t.Stop();
-        }
-
-        void t_Tick(object sender, EventArgs e)
-        {
-            
-                bw.CancelAsync();
-            bw.Dispose();
-            bw = null;
-
-            (sender as System.Windows.Forms.Timer).Stop();
-        }
-
-        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            foreach (Thread thread in bgWorkersThreads)
-            {
-                thread.Abort();
-            }
-        }
     }
 }

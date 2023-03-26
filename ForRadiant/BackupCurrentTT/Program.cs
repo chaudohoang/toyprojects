@@ -13,14 +13,18 @@ namespace BackupCurrentTT
     {
         static void Main(string[] args)
         {
-            //foreach (var process in Process.GetProcessesByName("TrueTest"))
-            //{
-            //    process.Kill();
-            //}
+            string sourcefolder = @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8";
+            if (!Directory.Exists(sourcefolder))
+            {
+                Console.WriteLine("C:\\Program Files\\Radiant Vision Systems\\TrueTest 1.8 Not existed ...");
+                Console.WriteLine();
+                Console.WriteLine("Press any key to close ...");
+                Console.ReadKey();
+                return;
+            }
             var versionInfo = FileVersionInfo.GetVersionInfo(@"C:\Program Files\Radiant Vision Systems\TrueTest 1.8\TrueTest.exe");
             string version = versionInfo.FileVersion.Replace(versionInfo.FilePrivatePart.ToString(),"");
-            version = version.Remove(version.Length - 1);
-            string sourcefolder = @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8";
+            version = version.Remove(version.Length - 1);            
             string destfolder = @"C:\Program Files\Radiant Vision Systems\TrueTest " + version;
             if (!Directory.Exists(destfolder))
             {
@@ -28,7 +32,29 @@ namespace BackupCurrentTT
                 CopyFolder(sourcefolder, destfolder);               
             }
             Console.WriteLine("Backed up to : " + destfolder);
-            Console.ReadKey();
+            Console.WriteLine("Delete TrueTest 1.8 folder ?, y/n");
+            char del;
+            del = (char)Console.ReadKey().KeyChar;
+            if (del=='y')
+            {
+                foreach (var process in Process.GetProcessesByName("TrueTest"))
+                {
+                    process.Kill();
+                }
+                Directory.Delete("C:\\Program Files\\Radiant Vision Systems\\TrueTest 1.8",true);
+                Console.WriteLine();
+                Console.WriteLine("C:\\Program Files\\Radiant Vision Systems\\TrueTest 1.8 Deleted ...");
+                Console.WriteLine();
+                Console.WriteLine("Finished, press any key to close ...");
+                Console.ReadKey();
+            }
+            else
+            {
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine("Finished, press any key to close ...");
+                Console.ReadKey();
+            }
             //CreateShortcut("TrueTest " + version, Environment.GetFolderPath(Environment.SpecialFolder.Desktop), Path.Combine(destfolder, "TrueTest.exe"));
         }
 
