@@ -86,7 +86,7 @@ namespace EZAE
 
         private void cmdOpenImageJ_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string filepath = @"Tools\ImageJ\ImageJ.exe";
+            string filepath = @"Apps\ImageJ\ImageJ.exe";
             if (File.Exists(filepath))
             {
                 Process.Start(filepath);
@@ -131,7 +131,7 @@ namespace EZAE
 
         private void cmdOpenWPSExcel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string filepath = @"Tools\WPSOffice\et.exe";
+            string filepath = @"Apps\WPSOffice\et.exe";
             if (File.Exists(filepath))
             {
                 Process.Start(filepath);
@@ -560,9 +560,9 @@ namespace EZAE
                 ExecuteAsAdmin(@"Big Installers\MATLAB_Runtime_R2022b_Update_5_win64.exe");
             }
 
-            if (File.Exists(@"Tools\ImageJ\pinImageJtoTaskbar.bat"))
+            if (File.Exists(@"Apps\ImageJ\pinImageJtoTaskbar.bat"))
             {
-                Process.Start(@"Tools\ImageJ\pinImageJtoTaskbar.bat");
+                Process.Start(@"Apps\ImageJ\pinImageJtoTaskbar.bat");
             }
 
             if (File.Exists(@"Tools\SetSequence\pinSetSequenceToTaskbar.bat"))
@@ -880,9 +880,9 @@ namespace EZAE
 
         private void cmdPinRegularApps_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\ImageJ\pinImageJtoTaskbar.bat"))
+            if (File.Exists(@"Apps\ImageJ\pinImageJtoTaskbar.bat"))
             {
-                Process.Start(@"Tools\ImageJ\pinImageJtoTaskbar.bat");
+                Process.Start(@"Apps\ImageJ\pinImageJtoTaskbar.bat");
             }
 
             if (File.Exists(@"Tools\SetSequence\pinSetSequencetoTaskbar.bat"))
@@ -1140,7 +1140,10 @@ namespace EZAE
 
         private void cmdInstallWinMerge_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-
+            if (File.Exists(@"Tools\Installer\WinMerge-2.16.20-x64-Setup.exe"))
+            {
+                ExecuteAsAdmin(@"Tools\Installer\WinMerge-2.16.20-x64-Setup.exe");
+            }
         }
 
     }
