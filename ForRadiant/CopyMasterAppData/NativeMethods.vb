@@ -1,7 +1,7 @@
 ﻿Imports System
 Imports System.Runtime.InteropServices
 
-Namespace TemplateAppVB
+Namespace CopyMasterAppData
 	Friend Class NativeMethods
 		Public Const HWND_BROADCAST As Integer = &HFFFF
 		Public Shared ReadOnly WM_SHOWME As Integer = NativeMethods.RegisterWindowMessage("WM_SHOWME")

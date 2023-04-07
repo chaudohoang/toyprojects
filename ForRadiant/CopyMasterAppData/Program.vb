@@ -2,7 +2,7 @@
 Imports System.Threading
 Imports System.Windows.Forms
 
-Namespace TemplateAppVB
+Namespace CopyMasterAppData
 	Friend Module Program
 		Private mutex As Mutex = New Mutex(True, "TemplateAppVB")
 		''' <summary>
