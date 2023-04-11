@@ -21,7 +21,7 @@ Namespace CopyMasterAppData
         Inherits Form
         Public apppath As String
         Public appdir As String
-        Public password As String
+        Public password As String = ""
         Public AppDataPath As String = "C:\Radiant Vision Systems Data\TrueTest\AppData"
         Public MasterAppDataPath As String = "C:\Radiant Vision Systems Data\TrueTest\Master AppData"
         Private allowVisible As Boolean = True
@@ -262,19 +262,23 @@ Namespace CopyMasterAppData
                 End If
             Next
 
-            Dim masterAppDataFiles = Directory.GetFiles(MasterAppDataPath)
-            For Each item As String In masterAppDataFiles
-                If Path.GetExtension(item) = ".xml" Then
-                    Dim SN As String = GetSN(item)
-                    If SN <> Nothing Then
-                        SNs.Add(item, SN)
+            Try
+                Dim masterAppDataFiles = Directory.GetFiles(MasterAppDataPath)
+                For Each item As String In masterAppDataFiles
+                    If Path.GetExtension(item) = ".xml" Then
+                        Dim SN As String = GetSN(item)
+                        If SN <> Nothing Then
+                            SNs.Add(item, SN)
+                        End If
                     End If
-                End If
-            Next
+                Next
+            Catch ex As Exception
+
+            End Try
 
             Dim keys() As String = SNs.Keys.ToArray
-            For i = 0 To keys.Count - 1
-                If SNs(keys(i)) = SNs(keys(i + 1)) Then
+            For i = 0 To keys.Count - 2
+                If SNs(keys(i)) <> SNs(keys(i + 1)) Then
                     sameSN = False
                     Exit For
                 End If
@@ -293,7 +297,7 @@ Namespace CopyMasterAppData
                     MessageBox.Show(ex.Message)
                 End Try
             Else
-                Dim errorMessage As String = "Serial Number Not Matching :" + Environment.NewLine + Environment.NewLine
+                Dim errorMessage As String = "Serial Number Not Matching, Lock Failed :" + Environment.NewLine + Environment.NewLine
                 For i = 0 To keys.Count - 1
                     errorMessage += keys(i) + " : " + SNs(keys(i)) + Environment.NewLine
                 Next
