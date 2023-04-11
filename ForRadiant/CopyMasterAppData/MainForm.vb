@@ -15,6 +15,7 @@ Imports System.Xml
 Imports System.Xml.Linq
 Imports System.Collections.Specialized
 Imports System.Linq
+Imports System.Net
 
 Namespace CopyMasterAppData
     Public Class MainForm
@@ -250,6 +251,7 @@ Namespace CopyMasterAppData
 
         Private Sub btnLock_Click(sender As Object, e As EventArgs) Handles btnLock.Click
             Dim sameSN As Boolean = True
+            Dim alreadyLocked As Boolean = False
             Dim SNs As New Dictionary(Of String, String)
 
             Dim appdataFiles = Directory.GetFiles(AppDataPath)
@@ -272,8 +274,8 @@ Namespace CopyMasterAppData
                         End If
                     End If
                 Next
-            Catch ex As Exception
-
+            Catch ex As UnauthorizedAccessException
+                alreadyLocked = True
             End Try
 
             Dim keys() As String = SNs.Keys.ToArray
@@ -283,8 +285,9 @@ Namespace CopyMasterAppData
                     Exit For
                 End If
             Next
-
-            If sameSN Then
+            If alreadyLocked Then
+                MessageBox.Show("Already Locked")
+            ElseIf sameSN Then
                 Try
                     Dim folderPath As String = "C:\Radiant Vision Systems Data\TrueTest\Master AppData"
                     Dim adminUserName = Environment.UserName
@@ -309,26 +312,52 @@ Namespace CopyMasterAppData
         End Sub
 
         Private Sub btnUnlock_Click(sender As Object, e As EventArgs) Handles btnUnlock.Click
-            Dim passwordForm = New Password
-            passwordForm.ShowDialog()
-            password = passwordForm.password
+            Dim AlreadyUnlocked As Boolean = True
 
-            If password.ToLower = "rvskorea1234" Then
-                Try
-                    Dim folderPath As String = "C:\Radiant Vision Systems Data\TrueTest\Master AppData"
-                    Dim adminUserName = Environment.UserName
-                    Dim ds As DirectorySecurity = Directory.GetAccessControl(folderPath)
-                    Dim fsa As FileSystemAccessRule = New FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny)
-                    ds.RemoveAccessRule(fsa)
-                    Directory.SetAccessControl(folderPath, ds)
-                    MessageBox.Show("Unlocked")
-                    password = ""
-                Catch ex As Exception
-                    MessageBox.Show(ex.Message)
-                End Try
-            ElseIf password = "" Then
+            Try
+                Dim folderPath As String = "C:\Radiant Vision Systems Data\TrueTest\Master AppData"
+                Dim adminUserName = Environment.UserName
+                Dim ds As DirectorySecurity = Directory.GetAccessControl(folderPath)
+                Dim fsa As FileSystemAccessRule = New FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny)
+                Dim fSecurity As AuthorizationRuleCollection =
+                ds.GetAccessRules(True, True,
+                Type.GetType("System.Security.Principal.NTAccount"))
+
+                For Each myacc As Security.AccessControl.AccessRule In fSecurity
+
+                    If (myacc.AccessControlType = AccessControlType.Deny) Then
+                        AlreadyUnlocked = False
+                        Exit For
+                    End If
+                Next
+            Catch ex As Exception
+
+            End Try
+
+
+            If AlreadyUnlocked Then
+                MessageBox.Show("Already Unlocked")
             Else
-                MessageBox.Show("Incorrect password, try again !")
+                Dim passwordForm = New Password
+                passwordForm.ShowDialog()
+                password = passwordForm.password
+                If password.ToLower = "rvskorea1234" Then
+                    Try
+                        Dim folderPath As String = "C:\Radiant Vision Systems Data\TrueTest\Master AppData"
+                        Dim adminUserName = Environment.UserName
+                        Dim ds As DirectorySecurity = Directory.GetAccessControl(folderPath)
+                        Dim fsa As FileSystemAccessRule = New FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny)
+                        ds.RemoveAccessRule(fsa)
+                        Directory.SetAccessControl(folderPath, ds)
+                        MessageBox.Show("Unlocked")
+                        password = ""
+                    Catch ex As Exception
+                        MessageBox.Show(ex.Message)
+                    End Try
+                ElseIf password = "" Then
+                Else
+                    MessageBox.Show("Incorrect password, try again !")
+                End If
             End If
 
         End Sub
