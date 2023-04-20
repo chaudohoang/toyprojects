@@ -135,6 +135,7 @@ Namespace FTPUploaderVB
 			Dim sourceIndexFile = lines(10)
 			Dim sourceHostFile = lines(13)
 			Dim totalFileCount = lines(15)
+			Dim channelIndex = lines(16)
 			Dim PID = Path.GetFileNameWithoutExtension(sourceIndexFile)
 
 			Dim failCountPath = txtUploadListPath.Text + "\Fail Count\" + Path.GetFileName(InfoFile)
@@ -210,8 +211,8 @@ Namespace FTPUploaderVB
 				If TasksCancellationTokenSource.IsCancellationRequested Then
 					Exit Sub
 				End If
-				File.AppendAllText(sourceIndexFile, destFile + System.Environment.NewLine)
-				File.AppendAllText(sourceHostFile, destFile + System.Environment.NewLine)
+				File.AppendAllText(sourceIndexFile, destFile + "@" + channelIndex + System.Environment.NewLine)
+				File.AppendAllText(sourceHostFile, destFile + "@" + channelIndex + System.Environment.NewLine)
 				Dim uploadedCount As Integer = File.ReadAllLines(sourceHostFile).Length
 				If uploadedCount = Int32.Parse(totalFileCount) Then
 					CreateIndexAndHostQueue(InfoFile)
