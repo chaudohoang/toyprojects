@@ -136,7 +136,7 @@ namespace FolderLock
                 DirectorySecurity ds = Directory.GetAccessControl(folderPath);
 				FileSystemAccessRule fsa = new FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny);
 
-      ds.AddAccessRule(fsa);
+				ds.AddAccessRule(fsa);
                 Directory.SetAccessControl(folderPath, ds);
                 MessageBox.Show("Locked");
             }
@@ -155,7 +155,7 @@ namespace FolderLock
                 DirectorySecurity ds = Directory.GetAccessControl(folderPath);
 				FileSystemAccessRule fsa = new FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny);
 
-     ds.RemoveAccessRule(fsa);
+				ds.RemoveAccessRule(fsa);
                 Directory.SetAccessControl(folderPath, ds);
                 MessageBox.Show("UnLocked");
             }
