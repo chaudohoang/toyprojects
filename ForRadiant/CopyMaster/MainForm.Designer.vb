@@ -279,7 +279,7 @@ Namespace CopyMasterAppData
             Me.MaximizeBox = False
             Me.Name = "MainForm"
             Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
-            Me.Text = "CopyMasterAppData"
+            Me.Text = "CopyMaster"
             Me.contextMenuStrip1.ResumeLayout(False)
             Me.menuStrip1.ResumeLayout(False)
             Me.menuStrip1.PerformLayout()

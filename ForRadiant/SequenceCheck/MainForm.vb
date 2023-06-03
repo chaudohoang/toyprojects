@@ -1,6 +1,7 @@
 ﻿Imports System.Data.SqlServerCe
 Imports System.IO
 Imports System.Runtime.Remoting.Metadata.W3cXsd2001
+Imports System.Timers
 Imports System.Xml
 
 
@@ -84,8 +85,16 @@ Public Class MainForm
 	End Sub
 
 	Public Sub CheckForMatchingSequenceParameters(ByVal file1FullPath As String, ByVal file2FullPath As String)
+		Dim timeLogString As New List(Of String)
+		Dim tempString As String = ""
+		Dim sw As New Stopwatch
+		sw.Start()
 		Dim equal As Boolean = True
 		Dim log As New List(Of String)
+
+		Dim sw2 As New Stopwatch
+		sw2.Start()
+
 		If Not File.Exists(file1FullPath) Then
 			equal = False
 			CommLogUpdateText("Sequence 1 is not existed !!!")
@@ -94,15 +103,23 @@ Public Class MainForm
 			CommLogUpdateText("Sequence 2 is not existed !!!")
 
 			Exit Sub
+
 		ElseIf file1FullPath = file2FullPath Then
 			equal = False
 			CommLogUpdateText("Sequence 1 and Sequence 2 is the same file !!!")
 			Exit Sub
 		End If
+		sw2.Stop()
+		timeLogString.Add("Check sequence files existence : " + sw2.ElapsedMilliseconds.ToString + "ms")
 
+		sw2.Restart()
 		Dim ignoreList As List(Of String)
 		ignoreList = (From s In cbxIgnoreList.Text.Split(CChar(","))
 					  Select s).ToList()
+
+		sw2.Stop()
+		timeLogString.Add("Get ignore parameters : " + sw2.ElapsedMilliseconds.ToString + "ms")
+		If cbxIgnoreList.Text <> "" Then timeLogString.Add(cbxIgnoreList.Text)
 
 		Dim sequence1AnaList As New List(Of String)
 		Dim sequence2AnaList As New List(Of String)
@@ -121,18 +138,30 @@ Public Class MainForm
 		nodes1 = xmlDoc1.DocumentElement.SelectNodes("/Sequence/Items/SequenceItem")
 		nodes2 = xmlDoc2.DocumentElement.SelectNodes("/Sequence/Items/SequenceItem")
 
+		sw2.Restart()
 		'conpare sequence analysis list
 		For i1 = 0 To nodes1.Count - 1
 			If nodes1(i1).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
 				sequence1AnaList.Add(nodes1(i1).SelectSingleNode("PatternSetupName").InnerText)
 			End If
 		Next
+		sw2.Stop()
+		timeLogString.Add("Get sequence 1 analysis list : " + sw2.ElapsedMilliseconds.ToString + "ms")
+		timeLogString.Add("Sequence 1 analysis : " + String.Join(",", sequence1AnaList))
 
+		sw2.Restart()
 		For i2 = 0 To nodes2.Count - 1
 			If nodes2(i2).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
 				sequence2AnaList.Add(nodes2(i2).SelectSingleNode("PatternSetupName").InnerText)
 			End If
 		Next
+
+		sw2.Stop()
+		timeLogString.Add("Get sequence 2 analysis list : " + sw2.ElapsedMilliseconds.ToString + "ms")
+		timeLogString.Add("Sequence 2 analysis : " + String.Join(",", sequence2AnaList))
+
+
+		sw2.Restart()
 
 		If String.Join(",", sequence1AnaList) <> String.Join(",", sequence2AnaList) Then
 			equal = False
@@ -141,6 +170,9 @@ Public Class MainForm
 			CommLogUpdateText("Sequence 2 analyses : " + String.Join(",", sequence2AnaList))
 			Exit Sub
 		End If
+		sw2.Stop()
+		timeLogString.Add("Check if 2 sequences having same number of analysis : " + sw2.ElapsedMilliseconds.ToString + "ms")
+
 		Dim SequenceItemCount As Integer
 		If nodes1.Count < nodes2.Count Then
 			SequenceItemCount = nodes1.Count
@@ -150,49 +182,80 @@ Public Class MainForm
 		For index = 0 To SequenceItemCount - 1
 			node1 = nodes1(index).SelectSingleNode("Analysis")
 			node2 = nodes2(index).SelectSingleNode("Analysis")
-
+			Dim seq1AnalysisName = nodes1(index).SelectSingleNode("PatternSetupName").InnerText
+			Dim seq2AnalysisName = nodes2(index).SelectSingleNode("PatternSetupName").InnerText
+			sw2.Restart()
 			'Remove items in ignoreList
+
 			For Each item As String In ignoreList
 				For Each childNode1 As XmlNode In node1.ChildNodes
-					If childNode1.Name = item Then
+					If childNode1.Name.ToLower = item.ToLower Then
 						node1.RemoveChild(childNode1)
+						tempString = tempString + childNode1.Name + ","
 					End If
 				Next
 			Next
-
+			sw2.Stop()
+			timeLogString.Add("Sequence 1 remove ignored parameters in Analysis " + seq1AnalysisName + " and removed " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
+			tempString = ""
+			sw2.Restart()
 			For Each item As String In ignoreList
 				For Each childNode2 As XmlNode In node2.ChildNodes
-					If childNode2.Name = item Then
+					If childNode2.Name.ToLower = item.ToLower Then
 						node2.RemoveChild(childNode2)
+						tempString = tempString + childNode2.Name + ","
 					End If
 				Next
 			Next
-
+			sw2.Stop()
+			timeLogString.Add("Sequence 2 remove ignored parameters in Analysis " + seq2AnalysisName + " and removed " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
+			tempString = ""
+			sw2.Restart()
 			'Equalize number of elements between 2 node
 			For Each childNode1 As XmlNode In node1.ChildNodes
 				If node2.SelectSingleNode(childNode1.Name) Is Nothing Then
 					Dim importNode As XmlNode = xmlDoc2.ImportNode(childNode1, True)
 					node2.AppendChild(importNode)
+					tempString = tempString + childNode1.Name + ","
 				End If
 			Next
+			sw2.Stop()
+			timeLogString.Add("Sequence 2 add missing element in Analysis " + seq2AnalysisName + " and added " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
+			tempString = ""
 
+			sw2.Restart()
 			For Each childNode2 As XmlNode In node2.ChildNodes
 				If node1.SelectSingleNode(childNode2.Name) Is Nothing Then
 					Dim importNode As XmlNode = xmlDoc1.ImportNode(childNode2, True)
 					node1.AppendChild(importNode)
+					tempString = tempString + childNode2.Name + ","
 				End If
 			Next
+			sw2.Stop()
+			timeLogString.Add("Sequence 1 add missing element in Analysis " + seq1AnalysisName + " and added " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
+			tempString = ""
 
+			sw2.Restart()
 			SortElements(node1)
+			sw2.Stop()
+			timeLogString.Add("Sorting element in sequence 1 for analysis " + seq1AnalysisName + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
+			sw2.Restart()
 			SortElements(node2)
+			sw2.Stop()
+			timeLogString.Add("Sorting element in sequence 2 for analysis " + seq2AnalysisName + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
+
+			sw2.Restart()
 
 			For childIndex = 0 To node1.ChildNodes.Count - 1
 				If node1.ChildNodes(childIndex).InnerText.ToLower <> node2.ChildNodes(childIndex).InnerText.ToLower Then
 					equal = False
 					log.Add("Step : " + nodes1(index).SelectSingleNode("PatternSetupName").InnerText + ", Parameter : " + node1.ChildNodes(childIndex).Name + ", Sequence 1 Value : " + node1.ChildNodes(childIndex).InnerText + ", Sequence 2 Value : " + node2.ChildNodes(childIndex).InnerText)
 				End If
-
+				tempString = tempString + node1.ChildNodes(childIndex).Name + ","
 			Next
+			sw2.Stop()
+			timeLogString.Add("Comparing done for analysis step" + seq1AnalysisName + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
+			timeLogString.Add("Compared " + node1.ChildNodes.Count.ToString + " parameters : " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)))
 
 		Next
 
@@ -202,9 +265,16 @@ Public Class MainForm
 			CommLogUpdateText("FOUND PARAMETER DIFFERENCE !!!")
 		End If
 
+		sw.Stop()
+		timeLogString.Add("Total time : " + sw.ElapsedMilliseconds.ToString + "ms")
+
 		For i = 0 To log.Count - 1
 			CommLogUpdateText(log(i))
 		Next
+
+		CommLogUpdateText("Compare Parameters Time : " + (sw.ElapsedMilliseconds / 1000).ToString + "s")
+		File.WriteAllLines(Path.Combine(Path.GetTempPath(), "Parameter Compare Time.txt"), timeLogString)
+		Process.Start("notepad.exe", Path.Combine(Path.GetTempPath(), "Parameter Compare Time.txt"))
 
 	End Sub
 
@@ -954,9 +1024,15 @@ Public Class MainForm
 	End Sub
 
 	Public Sub CompareCalSettings(ByVal file1FullPath As String, ByVal file2FullPath As String)
-
+		Dim timeLogString As New List(Of String)
+		Dim tempString As String = ""
+		Dim sw As New Stopwatch
+		sw.Start()
 		Dim equal As Boolean = True
 		Dim log As New List(Of String)
+		Dim sw2 As New Stopwatch
+		sw2.Start()
+
 		If Not File.Exists(file1FullPath) Then
 			equal = False
 			CommLogUpdateText("Sequence 1 is not existed !!!")
@@ -970,6 +1046,7 @@ Public Class MainForm
 			CommLogUpdateText("Sequence 1 and Sequence 2 is the same file !!!")
 			Exit Sub
 		End If
+		sw2.Stop()
 		Dim SN1 As String = ""
 		Dim SN2 As String = ""
 
@@ -999,6 +1076,7 @@ Public Class MainForm
 
 		nodes1 = xmlDoc1.DocumentElement.SelectNodes("/Sequence/Items/SequenceItem")
 		nodes2 = xmlDoc2.DocumentElement.SelectNodes("/Sequence/Items/SequenceItem")
+		sw2.Restart()
 
 		For i = 0 To nodes1.Count - 1
 			If nodes1(i).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
@@ -1009,6 +1087,9 @@ Public Class MainForm
 				demuraStepList1.Add(nodes1(i).SelectSingleNode("PatternSetupName").InnerText)
 			End If
 		Next
+		sw2.Stop()
+
+		sw2.Restart()
 		nodes1 = xmlDoc1.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
 		For index = 0 To nodes1.Count - 1
 			If sequence1AnaList.Contains(nodes1(index).SelectSingleNode("Name").InnerText) Then
@@ -1029,6 +1110,9 @@ Public Class MainForm
 				'log.Add("SN : " + SN1 + " , Step : " + nodes1(index).SelectSingleNode("Name").InnerText + " , ColorCalID : " + CCID + " , ImageScalingID : " + IMCID + " , FlatFieldID : " + FFID)
 			End If
 		Next
+		sw2.Stop()
+
+		sw2.Restart()
 
 		For i = 0 To nodes2.Count - 1
 			If nodes2(i).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
@@ -1039,8 +1123,10 @@ Public Class MainForm
 				demuraStepList2.Add(nodes2(i).SelectSingleNode("PatternSetupName").InnerText)
 			End If
 		Next
-		nodes2 = xmlDoc2.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
+		sw2.Stop()
 
+		sw2.Restart()
+		nodes2 = xmlDoc2.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
 		For index = 0 To nodes2.Count - 1
 			If sequence2AnaList.Contains(nodes2(index).SelectSingleNode("Name").InnerText) Then
 				If demuraStepList2.Contains(nodes2(index).SelectSingleNode("Name").InnerText) Then Continue For
@@ -1060,6 +1146,7 @@ Public Class MainForm
 				'log.Add("SN : " + SN2 + " , Step : " + nodes1(index).SelectSingleNode("Name").InnerText + " , ColorCalID : " + CCID + " , ImageScalingID : " + IMCID + " , FlatFieldID : " + FFID)
 			End If
 		Next
+		sw2.Stop()
 
 		If SN1 <> SN2 Then
 			CommLogUpdateText("Running sequence and master sequence is from different camera, cannot compare calibration")
@@ -1071,41 +1158,53 @@ Public Class MainForm
 		Dim colorCalRef1 As New Dictionary(Of String, String)
 		Dim colorCalRef2 As New Dictionary(Of String, String)
 
+		sw2.Restart()
 		GetColorCalRef(file1FullPath, colorCalRef1)
 		GetColorCalRef(file2FullPath, colorCalRef2)
+		sw2.Stop()
 
 		Dim imgScaleRef1 As New Dictionary(Of String, String)
 		Dim imgScaleRef2 As New Dictionary(Of String, String)
 
+		sw2.Restart()
 		GetIMGScaleCalRef(file1FullPath, imgScaleRef1)
 		GetIMGScaleCalRef(file2FullPath, imgScaleRef2)
+		sw2.Stop()
 
 		Dim flatFieldRef1 As New Dictionary(Of String, String)
 		Dim flatFieldRef2 As New Dictionary(Of String, String)
 
+		sw2.Restart()
 		GetFFCCalRef(file1FullPath, flatFieldRef1)
 		GetFFCCalRef(file2FullPath, flatFieldRef2)
+		sw2.Stop()
 
+		sw2.Restart()
 		For index = 0 To ColorCalSetting1.Count - 1
 			If ColorCalSetting1(index) <> ColorCalSetting2(index) Then
 				equal = False
 				log.Add("Step : " + ColorCalSetting1(index).Split(",")(1) + ", Sequence 1 Color Cal : " + colorCalRef1(ColorCalSetting1(index).Split(",")(2)) + ", Sequence 2 Color Cal : " + colorCalRef2(ColorCalSetting2(index).Split(",")(2)))
 			End If
 		Next
+		sw2.Stop()
 
+		sw2.Restart()
 		For index = 0 To ImgScaleSetting1.Count - 1
 			If ImgScaleSetting1(index) <> ImgScaleSetting2(index) Then
 				equal = False
 				log.Add("Step : " + ImgScaleSetting1(index).Split(",")(1) + ", Sequence 1 Img Scale Cal : " + imgScaleRef1(ImgScaleSetting1(index).Split(",")(2)) + ", Sequence 2 Img Scale Cal : " + imgScaleRef2(ImgScaleSetting2(index).Split(",")(2)))
 			End If
 		Next
+		sw2.Stop()
 
+		sw2.Restart()
 		For index = 0 To FFCSetting1.Count - 1
 			If FFCSetting1(index) <> FFCSetting2(index) Then
 				equal = False
 				log.Add("Step : " + FFCSetting1(index).Split(",")(1) + ", Sequence 1 FFC Cal : " + flatFieldRef1(FFCSetting1(index).Split(",")(2)) + ", Sequence 2 FFC Cal : " + flatFieldRef2(FFCSetting2(index).Split(",")(2)))
 			End If
 		Next
+		sw2.Stop()
 
 		If equal Then
 			CommLogUpdateText("NO CAL DIFFERENCE !!!")
@@ -1113,9 +1212,17 @@ Public Class MainForm
 			CommLogUpdateText("FOUND CAL DIFFERENCE !!!")
 		End If
 
+		sw.Stop()
+		timeLogString.Add("Total time : " + sw.ElapsedMilliseconds.ToString + "ms")
+
 		For i = 0 To log.Count - 1
 			CommLogUpdateText(log(i))
 		Next
+
+		CommLogUpdateText("Compare Calibrations Time : " + (sw.ElapsedMilliseconds / 1000).ToString + "s")
+		File.WriteAllLines(Path.Combine(Path.GetTempPath(), "Calibration Compare Time.txt"), timeLogString)
+		Process.Start("notepad.exe", Path.Combine(Path.GetTempPath(), "Calibration Compare Time.txt"))
+
 	End Sub
 
 	Public Sub GetColorCalRef(SequencePath As String, ByRef RefDict As Dictionary(Of String, String))

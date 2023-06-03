@@ -7,8 +7,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{577C1CB8-7CBF-4049-90B2-87DC4D70F2F7}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>CopyMasterAppData</RootNamespace>
-    <AssemblyName>CopyMasterAppData</AssemblyName>
+    <RootNamespace>CopyMaster</RootNamespace>
+    <AssemblyName>CopyMaster</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -20,7 +20,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\bin\Debug\CopyMasterAppData\</OutputPath>
+    <OutputPath>..\bin\Debug\CopyMaster\</OutputPath>
     <DefineConstants>DEBUG,TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>

@@ -12,6 +12,8 @@ using System.Diagnostics;
 using System.Reflection;
 using System.IO;
 using System.Security.AccessControl;
+using System.Security.Principal;
+
 
 namespace FolderLock
 {
@@ -133,9 +135,12 @@ namespace FolderLock
 
                 string folderPath = textBox1.Text;
                 string adminUserName = Environment.UserName;// getting your adminUserName
-                DirectorySecurity ds = Directory.GetAccessControl(folderPath);
-				FileSystemAccessRule fsa = new FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny);
 
+                SecurityIdentifier cu = WindowsIdentity.GetCurrent().User;
+                DirectorySecurity ds = Directory.GetAccessControl(folderPath);
+
+                ds.SetOwner(cu);
+                FileSystemAccessRule fsa = new FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny);
 				ds.AddAccessRule(fsa);
                 Directory.SetAccessControl(folderPath, ds);
                 MessageBox.Show("Locked");

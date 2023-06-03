@@ -16,6 +16,7 @@ Imports System.Xml.Linq
 Imports System.Collections.Specialized
 Imports System.Linq
 Imports System.Net
+Imports System.Security.Principal
 
 Namespace CopyMasterAppData
     Public Class MainForm
@@ -291,7 +292,9 @@ Namespace CopyMasterAppData
                 Try
                     Dim folderPath As String = "C:\Radiant Vision Systems Data\TrueTest\Master AppData"
                     Dim adminUserName = Environment.UserName
+                    Dim cu As SecurityIdentifier = WindowsIdentity.GetCurrent().User
                     Dim ds As DirectorySecurity = Directory.GetAccessControl(folderPath)
+                    ds.SetOwner(cu)
                     Dim fsa As FileSystemAccessRule = New FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny)
                     ds.AddAccessRule(fsa)
                     Directory.SetAccessControl(folderPath, ds)
