@@ -21,6 +21,7 @@ namespace FolderLock
 	{
 		public string apppath;
 		public string appdir;
+		public string password = "";
 		private bool allowVisible = true;
 
 		[DllImport("User32.dll")]
@@ -124,16 +125,124 @@ namespace FolderLock
         {
             if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
             {
-                textBox1.Text = folderBrowserDialog1.SelectedPath;
+                comboBox1.Text = folderBrowserDialog1.SelectedPath;
             }
         }
 
         private void bntLock_Click(object sender, EventArgs e)
         {
+            if (!Directory.Exists(comboBox1.Text))
+            {
+                MessageBox.Show("Path not existed !");
+                return;
+            }
+            try
+			{
+				string folderPath = comboBox1.Text;
+				string adminUserName = Environment.UserName;// getting your adminUserName
+
+				SecurityIdentifier cu = WindowsIdentity.GetCurrent().User;
+				DirectorySecurity ds = Directory.GetAccessControl(folderPath);
+
+				ds.SetOwner(cu);
+				FileSystemAccessRule fsa = new FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny);
+				ds.AddAccessRule(fsa);
+				Directory.SetAccessControl(folderPath, ds);
+				MessageBox.Show("Locked");
+			}
+			catch (UnauthorizedAccessException)
+			{
+                MessageBox.Show("Already Locked");
+            }
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.Message);
+			}
+        }
+
+        private void btnUnlock_Click(object sender, EventArgs e)
+        {
+			if (!Directory.Exists(comboBox1.Text))
+			{
+                MessageBox.Show("Path not existed !");
+				return;
+            }
+			bool alreadyUnlocked = true;
+			try
+			{
+                string folderPath = comboBox1.Text;
+                string adminUserName = Environment.UserName;// getting your adminUserName
+                DirectorySecurity ds = Directory.GetAccessControl(folderPath);
+                FileSystemAccessRule fsa = new FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny);
+				AuthorizationRuleCollection fSecurity = ds.GetAccessRules(true, true, Type.GetType("System.Security.Principal.NTAccount"));
+				foreach (AccessRule myacc in fSecurity)
+				{
+					if (myacc.AccessControlType==AccessControlType.Deny)
+					{
+						alreadyUnlocked = false;
+						break;
+					}
+				}
+            }
+			catch (Exception ex)
+			{
+                MessageBox.Show(ex.Message);
+            }
+
+			if (alreadyUnlocked)
+			{
+                MessageBox.Show("Already UnLocked");
+            }
+			else
+			{
+				Password passwordForm = new Password();
+				passwordForm.ShowDialog();
+				password = passwordForm.password;
+				if (password.ToLower() == "rvskorea1234")
+				{
+					try
+					{
+						string folderPath = comboBox1.Text;
+						string adminUserName = Environment.UserName;// getting your adminUserName
+						DirectorySecurity ds = Directory.GetAccessControl(folderPath);
+						FileSystemAccessRule fsa = new FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny);
+
+						ds.RemoveAccessRule(fsa);
+						Directory.SetAccessControl(folderPath, ds);
+						MessageBox.Show("UnLocked");
+						password = "";
+					}
+					catch (Exception ex)
+					{
+						MessageBox.Show(ex.Message);
+					}
+				}
+				else if (password == "")
+				{
+
+				}
+				else MessageBox.Show("Incorrect password, try again !");
+            }            
+        }
+
+        private void btnBrowse2_Click(object sender, EventArgs e)
+        {
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            {
+                textBox2.Text = folderBrowserDialog1.SelectedPath;
+            }
+        }
+
+        private void bntLock2_Click(object sender, EventArgs e)
+        {
+            if (!Directory.Exists(textBox2.Text))
+            {
+                MessageBox.Show("Path not existed !");
+                return;
+            }
             try
             {
-
-                string folderPath = textBox1.Text;
+                string folderPath = textBox2.Text;
                 string adminUserName = Environment.UserName;// getting your adminUserName
 
                 SecurityIdentifier cu = WindowsIdentity.GetCurrent().User;
@@ -141,9 +250,13 @@ namespace FolderLock
 
                 ds.SetOwner(cu);
                 FileSystemAccessRule fsa = new FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny);
-				ds.AddAccessRule(fsa);
+                ds.AddAccessRule(fsa);
                 Directory.SetAccessControl(folderPath, ds);
                 MessageBox.Show("Locked");
+            }
+            catch (UnauthorizedAccessException)
+            {
+                MessageBox.Show("Already Locked");
             }
             catch (Exception ex)
             {
@@ -151,22 +264,276 @@ namespace FolderLock
             }
         }
 
-        private void btnUnlock_Click(object sender, EventArgs e)
+        private void btnUnlock2_Click(object sender, EventArgs e)
         {
+            if (!Directory.Exists(textBox2.Text))
+            {
+                MessageBox.Show("Path not existed !");
+                return;
+            }
+            bool alreadyUnlocked = true;
             try
             {
-                string folderPath = textBox1.Text;
+                string folderPath = textBox2.Text;
                 string adminUserName = Environment.UserName;// getting your adminUserName
                 DirectorySecurity ds = Directory.GetAccessControl(folderPath);
-				FileSystemAccessRule fsa = new FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny);
-
-				ds.RemoveAccessRule(fsa);
-                Directory.SetAccessControl(folderPath, ds);
-                MessageBox.Show("UnLocked");
+                FileSystemAccessRule fsa = new FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny);
+                AuthorizationRuleCollection fSecurity = ds.GetAccessRules(true, true, Type.GetType("System.Security.Principal.NTAccount"));
+                foreach (AccessRule myacc in fSecurity)
+                {
+                    if (myacc.AccessControlType == AccessControlType.Deny)
+                    {
+                        alreadyUnlocked = false;
+                        break;
+                    }
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
+            }
+
+            if (alreadyUnlocked)
+            {
+                MessageBox.Show("Already UnLocked");
+            }
+            else
+            {
+                Password passwordForm = new Password();
+                passwordForm.ShowDialog();
+                password = passwordForm.password;
+                if (password.ToLower() == "rvskorea1234")
+                {
+                    try
+                    {
+                        string folderPath = textBox2.Text;
+                        string adminUserName = Environment.UserName;// getting your adminUserName
+                        DirectorySecurity ds = Directory.GetAccessControl(folderPath);
+                        FileSystemAccessRule fsa = new FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny);
+
+                        ds.RemoveAccessRule(fsa);
+                        Directory.SetAccessControl(folderPath, ds);
+                        MessageBox.Show("UnLocked");
+                        password = "";
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+                }
+                else if (password == "")
+                {
+
+                }
+                else MessageBox.Show("Incorrect password, try again !");
+            }
+        }
+
+        private void btnBrowse3_Click(object sender, EventArgs e)
+        {
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            {
+                textBox3.Text = folderBrowserDialog1.SelectedPath;
+            }
+        }
+
+        private void bntLock3_Click(object sender, EventArgs e)
+        {
+            if (!Directory.Exists(textBox3.Text))
+            {
+                MessageBox.Show("Path not existed !");
+                return;
+            }
+            try
+            {
+                string folderPath = textBox3.Text;
+                string adminUserName = Environment.UserName;// getting your adminUserName
+
+                SecurityIdentifier cu = WindowsIdentity.GetCurrent().User;
+                DirectorySecurity ds = Directory.GetAccessControl(folderPath);
+
+                ds.SetOwner(cu);
+                FileSystemAccessRule fsa = new FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny);
+                ds.AddAccessRule(fsa);
+                Directory.SetAccessControl(folderPath, ds);
+                MessageBox.Show("Locked");
+            }
+            catch (UnauthorizedAccessException)
+            {
+                MessageBox.Show("Already Locked");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void btnUnlock3_Click(object sender, EventArgs e)
+        {
+            if (!Directory.Exists(textBox3.Text))
+            {
+                MessageBox.Show("Path not existed !");
+                return;
+            }
+            bool alreadyUnlocked = true;
+            try
+            {
+                string folderPath = textBox3.Text;
+                string adminUserName = Environment.UserName;// getting your adminUserName
+                DirectorySecurity ds = Directory.GetAccessControl(folderPath);
+                FileSystemAccessRule fsa = new FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny);
+                AuthorizationRuleCollection fSecurity = ds.GetAccessRules(true, true, Type.GetType("System.Security.Principal.NTAccount"));
+                foreach (AccessRule myacc in fSecurity)
+                {
+                    if (myacc.AccessControlType == AccessControlType.Deny)
+                    {
+                        alreadyUnlocked = false;
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+            if (alreadyUnlocked)
+            {
+                MessageBox.Show("Already UnLocked");
+            }
+            else
+            {
+                Password passwordForm = new Password();
+                passwordForm.ShowDialog();
+                password = passwordForm.password;
+                if (password.ToLower() == "rvskorea1234")
+                {
+                    try
+                    {
+                        string folderPath = textBox3.Text;
+                        string adminUserName = Environment.UserName;// getting your adminUserName
+                        DirectorySecurity ds = Directory.GetAccessControl(folderPath);
+                        FileSystemAccessRule fsa = new FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny);
+
+                        ds.RemoveAccessRule(fsa);
+                        Directory.SetAccessControl(folderPath, ds);
+                        MessageBox.Show("UnLocked");
+                        password = "";
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+                }
+                else if (password == "")
+                {
+
+                }
+                else MessageBox.Show("Incorrect password, try again !");
+            }
+        }
+
+        private void btnBrowse4_Click(object sender, EventArgs e)
+        {
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            {
+                textBox4.Text = folderBrowserDialog1.SelectedPath;
+            }
+        }
+
+        private void bntLock4_Click(object sender, EventArgs e)
+        {
+            if (!Directory.Exists(textBox4.Text))
+            {
+                MessageBox.Show("Path not existed !");
+                return;
+            }
+            try
+            {
+                string folderPath = textBox4.Text;
+                string adminUserName = Environment.UserName;// getting your adminUserName
+
+                SecurityIdentifier cu = WindowsIdentity.GetCurrent().User;
+                DirectorySecurity ds = Directory.GetAccessControl(folderPath);
+
+                ds.SetOwner(cu);
+                FileSystemAccessRule fsa = new FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny);
+                ds.AddAccessRule(fsa);
+                Directory.SetAccessControl(folderPath, ds);
+                MessageBox.Show("Locked");
+            }
+            catch (UnauthorizedAccessException)
+            {
+                MessageBox.Show("Already Locked");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void btnUnlock4_Click(object sender, EventArgs e)
+        {
+            if (!Directory.Exists(textBox4.Text))
+            {
+                MessageBox.Show("Path not existed !");
+                return;
+            }
+            bool alreadyUnlocked = true;
+            try
+            {
+                string folderPath = textBox4.Text;
+                string adminUserName = Environment.UserName;// getting your adminUserName
+                DirectorySecurity ds = Directory.GetAccessControl(folderPath);
+                FileSystemAccessRule fsa = new FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny);
+                AuthorizationRuleCollection fSecurity = ds.GetAccessRules(true, true, Type.GetType("System.Security.Principal.NTAccount"));
+                foreach (AccessRule myacc in fSecurity)
+                {
+                    if (myacc.AccessControlType == AccessControlType.Deny)
+                    {
+                        alreadyUnlocked = false;
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+            if (alreadyUnlocked)
+            {
+                MessageBox.Show("Already UnLocked");
+            }
+            else
+            {
+                Password passwordForm = new Password();
+                passwordForm.ShowDialog();
+                password = passwordForm.password;
+                if (password.ToLower() == "rvskorea1234")
+                {
+                    try
+                    {
+                        string folderPath = textBox4.Text;
+                        string adminUserName = Environment.UserName;// getting your adminUserName
+                        DirectorySecurity ds = Directory.GetAccessControl(folderPath);
+                        FileSystemAccessRule fsa = new FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny);
+
+                        ds.RemoveAccessRule(fsa);
+                        Directory.SetAccessControl(folderPath, ds);
+                        MessageBox.Show("UnLocked");
+                        password = "";
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+                }
+                else if (password == "")
+                {
+
+                }
+                else MessageBox.Show("Incorrect password, try again !");
             }
         }
     }

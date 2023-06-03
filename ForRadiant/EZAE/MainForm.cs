@@ -1073,9 +1073,9 @@ namespace EZAE
             }
         }
 
-        private void cmdCopyMasterAppData_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void cmdCopyMaster_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string filepath = Path.GetFullPath(@"Tools\CopyMasterAppData\CopyMasterAppData.exe");
+            string filepath = Path.GetFullPath(@"Tools\CopyMaster\CopyMaster.exe");
             if (File.Exists(filepath))
             {
 
@@ -1146,5 +1146,17 @@ namespace EZAE
             }
         }
 
+        private void cmdFolderLock_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = Path.GetFullPath(@"Tools\FolderLock\FolderLock.exe");
+            if (File.Exists(filepath))
+            {
+
+                ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
+                startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
+                Process.Start(startInfo);
+
+            }
+        }
     }
 }

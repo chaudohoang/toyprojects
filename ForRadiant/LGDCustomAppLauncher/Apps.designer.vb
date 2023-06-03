@@ -33,10 +33,14 @@ Partial Class Apps
         Me.chkSkipRFD = New System.Windows.Forms.CheckBox()
         Me.chkSkipPOI = New System.Windows.Forms.CheckBox()
         Me.TabPage1 = New System.Windows.Forms.TabPage()
+        Me.cmdEmu2p1Simulator = New System.Windows.Forms.LinkLabel()
         Me.cmdRenameVNTT = New System.Windows.Forms.LinkLabel()
-        Me.cmdCopyMasterAppData = New System.Windows.Forms.LinkLabel()
+        Me.cmdCopyMaster = New System.Windows.Forms.LinkLabel()
         Me.cmdBackupTT = New System.Windows.Forms.LinkLabel()
+        Me.cmdEmu2p0Simulator = New System.Windows.Forms.LinkLabel()
+        Me.cmdDove2p0Simulator = New System.Windows.Forms.LinkLabel()
         Me.cmdEmu2p1SequenceConvert = New System.Windows.Forms.LinkLabel()
+        Me.cmdReloadSequence = New System.Windows.Forms.LinkLabel()
         Me.cmdFTPUploader = New System.Windows.Forms.LinkLabel()
         Me.cmdCheckSequence = New System.Windows.Forms.LinkLabel()
         Me.Label1 = New System.Windows.Forms.Label()
@@ -44,7 +48,6 @@ Partial Class Apps
         Me.cmdSetSequence = New System.Windows.Forms.LinkLabel()
         Me.cmdButterfly = New System.Windows.Forms.LinkLabel()
         Me.TabControl1 = New System.Windows.Forms.TabControl()
-        Me.cmdReloadSequence = New System.Windows.Forms.LinkLabel()
         Me.TabPage2.SuspendLayout()
         Me.TabPage1.SuspendLayout()
         Me.TabControl1.SuspendLayout()
@@ -159,9 +162,12 @@ Partial Class Apps
         '
         'TabPage1
         '
+        Me.TabPage1.Controls.Add(Me.cmdEmu2p1Simulator)
         Me.TabPage1.Controls.Add(Me.cmdRenameVNTT)
-        Me.TabPage1.Controls.Add(Me.cmdCopyMasterAppData)
+        Me.TabPage1.Controls.Add(Me.cmdCopyMaster)
         Me.TabPage1.Controls.Add(Me.cmdBackupTT)
+        Me.TabPage1.Controls.Add(Me.cmdEmu2p0Simulator)
+        Me.TabPage1.Controls.Add(Me.cmdDove2p0Simulator)
         Me.TabPage1.Controls.Add(Me.cmdEmu2p1SequenceConvert)
         Me.TabPage1.Controls.Add(Me.cmdReloadSequence)
         Me.TabPage1.Controls.Add(Me.cmdFTPUploader)
@@ -178,25 +184,35 @@ Partial Class Apps
         Me.TabPage1.Text = "Apps"
         Me.TabPage1.UseVisualStyleBackColor = True
         '
+        'cmdEmu2p1Simulator
+        '
+        Me.cmdEmu2p1Simulator.AutoSize = True
+        Me.cmdEmu2p1Simulator.Location = New System.Drawing.Point(209, 63)
+        Me.cmdEmu2p1Simulator.Name = "cmdEmu2p1Simulator"
+        Me.cmdEmu2p1Simulator.Size = New System.Drawing.Size(92, 13)
+        Me.cmdEmu2p1Simulator.TabIndex = 8
+        Me.cmdEmu2p1Simulator.TabStop = True
+        Me.cmdEmu2p1Simulator.Text = "Emu2p1 Simulator"
+        '
         'cmdRenameVNTT
         '
         Me.cmdRenameVNTT.AutoSize = True
-        Me.cmdRenameVNTT.Location = New System.Drawing.Point(361, 39)
+        Me.cmdRenameVNTT.Location = New System.Drawing.Point(319, 39)
         Me.cmdRenameVNTT.Name = "cmdRenameVNTT"
         Me.cmdRenameVNTT.Size = New System.Drawing.Size(76, 13)
         Me.cmdRenameVNTT.TabIndex = 7
         Me.cmdRenameVNTT.TabStop = True
         Me.cmdRenameVNTT.Text = "RenameVNTT"
         '
-        'cmdCopyMasterAppData
+        'cmdCopyMaster
         '
-        Me.cmdCopyMasterAppData.AutoSize = True
-        Me.cmdCopyMasterAppData.Location = New System.Drawing.Point(250, 39)
-        Me.cmdCopyMasterAppData.Name = "cmdCopyMasterAppData"
-        Me.cmdCopyMasterAppData.Size = New System.Drawing.Size(105, 13)
-        Me.cmdCopyMasterAppData.TabIndex = 6
-        Me.cmdCopyMasterAppData.TabStop = True
-        Me.cmdCopyMasterAppData.Text = "CopyMasterAppData"
+        Me.cmdCopyMaster.AutoSize = True
+        Me.cmdCopyMaster.Location = New System.Drawing.Point(250, 39)
+        Me.cmdCopyMaster.Name = "cmdCopyMaster"
+        Me.cmdCopyMaster.Size = New System.Drawing.Size(63, 13)
+        Me.cmdCopyMaster.TabIndex = 6
+        Me.cmdCopyMaster.TabStop = True
+        Me.cmdCopyMaster.Text = "CopyMaster"
         '
         'cmdBackupTT
         '
@@ -208,6 +224,26 @@ Partial Class Apps
         Me.cmdBackupTT.TabStop = True
         Me.cmdBackupTT.Text = "Backup Current TT"
         '
+        'cmdEmu2p0Simulator
+        '
+        Me.cmdEmu2p0Simulator.AutoSize = True
+        Me.cmdEmu2p0Simulator.Location = New System.Drawing.Point(111, 63)
+        Me.cmdEmu2p0Simulator.Name = "cmdEmu2p0Simulator"
+        Me.cmdEmu2p0Simulator.Size = New System.Drawing.Size(92, 13)
+        Me.cmdEmu2p0Simulator.TabIndex = 5
+        Me.cmdEmu2p0Simulator.TabStop = True
+        Me.cmdEmu2p0Simulator.Text = "Emu2p0 Simulator"
+        '
+        'cmdDove2p0Simulator
+        '
+        Me.cmdDove2p0Simulator.AutoSize = True
+        Me.cmdDove2p0Simulator.Location = New System.Drawing.Point(8, 63)
+        Me.cmdDove2p0Simulator.Name = "cmdDove2p0Simulator"
+        Me.cmdDove2p0Simulator.Size = New System.Drawing.Size(97, 13)
+        Me.cmdDove2p0Simulator.TabIndex = 5
+        Me.cmdDove2p0Simulator.TabStop = True
+        Me.cmdDove2p0Simulator.Text = "Dove2p0 Simulator"
+        '
         'cmdEmu2p1SequenceConvert
         '
         Me.cmdEmu2p1SequenceConvert.AutoSize = True
@@ -217,6 +253,16 @@ Partial Class Apps
         Me.cmdEmu2p1SequenceConvert.TabIndex = 5
         Me.cmdEmu2p1SequenceConvert.TabStop = True
         Me.cmdEmu2p1SequenceConvert.Text = "Emu2p1SequenceConvert"
+        '
+        'cmdReloadSequence
+        '
+        Me.cmdReloadSequence.AutoSize = True
+        Me.cmdReloadSequence.Location = New System.Drawing.Point(398, 16)
+        Me.cmdReloadSequence.Name = "cmdReloadSequence"
+        Me.cmdReloadSequence.Size = New System.Drawing.Size(93, 13)
+        Me.cmdReloadSequence.TabIndex = 5
+        Me.cmdReloadSequence.TabStop = True
+        Me.cmdReloadSequence.Text = "Reload Sequence"
         '
         'cmdFTPUploader
         '
@@ -288,16 +334,6 @@ Partial Class Apps
         Me.TabControl1.Size = New System.Drawing.Size(519, 291)
         Me.TabControl1.TabIndex = 2
         '
-        'cmdReloadSequence
-        '
-        Me.cmdReloadSequence.AutoSize = True
-        Me.cmdReloadSequence.Location = New System.Drawing.Point(398, 16)
-        Me.cmdReloadSequence.Name = "cmdReloadSequence"
-        Me.cmdReloadSequence.Size = New System.Drawing.Size(93, 13)
-        Me.cmdReloadSequence.TabIndex = 5
-        Me.cmdReloadSequence.TabStop = True
-        Me.cmdReloadSequence.Text = "Reload Sequence"
-        '
         'Apps
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -328,7 +364,7 @@ Partial Class Apps
 	Friend WithEvents cmdEmu2p1SequenceConvert As LinkLabel
     Friend WithEvents cmdBackupTT As LinkLabel
     Friend WithEvents cmdRenameVNTT As LinkLabel
-    Friend WithEvents cmdCopyMasterAppData As LinkLabel
+    Friend WithEvents cmdCopyMaster As LinkLabel
     Friend WithEvents chkSkipPOI As CheckBox
     Friend WithEvents chkSkipRFD As CheckBox
     Friend WithEvents chkSkipLCC As CheckBox
@@ -338,4 +374,7 @@ Partial Class Apps
     Friend WithEvents chkSkipFLDLGDNPOCB41 As CheckBox
     Friend WithEvents chkSkipSaveToDB As CheckBox
     Friend WithEvents cmdReloadSequence As LinkLabel
+    Friend WithEvents cmdEmu2p1Simulator As LinkLabel
+    Friend WithEvents cmdEmu2p0Simulator As LinkLabel
+    Friend WithEvents cmdDove2p0Simulator As LinkLabel
 End Class

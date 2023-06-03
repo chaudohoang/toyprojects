@@ -49,9 +49,9 @@ Public Class Apps
         Process.Start(startinfo)
     End Sub
 
-    Private Sub cmdCopyMasterAppData_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdCopyMasterAppData.LinkClicked
+    Private Sub cmdCopyMaster_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdCopyMaster.LinkClicked
         startinfo.WorkingDirectory = exePath
-        startinfo.FileName = System.IO.Path.Combine(exePath, "CopyMasterAppData.exe")
+        startinfo.FileName = System.IO.Path.Combine(exePath, "CopyMaster.exe")
         Process.Start(startinfo)
     End Sub
 
@@ -347,5 +347,23 @@ Public Class Apps
 
     Private Sub cmdReloadSequence_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdReloadSequence.LinkClicked
         'TrueTest.SequenceSet(TrueTest.Sequence.XMLFilePathName)
+    End Sub
+
+    Private Sub cmdDove2p0Simulator_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdDove2p0Simulator.LinkClicked
+        startinfo.WorkingDirectory = exePath
+        startinfo.FileName = System.IO.Path.Combine(exePath, "Dove2p0.exe")
+        Process.Start(startinfo)
+    End Sub
+
+    Private Sub cmdEmu2p0Simulator_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdEmu2p0Simulator.LinkClicked
+        startinfo.WorkingDirectory = exePath
+        startinfo.FileName = System.IO.Path.Combine(exePath, "EMU2p0.exe")
+        Process.Start(startinfo)
+    End Sub
+
+    Private Sub cmdEmu2p1Simulator_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdEmu2p1Simulator.LinkClicked
+        startinfo.WorkingDirectory = exePath
+        startinfo.FileName = System.IO.Path.Combine(exePath, "EMU2p1.exe")
+        Process.Start(startinfo)
     End Sub
 End Class

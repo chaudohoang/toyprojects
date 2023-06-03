@@ -104,7 +104,7 @@ namespace EZAE
             this.tabSetSequence = new System.Windows.Forms.TabPage();
             this.cmdRenameVNTT = new System.Windows.Forms.LinkLabel();
             this.cmdEmu2p1SequenceConvert = new System.Windows.Forms.LinkLabel();
-            this.cmdCopyMasterAppData = new System.Windows.Forms.LinkLabel();
+            this.cmdCopyMaster = new System.Windows.Forms.LinkLabel();
             this.cmdCheckSequence = new System.Windows.Forms.LinkLabel();
             this.cmdCreateFFC = new System.Windows.Forms.LinkLabel();
             this.cmdInstallTrueTest = new System.Windows.Forms.LinkLabel();
@@ -117,6 +117,7 @@ namespace EZAE
             this.cmdUseButterfly = new System.Windows.Forms.LinkLabel();
             this.lblSequenceFileName = new System.Windows.Forms.Label();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.cmdFolderLock = new System.Windows.Forms.LinkLabel();
             this.tabControl1.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabSetupPC.SuspendLayout();
@@ -976,7 +977,8 @@ namespace EZAE
             // 
             this.tabSetSequence.Controls.Add(this.cmdRenameVNTT);
             this.tabSetSequence.Controls.Add(this.cmdEmu2p1SequenceConvert);
-            this.tabSetSequence.Controls.Add(this.cmdCopyMasterAppData);
+            this.tabSetSequence.Controls.Add(this.cmdFolderLock);
+            this.tabSetSequence.Controls.Add(this.cmdCopyMaster);
             this.tabSetSequence.Controls.Add(this.cmdCheckSequence);
             this.tabSetSequence.Controls.Add(this.cmdCreateFFC);
             this.tabSetSequence.Controls.Add(this.cmdInstallTrueTest);
@@ -1015,16 +1017,16 @@ namespace EZAE
             this.cmdEmu2p1SequenceConvert.Text = "Emu2p1SequenceConvert";
             this.cmdEmu2p1SequenceConvert.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdEmu2p1SequenceConvert_LinkClicked);
             // 
-            // cmdCopyMasterAppData
+            // cmdCopyMaster
             // 
-            this.cmdCopyMasterAppData.AutoSize = true;
-            this.cmdCopyMasterAppData.Location = new System.Drawing.Point(350, 22);
-            this.cmdCopyMasterAppData.Name = "cmdCopyMasterAppData";
-            this.cmdCopyMasterAppData.Size = new System.Drawing.Size(105, 13);
-            this.cmdCopyMasterAppData.TabIndex = 65;
-            this.cmdCopyMasterAppData.TabStop = true;
-            this.cmdCopyMasterAppData.Text = "CopyMasterAppData";
-            this.cmdCopyMasterAppData.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCopyMasterAppData_LinkClicked);
+            this.cmdCopyMaster.AutoSize = true;
+            this.cmdCopyMaster.Location = new System.Drawing.Point(350, 22);
+            this.cmdCopyMaster.Name = "cmdCopyMaster";
+            this.cmdCopyMaster.Size = new System.Drawing.Size(63, 13);
+            this.cmdCopyMaster.TabIndex = 65;
+            this.cmdCopyMaster.TabStop = true;
+            this.cmdCopyMaster.Text = "CopyMaster";
+            this.cmdCopyMaster.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCopyMaster_LinkClicked);
             // 
             // cmdCheckSequence
             // 
@@ -1145,6 +1147,17 @@ namespace EZAE
             this.lblSequenceFileName.Size = new System.Drawing.Size(0, 13);
             this.lblSequenceFileName.TabIndex = 27;
             // 
+            // cmdFolderLock
+            // 
+            this.cmdFolderLock.AutoSize = true;
+            this.cmdFolderLock.Location = new System.Drawing.Point(419, 22);
+            this.cmdFolderLock.Name = "cmdFolderLock";
+            this.cmdFolderLock.Size = new System.Drawing.Size(60, 13);
+            this.cmdFolderLock.TabIndex = 65;
+            this.cmdFolderLock.TabStop = true;
+            this.cmdFolderLock.Text = "FolderLock";
+            this.cmdFolderLock.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdFolderLock_LinkClicked);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1252,7 +1265,7 @@ namespace EZAE
 		private System.Windows.Forms.LinkLabel cmdShareX;
 		private System.Windows.Forms.LinkLabel cmdMakeProcessFile2;
         private System.Windows.Forms.LinkLabel cmdEmu2p1SequenceConvert;
-        private System.Windows.Forms.LinkLabel cmdCopyMasterAppData;
+        private System.Windows.Forms.LinkLabel cmdCopyMaster;
         private System.Windows.Forms.LinkLabel cmdRenameVNTT;
         private System.Windows.Forms.CheckBox chkmatlabinstall2022b;
         private System.Windows.Forms.LinkLabel cmdInstallMatlab2022b;
@@ -1261,6 +1274,7 @@ namespace EZAE
         private System.Windows.Forms.LinkLabel cmdOpenGooil2Tablet;
         private System.Windows.Forms.LinkLabel cmdOpenGooil1Tablet;
         private System.Windows.Forms.LinkLabel cmdInstallWinMerge;
+        private System.Windows.Forms.LinkLabel cmdFolderLock;
     }
 }
 
