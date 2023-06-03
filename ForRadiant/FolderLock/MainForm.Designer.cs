@@ -62,6 +62,8 @@ namespace FolderLock
             this.btnBrowse4 = new System.Windows.Forms.Button();
             this.textBox4 = new System.Windows.Forms.TextBox();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.btnLockAll = new System.Windows.Forms.Button();
+            this.btnUnlockAll = new System.Windows.Forms.Button();
             this.contextMenuStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -96,7 +98,7 @@ namespace FolderLock
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(723, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(833, 24);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -337,11 +339,33 @@ namespace FolderLock
             this.comboBox1.Size = new System.Drawing.Size(333, 21);
             this.comboBox1.TabIndex = 22;
             // 
+            // btnLockAll
+            // 
+            this.btnLockAll.Location = new System.Drawing.Point(716, 59);
+            this.btnLockAll.Name = "btnLockAll";
+            this.btnLockAll.Size = new System.Drawing.Size(51, 80);
+            this.btnLockAll.TabIndex = 23;
+            this.btnLockAll.Text = "Lock All";
+            this.btnLockAll.UseVisualStyleBackColor = true;
+            this.btnLockAll.Click += new System.EventHandler(this.btnLockAll_Click);
+            // 
+            // btnUnlockAll
+            // 
+            this.btnUnlockAll.Location = new System.Drawing.Point(773, 59);
+            this.btnUnlockAll.Name = "btnUnlockAll";
+            this.btnUnlockAll.Size = new System.Drawing.Size(51, 80);
+            this.btnUnlockAll.TabIndex = 24;
+            this.btnUnlockAll.Text = "Unlock All";
+            this.btnUnlockAll.UseVisualStyleBackColor = true;
+            this.btnUnlockAll.Click += new System.EventHandler(this.btnUnlockAll_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(723, 155);
+            this.ClientSize = new System.Drawing.Size(833, 155);
+            this.Controls.Add(this.btnUnlockAll);
+            this.Controls.Add(this.btnLockAll);
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.btnUnlock4);
@@ -412,6 +436,8 @@ namespace FolderLock
         private System.Windows.Forms.Button btnBrowse4;
         private System.Windows.Forms.TextBox textBox4;
         private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.Button btnLockAll;
+        private System.Windows.Forms.Button btnUnlockAll;
     }
 }
 
