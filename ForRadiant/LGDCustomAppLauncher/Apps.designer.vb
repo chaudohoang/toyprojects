@@ -48,6 +48,7 @@ Partial Class Apps
         Me.cmdSetSequence = New System.Windows.Forms.LinkLabel()
         Me.cmdButterfly = New System.Windows.Forms.LinkLabel()
         Me.TabControl1 = New System.Windows.Forms.TabControl()
+        Me.cmdFolderLock = New System.Windows.Forms.LinkLabel()
         Me.TabPage2.SuspendLayout()
         Me.TabPage1.SuspendLayout()
         Me.TabControl1.SuspendLayout()
@@ -164,6 +165,7 @@ Partial Class Apps
         '
         Me.TabPage1.Controls.Add(Me.cmdEmu2p1Simulator)
         Me.TabPage1.Controls.Add(Me.cmdRenameVNTT)
+        Me.TabPage1.Controls.Add(Me.cmdFolderLock)
         Me.TabPage1.Controls.Add(Me.cmdCopyMaster)
         Me.TabPage1.Controls.Add(Me.cmdBackupTT)
         Me.TabPage1.Controls.Add(Me.cmdEmu2p0Simulator)
@@ -334,6 +336,16 @@ Partial Class Apps
         Me.TabControl1.Size = New System.Drawing.Size(519, 291)
         Me.TabControl1.TabIndex = 2
         '
+        'cmdFolderLock
+        '
+        Me.cmdFolderLock.AutoSize = True
+        Me.cmdFolderLock.Location = New System.Drawing.Point(401, 39)
+        Me.cmdFolderLock.Name = "cmdFolderLock"
+        Me.cmdFolderLock.Size = New System.Drawing.Size(60, 13)
+        Me.cmdFolderLock.TabIndex = 6
+        Me.cmdFolderLock.TabStop = True
+        Me.cmdFolderLock.Text = "FolderLock"
+        '
         'Apps
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -377,4 +389,5 @@ Partial Class Apps
     Friend WithEvents cmdEmu2p1Simulator As LinkLabel
     Friend WithEvents cmdEmu2p0Simulator As LinkLabel
     Friend WithEvents cmdDove2p0Simulator As LinkLabel
+    Friend WithEvents cmdFolderLock As LinkLabel
 End Class
