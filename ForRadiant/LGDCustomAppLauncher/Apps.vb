@@ -171,6 +171,35 @@ Public Class Apps
         File.WriteAllLines(DevModeFile, DevMode)
     End Sub
 
+    Private Sub chkSkipRFDDemuraLGDBase_CheckedChanged(sender As Object, e As EventArgs) Handles chkSkipRFDDemuraLGDBase.CheckedChanged
+        Dim DevMode As New List(Of String)
+        Dim DevModeFile As String = "C:\Radiant Vision Systems Data\TrueTest\AppData\DevMode.csv"
+
+        Dim skipProperty = "SkipRFDDemuraLGDBase"
+        Dim skipValue = If(chkSkipRFDDemuraLGDBase.Checked = True, "true", "false")
+        Dim line = skipProperty + "," + skipValue
+
+        Dim propertyExisted As Boolean = False
+        If Not IO.File.Exists(DevModeFile) Then
+            File.WriteAllText(DevModeFile, line)
+        Else
+            DevMode = IO.File.ReadAllLines(DevModeFile).ToList
+            For index = 0 To DevMode.Count - 1
+                If DevMode(index).Contains(skipProperty) Then
+                    DevMode(index) = line
+                    propertyExisted = True
+                    Exit For
+                End If
+            Next
+        End If
+
+        If Not propertyExisted Then
+            DevMode.Add(line)
+        End If
+
+        File.WriteAllLines(DevModeFile, DevMode)
+    End Sub
+
     Private Sub chkSkipRFDS_CheckedChanged(sender As Object, e As EventArgs) Handles chkSkipRFDS.CheckedChanged
         Dim DevMode As New List(Of String)
         Dim DevModeFile As String = "C:\Radiant Vision Systems Data\TrueTest\AppData\DevMode.csv"
@@ -372,4 +401,6 @@ Public Class Apps
         startinfo.FileName = System.IO.Path.Combine(exePath, "FolderLock.exe")
         Process.Start(startinfo)
     End Sub
+
+
 End Class
