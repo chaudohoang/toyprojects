@@ -41,7 +41,13 @@ namespace FolderLock
             {
                 button1_Click(this, new EventArgs());
             }
-            
+
+            if (e.KeyCode == Keys.Escape)
+            {
+                this.Close();
+            }
+
+
         }
     }
 }
