@@ -142,17 +142,16 @@ Public Class MainForm
 		'conpare sequence analysis list
 		For i1 = 0 To nodes1.Count - 1
 			If nodes1(i1).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
-				sequence1AnaList.Add(nodes1(i1).SelectSingleNode("PatternSetupName").InnerText)
+				sequence1AnaList.Add(nodes1(i1).SelectSingleNode("PatternSetupName").InnerText + "_" + (nodes1(i1).SelectSingleNode("Analysis/UserName").InnerText))
 			End If
 		Next
 		sw2.Stop()
 		timeLogString.Add("Get sequence 1 analysis list : " + sw2.ElapsedMilliseconds.ToString + "ms")
-		timeLogString.Add("Sequence 1 analysis : " + String.Join(",", sequence1AnaList))
 
 		sw2.Restart()
 		For i2 = 0 To nodes2.Count - 1
 			If nodes2(i2).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
-				sequence2AnaList.Add(nodes2(i2).SelectSingleNode("PatternSetupName").InnerText)
+				sequence2AnaList.Add(nodes2(i2).SelectSingleNode("PatternSetupName").InnerText + "_" + (nodes2(i2).SelectSingleNode("Analysis/UserName").InnerText))
 			End If
 		Next
 
@@ -171,7 +170,7 @@ Public Class MainForm
 			Exit Sub
 		End If
 		sw2.Stop()
-		timeLogString.Add("Check if 2 sequences having same number of analysis : " + sw2.ElapsedMilliseconds.ToString + "ms")
+		timeLogString.Add("Check if 2 sequences having same number of analysis : " + sw2.ElapsedMilliseconds.ToString + "ms" + Environment.NewLine)
 
 		Dim SequenceItemCount As Integer
 		If nodes1.Count < nodes2.Count Then
@@ -180,10 +179,15 @@ Public Class MainForm
 			SequenceItemCount = nodes2.Count
 		End If
 		For index = 0 To SequenceItemCount - 1
+			If Not nodes1(index).SelectSingleNode("Selected").InnerText.ToLower = "true" Or Not nodes2(index).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
+				Continue For
+			End If
 			node1 = nodes1(index).SelectSingleNode("Analysis")
 			node2 = nodes2(index).SelectSingleNode("Analysis")
-			Dim seq1AnalysisName = nodes1(index).SelectSingleNode("PatternSetupName").InnerText
-			Dim seq2AnalysisName = nodes2(index).SelectSingleNode("PatternSetupName").InnerText
+
+			Dim seq1AnalysisName = nodes1(index).SelectSingleNode("PatternSetupName").InnerText + "_" + nodes1(index).SelectSingleNode("Analysis/UserName").InnerText
+			Dim seq2AnalysisName = nodes2(index).SelectSingleNode("PatternSetupName").InnerText + "_" + nodes2(index).SelectSingleNode("Analysis/UserName").InnerText
+			timeLogString.Add("Checking step : " + seq1AnalysisName)
 			sw2.Restart()
 			'Remove items in ignoreList
 
@@ -249,14 +253,15 @@ Public Class MainForm
 			For childIndex = 0 To node1.ChildNodes.Count - 1
 				If node1.ChildNodes(childIndex).InnerText.ToLower <> node2.ChildNodes(childIndex).InnerText.ToLower Then
 					equal = False
-					log.Add("Step : " + nodes1(index).SelectSingleNode("PatternSetupName").InnerText + ", Parameter : " + node1.ChildNodes(childIndex).Name + ", Sequence 1 Value : " + node1.ChildNodes(childIndex).InnerText + ", Sequence 2 Value : " + node2.ChildNodes(childIndex).InnerText)
+					log.Add("Step : " + seq1AnalysisName + ", Parameter : " + node1.ChildNodes(childIndex).Name + ", Sequence 1 Value : " + node1.ChildNodes(childIndex).InnerText + ", Sequence 2 Value : " + node2.ChildNodes(childIndex).InnerText)
 				End If
 				tempString = tempString + node1.ChildNodes(childIndex).Name + ","
 			Next
 			sw2.Stop()
-			timeLogString.Add("Comparing done for analysis step" + seq1AnalysisName + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
-			timeLogString.Add("Compared " + node1.ChildNodes.Count.ToString + " parameters : " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)))
 
+			timeLogString.Add("Comparing done for analysis step : " + seq1AnalysisName + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
+			timeLogString.Add("Compared " + node1.ChildNodes.Count.ToString + " parameters : " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + Environment.NewLine)
+			tempString = ""
 		Next
 
 		If equal Then
@@ -1047,6 +1052,7 @@ Public Class MainForm
 			Exit Sub
 		End If
 		sw2.Stop()
+		timeLogString.Add("Check sequence files existence : " + sw2.ElapsedMilliseconds.ToString + "ms")
 		Dim SN1 As String = ""
 		Dim SN2 As String = ""
 
@@ -1088,10 +1094,12 @@ Public Class MainForm
 			End If
 		Next
 		sw2.Stop()
+		timeLogString.Add("Get sequence 1 analysis list and demura step list (to skip demura step) : " + sw2.ElapsedMilliseconds.ToString + "ms")
 
 		sw2.Restart()
 		nodes1 = xmlDoc1.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
 		For index = 0 To nodes1.Count - 1
+
 			If sequence1AnaList.Contains(nodes1(index).SelectSingleNode("Name").InnerText) Then
 				If demuraStepList1.Contains(nodes1(index).SelectSingleNode("Name").InnerText) Then Continue For
 				node1 = nodes1(index).SelectSingleNode("CameraSettingsList")
@@ -1111,6 +1119,7 @@ Public Class MainForm
 			End If
 		Next
 		sw2.Stop()
+		timeLogString.Add("Get sequence 1 Serial Number : " + sw2.ElapsedMilliseconds.ToString + "ms")
 
 		sw2.Restart()
 
@@ -1124,6 +1133,7 @@ Public Class MainForm
 			End If
 		Next
 		sw2.Stop()
+		timeLogString.Add("Get sequence 2 analysis list and demura step list (to skip demura step) : " + sw2.ElapsedMilliseconds.ToString + "ms")
 
 		sw2.Restart()
 		nodes2 = xmlDoc2.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
@@ -1147,6 +1157,7 @@ Public Class MainForm
 			End If
 		Next
 		sw2.Stop()
+		timeLogString.Add("Get sequence 2 Serial Number : " + sw2.ElapsedMilliseconds.ToString + "ms")
 
 		If SN1 <> SN2 Then
 			CommLogUpdateText("Running sequence and master sequence is from different camera, cannot compare calibration")
@@ -1162,6 +1173,7 @@ Public Class MainForm
 		GetColorCalRef(file1FullPath, colorCalRef1)
 		GetColorCalRef(file2FullPath, colorCalRef2)
 		sw2.Stop()
+		timeLogString.Add("Get color calibrations from cal files : " + sw2.ElapsedMilliseconds.ToString + "ms")
 
 		Dim imgScaleRef1 As New Dictionary(Of String, String)
 		Dim imgScaleRef2 As New Dictionary(Of String, String)
@@ -1170,6 +1182,7 @@ Public Class MainForm
 		GetIMGScaleCalRef(file1FullPath, imgScaleRef1)
 		GetIMGScaleCalRef(file2FullPath, imgScaleRef2)
 		sw2.Stop()
+		timeLogString.Add("Get image scaling calibrations from cal files : " + sw2.ElapsedMilliseconds.ToString + "ms")
 
 		Dim flatFieldRef1 As New Dictionary(Of String, String)
 		Dim flatFieldRef2 As New Dictionary(Of String, String)
@@ -1178,6 +1191,7 @@ Public Class MainForm
 		GetFFCCalRef(file1FullPath, flatFieldRef1)
 		GetFFCCalRef(file2FullPath, flatFieldRef2)
 		sw2.Stop()
+		timeLogString.Add("Get flat field calibrations from cal files : " + sw2.ElapsedMilliseconds.ToString + "ms")
 
 		sw2.Restart()
 		For index = 0 To ColorCalSetting1.Count - 1
@@ -1187,6 +1201,7 @@ Public Class MainForm
 			End If
 		Next
 		sw2.Stop()
+		timeLogString.Add("Done checking color calibrations : " + sw2.ElapsedMilliseconds.ToString + "ms")
 
 		sw2.Restart()
 		For index = 0 To ImgScaleSetting1.Count - 1
@@ -1196,6 +1211,7 @@ Public Class MainForm
 			End If
 		Next
 		sw2.Stop()
+		timeLogString.Add("Done checking image scaling calibrations : " + sw2.ElapsedMilliseconds.ToString + "ms")
 
 		sw2.Restart()
 		For index = 0 To FFCSetting1.Count - 1
@@ -1205,6 +1221,7 @@ Public Class MainForm
 			End If
 		Next
 		sw2.Stop()
+		timeLogString.Add("Done checking flat field calibrations : " + sw2.ElapsedMilliseconds.ToString + "ms")
 
 		If equal Then
 			CommLogUpdateText("NO CAL DIFFERENCE !!!")
