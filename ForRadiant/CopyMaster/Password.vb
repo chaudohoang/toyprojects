@@ -27,5 +27,10 @@ Public Class Password
             Button1_Click(Me, New EventArgs())
         End If
 
+        If (e.KeyCode = Keys.Escape) Then
+            Me.Close()
+        End If
+
     End Sub
+
 End Class
