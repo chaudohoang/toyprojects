@@ -375,7 +375,7 @@ Public Class Apps
     End Sub
 
     Private Sub cmdReloadSequence_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdReloadSequence.LinkClicked
-        TrueTest.SequenceSet(TrueTest.Sequence.XMLFilePathName)
+        'TrueTest.SequenceSet(TrueTest.Sequence.XMLFilePathName)
     End Sub
 
     Private Sub cmdDove2p0Simulator_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdDove2p0Simulator.LinkClicked

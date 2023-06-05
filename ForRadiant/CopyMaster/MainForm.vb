@@ -206,20 +206,35 @@ Namespace CopyMasterAppData
             End Using
         End Sub
         Private Sub btnCopy_Click(sender As Object, e As EventArgs) Handles btnCopy.Click
-            Dim locked As Boolean
+
             btnCopy.Enabled = False
+            Dim alreadyLocked As Boolean
             If Not Directory.Exists(MasterAppDataPath) Then
                 Directory.CreateDirectory(MasterAppDataPath)
             End If
             Dim count As Integer = 0
+
             Try
-                Directory.GetFiles(MasterAppDataPath)
-            Catch ex As UnauthorizedAccessException
-                MessageBox.Show("Locked, Unlock first !")
-                locked = True
+                Dim adminUserName = Environment.UserName
+                Dim ds As DirectorySecurity = Directory.GetAccessControl(MasterAppDataPath)
+                Dim fSecurity As AuthorizationRuleCollection =
+                ds.GetAccessRules(True, True,
+                Type.GetType("System.Security.Principal.NTAccount"))
+
+                For Each myacc As Security.AccessControl.AccessRule In fSecurity
+
+                    If (myacc.AccessControlType = AccessControlType.Deny) Then
+                        alreadyLocked = True
+                        Exit For
+                    End If
+                Next
+            Catch ex As Exception
+                MessageBox.Show(ex.Message)
             End Try
 
-            If Not locked Then
+            If alreadyLocked Then
+                MessageBox.Show("Locked, Unlock first !")
+            Else
                 For Each item As String In ListBox1.Items
                     Try
                         Dim newPath As String = item.Replace("AppData", "Master AppData")
@@ -230,9 +245,10 @@ Namespace CopyMasterAppData
                     End Try
 
                 Next
+                MessageBox.Show(count.ToString + " files copied !")
 
             End If
-            MessageBox.Show(count.ToString + " files copied !")
+
             Static m_Rnd As New Random
             Dim tempcolor As Color
             tempcolor = Label1.ForeColor
@@ -277,19 +293,29 @@ Namespace CopyMasterAppData
             Dim alreadyLocked As Boolean = False
             Dim SNs As New Dictionary(Of String, String)
 
-            Dim appdataFiles = Directory.GetFiles(AppDataPath)
-            For Each item As String In appdataFiles
-                If Path.GetExtension(item) = ".xml" Then
-                    Dim SN As String = GetSN(item)
-                    If SN <> Nothing Then
-                        SNs.Add(item, SN)
-                    End If
-                End If
-            Next
-
             Try
-                Dim masterAppDataFiles = Directory.GetFiles(MasterAppDataPath)
-                For Each item As String In masterAppDataFiles
+                Dim adminUserName = Environment.UserName
+                Dim ds As DirectorySecurity = Directory.GetAccessControl(MasterAppDataPath)
+                Dim fSecurity As AuthorizationRuleCollection =
+                ds.GetAccessRules(True, True,
+                Type.GetType("System.Security.Principal.NTAccount"))
+
+                For Each myacc As Security.AccessControl.AccessRule In fSecurity
+
+                    If (myacc.AccessControlType = AccessControlType.Deny) Then
+                        alreadyLocked = True
+                        Exit For
+                    End If
+                Next
+            Catch ex As Exception
+                MessageBox.Show(ex.Message)
+            End Try
+
+            If alreadyLocked Then
+                MessageBox.Show("Already Locked")
+            Else
+                Dim appdataFiles = Directory.GetFiles(AppDataPath)
+                For Each item As String In appdataFiles
                     If Path.GetExtension(item) = ".xml" Then
                         Dim SN As String = GetSN(item)
                         If SN <> Nothing Then
@@ -297,38 +323,49 @@ Namespace CopyMasterAppData
                         End If
                     End If
                 Next
-            Catch ex As UnauthorizedAccessException
-                alreadyLocked = True
-            End Try
 
-            Dim keys() As String = SNs.Keys.ToArray
-            For i = 0 To keys.Count - 2
-                If SNs(keys(i)) <> SNs(keys(i + 1)) Then
-                    sameSN = False
-                    Exit For
-                End If
-            Next
-            If alreadyLocked Then
-                MessageBox.Show("Already Locked")
-            ElseIf sameSN Then
                 Try
-                    Dim adminUserName = Environment.UserName
-                    Dim cu As SecurityIdentifier = WindowsIdentity.GetCurrent().User
-                    Dim ds As DirectorySecurity = Directory.GetAccessControl(MasterAppDataPath)
-                    ds.SetOwner(cu)
-                    Dim fsa As FileSystemAccessRule = New FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny)
-                    ds.AddAccessRule(fsa)
-                    Directory.SetAccessControl(MasterAppDataPath, ds)
-                    MessageBox.Show("Locked")
-                Catch ex As Exception
+                    Dim masterAppDataFiles = Directory.GetFiles(MasterAppDataPath)
+                    For Each item As String In masterAppDataFiles
+                        If Path.GetExtension(item) = ".xml" Then
+                            Dim SN As String = GetSN(item)
+                            If SN <> Nothing Then
+                                SNs.Add(item, SN)
+                            End If
+                        End If
+                    Next
+                Catch ex As UnauthorizedAccessException
                     MessageBox.Show(ex.Message)
                 End Try
-            Else
-                Dim errorMessage As String = "Serial Number Not Matching, Lock Failed :" + Environment.NewLine + Environment.NewLine
-                For i = 0 To keys.Count - 1
-                    errorMessage += keys(i) + " : " + SNs(keys(i)) + Environment.NewLine
+
+                Dim keys() As String = SNs.Keys.ToArray
+                For i = 0 To keys.Count - 2
+                    If SNs(keys(i)) <> SNs(keys(i + 1)) Then
+                        sameSN = False
+                        Exit For
+                    End If
                 Next
-                MessageBox.Show(errorMessage)
+
+                If sameSN Then
+                    Try
+                        Dim adminUserName = Environment.UserName
+                        Dim cu As SecurityIdentifier = WindowsIdentity.GetCurrent().User
+                        Dim ds As DirectorySecurity = Directory.GetAccessControl(MasterAppDataPath)
+                        ds.SetOwner(cu)
+                        Dim fsa As FileSystemAccessRule = New FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny)
+                        ds.AddAccessRule(fsa)
+                        Directory.SetAccessControl(MasterAppDataPath, ds)
+                        MessageBox.Show("Locked")
+                    Catch ex As Exception
+                        MessageBox.Show(ex.Message)
+                    End Try
+                Else
+                    Dim errorMessage As String = "Serial Number Not Matching, Lock Failed :" + Environment.NewLine + Environment.NewLine
+                    For i = 0 To keys.Count - 1
+                        errorMessage += keys(i) + " : " + SNs(keys(i)) + Environment.NewLine
+                    Next
+                    MessageBox.Show(errorMessage)
+                End If
 
             End If
 
@@ -385,43 +422,91 @@ Namespace CopyMasterAppData
 
         Private Sub btnLock_Click(sender As Object, e As EventArgs) Handles btnLock.Click
 
+            Dim alreadyLocked As Boolean = False
+
             Try
                 Dim adminUserName = Environment.UserName
-                Dim cu As SecurityIdentifier = WindowsIdentity.GetCurrent().User
                 Dim ds As DirectorySecurity = Directory.GetAccessControl(MasterAppDataPath)
-                ds.SetOwner(cu)
-                Dim fsa As FileSystemAccessRule = New FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny)
-                ds.AddAccessRule(fsa)
-                Directory.SetAccessControl(MasterAppDataPath, ds)
-                MessageBox.Show("Locked")
-            Catch ex As UnauthorizedAccessException
-                MessageBox.Show("Already Locked")
+                Dim fSecurity As AuthorizationRuleCollection =
+                ds.GetAccessRules(True, True,
+                Type.GetType("System.Security.Principal.NTAccount"))
+
+                For Each myacc As Security.AccessControl.AccessRule In fSecurity
+
+                    If (myacc.AccessControlType = AccessControlType.Deny) Then
+                        alreadyLocked = True
+                        Exit For
+                    End If
+                Next
             Catch ex As Exception
                 MessageBox.Show(ex.Message)
             End Try
+
+            If alreadyLocked Then
+                MessageBox.Show("Already Locked")
+            Else
+                Try
+                    Dim adminUserName = Environment.UserName
+                    Dim cu As SecurityIdentifier = WindowsIdentity.GetCurrent().User
+                    Dim ds As DirectorySecurity = Directory.GetAccessControl(MasterAppDataPath)
+                    ds.SetOwner(cu)
+                    Dim fsa As FileSystemAccessRule = New FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny)
+                    ds.AddAccessRule(fsa)
+                    Directory.SetAccessControl(MasterAppDataPath, ds)
+                    MessageBox.Show("Locked")
+                Catch ex As UnauthorizedAccessException
+                    MessageBox.Show(ex.Message)
+                Catch ex As Exception
+                    MessageBox.Show(ex.Message)
+                End Try
+            End If
 
         End Sub
 
         Private Sub btnDel_Click(sender As Object, e As EventArgs) Handles btnDel.Click
             btnDel.Enabled = False
+            Dim alreadyLocked As Boolean = False
             If Not Directory.Exists(MasterAppDataPath) Then
                 Directory.CreateDirectory(MasterAppDataPath)
             End If
-            Dim result As DialogResult = MessageBox.Show("Are you sure ?", "Delete all files in Master AppData ?", MessageBoxButtons.YesNo)
-            If result = DialogResult.Yes Then
-                Dim count As Integer = 0
-                Try
-                    For Each file_path As String In Directory.GetFiles(MasterAppDataPath)
 
-                        File.Delete(file_path)
-                        count += 1
+            Try
+                Dim adminUserName = Environment.UserName
+                Dim ds As DirectorySecurity = Directory.GetAccessControl(MasterAppDataPath)
+                Dim fSecurity As AuthorizationRuleCollection =
+                ds.GetAccessRules(True, True,
+                Type.GetType("System.Security.Principal.NTAccount"))
 
-                    Next
-                Catch ex As UnauthorizedAccessException
-                    MessageBox.Show("Locked, Unlock first !")
-                End Try
+                For Each myacc As Security.AccessControl.AccessRule In fSecurity
 
-                MessageBox.Show(count.ToString + " files deleted !")
+                    If (myacc.AccessControlType = AccessControlType.Deny) Then
+                        alreadyLocked = True
+                        Exit For
+                    End If
+                Next
+            Catch ex As Exception
+                MessageBox.Show(ex.Message)
+            End Try
+
+            If alreadyLocked Then
+                MessageBox.Show("Locked, Unlock first !")
+            Else
+                Dim result As DialogResult = MessageBox.Show("Are you sure ?", "Delete all files in Master AppData ?", MessageBoxButtons.YesNo)
+                If result = DialogResult.Yes Then
+                    Dim count As Integer = 0
+                    Try
+                        For Each file_path As String In Directory.GetFiles(MasterAppDataPath)
+
+                            File.Delete(file_path)
+                            count += 1
+
+                        Next
+                    Catch ex As UnauthorizedAccessException
+                        MessageBox.Show(ex.Message)
+                    End Try
+
+                    MessageBox.Show(count.ToString + " files deleted !")
+                End If
             End If
 
             Label1.Text = "DONE !"
@@ -495,20 +580,45 @@ Namespace CopyMasterAppData
         End Sub
 
         Private Sub btnLock2_Click(sender As Object, e As EventArgs) Handles btnLock2.Click
+            Dim alreadyLocked As Boolean = False
+
             Try
                 Dim adminUserName = Environment.UserName
-                Dim cu As SecurityIdentifier = WindowsIdentity.GetCurrent().User
                 Dim ds As DirectorySecurity = Directory.GetAccessControl(MasterSequencePath)
-                ds.SetOwner(cu)
-                Dim fsa As FileSystemAccessRule = New FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny)
-                ds.AddAccessRule(fsa)
-                Directory.SetAccessControl(MasterSequencePath, ds)
-                MessageBox.Show("Locked")
-            Catch ex As UnauthorizedAccessException
-                MessageBox.Show("Already Locked")
+                Dim fSecurity As AuthorizationRuleCollection =
+                ds.GetAccessRules(True, True,
+                Type.GetType("System.Security.Principal.NTAccount"))
+
+                For Each myacc As Security.AccessControl.AccessRule In fSecurity
+
+                    If (myacc.AccessControlType = AccessControlType.Deny) Then
+                        alreadyLocked = True
+                        Exit For
+                    End If
+                Next
             Catch ex As Exception
                 MessageBox.Show(ex.Message)
             End Try
+
+            If alreadyLocked Then
+                MessageBox.Show("Already Locked")
+            Else
+                Try
+                    Dim adminUserName = Environment.UserName
+                    Dim cu As SecurityIdentifier = WindowsIdentity.GetCurrent().User
+                    Dim ds As DirectorySecurity = Directory.GetAccessControl(MasterSequencePath)
+                    ds.SetOwner(cu)
+                    Dim fsa As FileSystemAccessRule = New FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny)
+                    ds.AddAccessRule(fsa)
+                    Directory.SetAccessControl(MasterSequencePath, ds)
+                    MessageBox.Show("Locked")
+                Catch ex As UnauthorizedAccessException
+                    MessageBox.Show(ex.Message)
+                Catch ex As Exception
+                    MessageBox.Show(ex.Message)
+                End Try
+            End If
+
         End Sub
 
         Private Sub btnUnlock2_Click(sender As Object, e As EventArgs) Handles btnUnlock2.Click
@@ -560,24 +670,48 @@ Namespace CopyMasterAppData
 
         Private Sub btnDel2_Click(sender As Object, e As EventArgs) Handles btnDel2.Click
             btnDel2.Enabled = False
+            Dim alreadyLocked As Boolean = False
             If Not Directory.Exists(MasterSequencePath) Then
                 Directory.CreateDirectory(MasterSequencePath)
             End If
-            Dim result As DialogResult = MessageBox.Show("Are you sure ?", "Delete all files in Master Sequence ?", MessageBoxButtons.YesNo)
-            If result = DialogResult.Yes Then
-                Dim count As Integer = 0
-                Try
-                    For Each file_path As String In Directory.GetFiles(MasterSequencePath)
 
-                        File.Delete(file_path)
-                        count += 1
+            Try
+                Dim adminUserName = Environment.UserName
+                Dim ds As DirectorySecurity = Directory.GetAccessControl(MasterSequencePath)
+                Dim fSecurity As AuthorizationRuleCollection =
+                ds.GetAccessRules(True, True,
+                Type.GetType("System.Security.Principal.NTAccount"))
 
-                    Next
-                Catch ex As UnauthorizedAccessException
-                    MessageBox.Show("Locked, Unlock first !")
-                End Try
+                For Each myacc As Security.AccessControl.AccessRule In fSecurity
 
-                MessageBox.Show(count.ToString + " files deleted !")
+                    If (myacc.AccessControlType = AccessControlType.Deny) Then
+                        alreadyLocked = True
+                        Exit For
+                    End If
+                Next
+            Catch ex As Exception
+                MessageBox.Show(ex.Message)
+            End Try
+
+            If alreadyLocked Then
+                MessageBox.Show("Locked, Unlock first !")
+            Else
+                Dim result As DialogResult = MessageBox.Show("Are you sure ?", "Delete all files in Master AppData ?", MessageBoxButtons.YesNo)
+                If result = DialogResult.Yes Then
+                    Dim count As Integer = 0
+                    Try
+                        For Each file_path As String In Directory.GetFiles(MasterSequencePath)
+
+                            File.Delete(file_path)
+                            count += 1
+
+                        Next
+                    Catch ex As UnauthorizedAccessException
+                        MessageBox.Show(ex.Message)
+                    End Try
+
+                    MessageBox.Show(count.ToString + " files deleted !")
+                End If
             End If
 
             Label2.Text = "DONE !"
@@ -585,23 +719,37 @@ Namespace CopyMasterAppData
         End Sub
 
         Private Sub btnCopy2_Click(sender As Object, e As EventArgs) Handles btnCopy2.Click
-            Dim locked As Boolean
             btnCopy2.Enabled = False
+            Dim alreadyLocked As Boolean
             If Not Directory.Exists(MasterSequencePath) Then
                 Directory.CreateDirectory(MasterSequencePath)
             End If
             Dim count As Integer = 0
+
             Try
-                Directory.GetFiles(MasterSequencePath)
-            Catch ex As UnauthorizedAccessException
-                MessageBox.Show("Locked, Unlock first !")
-                locked = True
+                Dim adminUserName = Environment.UserName
+                Dim ds As DirectorySecurity = Directory.GetAccessControl(MasterSequencePath)
+                Dim fSecurity As AuthorizationRuleCollection =
+                ds.GetAccessRules(True, True,
+                Type.GetType("System.Security.Principal.NTAccount"))
+
+                For Each myacc As Security.AccessControl.AccessRule In fSecurity
+
+                    If (myacc.AccessControlType = AccessControlType.Deny) Then
+                        alreadyLocked = True
+                        Exit For
+                    End If
+                Next
+            Catch ex As Exception
+                MessageBox.Show(ex.Message)
             End Try
 
-            If Not locked Then
+            If alreadyLocked Then
+                MessageBox.Show("Locked, Unlock first !")
+            Else
                 For Each item As String In ListBox2.Items
                     Try
-                        Dim newPath As String = item.Replace("Sequence", "Sequence\Master")
+                        Dim newPath As String = item.Replace("Sequence", "Sequence\\Master")
                         File.Copy(item, newPath, True)
                         count += 1
                     Catch ex As Exception
@@ -609,9 +757,10 @@ Namespace CopyMasterAppData
                     End Try
 
                 Next
+                MessageBox.Show(count.ToString + " files copied !")
 
             End If
-            MessageBox.Show(count.ToString + " files copied !")
+
             Static m_Rnd As New Random
             Dim tempcolor As Color
             tempcolor = Label2.ForeColor
@@ -690,20 +839,45 @@ Namespace CopyMasterAppData
         End Sub
 
         Private Sub btnLock3_Click(sender As Object, e As EventArgs) Handles btnLock3.Click
+            Dim alreadyLocked As Boolean = False
+
             Try
                 Dim adminUserName = Environment.UserName
-                Dim cu As SecurityIdentifier = WindowsIdentity.GetCurrent().User
                 Dim ds As DirectorySecurity = Directory.GetAccessControl(MasterCalibrationPath)
-                ds.SetOwner(cu)
-                Dim fsa As FileSystemAccessRule = New FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny)
-                ds.AddAccessRule(fsa)
-                Directory.SetAccessControl(MasterCalibrationPath, ds)
-                MessageBox.Show("Locked")
-            Catch ex As UnauthorizedAccessException
-                MessageBox.Show("Already Locked")
+                Dim fSecurity As AuthorizationRuleCollection =
+                ds.GetAccessRules(True, True,
+                Type.GetType("System.Security.Principal.NTAccount"))
+
+                For Each myacc As Security.AccessControl.AccessRule In fSecurity
+
+                    If (myacc.AccessControlType = AccessControlType.Deny) Then
+                        alreadyLocked = True
+                        Exit For
+                    End If
+                Next
             Catch ex As Exception
                 MessageBox.Show(ex.Message)
             End Try
+
+            If alreadyLocked Then
+                MessageBox.Show("Already Locked")
+            Else
+                Try
+                    Dim adminUserName = Environment.UserName
+                    Dim cu As SecurityIdentifier = WindowsIdentity.GetCurrent().User
+                    Dim ds As DirectorySecurity = Directory.GetAccessControl(MasterCalibrationPath)
+                    ds.SetOwner(cu)
+                    Dim fsa As FileSystemAccessRule = New FileSystemAccessRule(adminUserName, FileSystemRights.FullControl, AccessControlType.Deny)
+                    ds.AddAccessRule(fsa)
+                    Directory.SetAccessControl(MasterCalibrationPath, ds)
+                    MessageBox.Show("Locked")
+                Catch ex As UnauthorizedAccessException
+                    MessageBox.Show(ex.Message)
+                Catch ex As Exception
+                    MessageBox.Show(ex.Message)
+                End Try
+            End If
+
         End Sub
 
         Private Sub btnUnlock3_Click(sender As Object, e As EventArgs) Handles btnUnlock3.Click
@@ -755,24 +929,48 @@ Namespace CopyMasterAppData
 
         Private Sub btnDel3_Click(sender As Object, e As EventArgs) Handles btnDel3.Click
             btnDel3.Enabled = False
+            Dim alreadyLocked As Boolean = False
             If Not Directory.Exists(MasterCalibrationPath) Then
                 Directory.CreateDirectory(MasterCalibrationPath)
             End If
-            Dim result As DialogResult = MessageBox.Show("Are you sure ?", "Delete all files in Master Calibration ?", MessageBoxButtons.YesNo)
-            If result = DialogResult.Yes Then
-                Dim count As Integer = 0
-                Try
-                    For Each file_path As String In Directory.GetFiles(MasterCalibrationPath)
 
-                        File.Delete(file_path)
-                        count += 1
+            Try
+                Dim adminUserName = Environment.UserName
+                Dim ds As DirectorySecurity = Directory.GetAccessControl(MasterCalibrationPath)
+                Dim fSecurity As AuthorizationRuleCollection =
+                ds.GetAccessRules(True, True,
+                Type.GetType("System.Security.Principal.NTAccount"))
 
-                    Next
-                Catch ex As UnauthorizedAccessException
-                    MessageBox.Show("Locked, Unlock first !")
-                End Try
+                For Each myacc As Security.AccessControl.AccessRule In fSecurity
 
-                MessageBox.Show(count.ToString + " files deleted !")
+                    If (myacc.AccessControlType = AccessControlType.Deny) Then
+                        alreadyLocked = True
+                        Exit For
+                    End If
+                Next
+            Catch ex As Exception
+                MessageBox.Show(ex.Message)
+            End Try
+
+            If alreadyLocked Then
+                MessageBox.Show("Locked, Unlock first !")
+            Else
+                Dim result As DialogResult = MessageBox.Show("Are you sure ?", "Delete all files in Master AppData ?", MessageBoxButtons.YesNo)
+                If result = DialogResult.Yes Then
+                    Dim count As Integer = 0
+                    Try
+                        For Each file_path As String In Directory.GetFiles(MasterCalibrationPath)
+
+                            File.Delete(file_path)
+                            count += 1
+
+                        Next
+                    Catch ex As UnauthorizedAccessException
+                        MessageBox.Show(ex.Message)
+                    End Try
+
+                    MessageBox.Show(count.ToString + " files deleted !")
+                End If
             End If
 
             Label3.Text = "DONE !"
@@ -780,23 +978,37 @@ Namespace CopyMasterAppData
         End Sub
 
         Private Sub btnCopy3_Click(sender As Object, e As EventArgs) Handles btnCopy3.Click
-            Dim locked As Boolean
             btnCopy3.Enabled = False
+            Dim alreadyLocked As Boolean
             If Not Directory.Exists(MasterCalibrationPath) Then
                 Directory.CreateDirectory(MasterCalibrationPath)
             End If
             Dim count As Integer = 0
+
             Try
-                Directory.GetFiles(MasterCalibrationPath)
-            Catch ex As UnauthorizedAccessException
-                MessageBox.Show("Locked, Unlock first !")
-                locked = True
+                Dim adminUserName = Environment.UserName
+                Dim ds As DirectorySecurity = Directory.GetAccessControl(MasterCalibrationPath)
+                Dim fSecurity As AuthorizationRuleCollection =
+                ds.GetAccessRules(True, True,
+                Type.GetType("System.Security.Principal.NTAccount"))
+
+                For Each myacc As Security.AccessControl.AccessRule In fSecurity
+
+                    If (myacc.AccessControlType = AccessControlType.Deny) Then
+                        alreadyLocked = True
+                        Exit For
+                    End If
+                Next
+            Catch ex As Exception
+                MessageBox.Show(ex.Message)
             End Try
 
-            If Not locked Then
+            If alreadyLocked Then
+                MessageBox.Show("Locked, Unlock first !")
+            Else
                 For Each item As String In ListBox3.Items
                     Try
-                        Dim newPath As String = item.Replace("Sequence", "Sequence\Calibration")
+                        Dim newPath As String = item.Replace("Sequence", "Sequence\\Master")
                         File.Copy(item, newPath, True)
                         count += 1
                     Catch ex As Exception
@@ -804,9 +1016,10 @@ Namespace CopyMasterAppData
                     End Try
 
                 Next
+                MessageBox.Show(count.ToString + " files copied !")
 
             End If
-            MessageBox.Show(count.ToString + " files copied !")
+
             Static m_Rnd As New Random
             Dim tempcolor As Color
             tempcolor = Label3.ForeColor
