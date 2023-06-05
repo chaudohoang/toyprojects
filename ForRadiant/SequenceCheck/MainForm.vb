@@ -97,16 +97,17 @@ Public Class MainForm
 
 		If Not File.Exists(file1FullPath) Then
 			equal = False
-			CommLogUpdateText("Sequence 1 is not existed !!!")
+			CommLogUpdateText("Parameters Check : Sequence 1 is not existed !!!")
+			Exit Sub
 		ElseIf Not File.Exists(file2FullPath) Then
 			equal = False
-			CommLogUpdateText("Sequence 2 is not existed !!!")
+			CommLogUpdateText("Parameters Check : Sequence 2 is not existed !!!")
 
 			Exit Sub
 
 		ElseIf file1FullPath = file2FullPath Then
 			equal = False
-			CommLogUpdateText("Sequence 1 and Sequence 2 is the same file !!!")
+			CommLogUpdateText("Parameters Check : Sequence 1 and Sequence 2 is the same file !!!")
 			Exit Sub
 		End If
 		sw2.Stop()
@@ -147,6 +148,7 @@ Public Class MainForm
 		Next
 		sw2.Stop()
 		timeLogString.Add("Get sequence 1 analysis list : " + sw2.ElapsedMilliseconds.ToString + "ms")
+		timeLogString.Add("Sequence 1 analysis : " + String.Join(",", sequence1AnaList))
 
 		sw2.Restart()
 		For i2 = 0 To nodes2.Count - 1
@@ -164,9 +166,9 @@ Public Class MainForm
 
 		If String.Join(",", sequence1AnaList) <> String.Join(",", sequence2AnaList) Then
 			equal = False
-			CommLogUpdateText("Analysis list does not match !!!")
-			CommLogUpdateText("Sequence 1 analyses : " + String.Join(",", sequence1AnaList))
-			CommLogUpdateText("Sequence 2 analyses : " + String.Join(",", sequence2AnaList))
+			CommLogUpdateText("Parameters Check : Analysis list does not match !!!")
+			CommLogUpdateText("Parameters Check : Sequence 1 analyses : " + String.Join(",", sequence1AnaList))
+			CommLogUpdateText("Parameters Check : Sequence 2 analyses : " + String.Join(",", sequence2AnaList))
 			Exit Sub
 		End If
 		sw2.Stop()
@@ -1040,15 +1042,15 @@ Public Class MainForm
 
 		If Not File.Exists(file1FullPath) Then
 			equal = False
-			CommLogUpdateText("Sequence 1 is not existed !!!")
+			CommLogUpdateText("Calibrations Check : Sequence 1 is not existed !!!")
 		ElseIf Not File.Exists(file2FullPath) Then
 			equal = False
-			CommLogUpdateText("Sequence 2 is not existed !!!")
+			CommLogUpdateText("Calibrations Check : Sequence 2 is not existed !!!")
 
 			Exit Sub
 		ElseIf file1FullPath = file2FullPath Then
 			equal = False
-			CommLogUpdateText("Sequence 1 and Sequence 2 is the same file !!!")
+			CommLogUpdateText("Calibrations Check : Sequence 1 and Sequence 2 is the same file !!!")
 			Exit Sub
 		End If
 		sw2.Stop()
