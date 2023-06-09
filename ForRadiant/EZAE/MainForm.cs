@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.IO;
@@ -1156,6 +1157,16 @@ namespace EZAE
                 startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
                 Process.Start(startInfo);
 
+            }
+        }
+
+        private void cmdCheckUSBLicenseCode_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = @"Apps\WPSOffice\et.exe";
+            string lcfilepath = @"Tools\License Code Combined List.xlsx";
+            if (File.Exists(filepath) && File.Exists(lcfilepath))
+            {
+                Process.Start(filepath, "\"" + lcfilepath + "\"");
             }
         }
     }

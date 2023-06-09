@@ -226,6 +226,8 @@ Public Class MainForm
 				End If
 			Next
 			sw2.Stop()
+			Dim seq2NeedSorting As Boolean
+			seq2NeedSorting = If(tempString.Length = 0, False, True)
 			timeLogString.Add("Sequence 2 add missing element in Analysis " + seq2AnalysisName + " and added " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
 			tempString = ""
 
@@ -238,17 +240,25 @@ Public Class MainForm
 				End If
 			Next
 			sw2.Stop()
+			Dim seq1NeedSorting As Boolean
+			seq1NeedSorting = If(tempString.Length = 0, False, True)
 			timeLogString.Add("Sequence 1 add missing element in Analysis " + seq1AnalysisName + " and added " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
 			tempString = ""
 
-			sw2.Restart()
-			SortElements(node1)
-			sw2.Stop()
-			timeLogString.Add("Sorting element in sequence 1 for analysis " + seq1AnalysisName + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
-			sw2.Restart()
-			SortElements(node2)
-			sw2.Stop()
-			timeLogString.Add("Sorting element in sequence 2 for analysis " + seq2AnalysisName + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
+			If seq1NeedSorting Or seq2NeedSorting Then
+				seq1NeedSorting = False
+				seq2NeedSorting = False
+				sw2.Restart()
+				SortElements(node1)
+				sw2.Stop()
+				timeLogString.Add("Sorting element in sequence 1 for analysis " + seq1AnalysisName + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
+				sw2.Restart()
+				SortElements(node2)
+				sw2.Stop()
+				timeLogString.Add("Sorting element in sequence 2 for analysis " + seq2AnalysisName + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
+			Else
+				timeLogString.Add("No need sorting element in 2 sequences for analysis " + seq1AnalysisName)
+			End If
 
 			sw2.Restart()
 

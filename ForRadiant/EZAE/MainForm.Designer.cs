@@ -104,6 +104,7 @@ namespace EZAE
             this.tabSetSequence = new System.Windows.Forms.TabPage();
             this.cmdRenameVNTT = new System.Windows.Forms.LinkLabel();
             this.cmdEmu2p1SequenceConvert = new System.Windows.Forms.LinkLabel();
+            this.cmdFolderLock = new System.Windows.Forms.LinkLabel();
             this.cmdCopyMaster = new System.Windows.Forms.LinkLabel();
             this.cmdCheckSequence = new System.Windows.Forms.LinkLabel();
             this.cmdCreateFFC = new System.Windows.Forms.LinkLabel();
@@ -117,7 +118,7 @@ namespace EZAE
             this.cmdUseButterfly = new System.Windows.Forms.LinkLabel();
             this.lblSequenceFileName = new System.Windows.Forms.Label();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-            this.cmdFolderLock = new System.Windows.Forms.LinkLabel();
+            this.cmdCheckUSBLicenseCode = new System.Windows.Forms.LinkLabel();
             this.tabControl1.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabSetupPC.SuspendLayout();
@@ -142,6 +143,7 @@ namespace EZAE
             this.tabControl.Controls.Add(this.cmdOpenGooil3Tablet);
             this.tabControl.Controls.Add(this.cmdOpenGooil2Tablet);
             this.tabControl.Controls.Add(this.cmdOpenGooil1Tablet);
+            this.tabControl.Controls.Add(this.cmdCheckUSBLicenseCode);
             this.tabControl.Controls.Add(this.cmdMakeProcessFile2);
             this.tabControl.Controls.Add(this.cmdShareX);
             this.tabControl.Controls.Add(this.cmdRestartTTDove2p0);
@@ -1017,6 +1019,17 @@ namespace EZAE
             this.cmdEmu2p1SequenceConvert.Text = "Emu2p1SequenceConvert";
             this.cmdEmu2p1SequenceConvert.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdEmu2p1SequenceConvert_LinkClicked);
             // 
+            // cmdFolderLock
+            // 
+            this.cmdFolderLock.AutoSize = true;
+            this.cmdFolderLock.Location = new System.Drawing.Point(419, 22);
+            this.cmdFolderLock.Name = "cmdFolderLock";
+            this.cmdFolderLock.Size = new System.Drawing.Size(60, 13);
+            this.cmdFolderLock.TabIndex = 65;
+            this.cmdFolderLock.TabStop = true;
+            this.cmdFolderLock.Text = "FolderLock";
+            this.cmdFolderLock.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdFolderLock_LinkClicked);
+            // 
             // cmdCopyMaster
             // 
             this.cmdCopyMaster.AutoSize = true;
@@ -1147,16 +1160,16 @@ namespace EZAE
             this.lblSequenceFileName.Size = new System.Drawing.Size(0, 13);
             this.lblSequenceFileName.TabIndex = 27;
             // 
-            // cmdFolderLock
+            // cmdCheckUSBLicenseCode
             // 
-            this.cmdFolderLock.AutoSize = true;
-            this.cmdFolderLock.Location = new System.Drawing.Point(419, 22);
-            this.cmdFolderLock.Name = "cmdFolderLock";
-            this.cmdFolderLock.Size = new System.Drawing.Size(60, 13);
-            this.cmdFolderLock.TabIndex = 65;
-            this.cmdFolderLock.TabStop = true;
-            this.cmdFolderLock.Text = "FolderLock";
-            this.cmdFolderLock.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdFolderLock_LinkClicked);
+            this.cmdCheckUSBLicenseCode.AutoSize = true;
+            this.cmdCheckUSBLicenseCode.Location = new System.Drawing.Point(259, 89);
+            this.cmdCheckUSBLicenseCode.Name = "cmdCheckUSBLicenseCode";
+            this.cmdCheckUSBLicenseCode.Size = new System.Drawing.Size(131, 13);
+            this.cmdCheckUSBLicenseCode.TabIndex = 28;
+            this.cmdCheckUSBLicenseCode.TabStop = true;
+            this.cmdCheckUSBLicenseCode.Text = "Check USB License Code";
+            this.cmdCheckUSBLicenseCode.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCheckUSBLicenseCode_LinkClicked);
             // 
             // MainForm
             // 
@@ -1275,6 +1288,7 @@ namespace EZAE
         private System.Windows.Forms.LinkLabel cmdOpenGooil1Tablet;
         private System.Windows.Forms.LinkLabel cmdInstallWinMerge;
         private System.Windows.Forms.LinkLabel cmdFolderLock;
+        private System.Windows.Forms.LinkLabel cmdCheckUSBLicenseCode;
     }
 }
 
