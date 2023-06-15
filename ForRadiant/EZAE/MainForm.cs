@@ -1169,5 +1169,18 @@ namespace EZAE
                 Process.Start(filepath, "\"" + lcfilepath + "\"");
             }
         }
+
+        private void cmdSmartSniffer_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = Path.GetFullPath(@"Tools\smsniff-x64\smsniff.exe");
+            if (File.Exists(filepath))
+            {
+
+                ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
+                startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
+                Process.Start(startInfo);
+
+            }
+        }
     }
 }

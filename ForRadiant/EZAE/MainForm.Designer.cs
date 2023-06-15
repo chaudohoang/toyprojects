@@ -36,6 +36,7 @@ namespace EZAE
             this.cmdOpenGooil3Tablet = new System.Windows.Forms.LinkLabel();
             this.cmdOpenGooil2Tablet = new System.Windows.Forms.LinkLabel();
             this.cmdOpenGooil1Tablet = new System.Windows.Forms.LinkLabel();
+            this.cmdCheckUSBLicenseCode = new System.Windows.Forms.LinkLabel();
             this.cmdMakeProcessFile2 = new System.Windows.Forms.LinkLabel();
             this.cmdShareX = new System.Windows.Forms.LinkLabel();
             this.cmdRestartTTDove2p0 = new System.Windows.Forms.LinkLabel();
@@ -118,7 +119,7 @@ namespace EZAE
             this.cmdUseButterfly = new System.Windows.Forms.LinkLabel();
             this.lblSequenceFileName = new System.Windows.Forms.Label();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-            this.cmdCheckUSBLicenseCode = new System.Windows.Forms.LinkLabel();
+            this.cmdSmartSniffer = new System.Windows.Forms.LinkLabel();
             this.tabControl1.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabSetupPC.SuspendLayout();
@@ -151,6 +152,7 @@ namespace EZAE
             this.tabControl.Controls.Add(this.cmdOpenAutoClose);
             this.tabControl.Controls.Add(this.cmdOpenWorklog);
             this.tabControl.Controls.Add(this.cmdOpenCopywhiz);
+            this.tabControl.Controls.Add(this.cmdSmartSniffer);
             this.tabControl.Controls.Add(this.cmdOpenTCPClient);
             this.tabControl.Controls.Add(this.cmdOpenTCPServer);
             this.tabControl.Controls.Add(this.cmdOpenLINQPad);
@@ -220,6 +222,17 @@ namespace EZAE
             this.cmdOpenGooil1Tablet.TabStop = true;
             this.cmdOpenGooil1Tablet.Text = "Open Gooil1 Tablet";
             this.cmdOpenGooil1Tablet.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenGooil1Tablet_LinkClicked);
+            // 
+            // cmdCheckUSBLicenseCode
+            // 
+            this.cmdCheckUSBLicenseCode.AutoSize = true;
+            this.cmdCheckUSBLicenseCode.Location = new System.Drawing.Point(259, 89);
+            this.cmdCheckUSBLicenseCode.Name = "cmdCheckUSBLicenseCode";
+            this.cmdCheckUSBLicenseCode.Size = new System.Drawing.Size(131, 13);
+            this.cmdCheckUSBLicenseCode.TabIndex = 28;
+            this.cmdCheckUSBLicenseCode.TabStop = true;
+            this.cmdCheckUSBLicenseCode.Text = "Check USB License Code";
+            this.cmdCheckUSBLicenseCode.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCheckUSBLicenseCode_LinkClicked);
             // 
             // cmdMakeProcessFile2
             // 
@@ -1160,16 +1173,16 @@ namespace EZAE
             this.lblSequenceFileName.Size = new System.Drawing.Size(0, 13);
             this.lblSequenceFileName.TabIndex = 27;
             // 
-            // cmdCheckUSBLicenseCode
+            // cmdSmartSniffer
             // 
-            this.cmdCheckUSBLicenseCode.AutoSize = true;
-            this.cmdCheckUSBLicenseCode.Location = new System.Drawing.Point(259, 89);
-            this.cmdCheckUSBLicenseCode.Name = "cmdCheckUSBLicenseCode";
-            this.cmdCheckUSBLicenseCode.Size = new System.Drawing.Size(131, 13);
-            this.cmdCheckUSBLicenseCode.TabIndex = 28;
-            this.cmdCheckUSBLicenseCode.TabStop = true;
-            this.cmdCheckUSBLicenseCode.Text = "Check USB License Code";
-            this.cmdCheckUSBLicenseCode.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdCheckUSBLicenseCode_LinkClicked);
+            this.cmdSmartSniffer.AutoSize = true;
+            this.cmdSmartSniffer.Location = new System.Drawing.Point(382, 61);
+            this.cmdSmartSniffer.Name = "cmdSmartSniffer";
+            this.cmdSmartSniffer.Size = new System.Drawing.Size(67, 13);
+            this.cmdSmartSniffer.TabIndex = 21;
+            this.cmdSmartSniffer.TabStop = true;
+            this.cmdSmartSniffer.Text = "Smart Sniffer";
+            this.cmdSmartSniffer.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdSmartSniffer_LinkClicked);
             // 
             // MainForm
             // 
@@ -1289,6 +1302,7 @@ namespace EZAE
         private System.Windows.Forms.LinkLabel cmdInstallWinMerge;
         private System.Windows.Forms.LinkLabel cmdFolderLock;
         private System.Windows.Forms.LinkLabel cmdCheckUSBLicenseCode;
+        private System.Windows.Forms.LinkLabel cmdSmartSniffer;
     }
 }
 

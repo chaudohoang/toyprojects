@@ -68,6 +68,7 @@ Public Class Apps
         If Not IO.File.Exists(DevModeFile) Then
             chkSkipPOI.Checked = False
             chkSkipRFD.Checked = False
+            chkSkipRFDDemuraLGDBase.Checked = False
             chkSkipRFDS.Checked = False
             chkSkipLCC.Checked = False
             chkSkipRM.Checked = False
@@ -89,6 +90,8 @@ Public Class Apps
                         If skipValue.ToLower = "true" Then chkSkipPOI.Checked = True
                     Case "SkipRFD"
                         If skipValue.ToLower = "true" Then chkSkipRFD.Checked = True
+                    Case "SkipRFDDemuraLGDBase"
+                        If skipValue.ToLower = "true" Then chkSkipRFDDemuraLGDBase.Checked = True
                     Case "SkipRFDS"
                         If skipValue.ToLower = "true" Then chkSkipRFDS.Checked = True
                     Case "SkipLCC"
@@ -375,7 +378,7 @@ Public Class Apps
     End Sub
 
     Private Sub cmdReloadSequence_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdReloadSequence.LinkClicked
-        'TrueTest.SequenceSet(TrueTest.Sequence.XMLFilePathName)
+        TrueTest.SequenceSet(TrueTest.Sequence.XMLFilePathName)
     End Sub
 
     Private Sub cmdDove2p0Simulator_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdDove2p0Simulator.LinkClicked
