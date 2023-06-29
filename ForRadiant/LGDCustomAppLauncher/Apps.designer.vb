@@ -24,8 +24,24 @@ Partial Class Apps
     Private Sub InitializeComponent()
         Me.TabPage3 = New System.Windows.Forms.TabPage()
         Me.TabPage2 = New System.Windows.Forms.TabPage()
+        Me.chkSkipSaveToDB = New System.Windows.Forms.CheckBox()
+        Me.chkSkipFLDLGDNPOCB41 = New System.Windows.Forms.CheckBox()
+        Me.chkSkipFL = New System.Windows.Forms.CheckBox()
+        Me.chkSkipRM = New System.Windows.Forms.CheckBox()
+        Me.chkSkipLCC = New System.Windows.Forms.CheckBox()
+        Me.chkSkipRFDS = New System.Windows.Forms.CheckBox()
+        Me.chkSkipRFD = New System.Windows.Forms.CheckBox()
+        Me.chkSkipPOI = New System.Windows.Forms.CheckBox()
         Me.TabPage1 = New System.Windows.Forms.TabPage()
+        Me.cmdEmu2p1Simulator = New System.Windows.Forms.LinkLabel()
+        Me.cmdRenameVNTT = New System.Windows.Forms.LinkLabel()
+        Me.cmdFolderLock = New System.Windows.Forms.LinkLabel()
+        Me.cmdCopyMaster = New System.Windows.Forms.LinkLabel()
+        Me.cmdBackupTT = New System.Windows.Forms.LinkLabel()
+        Me.cmdEmu2p0Simulator = New System.Windows.Forms.LinkLabel()
+        Me.cmdDove2p0Simulator = New System.Windows.Forms.LinkLabel()
         Me.cmdEmu2p1SequenceConvert = New System.Windows.Forms.LinkLabel()
+        Me.cmdReloadSequence = New System.Windows.Forms.LinkLabel()
         Me.cmdFTPUploader = New System.Windows.Forms.LinkLabel()
         Me.cmdCheckSequence = New System.Windows.Forms.LinkLabel()
         Me.Label1 = New System.Windows.Forms.Label()
@@ -33,7 +49,8 @@ Partial Class Apps
         Me.cmdSetSequence = New System.Windows.Forms.LinkLabel()
         Me.cmdButterfly = New System.Windows.Forms.LinkLabel()
         Me.TabControl1 = New System.Windows.Forms.TabControl()
-        Me.cmdBackupTT = New System.Windows.Forms.LinkLabel()
+        Me.chkSkipRFDDemuraLGDBase = New System.Windows.Forms.CheckBox()
+        Me.TabPage2.SuspendLayout()
         Me.TabPage1.SuspendLayout()
         Me.TabControl1.SuspendLayout()
         Me.SuspendLayout()
@@ -49,18 +66,114 @@ Partial Class Apps
         '
         'TabPage2
         '
+        Me.TabPage2.Controls.Add(Me.chkSkipRFDDemuraLGDBase)
+        Me.TabPage2.Controls.Add(Me.chkSkipSaveToDB)
+        Me.TabPage2.Controls.Add(Me.chkSkipFLDLGDNPOCB41)
+        Me.TabPage2.Controls.Add(Me.chkSkipFL)
+        Me.TabPage2.Controls.Add(Me.chkSkipRM)
+        Me.TabPage2.Controls.Add(Me.chkSkipLCC)
+        Me.TabPage2.Controls.Add(Me.chkSkipRFDS)
+        Me.TabPage2.Controls.Add(Me.chkSkipRFD)
+        Me.TabPage2.Controls.Add(Me.chkSkipPOI)
         Me.TabPage2.Location = New System.Drawing.Point(4, 22)
         Me.TabPage2.Name = "TabPage2"
         Me.TabPage2.Padding = New System.Windows.Forms.Padding(3)
         Me.TabPage2.Size = New System.Drawing.Size(511, 265)
         Me.TabPage2.TabIndex = 1
-        Me.TabPage2.Text = "TabPage2"
+        Me.TabPage2.Text = "DevMode"
         Me.TabPage2.UseVisualStyleBackColor = True
+        '
+        'chkSkipSaveToDB
+        '
+        Me.chkSkipSaveToDB.AutoSize = True
+        Me.chkSkipSaveToDB.Location = New System.Drawing.Point(6, 190)
+        Me.chkSkipSaveToDB.Name = "chkSkipSaveToDB"
+        Me.chkSkipSaveToDB.Size = New System.Drawing.Size(100, 17)
+        Me.chkSkipSaveToDB.TabIndex = 7
+        Me.chkSkipSaveToDB.Text = "SkipSaveToDB"
+        Me.chkSkipSaveToDB.UseVisualStyleBackColor = True
+        '
+        'chkSkipFLDLGDNPOCB41
+        '
+        Me.chkSkipFLDLGDNPOCB41.AutoSize = True
+        Me.chkSkipFLDLGDNPOCB41.Location = New System.Drawing.Point(6, 167)
+        Me.chkSkipFLDLGDNPOCB41.Name = "chkSkipFLDLGDNPOCB41"
+        Me.chkSkipFLDLGDNPOCB41.Size = New System.Drawing.Size(138, 17)
+        Me.chkSkipFLDLGDNPOCB41.TabIndex = 6
+        Me.chkSkipFLDLGDNPOCB41.Text = "SkipFLDLGDNPOCB41"
+        Me.chkSkipFLDLGDNPOCB41.UseVisualStyleBackColor = True
+        '
+        'chkSkipFL
+        '
+        Me.chkSkipFL.AutoSize = True
+        Me.chkSkipFL.Location = New System.Drawing.Point(6, 144)
+        Me.chkSkipFL.Name = "chkSkipFL"
+        Me.chkSkipFL.Size = New System.Drawing.Size(59, 17)
+        Me.chkSkipFL.TabIndex = 5
+        Me.chkSkipFL.Text = "SkipFL"
+        Me.chkSkipFL.UseVisualStyleBackColor = True
+        '
+        'chkSkipRM
+        '
+        Me.chkSkipRM.AutoSize = True
+        Me.chkSkipRM.Location = New System.Drawing.Point(6, 121)
+        Me.chkSkipRM.Name = "chkSkipRM"
+        Me.chkSkipRM.Size = New System.Drawing.Size(64, 17)
+        Me.chkSkipRM.TabIndex = 4
+        Me.chkSkipRM.Text = "SkipRM"
+        Me.chkSkipRM.UseVisualStyleBackColor = True
+        '
+        'chkSkipLCC
+        '
+        Me.chkSkipLCC.AutoSize = True
+        Me.chkSkipLCC.Location = New System.Drawing.Point(6, 98)
+        Me.chkSkipLCC.Name = "chkSkipLCC"
+        Me.chkSkipLCC.Size = New System.Drawing.Size(67, 17)
+        Me.chkSkipLCC.TabIndex = 3
+        Me.chkSkipLCC.Text = "SkipLCC"
+        Me.chkSkipLCC.UseVisualStyleBackColor = True
+        '
+        'chkSkipRFDS
+        '
+        Me.chkSkipRFDS.AutoSize = True
+        Me.chkSkipRFDS.Location = New System.Drawing.Point(6, 75)
+        Me.chkSkipRFDS.Name = "chkSkipRFDS"
+        Me.chkSkipRFDS.Size = New System.Drawing.Size(76, 17)
+        Me.chkSkipRFDS.TabIndex = 2
+        Me.chkSkipRFDS.Text = "SkipRFDS"
+        Me.chkSkipRFDS.UseVisualStyleBackColor = True
+        '
+        'chkSkipRFD
+        '
+        Me.chkSkipRFD.AutoSize = True
+        Me.chkSkipRFD.Location = New System.Drawing.Point(6, 29)
+        Me.chkSkipRFD.Name = "chkSkipRFD"
+        Me.chkSkipRFD.Size = New System.Drawing.Size(69, 17)
+        Me.chkSkipRFD.TabIndex = 1
+        Me.chkSkipRFD.Text = "SkipRFD"
+        Me.chkSkipRFD.UseVisualStyleBackColor = True
+        '
+        'chkSkipPOI
+        '
+        Me.chkSkipPOI.AutoSize = True
+        Me.chkSkipPOI.Location = New System.Drawing.Point(6, 6)
+        Me.chkSkipPOI.Name = "chkSkipPOI"
+        Me.chkSkipPOI.Size = New System.Drawing.Size(65, 17)
+        Me.chkSkipPOI.TabIndex = 0
+        Me.chkSkipPOI.Text = "SkipPOI"
+        Me.chkSkipPOI.UseVisualStyleBackColor = True
         '
         'TabPage1
         '
+        Me.TabPage1.Controls.Add(Me.cmdEmu2p1Simulator)
+        Me.TabPage1.Controls.Add(Me.cmdRenameVNTT)
+        Me.TabPage1.Controls.Add(Me.cmdFolderLock)
+        Me.TabPage1.Controls.Add(Me.cmdCopyMaster)
         Me.TabPage1.Controls.Add(Me.cmdBackupTT)
+        Me.TabPage1.Controls.Add(Me.cmdEmu2p0Simulator)
+        Me.TabPage1.Controls.Add(Me.cmdDove2p0Simulator)
         Me.TabPage1.Controls.Add(Me.cmdEmu2p1SequenceConvert)
+        Me.TabPage1.Controls.Add(Me.cmdReloadSequence)
         Me.TabPage1.Controls.Add(Me.cmdFTPUploader)
         Me.TabPage1.Controls.Add(Me.cmdCheckSequence)
         Me.TabPage1.Controls.Add(Me.Label1)
@@ -72,8 +185,78 @@ Partial Class Apps
         Me.TabPage1.Padding = New System.Windows.Forms.Padding(3)
         Me.TabPage1.Size = New System.Drawing.Size(511, 265)
         Me.TabPage1.TabIndex = 0
-        Me.TabPage1.Text = "TabPage1"
+        Me.TabPage1.Text = "Apps"
         Me.TabPage1.UseVisualStyleBackColor = True
+        '
+        'cmdEmu2p1Simulator
+        '
+        Me.cmdEmu2p1Simulator.AutoSize = True
+        Me.cmdEmu2p1Simulator.Location = New System.Drawing.Point(209, 63)
+        Me.cmdEmu2p1Simulator.Name = "cmdEmu2p1Simulator"
+        Me.cmdEmu2p1Simulator.Size = New System.Drawing.Size(92, 13)
+        Me.cmdEmu2p1Simulator.TabIndex = 8
+        Me.cmdEmu2p1Simulator.TabStop = True
+        Me.cmdEmu2p1Simulator.Text = "Emu2p1 Simulator"
+        '
+        'cmdRenameVNTT
+        '
+        Me.cmdRenameVNTT.AutoSize = True
+        Me.cmdRenameVNTT.Location = New System.Drawing.Point(319, 39)
+        Me.cmdRenameVNTT.Name = "cmdRenameVNTT"
+        Me.cmdRenameVNTT.Size = New System.Drawing.Size(76, 13)
+        Me.cmdRenameVNTT.TabIndex = 7
+        Me.cmdRenameVNTT.TabStop = True
+        Me.cmdRenameVNTT.Text = "RenameVNTT"
+        '
+        'cmdFolderLock
+        '
+        Me.cmdFolderLock.AutoSize = True
+        Me.cmdFolderLock.Location = New System.Drawing.Point(401, 39)
+        Me.cmdFolderLock.Name = "cmdFolderLock"
+        Me.cmdFolderLock.Size = New System.Drawing.Size(60, 13)
+        Me.cmdFolderLock.TabIndex = 6
+        Me.cmdFolderLock.TabStop = True
+        Me.cmdFolderLock.Text = "FolderLock"
+        '
+        'cmdCopyMaster
+        '
+        Me.cmdCopyMaster.AutoSize = True
+        Me.cmdCopyMaster.Location = New System.Drawing.Point(250, 39)
+        Me.cmdCopyMaster.Name = "cmdCopyMaster"
+        Me.cmdCopyMaster.Size = New System.Drawing.Size(63, 13)
+        Me.cmdCopyMaster.TabIndex = 6
+        Me.cmdCopyMaster.TabStop = True
+        Me.cmdCopyMaster.Text = "CopyMaster"
+        '
+        'cmdBackupTT
+        '
+        Me.cmdBackupTT.AutoSize = True
+        Me.cmdBackupTT.Location = New System.Drawing.Point(146, 39)
+        Me.cmdBackupTT.Name = "cmdBackupTT"
+        Me.cmdBackupTT.Size = New System.Drawing.Size(98, 13)
+        Me.cmdBackupTT.TabIndex = 5
+        Me.cmdBackupTT.TabStop = True
+        Me.cmdBackupTT.Text = "Backup Current TT"
+        '
+        'cmdEmu2p0Simulator
+        '
+        Me.cmdEmu2p0Simulator.AutoSize = True
+        Me.cmdEmu2p0Simulator.Location = New System.Drawing.Point(111, 63)
+        Me.cmdEmu2p0Simulator.Name = "cmdEmu2p0Simulator"
+        Me.cmdEmu2p0Simulator.Size = New System.Drawing.Size(92, 13)
+        Me.cmdEmu2p0Simulator.TabIndex = 5
+        Me.cmdEmu2p0Simulator.TabStop = True
+        Me.cmdEmu2p0Simulator.Text = "Emu2p0 Simulator"
+        '
+        'cmdDove2p0Simulator
+        '
+        Me.cmdDove2p0Simulator.AutoSize = True
+        Me.cmdDove2p0Simulator.Location = New System.Drawing.Point(8, 63)
+        Me.cmdDove2p0Simulator.Name = "cmdDove2p0Simulator"
+        Me.cmdDove2p0Simulator.Size = New System.Drawing.Size(97, 13)
+        Me.cmdDove2p0Simulator.TabIndex = 5
+        Me.cmdDove2p0Simulator.TabStop = True
+        Me.cmdDove2p0Simulator.Text = "Dove2p0 Simulator"
         '
         'cmdEmu2p1SequenceConvert
         '
@@ -84,6 +267,16 @@ Partial Class Apps
         Me.cmdEmu2p1SequenceConvert.TabIndex = 5
         Me.cmdEmu2p1SequenceConvert.TabStop = True
         Me.cmdEmu2p1SequenceConvert.Text = "Emu2p1SequenceConvert"
+        '
+        'cmdReloadSequence
+        '
+        Me.cmdReloadSequence.AutoSize = True
+        Me.cmdReloadSequence.Location = New System.Drawing.Point(398, 16)
+        Me.cmdReloadSequence.Name = "cmdReloadSequence"
+        Me.cmdReloadSequence.Size = New System.Drawing.Size(93, 13)
+        Me.cmdReloadSequence.TabIndex = 5
+        Me.cmdReloadSequence.TabStop = True
+        Me.cmdReloadSequence.Text = "Reload Sequence"
         '
         'cmdFTPUploader
         '
@@ -155,15 +348,15 @@ Partial Class Apps
         Me.TabControl1.Size = New System.Drawing.Size(519, 291)
         Me.TabControl1.TabIndex = 2
         '
-        'cmdBackupTT
+        'chkSkipRFDDemuraLGDBase
         '
-        Me.cmdBackupTT.AutoSize = True
-        Me.cmdBackupTT.Location = New System.Drawing.Point(146, 39)
-        Me.cmdBackupTT.Name = "cmdBackupTT"
-        Me.cmdBackupTT.Size = New System.Drawing.Size(98, 13)
-        Me.cmdBackupTT.TabIndex = 5
-        Me.cmdBackupTT.TabStop = True
-        Me.cmdBackupTT.Text = "Backup Current TT"
+        Me.chkSkipRFDDemuraLGDBase.AutoSize = True
+        Me.chkSkipRFDDemuraLGDBase.Location = New System.Drawing.Point(6, 52)
+        Me.chkSkipRFDDemuraLGDBase.Name = "chkSkipRFDDemuraLGDBase"
+        Me.chkSkipRFDDemuraLGDBase.Size = New System.Drawing.Size(152, 17)
+        Me.chkSkipRFDDemuraLGDBase.TabIndex = 8
+        Me.chkSkipRFDDemuraLGDBase.Text = "SkipRFDDemuraLGDBase"
+        Me.chkSkipRFDDemuraLGDBase.UseVisualStyleBackColor = True
         '
         'Apps
         '
@@ -172,7 +365,9 @@ Partial Class Apps
         Me.ClientSize = New System.Drawing.Size(543, 315)
         Me.Controls.Add(Me.TabControl1)
         Me.Name = "Apps"
-        Me.Text = "Apps"
+        Me.Text = "Tools"
+        Me.TabPage2.ResumeLayout(False)
+        Me.TabPage2.PerformLayout()
         Me.TabPage1.ResumeLayout(False)
         Me.TabPage1.PerformLayout()
         Me.TabControl1.ResumeLayout(False)
@@ -192,4 +387,20 @@ Partial Class Apps
 	Friend WithEvents cmdFTPUploader As LinkLabel
 	Friend WithEvents cmdEmu2p1SequenceConvert As LinkLabel
     Friend WithEvents cmdBackupTT As LinkLabel
+    Friend WithEvents cmdRenameVNTT As LinkLabel
+    Friend WithEvents cmdCopyMaster As LinkLabel
+    Friend WithEvents chkSkipPOI As CheckBox
+    Friend WithEvents chkSkipRFD As CheckBox
+    Friend WithEvents chkSkipLCC As CheckBox
+    Friend WithEvents chkSkipRFDS As CheckBox
+    Friend WithEvents chkSkipRM As CheckBox
+    Friend WithEvents chkSkipFL As CheckBox
+    Friend WithEvents chkSkipFLDLGDNPOCB41 As CheckBox
+    Friend WithEvents chkSkipSaveToDB As CheckBox
+    Friend WithEvents cmdReloadSequence As LinkLabel
+    Friend WithEvents cmdEmu2p1Simulator As LinkLabel
+    Friend WithEvents cmdEmu2p0Simulator As LinkLabel
+    Friend WithEvents cmdDove2p0Simulator As LinkLabel
+    Friend WithEvents cmdFolderLock As LinkLabel
+    Friend WithEvents chkSkipRFDDemuraLGDBase As CheckBox
 End Class

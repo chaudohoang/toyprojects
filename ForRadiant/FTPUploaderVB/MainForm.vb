@@ -135,6 +135,7 @@ Namespace FTPUploaderVB
 			Dim sourceIndexFile = lines(10)
 			Dim sourceHostFile = lines(13)
 			Dim totalFileCount = lines(15)
+			Dim channelIndex = lines(16)
 			Dim PID = Path.GetFileNameWithoutExtension(sourceIndexFile)
 
 			Dim failCountPath = txtUploadListPath.Text + "\Fail Count\" + Path.GetFileName(InfoFile)
@@ -210,8 +211,8 @@ Namespace FTPUploaderVB
 				If TasksCancellationTokenSource.IsCancellationRequested Then
 					Exit Sub
 				End If
-				File.AppendAllText(sourceIndexFile, destFile + System.Environment.NewLine)
-				File.AppendAllText(sourceHostFile, destFile + System.Environment.NewLine)
+				File.AppendAllText(sourceIndexFile, destFile + "@" + channelIndex + System.Environment.NewLine)
+				File.AppendAllText(sourceHostFile, destFile + "@" + channelIndex + System.Environment.NewLine)
 				Dim uploadedCount As Integer = File.ReadAllLines(sourceHostFile).Length
 				If uploadedCount = Int32.Parse(totalFileCount) Then
 					CreateIndexAndHostQueue(InfoFile)
@@ -394,43 +395,71 @@ Namespace FTPUploaderVB
 				failedFileName = "OTP"
 				failedFileReason = "OTP_X"
 			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("gamma") Then
-				failedFileName = "Gamma"
-				failedFileReason = "Gamma_X"
+				failedFileName = "GAMMA"
+				failedFileReason = "GAMMA_X"
+			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("1g1o") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("map") Then
+				failedFileName = "HEX_MAP"
+				failedFileReason = "HEX_MAP_X"
+			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("1g1o") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("rcb") Then
+				failedFileName = "HEX_RCB"
+				failedFileReason = "HEX_RCB_X"
 			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("1g1o") Then
-				failedFileName = "Hex"
-				failedFileReason = "Hex_X"
+				failedFileName = "HEX"
+				failedFileReason = "HEX_X"
 			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("2nd") Then
-				failedFileName = "Hex_1"
-				failedFileReason = "Hex_1_X"
+				failedFileName = "HEX_1"
+				failedFileReason = "HEX_1_X"
 			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("3rd") Then
-				failedFileName = "Hex_2"
-				failedFileReason = "Hex_2_X"
+				failedFileName = "HEX_2"
+				failedFileReason = "HEX_2_X"
 			Else
 				failedFileName = Path.GetFileNameWithoutExtension(destFile).Replace("step2_03_", "").Replace("_imgY_Crop", "")
 				failedFileReason = failedFileName + "_X"
 			End If
 			Dim lines = File.ReadAllLines(summaryLogFile)
 			Dim columnHeader = lines(0).Split(",")
-			Dim failedFileIndex As Integer = 0
-			Dim failedReasonIndex As Integer = 0
+			Dim failedFileIndex As Integer = 1
+			Dim failedReasonIndex As Integer = 1
+			Dim columnAndFileNameMatch As Boolean = False
+			Dim columnAndFileReasonMatch As Boolean = False
 			For index = 0 To columnHeader.Count - 1
-				If columnHeader(index) = failedFileName Then
+				If columnHeader(index) = failedFileName.ToUpper Then
 					failedFileIndex = index
+					columnAndFileNameMatch = True
+					Exit For
 				End If
-				If columnHeader(index) = failedFileReason Then
+
+			Next
+			For index = 0 To columnHeader.Count - 1
+
+				If columnHeader(index) = failedFileReason.ToUpper Then
 					failedReasonIndex = index
+					columnAndFileReasonMatch = True
+					Exit For
 				End If
 			Next
-			For i = 1 To lines.Count - 1
-				Dim newlineList = lines(i).Split(",")
-				If newlineList.Contains(PID) Then
-					newlineList(failedFileIndex) = "X"
-					newlineList(failedReasonIndex) = failMessage
-				End If
-				Dim newLine As String = String.Join(",", newlineList)
-				lines(i) = newLine
-			Next
-			File.WriteAllLines(summaryLogFile, lines)
+			If columnAndFileNameMatch Then
+				For i = 1 To lines.Count - 1
+					Dim newlineList = lines(i).Split(",")
+					If newlineList.Contains(PID) Then
+						newlineList(failedFileIndex) = "X"
+					End If
+					Dim newLine As String = String.Join(",", newlineList)
+					lines(i) = newLine
+				Next
+				File.WriteAllLines(summaryLogFile, lines)
+			End If
+			If columnAndFileReasonMatch Then
+				For i = 1 To lines.Count - 1
+					Dim newlineList = lines(i).Split(",")
+					If newlineList.Contains(PID) Then
+						newlineList(failedReasonIndex) = failMessage
+					End If
+					Dim newLine As String = String.Join(",", newlineList)
+					lines(i) = newLine
+				Next
+				File.WriteAllLines(summaryLogFile, lines)
+			End If
 
 		End Sub
 
@@ -443,33 +472,43 @@ Namespace FTPUploaderVB
 			If Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("otp") Then
 				succeededFileName = "OTP"
 			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("gamma") Then
-				succeededFileName = "Gamma"
+				succeededFileName = "GAMMA"
+			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("1g1o") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("map") Then
+				succeededFileName = "HEX_MAP"
+			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("1g1o") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("rcb") Then
+				succeededFileName = "HEX_RCB"
 			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("1g1o") Then
-				succeededFileName = "Hex"
+				succeededFileName = "HEX"
 			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("2nd") Then
-				succeededFileName = "Hex_1"
+				succeededFileName = "HEX_1"
 			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("3rd") Then
-				succeededFileName = "Hex_2"
+				succeededFileName = "HEX_2"
 			Else
 				succeededFileName = Path.GetFileNameWithoutExtension(destFile).Replace("step2_03_", "").Replace("_imgY_Crop", "")
 			End If
 			Dim lines = File.ReadAllLines(summaryLogFile)
 			Dim columnHeader = lines(0).Split(",")
-			Dim succeededFileIndex As Integer = 0
+			Dim columnAndFileMatch As Boolean = False
+			Dim succeededFileIndex As Integer = 1
 			For index = 0 To columnHeader.Count - 1
-				If columnHeader(index) = succeededFileName Then
+				If columnHeader(index) = succeededFileName.ToUpper Then
 					succeededFileIndex = index
+					columnAndFileMatch = True
+					Exit For
 				End If
 			Next
-			For i = 1 To lines.Count - 1
-				Dim newlineList = lines(i).Split(",")
-				If newlineList.Contains(PID) Then
-					newlineList(succeededFileIndex) = "O"
-				End If
-				Dim newLine As String = String.Join(",", newlineList)
-				lines(i) = newLine
-			Next
-			File.WriteAllLines(summaryLogFile, lines)
+			If columnAndFileMatch Then
+				For i = 1 To lines.Count - 1
+					Dim newlineList = lines(i).Split(",")
+					If newlineList.Contains(PID) Then
+						newlineList(succeededFileIndex) = "O"
+					End If
+					Dim newLine As String = String.Join(",", newlineList)
+					lines(i) = newLine
+				Next
+				File.WriteAllLines(summaryLogFile, lines)
+			End If
+
 
 		End Sub
 

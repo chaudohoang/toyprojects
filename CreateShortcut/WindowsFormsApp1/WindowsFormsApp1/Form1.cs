@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
+﻿using IWshRuntimeLibrary;
+using System;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Linq.Expressions;
 using System.Windows.Forms;
 
 namespace WindowsFormsApp1
@@ -49,10 +44,27 @@ namespace WindowsFormsApp1
             string[] folders = Directory.GetDirectories(root);
             foreach (string folder in folders)
             {
+                string name = Path.GetFileName(folder);
                 string[] files = Directory.GetFiles(folder,"*.exe");
+                int i = 0;
                 foreach (string file in files)
                 {
-                    
+                    if (file.ToLower().Contains("unins"))
+                    {
+                        continue;
+                    }
+                    object shDesktop = (object)"Desktop";
+                    WshShell shell = new WshShell();
+                    string shortcutAddress = (string)shell.SpecialFolders.Item(ref shDesktop) + @"\Minigames\"+name + (i == 0 ? "" : "_"+i.ToString()) + ".lnk";
+                    if (!Directory.Exists((string)shell.SpecialFolders.Item(ref shDesktop) + @"\Minigames"))
+                    {
+                        Directory.CreateDirectory((string)shell.SpecialFolders.Item(ref shDesktop) + @"\Minigames");
+                    }
+                    IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(shortcutAddress);
+                    shortcut.Description = name;
+                    shortcut.TargetPath = file;
+                    shortcut.Save();
+                    i++;
                 }
             }
         }

@@ -19,7 +19,7 @@ Return
 *s::Left
 *f::Right
 *a::q ;L1
-*`;::w ;R1
+*;::w ;R1
 *k::z ;B
 *i::s ;X
 *j::a ;Y

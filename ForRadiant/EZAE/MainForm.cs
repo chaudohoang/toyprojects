@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.IO;
@@ -86,7 +87,7 @@ namespace EZAE
 
         private void cmdOpenImageJ_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string filepath = @"Tools\ImageJ\ImageJ.exe";
+            string filepath = @"Apps\ImageJ\ImageJ.exe";
             if (File.Exists(filepath))
             {
                 Process.Start(filepath);
@@ -129,13 +130,12 @@ namespace EZAE
             }
         }
 
-        private void cmdCheckLC_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void cmdOpenWPSExcel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string filepath = @"Tools\WPSOffice\et.exe";
-            string lcfilepath = @"Tools\License Code Combined List.xlsx";
-            if (File.Exists(filepath) && File.Exists(lcfilepath))
+            string filepath = @"Apps\WPSOffice\et.exe";
+            if (File.Exists(filepath))
             {
-                Process.Start(filepath, "\"" + lcfilepath + "\"");
+                Process.Start(filepath);
             }
         }
 
@@ -300,9 +300,9 @@ namespace EZAE
 
         private void cmdInstallDotnet48_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\Installer\ndp48-x86-x64-allos-enu.exe"))
+            if (File.Exists(@"Big Installers\ndp48-x86-xx64-allos-enu.exe"))
             {
-                ExecuteAsAdmin(@"Tools\Installer\ndp48-x86-x64-allos-enu.exe");
+                ExecuteAsAdmin(@"Big Installers\ndp48-x86-xx64-allos-enu.exe");
             }
         }
 
@@ -351,9 +351,9 @@ namespace EZAE
 
         private void cmdInstallWireshark_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\Installer\Wireshark-win64-3.4.3.exe"))
+            if (File.Exists(@"Big Installers\Wireshark-win64-3.4.3.exe"))
             {
-                ExecuteAsAdmin(@"Tools\Installer\Wireshark-win64-3.4.3.exe");
+                ExecuteAsAdmin(@"Big Installers\Wireshark-win64-3.4.3.exe");
             }
         }
 
@@ -541,24 +541,29 @@ namespace EZAE
                 ExecuteAsAdmin(@"Tools\Installer\npp.7.8.1.Installer.x64.exe");
             }
 
-            if (File.Exists(@"Tools\Installer\ndp48-x86-x64-allos-enu.exe") && chkdotnetinstall.Checked)
+            if (File.Exists(@"Big Installers\ndp48-x86-xx64-allos-enu.exe") && chkdotnetinstall.Checked)
             {
-                ExecuteAsAdmin(@"Tools\Installer\ndp48-x86-x64-allos-enu.exe");
+                ExecuteAsAdmin(@"Big Installers\ndp48-x86-xx64-allos-enu.exe");
             }
 
-            if (File.Exists(@"Tools\Installer\MATLAB_Runtime_R2021b_Update_2_win64.exe") && chkmatlabinstall.Checked)
+            if (File.Exists(@"Big Installers\MATLAB_Runtime_R2021b_Update_2_win64.exe") && chkmatlabinstall.Checked)
             {
-                ExecuteAsAdmin(@"Tools\Installer\MATLAB_Runtime_R2021b_Update_2_win64.exe");
+                ExecuteAsAdmin(@"Big Installers\MATLAB_Runtime_R2021b_Update_2_win64.exe");
             }
 
-            if (File.Exists(@"Tools\Installer\MCR_R2017b_win64_installer.exe") && chkmatlabinstall2017b.Checked)
+            if (File.Exists(@"Big Installers\MCR_R2017b_win64_installer.exe") && chkmatlabinstall2017b.Checked)
             {
-                ExecuteAsAdmin(@"Tools\Installer\MCR_R2017b_win64_installer.exe");
+                ExecuteAsAdmin(@"Big Installers\MCR_R2017b_win64_installer.exe");
             }
 
-            if (File.Exists(@"Tools\ImageJ\pinImageJtoTaskbar.bat"))
+            if (File.Exists(@"Big Installers\MATLAB_Runtime_R2022b_Update_5_win64.exe") && chkmatlabinstall2022b.Checked)
             {
-                Process.Start(@"Tools\ImageJ\pinImageJtoTaskbar.bat");
+                ExecuteAsAdmin(@"Big Installers\MATLAB_Runtime_R2022b_Update_5_win64.exe");
+            }
+
+            if (File.Exists(@"Apps\ImageJ\pinImageJtoTaskbar.bat"))
+            {
+                Process.Start(@"Apps\ImageJ\pinImageJtoTaskbar.bat");
             }
 
             if (File.Exists(@"Tools\SetSequence\pinSetSequenceToTaskbar.bat"))
@@ -715,11 +720,17 @@ namespace EZAE
         private void cbTrueTestInstallerList_DropDown(object sender, EventArgs e)
         {
             cbTrueTestInstallerList.Items.Clear();
-            String[] exes =
-            Directory.GetFiles(@"TrueTest Installers", "*.EXE", SearchOption.AllDirectories)
+            String[] exes = { };
+            try
+            {                
+            exes = Directory.GetFiles(@"TrueTest Installers", "*.EXE", SearchOption.AllDirectories)
             .Select(fileName => Path.GetFileName(fileName))
             .Where(fileName => Path.GetFileNameWithoutExtension(fileName).StartsWith("TrueTest"))
             .ToArray();
+            }
+            catch (Exception)
+            {
+            }
 
             foreach (string file in exes)
             {
@@ -727,13 +738,22 @@ namespace EZAE
             }
         }
         private void cmdInstallTrueTest_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            if (File.Exists(@"Tools\BackupCurrentTT.exe"))
-            {
-                Process.Start(@"Tools\BackupCurrentTT.exe");
-            }
+        {            
             if (File.Exists(@"TrueTest Installers\" + cbTrueTestInstallerList.Text))
             {
+                DialogResult dialogResult = MessageBox.Show("Backup TT First ?", "Backup TT", MessageBoxButtons.YesNo);
+                if (dialogResult == DialogResult.Yes)
+                {
+                    
+                    if (File.Exists(@"Tools\BackupCurrentTT.exe"))
+                    {
+                        Process p = new Process();
+                        p.StartInfo.FileName = @"Tools\BackupCurrentTT.exe";
+                        p.EnableRaisingEvents = true;
+                        p.Start();
+                        p.WaitForExit();
+                    }
+                }                
                 ExecuteAsAdmin(@"TrueTest Installers\" + cbTrueTestInstallerList.Text);
             }
         }
@@ -760,13 +780,6 @@ namespace EZAE
 
         }
 
-        private void cmdInstallMatlab2018a_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            if (File.Exists(@"Tools\Installer\MCR_R2018a_win64_installer.exe"))
-            {
-                ExecuteAsAdmin(@"Tools\Installer\MCR_R2018a_win64_installer.exe");
-            }
-        }
 
         private void cmdUseButterfly_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
@@ -778,7 +791,7 @@ namespace EZAE
 
         private void cmdUseScript_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\SetSequence\\Set_all_sequences.vbs"))
+            if (File.Exists(@"Tools\SetSequence\Set_all_sequences.vbs"))
             {
                 Process.Start(@"Tools\SetSequence\Set_all_sequences.vbs");
             }
@@ -868,9 +881,9 @@ namespace EZAE
 
         private void cmdPinRegularApps_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\ImageJ\pinImageJtoTaskbar.bat"))
+            if (File.Exists(@"Apps\ImageJ\pinImageJtoTaskbar.bat"))
             {
-                Process.Start(@"Tools\ImageJ\pinImageJtoTaskbar.bat");
+                Process.Start(@"Apps\ImageJ\pinImageJtoTaskbar.bat");
             }
 
             if (File.Exists(@"Tools\SetSequence\pinSetSequencetoTaskbar.bat"))
@@ -891,17 +904,17 @@ namespace EZAE
 
 		private void cmdInstallMatlab2017b_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
 		{
-            if (File.Exists(@"Tools\Installer\MCR_R2017b_win64_installer.exe"))
+            if (File.Exists(@"Big Installers\MCR_R2017b_win64_installer.exe"))
             {
-                ExecuteAsAdmin(@"Tools\Installer\MCR_R2017b_win64_installer.exe");
+                ExecuteAsAdmin(@"Big Installers\MCR_R2017b_win64_installer.exe");
             }
         }
 
         private void cmdInstallMatlab_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (File.Exists(@"Tools\Installer\MATLAB_Runtime_R2021b_Update_2_win64.exe"))
+            if (File.Exists(@"Big Installers\MATLAB_Runtime_R2021b_Update_2_win64.exe"))
             {
-                ExecuteAsAdmin(@"Tools\Installer\MATLAB_Runtime_R2021b_Update_2_win64.exe");
+                ExecuteAsAdmin(@"Big Installers\MATLAB_Runtime_R2021b_Update_2_win64.exe");
             }
         }
 
@@ -1048,17 +1061,126 @@ namespace EZAE
 			}
 		}
 
-		private void cmdEmu2p1SequenceConvert_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-		{
-			string filepath = Path.GetFullPath(@"Tools\Emu2p1SequenceConvert\Emu2p1SequenceConvert.exe");
-			if (File.Exists(filepath))
-			{
+        private void cmdEmu2p1SequenceConvert_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = Path.GetFullPath(@"Tools\Emu2p1SequenceConvert\Emu2p1SequenceConvert.exe");
+            if (File.Exists(filepath))
+            {
 
-				ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
-				startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
-				Process.Start(startInfo);
+                ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
+                startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
+                Process.Start(startInfo);
 
-			}
-		}
-	}
+            }
+        }
+
+        private void cmdCopyMaster_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = Path.GetFullPath(@"Tools\CopyMaster\CopyMaster.exe");
+            if (File.Exists(filepath))
+            {
+
+                ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
+                startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
+                Process.Start(startInfo);
+
+            }
+        }
+
+        private void cmdRenameVNTT_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"Tools\RenameVNTT.exe"))
+            {
+                Process.Start(@"Tools\RenameVNTT.exe");
+            }
+        }
+
+        private void cmdInstallMatlab2022b_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"Big Installers\MATLAB_Runtime_R2022b_Update_5_win64.exe"))
+            {
+                ExecuteAsAdmin(@"Big Installers\MATLAB_Runtime_R2022b_Update_5_win64.exe");
+            }
+        }
+
+        private void cmdOpenGooil1Tablet_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = @"C:\Windows\gooil1tablet.lnk";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void cmdOpenGooil2Tablet_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = @"C:\Windows\gooil2tablet.lnk";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void cmdOpenGooil3Tablet_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = @"C:\Windows\gooil3tablet.lnk";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void cmdOpenGooil4Tablet_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = @"C:\Windows\gooil4tablet.lnk";
+            if (File.Exists(filepath))
+            {
+                Process.Start(filepath);
+            }
+        }
+
+        private void cmdInstallWinMerge_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (File.Exists(@"Tools\Installer\WinMerge-2.16.20-x64-Setup.exe"))
+            {
+                ExecuteAsAdmin(@"Tools\Installer\WinMerge-2.16.20-x64-Setup.exe");
+            }
+        }
+
+        private void cmdFolderLock_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = Path.GetFullPath(@"Tools\FolderLock\FolderLock.exe");
+            if (File.Exists(filepath))
+            {
+
+                ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
+                startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
+                Process.Start(startInfo);
+
+            }
+        }
+
+        private void cmdCheckUSBLicenseCode_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = @"Apps\WPSOffice\et.exe";
+            string lcfilepath = @"Tools\License Code Combined List.xlsx";
+            if (File.Exists(filepath) && File.Exists(lcfilepath))
+            {
+                Process.Start(filepath, "\"" + lcfilepath + "\"");
+            }
+        }
+
+        private void cmdSmartSniffer_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string filepath = Path.GetFullPath(@"Tools\smsniff-x64\smsniff.exe");
+            if (File.Exists(filepath))
+            {
+
+                ProcessStartInfo startInfo = new ProcessStartInfo(filepath);
+                startInfo.WorkingDirectory = Path.GetDirectoryName(filepath);
+                Process.Start(startInfo);
+
+            }
+        }
+    }
 }
