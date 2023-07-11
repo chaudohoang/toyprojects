@@ -218,55 +218,82 @@ Public Class MainForm
 			tempString = ""
 			sw2.Restart()
 			'Equalize number of elements between 2 node
-			For Each childNode1 As XmlNode In node1.ChildNodes
-				If node2.SelectSingleNode(childNode1.Name) Is Nothing Then
-					Dim importNode As XmlNode = xmlDoc2.ImportNode(childNode1, True)
-					node2.AppendChild(importNode)
-					tempString = tempString + childNode1.Name + ","
+			'For Each childNode1 As XmlNode In node1.ChildNodes
+			'	If node2.SelectSingleNode(childNode1.Name) Is Nothing Then
+			'		Dim importNode As XmlNode = xmlDoc2.ImportNode(childNode1, True)
+			'		node2.AppendChild(importNode)
+			'		tempString = tempString + childNode1.Name + ","
+			'	End If
+			'Next
+			For childindex = node1.ChildNodes.Count - 1 To 0 Step -1
+				If node2.SelectSingleNode(node1.ChildNodes(childindex).Name) Is Nothing Then
+					tempString = tempString + node1.ChildNodes(childindex).Name + ","
+					node1.RemoveChild(node1.ChildNodes(childindex))
 				End If
 			Next
 			sw2.Stop()
 			Dim seq2NeedSorting As Boolean
 			seq2NeedSorting = If(tempString.Length = 0, False, True)
-			timeLogString.Add("Sequence 2 add missing element in Analysis " + seq2AnalysisName + " and added " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
+			'timeLogString.Add("Sequence 2 add missing element in Analysis " + seq2AnalysisName + " and added " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
+			timeLogString.Add("Sequence 1 removing extra element in Analysis " + seq1AnalysisName + " and removed " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
 			tempString = ""
 
 			sw2.Restart()
-			For Each childNode2 As XmlNode In node2.ChildNodes
-				If node1.SelectSingleNode(childNode2.Name) Is Nothing Then
-					Dim importNode As XmlNode = xmlDoc1.ImportNode(childNode2, True)
-					node1.AppendChild(importNode)
-					tempString = tempString + childNode2.Name + ","
+			'For Each childNode2 As XmlNode In node2.ChildNodes
+			'	If node1.SelectSingleNode(childNode2.Name) Is Nothing Then
+			'		Dim importNode As XmlNode = xmlDoc1.ImportNode(childNode2, True)
+			'		node1.AppendChild(importNode)
+			'		tempString = tempString + childNode2.Name + ","
+			'	End If
+			'Next
+			For childIndex = node2.ChildNodes.Count - 1 To 0 Step -1
+				If node1.SelectSingleNode(node2.ChildNodes(childIndex).Name) Is Nothing Then
+					tempString = tempString + node2.ChildNodes(childIndex).Name + ","
+					node2.RemoveChild(node2.ChildNodes(childIndex))
 				End If
 			Next
 			sw2.Stop()
 			Dim seq1NeedSorting As Boolean
 			seq1NeedSorting = If(tempString.Length = 0, False, True)
-			timeLogString.Add("Sequence 1 add missing element in Analysis " + seq1AnalysisName + " and added " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
+			'timeLogString.Add("Sequence 1 add missing element in Analysis " + seq1AnalysisName + " and added " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
+			timeLogString.Add("Sequence 2 removing extra element in Analysis " + seq2AnalysisName + " and removed " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
 			tempString = ""
 
-			If seq1NeedSorting Or seq2NeedSorting Then
-				seq1NeedSorting = False
-				seq2NeedSorting = False
-				sw2.Restart()
-				SortElements(node1)
-				sw2.Stop()
-				timeLogString.Add("Sorting element in sequence 1 for analysis " + seq1AnalysisName + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
-				sw2.Restart()
-				SortElements(node2)
-				sw2.Stop()
-				timeLogString.Add("Sorting element in sequence 2 for analysis " + seq2AnalysisName + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
-			Else
-				timeLogString.Add("No need sorting element in 2 sequences for analysis " + seq1AnalysisName)
-			End If
+			'If seq1NeedSorting Or seq2NeedSorting Then
+			'	seq1NeedSorting = False
+			'	seq2NeedSorting = False
+			'	sw2.Restart()
+			'	SortElements(node1)
+			'	sw2.Stop()
+			'	timeLogString.Add("Sorting element in sequence 1 for analysis " + seq1AnalysisName + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
+			'	sw2.Restart()
+			'	SortElements(node2)
+			'	sw2.Stop()
+			'	timeLogString.Add("Sorting element in sequence 2 for analysis " + seq2AnalysisName + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
+			'Else
+			'	timeLogString.Add("No need sorting element in 2 sequences for analysis " + seq1AnalysisName)
+			'End If
 
 			sw2.Restart()
 
 			For childIndex = 0 To node1.ChildNodes.Count - 1
-				If node1.ChildNodes(childIndex).InnerText.ToLower <> node2.ChildNodes(childIndex).InnerText.ToLower Then
-					equal = False
-					log.Add("Step : " + seq1AnalysisName + ", Parameter : " + node1.ChildNodes(childIndex).Name + ", Sequence 1 Value : " + node1.ChildNodes(childIndex).InnerText + ", Sequence 2 Value : " + node2.ChildNodes(childIndex).InnerText)
+				If node1.ChildNodes(childIndex).Name = "FilterList" Then
+
+					Dim filterFileName1 As String = node1.ChildNodes(childIndex).SelectSingleNode("FilterList/MoireFilter/MoireFilterList").InnerText
+					Dim filterFileName2 As String = node2.ChildNodes(childIndex).SelectSingleNode("FilterList/MoireFilter/MoireFilterList").InnerText
+
+					If filterFileName1 <> filterFileName2 Then
+						equal = False
+						log.Add("Step : " + seq1AnalysisName + ", Parameter : " + node1.ChildNodes(childIndex).Name + ", Sequence 1 Value : " + filterFileName1 + ", Sequence 2 Value : " + filterFileName2)
+					End If
+
+				Else
+					If node1.ChildNodes(childIndex).InnerText.ToLower <> node2.ChildNodes(childIndex).InnerText.ToLower Then
+						equal = False
+						log.Add("Step : " + seq1AnalysisName + ", Parameter : " + node1.ChildNodes(childIndex).Name + ", Sequence 1 Value : " + node1.ChildNodes(childIndex).InnerText + ", Sequence 2 Value : " + node2.ChildNodes(childIndex).InnerText)
+					End If
 				End If
+
 				tempString = tempString + node1.ChildNodes(childIndex).Name + ","
 			Next
 			sw2.Stop()
@@ -1041,6 +1068,10 @@ Public Class MainForm
 	End Sub
 
 	Public Sub CompareCalSettings(ByVal file1FullPath As String, ByVal file2FullPath As String)
+		If Not chkCompareCAL.Checked Then
+			CommLogUpdateText("SKIPPED CAL COMPARISION !!!")
+			Exit Sub
+		End If
 		Dim timeLogString As New List(Of String)
 		Dim tempString As String = ""
 		Dim sw As New Stopwatch
