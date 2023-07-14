@@ -277,7 +277,7 @@ Public Class MainForm
 			sw2.Restart()
 
 			For childIndex = 0 To node1.ChildNodes.Count - 1
-				If node1.ChildNodes(childIndex).Name = "FilterList" Then
+				If node1.ChildNodes(childIndex).Name = "FilterList" AndAlso node1.ChildNodes(childIndex).SelectSingleNode("FilterList") IsNot Nothing AndAlso node2.ChildNodes(childIndex).SelectSingleNode("FilterList") IsNot Nothing Then
 
 					Dim filterFileName1 As String = node1.ChildNodes(childIndex).SelectSingleNode("FilterList/MoireFilter/MoireFilterList").InnerText
 					Dim filterFileName2 As String = node2.ChildNodes(childIndex).SelectSingleNode("FilterList/MoireFilter/MoireFilterList").InnerText
