@@ -105,7 +105,7 @@ Namespace TrueTestWatcher
             Dim newProcs As New Dictionary(Of String, Process)
             While True
                 For Each process In System.Diagnostics.Process.GetProcesses()
-                    If process.ProcessName.CompareTo("CalculatorApp") = 0 Then
+                    If process.ProcessName.CompareTo("TrueTest") = 0 Then
                         If Not searchForProcess(newProcs, process.Id) Then
                             Dim searcher As ManagementObjectSearcher = New ManagementObjectSearcher("SELECT CommandLine FROM Win32_Process WHERE ProcessId = " & process.Id.ToString())
                             For Each [object] As ManagementObject In searcher.[Get]()
@@ -122,6 +122,34 @@ Namespace TrueTestWatcher
                 compareAll()
 
             End While
+        End Sub
+
+        Private Function searchForProcess(newProcs As Dictionary(Of String, Process), newKey As Integer) As Boolean
+            For Each process As Process In newProcs.Values
+                If process.Id = newKey Then Return True
+            Next
+
+            Return False
+        End Function
+
+        Private Sub checkProcesses(newProcs As Dictionary(Of String, Process))
+            For Each currProc In newProcs.Keys
+                Dim processExists = False
+                For Each process In System.Diagnostics.Process.GetProcesses()
+                    If process.Id = newProcs(currProc).Id Then
+                        processExists = True
+                        Exit For
+                    End If
+
+                Next
+                If Not processExists Then
+                    CommLogUpdateText("Process Closed: ")
+                    CommLogUpdateText(currProc)
+                    CommLogUpdateText(vbCrLf)
+                    newProcs.Remove(currProc)
+                    If newProcs.Count = 0 Then Exit For
+                End If
+            Next
         End Sub
         Private Sub watchFolder1()
             watchfolder = New System.IO.FileSystemWatcher()
@@ -242,35 +270,6 @@ Namespace TrueTestWatcher
 
             'End of code for btn_start_click
         End Sub
-
-        Private Function searchForProcess(newProcs As Dictionary(Of String, Process), newKey As Integer) As Boolean
-            For Each process As Process In newProcs.Values
-                If process.Id = newKey Then Return True
-            Next
-
-            Return False
-        End Function
-
-        Private Sub checkProcesses(newProcs As Dictionary(Of String, Process))
-            For Each currProc In newProcs.Keys
-                Dim processExists = False
-                For Each process In System.Diagnostics.Process.GetProcesses()
-                    If process.Id = newProcs(currProc).Id Then
-                        processExists = True
-                        Exit For
-                    End If
-
-                Next
-                If Not processExists Then
-                    CommLogUpdateText("Process Closed: ")
-                    CommLogUpdateText(currProc)
-                    CommLogUpdateText(vbCrLf)
-                    newProcs.Remove(currProc)
-                    If newProcs.Count = 0 Then Exit For
-                End If
-            Next
-        End Sub
-
 
         Private Sub aboutToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles aboutToolStripMenuItem.Click
             MessageBox.Show("dh.chau@radiantvs.com")
