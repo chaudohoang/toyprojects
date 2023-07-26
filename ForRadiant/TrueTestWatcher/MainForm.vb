@@ -24,8 +24,9 @@ Namespace TrueTestWatcher
         Dim conn As SqlCeConnection
         Dim CameraSN As String
         Dim exePath As String = My.Application.Info.DirectoryPath
-        Dim sequence1Path As String
-        Dim sequence2Path As String
+        Dim runningSequencePath As String
+        Dim masterSequencePath As String
+        Dim masterCalibrationPath As String
         Dim parameterNG As Boolean
         Dim calibrationNG As Boolean
         Dim appdataNG As Boolean
@@ -35,8 +36,9 @@ Namespace TrueTestWatcher
         Dim MasterStatusPath As String = "C:\Radiant Vision Systems Data\TrueTest\UserData\MasterStatus.txt"
         Dim watchPath1 As String = "C:\Radiant Vision Systems Data\TrueTest\Sequence"
         Dim watchPath2 As String = "C:\Radiant Vision Systems Data\TrueTest\Sequence\Master"
-        Dim watchPath3 As String = "C:\Radiant Vision Systems Data\TrueTest\AppData"
-        Dim watchPath4 As String = "C:\Radiant Vision Systems Data\TrueTest\Master AppData"
+        Dim watchPath3 As String = "C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration"
+        Dim watchPath4 As String = "C:\Radiant Vision Systems Data\TrueTest\AppData"
+        Dim watchPath5 As String = "C:\Radiant Vision Systems Data\TrueTest\Master AppData"
         Public watchfolder As FileSystemWatcher
 
         <DllImport("User32.dll")>
@@ -100,6 +102,10 @@ Namespace TrueTestWatcher
             watchFolder2()
             watchFolder3()
             watchFolder4()
+            watchFolder5()
+            If StartMinimizedToolStripMenuItem.Checked = True Then
+                Me.WindowState = FormWindowState.Minimized
+            End If
         End Sub
         Private Sub StartWatching()
             Dim newProcs As New Dictionary(Of String, Process)
@@ -109,9 +115,9 @@ Namespace TrueTestWatcher
                         If Not searchForProcess(newProcs, process.Id) Then
                             Dim searcher As ManagementObjectSearcher = New ManagementObjectSearcher("SELECT CommandLine FROM Win32_Process WHERE ProcessId = " & process.Id.ToString())
                             For Each [object] As ManagementObject In searcher.[Get]()
-                                CommLogUpdateText("Process Started: ")
+                                CommLogUpdateText("----------Process Started: ----------")
                                 CommLogUpdateText([object]("CommandLine").ToString() & " ")
-                                CommLogUpdateText(vbCrLf)
+
                                 newProcs.Add([object]("CommandLine").ToString() & " ", process)
                             Next
                             If newProcs.Count <> 0 Then
@@ -147,7 +153,7 @@ Namespace TrueTestWatcher
                 If Not processExists Then
                     CommLogUpdateText("Process Closed: ")
                     CommLogUpdateText(currProc)
-                    CommLogUpdateText(vbCrLf)
+
                     newProcs.Remove(currProc)
                     If newProcs.Count = 0 Then Exit For
                 End If
@@ -273,6 +279,36 @@ Namespace TrueTestWatcher
             'End of code for btn_start_click
         End Sub
 
+        Private Sub watchFolder5()
+            watchfolder = New System.IO.FileSystemWatcher()
+
+            'this is the path we want to monitor
+            watchfolder.Path = watchPath5
+
+            'Add a list of Filter we want to specify
+            'make sure you use OR for each Filter as we need to
+            'all of those 
+
+            watchfolder.NotifyFilter = IO.NotifyFilters.DirectoryName
+            watchfolder.NotifyFilter = watchfolder.NotifyFilter Or
+                           IO.NotifyFilters.FileName
+            watchfolder.NotifyFilter = watchfolder.NotifyFilter Or
+                           IO.NotifyFilters.Attributes
+
+            ' add the handler to each event
+            AddHandler watchfolder.Changed, AddressOf logchange5
+            AddHandler watchfolder.Created, AddressOf logchange5
+            AddHandler watchfolder.Deleted, AddressOf logchange5
+
+            ' add the rename handler as the signature is different
+            AddHandler watchfolder.Renamed, AddressOf logrename5
+
+            'Set this property to true to start watching
+            watchfolder.EnableRaisingEvents = True
+
+            'End of code for btn_start_click
+        End Sub
+
         Private Sub aboutToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles aboutToolStripMenuItem.Click
             MessageBox.Show("dh.chau@radiantvs.com")
         End Sub
@@ -325,8 +361,9 @@ Namespace TrueTestWatcher
 
                 If savefile.ShowDialog() = DialogResult.OK Then
                     Using sw As StreamWriter = New StreamWriter(savefile.FileName)
-                        sw.WriteLine("Sequence 1 : " + sequence1Path)
-                        sw.WriteLine("Sequence 2 : " + sequence2Path)
+                        sw.WriteLine("Running Sequence : " + runningSequencePath)
+                        sw.WriteLine("Master Sequence : " + masterSequencePath)
+                        sw.WriteLine("Master Calibration : " + masterSequencePath)
                         sw.WriteLine("Ignore List : " + cbxIgnoreList.Text)
 
                         For index = 0 To ListBox1.Items.Count - 1
@@ -362,18 +399,18 @@ Namespace TrueTestWatcher
 
             If Not File.Exists(file1FullPath) Then
                 equal = False
-                CommLogUpdateText("Parameters Check : Sequence 1 is not existed !!!")
+                CommLogUpdateText("Parameters Check : Running Sequence is not existed !!!")
                 parameterNG = True
                 Exit Sub
             ElseIf Not File.Exists(file2FullPath) Then
                 equal = False
-                CommLogUpdateText("Parameters Check : Sequence 2 is not existed !!!")
+                CommLogUpdateText("Parameters Check : Master Master Sequence is not existed !!!")
                 parameterNG = True
                 Exit Sub
 
             ElseIf file1FullPath = file2FullPath Then
                 equal = False
-                CommLogUpdateText("Parameters Check : Sequence 1 and Sequence 2 is the same file !!!")
+                CommLogUpdateText("Parameters Check : Running Sequence and Master Sequence is the same file !!!")
                 parameterNG = True
                 Exit Sub
             End If
@@ -424,8 +461,8 @@ Namespace TrueTestWatcher
                 End If
             Next
             sw2.Stop()
-            timeLogString.Add("Get sequence 1 analysis list : " + sw2.ElapsedMilliseconds.ToString + "ms")
-            timeLogString.Add("Sequence 1 analysis : " + String.Join(",", sequence1AnaList))
+            timeLogString.Add("Get Running Sequence analysis list : " + sw2.ElapsedMilliseconds.ToString + "ms")
+            timeLogString.Add("Running Sequence analysis : " + String.Join(",", sequence1AnaList))
 
             sw2.Restart()
             For i2 = 0 To nodes2.Count - 1
@@ -435,8 +472,8 @@ Namespace TrueTestWatcher
             Next
 
             sw2.Stop()
-            timeLogString.Add("Get sequence 2 analysis list : " + sw2.ElapsedMilliseconds.ToString + "ms")
-            timeLogString.Add("Sequence 2 analysis : " + String.Join(",", sequence2AnaList))
+            timeLogString.Add("Get Master Sequence analysis list : " + sw2.ElapsedMilliseconds.ToString + "ms")
+            timeLogString.Add("Master Sequence analysis : " + String.Join(",", sequence2AnaList))
 
 
             sw2.Restart()
@@ -444,8 +481,8 @@ Namespace TrueTestWatcher
             If String.Join(",", sequence1AnaList) <> String.Join(",", sequence2AnaList) Then
                 equal = False
                 CommLogUpdateText("Parameters Check : Analysis list does not match !!!")
-                CommLogUpdateText("Parameters Check : Sequence 1 analyses : " + String.Join(",", sequence1AnaList))
-                CommLogUpdateText("Parameters Check : Sequence 2 analyses : " + String.Join(",", sequence2AnaList))
+                CommLogUpdateText("Parameters Check : Running Sequence analyses : " + String.Join(",", sequence1AnaList))
+                CommLogUpdateText("Parameters Check : Master Sequence analyses : " + String.Join(",", sequence2AnaList))
                 Exit Sub
             End If
             sw2.Stop()
@@ -479,7 +516,7 @@ Namespace TrueTestWatcher
                     Next
                 Next
                 sw2.Stop()
-                timeLogString.Add("Sequence 1 remove ignored parameters in Analysis " + seq1AnalysisName + " and removed " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
+                timeLogString.Add("Running Sequence remove ignored parameters in Analysis " + seq1AnalysisName + " and removed " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
                 tempString = ""
                 sw2.Restart()
                 For Each item As String In ignoreList
@@ -491,7 +528,7 @@ Namespace TrueTestWatcher
                     Next
                 Next
                 sw2.Stop()
-                timeLogString.Add("Sequence 2 remove ignored parameters in Analysis " + seq2AnalysisName + " and removed " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
+                timeLogString.Add("Master Sequence remove ignored parameters in Analysis " + seq2AnalysisName + " and removed " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
                 tempString = ""
                 sw2.Restart()
                 For childindex = node1.ChildNodes.Count - 1 To 0 Step -1
@@ -503,7 +540,7 @@ Namespace TrueTestWatcher
                 sw2.Stop()
                 Dim seq2NeedSorting As Boolean
                 seq2NeedSorting = If(tempString.Length = 0, False, True)
-                timeLogString.Add("Sequence 1 removing extra element in Analysis " + seq1AnalysisName + " and removed " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
+                timeLogString.Add("Running Sequence removing extra element in Analysis " + seq1AnalysisName + " and removed " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
                 tempString = ""
 
                 sw2.Restart()
@@ -516,7 +553,7 @@ Namespace TrueTestWatcher
                 sw2.Stop()
                 Dim seq1NeedSorting As Boolean
                 seq1NeedSorting = If(tempString.Length = 0, False, True)
-                timeLogString.Add("Sequence 2 removing extra element in Analysis " + seq2AnalysisName + " and removed " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
+                timeLogString.Add("Master Sequence removing extra element in Analysis " + seq2AnalysisName + " and removed " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
                 tempString = ""
 
                 sw2.Restart()
@@ -530,14 +567,14 @@ Namespace TrueTestWatcher
                         If filterFileName1 <> filterFileName2 Then
                             equal = False
                             parameterNG = True
-                            log.Add("Step : " + seq1AnalysisName + ", Parameter : " + node1.ChildNodes(childIndex).Name + ", Sequence 1 Value : " + filterFileName1 + ", Sequence 2 Value : " + filterFileName2)
+                            log.Add("Step : " + seq1AnalysisName + ", Parameter : " + node1.ChildNodes(childIndex).Name + ", Running Sequence Value : " + filterFileName1 + ", Master Sequence Value : " + filterFileName2)
                         End If
 
                     Else
                         If node1.ChildNodes(childIndex).InnerText.ToLower <> node2.ChildNodes(childIndex).InnerText.ToLower Then
                             equal = False
                             parameterNG = True
-                            log.Add("Step : " + seq1AnalysisName + ", Parameter : " + node1.ChildNodes(childIndex).Name + ", Sequence 1 Value : " + node1.ChildNodes(childIndex).InnerText + ", Sequence 2 Value : " + node2.ChildNodes(childIndex).InnerText)
+                            log.Add("Step : " + seq1AnalysisName + ", Parameter : " + node1.ChildNodes(childIndex).Name + ", Running Sequence Value : " + node1.ChildNodes(childIndex).InnerText + ", Master Sequence Value : " + node2.ChildNodes(childIndex).InnerText)
                         End If
                     End If
 
@@ -588,17 +625,17 @@ Namespace TrueTestWatcher
             If Not File.Exists(file1FullPath) Then
                 equal = False
                 calibrationNG = True
-                CommLogUpdateText("Calibrations Check : Sequence 1 is not existed !!!")
+                CommLogUpdateText("Calibrations Check : Running Sequence is not existed !!!")
                 Exit Sub
             ElseIf Not File.Exists(file2FullPath) Then
                 equal = False
                 calibrationNG = True
-                CommLogUpdateText("Calibrations Check : Sequence 2 is not existed !!!")
+                CommLogUpdateText("Calibrations Check : Master Calibration is not existed !!!")
                 Exit Sub
             ElseIf file1FullPath = file2FullPath Then
                 equal = False
                 calibrationNG = True
-                CommLogUpdateText("Calibrations Check : Sequence 1 and Sequence 2 is the same file !!!")
+                CommLogUpdateText("Calibrations Check : Running Sequence and Master Calibration is the same file !!!")
                 Exit Sub
             End If
             sw2.Stop()
@@ -644,7 +681,7 @@ Namespace TrueTestWatcher
                 End If
             Next
             sw2.Stop()
-            timeLogString.Add("Get sequence 1 analysis list and demura step list (to skip demura step) : " + sw2.ElapsedMilliseconds.ToString + "ms")
+            timeLogString.Add("Get Running Sequence analysis list and demura step list (to skip demura step) : " + sw2.ElapsedMilliseconds.ToString + "ms")
 
             sw2.Restart()
             nodes1 = xmlDoc1.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
@@ -669,7 +706,7 @@ Namespace TrueTestWatcher
                 End If
             Next
             sw2.Stop()
-            timeLogString.Add("Get sequence 1 Serial Number : " + sw2.ElapsedMilliseconds.ToString + "ms")
+            timeLogString.Add("Get Running Sequence Serial Number : " + sw2.ElapsedMilliseconds.ToString + "ms")
 
             sw2.Restart()
 
@@ -683,7 +720,7 @@ Namespace TrueTestWatcher
                 End If
             Next
             sw2.Stop()
-            timeLogString.Add("Get sequence 2 analysis list and demura step list (to skip demura step) : " + sw2.ElapsedMilliseconds.ToString + "ms")
+            timeLogString.Add("Get Master Calibration analysis list and demura step list (to skip demura step) : " + sw2.ElapsedMilliseconds.ToString + "ms")
 
             sw2.Restart()
             nodes2 = xmlDoc2.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
@@ -707,11 +744,11 @@ Namespace TrueTestWatcher
                 End If
             Next
             sw2.Stop()
-            timeLogString.Add("Get sequence 2 Serial Number : " + sw2.ElapsedMilliseconds.ToString + "ms")
+            timeLogString.Add("Get Master Calibration Serial Number : " + sw2.ElapsedMilliseconds.ToString + "ms")
 
             If SN1 <> SN2 Then
                 calibrationNG = True
-                CommLogUpdateText("Running sequence and master sequence is from different camera, cannot compare calibration")
+                CommLogUpdateText("Running Sequence and master sequence is from different camera, cannot compare calibration")
                 Exit Sub
             Else
 
@@ -749,7 +786,7 @@ Namespace TrueTestWatcher
                 If ColorCalSetting1(index) <> ColorCalSetting2(index) Then
                     equal = False
                     calibrationNG = True
-                    log.Add("Step : " + ColorCalSetting1(index).Split(",")(1) + ", Sequence 1 Color Cal : " + colorCalRef1(ColorCalSetting1(index).Split(",")(2)) + ", Sequence 2 Color Cal : " + colorCalRef2(ColorCalSetting2(index).Split(",")(2)))
+                    log.Add("Step : " + ColorCalSetting1(index).Split(",")(1) + ", Running Sequence Color Cal : " + colorCalRef1(ColorCalSetting1(index).Split(",")(2)) + ", Master Calibration Color Cal : " + colorCalRef2(ColorCalSetting2(index).Split(",")(2)))
                 End If
             Next
             sw2.Stop()
@@ -760,7 +797,7 @@ Namespace TrueTestWatcher
                 If ImgScaleSetting1(index) <> ImgScaleSetting2(index) Then
                     equal = False
                     calibrationNG = True
-                    log.Add("Step : " + ImgScaleSetting1(index).Split(",")(1) + ", Sequence 1 Img Scale Cal : " + imgScaleRef1(ImgScaleSetting1(index).Split(",")(2)) + ", Sequence 2 Img Scale Cal : " + imgScaleRef2(ImgScaleSetting2(index).Split(",")(2)))
+                    log.Add("Step : " + ImgScaleSetting1(index).Split(",")(1) + ", Running Sequence Img Scale Cal : " + imgScaleRef1(ImgScaleSetting1(index).Split(",")(2)) + ", Master Calibration Img Scale Cal : " + imgScaleRef2(ImgScaleSetting2(index).Split(",")(2)))
                 End If
             Next
             sw2.Stop()
@@ -771,7 +808,7 @@ Namespace TrueTestWatcher
                 If FFCSetting1(index) <> FFCSetting2(index) Then
                     equal = False
                     calibrationNG = True
-                    log.Add("Step : " + FFCSetting1(index).Split(",")(1) + ", Sequence 1 FFC Cal : " + flatFieldRef1(FFCSetting1(index).Split(",")(2)) + ", Sequence 2 FFC Cal : " + flatFieldRef2(FFCSetting2(index).Split(",")(2)))
+                    log.Add("Step : " + FFCSetting1(index).Split(",")(1) + ", Running Sequence FFC Cal : " + flatFieldRef1(FFCSetting1(index).Split(",")(2)) + ", Master Calibration FFC Cal : " + flatFieldRef2(FFCSetting2(index).Split(",")(2)))
                 End If
             Next
             sw2.Stop()
@@ -1065,29 +1102,31 @@ Namespace TrueTestWatcher
                 Exit Sub
             End If
             CommLogUpdateText("Performing Master Functions Check !!!")
-            CommLogUpdateText(vbCrLf)
+
             getSequenceFilePath()
-            CheckForMatchingSequenceParameters(sequence1Path, sequence2Path)
-            CommLogUpdateText(vbCrLf)
-            CompareCalSettings(sequence1Path, sequence2Path)
-            CommLogUpdateText(vbCrLf)
+            CheckForMatchingSequenceParameters(runningSequencePath, masterSequencePath)
+
+            CompareCalSettings(runningSequencePath, masterCalibrationPath)
+
             CompareAppDataFiles()
-            CommLogUpdateText(vbCrLf)
+
             CommLogUpdateText("Finished Master Functions Check !!!")
-            CommLogUpdateText(vbCrLf)
+
             needtoCheck = False
 
+            Dim status As String = ""
             If Not parameterNG AndAlso Not calibrationNG AndAlso Not appdataNG Then
-                File.WriteAllText(MasterStatusPath, "OK")
+                status = "OK"
             ElseIf parameterNG Then
-                File.WriteAllText(MasterStatusPath, "Parameter Missmatch")
+                status = "Parameter Missmatch"
             ElseIf calibrationNG Then
-                File.WriteAllText(MasterStatusPath, "Calibration Missmatch")
+                status = "Calibration Missmatch"
             ElseIf appdataNG Then
-                File.WriteAllText(MasterStatusPath, "Appdata Missmatch")
+                status = "Appdata Missmatch"
             End If
-            CommLogUpdateText("Wrote Master Status to : " + MasterStatusPath + " !!!")
-            CommLogUpdateText(vbCrLf)
+            File.WriteAllText(MasterStatusPath, status)
+            CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
         End Sub
 
         Private Sub getSequenceFilePath()
@@ -1096,12 +1135,12 @@ Namespace TrueTestWatcher
 
             xmlDoc1.Load("C:\Radiant Vision Systems Data\TrueTest\AppData\1.8\app.settings")
             node1 = xmlDoc1.DocumentElement.SelectSingleNode("/Settings/LastSequenceFile")
-            sequence1Path = node1.InnerText
-            sequence2Path = Path.Combine("C:\Radiant Vision Systems Data\TrueTest\Sequence\Master", Path.GetFileName(sequence1Path))
-            CommLogUpdateText("Sequence 1 file path : " + sequence1Path)
-            CommLogUpdateText(vbCrLf)
-            CommLogUpdateText("Sequence 2 file path : " + sequence2Path)
-            CommLogUpdateText(vbCrLf)
+            runningSequencePath = node1.InnerText
+            masterSequencePath = Path.Combine("C:\Radiant Vision Systems Data\TrueTest\Sequence\Master", Path.GetFileName(runningSequencePath))
+            masterCalibrationPath = Path.Combine("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration", Path.GetFileName(runningSequencePath))
+            CommLogUpdateText("Running Sequence file path : " + runningSequencePath)
+            CommLogUpdateText("Master sequence file path : " + masterSequencePath)
+            CommLogUpdateText("Master calibraion file path : " + masterCalibrationPath)
         End Sub
 
         Private Sub SetControlEnabled(ByVal ctl As Control, ByVal enabled As Boolean)
@@ -1117,35 +1156,37 @@ Namespace TrueTestWatcher
             Dim Extensions() As String = {".seqxc"}
             If Extensions.Contains(Path.GetExtension(e.FullPath)) Then
                 If e.ChangeType = IO.WatcherChangeTypes.Changed Then
-                    CommLogUpdateText("File " & e.FullPath & " has been modified")
-                    CommLogUpdateText(vbCrLf)
+                    CommLogUpdateText("----------File " & e.FullPath & " has been modified----------")
+
                 End If
                 If e.ChangeType = IO.WatcherChangeTypes.Created Then
-                    CommLogUpdateText("File " & e.FullPath & " has been created")
-                    CommLogUpdateText(vbCrLf)
+                    CommLogUpdateText("----------File " & e.FullPath & " has been created----------")
+
                 End If
                 If e.ChangeType = IO.WatcherChangeTypes.Deleted Then
-                    CommLogUpdateText("File " & e.FullPath & " has been deleted")
-                    CommLogUpdateText(vbCrLf)
+                    CommLogUpdateText("----------File " & e.FullPath & " has been deleted----------")
+
                 End If
                 CommLogUpdateText("Performing Master Sequence and Calibration Check !!!")
-                CommLogUpdateText(vbCrLf)
+
                 getSequenceFilePath()
-                CheckForMatchingSequenceParameters(sequence1Path, sequence2Path)
-                CommLogUpdateText(vbCrLf)
-                CompareCalSettings(sequence1Path, sequence2Path)
-                CommLogUpdateText(vbCrLf)
+                CheckForMatchingSequenceParameters(runningSequencePath, masterSequencePath)
+
+                CompareCalSettings(runningSequencePath, masterCalibrationPath)
+
                 CommLogUpdateText("Finished Master Sequence and Calibration Check !!!")
-                CommLogUpdateText(vbCrLf)
+
+                Dim status As String = ""
                 If Not parameterNG AndAlso Not calibrationNG Then
-                    File.WriteAllText(MasterStatusPath, "OK")
+                    status = "OK"
                 ElseIf parameterNG Then
-                    File.WriteAllText(MasterStatusPath, "Parameter Missmatch")
+                    status = "Parameter Missmatch"
                 ElseIf calibrationNG Then
-                    File.WriteAllText(MasterStatusPath, "Calibration Missmatch")
+                    status = "Calibration Missmatch"
                 End If
-                CommLogUpdateText("Wrote Master Status to : " + MasterStatusPath + " !!!")
-                CommLogUpdateText(vbCrLf)
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
             End If
 
         End Sub
@@ -1154,27 +1195,28 @@ Namespace TrueTestWatcher
                             System.IO.RenamedEventArgs)
             Dim Extensions() As String = {".seqxc"}
             If Extensions.Contains(Path.GetExtension(e.FullPath)) Then
-                CommLogUpdateText("File" & e.OldName & " has been renamed to " & e.Name)
-                CommLogUpdateText(vbCrLf)
+                CommLogUpdateText("----------File" & e.OldName & " has been renamed to " & e.Name & "----------")
+
                 CommLogUpdateText("Performing Master Sequence and Calibration Check !!!")
-                CommLogUpdateText(vbCrLf)
+
                 getSequenceFilePath()
-                CheckForMatchingSequenceParameters(sequence1Path, sequence2Path)
-                CommLogUpdateText(vbCrLf)
-                CompareCalSettings(sequence1Path, sequence2Path)
-                CommLogUpdateText(vbCrLf)
+                CheckForMatchingSequenceParameters(runningSequencePath, masterSequencePath)
+
+                CompareCalSettings(runningSequencePath, masterCalibrationPath)
+
                 CommLogUpdateText("Finished Master Sequence and Calibration Check !!!")
-                CommLogUpdateText(vbCrLf)
-                CommLogUpdateText(vbCrLf)
+
+                Dim status As String = ""
                 If Not parameterNG AndAlso Not calibrationNG Then
-                    File.WriteAllText(MasterStatusPath, "OK")
+                    status = "OK"
                 ElseIf parameterNG Then
-                    File.WriteAllText(MasterStatusPath, "Parameter Missmatch")
+                    status = "Parameter Missmatch"
                 ElseIf calibrationNG Then
-                    File.WriteAllText(MasterStatusPath, "Calibration Missmatch")
+                    status = "Calibration Missmatch"
                 End If
-                CommLogUpdateText("Wrote Master Status to : " + MasterStatusPath + " !!!")
-                CommLogUpdateText(vbCrLf)
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
             End If
 
         End Sub
@@ -1184,36 +1226,37 @@ Namespace TrueTestWatcher
             Dim Extensions() As String = {".seqxc"}
             If Extensions.Contains(Path.GetExtension(e.FullPath)) Then
                 If e.ChangeType = IO.WatcherChangeTypes.Changed Then
-                    CommLogUpdateText("File " & e.FullPath & " has been modified")
-                    CommLogUpdateText(vbCrLf)
+                    CommLogUpdateText("----------File " & e.FullPath & " has been modified----------")
+
                 End If
                 If e.ChangeType = IO.WatcherChangeTypes.Created Then
-                    CommLogUpdateText("File " & e.FullPath & " has been created")
-                    CommLogUpdateText(vbCrLf)
+                    CommLogUpdateText("----------File " & e.FullPath & " has been created----------")
+
                 End If
                 If e.ChangeType = IO.WatcherChangeTypes.Deleted Then
-                    CommLogUpdateText("File " & e.FullPath & " has been deleted")
-                    CommLogUpdateText(vbCrLf)
+                    CommLogUpdateText("----------File " & e.FullPath & " has been deleted----------")
+
                 End If
                 CommLogUpdateText("Performing Master Sequence and Calibration Check !!!")
-                CommLogUpdateText(vbCrLf)
+
                 getSequenceFilePath()
-                CheckForMatchingSequenceParameters(sequence1Path, sequence2Path)
-                CommLogUpdateText(vbCrLf)
-                CompareCalSettings(sequence1Path, sequence2Path)
-                CommLogUpdateText(vbCrLf)
+                CheckForMatchingSequenceParameters(runningSequencePath, masterSequencePath)
+
+                CompareCalSettings(runningSequencePath, masterCalibrationPath)
+
                 CommLogUpdateText("Finished Master Sequence and Calibration Check !!!")
-                CommLogUpdateText(vbCrLf)
-                CommLogUpdateText(vbCrLf)
+
+                Dim status As String = ""
                 If Not parameterNG AndAlso Not calibrationNG Then
-                    File.WriteAllText(MasterStatusPath, "OK")
+                    status = "OK"
                 ElseIf parameterNG Then
-                    File.WriteAllText(MasterStatusPath, "Parameter Missmatch")
+                    status = "Parameter Missmatch"
                 ElseIf calibrationNG Then
-                    File.WriteAllText(MasterStatusPath, "Calibration Missmatch")
+                    status = "Calibration Missmatch"
                 End If
-                CommLogUpdateText("Wrote Master Status to : " + MasterStatusPath + " !!!")
-                CommLogUpdateText(vbCrLf)
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
             End If
 
         End Sub
@@ -1222,83 +1265,98 @@ Namespace TrueTestWatcher
                             System.IO.RenamedEventArgs)
             Dim Extensions() As String = {".seqxc"}
             If Extensions.Contains(Path.GetExtension(e.FullPath)) Then
-                CommLogUpdateText("File" & e.OldName & " has been renamed to " & e.Name)
-                CommLogUpdateText(vbCrLf)
+                CommLogUpdateText("----------File" & e.OldName & " has been renamed to " & e.Name & "----------")
+
                 CommLogUpdateText("Performing Master Sequence and Calibration Check !!!")
-                CommLogUpdateText(vbCrLf)
+
                 getSequenceFilePath()
-                CheckForMatchingSequenceParameters(sequence1Path, sequence2Path)
-                CommLogUpdateText(vbCrLf)
-                CompareCalSettings(sequence1Path, sequence2Path)
-                CommLogUpdateText(vbCrLf)
+                CheckForMatchingSequenceParameters(runningSequencePath, masterSequencePath)
+
+                CompareCalSettings(runningSequencePath, masterCalibrationPath)
+
                 CommLogUpdateText("Finished Master Sequence and Calibration Check !!!")
-                CommLogUpdateText(vbCrLf)
-                CommLogUpdateText(vbCrLf)
+
+                Dim status As String = ""
                 If Not parameterNG AndAlso Not calibrationNG Then
-                    File.WriteAllText(MasterStatusPath, "OK")
+                    status = "OK"
                 ElseIf parameterNG Then
-                    File.WriteAllText(MasterStatusPath, "Parameter Missmatch")
+                    status = "Parameter Missmatch"
                 ElseIf calibrationNG Then
-                    File.WriteAllText(MasterStatusPath, "Calibration Missmatch")
+                    status = "Calibration Missmatch"
                 End If
-                CommLogUpdateText("Wrote Master Status to : " + MasterStatusPath + " !!!")
-                CommLogUpdateText(vbCrLf)
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
             End If
 
         End Sub
 
         Private Sub logchange3(ByVal source As Object, ByVal e As _
                         System.IO.FileSystemEventArgs)
-            Dim Extensions() As String = {".xml", ".csv"}
-            If Extensions.Contains(Path.GetExtension(e.FullPath)) Or Path.GetFileNameWithoutExtension(e.FullPath).Contains("RegisterPixels") Then
+            Dim Extensions() As String = {".seqxc"}
+            If Extensions.Contains(Path.GetExtension(e.FullPath)) Then
                 If e.ChangeType = IO.WatcherChangeTypes.Changed Then
-                    CommLogUpdateText("File " & e.FullPath & " has been modified")
-                    CommLogUpdateText(vbCrLf)
+                    CommLogUpdateText("----------File " & e.FullPath & " has been modified----------")
+
                 End If
                 If e.ChangeType = IO.WatcherChangeTypes.Created Then
-                    CommLogUpdateText("File " & e.FullPath & " has been created")
-                    CommLogUpdateText(vbCrLf)
+                    CommLogUpdateText("----------File " & e.FullPath & " has been created----------")
+
                 End If
                 If e.ChangeType = IO.WatcherChangeTypes.Deleted Then
-                    CommLogUpdateText("File " & e.FullPath & " has been deleted")
-                    CommLogUpdateText(vbCrLf)
+                    CommLogUpdateText("----------File " & e.FullPath & " has been deleted----------")
+
                 End If
-                CommLogUpdateText("Performing Master AppData Check !!!")
-                CommLogUpdateText(vbCrLf)
-                CompareAppDataFiles()
-                CommLogUpdateText(vbCrLf)
-                CommLogUpdateText("Finished Master AppData Check !!!")
-                CommLogUpdateText(vbCrLf)
-                CommLogUpdateText(vbCrLf)
-                If Not appdataNG Then
-                    File.WriteAllText(MasterStatusPath, "OK")
-                Else
-                    File.WriteAllText(MasterStatusPath, "Appdata Missmatch")
+                CommLogUpdateText("Performing Master Sequence and Calibration Check !!!")
+
+                getSequenceFilePath()
+                CheckForMatchingSequenceParameters(runningSequencePath, masterSequencePath)
+
+                CompareCalSettings(runningSequencePath, masterCalibrationPath)
+
+                CommLogUpdateText("Finished Master Sequence and Calibration Check !!!")
+
+                Dim status As String = ""
+                If Not parameterNG AndAlso Not calibrationNG Then
+                    status = "OK"
+                ElseIf parameterNG Then
+                    status = "Parameter Missmatch"
+                ElseIf calibrationNG Then
+                    status = "Calibration Missmatch"
                 End If
-                CommLogUpdateText("Wrote Master Status to : " + MasterStatusPath + " !!!")
-                CommLogUpdateText(vbCrLf)
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
             End If
+
         End Sub
 
         Public Sub logrename3(ByVal source As Object, ByVal e As _
                             System.IO.RenamedEventArgs)
-            Dim Extensions() As String = {".xml", ".csv"}
-            If Extensions.Contains(Path.GetExtension(e.FullPath)) Or Path.GetFileNameWithoutExtension(e.FullPath).Contains("RegisterPixels") Then
-                CommLogUpdateText("File" & e.OldName & " has been renamed to " & e.Name)
-                CommLogUpdateText(vbCrLf)
-                CommLogUpdateText("Performing Master AppData Check !!!")
-                CommLogUpdateText(vbCrLf)
-                CompareAppDataFiles()
-                CommLogUpdateText(vbCrLf)
-                CommLogUpdateText("Finished Master AppData Check !!!")
-                CommLogUpdateText(vbCrLf)
-                If Not appdataNG Then
-                    File.WriteAllText(MasterStatusPath, "OK")
-                Else
-                    File.WriteAllText(MasterStatusPath, "Appdata Missmatch")
+            Dim Extensions() As String = {".seqxc"}
+            If Extensions.Contains(Path.GetExtension(e.FullPath)) Then
+                CommLogUpdateText("----------File" & e.OldName & " has been renamed to " & e.Name & "----------")
+
+                CommLogUpdateText("Performing Master Sequence and Calibration Check !!!")
+
+                getSequenceFilePath()
+                CheckForMatchingSequenceParameters(runningSequencePath, masterSequencePath)
+
+                CompareCalSettings(runningSequencePath, masterCalibrationPath)
+
+                CommLogUpdateText("Finished Master Sequence and Calibration Check !!!")
+
+                Dim status As String = ""
+                If Not parameterNG AndAlso Not calibrationNG Then
+                    status = "OK"
+                ElseIf parameterNG Then
+                    status = "Parameter Missmatch"
+                ElseIf calibrationNG Then
+                    status = "Calibration Missmatch"
                 End If
-                CommLogUpdateText("Wrote Master Status to : " + MasterStatusPath + " !!!")
-                CommLogUpdateText(vbCrLf)
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
             End If
 
         End Sub
@@ -1308,31 +1366,32 @@ Namespace TrueTestWatcher
             Dim Extensions() As String = {".xml", ".csv"}
             If Extensions.Contains(Path.GetExtension(e.FullPath)) Or Path.GetFileNameWithoutExtension(e.FullPath).Contains("RegisterPixels") Then
                 If e.ChangeType = IO.WatcherChangeTypes.Changed Then
-                    CommLogUpdateText("File " & e.FullPath & " has been modified")
-                    CommLogUpdateText(vbCrLf)
+                    CommLogUpdateText("----------File " & e.FullPath & " has been modified----------")
+
                 End If
                 If e.ChangeType = IO.WatcherChangeTypes.Created Then
-                    CommLogUpdateText("File " & e.FullPath & " has been created")
-                    CommLogUpdateText(vbCrLf)
+                    CommLogUpdateText("----------File " & e.FullPath & " has been created----------")
+
                 End If
                 If e.ChangeType = IO.WatcherChangeTypes.Deleted Then
-                    CommLogUpdateText("File " & e.FullPath & " has been deleted")
-                    CommLogUpdateText(vbCrLf)
+                    CommLogUpdateText("----------File " & e.FullPath & " has been deleted----------")
+
                 End If
                 CommLogUpdateText("Performing Master AppData Check !!!")
-                CommLogUpdateText(vbCrLf)
+
                 CompareAppDataFiles()
-                CommLogUpdateText(vbCrLf)
+
                 CommLogUpdateText("Finished Master AppData Check !!!")
-                CommLogUpdateText(vbCrLf)
-                CommLogUpdateText(vbCrLf)
+
+                Dim status As String = ""
                 If Not appdataNG Then
-                    File.WriteAllText(MasterStatusPath, "OK")
+                    status = "OK"
                 Else
-                    File.WriteAllText(MasterStatusPath, "Appdata Missmatch")
+                    status = "Appdata Missmatch"
                 End If
-                CommLogUpdateText("Wrote Master Status to : " + MasterStatusPath + " !!!")
-                CommLogUpdateText(vbCrLf)
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
             End If
         End Sub
 
@@ -1340,23 +1399,108 @@ Namespace TrueTestWatcher
                             System.IO.RenamedEventArgs)
             Dim Extensions() As String = {".xml", ".csv"}
             If Extensions.Contains(Path.GetExtension(e.FullPath)) Or Path.GetFileNameWithoutExtension(e.FullPath).Contains("RegisterPixels") Then
-                CommLogUpdateText("File" & e.OldName & " has been renamed to " & e.Name)
-                CommLogUpdateText(vbCrLf)
+                CommLogUpdateText("----------File" & e.OldName & " has been renamed to " & e.Name & "----------")
+
                 CommLogUpdateText("Performing Master AppData Check !!!")
-                CommLogUpdateText(vbCrLf)
+
                 CompareAppDataFiles()
-                CommLogUpdateText(vbCrLf)
+
                 CommLogUpdateText("Finished Master AppData Check !!!")
-                CommLogUpdateText(vbCrLf)
+
+                Dim status As String = ""
                 If Not appdataNG Then
-                    File.WriteAllText(MasterStatusPath, "OK")
+                    status = "OK"
                 Else
-                    File.WriteAllText(MasterStatusPath, "Appdata Missmatch")
+                    status = "Appdata Missmatch"
                 End If
-                CommLogUpdateText("Wrote Master Status to : " + MasterStatusPath + " !!!")
-                CommLogUpdateText(vbCrLf)
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
             End If
         End Sub
 
+        Private Sub logchange5(ByVal source As Object, ByVal e As _
+                        System.IO.FileSystemEventArgs)
+            Dim Extensions() As String = {".xml", ".csv"}
+            If Extensions.Contains(Path.GetExtension(e.FullPath)) Or Path.GetFileNameWithoutExtension(e.FullPath).Contains("RegisterPixels") Then
+                If e.ChangeType = IO.WatcherChangeTypes.Changed Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been modified----------")
+
+                End If
+                If e.ChangeType = IO.WatcherChangeTypes.Created Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been created----------")
+
+                End If
+                If e.ChangeType = IO.WatcherChangeTypes.Deleted Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been deleted----------")
+
+                End If
+                CommLogUpdateText("Performing Master AppData Check !!!")
+
+                CompareAppDataFiles()
+
+                CommLogUpdateText("Finished Master AppData Check !!!")
+
+                Dim status As String = ""
+                If Not appdataNG Then
+                    status = "OK"
+                Else
+                    status = "Appdata Missmatch"
+                End If
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
+            End If
+        End Sub
+
+        Public Sub logrename5(ByVal source As Object, ByVal e As _
+                            System.IO.RenamedEventArgs)
+            Dim Extensions() As String = {".xml", ".csv"}
+            If Extensions.Contains(Path.GetExtension(e.FullPath)) Or Path.GetFileNameWithoutExtension(e.FullPath).Contains("RegisterPixels") Then
+                CommLogUpdateText("----------File" & e.OldName & " has been renamed to " & e.Name & "----------")
+
+                CommLogUpdateText("Performing Master AppData Check !!!")
+
+                CompareAppDataFiles()
+
+                CommLogUpdateText("Finished Master AppData Check !!!")
+
+                Dim status As String = ""
+                If Not appdataNG Then
+                    status = "OK"
+                Else
+                    status = "Appdata Missmatch"
+                End If
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
+            End If
+        End Sub
+
+        Private Sub ManualCheckToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ManualCheckToolStripMenuItem.Click
+            CommLogUpdateText("Performing Master Functions Check !!!")
+
+            getSequenceFilePath()
+            CheckForMatchingSequenceParameters(runningSequencePath, masterSequencePath)
+
+            CompareCalSettings(runningSequencePath, masterCalibrationPath)
+
+            CompareAppDataFiles()
+
+            CommLogUpdateText("Finished Master Functions Check !!!")
+
+            Dim status As String = ""
+            If Not parameterNG AndAlso Not calibrationNG AndAlso Not appdataNG Then
+                status = "OK"
+            ElseIf parameterNG Then
+                status = "Parameter Missmatch"
+            ElseIf calibrationNG Then
+                status = "Calibration Missmatch"
+            ElseIf appdataNG Then
+                status = "Appdata Missmatch"
+            End If
+            File.WriteAllText(MasterStatusPath, status)
+            CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+        End Sub
     End Class
 End Namespace

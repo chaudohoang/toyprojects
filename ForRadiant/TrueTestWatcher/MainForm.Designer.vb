@@ -26,10 +26,9 @@ Namespace TrueTestWatcher
 		''' the contents of this method with the code editor.
 		''' </summary>
 		Private Sub InitializeComponent()
-            Me.components = New System.ComponentModel.Container()
             Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(MainForm))
-            Me.notifyIcon1 = New System.Windows.Forms.NotifyIcon(Me.components)
-            Me.contextMenuStrip1 = New System.Windows.Forms.ContextMenuStrip(Me.components)
+            Me.notifyIcon1 = New System.Windows.Forms.NotifyIcon()
+            Me.contextMenuStrip1 = New System.Windows.Forms.ContextMenuStrip()
             Me.exit2ToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.menuStrip1 = New System.Windows.Forms.MenuStrip()
             Me.commandToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -50,6 +49,8 @@ Namespace TrueTestWatcher
             Me.chkCompareAppdataFiles = New System.Windows.Forms.CheckBox()
             Me.chkCompareSequenceCalibrations = New System.Windows.Forms.CheckBox()
             Me.chkCompareSequenceParameters = New System.Windows.Forms.CheckBox()
+            Me.ManualCheckToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+            Me.StartMinimizedToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.contextMenuStrip1.SuspendLayout()
             Me.menuStrip1.SuspendLayout()
             Me.TabControl1.SuspendLayout()
@@ -87,7 +88,7 @@ Namespace TrueTestWatcher
             '
             'commandToolStripMenuItem
             '
-            Me.commandToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.exitToolStripMenuItem})
+            Me.commandToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ManualCheckToolStripMenuItem, Me.exitToolStripMenuItem})
             Me.commandToolStripMenuItem.Name = "commandToolStripMenuItem"
             Me.commandToolStripMenuItem.Size = New System.Drawing.Size(76, 20)
             Me.commandToolStripMenuItem.Text = "Command"
@@ -95,12 +96,12 @@ Namespace TrueTestWatcher
             'exitToolStripMenuItem
             '
             Me.exitToolStripMenuItem.Name = "exitToolStripMenuItem"
-            Me.exitToolStripMenuItem.Size = New System.Drawing.Size(93, 22)
+            Me.exitToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
             Me.exitToolStripMenuItem.Text = "Exit"
             '
             'settingsToolStripMenuItem
             '
-            Me.settingsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.minimizedToTrayToolStripMenuItem})
+            Me.settingsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.minimizedToTrayToolStripMenuItem, Me.StartMinimizedToolStripMenuItem})
             Me.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem"
             Me.settingsToolStripMenuItem.Size = New System.Drawing.Size(61, 20)
             Me.settingsToolStripMenuItem.Text = "Settings"
@@ -258,6 +259,20 @@ Namespace TrueTestWatcher
             Me.chkCompareSequenceParameters.Text = "Compare Sequence Parameters"
             Me.chkCompareSequenceParameters.UseVisualStyleBackColor = True
             '
+            'ManualCheckToolStripMenuItem
+            '
+            Me.ManualCheckToolStripMenuItem.Name = "ManualCheckToolStripMenuItem"
+            Me.ManualCheckToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+            Me.ManualCheckToolStripMenuItem.Text = "Manual Check"
+            '
+            'StartMinimizedToolStripMenuItem
+            '
+            Me.StartMinimizedToolStripMenuItem.Checked = True
+            Me.StartMinimizedToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked
+            Me.StartMinimizedToolStripMenuItem.Name = "StartMinimizedToolStripMenuItem"
+            Me.StartMinimizedToolStripMenuItem.Size = New System.Drawing.Size(226, 22)
+            Me.StartMinimizedToolStripMenuItem.Text = "Start Minimized"
+            '
             'MainForm
             '
             Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -308,5 +323,7 @@ Namespace TrueTestWatcher
         Friend WithEvents chkCompareSequenceParameters As Windows.Forms.CheckBox
         Friend WithEvents cbxIgnoreList As Windows.Forms.ComboBox
         Friend WithEvents Label4 As Windows.Forms.Label
+        Friend WithEvents ManualCheckToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+        Friend WithEvents StartMinimizedToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     End Class
 End Namespace
