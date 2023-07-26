@@ -114,7 +114,9 @@ Namespace TrueTestWatcher
                                 CommLogUpdateText(vbCrLf)
                                 newProcs.Add([object]("CommandLine").ToString() & " ", process)
                             Next
-                            needtoCheck = True
+                            If newProcs.Count <> 0 Then
+                                needtoCheck = True
+                            End If
                         End If
                     End If
                 Next
