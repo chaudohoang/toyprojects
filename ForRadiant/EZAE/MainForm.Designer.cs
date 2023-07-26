@@ -44,6 +44,7 @@ namespace EZAE
             this.cmdOpenAutoClose = new System.Windows.Forms.LinkLabel();
             this.cmdOpenWorklog = new System.Windows.Forms.LinkLabel();
             this.cmdOpenCopywhiz = new System.Windows.Forms.LinkLabel();
+            this.cmdSmartSniffer = new System.Windows.Forms.LinkLabel();
             this.cmdOpenTCPClient = new System.Windows.Forms.LinkLabel();
             this.cmdOpenTCPServer = new System.Windows.Forms.LinkLabel();
             this.cmdOpenLINQPad = new System.Windows.Forms.LinkLabel();
@@ -119,7 +120,7 @@ namespace EZAE
             this.cmdUseButterfly = new System.Windows.Forms.LinkLabel();
             this.lblSequenceFileName = new System.Windows.Forms.Label();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-            this.cmdSmartSniffer = new System.Windows.Forms.LinkLabel();
+            this.cmdTrueTestWatcher = new System.Windows.Forms.LinkLabel();
             this.tabControl1.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabSetupPC.SuspendLayout();
@@ -310,6 +311,17 @@ namespace EZAE
             this.cmdOpenCopywhiz.TabStop = true;
             this.cmdOpenCopywhiz.Text = "Open Copywhiz";
             this.cmdOpenCopywhiz.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdOpenCopywhiz_LinkClicked);
+            // 
+            // cmdSmartSniffer
+            // 
+            this.cmdSmartSniffer.AutoSize = true;
+            this.cmdSmartSniffer.Location = new System.Drawing.Point(382, 61);
+            this.cmdSmartSniffer.Name = "cmdSmartSniffer";
+            this.cmdSmartSniffer.Size = new System.Drawing.Size(67, 13);
+            this.cmdSmartSniffer.TabIndex = 21;
+            this.cmdSmartSniffer.TabStop = true;
+            this.cmdSmartSniffer.Text = "Smart Sniffer";
+            this.cmdSmartSniffer.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdSmartSniffer_LinkClicked);
             // 
             // cmdOpenTCPClient
             // 
@@ -994,6 +1006,7 @@ namespace EZAE
             this.tabSetSequence.Controls.Add(this.cmdEmu2p1SequenceConvert);
             this.tabSetSequence.Controls.Add(this.cmdFolderLock);
             this.tabSetSequence.Controls.Add(this.cmdCopyMaster);
+            this.tabSetSequence.Controls.Add(this.cmdTrueTestWatcher);
             this.tabSetSequence.Controls.Add(this.cmdCheckSequence);
             this.tabSetSequence.Controls.Add(this.cmdCreateFFC);
             this.tabSetSequence.Controls.Add(this.cmdInstallTrueTest);
@@ -1173,16 +1186,16 @@ namespace EZAE
             this.lblSequenceFileName.Size = new System.Drawing.Size(0, 13);
             this.lblSequenceFileName.TabIndex = 27;
             // 
-            // cmdSmartSniffer
+            // cmdTrueTestWatcher
             // 
-            this.cmdSmartSniffer.AutoSize = true;
-            this.cmdSmartSniffer.Location = new System.Drawing.Point(382, 61);
-            this.cmdSmartSniffer.Name = "cmdSmartSniffer";
-            this.cmdSmartSniffer.Size = new System.Drawing.Size(67, 13);
-            this.cmdSmartSniffer.TabIndex = 21;
-            this.cmdSmartSniffer.TabStop = true;
-            this.cmdSmartSniffer.Text = "Smart Sniffer";
-            this.cmdSmartSniffer.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdSmartSniffer_LinkClicked);
+            this.cmdTrueTestWatcher.AutoSize = true;
+            this.cmdTrueTestWatcher.Location = new System.Drawing.Point(328, 49);
+            this.cmdTrueTestWatcher.Name = "cmdTrueTestWatcher";
+            this.cmdTrueTestWatcher.Size = new System.Drawing.Size(91, 13);
+            this.cmdTrueTestWatcher.TabIndex = 64;
+            this.cmdTrueTestWatcher.TabStop = true;
+            this.cmdTrueTestWatcher.Text = "TrueTestWatcher";
+            this.cmdTrueTestWatcher.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cmdTrueTestWatcher_LinkClicked);
             // 
             // MainForm
             // 
@@ -1303,6 +1316,7 @@ namespace EZAE
         private System.Windows.Forms.LinkLabel cmdFolderLock;
         private System.Windows.Forms.LinkLabel cmdCheckUSBLicenseCode;
         private System.Windows.Forms.LinkLabel cmdSmartSniffer;
+        private System.Windows.Forms.LinkLabel cmdTrueTestWatcher;
     }
 }
 

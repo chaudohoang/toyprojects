@@ -24,6 +24,9 @@ Partial Class Apps
     Private Sub InitializeComponent()
         Me.TabPage3 = New System.Windows.Forms.TabPage()
         Me.TabPage2 = New System.Windows.Forms.TabPage()
+        Me.chkSkipFLDLGDPOCB41 = New System.Windows.Forms.CheckBox()
+        Me.chkSkipPFL = New System.Windows.Forms.CheckBox()
+        Me.chkSkipRFDDemuraLGDBase = New System.Windows.Forms.CheckBox()
         Me.chkSkipSaveToDB = New System.Windows.Forms.CheckBox()
         Me.chkSkipFLDLGDNPOCB41 = New System.Windows.Forms.CheckBox()
         Me.chkSkipFL = New System.Windows.Forms.CheckBox()
@@ -49,7 +52,7 @@ Partial Class Apps
         Me.cmdSetSequence = New System.Windows.Forms.LinkLabel()
         Me.cmdButterfly = New System.Windows.Forms.LinkLabel()
         Me.TabControl1 = New System.Windows.Forms.TabControl()
-        Me.chkSkipRFDDemuraLGDBase = New System.Windows.Forms.CheckBox()
+        Me.cmdTrueTestWatcher = New System.Windows.Forms.LinkLabel()
         Me.TabPage2.SuspendLayout()
         Me.TabPage1.SuspendLayout()
         Me.TabControl1.SuspendLayout()
@@ -66,6 +69,8 @@ Partial Class Apps
         '
         'TabPage2
         '
+        Me.TabPage2.Controls.Add(Me.chkSkipFLDLGDPOCB41)
+        Me.TabPage2.Controls.Add(Me.chkSkipPFL)
         Me.TabPage2.Controls.Add(Me.chkSkipRFDDemuraLGDBase)
         Me.TabPage2.Controls.Add(Me.chkSkipSaveToDB)
         Me.TabPage2.Controls.Add(Me.chkSkipFLDLGDNPOCB41)
@@ -83,10 +88,40 @@ Partial Class Apps
         Me.TabPage2.Text = "DevMode"
         Me.TabPage2.UseVisualStyleBackColor = True
         '
+        'chkSkipFLDLGDPOCB41
+        '
+        Me.chkSkipFLDLGDPOCB41.AutoSize = True
+        Me.chkSkipFLDLGDPOCB41.Location = New System.Drawing.Point(6, 190)
+        Me.chkSkipFLDLGDPOCB41.Name = "chkSkipFLDLGDPOCB41"
+        Me.chkSkipFLDLGDPOCB41.Size = New System.Drawing.Size(130, 17)
+        Me.chkSkipFLDLGDPOCB41.TabIndex = 10
+        Me.chkSkipFLDLGDPOCB41.Text = "SkipFLDLGDPOCB41"
+        Me.chkSkipFLDLGDPOCB41.UseVisualStyleBackColor = True
+        '
+        'chkSkipPFL
+        '
+        Me.chkSkipPFL.AutoSize = True
+        Me.chkSkipPFL.Location = New System.Drawing.Point(6, 167)
+        Me.chkSkipPFL.Name = "chkSkipPFL"
+        Me.chkSkipPFL.Size = New System.Drawing.Size(66, 17)
+        Me.chkSkipPFL.TabIndex = 9
+        Me.chkSkipPFL.Text = "SkipPFL"
+        Me.chkSkipPFL.UseVisualStyleBackColor = True
+        '
+        'chkSkipRFDDemuraLGDBase
+        '
+        Me.chkSkipRFDDemuraLGDBase.AutoSize = True
+        Me.chkSkipRFDDemuraLGDBase.Location = New System.Drawing.Point(6, 52)
+        Me.chkSkipRFDDemuraLGDBase.Name = "chkSkipRFDDemuraLGDBase"
+        Me.chkSkipRFDDemuraLGDBase.Size = New System.Drawing.Size(152, 17)
+        Me.chkSkipRFDDemuraLGDBase.TabIndex = 8
+        Me.chkSkipRFDDemuraLGDBase.Text = "SkipRFDDemuraLGDBase"
+        Me.chkSkipRFDDemuraLGDBase.UseVisualStyleBackColor = True
+        '
         'chkSkipSaveToDB
         '
         Me.chkSkipSaveToDB.AutoSize = True
-        Me.chkSkipSaveToDB.Location = New System.Drawing.Point(6, 190)
+        Me.chkSkipSaveToDB.Location = New System.Drawing.Point(6, 236)
         Me.chkSkipSaveToDB.Name = "chkSkipSaveToDB"
         Me.chkSkipSaveToDB.Size = New System.Drawing.Size(100, 17)
         Me.chkSkipSaveToDB.TabIndex = 7
@@ -96,7 +131,7 @@ Partial Class Apps
         'chkSkipFLDLGDNPOCB41
         '
         Me.chkSkipFLDLGDNPOCB41.AutoSize = True
-        Me.chkSkipFLDLGDNPOCB41.Location = New System.Drawing.Point(6, 167)
+        Me.chkSkipFLDLGDNPOCB41.Location = New System.Drawing.Point(6, 213)
         Me.chkSkipFLDLGDNPOCB41.Name = "chkSkipFLDLGDNPOCB41"
         Me.chkSkipFLDLGDNPOCB41.Size = New System.Drawing.Size(138, 17)
         Me.chkSkipFLDLGDNPOCB41.TabIndex = 6
@@ -165,6 +200,7 @@ Partial Class Apps
         '
         'TabPage1
         '
+        Me.TabPage1.Controls.Add(Me.cmdTrueTestWatcher)
         Me.TabPage1.Controls.Add(Me.cmdEmu2p1Simulator)
         Me.TabPage1.Controls.Add(Me.cmdRenameVNTT)
         Me.TabPage1.Controls.Add(Me.cmdFolderLock)
@@ -348,15 +384,15 @@ Partial Class Apps
         Me.TabControl1.Size = New System.Drawing.Size(519, 291)
         Me.TabControl1.TabIndex = 2
         '
-        'chkSkipRFDDemuraLGDBase
+        'cmdTrueTestWatcher
         '
-        Me.chkSkipRFDDemuraLGDBase.AutoSize = True
-        Me.chkSkipRFDDemuraLGDBase.Location = New System.Drawing.Point(6, 52)
-        Me.chkSkipRFDDemuraLGDBase.Name = "chkSkipRFDDemuraLGDBase"
-        Me.chkSkipRFDDemuraLGDBase.Size = New System.Drawing.Size(152, 17)
-        Me.chkSkipRFDDemuraLGDBase.TabIndex = 8
-        Me.chkSkipRFDDemuraLGDBase.Text = "SkipRFDDemuraLGDBase"
-        Me.chkSkipRFDDemuraLGDBase.UseVisualStyleBackColor = True
+        Me.cmdTrueTestWatcher.AutoSize = True
+        Me.cmdTrueTestWatcher.Location = New System.Drawing.Point(307, 63)
+        Me.cmdTrueTestWatcher.Name = "cmdTrueTestWatcher"
+        Me.cmdTrueTestWatcher.Size = New System.Drawing.Size(91, 13)
+        Me.cmdTrueTestWatcher.TabIndex = 8
+        Me.cmdTrueTestWatcher.TabStop = True
+        Me.cmdTrueTestWatcher.Text = "TrueTestWatcher"
         '
         'Apps
         '
@@ -403,4 +439,7 @@ Partial Class Apps
     Friend WithEvents cmdDove2p0Simulator As LinkLabel
     Friend WithEvents cmdFolderLock As LinkLabel
     Friend WithEvents chkSkipRFDDemuraLGDBase As CheckBox
+    Friend WithEvents chkSkipPFL As CheckBox
+    Friend WithEvents chkSkipFLDLGDPOCB41 As CheckBox
+    Friend WithEvents cmdTrueTestWatcher As LinkLabel
 End Class

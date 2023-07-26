@@ -73,6 +73,8 @@ Public Class Apps
             chkSkipLCC.Checked = False
             chkSkipRM.Checked = False
             chkSkipFL.Checked = False
+            chkSkipPFL.Checked = False
+            chkSkipFLDLGDPOCB41.Checked = False
             chkSkipFLDLGDNPOCB41.Checked = False
             chkSkipSaveToDB.Checked = False
             Exit Sub
@@ -100,6 +102,10 @@ Public Class Apps
                         If skipValue.ToLower = "true" Then chkSkipRM.Checked = True
                     Case "SkipFL"
                         If skipValue.ToLower = "true" Then chkSkipFL.Checked = True
+                    Case "SkipPFL"
+                        If skipValue.ToLower = "true" Then chkSkipPFL.Checked = True
+                    Case "SkipFLDLGDPOCB41"
+                        If skipValue.ToLower = "true" Then chkSkipFLDLGDPOCB41.Checked = True
                     Case "SkipFLDLGDNPOCB41"
                         If skipValue.ToLower = "true" Then chkSkipFLDLGDNPOCB41.Checked = True
                     Case "SkipSaveToDB"
@@ -318,6 +324,63 @@ Public Class Apps
 
         File.WriteAllLines(DevModeFile, DevMode)
     End Sub
+    Private Sub chkSkipPFL_CheckedChanged(sender As Object, e As EventArgs) Handles chkSkipPFL.CheckedChanged
+        Dim DevMode As New List(Of String)
+        Dim DevModeFile As String = "C:\Radiant Vision Systems Data\TrueTest\AppData\DevMode.csv"
+
+        Dim skipProperty = "SkipPFL"
+        Dim skipValue = If(chkSkipPFL.Checked = True, "true", "false")
+        Dim line = skipProperty + "," + skipValue
+
+        Dim propertyExisted As Boolean = False
+        If Not IO.File.Exists(DevModeFile) Then
+            File.WriteAllText(DevModeFile, line)
+        Else
+            DevMode = IO.File.ReadAllLines(DevModeFile).ToList
+            For index = 0 To DevMode.Count - 1
+                If DevMode(index).Contains(skipProperty) Then
+                    DevMode(index) = line
+                    propertyExisted = True
+                    Exit For
+                End If
+            Next
+        End If
+
+        If Not propertyExisted Then
+            DevMode.Add(line)
+        End If
+
+        File.WriteAllLines(DevModeFile, DevMode)
+    End Sub
+
+    Private Sub chkSkipFLDLGDPOCB41_CheckedChanged(sender As Object, e As EventArgs) Handles chkSkipFLDLGDPOCB41.CheckedChanged
+        Dim DevMode As New List(Of String)
+        Dim DevModeFile As String = "C:\Radiant Vision Systems Data\TrueTest\AppData\DevMode.csv"
+
+        Dim skipProperty = "SkipFLDLGDPOCB41"
+        Dim skipValue = If(chkSkipFLDLGDPOCB41.Checked = True, "true", "false")
+        Dim line = skipProperty + "," + skipValue
+
+        Dim propertyExisted As Boolean = False
+        If Not IO.File.Exists(DevModeFile) Then
+            File.WriteAllText(DevModeFile, line)
+        Else
+            DevMode = IO.File.ReadAllLines(DevModeFile).ToList
+            For index = 0 To DevMode.Count - 1
+                If DevMode(index).Contains(skipProperty) Then
+                    DevMode(index) = line
+                    propertyExisted = True
+                    Exit For
+                End If
+            Next
+        End If
+
+        If Not propertyExisted Then
+            DevMode.Add(line)
+        End If
+
+        File.WriteAllLines(DevModeFile, DevMode)
+    End Sub
 
     Private Sub chkSkipFLDLGDNPOCB41_CheckedChanged(sender As Object, e As EventArgs) Handles chkSkipFLDLGDNPOCB41.CheckedChanged
         Dim DevMode As New List(Of String)
@@ -378,7 +441,7 @@ Public Class Apps
     End Sub
 
     Private Sub cmdReloadSequence_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdReloadSequence.LinkClicked
-        TrueTest.SequenceSet(TrueTest.Sequence.XMLFilePathName)
+        'TrueTest.SequenceSet(TrueTest.Sequence.XMLFilePathName)
     End Sub
 
     Private Sub cmdDove2p0Simulator_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdDove2p0Simulator.LinkClicked
@@ -405,5 +468,9 @@ Public Class Apps
         Process.Start(startinfo)
     End Sub
 
-
+    Private Sub cmdTrueTestWatcher_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdTrueTestWatcher.LinkClicked
+        startinfo.WorkingDirectory = exePath
+        startinfo.FileName = System.IO.Path.Combine(exePath, "TrueTestWatcher.exe")
+        Process.Start(startinfo)
+    End Sub
 End Class

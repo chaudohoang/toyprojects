@@ -49,6 +49,7 @@ Partial Class MainForm
         Me.txtFile3 = New System.Windows.Forms.TextBox()
         Me.btnBrowse3 = New System.Windows.Forms.Button()
         Me.TabPage1 = New System.Windows.Forms.TabPage()
+        Me.chkCompareCAL = New System.Windows.Forms.CheckBox()
         Me.btnExportAnalysesCompareLog = New System.Windows.Forms.Button()
         Me.btnUseDefaultMaster = New System.Windows.Forms.Button()
         Me.btnUseLastModified1 = New System.Windows.Forms.Button()
@@ -65,7 +66,6 @@ Partial Class MainForm
         Me.btnBrowse1 = New System.Windows.Forms.Button()
         Me.Label4 = New System.Windows.Forms.Label()
         Me.TabControl1 = New System.Windows.Forms.TabControl()
-        Me.chkCompareCAL = New System.Windows.Forms.CheckBox()
         Me.TabPage3.SuspendLayout()
         Me.TabPage2.SuspendLayout()
         Me.TabPage1.SuspendLayout()
@@ -354,6 +354,16 @@ Partial Class MainForm
         Me.TabPage1.Text = "Compare Sequence"
         Me.TabPage1.UseVisualStyleBackColor = True
         '
+        'chkCompareCAL
+        '
+        Me.chkCompareCAL.AutoSize = True
+        Me.chkCompareCAL.Location = New System.Drawing.Point(857, 67)
+        Me.chkCompareCAL.Name = "chkCompareCAL"
+        Me.chkCompareCAL.Size = New System.Drawing.Size(91, 17)
+        Me.chkCompareCAL.TabIndex = 14
+        Me.chkCompareCAL.Text = "Compare CAL"
+        Me.chkCompareCAL.UseVisualStyleBackColor = True
+        '
         'btnExportAnalysesCompareLog
         '
         Me.btnExportAnalysesCompareLog.Location = New System.Drawing.Point(6, 220)
@@ -384,11 +394,12 @@ Partial Class MainForm
         'cbxIgnoreList
         '
         Me.cbxIgnoreList.FormattingEnabled = True
-        Me.cbxIgnoreList.Items.AddRange(New Object() {"", "Notes,DllOutputPath,DllDefFolder"})
+        Me.cbxIgnoreList.Items.AddRange(New Object() {"", "Notes,DllOutputPath,DLLDefFolder"})
         Me.cbxIgnoreList.Location = New System.Drawing.Point(77, 65)
         Me.cbxIgnoreList.Name = "cbxIgnoreList"
         Me.cbxIgnoreList.Size = New System.Drawing.Size(598, 21)
         Me.cbxIgnoreList.TabIndex = 10
+        Me.cbxIgnoreList.Text = "Notes,DllOutputPath,DLLDefFolder"
         '
         'Label2
         '
@@ -500,16 +511,6 @@ Partial Class MainForm
         Me.TabControl1.SelectedIndex = 0
         Me.TabControl1.Size = New System.Drawing.Size(959, 511)
         Me.TabControl1.TabIndex = 10
-        '
-        'chkCompareCAL
-        '
-        Me.chkCompareCAL.AutoSize = True
-        Me.chkCompareCAL.Location = New System.Drawing.Point(857, 67)
-        Me.chkCompareCAL.Name = "chkCompareCAL"
-        Me.chkCompareCAL.Size = New System.Drawing.Size(91, 17)
-        Me.chkCompareCAL.TabIndex = 14
-        Me.chkCompareCAL.Text = "Compare CAL"
-        Me.chkCompareCAL.UseVisualStyleBackColor = True
         '
         'MainForm
         '

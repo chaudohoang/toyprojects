@@ -1,7 +1,5 @@
 ﻿Imports System.Data.SqlServerCe
 Imports System.IO
-Imports System.Runtime.Remoting.Metadata.W3cXsd2001
-Imports System.Timers
 Imports System.Xml
 
 
@@ -133,8 +131,16 @@ Public Class MainForm
 
 		Dim xmlDoc1 = New XmlDocument()
 		Dim xmlDoc2 = New XmlDocument()
-		xmlDoc1.Load(file1FullPath)
-		xmlDoc2.Load(file2FullPath)
+		Dim fileloaded As Boolean
+		While Not fileloaded
+			Try
+				xmlDoc1.Load(file1FullPath)
+				xmlDoc2.Load(file2FullPath)
+				fileloaded = True
+			Catch ex As Exception
+				fileloaded = False
+			End Try
+		End While
 
 		nodes1 = xmlDoc1.DocumentElement.SelectNodes("/Sequence/Items/SequenceItem")
 		nodes2 = xmlDoc2.DocumentElement.SelectNodes("/Sequence/Items/SequenceItem")
@@ -217,14 +223,6 @@ Public Class MainForm
 			timeLogString.Add("Sequence 2 remove ignored parameters in Analysis " + seq2AnalysisName + " and removed " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
 			tempString = ""
 			sw2.Restart()
-			'Equalize number of elements between 2 node
-			'For Each childNode1 As XmlNode In node1.ChildNodes
-			'	If node2.SelectSingleNode(childNode1.Name) Is Nothing Then
-			'		Dim importNode As XmlNode = xmlDoc2.ImportNode(childNode1, True)
-			'		node2.AppendChild(importNode)
-			'		tempString = tempString + childNode1.Name + ","
-			'	End If
-			'Next
 			For childindex = node1.ChildNodes.Count - 1 To 0 Step -1
 				If node2.SelectSingleNode(node1.ChildNodes(childindex).Name) Is Nothing Then
 					tempString = tempString + node1.ChildNodes(childindex).Name + ","
@@ -234,18 +232,10 @@ Public Class MainForm
 			sw2.Stop()
 			Dim seq2NeedSorting As Boolean
 			seq2NeedSorting = If(tempString.Length = 0, False, True)
-			'timeLogString.Add("Sequence 2 add missing element in Analysis " + seq2AnalysisName + " and added " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
 			timeLogString.Add("Sequence 1 removing extra element in Analysis " + seq1AnalysisName + " and removed " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
 			tempString = ""
 
 			sw2.Restart()
-			'For Each childNode2 As XmlNode In node2.ChildNodes
-			'	If node1.SelectSingleNode(childNode2.Name) Is Nothing Then
-			'		Dim importNode As XmlNode = xmlDoc1.ImportNode(childNode2, True)
-			'		node1.AppendChild(importNode)
-			'		tempString = tempString + childNode2.Name + ","
-			'	End If
-			'Next
 			For childIndex = node2.ChildNodes.Count - 1 To 0 Step -1
 				If node1.SelectSingleNode(node2.ChildNodes(childIndex).Name) Is Nothing Then
 					tempString = tempString + node2.ChildNodes(childIndex).Name + ","
@@ -255,24 +245,8 @@ Public Class MainForm
 			sw2.Stop()
 			Dim seq1NeedSorting As Boolean
 			seq1NeedSorting = If(tempString.Length = 0, False, True)
-			'timeLogString.Add("Sequence 1 add missing element in Analysis " + seq1AnalysisName + " and added " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
 			timeLogString.Add("Sequence 2 removing extra element in Analysis " + seq2AnalysisName + " and removed " + If(tempString.Length = 0, "nothing", tempString.Trim().Remove(tempString.Length - 1)) + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
 			tempString = ""
-
-			'If seq1NeedSorting Or seq2NeedSorting Then
-			'	seq1NeedSorting = False
-			'	seq2NeedSorting = False
-			'	sw2.Restart()
-			'	SortElements(node1)
-			'	sw2.Stop()
-			'	timeLogString.Add("Sorting element in sequence 1 for analysis " + seq1AnalysisName + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
-			'	sw2.Restart()
-			'	SortElements(node2)
-			'	sw2.Stop()
-			'	timeLogString.Add("Sorting element in sequence 2 for analysis " + seq2AnalysisName + " : " + sw2.ElapsedMilliseconds.ToString + "ms")
-			'Else
-			'	timeLogString.Add("No need sorting element in 2 sequences for analysis " + seq1AnalysisName)
-			'End If
 
 			sw2.Restart()
 
@@ -317,8 +291,8 @@ Public Class MainForm
 		Next
 
 		CommLogUpdateText("Compare Parameters Time : " + (sw.ElapsedMilliseconds / 1000).ToString + "s")
-		File.WriteAllLines(Path.Combine(Path.GetTempPath(), "Parameter Compare Time.txt"), timeLogString)
-		Process.Start("notepad.exe", Path.Combine(Path.GetTempPath(), "Parameter Compare Time.txt"))
+		'File.WriteAllLines(Path.Combine(Path.GetTempPath(), "Parameter Compare Time.txt"), timeLogString)
+		'Process.Start("notepad.exe", Path.Combine(Path.GetTempPath(), "Parameter Compare Time.txt"))
 
 	End Sub
 
@@ -341,7 +315,11 @@ Public Class MainForm
 	Private Delegate Sub UpdateCommLogDelegate(text As String)
 	Private Sub CommLogUpdateText(text As String)
 		If InvokeRequired Then BeginInvoke(New UpdateCommLogDelegate(AddressOf CommLogUpdateText), New Object() {text}) : Exit Sub
-		ListBox1.Items.Add(text)
+		If text <> vbCrLf Then
+			ListBox1.Items.Add(Now.ToString("yyyyMMdd HH:mm:ss") + " : " + text)
+		Else
+			ListBox1.Items.Add(text)
+		End If
 		ListBox1.TopIndex = ListBox1.Items.Count - 1
 	End Sub
 
@@ -351,7 +329,11 @@ Public Class MainForm
 
 	Private Sub CommLogUpdateText2(text As String)
 		If InvokeRequired Then BeginInvoke(New UpdateCommLogDelegate(AddressOf CommLogUpdateText2), New Object() {text}) : Exit Sub
-		ListBox2.Items.Add(text)
+		If text <> vbCrLf Then
+			ListBox2.Items.Add(Now.ToString("yyyyMMdd HH:mm:ss") + " : " + text)
+		Else
+			ListBox2.Items.Add(text)
+		End If
 		ListBox2.TopIndex = ListBox2.Items.Count - 1
 	End Sub
 
@@ -360,7 +342,11 @@ Public Class MainForm
 	End Sub
 	Private Sub CommLogUpdateText3(text As String)
 		If InvokeRequired Then BeginInvoke(New UpdateCommLogDelegate(AddressOf CommLogUpdateText3), New Object() {text}) : Exit Sub
-		ListBox3.Items.Add(text)
+		If text <> vbCrLf Then
+			ListBox3.Items.Add(Now.ToString("yyyyMMdd HH:mm:ss") + " : " + text)
+		Else
+			ListBox3.Items.Add(text)
+		End If
 		ListBox3.TopIndex = ListBox3.Items.Count - 1
 	End Sub
 
@@ -997,8 +983,9 @@ Public Class MainForm
 						sw.WriteLine(ListBox1.Items(index))
 					Next
 				End Using
+				Process.Start("notepad", savefile.FileName)
 			End If
-			Process.Start("notepad", savefile.FileName)
+
 		End If
 	End Sub
 
@@ -1024,8 +1011,9 @@ Public Class MainForm
 						sw.WriteLine(ListBox2.Items(index))
 					Next
 				End Using
+				Process.Start("notepad", savefile.FileName)
 			End If
-			Process.Start("notepad", savefile.FileName)
+
 		End If
 	End Sub
 
@@ -1048,8 +1036,9 @@ Public Class MainForm
 						sw.WriteLine(ListBox3.Items(index))
 					Next
 				End Using
+				Process.Start("notepad", savefile.FileName)
 			End If
-			Process.Start("notepad", savefile.FileName)
+
 		End If
 	End Sub
 
@@ -1084,6 +1073,7 @@ Public Class MainForm
 		If Not File.Exists(file1FullPath) Then
 			equal = False
 			CommLogUpdateText("Calibrations Check : Sequence 1 is not existed !!!")
+			Exit Sub
 		ElseIf Not File.Exists(file2FullPath) Then
 			equal = False
 			CommLogUpdateText("Calibrations Check : Sequence 2 is not existed !!!")
@@ -1280,8 +1270,8 @@ Public Class MainForm
 		Next
 
 		CommLogUpdateText("Compare Calibrations Time : " + (sw.ElapsedMilliseconds / 1000).ToString + "s")
-		File.WriteAllLines(Path.Combine(Path.GetTempPath(), "Calibration Compare Time.txt"), timeLogString)
-		Process.Start("notepad.exe", Path.Combine(Path.GetTempPath(), "Calibration Compare Time.txt"))
+		'File.WriteAllLines(Path.Combine(Path.GetTempPath(), "Calibration Compare Time.txt"), timeLogString)
+		'Process.Start("notepad.exe", Path.Combine(Path.GetTempPath(), "Calibration Compare Time.txt"))
 
 	End Sub
 
@@ -1467,8 +1457,7 @@ Public Class MainForm
 
 		Return conn
 	End Function
-
-	Private Sub btnCompareAppdata_Click(sender As Object, e As EventArgs) Handles btnCompareAppdata.Click
+	Private Sub CompareAppDataFiles()
 		Dim sw As New Stopwatch
 		sw.Start()
 		Dim AppDataFolder As String = "C:\Radiant Vision Systems Data\TrueTest\AppData"
@@ -1538,5 +1527,9 @@ Public Class MainForm
 		End If
 		sw.Stop()
 		CommLogUpdateText3("Elapsed time : " + (sw.ElapsedMilliseconds / 1000).ToString + " seconds.")
+	End Sub
+
+	Private Sub btnCompareAppdata_Click(sender As Object, e As EventArgs) Handles btnCompareAppdata.Click
+		CompareAppDataFiles()
 	End Sub
 End Class
