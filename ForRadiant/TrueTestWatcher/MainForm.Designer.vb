@@ -54,6 +54,7 @@ Namespace TrueTestWatcher
             Me.chkCompareAppdataFiles = New System.Windows.Forms.CheckBox()
             Me.chkCompareSequenceCalibrations = New System.Windows.Forms.CheckBox()
             Me.chkCompareSequenceParameters = New System.Windows.Forms.CheckBox()
+            Me.DeleteMasterStatusToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.contextMenuStrip1.SuspendLayout()
             Me.menuStrip1.SuspendLayout()
             Me.TabControl1.SuspendLayout()
@@ -91,7 +92,7 @@ Namespace TrueTestWatcher
             '
             'commandToolStripMenuItem
             '
-            Me.commandToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ManualCheckToolStripMenuItem, Me.exitToolStripMenuItem})
+            Me.commandToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ManualCheckToolStripMenuItem, Me.DeleteMasterStatusToolStripMenuItem, Me.exitToolStripMenuItem})
             Me.commandToolStripMenuItem.Name = "commandToolStripMenuItem"
             Me.commandToolStripMenuItem.Size = New System.Drawing.Size(76, 20)
             Me.commandToolStripMenuItem.Text = "Command"
@@ -99,13 +100,13 @@ Namespace TrueTestWatcher
             'ManualCheckToolStripMenuItem
             '
             Me.ManualCheckToolStripMenuItem.Name = "ManualCheckToolStripMenuItem"
-            Me.ManualCheckToolStripMenuItem.Size = New System.Drawing.Size(150, 22)
+            Me.ManualCheckToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
             Me.ManualCheckToolStripMenuItem.Text = "Manual Check"
             '
             'exitToolStripMenuItem
             '
             Me.exitToolStripMenuItem.Name = "exitToolStripMenuItem"
-            Me.exitToolStripMenuItem.Size = New System.Drawing.Size(150, 22)
+            Me.exitToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
             Me.exitToolStripMenuItem.Text = "Exit"
             '
             'settingsToolStripMenuItem
@@ -297,6 +298,12 @@ Namespace TrueTestWatcher
             Me.chkCompareSequenceParameters.Text = "Compare Sequence Parameters"
             Me.chkCompareSequenceParameters.UseVisualStyleBackColor = True
             '
+            'DeleteMasterStatusToolStripMenuItem
+            '
+            Me.DeleteMasterStatusToolStripMenuItem.Name = "DeleteMasterStatusToolStripMenuItem"
+            Me.DeleteMasterStatusToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+            Me.DeleteMasterStatusToolStripMenuItem.Text = "Delete MasterStatus"
+            '
             'MainForm
             '
             Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -351,5 +358,6 @@ Namespace TrueTestWatcher
         Friend WithEvents StartMinimizedToolStripMenuItem As Windows.Forms.ToolStripMenuItem
         Friend WithEvents Label1 As Windows.Forms.Label
         Friend WithEvents cbxAppdataIgnoreList As Windows.Forms.ComboBox
+        Friend WithEvents DeleteMasterStatusToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     End Class
 End Namespace

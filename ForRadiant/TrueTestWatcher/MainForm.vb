@@ -14,6 +14,7 @@ Imports System.Data
 Imports System.Linq
 Imports System.ComponentModel
 Imports System.Drawing
+Imports System.Windows.Forms.VisualStyles.VisualStyleElement
 
 Namespace TrueTestWatcher
     Partial Public Class MainForm
@@ -1604,5 +1605,11 @@ Namespace TrueTestWatcher
             CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
         End Sub
 
+        Private Sub DeleteMasterStatusToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles DeleteMasterStatusToolStripMenuItem.Click
+            If File.Exists(MasterStatusPath) Then
+                File.Delete(MasterStatusPath)
+                CommLogUpdateText("Deleted Master Status !!!")
+            End If
+        End Sub
     End Class
 End Namespace
