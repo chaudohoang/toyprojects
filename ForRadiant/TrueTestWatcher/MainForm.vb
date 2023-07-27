@@ -39,6 +39,7 @@ Namespace TrueTestWatcher
         Dim watchPath3 As String = "C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration"
         Dim watchPath4 As String = "C:\Radiant Vision Systems Data\TrueTest\AppData"
         Dim watchPath5 As String = "C:\Radiant Vision Systems Data\TrueTest\Master AppData"
+        Dim watchPath6 As String = "C:\Radiant Vision Systems Data\TrueTest\UserData"
         Public watchfolder As FileSystemWatcher
 
         <DllImport("User32.dll")>
@@ -103,6 +104,7 @@ Namespace TrueTestWatcher
             watchFolder3()
             watchFolder4()
             watchFolder5()
+            watchFolder6()
             If StartMinimizedToolStripMenuItem.Checked = True Then
                 Me.WindowState = FormWindowState.Minimized
             End If
@@ -163,6 +165,9 @@ Namespace TrueTestWatcher
             watchfolder = New System.IO.FileSystemWatcher()
 
             'this is the path we want to monitor
+            If Not Directory.Exists(watchPath1) Then
+                Directory.CreateDirectory(watchPath1)
+            End If
             watchfolder.Path = watchPath1
 
             'Add a list of Filter we want to specify
@@ -193,6 +198,9 @@ Namespace TrueTestWatcher
             watchfolder = New System.IO.FileSystemWatcher()
 
             'this is the path we want to monitor
+            If Not Directory.Exists(watchPath2) Then
+                Directory.CreateDirectory(watchPath2)
+            End If
             watchfolder.Path = watchPath2
 
             'Add a list of Filter we want to specify
@@ -223,6 +231,9 @@ Namespace TrueTestWatcher
             watchfolder = New System.IO.FileSystemWatcher()
 
             'this is the path we want to monitor
+            If Not Directory.Exists(watchPath3) Then
+                Directory.CreateDirectory(watchPath3)
+            End If
             watchfolder.Path = watchPath3
 
             'Add a list of Filter we want to specify
@@ -253,6 +264,9 @@ Namespace TrueTestWatcher
             watchfolder = New System.IO.FileSystemWatcher()
 
             'this is the path we want to monitor
+            If Not Directory.Exists(watchPath4) Then
+                Directory.CreateDirectory(watchPath4)
+            End If
             watchfolder.Path = watchPath4
 
             'Add a list of Filter we want to specify
@@ -283,6 +297,9 @@ Namespace TrueTestWatcher
             watchfolder = New System.IO.FileSystemWatcher()
 
             'this is the path we want to monitor
+            If Not Directory.Exists(watchPath5) Then
+                Directory.CreateDirectory(watchPath5)
+            End If
             watchfolder.Path = watchPath5
 
             'Add a list of Filter we want to specify
@@ -302,6 +319,34 @@ Namespace TrueTestWatcher
 
             ' add the rename handler as the signature is different
             AddHandler watchfolder.Renamed, AddressOf logrename5
+
+            'Set this property to true to start watching
+            watchfolder.EnableRaisingEvents = True
+
+            'End of code for btn_start_click
+        End Sub
+        Private Sub watchFolder6()
+            watchfolder = New System.IO.FileSystemWatcher()
+
+            'this is the path we want to monitor
+            If Not Directory.Exists(watchPath6) Then
+                Directory.CreateDirectory(watchPath6)
+            End If
+            watchfolder.Path = watchPath6
+
+            'Add a list of Filter we want to specify
+            'make sure you use OR for each Filter as we need to
+            'all of those 
+
+            watchfolder.NotifyFilter = IO.NotifyFilters.DirectoryName
+            watchfolder.NotifyFilter = watchfolder.NotifyFilter Or
+                           IO.NotifyFilters.FileName
+            watchfolder.NotifyFilter = watchfolder.NotifyFilter Or
+                           IO.NotifyFilters.Attributes
+
+            ' add the handler to each event
+            AddHandler watchfolder.Changed, AddressOf logchange6
+            AddHandler watchfolder.Created, AddressOf logchange6
 
             'Set this property to true to start watching
             watchfolder.EnableRaisingEvents = True
@@ -1132,10 +1177,13 @@ Namespace TrueTestWatcher
         Private Sub getSequenceFilePath()
             Dim node1 As XmlNode
             Dim xmlDoc1 = New XmlDocument()
-
-            xmlDoc1.Load("C:\Radiant Vision Systems Data\TrueTest\AppData\1.8\app.settings")
-            node1 = xmlDoc1.DocumentElement.SelectSingleNode("/Settings/LastSequenceFile")
-            runningSequencePath = node1.InnerText
+            If File.Exists("C:\Radiant Vision Systems Data\TrueTest\UserData\CurrentSequence.txt") Then
+                runningSequencePath = File.ReadAllText("C:\Radiant Vision Systems Data\TrueTest\UserData\CurrentSequence.txt")
+            Else
+                xmlDoc1.Load("C:\Radiant Vision Systems Data\TrueTest\AppData\1.8\app.settings")
+                node1 = xmlDoc1.DocumentElement.SelectSingleNode("/Settings/LastSequenceFile")
+                runningSequencePath = node1.InnerText
+            End If
             masterSequencePath = Path.Combine("C:\Radiant Vision Systems Data\TrueTest\Sequence\Master", Path.GetFileName(runningSequencePath))
             masterCalibrationPath = Path.Combine("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration", Path.GetFileName(runningSequencePath))
             CommLogUpdateText("Running Sequence file path : " + runningSequencePath)
@@ -1363,6 +1411,12 @@ Namespace TrueTestWatcher
 
         Private Sub logchange4(ByVal source As Object, ByVal e As _
                         System.IO.FileSystemEventArgs)
+            Dim appdataIgnoreList As New List(Of String)
+            Dim filename As String = Path.GetFileName(e.FullPath).ToLower
+            appdataIgnoreList = cbxAppdataIgnoreList.Text.Split(",").ToList
+            If appdataIgnoreList.Contains(filename) Then
+                Exit Sub
+            End If
             Dim Extensions() As String = {".xml", ".csv"}
             If Extensions.Contains(Path.GetExtension(e.FullPath)) Or Path.GetFileNameWithoutExtension(e.FullPath).Contains("RegisterPixels") Then
                 If e.ChangeType = IO.WatcherChangeTypes.Changed Then
@@ -1477,6 +1531,41 @@ Namespace TrueTestWatcher
             End If
         End Sub
 
+        Private Sub logchange6(ByVal source As Object, ByVal e As _
+                        System.IO.FileSystemEventArgs)
+            If Path.GetFileNameWithoutExtension(e.FullPath).Contains("CurrentSequence") Then
+                Dim sequenceName As String = File.ReadAllText(e.FullPath())
+                If e.ChangeType = IO.WatcherChangeTypes.Changed Then
+                    CommLogUpdateText("----------TrueTest Sequence Changed To: " & sequenceName & "----------")
+                End If
+                If e.ChangeType = IO.WatcherChangeTypes.Created Then
+                    CommLogUpdateText("----------TrueTest Sequence Changed To: " & sequenceName & "----------")
+
+                End If
+
+                CommLogUpdateText("Performing Master Sequence and Calibration Check !!!")
+
+                getSequenceFilePath()
+                CheckForMatchingSequenceParameters(runningSequencePath, masterSequencePath)
+
+                CompareCalSettings(runningSequencePath, masterCalibrationPath)
+
+                CommLogUpdateText("Finished Master Sequence and Calibration Check !!!")
+
+                Dim status As String = ""
+                If Not parameterNG AndAlso Not calibrationNG Then
+                    status = "OK"
+                ElseIf parameterNG Then
+                    status = "Parameter Missmatch"
+                ElseIf calibrationNG Then
+                    status = "Calibration Missmatch"
+                End If
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
+            End If
+        End Sub
+
         Private Sub ManualCheckToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ManualCheckToolStripMenuItem.Click
             CommLogUpdateText("Performing Master Functions Check !!!")
 
@@ -1502,5 +1591,6 @@ Namespace TrueTestWatcher
             File.WriteAllText(MasterStatusPath, status)
             CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
         End Sub
+
     End Class
 End Namespace

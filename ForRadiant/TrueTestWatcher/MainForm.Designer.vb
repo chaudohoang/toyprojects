@@ -26,15 +26,18 @@ Namespace TrueTestWatcher
 		''' the contents of this method with the code editor.
 		''' </summary>
 		Private Sub InitializeComponent()
+            Me.components = New System.ComponentModel.Container()
             Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(MainForm))
-            Me.notifyIcon1 = New System.Windows.Forms.NotifyIcon()
-            Me.contextMenuStrip1 = New System.Windows.Forms.ContextMenuStrip()
+            Me.notifyIcon1 = New System.Windows.Forms.NotifyIcon(Me.components)
+            Me.contextMenuStrip1 = New System.Windows.Forms.ContextMenuStrip(Me.components)
             Me.exit2ToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.menuStrip1 = New System.Windows.Forms.MenuStrip()
             Me.commandToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+            Me.ManualCheckToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.exitToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.settingsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.minimizedToTrayToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+            Me.StartMinimizedToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.helpToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.aboutToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.btnExportAnalysesCompareLog = New System.Windows.Forms.Button()
@@ -44,13 +47,13 @@ Namespace TrueTestWatcher
             Me.TabControl1 = New System.Windows.Forms.TabControl()
             Me.TabPage1 = New System.Windows.Forms.TabPage()
             Me.TabPage2 = New System.Windows.Forms.TabPage()
+            Me.Label1 = New System.Windows.Forms.Label()
             Me.cbxIgnoreList = New System.Windows.Forms.ComboBox()
             Me.Label4 = New System.Windows.Forms.Label()
             Me.chkCompareAppdataFiles = New System.Windows.Forms.CheckBox()
             Me.chkCompareSequenceCalibrations = New System.Windows.Forms.CheckBox()
             Me.chkCompareSequenceParameters = New System.Windows.Forms.CheckBox()
-            Me.ManualCheckToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-            Me.StartMinimizedToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+            Me.cbxAppdataIgnoreList = New System.Windows.Forms.ComboBox()
             Me.contextMenuStrip1.SuspendLayout()
             Me.menuStrip1.SuspendLayout()
             Me.TabControl1.SuspendLayout()
@@ -93,10 +96,16 @@ Namespace TrueTestWatcher
             Me.commandToolStripMenuItem.Size = New System.Drawing.Size(76, 20)
             Me.commandToolStripMenuItem.Text = "Command"
             '
+            'ManualCheckToolStripMenuItem
+            '
+            Me.ManualCheckToolStripMenuItem.Name = "ManualCheckToolStripMenuItem"
+            Me.ManualCheckToolStripMenuItem.Size = New System.Drawing.Size(150, 22)
+            Me.ManualCheckToolStripMenuItem.Text = "Manual Check"
+            '
             'exitToolStripMenuItem
             '
             Me.exitToolStripMenuItem.Name = "exitToolStripMenuItem"
-            Me.exitToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+            Me.exitToolStripMenuItem.Size = New System.Drawing.Size(150, 22)
             Me.exitToolStripMenuItem.Text = "Exit"
             '
             'settingsToolStripMenuItem
@@ -114,6 +123,14 @@ Namespace TrueTestWatcher
             Me.minimizedToTrayToolStripMenuItem.Name = "minimizedToTrayToolStripMenuItem"
             Me.minimizedToTrayToolStripMenuItem.Size = New System.Drawing.Size(226, 22)
             Me.minimizedToTrayToolStripMenuItem.Text = "Minimized Hide Taskbar Icon"
+            '
+            'StartMinimizedToolStripMenuItem
+            '
+            Me.StartMinimizedToolStripMenuItem.Checked = True
+            Me.StartMinimizedToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked
+            Me.StartMinimizedToolStripMenuItem.Name = "StartMinimizedToolStripMenuItem"
+            Me.StartMinimizedToolStripMenuItem.Size = New System.Drawing.Size(226, 22)
+            Me.StartMinimizedToolStripMenuItem.Text = "Start Minimized"
             '
             'helpToolStripMenuItem
             '
@@ -191,6 +208,8 @@ Namespace TrueTestWatcher
             '
             'TabPage2
             '
+            Me.TabPage2.Controls.Add(Me.cbxAppdataIgnoreList)
+            Me.TabPage2.Controls.Add(Me.Label1)
             Me.TabPage2.Controls.Add(Me.cbxIgnoreList)
             Me.TabPage2.Controls.Add(Me.Label4)
             Me.TabPage2.Controls.Add(Me.chkCompareAppdataFiles)
@@ -204,13 +223,22 @@ Namespace TrueTestWatcher
             Me.TabPage2.Text = "Compare Settings"
             Me.TabPage2.UseVisualStyleBackColor = True
             '
+            'Label1
+            '
+            Me.Label1.AutoSize = True
+            Me.Label1.Location = New System.Drawing.Point(6, 102)
+            Me.Label1.Name = "Label1"
+            Me.Label1.Size = New System.Drawing.Size(99, 13)
+            Me.Label1.TabIndex = 30
+            Me.Label1.Text = "Appdata Ignore List"
+            '
             'cbxIgnoreList
             '
             Me.cbxIgnoreList.FormattingEnabled = True
             Me.cbxIgnoreList.Items.AddRange(New Object() {"", "Notes,DllOutputPath,DLLDefFolder"})
             Me.cbxIgnoreList.Location = New System.Drawing.Point(68, 72)
             Me.cbxIgnoreList.Name = "cbxIgnoreList"
-            Me.cbxIgnoreList.Size = New System.Drawing.Size(598, 21)
+            Me.cbxIgnoreList.Size = New System.Drawing.Size(382, 21)
             Me.cbxIgnoreList.TabIndex = 29
             Me.cbxIgnoreList.Text = "Notes,DllOutputPath,DLLDefFolder"
             '
@@ -259,19 +287,15 @@ Namespace TrueTestWatcher
             Me.chkCompareSequenceParameters.Text = "Compare Sequence Parameters"
             Me.chkCompareSequenceParameters.UseVisualStyleBackColor = True
             '
-            'ManualCheckToolStripMenuItem
+            'cbxAppdataIgnoreList
             '
-            Me.ManualCheckToolStripMenuItem.Name = "ManualCheckToolStripMenuItem"
-            Me.ManualCheckToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
-            Me.ManualCheckToolStripMenuItem.Text = "Manual Check"
-            '
-            'StartMinimizedToolStripMenuItem
-            '
-            Me.StartMinimizedToolStripMenuItem.Checked = True
-            Me.StartMinimizedToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked
-            Me.StartMinimizedToolStripMenuItem.Name = "StartMinimizedToolStripMenuItem"
-            Me.StartMinimizedToolStripMenuItem.Size = New System.Drawing.Size(226, 22)
-            Me.StartMinimizedToolStripMenuItem.Text = "Start Minimized"
+            Me.cbxAppdataIgnoreList.FormattingEnabled = True
+            Me.cbxAppdataIgnoreList.Items.AddRange(New Object() {"", "edt.csv,devmode.csv,panel_log.csv"})
+            Me.cbxAppdataIgnoreList.Location = New System.Drawing.Point(111, 99)
+            Me.cbxAppdataIgnoreList.Name = "cbxAppdataIgnoreList"
+            Me.cbxAppdataIgnoreList.Size = New System.Drawing.Size(382, 21)
+            Me.cbxAppdataIgnoreList.TabIndex = 31
+            Me.cbxAppdataIgnoreList.Text = "edt.csv,devmode.csv,panel_log.csv"
             '
             'MainForm
             '
@@ -325,5 +349,7 @@ Namespace TrueTestWatcher
         Friend WithEvents Label4 As Windows.Forms.Label
         Friend WithEvents ManualCheckToolStripMenuItem As Windows.Forms.ToolStripMenuItem
         Friend WithEvents StartMinimizedToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+        Friend WithEvents Label1 As Windows.Forms.Label
+        Friend WithEvents cbxAppdataIgnoreList As Windows.Forms.ComboBox
     End Class
 End Namespace
