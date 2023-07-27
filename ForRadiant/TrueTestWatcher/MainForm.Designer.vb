@@ -47,13 +47,13 @@ Namespace TrueTestWatcher
             Me.TabControl1 = New System.Windows.Forms.TabControl()
             Me.TabPage1 = New System.Windows.Forms.TabPage()
             Me.TabPage2 = New System.Windows.Forms.TabPage()
+            Me.cbxAppdataIgnoreList = New System.Windows.Forms.ComboBox()
             Me.Label1 = New System.Windows.Forms.Label()
             Me.cbxIgnoreList = New System.Windows.Forms.ComboBox()
             Me.Label4 = New System.Windows.Forms.Label()
             Me.chkCompareAppdataFiles = New System.Windows.Forms.CheckBox()
             Me.chkCompareSequenceCalibrations = New System.Windows.Forms.CheckBox()
             Me.chkCompareSequenceParameters = New System.Windows.Forms.CheckBox()
-            Me.cbxAppdataIgnoreList = New System.Windows.Forms.ComboBox()
             Me.contextMenuStrip1.SuspendLayout()
             Me.menuStrip1.SuspendLayout()
             Me.TabControl1.SuspendLayout()
@@ -223,6 +223,16 @@ Namespace TrueTestWatcher
             Me.TabPage2.Text = "Compare Settings"
             Me.TabPage2.UseVisualStyleBackColor = True
             '
+            'cbxAppdataIgnoreList
+            '
+            Me.cbxAppdataIgnoreList.FormattingEnabled = True
+            Me.cbxAppdataIgnoreList.Items.AddRange(New Object() {"", "edt.csv,devmode.csv,pixel_log.csv"})
+            Me.cbxAppdataIgnoreList.Location = New System.Drawing.Point(111, 99)
+            Me.cbxAppdataIgnoreList.Name = "cbxAppdataIgnoreList"
+            Me.cbxAppdataIgnoreList.Size = New System.Drawing.Size(382, 21)
+            Me.cbxAppdataIgnoreList.TabIndex = 31
+            Me.cbxAppdataIgnoreList.Text = "edt.csv,devmode.csv,pixel_log.csv"
+            '
             'Label1
             '
             Me.Label1.AutoSize = True
@@ -286,16 +296,6 @@ Namespace TrueTestWatcher
             Me.chkCompareSequenceParameters.TabIndex = 25
             Me.chkCompareSequenceParameters.Text = "Compare Sequence Parameters"
             Me.chkCompareSequenceParameters.UseVisualStyleBackColor = True
-            '
-            'cbxAppdataIgnoreList
-            '
-            Me.cbxAppdataIgnoreList.FormattingEnabled = True
-            Me.cbxAppdataIgnoreList.Items.AddRange(New Object() {"", "edt.csv,devmode.csv,panel_log.csv"})
-            Me.cbxAppdataIgnoreList.Location = New System.Drawing.Point(111, 99)
-            Me.cbxAppdataIgnoreList.Name = "cbxAppdataIgnoreList"
-            Me.cbxAppdataIgnoreList.Size = New System.Drawing.Size(382, 21)
-            Me.cbxAppdataIgnoreList.TabIndex = 31
-            Me.cbxAppdataIgnoreList.Text = "edt.csv,devmode.csv,panel_log.csv"
             '
             'MainForm
             '

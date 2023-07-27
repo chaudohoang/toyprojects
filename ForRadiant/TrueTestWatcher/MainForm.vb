@@ -828,7 +828,11 @@ Namespace TrueTestWatcher
 
             sw2.Restart()
             For index = 0 To ColorCalSetting1.Count - 1
-                If ColorCalSetting1(index) <> ColorCalSetting2(index) Then
+                If ColorCalSetting1(index).EndsWith("0") Then
+                    equal = False
+                    calibrationNG = True
+                    log.Add("Step : " + ColorCalSetting1(index).Split(",")(1) + ", Running Sequence Color Cal is (None)")
+                ElseIf ColorCalSetting1(index) <> ColorCalSetting2(index) Then
                     equal = False
                     calibrationNG = True
                     log.Add("Step : " + ColorCalSetting1(index).Split(",")(1) + ", Running Sequence Color Cal : " + colorCalRef1(ColorCalSetting1(index).Split(",")(2)) + ", Master Calibration Color Cal : " + colorCalRef2(ColorCalSetting2(index).Split(",")(2)))
@@ -839,7 +843,11 @@ Namespace TrueTestWatcher
 
             sw2.Restart()
             For index = 0 To ImgScaleSetting1.Count - 1
-                If ImgScaleSetting1(index) <> ImgScaleSetting2(index) Then
+                If ImgScaleSetting1(index).EndsWith("0") Then
+                    equal = False
+                    calibrationNG = True
+                    log.Add("Step : " + ImgScaleSetting1(index).Split(",")(1) + ", Running Sequence Img Scale Cal is (None)")
+                ElseIf ImgScaleSetting1(index) <> ImgScaleSetting2(index) Then
                     equal = False
                     calibrationNG = True
                     log.Add("Step : " + ImgScaleSetting1(index).Split(",")(1) + ", Running Sequence Img Scale Cal : " + imgScaleRef1(ImgScaleSetting1(index).Split(",")(2)) + ", Master Calibration Img Scale Cal : " + imgScaleRef2(ImgScaleSetting2(index).Split(",")(2)))
@@ -850,7 +858,11 @@ Namespace TrueTestWatcher
 
             sw2.Restart()
             For index = 0 To FFCSetting1.Count - 1
-                If FFCSetting1(index) <> FFCSetting2(index) Then
+                If FFCSetting1(index).EndsWith("0") Then
+                    equal = False
+                    calibrationNG = True
+                    log.Add("Step : " + FFCSetting1(index).Split(",")(1) + ", Running Sequence FFC Cal is (None)")
+                ElseIf FFCSetting1(index) <> FFCSetting2(index) Then
                     equal = False
                     calibrationNG = True
                     log.Add("Step : " + FFCSetting1(index).Split(",")(1) + ", Running Sequence FFC Cal : " + flatFieldRef1(FFCSetting1(index).Split(",")(2)) + ", Master Calibration FFC Cal : " + flatFieldRef2(FFCSetting2(index).Split(",")(2)))
