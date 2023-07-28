@@ -829,7 +829,7 @@ Namespace TrueTestWatcher
 
             sw2.Restart()
             For index = 0 To ColorCalSetting1.Count - 1
-                If ColorCalSetting1(index).EndsWith("0") Then
+                If ColorCalSetting1(index).Split(",").Reverse()(0) = "0" Then
                     equal = False
                     calibrationNG = True
                     log.Add("Step : " + ColorCalSetting1(index).Split(",")(1) + ", Running Sequence Color Cal is (None)")
@@ -844,7 +844,7 @@ Namespace TrueTestWatcher
 
             sw2.Restart()
             For index = 0 To ImgScaleSetting1.Count - 1
-                If ImgScaleSetting1(index).EndsWith("0") Then
+                If ImgScaleSetting1(index).Split(",").Reverse()(0) = "0" Then
                     equal = False
                     calibrationNG = True
                     log.Add("Step : " + ImgScaleSetting1(index).Split(",")(1) + ", Running Sequence Img Scale Cal is (None)")
@@ -859,7 +859,7 @@ Namespace TrueTestWatcher
 
             sw2.Restart()
             For index = 0 To FFCSetting1.Count - 1
-                If FFCSetting1(index).EndsWith("0") Then
+                If FFCSetting1(index).Split(",").Reverse()(0) = "0" Then
                     equal = False
                     calibrationNG = True
                     log.Add("Step : " + FFCSetting1(index).Split(",")(1) + ", Running Sequence FFC Cal is (None)")

@@ -1228,7 +1228,7 @@ Public Class MainForm
 
 		sw2.Restart()
 		For index = 0 To ColorCalSetting1.Count - 1
-			If ColorCalSetting1(index).EndsWith("0") Then
+			If ColorCalSetting1(index).Split(",").Reverse()(0) = "0" Then
 				equal = False
 				log.Add("Step : " + ColorCalSetting1(index).Split(",")(1) + ", Sequence 1 Color Cal is (None)")
 			ElseIf ColorCalSetting1(index) <> ColorCalSetting2(index) Then
@@ -1241,7 +1241,7 @@ Public Class MainForm
 
 		sw2.Restart()
 		For index = 0 To ImgScaleSetting1.Count - 1
-			If ImgScaleSetting1(index).EndsWith("0") Then
+			If ImgScaleSetting1(index).Split(",").Reverse()(0) = "0" Then
 				equal = False
 				log.Add("Step : " + ImgScaleSetting1(index).Split(",")(1) + ", Sequence 1 Img Scale Cal is (None)")
 			ElseIf ImgScaleSetting1(index) <> ImgScaleSetting2(index) Then
@@ -1254,7 +1254,7 @@ Public Class MainForm
 
 		sw2.Restart()
 		For index = 0 To FFCSetting1.Count - 1
-			If FFCSetting1(index).EndsWith("0") Then
+			If FFCSetting1(index).Split(",").Reverse()(0) = "0" Then
 				equal = False
 				log.Add("Step : " + FFCSetting1(index).Split(",")(1) + ", Sequence 1 FFC Cal is (None)")
 			ElseIf FFCSetting1(index) <> FFCSetting2(index) Then
