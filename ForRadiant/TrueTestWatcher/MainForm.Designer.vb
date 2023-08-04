@@ -34,6 +34,7 @@ Namespace TrueTestWatcher
             Me.menuStrip1 = New System.Windows.Forms.MenuStrip()
             Me.commandToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.ManualCheckToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+            Me.DeleteMasterStatusToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.exitToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.settingsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.minimizedToTrayToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -54,7 +55,8 @@ Namespace TrueTestWatcher
             Me.chkCompareAppdataFiles = New System.Windows.Forms.CheckBox()
             Me.chkCompareSequenceCalibrations = New System.Windows.Forms.CheckBox()
             Me.chkCompareSequenceParameters = New System.Windows.Forms.CheckBox()
-            Me.DeleteMasterStatusToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+            Me.chkAutolog = New System.Windows.Forms.CheckBox()
+            Me.cbxAutologPath = New System.Windows.Forms.ComboBox()
             Me.contextMenuStrip1.SuspendLayout()
             Me.menuStrip1.SuspendLayout()
             Me.TabControl1.SuspendLayout()
@@ -100,13 +102,19 @@ Namespace TrueTestWatcher
             'ManualCheckToolStripMenuItem
             '
             Me.ManualCheckToolStripMenuItem.Name = "ManualCheckToolStripMenuItem"
-            Me.ManualCheckToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+            Me.ManualCheckToolStripMenuItem.Size = New System.Drawing.Size(178, 22)
             Me.ManualCheckToolStripMenuItem.Text = "Manual Check"
+            '
+            'DeleteMasterStatusToolStripMenuItem
+            '
+            Me.DeleteMasterStatusToolStripMenuItem.Name = "DeleteMasterStatusToolStripMenuItem"
+            Me.DeleteMasterStatusToolStripMenuItem.Size = New System.Drawing.Size(178, 22)
+            Me.DeleteMasterStatusToolStripMenuItem.Text = "Delete MasterStatus"
             '
             'exitToolStripMenuItem
             '
             Me.exitToolStripMenuItem.Name = "exitToolStripMenuItem"
-            Me.exitToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+            Me.exitToolStripMenuItem.Size = New System.Drawing.Size(178, 22)
             Me.exitToolStripMenuItem.Text = "Exit"
             '
             'settingsToolStripMenuItem
@@ -209,6 +217,8 @@ Namespace TrueTestWatcher
             '
             'TabPage2
             '
+            Me.TabPage2.Controls.Add(Me.cbxAutologPath)
+            Me.TabPage2.Controls.Add(Me.chkAutolog)
             Me.TabPage2.Controls.Add(Me.cbxAppdataIgnoreList)
             Me.TabPage2.Controls.Add(Me.Label1)
             Me.TabPage2.Controls.Add(Me.cbxIgnoreList)
@@ -298,11 +308,27 @@ Namespace TrueTestWatcher
             Me.chkCompareSequenceParameters.Text = "Compare Sequence Parameters"
             Me.chkCompareSequenceParameters.UseVisualStyleBackColor = True
             '
-            'DeleteMasterStatusToolStripMenuItem
+            'chkAutolog
             '
-            Me.DeleteMasterStatusToolStripMenuItem.Name = "DeleteMasterStatusToolStripMenuItem"
-            Me.DeleteMasterStatusToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
-            Me.DeleteMasterStatusToolStripMenuItem.Text = "Delete MasterStatus"
+            Me.chkAutolog.AutoSize = True
+            Me.chkAutolog.Checked = True
+            Me.chkAutolog.CheckState = System.Windows.Forms.CheckState.Checked
+            Me.chkAutolog.Location = New System.Drawing.Point(9, 126)
+            Me.chkAutolog.Name = "chkAutolog"
+            Me.chkAutolog.Size = New System.Drawing.Size(151, 17)
+            Me.chkAutolog.TabIndex = 32
+            Me.chkAutolog.Text = "Automatically write log to : "
+            Me.chkAutolog.UseVisualStyleBackColor = True
+            '
+            'cbxAutologPath
+            '
+            Me.cbxAutologPath.FormattingEnabled = True
+            Me.cbxAutologPath.Items.AddRange(New Object() {"", "D:\Program\RVS\TrueTestWatcherLog"})
+            Me.cbxAutologPath.Location = New System.Drawing.Point(156, 124)
+            Me.cbxAutologPath.Name = "cbxAutologPath"
+            Me.cbxAutologPath.Size = New System.Drawing.Size(382, 21)
+            Me.cbxAutologPath.TabIndex = 33
+            Me.cbxAutologPath.Text = "D:\Program\RVS\TrueTestWatcherLog"
             '
             'MainForm
             '
@@ -359,5 +385,7 @@ Namespace TrueTestWatcher
         Friend WithEvents Label1 As Windows.Forms.Label
         Friend WithEvents cbxAppdataIgnoreList As Windows.Forms.ComboBox
         Friend WithEvents DeleteMasterStatusToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+        Friend WithEvents cbxAutologPath As Windows.Forms.ComboBox
+        Friend WithEvents chkAutolog As Windows.Forms.CheckBox
     End Class
 End Namespace
