@@ -48,6 +48,8 @@ Namespace TrueTestWatcher
             Me.TabControl1 = New System.Windows.Forms.TabControl()
             Me.TabPage1 = New System.Windows.Forms.TabPage()
             Me.TabPage2 = New System.Windows.Forms.TabPage()
+            Me.cbxAutologPath = New System.Windows.Forms.ComboBox()
+            Me.chkAutolog = New System.Windows.Forms.CheckBox()
             Me.cbxAppdataIgnoreList = New System.Windows.Forms.ComboBox()
             Me.Label1 = New System.Windows.Forms.Label()
             Me.cbxIgnoreList = New System.Windows.Forms.ComboBox()
@@ -55,8 +57,6 @@ Namespace TrueTestWatcher
             Me.chkCompareAppdataFiles = New System.Windows.Forms.CheckBox()
             Me.chkCompareSequenceCalibrations = New System.Windows.Forms.CheckBox()
             Me.chkCompareSequenceParameters = New System.Windows.Forms.CheckBox()
-            Me.chkAutolog = New System.Windows.Forms.CheckBox()
-            Me.cbxAutologPath = New System.Windows.Forms.ComboBox()
             Me.contextMenuStrip1.SuspendLayout()
             Me.menuStrip1.SuspendLayout()
             Me.TabControl1.SuspendLayout()
@@ -126,17 +126,13 @@ Namespace TrueTestWatcher
             '
             'minimizedToTrayToolStripMenuItem
             '
-            Me.minimizedToTrayToolStripMenuItem.Checked = True
             Me.minimizedToTrayToolStripMenuItem.CheckOnClick = True
-            Me.minimizedToTrayToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked
             Me.minimizedToTrayToolStripMenuItem.Name = "minimizedToTrayToolStripMenuItem"
             Me.minimizedToTrayToolStripMenuItem.Size = New System.Drawing.Size(226, 22)
             Me.minimizedToTrayToolStripMenuItem.Text = "Minimized Hide Taskbar Icon"
             '
             'StartMinimizedToolStripMenuItem
             '
-            Me.StartMinimizedToolStripMenuItem.Checked = True
-            Me.StartMinimizedToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked
             Me.StartMinimizedToolStripMenuItem.Name = "StartMinimizedToolStripMenuItem"
             Me.StartMinimizedToolStripMenuItem.Size = New System.Drawing.Size(226, 22)
             Me.StartMinimizedToolStripMenuItem.Text = "Start Minimized"
@@ -234,6 +230,28 @@ Namespace TrueTestWatcher
             Me.TabPage2.Text = "Compare Settings"
             Me.TabPage2.UseVisualStyleBackColor = True
             '
+            'cbxAutologPath
+            '
+            Me.cbxAutologPath.FormattingEnabled = True
+            Me.cbxAutologPath.Items.AddRange(New Object() {"", "D:\Program\RVS\TrueTestWatcherLog"})
+            Me.cbxAutologPath.Location = New System.Drawing.Point(156, 124)
+            Me.cbxAutologPath.Name = "cbxAutologPath"
+            Me.cbxAutologPath.Size = New System.Drawing.Size(382, 21)
+            Me.cbxAutologPath.TabIndex = 33
+            Me.cbxAutologPath.Text = "D:\Program\RVS\TrueTestWatcherLog"
+            '
+            'chkAutolog
+            '
+            Me.chkAutolog.AutoSize = True
+            Me.chkAutolog.Checked = True
+            Me.chkAutolog.CheckState = System.Windows.Forms.CheckState.Checked
+            Me.chkAutolog.Location = New System.Drawing.Point(9, 126)
+            Me.chkAutolog.Name = "chkAutolog"
+            Me.chkAutolog.Size = New System.Drawing.Size(151, 17)
+            Me.chkAutolog.TabIndex = 32
+            Me.chkAutolog.Text = "Automatically write log to : "
+            Me.chkAutolog.UseVisualStyleBackColor = True
+            '
             'cbxAppdataIgnoreList
             '
             Me.cbxAppdataIgnoreList.FormattingEnabled = True
@@ -307,28 +325,6 @@ Namespace TrueTestWatcher
             Me.chkCompareSequenceParameters.TabIndex = 25
             Me.chkCompareSequenceParameters.Text = "Compare Sequence Parameters"
             Me.chkCompareSequenceParameters.UseVisualStyleBackColor = True
-            '
-            'chkAutolog
-            '
-            Me.chkAutolog.AutoSize = True
-            Me.chkAutolog.Checked = True
-            Me.chkAutolog.CheckState = System.Windows.Forms.CheckState.Checked
-            Me.chkAutolog.Location = New System.Drawing.Point(9, 126)
-            Me.chkAutolog.Name = "chkAutolog"
-            Me.chkAutolog.Size = New System.Drawing.Size(151, 17)
-            Me.chkAutolog.TabIndex = 32
-            Me.chkAutolog.Text = "Automatically write log to : "
-            Me.chkAutolog.UseVisualStyleBackColor = True
-            '
-            'cbxAutologPath
-            '
-            Me.cbxAutologPath.FormattingEnabled = True
-            Me.cbxAutologPath.Items.AddRange(New Object() {"", "D:\Program\RVS\TrueTestWatcherLog"})
-            Me.cbxAutologPath.Location = New System.Drawing.Point(156, 124)
-            Me.cbxAutologPath.Name = "cbxAutologPath"
-            Me.cbxAutologPath.Size = New System.Drawing.Size(382, 21)
-            Me.cbxAutologPath.TabIndex = 33
-            Me.cbxAutologPath.Text = "D:\Program\RVS\TrueTestWatcherLog"
             '
             'MainForm
             '

@@ -20,12 +20,17 @@ Namespace RestartTT
 		Public settingPath As String
 		Public monitorResultMessageTask As Tasks.Task
 		Public monitorRestartMessageTask As Tasks.Task
+		Public monitorOnInitializeMessageTask As Tasks.Task
 		Public monitorResultMessageTaskTasksCancellationTokenSource As New CancellationTokenSource
 		Public monitorRestartMessageTaskTasksCancellationTokenSource As New CancellationTokenSource
+		Public monitorOnInitializeMessageTaskTasksCancellationTokenSource As New CancellationTokenSource
 		Public ResultMessageCount As Integer = 0
-		Public RestartMessageCount As Integer = 0
 		Public IgnoreExistedResult As Boolean
 		Public IgnoreExistedRestart As Boolean
+		Public IgnoreExistedOnInitialize As Boolean
+		Public monitorResultMessageRunning As Boolean
+		Public monitorRestartMessageRunning As Boolean
+		Public monitorOnInitializeMessageRunning As Boolean
 		Private allowVisible As Boolean = True
 		Public today As String = Now.ToString("yyyyMMdd")
 		Public logPath As String = ""
@@ -87,6 +92,7 @@ Namespace RestartTT
 		End Sub
 		Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 			logPath = "C:\Radiant Vision Systems Data\TrueTest\AppData\" + today + " Operation Log.txt"
+			lblTodayLogPath.Text = logPath
 			If Not File.Exists(logPath) Then
 				File.WriteAllText(logPath, "")
 			End If
@@ -95,12 +101,15 @@ Namespace RestartTT
 			If startMinimizedToolStripMenuItem.Checked = True Then
 				Me.WindowState = FormWindowState.Minimized
 			End If
-
+			Dim checkChangedDayLogTask = New Tasks.Task(New Action(Sub() CheckForChangeDayLog()))
+			checkChangedDayLogTask.Start()
+			StartMonitorOnInitializeMessage()
+			monitorOnInitializeMessageRunning = True
 		End Sub
-		Private Sub CheckForNextDayLogResultMessage()
+		Public Sub CheckForChangeDayLog()
 			Dim startTime As DateTime = DateTime.Now
 			Dim tomorrow As DateTime
-
+			Dim newToday As String
 			tomorrow = startTime + New TimeSpan(1, 0, 0, 0, 0)
 			Dim year = tomorrow.Year
 			Dim month = tomorrow.Month
@@ -108,43 +117,36 @@ Namespace RestartTT
 			Dim endTime = New DateTime(year, month, day, 0, 0, 0)
 			Dim duration = endTime - startTime
 			Dim durationInSeconds = duration.TotalSeconds
-			sw = New Stopwatch
-			sw.Start()
-			While sw.ElapsedMilliseconds <= durationInSeconds * 1000
-				If monitorResultMessageTaskTasksCancellationTokenSource.IsCancellationRequested Then
-					Exit Sub
+
+			While True
+				newToday = Now.ToString("yyyyMMdd")
+				If newToday <> today Then
+					today = newToday
+					logPath = "C:\Radiant Vision Systems Data\TrueTest\AppData\" + today + " Operation Log.txt"
+					lblTodayLogPath.Invoke(Sub()
+											   lblTodayLogPath.Text = logPath
+										   End Sub)
+					If monitorResultMessageRunning Then
+						monitorResultMessageRunning = False
+						StopMonitorResultMessage()
+						StartMonitorResultMessage()
+						monitorResultMessageRunning = True
+					End If
+					If monitorRestartMessageRunning Then
+						monitorRestartMessageRunning = False
+						StopMonitorRestartMessage()
+						StartMonitorRestartMessage()
+						monitorRestartMessageRunning = True
+					End If
+					If monitorOnInitializeMessageRunning Then
+						monitorOnInitializeMessageRunning = False
+						StopMonitorOnInitializeMessage()
+						StartMonitorOnInitializeMessage()
+						monitorOnInitializeMessageRunning = True
+					End If
 				End If
-				System.Threading.Thread.Sleep(100)
+				System.Threading.Thread.Sleep(1000)
 			End While
-			StopMonitorResultMessage()
-			today = Now.ToString("yyyyMMdd")
-			logPath = "C:\Radiant Vision Systems Data\TrueTest\AppData\" + today + " Operation Log.txt"
-			StartMonitorResultMessage()
-			File.AppendAllText("log.txt", "today = " + today + "logPath = " + logPath)
-		End Sub
-
-		Private Sub CheckForNextDayLogRestartMessage()
-			Dim startTime As DateTime = DateTime.Now
-			Dim tomorrow As DateTime
-
-			tomorrow = startTime + New TimeSpan(1, 0, 0, 0, 0)
-			Dim year = tomorrow.Year
-			Dim month = tomorrow.Month
-			Dim day = tomorrow.Day
-			Dim endTime = New DateTime(year, month, day, 0, 0, 0)
-			Dim duration = endTime - startTime
-			Dim durationInSeconds = duration.TotalSeconds
-			sw = New Stopwatch
-			sw.Start()
-			While sw.ElapsedMilliseconds <= durationInSeconds * 1000
-				If monitorRestartMessageTaskTasksCancellationTokenSource.IsCancellationRequested Then
-					Exit Sub
-				End If
-				System.Threading.Thread.Sleep(100)
-			End While
-			StopMonitorRestartMessage()
-			StartMonitorRestartMessage()
-
 
 		End Sub
 
@@ -194,8 +196,6 @@ Namespace RestartTT
 			cmdStopMonitorResultMessage.Invoke(Sub()
 												   cmdStopMonitorResultMessage.Enabled = True
 											   End Sub)
-			Dim checkNextDayLogTask = New Tasks.Task(New Action(Sub() CheckForNextDayLogResultMessage()))
-			checkNextDayLogTask.Start()
 
 		End Sub
 
@@ -250,8 +250,60 @@ Namespace RestartTT
 			cmdStopMonitorRestartMessage.Invoke(Sub()
 													cmdStopMonitorRestartMessage.Enabled = True
 												End Sub)
-			Dim checkNextDayLogTask = New Tasks.Task(New Action(Sub() CheckForNextDayLogRestartMessage()))
-			checkNextDayLogTask.Start()
+
+		End Sub
+
+		Private Sub StartMonitorOnInitializeMessage()
+			IgnoreExistedOnInitialize = IgnoreExistingOnInitializeMessage()
+			today = Now.ToString("yyyyMMdd")
+			logPath = "C:\Radiant Vision Systems Data\TrueTest\AppData\" + today + " Operation Log.txt"
+			File.AppendAllText("log.txt", "today = " + today + Environment.NewLine + "logPath = " + logPath + Environment.NewLine)
+			monitorOnInitializeMessageTaskTasksCancellationTokenSource = New CancellationTokenSource
+			monitorOnInitializeMessageTask = New Tasks.Task(New Action(Sub() MonitorTailOfFileForOnInitializeMessage()), monitorOnInitializeMessageTaskTasksCancellationTokenSource.Token)
+			monitorOnInitializeMessageTask.Start()
+			lblOnInitializeMonitoringStatus.Invoke(Sub()
+													   lblOnInitializeMonitoringStatus.Text = "Status : Monitoring ..."
+												   End Sub)
+			cmdStartMonitorOnInitializeMessage.Invoke(Sub()
+														  cmdStartMonitorOnInitializeMessage.Enabled = False
+													  End Sub)
+			cmdStopMonitorOnInitializeMessage.Invoke(Sub()
+														 cmdStopMonitorOnInitializeMessage.Enabled = True
+													 End Sub)
+
+		End Sub
+
+		Private Sub StopMonitorOnInitializeMessage()
+
+			If monitorOnInitializeMessageTaskTasksCancellationTokenSource IsNot Nothing Then
+				monitorOnInitializeMessageTaskTasksCancellationTokenSource.Cancel()
+			End If
+			If monitorOnInitializeMessageTask IsNot Nothing Then
+				If monitorOnInitializeMessageTask.Status <> TaskStatus.RanToCompletion Then
+					'Wait a little longer
+					Dim sw As New Stopwatch
+					sw.Start()
+					Do Until monitorOnInitializeMessageTask.Status = TaskStatus.RanToCompletion
+						If monitorOnInitializeMessageTask.Status = TaskStatus.Canceled Then Exit Do
+						If monitorOnInitializeMessageTask.Status = TaskStatus.Faulted Then Exit Do
+						If sw.ElapsedMilliseconds > 1000 Then Exit Do
+					Loop
+					sw.Stop()
+				End If
+				If monitorOnInitializeMessageTask.IsCompleted OrElse monitorOnInitializeMessageTask.IsCanceled OrElse monitorOnInitializeMessageTask.IsFaulted Then
+					monitorOnInitializeMessageTask.Dispose()
+				End If
+				monitorOnInitializeMessageTask = Nothing
+			End If
+			lblOnInitializeMonitoringStatus.Invoke(Sub()
+													   lblOnInitializeMonitoringStatus.Text = "Status : Stopped ..."
+												   End Sub)
+			cmdStartMonitorOnInitializeMessage.Invoke(Sub()
+														  cmdStartMonitorOnInitializeMessage.Enabled = True
+													  End Sub)
+			cmdStopMonitorOnInitializeMessage.Invoke(Sub()
+														 cmdStopMonitorOnInitializeMessage.Enabled = False
+													 End Sub)
 
 		End Sub
 
@@ -290,6 +342,9 @@ Namespace RestartTT
 		End Sub
 
 		Public Sub MonitorTailOfFileForResultMessage()
+			If Not File.Exists(logPath) Then
+				File.AppendAllText(logPath, "")
+			End If
 			Dim initialFileSize = New FileInfo(logPath).Length
 			Dim lastReadLength = initialFileSize - 1024
 			If lastReadLength < 0 Then lastReadLength = 0
@@ -359,6 +414,9 @@ Namespace RestartTT
 
 		Public Function IgnoreExistingResultMessage() As Boolean
 			Dim ignore As Boolean
+			If Not File.Exists(logPath) Then
+				File.AppendAllText(logPath, "")
+			End If
 			Dim initialFileSize = New FileInfo(logPath).Length
 			Dim lastReadLength = initialFileSize - 1024
 			If lastReadLength < 0 Then lastReadLength = 0
@@ -394,6 +452,9 @@ Namespace RestartTT
 
 		Public Function IgnoreExistingRestartMessage() As Boolean
 			Dim ignore As Boolean
+			If Not File.Exists(logPath) Then
+				File.AppendAllText(logPath, "")
+			End If
 			Dim initialFileSize = New FileInfo(logPath).Length
 			Dim lastReadLength = initialFileSize - 1024
 			If lastReadLength < 0 Then lastReadLength = 0
@@ -427,7 +488,48 @@ Namespace RestartTT
 			Return ignore
 		End Function
 
+		Public Function IgnoreExistingOnInitializeMessage() As Boolean
+			Dim ignore As Boolean
+			If Not File.Exists(logPath) Then
+				File.AppendAllText(logPath, "")
+			End If
+			Dim initialFileSize = New FileInfo(logPath).Length
+			Dim lastReadLength = initialFileSize - 1024
+			If lastReadLength < 0 Then lastReadLength = 0
+
+			Try
+				Dim fileSize = New FileInfo(logPath).Length
+
+				If fileSize > lastReadLength Then
+
+					Using fs = New FileStream(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
+						fs.Seek(lastReadLength, SeekOrigin.Begin)
+						Dim buffer = New Byte(1023) {}
+
+						Dim bytesRead = fs.Read(buffer, 0, buffer.Length)
+						lastReadLength += bytesRead
+						If bytesRead = 0 Then
+							ignore = False
+						End If
+						Dim text = ASCIIEncoding.ASCII.GetString(buffer, 0, bytesRead)
+
+						If text.Contains("On initialize #2") Then
+							ignore = True
+
+						End If
+
+					End Using
+				End If
+
+			Catch
+			End Try
+			Return ignore
+		End Function
+
 		Public Sub MonitorTailOfFileForRestartMessage()
+			If Not File.Exists(logPath) Then
+				File.AppendAllText(logPath, "")
+			End If
 			Dim initialFileSize = New FileInfo(logPath).Length
 			Dim lastReadLength = initialFileSize - 1024
 			If lastReadLength < 0 Then lastReadLength = 0
@@ -459,6 +561,66 @@ Namespace RestartTT
 								ElseIf text.Contains("Sent RESTART response") And Not IgnoreExistedRestart Then
 									Dim waitTime As New Integer
 									If Not Int32.TryParse(txtWaitRestart.Text, waitTime) Then
+										waitTime = 1
+									End If
+									Thread.Sleep(waitTime * 1000)
+									Try
+										For Each process As Process In Process.GetProcessesByName("TrueTest")
+											process.Kill()
+											Process.Start("TrueTest")
+										Next
+									Catch ex As Exception
+
+									End Try
+								End If
+
+								'File.AppendAllText("log.txt", text)
+							End While
+						End Using
+					End If
+
+				Catch
+				End Try
+
+				Thread.Sleep(1000)
+			End While
+		End Sub
+
+		Public Sub MonitorTailOfFileForOnInitializeMessage()
+			If Not File.Exists(logPath) Then
+				File.AppendAllText(logPath, "")
+			End If
+			Dim initialFileSize = New FileInfo(logPath).Length
+			Dim lastReadLength = initialFileSize - 1024
+			If lastReadLength < 0 Then lastReadLength = 0
+
+			While True
+				If monitorOnInitializeMessageTaskTasksCancellationTokenSource.IsCancellationRequested Then
+					Exit Sub
+				End If
+				Try
+					Dim fileSize = New FileInfo(logPath).Length
+
+					If fileSize > lastReadLength Then
+
+						Using fs = New FileStream(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
+							fs.Seek(lastReadLength, SeekOrigin.Begin)
+							Dim buffer = New Byte(1023) {}
+
+							While True
+								If monitorOnInitializeMessageTaskTasksCancellationTokenSource.IsCancellationRequested Then
+									Exit Sub
+								End If
+								Dim bytesRead = fs.Read(buffer, 0, buffer.Length)
+								lastReadLength += bytesRead
+								If bytesRead = 0 Then Exit While
+								Dim text = ASCIIEncoding.ASCII.GetString(buffer, 0, bytesRead)
+
+								If text.Contains("On initialize #2") And IgnoreExistedOnInitialize Then
+									IgnoreExistedOnInitialize = False
+								ElseIf text.Contains("On initialize #2") And Not IgnoreExistedOnInitialize Then
+									Dim waitTime As New Integer
+									If Not Int32.TryParse(txtWaitOnInitialize.Text, waitTime) Then
 										waitTime = 1
 									End If
 									Thread.Sleep(waitTime * 1000)
@@ -570,19 +732,44 @@ Namespace RestartTT
 
 		Private Sub cmdStartMonitorResultMessage_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdStartMonitorResultMessage.LinkClicked
 			StartMonitorResultMessage()
+			monitorResultMessageRunning = True
 		End Sub
 
 		Private Sub cmdStopMonitorResultMessage_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdStopMonitorResultMessage.LinkClicked
 			StopMonitorResultMessage()
+			monitorResultMessageRunning = False
 		End Sub
 
 		Private Sub cmdStartMonitorRestartMessage_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdStartMonitorRestartMessage.LinkClicked
 			StartMonitorRestartMessage()
+			monitorRestartMessageRunning = True
 		End Sub
 
 		Private Sub cmdStopMonitorRestartMessage_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdStopMonitorRestartMessage.LinkClicked
 			StopMonitorRestartMessage()
-
+			monitorRestartMessageRunning = False
 		End Sub
+
+		Private Sub cmdRestartNowOnInitialize_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdRestartNowOnInitialize.LinkClicked
+			Try
+				For Each process As Process In Process.GetProcessesByName("TrueTest")
+					process.Kill()
+					Process.Start("TrueTest")
+				Next
+			Catch ex As Exception
+
+			End Try
+		End Sub
+
+		Private Sub cmdStartMonitorOnInitializeMessage_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdStartMonitorOnInitializeMessage.LinkClicked
+			StartMonitorOnInitializeMessage()
+			monitorOnInitializeMessageRunning = True
+		End Sub
+
+		Private Sub cmdStopMonitorOnInitializeMessage_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdStopMonitorOnInitializeMessage.LinkClicked
+			StopMonitorOnInitializeMessage()
+			monitorOnInitializeMessageRunning = False
+		End Sub
+
 	End Class
 End Namespace

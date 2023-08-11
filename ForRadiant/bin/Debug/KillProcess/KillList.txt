@@ -1,2 +1,4 @@
 ezae
 magnify
+truetest
+truetestwatcher

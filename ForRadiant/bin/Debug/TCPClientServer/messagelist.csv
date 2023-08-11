@@ -1,5 +1,6 @@
 Message,Description
 Restart TrueTest,Restart TrueTest
+Shutdown TrueTest,Sutdown TrueTest
 Open Notepad,Open Notepad
 cmd /c explorer,Open Explorer
 cmd /c explorer \\192.168.1.1,Open Explorer for network drive

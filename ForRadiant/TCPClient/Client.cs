@@ -86,6 +86,20 @@ namespace TCPClient
 
                 }
             }
+            else if (message == "Shutdown TrueTest")
+            {
+                try
+                {
+                    foreach (var process in Process.GetProcessesByName("TrueTest"))
+                    {
+                        process.Kill();
+                    }
+                }
+                catch (Exception)
+                {
+
+                }
+            }
             else if (message.StartsWith("start "))
             {
                 try

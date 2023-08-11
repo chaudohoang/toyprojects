@@ -55,7 +55,7 @@ namespace TCPServer
                         this.Text, versionInfo.ToString());
         }
 
-        SimpleTcpServer server1,server2,server3,server4,server5,server6;
+        SimpleTcpServer server1,server2,server3,server4,server5,server6,server7,server8;
         private void HandleMessage(string message)
         {
             if (message == "Open Notepad")
@@ -79,6 +79,20 @@ namespace TCPServer
                         process.Kill();
                     }
                     Process.Start("TrueTest.exe");
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+            else if (message == "Shutdown TrueTest")
+            {
+                try
+                {
+                    foreach (var process in Process.GetProcessesByName("TrueTest"))
+                    {
+                        process.Kill();
+                    }
                 }
                 catch (Exception)
                 {
@@ -187,6 +201,30 @@ namespace TCPServer
                     {
                         server6.Send(ip.ToString(), cbxMessage.Text);
                         txtLog6.Text += $"-->{ip} : {cbxMessage.Text}{Environment.NewLine}";
+                    }
+                }
+            }
+
+            else if (tabControl1.SelectedTab == tabPage7 && server7 != null && server7.IsListening)
+            {
+                if (!string.IsNullOrEmpty(cbxMessage.Text) && (lstClientIP7.SelectedItems.Count > 0)) //check message & select client ip from listbox
+                {
+                    foreach (var ip in lstClientIP7.SelectedItems)
+                    {
+                        server7.Send(ip.ToString(), cbxMessage.Text);
+                        txtLog7.Text += $"-->{ip} : {cbxMessage.Text}{Environment.NewLine}";
+                    }
+                }
+            }
+
+            else if (tabControl1.SelectedTab == tabPage8 && server8 != null && server8.IsListening)
+            {
+                if (!string.IsNullOrEmpty(cbxMessage.Text) && (lstClientIP8.SelectedItems.Count > 0)) //check message & select client ip from listbox
+                {
+                    foreach (var ip in lstClientIP8.SelectedItems)
+                    {
+                        server8.Send(ip.ToString(), cbxMessage.Text);
+                        txtLog8.Text += $"-->{ip} : {cbxMessage.Text}{Environment.NewLine}";
                     }
                 }
             }
@@ -467,11 +505,47 @@ namespace TCPServer
             });
         }
 
+        private void Events_ClientDisconnected7(object sender, SuperSimpleTcp.ConnectionEventArgs e)
+        {
+            this.Invoke((MethodInvoker)delegate
+            {
+                txtLog7.Text += $"{e.IpPort} disconnected.{Environment.NewLine}";
+                lstClientIP7.Items.Remove(e.IpPort);
+            });
+        }
+
+        private void Events_ClientDisconnected8(object sender, SuperSimpleTcp.ConnectionEventArgs e)
+        {
+            this.Invoke((MethodInvoker)delegate
+            {
+                txtLog8.Text += $"{e.IpPort} disconnected.{Environment.NewLine}";
+                lstClientIP8.Items.Remove(e.IpPort);
+            });
+        }
+
         private void Events_DataReceived6(object sender, SuperSimpleTcp.DataReceivedEventArgs e)
         {
             this.Invoke((MethodInvoker)delegate
             {
                 txtLog6.Text += $"{e.IpPort} : {Encoding.UTF8.GetString(e.Data)}{Environment.NewLine}";
+            });
+            HandleMessage(Encoding.UTF8.GetString(e.Data));
+        }
+
+        private void Events_DataReceived7(object sender, SuperSimpleTcp.DataReceivedEventArgs e)
+        {
+            this.Invoke((MethodInvoker)delegate
+            {
+                txtLog7.Text += $"{e.IpPort} : {Encoding.UTF8.GetString(e.Data)}{Environment.NewLine}";
+            });
+            HandleMessage(Encoding.UTF8.GetString(e.Data));
+        }
+
+        private void Events_DataReceived8(object sender, SuperSimpleTcp.DataReceivedEventArgs e)
+        {
+            this.Invoke((MethodInvoker)delegate
+            {
+                txtLog8.Text += $"{e.IpPort} : {Encoding.UTF8.GetString(e.Data)}{Environment.NewLine}";
             });
             HandleMessage(Encoding.UTF8.GetString(e.Data));
         }
@@ -483,6 +557,26 @@ namespace TCPServer
                 txtLog6.Text += $"{e.IpPort} connected.{Environment.NewLine}";
                 lstClientIP6.Items.Add(e.IpPort);
                 lstClientIP6.SetSelected(lstClientIP6.FindString(e.IpPort), true);
+            });
+        }
+
+        private void Events_ClientConnected7(object sender, SuperSimpleTcp.ConnectionEventArgs e)
+        {
+            this.Invoke((MethodInvoker)delegate
+            {
+                txtLog7.Text += $"{e.IpPort} connected.{Environment.NewLine}";
+                lstClientIP7.Items.Add(e.IpPort);
+                lstClientIP7.SetSelected(lstClientIP7.FindString(e.IpPort), true);
+            });
+        }
+
+        private void Events_ClientConnected8(object sender, SuperSimpleTcp.ConnectionEventArgs e)
+        {
+            this.Invoke((MethodInvoker)delegate
+            {
+                txtLog8.Text += $"{e.IpPort} connected.{Environment.NewLine}";
+                lstClientIP8.Items.Add(e.IpPort);
+                lstClientIP8.SetSelected(lstClientIP8.FindString(e.IpPort), true);
             });
         }
 
@@ -523,14 +617,14 @@ namespace TCPServer
                         if (addr.Address.ToString().StartsWith("10.119"))
                         {
                             cbxIP6.Text = addr.Address.ToString();
-                            btnStart6_Click(this, new EventArgs());
+                            btnStart8_Click(this, new EventArgs());
                             listened = true;
                             break;
                         }
                         else if (addr.Address.ToString().StartsWith("10.121"))
                         {
                             cbxIP6.Text = addr.Address.ToString();
-                            btnStart6_Click(this, new EventArgs());
+                            btnStart8_Click(this, new EventArgs());
                             listened = true;
                             break;
                         }
@@ -567,6 +661,14 @@ namespace TCPServer
                     {
                         cbxIP6.Text = line.Split('=')[1];
                     }
+                    else if (line.StartsWith("Server7IP") && !string.IsNullOrEmpty(line.Split('=')[1]))
+                    {
+                        cbxIP7.Text = line.Split('=')[1];
+                    }
+                    else if (line.StartsWith("Server8IP") && !string.IsNullOrEmpty(line.Split('=')[1]))
+                    {
+                        cbxIP8.Text = line.Split('=')[1];
+                    }
                     else if (line.StartsWith("Server1AutoStart") && line.Split('=')[1].ToLower() == "true")
                     {
                         btnStart1_Click(this, new EventArgs());
@@ -590,6 +692,14 @@ namespace TCPServer
                     else if (line.StartsWith("Server6AutoStart") && line.Split('=')[1].ToLower() == "true")
                     {
                         btnStart6_Click(this, new EventArgs());
+                    }
+                    else if (line.StartsWith("Server7AutoStart") && line.Split('=')[1].ToLower() == "true")
+                    {
+                        btnStart7_Click(this, new EventArgs());
+                    }
+                    else if (line.StartsWith("Server8AutoStart") && line.Split('=')[1].ToLower() == "true")
+                    {
+                        btnStart8_Click(this, new EventArgs());
                     }
                 }                
             }
@@ -720,13 +830,55 @@ namespace TCPServer
             }
         }
 
+        private void btnStop7_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                server7.Dispose();
+                txtLog7.Text += $"Stopped.{Environment.NewLine}";
+                btnStart7.Enabled = true;
+                btnStop7.Enabled = false;
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+        private void btnStop8_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                server8.Dispose();
+                txtLog8.Text += $"Stopped.{Environment.NewLine}";
+                btnStart8.Enabled = true;
+                btnStop8.Enabled = false;
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
         private void txtLog6_TextChanged(object sender, EventArgs e)
         {
             txtLog6.SelectionStart = txtLog6.Text.Length;
             txtLog6.ScrollToCaret();
         }
 
-		private void cbxIP1_DropDown(object sender, EventArgs e)
+        private void txtLog7_TextChanged(object sender, EventArgs e)
+        {
+            txtLog7.SelectionStart = txtLog7.Text.Length;
+            txtLog7.ScrollToCaret();
+        }
+
+        private void txtLog8_TextChanged(object sender, EventArgs e)
+        {
+            txtLog8.SelectionStart = txtLog8.Text.Length;
+            txtLog8.ScrollToCaret();
+        }
+
+        private void cbxIP1_DropDown(object sender, EventArgs e)
 		{
             try
             {
@@ -741,6 +893,8 @@ namespace TCPServer
                 cbxIP1.Items.Add("192.168.2.2");
                 cbxIP1.Items.Add("192.168.3.3");
                 cbxIP1.Items.Add("192.168.4.4");
+                cbxIP1.Items.Add("192.168.0.11");
+                cbxIP1.Items.Add("192.168.1.100");
                 cbxIP1.Items.Add("127.0.0.1");
                 foreach (NetworkInterface netInterface in NetworkInterface.GetAllNetworkInterfaces())
                 {
@@ -781,6 +935,8 @@ namespace TCPServer
                 cbxIP2.Items.Add("192.168.2.2");
                 cbxIP2.Items.Add("192.168.3.3");
                 cbxIP2.Items.Add("192.168.4.4");
+                cbxIP2.Items.Add("192.168.0.11");
+                cbxIP2.Items.Add("192.168.1.100");
                 cbxIP2.Items.Add("127.0.0.1");
                 foreach (NetworkInterface netInterface in NetworkInterface.GetAllNetworkInterfaces())
                 {
@@ -821,6 +977,8 @@ namespace TCPServer
                 cbxIP3.Items.Add("192.168.2.2");
                 cbxIP3.Items.Add("192.168.3.3");
                 cbxIP3.Items.Add("192.168.4.4");
+                cbxIP3.Items.Add("192.168.0.11");
+                cbxIP3.Items.Add("192.168.1.100");
                 cbxIP3.Items.Add("127.0.0.1");
                 foreach (NetworkInterface netInterface in NetworkInterface.GetAllNetworkInterfaces())
                 {
@@ -861,6 +1019,8 @@ namespace TCPServer
                 cbxIP4.Items.Add("192.168.2.2");
                 cbxIP4.Items.Add("192.168.3.3");
                 cbxIP4.Items.Add("192.168.4.4");
+                cbxIP4.Items.Add("192.168.0.11");
+                cbxIP4.Items.Add("192.168.1.100");
                 cbxIP4.Items.Add("127.0.0.1");
                 foreach (NetworkInterface netInterface in NetworkInterface.GetAllNetworkInterfaces())
                 {
@@ -901,6 +1061,8 @@ namespace TCPServer
                 cbxIP5.Items.Add("192.168.2.2");
                 cbxIP5.Items.Add("192.168.3.3");
                 cbxIP5.Items.Add("192.168.4.4");
+                cbxIP5.Items.Add("192.168.0.11");
+                cbxIP5.Items.Add("192.168.1.100");
                 cbxIP5.Items.Add("127.0.0.1");
                 foreach (NetworkInterface netInterface in NetworkInterface.GetAllNetworkInterfaces())
                 {
@@ -941,6 +1103,8 @@ namespace TCPServer
                 cbxIP6.Items.Add("192.168.2.2");
                 cbxIP6.Items.Add("192.168.3.3");
                 cbxIP6.Items.Add("192.168.4.4");
+                cbxIP6.Items.Add("192.168.0.11");
+                cbxIP6.Items.Add("192.168.1.100");
                 cbxIP6.Items.Add("127.0.0.1");
                 foreach (NetworkInterface netInterface in NetworkInterface.GetAllNetworkInterfaces())
                 {
@@ -966,7 +1130,91 @@ namespace TCPServer
             }
         }
 
-		private void btnStart6_Click(object sender, EventArgs e)
+        private void cbxIP7_DropDown(object sender, EventArgs e)
+        {
+            try
+            {
+                string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                string appdir = Path.GetDirectoryName(apppath);
+                string messagelist = Path.Combine(appdir, "serverlist.csv");
+                var listOfLines = File.ReadAllLines(messagelist)
+                          .Where(x => !string.IsNullOrWhiteSpace(x));
+                cbxIP7.Items.Clear();
+                cbxIP7.Items.Add("192.168.0.100");
+                cbxIP7.Items.Add("192.168.1.1");
+                cbxIP7.Items.Add("192.168.2.2");
+                cbxIP7.Items.Add("192.168.3.3");
+                cbxIP7.Items.Add("192.168.4.4");
+                cbxIP7.Items.Add("192.168.0.11");
+                cbxIP7.Items.Add("192.168.1.100");
+                cbxIP7.Items.Add("127.0.0.1");
+                foreach (NetworkInterface netInterface in NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    IPInterfaceProperties ipProps = netInterface.GetIPProperties();
+                    foreach (UnicastIPAddressInformation addr in ipProps.UnicastAddresses)
+                    {
+                        if (addr.Address.ToString().StartsWith("192.168"))
+                        {
+                            cbxIP7.Items.Add(addr.Address.ToString());
+                        }
+
+                    }
+                }
+                foreach (var line in listOfLines)
+                {
+                    cbxIP7.Items.Add(line);
+                }
+
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+        private void cbxIP8_DropDown(object sender, EventArgs e)
+        {
+            try
+            {
+                string apppath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                string appdir = Path.GetDirectoryName(apppath);
+                string messagelist = Path.Combine(appdir, "serverlist.csv");
+                var listOfLines = File.ReadAllLines(messagelist)
+                          .Where(x => !string.IsNullOrWhiteSpace(x));
+                cbxIP8.Items.Clear();
+                cbxIP8.Items.Add("192.168.0.100");
+                cbxIP8.Items.Add("192.168.1.1");
+                cbxIP8.Items.Add("192.168.2.2");
+                cbxIP8.Items.Add("192.168.3.3");
+                cbxIP8.Items.Add("192.168.4.4");
+                cbxIP8.Items.Add("192.168.0.11");
+                cbxIP8.Items.Add("192.168.1.100");
+                cbxIP8.Items.Add("127.0.0.1");
+                foreach (NetworkInterface netInterface in NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    IPInterfaceProperties ipProps = netInterface.GetIPProperties();
+                    foreach (UnicastIPAddressInformation addr in ipProps.UnicastAddresses)
+                    {
+                        if (addr.Address.ToString().StartsWith("192.168"))
+                        {
+                            cbxIP8.Items.Add(addr.Address.ToString());
+                        }
+
+                    }
+                }
+                foreach (var line in listOfLines)
+                {
+                    cbxIP8.Items.Add(line);
+                }
+
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+        private void btnStart6_Click(object sender, EventArgs e)
         {
             try
             {
@@ -984,6 +1232,56 @@ namespace TCPServer
                 txtLog6.Text += $"Listening on {ip}...{Environment.NewLine}";
                 btnStart6.Enabled = false;
                 btnStop6.Enabled = true;
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+        private void btnStart7_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string ip;
+                if (cbxIP7.Text.Contains(","))
+                {
+                    ip = cbxIP7.Text.Split(',')[1];
+                }
+                else ip = cbxIP7.Text;
+                server7 = new SimpleTcpServer($"{ip}:9000");
+                server7.Events.ClientConnected += Events_ClientConnected7;
+                server7.Events.ClientDisconnected += Events_ClientDisconnected7;
+                server7.Events.DataReceived += Events_DataReceived7;
+                server7.Start();
+                txtLog7.Text += $"Listening on {ip}...{Environment.NewLine}";
+                btnStart7.Enabled = false;
+                btnStop7.Enabled = true;
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+        private void btnStart8_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string ip;
+                if (cbxIP8.Text.Contains(","))
+                {
+                    ip = cbxIP8.Text.Split(',')[1];
+                }
+                else ip = cbxIP8.Text;
+                server8 = new SimpleTcpServer($"{ip}:9000");
+                server8.Events.ClientConnected += Events_ClientConnected8;
+                server8.Events.ClientDisconnected += Events_ClientDisconnected8;
+                server8.Events.DataReceived += Events_DataReceived8;
+                server8.Start();
+                txtLog8.Text += $"Listening on {ip}...{Environment.NewLine}";
+                btnStart8.Enabled = false;
+                btnStop8.Enabled = true;
             }
             catch (Exception)
             {
@@ -1079,6 +1377,30 @@ namespace TCPServer
                     {
                         server6.Send(ip.ToString(), cbxMessage.Text);
                         txtLog6.Text += $"-->{ip} : {cbxMessage.Text}{Environment.NewLine}";
+                    }
+                }
+            }
+
+            if (server7 != null && server7.IsListening)
+            {
+                if (!string.IsNullOrEmpty(cbxMessage.Text) && (lstClientIP7.Items.Count > 0)) //check message & select client ip from listbox
+                {
+                    foreach (var ip in lstClientIP7.Items)
+                    {
+                        server7.Send(ip.ToString(), cbxMessage.Text);
+                        txtLog7.Text += $"-->{ip} : {cbxMessage.Text}{Environment.NewLine}";
+                    }
+                }
+            }
+
+            if (server8 != null && server8.IsListening)
+            {
+                if (!string.IsNullOrEmpty(cbxMessage.Text) && (lstClientIP8.Items.Count > 0)) //check message & select client ip from listbox
+                {
+                    foreach (var ip in lstClientIP8.Items)
+                    {
+                        server8.Send(ip.ToString(), cbxMessage.Text);
+                        txtLog8.Text += $"-->{ip} : {cbxMessage.Text}{Environment.NewLine}";
                     }
                 }
             }
