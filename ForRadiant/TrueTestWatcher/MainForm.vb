@@ -636,6 +636,7 @@ Namespace TrueTestWatcher
                         Dim FLXmlNode2 As XmlNode = node2.ChildNodes(childIndex).SelectSingleNode("FilterList")
 
                         For FLChildIndex = FLXmlNode1.ChildNodes.Count - 1 To 0 Step -1
+                            If FLXmlNode1.ChildNodes(FLChildIndex).SelectSingleNode("Selected").InnerText.ToLower = "false" Then Continue For
                             For FLGrandChildIndex = FLXmlNode1.ChildNodes(FLChildIndex).ChildNodes.Count - 1 To 0 Step -1
                                 If FLXmlNode1.ChildNodes(FLChildIndex).ChildNodes(FLGrandChildIndex).Name = "ElapsedMilliseconds" Then
                                     FLXmlNode1.ChildNodes(FLChildIndex).RemoveChild(FLXmlNode1.ChildNodes(FLChildIndex).ChildNodes(FLGrandChildIndex))
@@ -644,6 +645,7 @@ Namespace TrueTestWatcher
                         Next
 
                         For FLChildIndex = FLXmlNode2.ChildNodes.Count - 1 To 0 Step -1
+                            If FLXmlNode2.ChildNodes(FLChildIndex).SelectSingleNode("Selected").InnerText.ToLower = "false" Then Continue For
                             For FLGrandChildIndex = FLXmlNode2.ChildNodes(FLChildIndex).ChildNodes.Count - 1 To 0 Step -1
                                 If FLXmlNode2.ChildNodes(FLChildIndex).ChildNodes(FLGrandChildIndex).Name = "ElapsedMilliseconds" Then
                                     FLXmlNode2.ChildNodes(FLChildIndex).RemoveChild(FLXmlNode2.ChildNodes(FLChildIndex).ChildNodes(FLGrandChildIndex))
