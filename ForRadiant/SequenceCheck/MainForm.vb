@@ -251,15 +251,38 @@ Public Class MainForm
 			sw2.Restart()
 
 			For childIndex = 0 To node1.ChildNodes.Count - 1
-				If node1.ChildNodes(childIndex).Name = "FilterList" AndAlso node1.ChildNodes(childIndex).SelectSingleNode("FilterList") IsNot Nothing AndAlso node2.ChildNodes(childIndex).SelectSingleNode("FilterList") IsNot Nothing Then
+				If node1.ChildNodes(childIndex).Name = "FilterList" AndAlso
+					node1.ChildNodes(childIndex).SelectSingleNode("FilterList") IsNot Nothing AndAlso
+					node2.ChildNodes(childIndex).SelectSingleNode("FilterList") IsNot Nothing Then
 
-					Dim filterFileName1 As String = node1.ChildNodes(childIndex).SelectSingleNode("FilterList/MoireFilter/MoireFilterList").InnerText
-					Dim filterFileName2 As String = node2.ChildNodes(childIndex).SelectSingleNode("FilterList/MoireFilter/MoireFilterList").InnerText
+					Dim FLXmlNode1 As XmlNode = node1.ChildNodes(childIndex).SelectSingleNode("FilterList")
+					Dim FLXmlNode2 As XmlNode = node2.ChildNodes(childIndex).SelectSingleNode("FilterList")
 
-					If filterFileName1 <> filterFileName2 Then
-						equal = False
-						log.Add("Step : " + seq1AnalysisName + ", Parameter : " + node1.ChildNodes(childIndex).Name + ", Sequence 1 Value : " + filterFileName1 + ", Sequence 2 Value : " + filterFileName2)
-					End If
+					For FLChildIndex = FLXmlNode1.ChildNodes.Count - 1 To 0 Step -1
+						For FLGrandChildIndex = FLXmlNode1.ChildNodes(FLChildIndex).ChildNodes.Count - 1 To 0 Step -1
+							If FLXmlNode1.ChildNodes(FLChildIndex).ChildNodes(FLGrandChildIndex).Name = "ElapsedMilliseconds" Then
+								FLXmlNode1.ChildNodes(FLChildIndex).RemoveChild(FLXmlNode1.ChildNodes(FLChildIndex).ChildNodes(FLGrandChildIndex))
+							End If
+						Next
+					Next
+
+					For FLChildIndex = FLXmlNode2.ChildNodes.Count - 1 To 0 Step -1
+						For FLGrandChildIndex = FLXmlNode2.ChildNodes(FLChildIndex).ChildNodes.Count - 1 To 0 Step -1
+							If FLXmlNode2.ChildNodes(FLChildIndex).ChildNodes(FLGrandChildIndex).Name = "ElapsedMilliseconds" Then
+								FLXmlNode2.ChildNodes(FLChildIndex).RemoveChild(FLXmlNode2.ChildNodes(FLChildIndex).ChildNodes(FLGrandChildIndex))
+							End If
+						Next
+					Next
+
+					For FLChildIndex = 0 To FLXmlNode1.ChildNodes.Count - 1
+						If FLXmlNode1.ChildNodes(FLChildIndex).SelectSingleNode("Selected").InnerText.ToLower = "false" Then Continue For
+						For FLGrandChildIndex = FLXmlNode1.ChildNodes(FLChildIndex).ChildNodes.Count - 1 To 0 Step -1
+							If FLXmlNode1.ChildNodes(FLChildIndex).ChildNodes(FLGrandChildIndex).InnerText.ToLower <> FLXmlNode2.ChildNodes(FLChildIndex).ChildNodes(FLGrandChildIndex).InnerText.ToLower Then
+								equal = False
+								log.Add("Step : " + seq1AnalysisName + ", FilterList Parameter : " + FLXmlNode1.ChildNodes(FLChildIndex).Name + "/" + FLXmlNode1.ChildNodes(FLChildIndex).ChildNodes(FLGrandChildIndex).Name + ", Sequence 1 Value : " + FLXmlNode1.ChildNodes(FLChildIndex).ChildNodes(FLGrandChildIndex).InnerText + ", Sequence 2 Value : " + FLXmlNode2.ChildNodes(FLChildIndex).ChildNodes(FLGrandChildIndex).InnerText)
+							End If
+						Next
+					Next
 
 				Else
 					If node1.ChildNodes(childIndex).InnerText.ToLower <> node2.ChildNodes(childIndex).InnerText.ToLower Then
