@@ -182,7 +182,7 @@ Namespace RestartTT
 			IgnoreExistedResult = IgnoreExistingResultMessage()
 			today = Now.ToString("yyyyMMdd")
 			logPath = "C:\Radiant Vision Systems Data\TrueTest\AppData\" + today + " Operation Log.txt"
-			File.AppendAllText("log.txt", "today = " + today + Environment.NewLine + "logPath = " + logPath + Environment.NewLine)
+			File.AppendAllText("RestartTTDove2p0log.txt", "today = " + today + Environment.NewLine + "logPath = " + logPath + Environment.NewLine)
 			monitorResultMessageTaskTasksCancellationTokenSource = New CancellationTokenSource
 			monitorResultMessageTask = New Tasks.Task(New Action(Sub() MonitorTailOfFileForResultMessage()), monitorResultMessageTaskTasksCancellationTokenSource.Token)
 			monitorResultMessageTask.Start()
@@ -237,7 +237,7 @@ Namespace RestartTT
 			IgnoreExistedRestart = IgnoreExistingRestartMessage()
 			today = Now.ToString("yyyyMMdd")
 			logPath = "C:\Radiant Vision Systems Data\TrueTest\AppData\" + today + " Operation Log.txt"
-			File.AppendAllText("log.txt", "today = " + today + Environment.NewLine + "logPath = " + logPath + Environment.NewLine)
+			File.AppendAllText("RestartTTDove2p0log.txt", "today = " + today + Environment.NewLine + "logPath = " + logPath + Environment.NewLine)
 			monitorRestartMessageTaskTasksCancellationTokenSource = New CancellationTokenSource
 			monitorRestartMessageTask = New Tasks.Task(New Action(Sub() MonitorTailOfFileForRestartMessage()), monitorRestartMessageTaskTasksCancellationTokenSource.Token)
 			monitorRestartMessageTask.Start()
@@ -257,7 +257,7 @@ Namespace RestartTT
 			IgnoreExistedOnInitialize = IgnoreExistingOnInitializeMessage()
 			today = Now.ToString("yyyyMMdd")
 			logPath = "C:\Radiant Vision Systems Data\TrueTest\AppData\" + today + " Operation Log.txt"
-			File.AppendAllText("log.txt", "today = " + today + Environment.NewLine + "logPath = " + logPath + Environment.NewLine)
+			File.AppendAllText("RestartTTDove2p0log.txt", "today = " + today + Environment.NewLine + "logPath = " + logPath + Environment.NewLine)
 			monitorOnInitializeMessageTaskTasksCancellationTokenSource = New CancellationTokenSource
 			monitorOnInitializeMessageTask = New Tasks.Task(New Action(Sub() MonitorTailOfFileForOnInitializeMessage()), monitorOnInitializeMessageTaskTasksCancellationTokenSource.Token)
 			monitorOnInitializeMessageTask.Start()
