@@ -2,7 +2,6 @@ D:\GitHub\toyprojects\bin\Debug\ArcadeControllerChange\ArcadeControllerChange.ex
 D:\GitHub\toyprojects\bin\Debug\ArcadeControllerChange\ArcadeControllerChange.exe
 D:\GitHub\toyprojects\bin\Debug\ArcadeControllerChange\ArcadeControllerChange.pdb
 D:\GitHub\toyprojects\ArcadeControllerChange\obj\Debug\ArcadeControllerChange.csproj.AssemblyReference.cache
-D:\GitHub\toyprojects\ArcadeControllerChange\obj\Debug\ArcadeControllerChange.csproj.SuggestedBindingRedirects.cache
 D:\GitHub\toyprojects\ArcadeControllerChange\obj\Debug\ArcadeControllerChange.MainForm.resources
 D:\GitHub\toyprojects\ArcadeControllerChange\obj\Debug\ArcadeControllerChange.Properties.Resources.resources
 D:\GitHub\toyprojects\ArcadeControllerChange\obj\Debug\ArcadeControllerChange.csproj.GenerateResource.cache

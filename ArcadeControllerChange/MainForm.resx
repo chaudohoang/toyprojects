@@ -2832,12 +2832,8 @@
   <data name="textBox1.Text" xml:space="preserve">
     <value>"D:\GG\Arcade v220 (32bit)\cfg\default-template.cfg"
 "D:\GG\HBMAME 0.241 Hacks\cfg\default-template.cfg"
-"D:\GG\MAMEPPK 0.164-R259 (32bit)\cfg\default-template.cfg"
-"D:\GG\Multi Jogos\cfg\default-template.cfg"
 "E:\Games\Arcade v220 (32bit)\cfg\default-template.cfg"
-"E:\Games\HBMAME 0.241 Hacks\cfg\default-template.cfg"
-"E:\Games\MAMEPPK 0.164-R259 (32bit)\cfg\default-template.cfg"
-"E:\Games\Multi Jogos\cfg\default-template.cfg"</value>
+"E:\Games\HBMAME 0.241 Hacks\cfg\default-template.cfg"</value>
   </data>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
