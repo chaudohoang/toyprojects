@@ -295,18 +295,37 @@ Namespace AutoDeleteData
 					End If
 				Next
 
-				For Each dir As IO.DirectoryInfo In directory.GetDirectories
-					If (Now - dir.CreationTime).Days > period Then
-						Try
-							dir.Delete(True)
-							IO.File.AppendAllText(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Deleted " + dir.FullName + Environment.NewLine)
-						Catch ex As Exception
-							IO.File.AppendAllText(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Cannot delete " + dir.FullName + ", exception : " + ex.Message + Environment.NewLine)
+				If path.Contains("POCB\HEX") Or path.Contains("D:\Test") Then
+					Dim subFolders As New List(Of String)
+					GetLevel3SubFolders(path, subFolders)
 
-						End Try
+					For Each dir As String In subFolders
+						Dim dirInfo As New IO.DirectoryInfo(dir)
+						If (Now - dirInfo.CreationTime).Days > period Then
+							Try
+								dirInfo.Delete(True)
+								IO.File.AppendAllText(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Deleted " + dirInfo.FullName + Environment.NewLine)
+							Catch ex As Exception
+								IO.File.AppendAllText(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Cannot delete " + dirInfo.FullName + ", exception : " + ex.Message + Environment.NewLine)
 
-					End If
-				Next
+							End Try
+
+						End If
+					Next
+				Else
+					For Each dir As IO.DirectoryInfo In directory.GetDirectories()
+						If (Now - dir.CreationTime).Days > period Then
+							Try
+								dir.Delete(True)
+								IO.File.AppendAllText(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Deleted " + dir.FullName + Environment.NewLine)
+							Catch ex As Exception
+								IO.File.AppendAllText(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Cannot delete " + dir.FullName + ", exception : " + ex.Message + Environment.NewLine)
+
+							End Try
+
+						End If
+					Next
+				End If
 
 			End If
 
@@ -555,5 +574,22 @@ Namespace AutoDeleteData
 
 			End If
 		End Sub
+		Sub GetLevel3SubFolders(ByVal currentPath As String, ByRef subFolders As List(Of String), Optional ByVal currentDepth As Integer = 0)
+			' Check if we've reached level 2 depth
+			If currentDepth = 3 Then
+				' Add the current folder to the list
+				subFolders.Add(currentPath)
+				Return
+			End If
+
+			' Get all subdirectories in the current directory
+			Dim subDirs As String() = Directory.GetDirectories(currentPath)
+
+			' Recursively call the function for each subdirectory
+			For Each subDir In subDirs
+				GetLevel3SubFolders(subDir, subFolders, currentDepth + 1)
+			Next
+		End Sub
+
 	End Class
 End Namespace

@@ -840,6 +840,11 @@ Namespace TrueTestWatcher
             sw2.Stop()
             timeLogString.Add("Get Master Calibration Serial Number : " + sw2.ElapsedMilliseconds.ToString + "ms")
 
+            If SN1 <> CameraSN Then
+                calibrationNG = True
+                CommLogUpdateText("Sequence is copied but not set calibraion !")
+                Exit Sub
+            End If
             If SN1 <> SN2 Then
                 calibrationNG = True
                 CommLogUpdateText("Running Sequence and master sequence is from different camera, cannot compare calibration")
@@ -1210,6 +1215,7 @@ Namespace TrueTestWatcher
             CommLogUpdateText("Performing Master Functions Check !!!")
 
             getSequenceFilePath()
+            getCurrentCameraSN()
             CheckForMatchingSequenceParameters(runningSequencePath, masterSequencePath)
 
             CompareCalSettings(runningSequencePath, masterCalibrationPath)
@@ -1239,7 +1245,15 @@ Namespace TrueTestWatcher
             Dim node1 As XmlNode
             Dim xmlDoc1 = New XmlDocument()
             If File.Exists("C:\Radiant Vision Systems Data\TrueTest\UserData\CurrentSequence.txt") Then
-                runningSequencePath = File.ReadAllText("C:\Radiant Vision Systems Data\TrueTest\UserData\CurrentSequence.txt")
+                Dim fileloaded As Boolean
+                While Not fileloaded
+                    Try
+                        runningSequencePath = File.ReadAllText("C:\Radiant Vision Systems Data\TrueTest\UserData\CurrentSequence.txt")
+                        fileloaded = True
+                    Catch ex As Exception
+                        fileloaded = False
+                    End Try
+                End While
             Else
                 xmlDoc1.Load("C:\Radiant Vision Systems Data\TrueTest\AppData\1.8\app.settings")
                 node1 = xmlDoc1.DocumentElement.SelectSingleNode("/Settings/LastSequenceFile")
@@ -1250,6 +1264,24 @@ Namespace TrueTestWatcher
             CommLogUpdateText("Running Sequence file path : " + runningSequencePath)
             CommLogUpdateText("Master sequence file path : " + masterSequencePath)
             CommLogUpdateText("Master calibraion file path : " + masterCalibrationPath)
+        End Sub
+
+        Private Sub getCurrentCameraSN()
+
+            If File.Exists("C:\Radiant Vision Systems Data\TrueTest\UserData\CameraSN.txt") Then
+                Dim fileloaded As Boolean
+                While Not fileloaded
+                    Try
+                        CameraSN = File.ReadAllText("C:\Radiant Vision Systems Data\TrueTest\UserData\CameraSN.txt")
+                        fileloaded = True
+                    Catch ex As Exception
+                        fileloaded = False
+                    End Try
+                End While
+
+            End If
+            CommLogUpdateText("Current Camera SN : " + CameraSN)
+
         End Sub
 
         Private Sub SetControlEnabled(ByVal ctl As Control, ByVal enabled As Boolean)
@@ -1279,6 +1311,7 @@ Namespace TrueTestWatcher
                 CommLogUpdateText("Performing Master Sequence and Calibration Check !!!")
 
                 getSequenceFilePath()
+                getCurrentCameraSN()
                 CheckForMatchingSequenceParameters(runningSequencePath, masterSequencePath)
 
                 CompareCalSettings(runningSequencePath, masterCalibrationPath)
@@ -1309,6 +1342,7 @@ Namespace TrueTestWatcher
                 CommLogUpdateText("Performing Master Sequence and Calibration Check !!!")
 
                 getSequenceFilePath()
+                getCurrentCameraSN()
                 CheckForMatchingSequenceParameters(runningSequencePath, masterSequencePath)
 
                 CompareCalSettings(runningSequencePath, masterCalibrationPath)
@@ -1349,6 +1383,7 @@ Namespace TrueTestWatcher
                 CommLogUpdateText("Performing Master Sequence and Calibration Check !!!")
 
                 getSequenceFilePath()
+                getCurrentCameraSN()
                 CheckForMatchingSequenceParameters(runningSequencePath, masterSequencePath)
 
                 CompareCalSettings(runningSequencePath, masterCalibrationPath)
@@ -1379,6 +1414,7 @@ Namespace TrueTestWatcher
                 CommLogUpdateText("Performing Master Sequence and Calibration Check !!!")
 
                 getSequenceFilePath()
+                getCurrentCameraSN()
                 CheckForMatchingSequenceParameters(runningSequencePath, masterSequencePath)
 
                 CompareCalSettings(runningSequencePath, masterCalibrationPath)
@@ -1419,6 +1455,7 @@ Namespace TrueTestWatcher
                 CommLogUpdateText("Performing Master Sequence and Calibration Check !!!")
 
                 getSequenceFilePath()
+                getCurrentCameraSN()
                 CheckForMatchingSequenceParameters(runningSequencePath, masterSequencePath)
 
                 CompareCalSettings(runningSequencePath, masterCalibrationPath)
@@ -1449,6 +1486,7 @@ Namespace TrueTestWatcher
                 CommLogUpdateText("Performing Master Sequence and Calibration Check !!!")
 
                 getSequenceFilePath()
+                getCurrentCameraSN()
                 CheckForMatchingSequenceParameters(runningSequencePath, masterSequencePath)
 
                 CompareCalSettings(runningSequencePath, masterCalibrationPath)
@@ -1595,7 +1633,17 @@ Namespace TrueTestWatcher
         Private Sub logchange6(ByVal source As Object, ByVal e As _
                         System.IO.FileSystemEventArgs)
             If Path.GetFileNameWithoutExtension(e.FullPath).Contains("CurrentSequence") Then
-                Dim sequenceName As String = File.ReadAllText(e.FullPath())
+                Dim sequenceName As String = ""
+                Dim fileloaded As Boolean
+                While Not fileloaded
+                    Try
+                        sequenceName = File.ReadAllText(e.FullPath())
+                        fileloaded = True
+                    Catch ex As Exception
+                        fileloaded = False
+                    End Try
+                End While
+
                 If e.ChangeType = IO.WatcherChangeTypes.Changed Then
                     CommLogUpdateText("----------TrueTest Sequence Changed To: " & sequenceName & "----------")
                 End If
@@ -1607,6 +1655,7 @@ Namespace TrueTestWatcher
                 CommLogUpdateText("Performing Master Sequence and Calibration Check !!!")
 
                 getSequenceFilePath()
+                getCurrentCameraSN()
                 CheckForMatchingSequenceParameters(runningSequencePath, masterSequencePath)
 
                 CompareCalSettings(runningSequencePath, masterCalibrationPath)
@@ -1631,6 +1680,7 @@ Namespace TrueTestWatcher
             CommLogUpdateText("Performing Master Functions Check !!!")
 
             getSequenceFilePath()
+            getCurrentCameraSN()
             CheckForMatchingSequenceParameters(runningSequencePath, masterSequencePath)
 
             CompareCalSettings(runningSequencePath, masterCalibrationPath)

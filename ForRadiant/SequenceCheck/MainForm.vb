@@ -58,7 +58,7 @@ Public Class MainForm
 
 	Private Sub btnCompare_Click(sender As Object, e As EventArgs) Handles btnCompare.Click
 		btnCompare.Enabled = False
-
+		getCurrentCameraSN()
 		CheckForMatchingSequenceParameters(txtFile1.Text, txtFile2.Text)
 		CommLogUpdateText(vbCrLf)
 		CompareCalSettings(txtFile1.Text, txtFile2.Text)
@@ -1081,6 +1081,24 @@ Public Class MainForm
 		CalRule.Show()
 	End Sub
 
+	Private Sub getCurrentCameraSN()
+
+		If File.Exists("C:\Radiant Vision Systems Data\TrueTest\UserData\CameraSN.txt") Then
+			Dim fileloaded As Boolean
+			While Not fileloaded
+				Try
+					CameraSN = File.ReadAllText("C:\Radiant Vision Systems Data\TrueTest\UserData\CameraSN.txt")
+					fileloaded = True
+				Catch ex As Exception
+					fileloaded = False
+				End Try
+			End While
+
+		End If
+		CommLogUpdateText("Current Camera SN : " + CameraSN)
+
+	End Sub
+
 	Public Sub CompareCalSettings(ByVal file1FullPath As String, ByVal file2FullPath As String)
 		If Not chkCompareCAL.Checked Then
 			CommLogUpdateText("SKIPPED CAL COMPARISION !!!")
@@ -1217,11 +1235,14 @@ Public Class MainForm
 		sw2.Stop()
 		timeLogString.Add("Get sequence 2 Serial Number : " + sw2.ElapsedMilliseconds.ToString + "ms")
 
+		If SN1 <> CameraSN Then
+			CommLogUpdateText("Sequence is copied but not set calibraion !")
+			Exit Sub
+		End If
+
 		If SN1 <> SN2 Then
 			CommLogUpdateText("Running sequence and master sequence is from different camera, cannot compare calibration")
 			Exit Sub
-		Else
-
 		End If
 
 		Dim colorCalRef1 As New Dictionary(Of String, String)

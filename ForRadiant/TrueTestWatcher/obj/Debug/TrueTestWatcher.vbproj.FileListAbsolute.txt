@@ -2,7 +2,6 @@ D:\GitHub\toyprojects\ForRadiant\bin\Debug\TrueTestWatcher\TrueTestWatcher.exe.c
 D:\GitHub\toyprojects\ForRadiant\bin\Debug\TrueTestWatcher\TrueTestWatcher.exe
 D:\GitHub\toyprojects\ForRadiant\bin\Debug\TrueTestWatcher\TrueTestWatcher.pdb
 D:\GitHub\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTestWatcher.vbproj.AssemblyReference.cache
-D:\GitHub\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTestWatcher.vbproj.SuggestedBindingRedirects.cache
 D:\GitHub\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTestWatcher.TrueTestWatcher.MainForm.resources
 D:\GitHub\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTestWatcher.Resources.resources
 D:\GitHub\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTestWatcher.vbproj.GenerateResource.cache
