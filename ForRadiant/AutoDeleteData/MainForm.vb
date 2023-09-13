@@ -389,20 +389,43 @@ Namespace AutoDeleteData
 							End If
 						Next
 
-						For Each dir As IO.DirectoryInfo In directory.GetDirectories
+						If path.Contains("POCB\HEX") Or path.Contains("D:\Test") Then
 							If DeleteTaskTasksCancellationTokenSource.IsCancellationRequested Then
 								Exit Sub
 							End If
-							If (Now - dir.CreationTime).Days > period Then
-								Try
-									dir.Delete(True)
-									IO.File.AppendAllText(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Deleted " + dir.FullName + Environment.NewLine)
-								Catch ex As Exception
-									IO.File.AppendAllText(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Cannot delete " + dir.FullName + ", exception : " + ex.Message + Environment.NewLine)
-								End Try
+							Dim subFolders As New List(Of String)
+							GetLevel3SubFolders(path, subFolders)
 
-							End If
-						Next
+							For Each dir As String In subFolders
+								Dim dirInfo As New IO.DirectoryInfo(dir)
+								If (Now - dirInfo.CreationTime).Days > period Then
+									Try
+										dirInfo.Delete(True)
+										IO.File.AppendAllText(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Deleted " + dirInfo.FullName + Environment.NewLine)
+									Catch ex As Exception
+										IO.File.AppendAllText(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Cannot delete " + dirInfo.FullName + ", exception : " + ex.Message + Environment.NewLine)
+
+									End Try
+
+								End If
+							Next
+						Else
+							For Each dir As IO.DirectoryInfo In directory.GetDirectories
+								If DeleteTaskTasksCancellationTokenSource.IsCancellationRequested Then
+									Exit Sub
+								End If
+								If (Now - dir.CreationTime).Days > period Then
+									Try
+										dir.Delete(True)
+										IO.File.AppendAllText(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Deleted " + dir.FullName + Environment.NewLine)
+									Catch ex As Exception
+										IO.File.AppendAllText(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Cannot delete " + dir.FullName + ", exception : " + ex.Message + Environment.NewLine)
+									End Try
+
+								End If
+							Next
+						End If
+
 					End If
 
 					Deleting = False
