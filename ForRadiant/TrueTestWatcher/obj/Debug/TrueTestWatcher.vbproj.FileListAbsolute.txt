@@ -6,6 +6,6 @@ D:\GitHub\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTestWatcher.TrueT
 D:\GitHub\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTestWatcher.Resources.resources
 D:\GitHub\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTestWatcher.vbproj.GenerateResource.cache
 D:\GitHub\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTestWatcher.vbproj.CoreCompileInputs.cache
+D:\GitHub\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTestWatcher.vbproj.CopyComplete
 D:\GitHub\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTestWatcher.exe
 D:\GitHub\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTestWatcher.pdb
-D:\GitHub\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTestWatcher.vbproj.CopyComplete

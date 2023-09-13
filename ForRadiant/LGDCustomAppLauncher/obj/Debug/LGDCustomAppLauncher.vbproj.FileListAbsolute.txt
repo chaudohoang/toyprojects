@@ -25,7 +25,6 @@ D:\GitHub\toyprojects\ForRadiant\bin\Debug\LGDCustomAppLauncher\Apps.exe
 D:\GitHub\toyprojects\ForRadiant\bin\Debug\LGDCustomAppLauncher\Apps.pdb
 D:\GitHub\toyprojects\ForRadiant\bin\Debug\LGDCustomAppLauncher\Apps.xml
 D:\GitHub\toyprojects\ForRadiant\LGDCustomAppLauncher\obj\Debug\LGDCustomAppLauncher.vbproj.AssemblyReference.cache
-D:\GitHub\toyprojects\ForRadiant\LGDCustomAppLauncher\obj\Debug\LGDCustomAppLauncher.vbproj.SuggestedBindingRedirects.cache
 D:\GitHub\toyprojects\ForRadiant\LGDCustomAppLauncher\obj\Debug\Apps.Apps.resources
 D:\GitHub\toyprojects\ForRadiant\LGDCustomAppLauncher\obj\Debug\Apps.Resources.resources
 D:\GitHub\toyprojects\ForRadiant\LGDCustomAppLauncher\obj\Debug\LGDCustomAppLauncher.vbproj.GenerateResource.cache
