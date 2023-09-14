@@ -206,7 +206,7 @@ Namespace FTPUploaderVB
 											   lblFileUploadStatus.Text = "Succeeded "
 										   End Sub)
 
-				logContent = Now.ToString("HH:mm:ss.fff") + vbTab + "Upload succeeded " + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
+				logContent = Me.Text + vbTab + Now.ToString("HH:mm:ss.fff") + vbTab + "Upload succeeded " + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
 				File.AppendAllText(succeedLogPath, logContent)
 				If TasksCancellationTokenSource.IsCancellationRequested Then
 					Exit Sub
@@ -223,7 +223,7 @@ Namespace FTPUploaderVB
 											   lblFileUploadStatus.Text = "Failed "
 										   End Sub)
 
-				logContent = Now.ToString("HH:mm:ss.fff") + vbTab + "Upload failed with exception : " + e.Message + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
+				logContent = Me.Text + vbTab + Now.ToString("HH:mm:ss.fff") + vbTab + "Upload failed with exception : " + e.Message + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
 				File.AppendAllText(failLogPath, logContent)
 				If Not Directory.Exists(Path.GetDirectoryName(failCountPath)) Then
 					Directory.CreateDirectory(Path.GetDirectoryName(failCountPath))

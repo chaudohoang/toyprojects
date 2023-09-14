@@ -382,28 +382,28 @@ Namespace TrueTestWatcher
         Private Sub CommLogUpdateText(text As String)
             If InvokeRequired Then BeginInvoke(New UpdateCommLogDelegate(AddressOf CommLogUpdateText), New Object() {text}) : Exit Sub
             If text <> vbCrLf Then
-                ListBox1.Items.Add(Now.ToString("yyyyMMdd HH:mm:ss") + " : " + text)
+                ListBox1.Items.Add(Me.Text + vbTab + Now.ToString("yyyyMMdd HH:mm:ss") + " : " + text)
                 If chkAutolog.Checked AndAlso cbxAutologPath.Text <> "" Then
                     Try
                         Directory.CreateDirectory(cbxAutologPath.Text)
                         Dim logFile As String = Path.Combine(cbxAutologPath.Text, Now.ToString("yyyyMMdd") + ".txt")
-                        File.AppendAllText(logFile, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + text)
+                        File.AppendAllText(logFile, Me.Text + vbTab + Now.ToString("yyyyMMdd HH:mm:ss") + " : " + text)
                         File.AppendAllText(logFile, vbCrLf)
                     Catch ex As Exception
-                        ListBox1.Items.Add("Failed to write log automatically with exception : " + ex.Message)
+                        ListBox1.Items.Add(Me.Text + vbTab + "Failed to write log automatically with exception : " + ex.Message)
                     End Try
 
                 End If
             Else
-                ListBox1.Items.Add(text)
+                ListBox1.Items.Add(Me.Text + vbTab + text)
                 If chkAutolog.Checked AndAlso cbxAutologPath.Text <> "" Then
                     Try
                         Directory.CreateDirectory(cbxAutologPath.Text)
                         Dim logFile As String = Path.Combine(cbxAutologPath.Text, Now.ToString("yyyyMMdd") + ".txt")
-                        File.AppendAllText(logFile, text)
+                        File.AppendAllText(logFile, Me.Text + vbTab + text)
                         File.AppendAllText(logFile, vbCrLf)
                     Catch ex As Exception
-                        ListBox1.Items.Add("Failed to write log automatically with exception : " + ex.Message)
+                        ListBox1.Items.Add(Me.Text + vbTab + "Failed to write log automatically with exception : " + ex.Message)
                     End Try
 
                 End If
