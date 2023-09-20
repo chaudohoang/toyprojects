@@ -1709,5 +1709,6 @@ Namespace TrueTestWatcher
                 CommLogUpdateText("Deleted Master Status !!!")
             End If
         End Sub
+
     End Class
 End Namespace

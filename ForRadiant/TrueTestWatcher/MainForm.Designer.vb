@@ -126,13 +126,17 @@ Namespace TrueTestWatcher
             '
             'minimizedToTrayToolStripMenuItem
             '
+            Me.minimizedToTrayToolStripMenuItem.Checked = True
             Me.minimizedToTrayToolStripMenuItem.CheckOnClick = True
+            Me.minimizedToTrayToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked
             Me.minimizedToTrayToolStripMenuItem.Name = "minimizedToTrayToolStripMenuItem"
             Me.minimizedToTrayToolStripMenuItem.Size = New System.Drawing.Size(226, 22)
             Me.minimizedToTrayToolStripMenuItem.Text = "Minimized Hide Taskbar Icon"
             '
             'StartMinimizedToolStripMenuItem
             '
+            Me.StartMinimizedToolStripMenuItem.Checked = True
+            Me.StartMinimizedToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked
             Me.StartMinimizedToolStripMenuItem.Name = "StartMinimizedToolStripMenuItem"
             Me.StartMinimizedToolStripMenuItem.Size = New System.Drawing.Size(226, 22)
             Me.StartMinimizedToolStripMenuItem.Text = "Start Minimized"

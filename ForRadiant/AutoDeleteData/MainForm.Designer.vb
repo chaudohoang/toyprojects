@@ -137,7 +137,7 @@ Namespace AutoDeleteData
             'richTextBox1
             '
             Me.richTextBox1.BackColor = System.Drawing.SystemColors.Menu
-            Me.richTextBox1.Location = New System.Drawing.Point(12, 298)
+            Me.richTextBox1.Location = New System.Drawing.Point(13, 378)
             Me.richTextBox1.Name = "richTextBox1"
             Me.richTextBox1.Size = New System.Drawing.Size(864, 218)
             Me.richTextBox1.TabIndex = 12
@@ -148,12 +148,12 @@ Namespace AutoDeleteData
             Me.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
             Me.dataGridView1.Location = New System.Drawing.Point(12, 27)
             Me.dataGridView1.Name = "dataGridView1"
-            Me.dataGridView1.Size = New System.Drawing.Size(864, 236)
+            Me.dataGridView1.Size = New System.Drawing.Size(864, 316)
             Me.dataGridView1.TabIndex = 10
             '
             'btnDeleteSelectedNow
             '
-            Me.btnDeleteSelectedNow.Location = New System.Drawing.Point(12, 269)
+            Me.btnDeleteSelectedNow.Location = New System.Drawing.Point(14, 349)
             Me.btnDeleteSelectedNow.Name = "btnDeleteSelectedNow"
             Me.btnDeleteSelectedNow.Size = New System.Drawing.Size(119, 23)
             Me.btnDeleteSelectedNow.TabIndex = 8
@@ -162,7 +162,7 @@ Namespace AutoDeleteData
             '
             'btnSaveList
             '
-            Me.btnSaveList.Location = New System.Drawing.Point(231, 269)
+            Me.btnSaveList.Location = New System.Drawing.Point(233, 349)
             Me.btnSaveList.Name = "btnSaveList"
             Me.btnSaveList.Size = New System.Drawing.Size(72, 23)
             Me.btnSaveList.TabIndex = 9
@@ -171,7 +171,7 @@ Namespace AutoDeleteData
             '
             'btnDeleteAllNow
             '
-            Me.btnDeleteAllNow.Location = New System.Drawing.Point(137, 269)
+            Me.btnDeleteAllNow.Location = New System.Drawing.Point(139, 349)
             Me.btnDeleteAllNow.Name = "btnDeleteAllNow"
             Me.btnDeleteAllNow.Size = New System.Drawing.Size(88, 23)
             Me.btnDeleteAllNow.TabIndex = 8
@@ -182,7 +182,7 @@ Namespace AutoDeleteData
             '
             Me.lblMonitoringStatus.AutoSize = True
             Me.lblMonitoringStatus.ForeColor = System.Drawing.Color.Blue
-            Me.lblMonitoringStatus.Location = New System.Drawing.Point(744, 274)
+            Me.lblMonitoringStatus.Location = New System.Drawing.Point(746, 354)
             Me.lblMonitoringStatus.Name = "lblMonitoringStatus"
             Me.lblMonitoringStatus.Size = New System.Drawing.Size(46, 13)
             Me.lblMonitoringStatus.TabIndex = 38
@@ -192,7 +192,7 @@ Namespace AutoDeleteData
             '
             Me.cmdStopMonitor.AutoSize = True
             Me.cmdStopMonitor.LinkColor = System.Drawing.Color.DarkCyan
-            Me.cmdStopMonitor.Location = New System.Drawing.Point(657, 274)
+            Me.cmdStopMonitor.Location = New System.Drawing.Point(659, 354)
             Me.cmdStopMonitor.Name = "cmdStopMonitor"
             Me.cmdStopMonitor.Size = New System.Drawing.Size(81, 13)
             Me.cmdStopMonitor.TabIndex = 37
@@ -203,7 +203,7 @@ Namespace AutoDeleteData
             '
             Me.cmdStartMonitor.AutoSize = True
             Me.cmdStartMonitor.LinkColor = System.Drawing.Color.Chocolate
-            Me.cmdStartMonitor.Location = New System.Drawing.Point(570, 274)
+            Me.cmdStartMonitor.Location = New System.Drawing.Point(572, 354)
             Me.cmdStartMonitor.Name = "cmdStartMonitor"
             Me.cmdStartMonitor.Size = New System.Drawing.Size(81, 13)
             Me.cmdStartMonitor.TabIndex = 36
@@ -212,7 +212,7 @@ Namespace AutoDeleteData
             '
             'btnReloadList
             '
-            Me.btnReloadList.Location = New System.Drawing.Point(309, 269)
+            Me.btnReloadList.Location = New System.Drawing.Point(311, 349)
             Me.btnReloadList.Name = "btnReloadList"
             Me.btnReloadList.Size = New System.Drawing.Size(72, 23)
             Me.btnReloadList.TabIndex = 39
@@ -221,7 +221,7 @@ Namespace AutoDeleteData
             '
             'btnLogClear
             '
-            Me.btnLogClear.Location = New System.Drawing.Point(500, 269)
+            Me.btnLogClear.Location = New System.Drawing.Point(502, 349)
             Me.btnLogClear.Name = "btnLogClear"
             Me.btnLogClear.Size = New System.Drawing.Size(64, 23)
             Me.btnLogClear.TabIndex = 39
@@ -230,7 +230,7 @@ Namespace AutoDeleteData
             '
             'btnVewItemLog
             '
-            Me.btnVewItemLog.Location = New System.Drawing.Point(387, 269)
+            Me.btnVewItemLog.Location = New System.Drawing.Point(389, 349)
             Me.btnVewItemLog.Name = "btnVewItemLog"
             Me.btnVewItemLog.Size = New System.Drawing.Size(107, 23)
             Me.btnVewItemLog.TabIndex = 40
@@ -241,7 +241,7 @@ Namespace AutoDeleteData
             '
             Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
             Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-            Me.ClientSize = New System.Drawing.Size(888, 528)
+            Me.ClientSize = New System.Drawing.Size(888, 608)
             Me.Controls.Add(Me.btnVewItemLog)
             Me.Controls.Add(Me.btnLogClear)
             Me.Controls.Add(Me.btnReloadList)
