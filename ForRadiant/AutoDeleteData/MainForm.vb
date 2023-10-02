@@ -1173,6 +1173,10 @@ Namespace AutoDeleteData
 											End Sub)
 			dataGridView2.ReadOnly = True
 
+			chkMonitorDisk.Enabled = False
+
+			chkMonitorFolders.Enabled = False
+
 		End Sub
 
 		Private Sub stopMonitor()
@@ -1279,6 +1283,10 @@ Namespace AutoDeleteData
 												btnCheckAllDiskFreeSpace.Enabled = True
 											End Sub)
 			dataGridView2.ReadOnly = False
+
+			chkMonitorDisk.Enabled = True
+
+			chkMonitorFolders.Enabled = True
 
 		End Sub
 
