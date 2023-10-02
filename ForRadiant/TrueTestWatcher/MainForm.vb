@@ -387,8 +387,8 @@ Namespace TrueTestWatcher
                     Try
                         Directory.CreateDirectory(cbxAutologPath.Text)
                         Dim logFile As String = Path.Combine(cbxAutologPath.Text, Now.ToString("yyyyMMdd") + ".txt")
-                        File.AppendAllText(logFile, Me.Text + vbTab + Now.ToString("yyyyMMdd HH:mm:ss") + " : " + text)
-                        File.AppendAllText(logFile, vbCrLf)
+                        WriteLog(logFile, Me.Text + vbTab + Now.ToString("yyyyMMdd HH:mm:ss") + " : " + text)
+                        WriteLog(logFile, vbCrLf)
                     Catch ex As Exception
                         ListBox1.Items.Add(Me.Text + vbTab + "Failed to write log automatically with exception : " + ex.Message)
                     End Try
@@ -400,8 +400,8 @@ Namespace TrueTestWatcher
                     Try
                         Directory.CreateDirectory(cbxAutologPath.Text)
                         Dim logFile As String = Path.Combine(cbxAutologPath.Text, Now.ToString("yyyyMMdd") + ".txt")
-                        File.AppendAllText(logFile, Me.Text + vbTab + text)
-                        File.AppendAllText(logFile, vbCrLf)
+                        WriteLog(logFile, Me.Text + vbTab + text)
+                        WriteLog(logFile, vbCrLf)
                     Catch ex As Exception
                         ListBox1.Items.Add(Me.Text + vbTab + "Failed to write log automatically with exception : " + ex.Message)
                     End Try
@@ -525,7 +525,8 @@ Namespace TrueTestWatcher
             'conpare sequence analysis list
             For i1 = 0 To nodes1.Count - 1
                 If nodes1(i1).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
-                    sequence1AnaList.Add(nodes1(i1).SelectSingleNode("PatternSetupName").InnerText + "_" + (nodes1(i1).SelectSingleNode("Analysis/UserName").InnerText))
+                    Dim analysisName As String = nodes1(i1).SelectSingleNode("PatternSetupName").InnerText + "_" + nodes1(i1).SelectSingleNode("Analysis/UserName").InnerText
+                    sequence1AnaList.Add(analysisName)
                 End If
             Next
             sw2.Stop()
@@ -535,7 +536,8 @@ Namespace TrueTestWatcher
             sw2.Restart()
             For i2 = 0 To nodes2.Count - 1
                 If nodes2(i2).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
-                    sequence2AnaList.Add(nodes2(i2).SelectSingleNode("PatternSetupName").InnerText + "_" + (nodes2(i2).SelectSingleNode("Analysis/UserName").InnerText))
+                    Dim analysisName As String = nodes2(i2).SelectSingleNode("PatternSetupName").InnerText + "_" + nodes2(i2).SelectSingleNode("Analysis/UserName").InnerText
+                    sequence2AnaList.Add(analysisName)
                 End If
             Next
 
@@ -774,6 +776,7 @@ Namespace TrueTestWatcher
                     demuraStepList1.Add(nodes1(i).SelectSingleNode("PatternSetupName").InnerText)
                 End If
             Next
+            sequence1AnaList = sequence1AnaList.Distinct.ToList()
             sw2.Stop()
             timeLogString.Add("Get Running Sequence analysis list and demura step list (to skip demura step) : " + sw2.ElapsedMilliseconds.ToString + "ms")
 
@@ -785,14 +788,20 @@ Namespace TrueTestWatcher
                     If demuraStepList1.Contains(nodes1(index).SelectSingleNode("Name").InnerText) Then Continue For
                     node1 = nodes1(index).SelectSingleNode("CameraSettingsList")
                     For Each childNode As XmlNode In node1.ChildNodes
-                        Dim lastChild As XmlNode = node1.LastChild.Clone()
-                        node1.RemoveAll()
-                        node1.AppendChild(lastChild)
+                        If childNode.SelectSingleNode("SerialNumber").InnerText <> CameraSN Then
+                            node1.RemoveChild(childNode)
+                        End If
                     Next
+                    Try
+                        SN1 = node1.SelectSingleNode("CameraSettings/SerialNumber").InnerText
+                    Catch ex As Exception
+                    End Try
+                    If SN1 = "" Then
+                        Exit For
+                    End If
                     Dim CCID = node1.SelectSingleNode("CameraSettings/ColorCalID").InnerText
                     Dim IMCID = node1.SelectSingleNode("CameraSettings/ImageScalingCalibrationID").InnerText
                     Dim FFID = node1.SelectSingleNode("CameraSettings/FlatFieldID").InnerText
-                    SN1 = node1.SelectSingleNode("CameraSettings/SerialNumber").InnerText
                     ColorCalSetting1.Add(SN1 + "," + nodes1(index).SelectSingleNode("Name").InnerText + "," + CCID)
                     ImgScaleSetting1.Add(SN1 + "," + nodes1(index).SelectSingleNode("Name").InnerText + "," + IMCID)
                     FFCSetting1.Add(SN1 + "," + nodes1(index).SelectSingleNode("Name").InnerText + "," + FFID)
@@ -813,6 +822,7 @@ Namespace TrueTestWatcher
                     demuraStepList2.Add(nodes2(i).SelectSingleNode("PatternSetupName").InnerText)
                 End If
             Next
+            sequence2AnaList = sequence2AnaList.Distinct.ToList()
             sw2.Stop()
             timeLogString.Add("Get Master Calibration analysis list and demura step list (to skip demura step) : " + sw2.ElapsedMilliseconds.ToString + "ms")
 
@@ -823,14 +833,20 @@ Namespace TrueTestWatcher
                     If demuraStepList2.Contains(nodes2(index).SelectSingleNode("Name").InnerText) Then Continue For
                     node2 = nodes2(index).SelectSingleNode("CameraSettingsList")
                     For Each childNode As XmlNode In node2.ChildNodes
-                        Dim lastChild As XmlNode = node2.LastChild.Clone()
-                        node2.RemoveAll()
-                        node2.AppendChild(lastChild)
+                        If childNode.SelectSingleNode("SerialNumber").InnerText <> CameraSN Then
+                            node2.RemoveChild(childNode)
+                        End If
                     Next
+                    Try
+                        SN2 = node2.SelectSingleNode("CameraSettings/SerialNumber").InnerText
+                    Catch ex As Exception
+                    End Try
+                    If SN2 = "" Then
+                        Exit For
+                    End If
                     Dim CCID = node2.SelectSingleNode("CameraSettings/ColorCalID").InnerText
                     Dim IMCID = node2.SelectSingleNode("CameraSettings/ImageScalingCalibrationID").InnerText
                     Dim FFID = node2.SelectSingleNode("CameraSettings/FlatFieldID").InnerText
-                    SN2 = node2.SelectSingleNode("CameraSettings/SerialNumber").InnerText
                     ColorCalSetting2.Add(SN2 + "," + nodes2(index).SelectSingleNode("Name").InnerText + "," + CCID)
                     ImgScaleSetting2.Add(SN2 + "," + nodes2(index).SelectSingleNode("Name").InnerText + "," + IMCID)
                     FFCSetting2.Add(SN2 + "," + nodes2(index).SelectSingleNode("Name").InnerText + "," + FFID)
@@ -840,17 +856,15 @@ Namespace TrueTestWatcher
             sw2.Stop()
             timeLogString.Add("Get Master Calibration Serial Number : " + sw2.ElapsedMilliseconds.ToString + "ms")
 
-            If SN1 <> CameraSN Then
+            If SN1 = "" Then
                 calibrationNG = True
-                CommLogUpdateText("Sequence is copied but not set calibraion !")
+                CommLogUpdateText("Running Sequence is copied but not set calibraion !")
                 Exit Sub
             End If
-            If SN1 <> SN2 Then
+            If SN2 = "" Then
                 calibrationNG = True
-                CommLogUpdateText("Running Sequence and master sequence is from different camera, cannot compare calibration")
+                CommLogUpdateText("Calibration Sequence is copied but not set calibraion !")
                 Exit Sub
-            Else
-
             End If
 
             Dim colorCalRef1 As New Dictionary(Of String, String)
@@ -966,7 +980,21 @@ Namespace TrueTestWatcher
             Dim runningFileMissing As Boolean
             Dim ngFiles As New List(Of String)
             Dim okFiles As New List(Of String)
+
+            Dim appdataIgnoreList As New List(Of String)
+            appdataIgnoreList = cbxAppdataIgnoreList.Text.Split(",").ToList
+
             For Each masterFile As String In files
+                Dim skip As Boolean
+                For Each item As String In appdataIgnoreList
+                    If HaveCommonSubstrings(item, Path.GetFileNameWithoutExtension(masterFile)) Then
+                        skip = True
+                        Exit For
+                    End If
+                Next
+                If skip Then
+                    Continue For
+                End If
                 Dim filename = Path.GetFileName(masterFile)
                 Dim runningFile As String = Path.Combine(AppDataFolder, filename)
                 If Not File.Exists(runningFile) Then
@@ -1255,7 +1283,15 @@ Namespace TrueTestWatcher
                     End Try
                 End While
             Else
-                xmlDoc1.Load("C:\Radiant Vision Systems Data\TrueTest\AppData\1.8\app.settings")
+                Dim fileloaded As Boolean
+                While Not fileloaded
+                    Try
+                        xmlDoc1.Load("C:\Radiant Vision Systems Data\TrueTest\AppData\1.8\app.settings")
+                        fileloaded = True
+                    Catch ex As Exception
+                        fileloaded = False
+                    End Try
+                End While
                 node1 = xmlDoc1.DocumentElement.SelectSingleNode("/Settings/LastSequenceFile")
                 runningSequencePath = node1.InnerText
             End If
@@ -1511,11 +1547,13 @@ Namespace TrueTestWatcher
         Private Sub logchange4(ByVal source As Object, ByVal e As _
                         System.IO.FileSystemEventArgs)
             Dim appdataIgnoreList As New List(Of String)
-            Dim filename As String = Path.GetFileName(e.FullPath).ToLower
+            Dim filename As String = Path.GetFileNameWithoutExtension(e.FullPath).ToLower
             appdataIgnoreList = cbxAppdataIgnoreList.Text.Split(",").ToList
-            If appdataIgnoreList.Contains(filename) Then
-                Exit Sub
-            End If
+            For Each item As String In appdataIgnoreList
+                If HaveCommonSubstrings(item, filename) Then
+                    Exit Sub
+                End If
+            Next
             Dim Extensions() As String = {".xml", ".csv"}
             If Extensions.Contains(Path.GetExtension(e.FullPath)) Or Path.GetFileNameWithoutExtension(e.FullPath).Contains("RegisterPixels") Then
                 If e.ChangeType = IO.WatcherChangeTypes.Changed Then
@@ -1550,6 +1588,14 @@ Namespace TrueTestWatcher
 
         Public Sub logrename4(ByVal source As Object, ByVal e As _
                             System.IO.RenamedEventArgs)
+            Dim appdataIgnoreList As New List(Of String)
+            Dim filename As String = Path.GetFileNameWithoutExtension(e.FullPath).ToLower
+            appdataIgnoreList = cbxAppdataIgnoreList.Text.Split(",").ToList
+            For Each item As String In appdataIgnoreList
+                If HaveCommonSubstrings(item, filename) Then
+                    Exit Sub
+                End If
+            Next
             Dim Extensions() As String = {".xml", ".csv"}
             If Extensions.Contains(Path.GetExtension(e.FullPath)) Or Path.GetFileNameWithoutExtension(e.FullPath).Contains("RegisterPixels") Then
                 CommLogUpdateText("----------File" & e.OldName & " has been renamed to " & e.Name & "----------")
@@ -1574,6 +1620,14 @@ Namespace TrueTestWatcher
 
         Private Sub logchange5(ByVal source As Object, ByVal e As _
                         System.IO.FileSystemEventArgs)
+            Dim appdataIgnoreList As New List(Of String)
+            Dim filename As String = Path.GetFileNameWithoutExtension(e.FullPath).ToLower
+            appdataIgnoreList = cbxAppdataIgnoreList.Text.Split(",").ToList
+            For Each item As String In appdataIgnoreList
+                If HaveCommonSubstrings(item, filename) Then
+                    Exit Sub
+                End If
+            Next
             Dim Extensions() As String = {".xml", ".csv"}
             If Extensions.Contains(Path.GetExtension(e.FullPath)) Or Path.GetFileNameWithoutExtension(e.FullPath).Contains("RegisterPixels") Then
                 If e.ChangeType = IO.WatcherChangeTypes.Changed Then
@@ -1608,6 +1662,14 @@ Namespace TrueTestWatcher
 
         Public Sub logrename5(ByVal source As Object, ByVal e As _
                             System.IO.RenamedEventArgs)
+            Dim appdataIgnoreList As New List(Of String)
+            Dim filename As String = Path.GetFileNameWithoutExtension(e.FullPath).ToLower
+            appdataIgnoreList = cbxAppdataIgnoreList.Text.Split(",").ToList
+            For Each item As String In appdataIgnoreList
+                If HaveCommonSubstrings(item, filename) Then
+                    Exit Sub
+                End If
+            Next
             Dim Extensions() As String = {".xml", ".csv"}
             If Extensions.Contains(Path.GetExtension(e.FullPath)) Or Path.GetFileNameWithoutExtension(e.FullPath).Contains("RegisterPixels") Then
                 CommLogUpdateText("----------File" & e.OldName & " has been renamed to " & e.Name & "----------")
@@ -1709,6 +1771,31 @@ Namespace TrueTestWatcher
                 CommLogUpdateText("Deleted Master Status !!!")
             End If
         End Sub
+
+        Private Sub WriteLog(file As String, content As String)
+            Dim fileloaded As Boolean
+            While Not fileloaded
+                Try
+                    IO.File.AppendAllText(file, content)
+                    fileloaded = True
+                Catch ex As Exception
+                    fileloaded = False
+                End Try
+            End While
+        End Sub
+
+        Private Function HaveCommonSubstrings(str1 As String, str2 As String) As Boolean
+
+            If String.IsNullOrEmpty(str1) OrElse String.IsNullOrEmpty(str2) Then
+                Return False
+            End If
+
+            If str2.Contains(str1) Or str1.Contains(str2) Then
+                Return True
+            End If
+
+            Return False
+        End Function
 
     End Class
 End Namespace

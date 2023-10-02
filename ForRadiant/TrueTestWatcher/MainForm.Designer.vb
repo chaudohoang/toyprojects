@@ -264,7 +264,7 @@ Namespace TrueTestWatcher
             Me.cbxAppdataIgnoreList.Name = "cbxAppdataIgnoreList"
             Me.cbxAppdataIgnoreList.Size = New System.Drawing.Size(382, 21)
             Me.cbxAppdataIgnoreList.TabIndex = 31
-            Me.cbxAppdataIgnoreList.Text = "edt.csv,devmode.csv,pixel_log.csv"
+            Me.cbxAppdataIgnoreList.Text = "edt,devmode,pixel_log"
             '
             'Label1
             '
@@ -279,7 +279,7 @@ Namespace TrueTestWatcher
             '
             Me.cbxIgnoreList.FormattingEnabled = True
             Me.cbxIgnoreList.Items.AddRange(New Object() {"", "Notes,DllOutputPath,DLLDefFolder"})
-            Me.cbxIgnoreList.Location = New System.Drawing.Point(68, 72)
+            Me.cbxIgnoreList.Location = New System.Drawing.Point(171, 72)
             Me.cbxIgnoreList.Name = "cbxIgnoreList"
             Me.cbxIgnoreList.Size = New System.Drawing.Size(382, 21)
             Me.cbxIgnoreList.TabIndex = 29
@@ -290,9 +290,9 @@ Namespace TrueTestWatcher
             Me.Label4.AutoSize = True
             Me.Label4.Location = New System.Drawing.Point(6, 75)
             Me.Label4.Name = "Label4"
-            Me.Label4.Size = New System.Drawing.Size(56, 13)
+            Me.Label4.Size = New System.Drawing.Size(159, 13)
             Me.Label4.TabIndex = 28
-            Me.Label4.Text = "Ignore List"
+            Me.Label4.Text = "Sequence Parameter Ignore List"
             '
             'chkCompareAppdataFiles
             '

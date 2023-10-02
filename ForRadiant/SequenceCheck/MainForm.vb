@@ -1169,6 +1169,7 @@ Public Class MainForm
 				demuraStepList1.Add(nodes1(i).SelectSingleNode("PatternSetupName").InnerText)
 			End If
 		Next
+		sequence1AnaList = sequence1AnaList.Distinct.ToList()
 		sw2.Stop()
 		timeLogString.Add("Get sequence 1 analysis list and demura step list (to skip demura step) : " + sw2.ElapsedMilliseconds.ToString + "ms")
 
@@ -1180,14 +1181,20 @@ Public Class MainForm
 				If demuraStepList1.Contains(nodes1(index).SelectSingleNode("Name").InnerText) Then Continue For
 				node1 = nodes1(index).SelectSingleNode("CameraSettingsList")
 				For Each childNode As XmlNode In node1.ChildNodes
-					Dim lastChild As XmlNode = node1.LastChild.Clone()
-					node1.RemoveAll()
-					node1.AppendChild(lastChild)
+					If childNode.SelectSingleNode("SerialNumber").InnerText <> CameraSN Then
+						node1.RemoveChild(childNode)
+					End If
 				Next
+				Try
+					SN1 = node1.SelectSingleNode("CameraSettings/SerialNumber").InnerText
+				Catch ex As Exception
+				End Try
+				If SN1 = "" Then
+					Exit For
+				End If
 				Dim CCID = node1.SelectSingleNode("CameraSettings/ColorCalID").InnerText
 				Dim IMCID = node1.SelectSingleNode("CameraSettings/ImageScalingCalibrationID").InnerText
 				Dim FFID = node1.SelectSingleNode("CameraSettings/FlatFieldID").InnerText
-				SN1 = node1.SelectSingleNode("CameraSettings/SerialNumber").InnerText
 				ColorCalSetting1.Add(SN1 + "," + nodes1(index).SelectSingleNode("Name").InnerText + "," + CCID)
 				ImgScaleSetting1.Add(SN1 + "," + nodes1(index).SelectSingleNode("Name").InnerText + "," + IMCID)
 				FFCSetting1.Add(SN1 + "," + nodes1(index).SelectSingleNode("Name").InnerText + "," + FFID)
@@ -1208,6 +1215,7 @@ Public Class MainForm
 				demuraStepList2.Add(nodes2(i).SelectSingleNode("PatternSetupName").InnerText)
 			End If
 		Next
+		sequence2AnaList = sequence2AnaList.Distinct.ToList()
 		sw2.Stop()
 		timeLogString.Add("Get sequence 2 analysis list and demura step list (to skip demura step) : " + sw2.ElapsedMilliseconds.ToString + "ms")
 
@@ -1218,14 +1226,20 @@ Public Class MainForm
 				If demuraStepList2.Contains(nodes2(index).SelectSingleNode("Name").InnerText) Then Continue For
 				node2 = nodes2(index).SelectSingleNode("CameraSettingsList")
 				For Each childNode As XmlNode In node2.ChildNodes
-					Dim lastChild As XmlNode = node2.LastChild.Clone()
-					node2.RemoveAll()
-					node2.AppendChild(lastChild)
+					If childNode.SelectSingleNode("SerialNumber").InnerText <> CameraSN Then
+						node2.RemoveChild(childNode)
+					End If
 				Next
+				Try
+					SN2 = node2.SelectSingleNode("CameraSettings/SerialNumber").InnerText
+				Catch ex As Exception
+				End Try
+				If SN2 = "" Then
+					Exit For
+				End If
 				Dim CCID = node2.SelectSingleNode("CameraSettings/ColorCalID").InnerText
 				Dim IMCID = node2.SelectSingleNode("CameraSettings/ImageScalingCalibrationID").InnerText
 				Dim FFID = node2.SelectSingleNode("CameraSettings/FlatFieldID").InnerText
-				SN2 = node2.SelectSingleNode("CameraSettings/SerialNumber").InnerText
 				ColorCalSetting2.Add(SN2 + "," + nodes2(index).SelectSingleNode("Name").InnerText + "," + CCID)
 				ImgScaleSetting2.Add(SN2 + "," + nodes2(index).SelectSingleNode("Name").InnerText + "," + IMCID)
 				FFCSetting2.Add(SN2 + "," + nodes2(index).SelectSingleNode("Name").InnerText + "," + FFID)
@@ -1235,13 +1249,12 @@ Public Class MainForm
 		sw2.Stop()
 		timeLogString.Add("Get sequence 2 Serial Number : " + sw2.ElapsedMilliseconds.ToString + "ms")
 
-		If SN1 <> CameraSN Then
-			CommLogUpdateText("Sequence is copied but not set calibraion !")
+		If SN1 = "" Then
+			CommLogUpdateText("Running Sequence is copied but not set calibraion !")
 			Exit Sub
 		End If
-
-		If SN1 <> SN2 Then
-			CommLogUpdateText("Running sequence and master sequence is from different camera, cannot compare calibration")
+		If SN2 = "" Then
+			CommLogUpdateText("Calibration Sequence is copied but not set calibraion !")
 			Exit Sub
 		End If
 
