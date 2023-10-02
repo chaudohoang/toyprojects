@@ -1177,6 +1177,10 @@ Namespace AutoDeleteData
 
 			chkMonitorFolders.Enabled = False
 
+			SaveAllListToolStripMenuItem.Enabled = False
+
+			ReloadAllListToolStripMenuItem.Enabled = False
+
 		End Sub
 
 		Private Sub stopMonitor()
@@ -1287,6 +1291,10 @@ Namespace AutoDeleteData
 			chkMonitorDisk.Enabled = True
 
 			chkMonitorFolders.Enabled = True
+
+			SaveAllListToolStripMenuItem.Enabled = True
+
+			ReloadAllListToolStripMenuItem.Enabled = True
 
 		End Sub
 
