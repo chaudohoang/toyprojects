@@ -1159,6 +1159,10 @@ Namespace AutoDeleteData
 									End Sub)
 			dataGridView1.ReadOnly = True
 
+			dataGridView2.ReadOnly = True
+
+			dataGridView3.ReadOnly = True
+
 			btnSaveList2.Invoke(Sub()
 									btnSaveList2.Enabled = False
 								End Sub)
@@ -1171,7 +1175,6 @@ Namespace AutoDeleteData
 			btnCheckAllDiskFreeSpace.Invoke(Sub()
 												btnCheckAllDiskFreeSpace.Enabled = False
 											End Sub)
-			dataGridView2.ReadOnly = True
 
 			chkMonitorDisk.Enabled = False
 
@@ -1274,6 +1277,14 @@ Namespace AutoDeleteData
 									End Sub)
 			dataGridView1.ReadOnly = False
 
+			dataGridView2.ReadOnly = False
+
+			dataGridView3.ReadOnly = False
+
+			dataGridView1.Columns(3).ReadOnly = True
+
+			dataGridView2.Columns(5).ReadOnly = True
+
 			btnSaveList2.Invoke(Sub()
 									btnSaveList2.Enabled = True
 								End Sub)
@@ -1286,8 +1297,6 @@ Namespace AutoDeleteData
 			btnCheckAllDiskFreeSpace.Invoke(Sub()
 												btnCheckAllDiskFreeSpace.Enabled = True
 											End Sub)
-			dataGridView2.ReadOnly = False
-
 			chkMonitorDisk.Enabled = True
 
 			chkMonitorFolders.Enabled = True
