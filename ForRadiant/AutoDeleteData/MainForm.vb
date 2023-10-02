@@ -1453,7 +1453,12 @@ Namespace AutoDeleteData
 		Private Sub ClearAllLogsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ClearAllLogsToolStripMenuItem.Click
 			richTextBox1.Clear()
 			richTextBox2.Clear()
-			Dim logList As IEnumerable(Of String) = IO.Directory.EnumerateFiles(appdir, "autodeletedatalog*.txt")
+			Dim logList As IEnumerable(Of String)
+			If Directory.Exists(txtLogpath.Text) Then
+				logList = IO.Directory.EnumerateFiles(txtLogpath.Text, "autodeletedatalog*.txt")
+			Else
+				logList = IO.Directory.EnumerateFiles(appdir, "autodeletedatalog*.txt")
+			End If
 
 			For Each log As String In logList
 				Try
@@ -1463,7 +1468,12 @@ Namespace AutoDeleteData
 				End Try
 			Next
 
-			Dim logList2 As IEnumerable(Of String) = IO.Directory.EnumerateFiles(appdir, "autocheckdisklog*.txt")
+			Dim logList2 As IEnumerable(Of String)
+			If Directory.Exists(txtLogpath.Text) Then
+				logList2 = IO.Directory.EnumerateFiles(txtLogpath.Text, "autocheckdisklog*.txt")
+			Else
+				logList2 = IO.Directory.EnumerateFiles(appdir, "autocheckdisklog*.txt")
+			End If
 
 			For Each log As String In logList2
 				Try
@@ -1494,7 +1504,12 @@ Namespace AutoDeleteData
 
 		Private Sub btnClearLogs_Click(sender As Object, e As EventArgs) Handles btnClearLogs.Click
 			richTextBox1.Clear()
-			Dim logList As IEnumerable(Of String) = IO.Directory.EnumerateFiles(appdir, "autodeletedatalog*.txt")
+			Dim logList As IEnumerable(Of String)
+			If Directory.Exists(txtLogpath.Text) Then
+				logList = IO.Directory.EnumerateFiles(txtLogpath.Text, "autodeletedatalog*.txt")
+			Else
+				logList = IO.Directory.EnumerateFiles(appdir, "autodeletedatalog*.txt")
+			End If
 
 			For Each log As String In logList
 				Try
@@ -1507,7 +1522,12 @@ Namespace AutoDeleteData
 
 		Private Sub btnClearLogs2_Click(sender As Object, e As EventArgs) Handles btnClearLogs2.Click
 			richTextBox2.Clear()
-			Dim logList2 As IEnumerable(Of String) = IO.Directory.EnumerateFiles(appdir, "autocheckdisklog*.txt")
+			Dim logList2 As IEnumerable(Of String)
+			If Directory.Exists(txtLogpath.Text) Then
+				logList2 = IO.Directory.EnumerateFiles(txtLogpath.Text, "autocheckdisklog*.txt")
+			Else
+				logList2 = IO.Directory.EnumerateFiles(appdir, "autocheckdisklog*.txt")
+			End If
 
 			For Each log As String In logList2
 				Try
