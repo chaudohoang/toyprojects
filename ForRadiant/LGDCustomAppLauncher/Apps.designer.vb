@@ -36,6 +36,7 @@ Partial Class Apps
         Me.chkSkipRFD = New System.Windows.Forms.CheckBox()
         Me.chkSkipPOI = New System.Windows.Forms.CheckBox()
         Me.TabPage1 = New System.Windows.Forms.TabPage()
+        Me.cmdTrueTestWatcher = New System.Windows.Forms.LinkLabel()
         Me.cmdEmu2p1Simulator = New System.Windows.Forms.LinkLabel()
         Me.cmdRenameVNTT = New System.Windows.Forms.LinkLabel()
         Me.cmdFolderLock = New System.Windows.Forms.LinkLabel()
@@ -52,7 +53,9 @@ Partial Class Apps
         Me.cmdSetSequence = New System.Windows.Forms.LinkLabel()
         Me.cmdButterfly = New System.Windows.Forms.LinkLabel()
         Me.TabControl1 = New System.Windows.Forms.TabControl()
-        Me.cmdTrueTestWatcher = New System.Windows.Forms.LinkLabel()
+        Me.cmdAutoDeleteData = New System.Windows.Forms.LinkLabel()
+        Me.cmdRadFlowSimulator = New System.Windows.Forms.LinkLabel()
+        Me.cmdRadFlowANISimulator = New System.Windows.Forms.LinkLabel()
         Me.TabPage2.SuspendLayout()
         Me.TabPage1.SuspendLayout()
         Me.TabControl1.SuspendLayout()
@@ -200,6 +203,9 @@ Partial Class Apps
         '
         'TabPage1
         '
+        Me.TabPage1.Controls.Add(Me.cmdRadFlowANISimulator)
+        Me.TabPage1.Controls.Add(Me.cmdRadFlowSimulator)
+        Me.TabPage1.Controls.Add(Me.cmdAutoDeleteData)
         Me.TabPage1.Controls.Add(Me.cmdTrueTestWatcher)
         Me.TabPage1.Controls.Add(Me.cmdEmu2p1Simulator)
         Me.TabPage1.Controls.Add(Me.cmdRenameVNTT)
@@ -223,6 +229,16 @@ Partial Class Apps
         Me.TabPage1.TabIndex = 0
         Me.TabPage1.Text = "Apps"
         Me.TabPage1.UseVisualStyleBackColor = True
+        '
+        'cmdTrueTestWatcher
+        '
+        Me.cmdTrueTestWatcher.AutoSize = True
+        Me.cmdTrueTestWatcher.Location = New System.Drawing.Point(307, 63)
+        Me.cmdTrueTestWatcher.Name = "cmdTrueTestWatcher"
+        Me.cmdTrueTestWatcher.Size = New System.Drawing.Size(91, 13)
+        Me.cmdTrueTestWatcher.TabIndex = 8
+        Me.cmdTrueTestWatcher.TabStop = True
+        Me.cmdTrueTestWatcher.Text = "TrueTestWatcher"
         '
         'cmdEmu2p1Simulator
         '
@@ -384,15 +400,35 @@ Partial Class Apps
         Me.TabControl1.Size = New System.Drawing.Size(519, 291)
         Me.TabControl1.TabIndex = 2
         '
-        'cmdTrueTestWatcher
+        'cmdAutoDeleteData
         '
-        Me.cmdTrueTestWatcher.AutoSize = True
-        Me.cmdTrueTestWatcher.Location = New System.Drawing.Point(307, 63)
-        Me.cmdTrueTestWatcher.Name = "cmdTrueTestWatcher"
-        Me.cmdTrueTestWatcher.Size = New System.Drawing.Size(91, 13)
-        Me.cmdTrueTestWatcher.TabIndex = 8
-        Me.cmdTrueTestWatcher.TabStop = True
-        Me.cmdTrueTestWatcher.Text = "TrueTestWatcher"
+        Me.cmdAutoDeleteData.AutoSize = True
+        Me.cmdAutoDeleteData.Location = New System.Drawing.Point(404, 63)
+        Me.cmdAutoDeleteData.Name = "cmdAutoDeleteData"
+        Me.cmdAutoDeleteData.Size = New System.Drawing.Size(89, 13)
+        Me.cmdAutoDeleteData.TabIndex = 8
+        Me.cmdAutoDeleteData.TabStop = True
+        Me.cmdAutoDeleteData.Text = "Auto Delete Data"
+        '
+        'cmdRadFlowSimulator
+        '
+        Me.cmdRadFlowSimulator.AutoSize = True
+        Me.cmdRadFlowSimulator.Location = New System.Drawing.Point(8, 89)
+        Me.cmdRadFlowSimulator.Name = "cmdRadFlowSimulator"
+        Me.cmdRadFlowSimulator.Size = New System.Drawing.Size(95, 13)
+        Me.cmdRadFlowSimulator.TabIndex = 9
+        Me.cmdRadFlowSimulator.TabStop = True
+        Me.cmdRadFlowSimulator.Text = "RadFlow Simulator"
+        '
+        'cmdRadFlowANISimulator
+        '
+        Me.cmdRadFlowANISimulator.AutoSize = True
+        Me.cmdRadFlowANISimulator.Location = New System.Drawing.Point(109, 89)
+        Me.cmdRadFlowANISimulator.Name = "cmdRadFlowANISimulator"
+        Me.cmdRadFlowANISimulator.Size = New System.Drawing.Size(113, 13)
+        Me.cmdRadFlowANISimulator.TabIndex = 10
+        Me.cmdRadFlowANISimulator.TabStop = True
+        Me.cmdRadFlowANISimulator.Text = "RadFlowANI Simulator"
         '
         'Apps
         '
@@ -442,4 +478,7 @@ Partial Class Apps
     Friend WithEvents chkSkipPFL As CheckBox
     Friend WithEvents chkSkipFLDLGDPOCB41 As CheckBox
     Friend WithEvents cmdTrueTestWatcher As LinkLabel
+    Friend WithEvents cmdAutoDeleteData As LinkLabel
+    Friend WithEvents cmdRadFlowSimulator As LinkLabel
+    Friend WithEvents cmdRadFlowANISimulator As LinkLabel
 End Class

@@ -473,4 +473,22 @@ Public Class Apps
         startinfo.FileName = System.IO.Path.Combine(exePath, "TrueTestWatcher.exe")
         Process.Start(startinfo)
     End Sub
+
+    Private Sub cmdAutoDeleteData_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdAutoDeleteData.LinkClicked
+        startinfo.WorkingDirectory = exePath
+        startinfo.FileName = System.IO.Path.Combine(exePath, "AutoDeleteData.exe")
+        Process.Start(startinfo)
+    End Sub
+
+    Private Sub cmdRadFlowSimulator_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdRadFlowSimulator.LinkClicked
+        startinfo.WorkingDirectory = exePath
+        startinfo.FileName = System.IO.Path.Combine(exePath, "RadFlowANISim.exe")
+        Process.Start(startinfo)
+    End Sub
+
+    Private Sub cmdRadFlowANISimulator_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdRadFlowANISimulator.LinkClicked
+        startinfo.WorkingDirectory = exePath
+        startinfo.FileName = System.IO.Path.Combine(exePath, "RadFlowANISimANI.exe")
+        Process.Start(startinfo)
+    End Sub
 End Class
