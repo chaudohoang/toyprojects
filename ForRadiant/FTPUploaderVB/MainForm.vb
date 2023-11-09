@@ -406,14 +406,26 @@ Namespace FTPUploaderVB
 			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("1g1o") Then
 				failedFileName = "HEX"
 				failedFileReason = "HEX_X"
+			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("1st") Then
+				failedFileName = "HEX_1ST"
+				failedFileReason = "HEX_1ST_X"
 			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("2nd") Then
-				failedFileName = "HEX_1"
-				failedFileReason = "HEX_1_X"
+				failedFileName = "HEX_2ND"
+				failedFileReason = "HEX_2ND_X"
 			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("3rd") Then
-				failedFileName = "HEX_2"
-				failedFileReason = "HEX_2_X"
-			Else
+				failedFileName = "HEX_3RD"
+				failedFileReason = "HEX_3RD_X"
+			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("4th") Then
+				failedFileName = "HEX_4TH"
+				failedFileReason = "HEX_4TH_X"
+			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("5th") Then
+				failedFileName = "HEX_5TH"
+				failedFileReason = "HEX_5TH_X"
+			ElseIf Path.GetFileNameWithoutExtension(destFile).Contains("step2_03") Then
 				failedFileName = Path.GetFileNameWithoutExtension(destFile).Replace("step2_03_", "").Replace("_imgY_Crop", "")
+				failedFileReason = failedFileName + "_X"
+			Else
+				failedFileName = Path.GetFileNameWithoutExtension(destFile).Replace("_imgY_Crop", "")
 				failedFileReason = failedFileName + "_X"
 			End If
 			Dim lines = File.ReadAllLines(summaryLogFile)
@@ -479,12 +491,20 @@ Namespace FTPUploaderVB
 				succeededFileName = "HEX_RCB"
 			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("1g1o") Then
 				succeededFileName = "HEX"
+			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("1st") Then
+				succeededFileName = "HEX_1ST"
 			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("2nd") Then
-				succeededFileName = "HEX_1"
+				succeededFileName = "HEX_2ND"
 			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("3rd") Then
-				succeededFileName = "HEX_2"
-			Else
+				succeededFileName = "HEX_3RD"
+			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("4th") Then
+				succeededFileName = "HEX_4TH"
+			ElseIf Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("nypucdata") AndAlso Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("5th") Then
+				succeededFileName = "HEX_5TH"
+			ElseIf Path.GetFileNameWithoutExtension(destFile).Contains("step2_03") Then
 				succeededFileName = Path.GetFileNameWithoutExtension(destFile).Replace("step2_03_", "").Replace("_imgY_Crop", "")
+			Else
+				succeededFileName = Path.GetFileNameWithoutExtension(destFile).Replace("_imgY_Crop", "")
 			End If
 			Dim lines = File.ReadAllLines(summaryLogFile)
 			Dim columnHeader = lines(0).Split(",")
