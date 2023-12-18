@@ -12,7 +12,7 @@ namespace Program
 			foreach(String path in fileNames)
 			{
 			    var dir = Path.GetDirectoryName(path);
-				var fileName = Path.GetFileNameWithoutExtension(path).Replace("step04","step05");
+				var fileName = Path.GetFileNameWithoutExtension(path).Replace("D964","D965");
 				var ext = Path.GetExtension(path);
 			    var newPath = Path.Combine(dir, fileName+ext);
 			    File.Move(path, newPath);

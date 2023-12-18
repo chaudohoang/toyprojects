@@ -1,0 +1,10 @@
+D:\Github\toyprojects\ForRadiant\RenameFiiles\bin\Debug\RenameFiiles.exe.config
+D:\Github\toyprojects\ForRadiant\RenameFiiles\bin\Debug\RenameFiiles.exe
+D:\Github\toyprojects\ForRadiant\RenameFiiles\bin\Debug\RenameFiiles.pdb
+D:\Github\toyprojects\ForRadiant\RenameFiiles\obj\Debug\RenameFiiles.csproj.AssemblyReference.cache
+D:\Github\toyprojects\ForRadiant\RenameFiiles\obj\Debug\RenameFiiles.Form1.resources
+D:\Github\toyprojects\ForRadiant\RenameFiiles\obj\Debug\RenameFiiles.Properties.Resources.resources
+D:\Github\toyprojects\ForRadiant\RenameFiiles\obj\Debug\RenameFiiles.csproj.GenerateResource.cache
+D:\Github\toyprojects\ForRadiant\RenameFiiles\obj\Debug\RenameFiiles.csproj.CoreCompileInputs.cache
+D:\Github\toyprojects\ForRadiant\RenameFiiles\obj\Debug\RenameFiiles.exe
+D:\Github\toyprojects\ForRadiant\RenameFiiles\obj\Debug\RenameFiiles.pdb
