@@ -400,8 +400,18 @@ Public Class MainForm
 
 	Private Sub btnCheck_Click(sender As Object, e As EventArgs) Handles btnCheck.Click
 		btnCheck.Enabled = False
-
-		CheckSequence()
+		getCurrentCameraSN2()
+		CheckSequence(txtFile3.Text)
+		If Not String.IsNullOrEmpty(txtAdditionalSequence.Text) Then
+			Try
+				Dim additionalTargets As String() = txtAdditionalSequence.Text.Split(New Char() {ChrW(13), ChrW(10)}, StringSplitOptions.RemoveEmptyEntries)
+				For Each item As String In additionalTargets
+					CommLogUpdateText2(vbCrLf)
+					CheckSequence(item)
+				Next
+			Catch ex As Exception
+			End Try
+		End If
 
 		If ListBox2.Items.Count > 0 AndAlso ListBox2.Items(ListBox2.Items.Count - 1).ToString() <> vbCrLf Then
 			CommLogUpdateText2(vbCrLf)
@@ -410,7 +420,7 @@ Public Class MainForm
 
 	End Sub
 
-	Public Sub CheckSequence()
+	Public Sub CheckSequence(InputSequence As String)
 		Dim subframeMatch As Boolean = True
 		Dim CalIsNONE As Boolean = False
 		Dim ColorCalNG As Boolean = False
@@ -426,10 +436,11 @@ Public Class MainForm
 		Dim node3 As XmlNode
 		Dim nodes3 As XmlNodeList
 		Dim xmlDoc3 = New XmlDocument()
+		Dim SN As String = ""
 		If Not Directory.Exists("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules") Then
 			Directory.CreateDirectory("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules")
 		End If
-		Dim ColorCalRuleFilaName As String = Path.GetFileNameWithoutExtension(txtFile3.Text) + "_colorcal.txt"
+		Dim ColorCalRuleFilaName As String = Path.GetFileNameWithoutExtension(InputSequence) + "_colorcal.txt"
 		Dim ColorCalRuleFilePath As String = Path.Combine("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules", ColorCalRuleFilaName)
 
 		Dim ColorCalRulesDict As New Dictionary(Of String, String)
@@ -444,7 +455,7 @@ Public Class MainForm
 
 		End If
 
-		Dim FlatFieldCalRuleFilaName As String = Path.GetFileNameWithoutExtension(txtFile3.Text) + "_flatfieldcal.txt"
+		Dim FlatFieldCalRuleFilaName As String = Path.GetFileNameWithoutExtension(InputSequence) + "_flatfieldcal.txt"
 		Dim FlatFieldCalRuleFilePath As String = Path.Combine("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules", FlatFieldCalRuleFilaName)
 
 		Dim FlatFieldCalRulesDict As New Dictionary(Of String, String)
@@ -459,7 +470,7 @@ Public Class MainForm
 
 		End If
 
-		Dim ImgScaleCalRuleFilaName As String = Path.GetFileNameWithoutExtension(txtFile3.Text) + "_imgscalecal.txt"
+		Dim ImgScaleCalRuleFilaName As String = Path.GetFileNameWithoutExtension(InputSequence) + "_imgscalecal.txt"
 		Dim ImgScaleCalRuleFilePath As String = Path.Combine("C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration Rules", ImgScaleCalRuleFilaName)
 
 		Dim ImgScaleCalRulesDict As New Dictionary(Of String, String)
@@ -474,7 +485,7 @@ Public Class MainForm
 
 		End If
 
-		xmlDoc3.Load(txtFile3.Text)
+		xmlDoc3.Load(InputSequence)
 		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/Items/SequenceItem")
 		For i = 0 To nodes3.Count - 1
 			If nodes3(i).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
@@ -491,14 +502,29 @@ Public Class MainForm
 			If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
 			If cbxSubframe.Text <> "" AndAlso sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
 				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
-				For Each childNode As XmlNode In node3.ChildNodes
-					Dim lastChild As XmlNode = node3.LastChild.Clone()
-					node3.RemoveAll()
-					node3.AppendChild(lastChild)
-				Next
+				If cbCameraSNStyle2.SelectedIndex = 0 Then
+					For Each childNode As XmlNode In node3.ChildNodes
+						If childNode.SelectSingleNode("SerialNumber").InnerText <> CameraSN Then
+							node3.RemoveChild(childNode)
+						End If
+					Next
+				Else
+					For Each childNode As XmlNode In node3.ChildNodes
+						Dim lastChild As XmlNode = node3.LastChild.Clone()
+						node3.RemoveAll()
+						node3.AppendChild(lastChild)
+					Next
+				End If
+				Try
+					SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
+				Catch ex As Exception
+				End Try
+				If SN = "" Then
+					Exit For
+				End If
+
 				Dim subframe = node3.SelectSingleNode("CameraSettings/SubFrameRegion").InnerText
 				Dim StepName = nodes3(index).SelectSingleNode("Name").InnerText
-				Dim SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
 				If subframe <> cbxSubframe.Text Then
 					subframeMatch = False
 					logSubframe.Add("SN : " + SN + " , Step : " + StepName + ", Subframe : " + subframe)
@@ -512,17 +538,34 @@ Public Class MainForm
 			If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
 			If chkCalNone.Checked = True AndAlso sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
 				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
-				For Each childNode As XmlNode In node3.ChildNodes
-					Dim lastChild As XmlNode = node3.LastChild.Clone()
-					node3.RemoveAll()
-					node3.AppendChild(lastChild)
-				Next
+
+				If cbCameraSNStyle2.SelectedIndex = 0 Then
+					For Each childNode As XmlNode In node3.ChildNodes
+						If childNode.SelectSingleNode("SerialNumber").InnerText <> CameraSN Then
+							node3.RemoveChild(childNode)
+						End If
+					Next
+				Else
+					For Each childNode As XmlNode In node3.ChildNodes
+						Dim lastChild As XmlNode = node3.LastChild.Clone()
+						node3.RemoveAll()
+						node3.AppendChild(lastChild)
+					Next
+				End If
+				Try
+					SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
+				Catch ex As Exception
+				End Try
+
+				If SN = "" Then
+					Exit For
+				End If
+
 				Dim subframe = node3.SelectSingleNode("CameraSettings/SubFrameRegion").InnerText
 				Dim CCID = node3.SelectSingleNode("CameraSettings/ColorCalID").InnerText
 				Dim IMCID = node3.SelectSingleNode("CameraSettings/ImageScalingCalibrationID").InnerText
 				Dim FFID = node3.SelectSingleNode("CameraSettings/FlatFieldID").InnerText
 				Dim StepName = nodes3(index).SelectSingleNode("Name").InnerText
-				Dim SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
 				Dim log As String = ""
 				If CCID = 0 Then
 					CalIsNONE = True
@@ -547,15 +590,30 @@ Public Class MainForm
 			If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
 			If chkColorCalSettings.Checked = True AndAlso sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
 				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
-				For Each childNode As XmlNode In node3.ChildNodes
-					Dim lastChild As XmlNode = node3.LastChild.Clone()
-					node3.RemoveAll()
-					node3.AppendChild(lastChild)
-				Next
+				If cbCameraSNStyle2.SelectedIndex = 0 Then
+					For Each childNode As XmlNode In node3.ChildNodes
+						If childNode.SelectSingleNode("SerialNumber").InnerText <> CameraSN Then
+							node3.RemoveChild(childNode)
+						End If
+					Next
+				Else
+					For Each childNode As XmlNode In node3.ChildNodes
+						Dim lastChild As XmlNode = node3.LastChild.Clone()
+						node3.RemoveAll()
+						node3.AppendChild(lastChild)
+					Next
+				End If
+				Try
+					SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
+				Catch ex As Exception
+				End Try
+
+				If SN = "" Then
+					Exit For
+				End If
 
 				Dim CCID = node3.SelectSingleNode("CameraSettings/ColorCalID").InnerText
 				Dim StepName = nodes3(index).SelectSingleNode("Name").InnerText
-				Dim SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
 				Dim log As String = ""
 				If ColorCalRulesDict.ContainsKey(StepName) AndAlso ColorCalRulesDict(StepName) <> CCID Then
 					ColorCalNG = True
@@ -576,15 +634,30 @@ Public Class MainForm
 			If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
 			If chkFlatFieldCalSettings.Checked = True AndAlso sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
 				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
-				For Each childNode As XmlNode In node3.ChildNodes
-					Dim lastChild As XmlNode = node3.LastChild.Clone()
-					node3.RemoveAll()
-					node3.AppendChild(lastChild)
-				Next
+
+				If cbCameraSNStyle2.SelectedIndex = 0 Then
+					For Each childNode As XmlNode In node3.ChildNodes
+						If childNode.SelectSingleNode("SerialNumber").InnerText <> CameraSN Then
+							node3.RemoveChild(childNode)
+						End If
+					Next
+				Else
+					For Each childNode As XmlNode In node3.ChildNodes
+						Dim lastChild As XmlNode = node3.LastChild.Clone()
+						node3.RemoveAll()
+						node3.AppendChild(lastChild)
+					Next
+				End If
+				Try
+					SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
+				Catch ex As Exception
+				End Try
+				If SN = "" Then
+					Exit For
+				End If
 
 				Dim FFID = node3.SelectSingleNode("CameraSettings/FlatFieldID").InnerText
 				Dim StepName = nodes3(index).SelectSingleNode("Name").InnerText
-				Dim SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
 				Dim log As String = ""
 				If FlatFieldCalRulesDict.ContainsKey(StepName) AndAlso FlatFieldCalRulesDict(StepName) <> FFID Then
 					FlatFieldCalNG = True
@@ -605,15 +678,31 @@ Public Class MainForm
 			'If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
 			If chkImgScaleCalSettings.Checked = True AndAlso sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
 				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
-				For Each childNode As XmlNode In node3.ChildNodes
-					Dim lastChild As XmlNode = node3.LastChild.Clone()
-					node3.RemoveAll()
-					node3.AppendChild(lastChild)
-				Next
+				If cbCameraSNStyle2.SelectedIndex = 0 Then
+					For Each childNode As XmlNode In node3.ChildNodes
+						If childNode.SelectSingleNode("SerialNumber").InnerText <> CameraSN Then
+							node3.RemoveChild(childNode)
+						End If
+					Next
+				Else
+					For Each childNode As XmlNode In node3.ChildNodes
+						Dim lastChild As XmlNode = node3.LastChild.Clone()
+						node3.RemoveAll()
+						node3.AppendChild(lastChild)
+					Next
+				End If
+				Try
+					SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
+				Catch ex As Exception
+				End Try
+
+				If SN = "" Then
+					Exit For
+				End If
 
 				Dim ISCID = node3.SelectSingleNode("CameraSettings/FlatFieldID").InnerText
 				Dim StepName = nodes3(index).SelectSingleNode("Name").InnerText
-				Dim SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
+
 				Dim log As String = ""
 				If ImgScaleCalRulesDict.ContainsKey(StepName) AndAlso ImgScaleCalRulesDict(StepName) <> ISCID Then
 					ImgScaleCalNG = True
@@ -629,6 +718,16 @@ Public Class MainForm
 			End If
 
 		Next
+
+		If cbxSubframe.Text <> "" Or chkCalNone.Checked = True Or chkColorCalSettings.Checked = True Or chkFlatFieldCalSettings.Checked = True Or chkImgScaleCalSettings.Checked = True Then
+			CommLogUpdateText2("Local Camera SN : " + CameraSN)
+			CommLogUpdateText2("Sequence File : " + InputSequence)
+			CommLogUpdateText2("Sequence Camera SN : " + SN)
+			If SN = "" Then
+				CommLogUpdateText2("Sequence is not set with local Camera, cannot check with local Camera !")
+				Exit Sub
+			End If
+		End If
 
 		If cbxSubframe.Text <> "" AndAlso subframeMatch Then
 			CommLogUpdateText2("SUBFRAME MATCH ALL !!!")
@@ -692,18 +791,18 @@ Public Class MainForm
 
 	Private Sub btnShowSettings_Click(sender As Object, e As EventArgs) Handles btnShowSettings.Click
 		btnShowSettings.Enabled = False
-		ShowMeasSettings()
+		ShowMeasSettings(txtFile3.Text)
 		CommLogUpdateText2(vbCrLf)
 		btnShowSettings.Enabled = True
 	End Sub
 
-	Public Sub ShowMeasSettings()
+	Public Sub ShowMeasSettings(InputSequence As String)
 		Dim sequenceAnaList As New List(Of String)
 		Dim demuraStepList As New List(Of String)
 		Dim node3 As XmlNode
 		Dim nodes3 As XmlNodeList
 		Dim xmlDoc3 = New XmlDocument()
-		xmlDoc3.Load(txtFile3.Text)
+		xmlDoc3.Load(InputSequence)
 		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/Items/SequenceItem")
 
 		For i = 0 To nodes3.Count - 1
@@ -715,6 +814,7 @@ Public Class MainForm
 			End If
 		Next
 		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
+		CommLogUpdateText2("Sequence File : " + InputSequence)
 		CommLogUpdateText2("ALL SETTINGS :")
 		For index = 0 To nodes3.Count - 1
 			'If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
@@ -773,7 +873,7 @@ Public Class MainForm
 		Next
 	End Sub
 
-	Public Sub ShowColorCalSettings()
+	Public Sub ShowColorCalSettings(InputSequence As String)
 		Dim conn As SqlCeConnection
 		Dim cmdCalibration As New SqlCeCommand
 		Dim daCalibration As New SqlCeDataAdapter
@@ -785,7 +885,7 @@ Public Class MainForm
 		Dim node3 As XmlNode
 		Dim nodes3 As XmlNodeList
 		Dim xmlDoc3 = New XmlDocument()
-		xmlDoc3.Load(txtFile3.Text)
+		xmlDoc3.Load(InputSequence)
 		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/Items/SequenceItem")
 		For i = 0 To nodes3.Count - 1
 			If nodes3(i).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
@@ -796,6 +896,7 @@ Public Class MainForm
 			End If
 		Next
 		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
+		CommLogUpdateText2("Sequence File : " + InputSequence)
 		CommLogUpdateText2("COLOR CALIBRATION SETTINGS :")
 		For index = 0 To nodes3.Count - 1
 			If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
@@ -835,7 +936,7 @@ Public Class MainForm
 
 
 	End Sub
-	Public Sub ShowFlatFieldCalRefs()
+	Public Sub ShowFlatFieldCalRefs(InputSequence As String)
 		Dim conn As SqlCeConnection
 		Dim cmdCalibration As New SqlCeCommand
 		Dim daCalibration As New SqlCeDataAdapter
@@ -847,7 +948,7 @@ Public Class MainForm
 		Dim node3 As XmlNode
 		Dim nodes3 As XmlNodeList
 		Dim xmlDoc3 = New XmlDocument()
-		xmlDoc3.Load(txtFile3.Text)
+		xmlDoc3.Load(InputSequence)
 		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/Items/SequenceItem")
 		For i = 0 To nodes3.Count - 1
 			If nodes3(i).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
@@ -858,6 +959,7 @@ Public Class MainForm
 			End If
 		Next
 		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
+		CommLogUpdateText2("Sequence File : " + InputSequence)
 		CommLogUpdateText2("FLAT FIELD CALIBRATION SETTINGS :")
 		For index = 0 To nodes3.Count - 1
 			If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
@@ -899,7 +1001,7 @@ Public Class MainForm
 
 
 	End Sub
-	Public Sub ShowImgScaleCalRefs()
+	Public Sub ShowImgScaleCalRefs(InputSequence As String)
 		Dim conn As SqlCeConnection
 		Dim cmdCalibration As New SqlCeCommand
 		Dim daCalibration As New SqlCeDataAdapter
@@ -911,7 +1013,7 @@ Public Class MainForm
 		Dim node3 As XmlNode
 		Dim nodes3 As XmlNodeList
 		Dim xmlDoc3 = New XmlDocument()
-		xmlDoc3.Load(txtFile3.Text)
+		xmlDoc3.Load(InputSequence)
 		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/Items/SequenceItem")
 		For i = 0 To nodes3.Count - 1
 			If nodes3(i).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
@@ -922,6 +1024,7 @@ Public Class MainForm
 			End If
 		Next
 		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
+		CommLogUpdateText2("Sequence File : " + InputSequence)
 		CommLogUpdateText2("IMG SCALING CALIBRATION SETTINGS :")
 		For index = 0 To nodes3.Count - 1
 			If demuraStepList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then Continue For
@@ -1069,9 +1172,9 @@ Public Class MainForm
 
 	Private Sub btnShowCalSettings_Click(sender As Object, e As EventArgs) Handles btnShowCalSettings.Click
 		btnShowCalSettings.Enabled = False
-		ShowColorCalSettings()
-		ShowFlatFieldCalRefs()
-		ShowImgScaleCalRefs()
+		ShowColorCalSettings(txtFile3.Text)
+		ShowFlatFieldCalRefs(txtFile3.Text)
+		ShowImgScaleCalRefs(txtFile3.Text)
 		CommLogUpdateText2(vbCrLf)
 		btnShowCalSettings.Enabled = True
 
@@ -1095,7 +1198,25 @@ Public Class MainForm
 			End While
 
 		End If
-		CommLogUpdateText("Current Camera SN : " + CameraSN)
+		'CommLogUpdateText("Local Camera SN : " + CameraSN)
+
+	End Sub
+
+	Private Sub getCurrentCameraSN2()
+
+		If File.Exists("C:\Radiant Vision Systems Data\TrueTest\UserData\CameraSN.txt") Then
+			Dim fileloaded As Boolean
+			While Not fileloaded
+				Try
+					CameraSN = File.ReadAllText("C:\Radiant Vision Systems Data\TrueTest\UserData\CameraSN.txt")
+					fileloaded = True
+				Catch ex As Exception
+					fileloaded = False
+				End Try
+			End While
+
+		End If
+		'CommLogUpdateText2("Local Camera SN : " + CameraSN)
 
 	End Sub
 
@@ -1112,6 +1233,8 @@ Public Class MainForm
 		Dim log As New List(Of String)
 		Dim sw2 As New Stopwatch
 		sw2.Start()
+
+		CommLogUpdateText("Local Camera SN : " + CameraSN)
 
 		If Not File.Exists(file1FullPath) Then
 			equal = False
@@ -1180,11 +1303,19 @@ Public Class MainForm
 			If sequence1AnaList.Contains(nodes1(index).SelectSingleNode("Name").InnerText) Then
 				If demuraStepList1.Contains(nodes1(index).SelectSingleNode("Name").InnerText) Then Continue For
 				node1 = nodes1(index).SelectSingleNode("CameraSettingsList")
-				For Each childNode As XmlNode In node1.ChildNodes
-					If childNode.SelectSingleNode("SerialNumber").InnerText <> CameraSN Then
-						node1.RemoveChild(childNode)
-					End If
-				Next
+				If cbCameraSNStyle.SelectedIndex = 0 Then
+					For Each childNode As XmlNode In node1.ChildNodes
+						If childNode.SelectSingleNode("SerialNumber").InnerText <> CameraSN Then
+							node1.RemoveChild(childNode)
+						End If
+					Next
+				Else
+					For Each childNode As XmlNode In node1.ChildNodes
+						Dim lastChild As XmlNode = node1.LastChild.Clone()
+						node1.RemoveAll()
+						node1.AppendChild(lastChild)
+					Next
+				End If
 				Try
 					SN1 = node1.SelectSingleNode("CameraSettings/SerialNumber").InnerText
 				Catch ex As Exception
@@ -1192,6 +1323,7 @@ Public Class MainForm
 				If SN1 = "" Then
 					Exit For
 				End If
+
 				Dim CCID = node1.SelectSingleNode("CameraSettings/ColorCalID").InnerText
 				Dim IMCID = node1.SelectSingleNode("CameraSettings/ImageScalingCalibrationID").InnerText
 				Dim FFID = node1.SelectSingleNode("CameraSettings/FlatFieldID").InnerText
@@ -1225,11 +1357,19 @@ Public Class MainForm
 			If sequence2AnaList.Contains(nodes2(index).SelectSingleNode("Name").InnerText) Then
 				If demuraStepList2.Contains(nodes2(index).SelectSingleNode("Name").InnerText) Then Continue For
 				node2 = nodes2(index).SelectSingleNode("CameraSettingsList")
-				For Each childNode As XmlNode In node2.ChildNodes
-					If childNode.SelectSingleNode("SerialNumber").InnerText <> CameraSN Then
-						node2.RemoveChild(childNode)
-					End If
-				Next
+				If cbCameraSNStyle.SelectedIndex = 0 Then
+					For Each childNode As XmlNode In node2.ChildNodes
+						If childNode.SelectSingleNode("SerialNumber").InnerText <> CameraSN Then
+							node2.RemoveChild(childNode)
+						End If
+					Next
+				Else
+					For Each childNode As XmlNode In node2.ChildNodes
+						Dim lastChild As XmlNode = node2.LastChild.Clone()
+						node2.RemoveAll()
+						node2.AppendChild(lastChild)
+					Next
+				End If
 				Try
 					SN2 = node2.SelectSingleNode("CameraSettings/SerialNumber").InnerText
 				Catch ex As Exception
@@ -1250,11 +1390,22 @@ Public Class MainForm
 		timeLogString.Add("Get sequence 2 Serial Number : " + sw2.ElapsedMilliseconds.ToString + "ms")
 
 		If SN1 = "" Then
+			CommLogUpdateText("Sequence 1 Camera SN : " + SN1)
+			CommLogUpdateText("Sequence 2 Camera SN : " + SN2)
 			CommLogUpdateText("Running Sequence is copied but not set calibraion !")
 			Exit Sub
 		End If
 		If SN2 = "" Then
+			CommLogUpdateText("Sequence 1 Camera SN : " + SN1)
+			CommLogUpdateText("Sequence 2 Camera SN : " + SN2)
 			CommLogUpdateText("Calibration Sequence is copied but not set calibraion !")
+			Exit Sub
+		End If
+
+		If SN1 <> "" AndAlso SN2 <> "" AndAlso SN1 <> SN2 Then
+			CommLogUpdateText("Sequence 1 Camera SN : " + SN1)
+			CommLogUpdateText("Sequence 2 Camera SN : " + SN2)
+			CommLogUpdateText("2 sequences are set from different cameras !")
 			Exit Sub
 		End If
 
@@ -1323,6 +1474,9 @@ Public Class MainForm
 		Next
 		sw2.Stop()
 		timeLogString.Add("Done checking flat field calibrations : " + sw2.ElapsedMilliseconds.ToString + "ms")
+
+		CommLogUpdateText("Sequence 1 Camera SN : " + SN1)
+		CommLogUpdateText("Sequence 2 Camera SN : " + SN2)
 
 		If equal Then
 			CommLogUpdateText("NO CAL DIFFERENCE !!!")
@@ -1541,6 +1695,10 @@ Public Class MainForm
 		Dim runningFileMissing As Boolean
 		Dim ngFiles As New List(Of String)
 		Dim okFiles As New List(Of String)
+		If Not File.Exists(System.IO.Path.Combine(My.Application.Info.DirectoryPath, "WinMergeU.exe")) Then
+			MessageBox.Show(System.IO.Path.Combine(My.Application.Info.DirectoryPath, "WinMergeU.exe") + " not existed, copy WinMergeU.exe to same folder and try again !")
+			Exit Sub
+		End If
 		For Each masterFile As String In files
 			Dim filename = Path.GetFileName(masterFile)
 			Dim runningFile As String = Path.Combine(AppDataFolder, filename)
@@ -1554,8 +1712,8 @@ Public Class MainForm
 				Dim startinfo As System.Diagnostics.ProcessStartInfo = New System.Diagnostics.ProcessStartInfo()
 				startinfo.FileName = System.IO.Path.Combine(My.Application.Info.DirectoryPath, "WinMergeU.exe")
 				startinfo.Arguments = "-noninteractive -minimize -enableexitcode -cfg Settings/DiffContextV2=0 " + Chr(34) + runningFile + Chr(34) + " " + Chr(34) + masterFile + Chr(34)
-				compareProcess = Process.Start(startinfo)
 
+				compareProcess = Process.Start(startinfo)
 				If compareProcess.WaitForExit(15000) Then
 					Dim ExitCode As Integer = compareProcess.ExitCode
 					If ExitCode <> 0 Then
@@ -1599,5 +1757,39 @@ Public Class MainForm
 
 	Private Sub btnCompareAppdata_Click(sender As Object, e As EventArgs) Handles btnCompareAppdata.Click
 		CompareAppDataFiles()
+	End Sub
+
+	Private Sub btnBrowseAdditional_Click(sender As Object, e As EventArgs) Handles btnBrowseAdditional.Click
+		Using dialog As New OpenFileDialog()
+			dialog.InitialDirectory = "C:\Radiant Vision Systems Data\TrueTest\Sequence"
+			dialog.Multiselect = True
+
+			If dialog.ShowDialog(Me) = DialogResult.OK Then
+				Dim files As String() = dialog.FileNames
+
+				For Each file As String In files
+					txtAdditionalSequence.Text += file & vbCrLf
+				Next
+			End If
+		End Using
+	End Sub
+
+	Private Sub txtAdditionalSequence_DragDrop(sender As Object, e As DragEventArgs) Handles txtAdditionalSequence.DragDrop
+		e.Effect = DragDropEffects.Copy
+		Dim files As String() = DirectCast(e.Data.GetData(DataFormats.FileDrop), String())
+
+		If files IsNot Nothing AndAlso files.Length <> 0 Then
+			For Each file As String In files
+				txtAdditionalSequence.Text += file & vbCrLf
+			Next
+		End If
+	End Sub
+
+	Private Sub txtAdditionalSequence_DragEnter(sender As Object, e As DragEventArgs) Handles txtAdditionalSequence.DragEnter
+		e.Effect = DragDropEffects.Copy
+	End Sub
+
+	Private Sub btnClearAdditional_Click(sender As Object, e As EventArgs) Handles btnClearAdditional.Click
+		txtAdditionalSequence.Text = ""
 	End Sub
 End Class

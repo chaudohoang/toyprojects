@@ -18,12 +18,38 @@ Public Class CalRule
 	Public daImgScaleCalibration As New SqlCeDataAdapter
 	Public dsImgScaleCalibration As New DataSet
 	Public dtImgScaleCalibration As New DataTable
-	Public SN As String = ""
-	Public sequenceAnaList As New List(Of String)
+	Public CameraSN As String = ""
 	Public node3 As XmlNode
 	Public nodes3 As XmlNodeList
 	Public xmlDoc3 = New XmlDocument()
 	Public exePath As String = My.Application.Info.DirectoryPath
+
+	Public Sub New()
+
+		' This call is required by the designer.
+		InitializeComponent()
+
+		' Add any initialization after the InitializeComponent() call.
+
+	End Sub
+
+	Private Sub getCurrentCameraSN()
+
+		If File.Exists("C:\Radiant Vision Systems Data\TrueTest\UserData\CameraSN.txt") Then
+			Dim fileloaded As Boolean
+			While Not fileloaded
+				Try
+					CameraSN = File.ReadAllText("C:\Radiant Vision Systems Data\TrueTest\UserData\CameraSN.txt")
+					fileloaded = True
+				Catch ex As Exception
+					fileloaded = False
+				End Try
+			End While
+
+		End If
+
+	End Sub
+
 	Public Function GetConnect(ByVal CameraSN)
 		Dim calFile1 As String = Path.Combine("C:\Radiant Vision Systems Data\Camera Data\Calibration Files", CameraSN + "_CalibrationDB.calx")
 		Dim calFile2 As String = Path.Combine("C:\Radiant Vision Systems Data\Camera Data\Calibration Files", "0" + CameraSN + "_CalibrationDB.calx")
@@ -54,30 +80,9 @@ Public Class CalRule
 
 	Private Sub ShowColorCalRefs()
 
-		xmlDoc3.Load(txtFile3.Text)
-		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/Items/SequenceItem")
-		For i = 0 To nodes3.Count - 1
-			If nodes3(i).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
-				sequenceAnaList.Add(nodes3(i).SelectSingleNode("PatternSetupName").InnerText)
-			End If
-		Next
-		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
-
-		For index = 0 To nodes3.Count - 1
-			If sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
-
-				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
-				For Each childNode As XmlNode In node3.ChildNodes
-					Dim lastChild As XmlNode = node3.LastChild.Clone()
-					node3.RemoveAll()
-					node3.AppendChild(lastChild)
-				Next
-				SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
-			End If
-		Next
 		Try
 			dsColorCalibration.Clear()
-			conn = GetConnect(SN)
+			conn = GetConnect(CameraSN)
 			cmdColorCalibration = conn.CreateCommand
 			cmdColorCalibration.CommandText = "SELECT ColorCalibrationID, Description FROM ColorCalibrations"
 
@@ -104,30 +109,9 @@ Public Class CalRule
 	End Sub
 	Private Sub ShowFlatFieldCalRefs()
 
-		xmlDoc3.Load(txtFile3.Text)
-		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/Items/SequenceItem")
-		For i = 0 To nodes3.Count - 1
-			If nodes3(i).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
-				sequenceAnaList.Add(nodes3(i).SelectSingleNode("PatternSetupName").InnerText)
-			End If
-		Next
-		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
-
-		For index = 0 To nodes3.Count - 1
-			If sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
-
-				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
-				For Each childNode As XmlNode In node3.ChildNodes
-					Dim lastChild As XmlNode = node3.LastChild.Clone()
-					node3.RemoveAll()
-					node3.AppendChild(lastChild)
-				Next
-				SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
-			End If
-		Next
 		Try
 			dsFlatFieldCalibration.Clear()
-			conn = GetConnect(SN)
+			conn = GetConnect(CameraSN)
 			cmdFlatFieldCalibration = conn.CreateCommand
 			cmdFlatFieldCalibration.CommandText = "SELECT CalibrationID, CalibrationDesc FROM FlatFieldCalibration"
 
@@ -154,30 +138,9 @@ Public Class CalRule
 	End Sub
 	Private Sub ShowImgScaleCalRefs()
 
-		xmlDoc3.Load(txtFile3.Text)
-		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/Items/SequenceItem")
-		For i = 0 To nodes3.Count - 1
-			If nodes3(i).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
-				sequenceAnaList.Add(nodes3(i).SelectSingleNode("PatternSetupName").InnerText)
-			End If
-		Next
-		nodes3 = xmlDoc3.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
-
-		For index = 0 To nodes3.Count - 1
-			If sequenceAnaList.Contains(nodes3(index).SelectSingleNode("Name").InnerText) Then
-
-				node3 = nodes3(index).SelectSingleNode("CameraSettingsList")
-				For Each childNode As XmlNode In node3.ChildNodes
-					Dim lastChild As XmlNode = node3.LastChild.Clone()
-					node3.RemoveAll()
-					node3.AppendChild(lastChild)
-				Next
-				SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
-			End If
-		Next
 		Try
 			dsImgScaleCalibration.Clear()
-			conn = GetConnect(SN)
+			conn = GetConnect(CameraSN)
 			cmdImgScaleCalibration = conn.CreateCommand
 			cmdImgScaleCalibration.CommandText = "SELECT ImageScalingCalibrationID, ImageScalingCalibrationDesc FROM ImageScalingCalibration"
 
@@ -205,6 +168,7 @@ Public Class CalRule
 
 	Private Sub CalRule_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 		txtFile3.Text = MainForm.txtFile3.Text
+		getCurrentCameraSN()
 	End Sub
 
 	Private Sub txtFile3_TextChanged(sender As Object, e As EventArgs) Handles txtFile3.TextChanged

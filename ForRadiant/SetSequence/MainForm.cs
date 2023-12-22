@@ -22,10 +22,11 @@ namespace SetSequence
         private string imagescalingID = "";
         private string flatfieldID = "";
         private string cameraRotation = "";
+        CalRule calRuleForm = new CalRule();
 
         public MainForm()
         {
-            InitializeComponent();
+            InitializeComponent();            
         }
 
         private void SetVersionInfo()
@@ -67,20 +68,28 @@ namespace SetSequence
             btnApply.Enabled = false;
 
             GetValues(lblSequencePath.Text,cbSubframe.Text,cbCalBox.Text,cbFocusDistance.Text,cbFNumber.Text,cbCameraRotation.Text);
-            SetValues(lblSequencePath.Text);
+            if (cbCalibrationIDStyle.SelectedIndex ==0)
+            {
+                SetValuesSameCal(lblSequencePath.Text);
 
-            
-            try
-            {
-                string[] additionalTargets;
-                additionalTargets = txtAdditionalSequence.Text.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (string item in additionalTargets)
+
+                try
                 {
-                    SetValues(item);
+                    string[] additionalTargets;
+                    additionalTargets = txtAdditionalSequence.Text.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (string item in additionalTargets)
+                    {
+                        SetValuesSameCal(item);
+                    }
                 }
-            }
-            catch (Exception)
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            }       
+            else
             {
+
             }
 
 
@@ -268,7 +277,7 @@ namespace SetSequence
 
         }
 
-        private void SetValues(string xmlFile)
+        private void SetValuesSameCal(string xmlFile)
 		{
             XmlNodeList nodes;
 
@@ -349,6 +358,119 @@ namespace SetSequence
             }
         }
 
+        private void SetValuesDifCal(string xmlFile)
+        {
+            XmlNodeList nodes;
+
+            var xmlDoc = new XmlDocument();
+            if (File.Exists(@xmlFile))
+            {
+                xmlDoc.Load(xmlFile);
+                nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/LensDistance");
+                for (int index = 0; index <= nodes.Count - 1; index++)
+                {
+                    if (lensdistance != "")
+                    {
+                        nodes[index].InnerText = lensdistance;
+                    }
+                }
+
+                nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/LensfStop");
+                for (int index = 0; index <= nodes.Count - 1; index++)
+                {
+                    if (fnumber != "")
+                    {
+                        nodes[index].InnerText = fnumber;
+                    }
+                }
+
+                nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/SubFrameRegion");
+                for (int index = 0; index <= nodes.Count - 1; index++)
+                {
+                    if (subframeregion != "")
+                    {
+                        nodes[index].InnerText = subframeregion;
+                    }
+                }
+
+                nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/ColorCalID");
+                for (int index = 0; index <= nodes.Count - 1; index++)
+                {
+                    if (colorcalID != "")
+                    {
+                        nodes[index].InnerText = colorcalID;
+                    }
+                }
+
+                nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/ImageScalingCalibrationID");
+                for (int index = 0; index <= nodes.Count - 1; index++)
+                {
+                    if (imagescalingID != "")
+                    {
+                        nodes[index].InnerText = imagescalingID;
+                    }
+                }
+
+                nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraSettingsList/CameraSettings/FlatFieldID");
+                for (int index = 0; index <= nodes.Count - 1; index++)
+                {
+                    if (flatfieldID != "")
+                    {
+                        nodes[index].InnerText = flatfieldID;
+                    }
+                }
+
+                nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/CameraRotation");
+                for (int index = 0; index <= nodes.Count - 1; index++)
+                {
+                    if (cameraRotation != "")
+                    {
+                        nodes[index].InnerText = cameraRotation;
+                    }
+                }
+
+                XmlWriterSettings settings = new XmlWriterSettings { Indent = true };
+                XmlWriter writer = XmlWriter.Create(xmlFile, settings);
+                xmlDoc.Save(writer);
+                if (writer != null)
+                    writer.Close();
+
+
+            }
+        }
+
+
+        private void btnClearAdditional_Click(object sender, EventArgs e)
+        {
+            txtAdditionalSequence.Text = "";
+        }
+
+        private void cbCalibrationIDStyle_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cbCalibrationIDStyle.SelectedIndex == 0)
+            {
+                cbCalBox.Enabled = true;
+                btnSetCalRule.Enabled = false;
+            }
+            else
+            {
+                cbCalBox.Enabled = false;
+                btnSetCalRule.Enabled = true;
+            }
+        }
+
+        private void btnSetCalRule_Click(object sender, EventArgs e)
+        {
+            if (calRuleForm != null && !calRuleForm.IsDisposed)
+            {
+                calRuleForm.Show();
+            }
+            else
+            {
+                calRuleForm = new CalRule();
+                calRuleForm.Show();
+            }
+        }
     }
 
 }

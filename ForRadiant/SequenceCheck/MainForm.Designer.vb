@@ -30,6 +30,11 @@ Partial Class MainForm
         Me.Label8 = New System.Windows.Forms.Label()
         Me.btnCompareAppdata = New System.Windows.Forms.Button()
         Me.TabPage2 = New System.Windows.Forms.TabPage()
+        Me.cbCameraSNStyle2 = New System.Windows.Forms.ComboBox()
+        Me.btnClearAdditional = New System.Windows.Forms.Button()
+        Me.btnBrowseAdditional = New System.Windows.Forms.Button()
+        Me.txtAdditionalSequence = New System.Windows.Forms.TextBox()
+        Me.lblAddtionalTarget = New System.Windows.Forms.Label()
         Me.chkImgScaleCalSettings = New System.Windows.Forms.CheckBox()
         Me.chkFlatFieldCalSettings = New System.Windows.Forms.CheckBox()
         Me.btnEditCalRule = New System.Windows.Forms.Button()
@@ -49,6 +54,7 @@ Partial Class MainForm
         Me.txtFile3 = New System.Windows.Forms.TextBox()
         Me.btnBrowse3 = New System.Windows.Forms.Button()
         Me.TabPage1 = New System.Windows.Forms.TabPage()
+        Me.cbCameraSNStyle = New System.Windows.Forms.ComboBox()
         Me.chkCompareCAL = New System.Windows.Forms.CheckBox()
         Me.btnExportAnalysesCompareLog = New System.Windows.Forms.Button()
         Me.btnUseDefaultMaster = New System.Windows.Forms.Button()
@@ -82,14 +88,14 @@ Partial Class MainForm
         Me.TabPage3.Location = New System.Drawing.Point(4, 22)
         Me.TabPage3.Name = "TabPage3"
         Me.TabPage3.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage3.Size = New System.Drawing.Size(951, 485)
+        Me.TabPage3.Size = New System.Drawing.Size(951, 562)
         Me.TabPage3.TabIndex = 2
         Me.TabPage3.Text = "Other Compare"
         Me.TabPage3.UseVisualStyleBackColor = True
         '
         'btnExportOtherCompareLog
         '
-        Me.btnExportOtherCompareLog.Location = New System.Drawing.Point(6, 220)
+        Me.btnExportOtherCompareLog.Location = New System.Drawing.Point(6, 298)
         Me.btnExportOtherCompareLog.Name = "btnExportOtherCompareLog"
         Me.btnExportOtherCompareLog.Size = New System.Drawing.Size(65, 79)
         Me.btnExportOtherCompareLog.TabIndex = 17
@@ -98,7 +104,7 @@ Partial Class MainForm
         '
         'btnClearlog3
         '
-        Me.btnClearlog3.Location = New System.Drawing.Point(6, 135)
+        Me.btnClearlog3.Location = New System.Drawing.Point(6, 213)
         Me.btnClearlog3.Name = "btnClearlog3"
         Me.btnClearlog3.Size = New System.Drawing.Size(65, 79)
         Me.btnClearlog3.TabIndex = 16
@@ -109,7 +115,7 @@ Partial Class MainForm
         '
         Me.ListBox3.FormattingEnabled = True
         Me.ListBox3.HorizontalScrollbar = True
-        Me.ListBox3.Location = New System.Drawing.Point(77, 97)
+        Me.ListBox3.Location = New System.Drawing.Point(77, 175)
         Me.ListBox3.Name = "ListBox3"
         Me.ListBox3.ScrollAlwaysVisible = True
         Me.ListBox3.Size = New System.Drawing.Size(868, 381)
@@ -118,7 +124,7 @@ Partial Class MainForm
         'Label8
         '
         Me.Label8.AutoSize = True
-        Me.Label8.Location = New System.Drawing.Point(12, 97)
+        Me.Label8.Location = New System.Drawing.Point(12, 175)
         Me.Label8.Name = "Label8"
         Me.Label8.Size = New System.Drawing.Size(25, 13)
         Me.Label8.TabIndex = 15
@@ -135,6 +141,11 @@ Partial Class MainForm
         '
         'TabPage2
         '
+        Me.TabPage2.Controls.Add(Me.cbCameraSNStyle2)
+        Me.TabPage2.Controls.Add(Me.btnClearAdditional)
+        Me.TabPage2.Controls.Add(Me.btnBrowseAdditional)
+        Me.TabPage2.Controls.Add(Me.txtAdditionalSequence)
+        Me.TabPage2.Controls.Add(Me.lblAddtionalTarget)
         Me.TabPage2.Controls.Add(Me.chkImgScaleCalSettings)
         Me.TabPage2.Controls.Add(Me.chkFlatFieldCalSettings)
         Me.TabPage2.Controls.Add(Me.btnEditCalRule)
@@ -156,15 +167,62 @@ Partial Class MainForm
         Me.TabPage2.Location = New System.Drawing.Point(4, 22)
         Me.TabPage2.Name = "TabPage2"
         Me.TabPage2.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage2.Size = New System.Drawing.Size(951, 485)
+        Me.TabPage2.Size = New System.Drawing.Size(951, 562)
         Me.TabPage2.TabIndex = 1
         Me.TabPage2.Text = "Check Sequence Measurement"
         Me.TabPage2.UseVisualStyleBackColor = True
         '
+        'cbCameraSNStyle2
+        '
+        Me.cbCameraSNStyle2.FormattingEnabled = True
+        Me.cbCameraSNStyle2.Items.AddRange(New Object() {"Use local Camera SN", "Use sequence last saved Camera SN"})
+        Me.cbCameraSNStyle2.Location = New System.Drawing.Point(337, 140)
+        Me.cbCameraSNStyle2.Name = "cbCameraSNStyle2"
+        Me.cbCameraSNStyle2.Size = New System.Drawing.Size(170, 21)
+        Me.cbCameraSNStyle2.TabIndex = 81
+        Me.cbCameraSNStyle2.Text = "Use local Camera SN"
+        '
+        'btnClearAdditional
+        '
+        Me.btnClearAdditional.Location = New System.Drawing.Point(754, 49)
+        Me.btnClearAdditional.Name = "btnClearAdditional"
+        Me.btnClearAdditional.Size = New System.Drawing.Size(76, 58)
+        Me.btnClearAdditional.TabIndex = 80
+        Me.btnClearAdditional.Text = "Clear"
+        Me.btnClearAdditional.UseVisualStyleBackColor = True
+        '
+        'btnBrowseAdditional
+        '
+        Me.btnBrowseAdditional.Location = New System.Drawing.Point(672, 49)
+        Me.btnBrowseAdditional.Name = "btnBrowseAdditional"
+        Me.btnBrowseAdditional.Size = New System.Drawing.Size(76, 58)
+        Me.btnBrowseAdditional.TabIndex = 80
+        Me.btnBrowseAdditional.Text = "Browse"
+        Me.btnBrowseAdditional.UseVisualStyleBackColor = True
+        '
+        'txtAdditionalSequence
+        '
+        Me.txtAdditionalSequence.AllowDrop = True
+        Me.txtAdditionalSequence.Location = New System.Drawing.Point(6, 49)
+        Me.txtAdditionalSequence.Multiline = True
+        Me.txtAdditionalSequence.Name = "txtAdditionalSequence"
+        Me.txtAdditionalSequence.ScrollBars = System.Windows.Forms.ScrollBars.Both
+        Me.txtAdditionalSequence.Size = New System.Drawing.Size(660, 60)
+        Me.txtAdditionalSequence.TabIndex = 79
+        '
+        'lblAddtionalTarget
+        '
+        Me.lblAddtionalTarget.AutoSize = True
+        Me.lblAddtionalTarget.Location = New System.Drawing.Point(6, 33)
+        Me.lblAddtionalTarget.Name = "lblAddtionalTarget"
+        Me.lblAddtionalTarget.Size = New System.Drawing.Size(148, 13)
+        Me.lblAddtionalTarget.TabIndex = 78
+        Me.lblAddtionalTarget.Text = "Additional Target Sequence : "
+        '
         'chkImgScaleCalSettings
         '
         Me.chkImgScaleCalSettings.AutoSize = True
-        Me.chkImgScaleCalSettings.Location = New System.Drawing.Point(513, 75)
+        Me.chkImgScaleCalSettings.Location = New System.Drawing.Point(513, 153)
         Me.chkImgScaleCalSettings.Name = "chkImgScaleCalSettings"
         Me.chkImgScaleCalSettings.Size = New System.Drawing.Size(163, 17)
         Me.chkImgScaleCalSettings.TabIndex = 27
@@ -174,7 +232,7 @@ Partial Class MainForm
         'chkFlatFieldCalSettings
         '
         Me.chkFlatFieldCalSettings.AutoSize = True
-        Me.chkFlatFieldCalSettings.Location = New System.Drawing.Point(513, 57)
+        Me.chkFlatFieldCalSettings.Location = New System.Drawing.Point(513, 135)
         Me.chkFlatFieldCalSettings.Name = "chkFlatFieldCalSettings"
         Me.chkFlatFieldCalSettings.Size = New System.Drawing.Size(158, 17)
         Me.chkFlatFieldCalSettings.TabIndex = 26
@@ -183,7 +241,7 @@ Partial Class MainForm
         '
         'btnEditCalRule
         '
-        Me.btnEditCalRule.Location = New System.Drawing.Point(669, 35)
+        Me.btnEditCalRule.Location = New System.Drawing.Point(669, 113)
         Me.btnEditCalRule.Name = "btnEditCalRule"
         Me.btnEditCalRule.Size = New System.Drawing.Size(90, 23)
         Me.btnEditCalRule.TabIndex = 25
@@ -193,7 +251,7 @@ Partial Class MainForm
         'chkColorCalSettings
         '
         Me.chkColorCalSettings.AutoSize = True
-        Me.chkColorCalSettings.Location = New System.Drawing.Point(513, 39)
+        Me.chkColorCalSettings.Location = New System.Drawing.Point(513, 117)
         Me.chkColorCalSettings.Name = "chkColorCalSettings"
         Me.chkColorCalSettings.Size = New System.Drawing.Size(143, 17)
         Me.chkColorCalSettings.TabIndex = 24
@@ -202,7 +260,7 @@ Partial Class MainForm
         '
         'btnShowCalSettings
         '
-        Me.btnShowCalSettings.Location = New System.Drawing.Point(846, 64)
+        Me.btnShowCalSettings.Location = New System.Drawing.Point(846, 142)
         Me.btnShowCalSettings.Name = "btnShowCalSettings"
         Me.btnShowCalSettings.Size = New System.Drawing.Size(99, 23)
         Me.btnShowCalSettings.TabIndex = 23
@@ -211,7 +269,7 @@ Partial Class MainForm
         '
         'btnExportMeasurementsCompareLog
         '
-        Me.btnExportMeasurementsCompareLog.Location = New System.Drawing.Point(6, 220)
+        Me.btnExportMeasurementsCompareLog.Location = New System.Drawing.Point(6, 298)
         Me.btnExportMeasurementsCompareLog.Name = "btnExportMeasurementsCompareLog"
         Me.btnExportMeasurementsCompareLog.Size = New System.Drawing.Size(65, 79)
         Me.btnExportMeasurementsCompareLog.TabIndex = 18
@@ -229,7 +287,7 @@ Partial Class MainForm
         '
         'btnShowSettings
         '
-        Me.btnShowSettings.Location = New System.Drawing.Point(846, 35)
+        Me.btnShowSettings.Location = New System.Drawing.Point(846, 113)
         Me.btnShowSettings.Name = "btnShowSettings"
         Me.btnShowSettings.Size = New System.Drawing.Size(99, 23)
         Me.btnShowSettings.TabIndex = 16
@@ -238,7 +296,7 @@ Partial Class MainForm
         '
         'btnClearlog2
         '
-        Me.btnClearlog2.Location = New System.Drawing.Point(6, 135)
+        Me.btnClearlog2.Location = New System.Drawing.Point(6, 213)
         Me.btnClearlog2.Name = "btnClearlog2"
         Me.btnClearlog2.Size = New System.Drawing.Size(65, 79)
         Me.btnClearlog2.TabIndex = 15
@@ -257,7 +315,7 @@ Partial Class MainForm
         'chkCalNone
         '
         Me.chkCalNone.AutoSize = True
-        Me.chkCalNone.Location = New System.Drawing.Point(364, 39)
+        Me.chkCalNone.Location = New System.Drawing.Point(364, 117)
         Me.chkCalNone.Name = "chkCalNone"
         Me.chkCalNone.Size = New System.Drawing.Size(143, 17)
         Me.chkCalNone.TabIndex = 13
@@ -268,7 +326,7 @@ Partial Class MainForm
         '
         Me.cbxSubframe.FormattingEnabled = True
         Me.cbxSubframe.Items.AddRange(New Object() {"", "800,450,2784,5676", "700,250,2984,6076", "1000,1300,4576,1784"})
-        Me.cbxSubframe.Location = New System.Drawing.Point(77, 37)
+        Me.cbxSubframe.Location = New System.Drawing.Point(77, 115)
         Me.cbxSubframe.Name = "cbxSubframe"
         Me.cbxSubframe.Size = New System.Drawing.Size(281, 21)
         Me.cbxSubframe.TabIndex = 12
@@ -276,7 +334,7 @@ Partial Class MainForm
         'Label7
         '
         Me.Label7.AutoSize = True
-        Me.Label7.Location = New System.Drawing.Point(6, 40)
+        Me.Label7.Location = New System.Drawing.Point(6, 118)
         Me.Label7.Name = "Label7"
         Me.Label7.Size = New System.Drawing.Size(52, 13)
         Me.Label7.TabIndex = 11
@@ -286,7 +344,7 @@ Partial Class MainForm
         '
         Me.ListBox2.FormattingEnabled = True
         Me.ListBox2.HorizontalScrollbar = True
-        Me.ListBox2.Location = New System.Drawing.Point(77, 97)
+        Me.ListBox2.Location = New System.Drawing.Point(77, 175)
         Me.ListBox2.Name = "ListBox2"
         Me.ListBox2.ScrollAlwaysVisible = True
         Me.ListBox2.Size = New System.Drawing.Size(868, 381)
@@ -295,7 +353,7 @@ Partial Class MainForm
         'Label6
         '
         Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(12, 97)
+        Me.Label6.Location = New System.Drawing.Point(12, 175)
         Me.Label6.Name = "Label6"
         Me.Label6.Size = New System.Drawing.Size(25, 13)
         Me.Label6.TabIndex = 10
@@ -330,6 +388,7 @@ Partial Class MainForm
         '
         'TabPage1
         '
+        Me.TabPage1.Controls.Add(Me.cbCameraSNStyle)
         Me.TabPage1.Controls.Add(Me.chkCompareCAL)
         Me.TabPage1.Controls.Add(Me.btnExportAnalysesCompareLog)
         Me.TabPage1.Controls.Add(Me.btnUseDefaultMaster)
@@ -349,10 +408,20 @@ Partial Class MainForm
         Me.TabPage1.Location = New System.Drawing.Point(4, 22)
         Me.TabPage1.Name = "TabPage1"
         Me.TabPage1.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage1.Size = New System.Drawing.Size(951, 485)
+        Me.TabPage1.Size = New System.Drawing.Size(951, 562)
         Me.TabPage1.TabIndex = 0
         Me.TabPage1.Text = "Compare Sequence"
         Me.TabPage1.UseVisualStyleBackColor = True
+        '
+        'cbCameraSNStyle
+        '
+        Me.cbCameraSNStyle.FormattingEnabled = True
+        Me.cbCameraSNStyle.Items.AddRange(New Object() {"Use local Camera SN", "Use sequence last saved Camera SN"})
+        Me.cbCameraSNStyle.Location = New System.Drawing.Point(681, 65)
+        Me.cbCameraSNStyle.Name = "cbCameraSNStyle"
+        Me.cbCameraSNStyle.Size = New System.Drawing.Size(170, 21)
+        Me.cbCameraSNStyle.TabIndex = 15
+        Me.cbCameraSNStyle.Text = "Use local Camera SN"
         '
         'chkCompareCAL
         '
@@ -366,7 +435,7 @@ Partial Class MainForm
         '
         'btnExportAnalysesCompareLog
         '
-        Me.btnExportAnalysesCompareLog.Location = New System.Drawing.Point(6, 220)
+        Me.btnExportAnalysesCompareLog.Location = New System.Drawing.Point(6, 298)
         Me.btnExportAnalysesCompareLog.Name = "btnExportAnalysesCompareLog"
         Me.btnExportAnalysesCompareLog.Size = New System.Drawing.Size(65, 79)
         Me.btnExportAnalysesCompareLog.TabIndex = 13
@@ -430,7 +499,7 @@ Partial Class MainForm
         '
         'btnClearlog
         '
-        Me.btnClearlog.Location = New System.Drawing.Point(6, 135)
+        Me.btnClearlog.Location = New System.Drawing.Point(6, 213)
         Me.btnClearlog.Name = "btnClearlog"
         Me.btnClearlog.Size = New System.Drawing.Size(65, 79)
         Me.btnClearlog.TabIndex = 9
@@ -459,7 +528,7 @@ Partial Class MainForm
         '
         Me.ListBox1.FormattingEnabled = True
         Me.ListBox1.HorizontalScrollbar = True
-        Me.ListBox1.Location = New System.Drawing.Point(77, 97)
+        Me.ListBox1.Location = New System.Drawing.Point(77, 175)
         Me.ListBox1.Name = "ListBox1"
         Me.ListBox1.ScrollAlwaysVisible = True
         Me.ListBox1.Size = New System.Drawing.Size(868, 381)
@@ -477,7 +546,7 @@ Partial Class MainForm
         'Label3
         '
         Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(12, 97)
+        Me.Label3.Location = New System.Drawing.Point(12, 175)
         Me.Label3.Name = "Label3"
         Me.Label3.Size = New System.Drawing.Size(25, 13)
         Me.Label3.TabIndex = 8
@@ -509,14 +578,14 @@ Partial Class MainForm
         Me.TabControl1.Location = New System.Drawing.Point(12, 12)
         Me.TabControl1.Name = "TabControl1"
         Me.TabControl1.SelectedIndex = 0
-        Me.TabControl1.Size = New System.Drawing.Size(959, 511)
+        Me.TabControl1.Size = New System.Drawing.Size(959, 588)
         Me.TabControl1.TabIndex = 10
         '
         'MainForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(978, 529)
+        Me.ClientSize = New System.Drawing.Size(978, 605)
         Me.Controls.Add(Me.TabControl1)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
@@ -577,4 +646,10 @@ Partial Class MainForm
     Friend WithEvents ListBox3 As ListBox
     Friend WithEvents Label8 As Label
     Friend WithEvents chkCompareCAL As CheckBox
+    Private WithEvents btnBrowseAdditional As Button
+    Private WithEvents txtAdditionalSequence As TextBox
+    Private WithEvents lblAddtionalTarget As Label
+    Private WithEvents btnClearAdditional As Button
+    Friend WithEvents cbCameraSNStyle As ComboBox
+    Friend WithEvents cbCameraSNStyle2 As ComboBox
 End Class
