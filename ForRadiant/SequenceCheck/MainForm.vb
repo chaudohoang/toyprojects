@@ -516,6 +516,7 @@ Public Class MainForm
 					Next
 				End If
 				Try
+					SN = ""
 					SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
 				Catch ex As Exception
 				End Try
@@ -553,6 +554,7 @@ Public Class MainForm
 					Next
 				End If
 				Try
+					SN = ""
 					SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
 				Catch ex As Exception
 				End Try
@@ -561,7 +563,6 @@ Public Class MainForm
 					Exit For
 				End If
 
-				Dim subframe = node3.SelectSingleNode("CameraSettings/SubFrameRegion").InnerText
 				Dim CCID = node3.SelectSingleNode("CameraSettings/ColorCalID").InnerText
 				Dim IMCID = node3.SelectSingleNode("CameraSettings/ImageScalingCalibrationID").InnerText
 				Dim FFID = node3.SelectSingleNode("CameraSettings/FlatFieldID").InnerText
@@ -582,6 +583,8 @@ Public Class MainForm
 				If log <> "" Then
 					logCalNone.Add("SN : " + SN + " , Step : " + StepName + log)
 				End If
+
+
 			End If
 
 		Next
@@ -604,6 +607,7 @@ Public Class MainForm
 					Next
 				End If
 				Try
+					SN = ""
 					SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
 				Catch ex As Exception
 				End Try
@@ -649,6 +653,7 @@ Public Class MainForm
 					Next
 				End If
 				Try
+					SN = ""
 					SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
 				Catch ex As Exception
 				End Try
@@ -692,6 +697,7 @@ Public Class MainForm
 					Next
 				End If
 				Try
+					SN = ""
 					SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText
 				Catch ex As Exception
 				End Try
@@ -1317,6 +1323,7 @@ Public Class MainForm
 					Next
 				End If
 				Try
+					SN1 = ""
 					SN1 = node1.SelectSingleNode("CameraSettings/SerialNumber").InnerText
 				Catch ex As Exception
 				End Try
@@ -1371,6 +1378,7 @@ Public Class MainForm
 					Next
 				End If
 				Try
+					SN2 = ""
 					SN2 = node2.SelectSingleNode("CameraSettings/SerialNumber").InnerText
 				Catch ex As Exception
 				End Try

@@ -658,6 +658,7 @@ namespace SequenceCheckCS
                     }
                     try
                     {
+                        SN = "";
                         SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText;
                     }
                     catch (Exception ex)
@@ -709,6 +710,7 @@ namespace SequenceCheckCS
                     }
                     try
                     {
+                        SN = "";
                         SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText;
                     }
                     catch (Exception ex)
@@ -720,7 +722,6 @@ namespace SequenceCheckCS
                         break;
                     }
 
-                    string subframe = node3.SelectSingleNode("CameraSettings/SubFrameRegion").InnerText;
                     string CCID = node3.SelectSingleNode("CameraSettings/ColorCalID").InnerText;
                     string IMCID = node3.SelectSingleNode("CameraSettings/ImageScalingCalibrationID").InnerText;
                     string FFID = node3.SelectSingleNode("CameraSettings/FlatFieldID").InnerText;
@@ -777,6 +778,7 @@ namespace SequenceCheckCS
                     }
                     try
                     {
+                        SN = "";
                         SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText;
                     }
                     catch (Exception ex)
@@ -839,6 +841,7 @@ namespace SequenceCheckCS
                     }
                     try
                     {
+                        SN = "";
                         SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText;
                     }
                     catch (Exception ex)
@@ -898,6 +901,7 @@ namespace SequenceCheckCS
                     }
                     try
                     {
+                        SN = "";
                         SN = node3.SelectSingleNode("CameraSettings/SerialNumber").InnerText;
                     }
                     catch (Exception ex)
@@ -1702,6 +1706,7 @@ namespace SequenceCheckCS
                     }
                     try
                     {
+                        SN1 = "";
                         SN1 = node1.SelectSingleNode("CameraSettings/SerialNumber").InnerText;
                     }
                     catch (Exception ex)
@@ -1771,6 +1776,7 @@ namespace SequenceCheckCS
                     }
                     try
                     {
+                        SN2 = "";
                         SN2 = node2.SelectSingleNode("CameraSettings/SerialNumber").InnerText;
                     }
                     catch (Exception ex)
