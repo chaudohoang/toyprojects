@@ -37,6 +37,7 @@ namespace TTLogViewer
             MouseMove += Form1_MouseMove;
             rtbContent.VScroll += rtbContent_VScroll;
             Paint += Form1_Paint;
+            btnToggleAutoScroll.Click += btnToggleAutoScroll_Click;
         }
 
         private void SetupFileWatcher()
@@ -55,7 +56,6 @@ namespace TTLogViewer
         {
             try
             {
-                // Try to open and read the file with a retry mechanism
                 for (int i = 0; i < 3; i++)
                 {
                     try
@@ -70,24 +70,22 @@ namespace TTLogViewer
                                     rtbContent.Text = fileContent;
                                     rtbContent.SelectionStart = rtbContent.Text.Length;
                                     rtbContent.ScrollToCaret();
-                                    return; // Exit the loop if successful
+                                    return;
                                 }
                             }
                         }
                         else
                         {
                             MessageBox.Show("File not found.");
-                            return; // Exit the loop if file not found
+                            return;
                         }
                     }
                     catch (IOException)
                     {
-                        // Retry after a short delay
                         System.Threading.Thread.Sleep(100);
                     }
                 }
 
-                // If the loop completes without success, show an error message
                 MessageBox.Show("Error loading file after multiple attempts.");
             }
             catch (Exception ex)
@@ -96,16 +94,12 @@ namespace TTLogViewer
             }
         }
 
-        private bool scrollToEndRequested = false;
-        private bool userScrolled = false;
-
         private void UpdateFileContent()
         {
             try
             {
                 if (autoScrollEnabled)
                 {
-                    // Try to open and read the file with a retry mechanism
                     for (int i = 0; i < 3; i++)
                     {
                         try
@@ -117,59 +111,37 @@ namespace TTLogViewer
                                     using (StreamReader streamReader = new StreamReader(fileStream))
                                     {
                                         int currentLength = rtbContent.Text.Length;
-                                        int linesToRead = 100; // Adjust the number of lines to read initially
-                                        int linesRead = 0;
 
-                                        // Read the file line by line
-                                        while (linesRead < linesToRead && !streamReader.EndOfStream)
+                                        while (!streamReader.EndOfStream)
                                         {
                                             string newLine = streamReader.ReadLine();
 
                                             if (!string.IsNullOrEmpty(newLine))
                                             {
-                                                // Append only the new lines
                                                 if (fileStream.Position > currentLength)
                                                 {
                                                     rtbContent.AppendText(newLine + Environment.NewLine);
-                                                    linesRead++;
+                                                    rtbContent.ScrollToCaret();
                                                 }
                                             }
                                         }
 
-                                        // If it's the first time loading or user manually scrolled, scroll to the end
-                                        if (currentLength == 0 || userScrolled)
-                                        {
-                                            rtbContent.SelectionStart = rtbContent.Text.Length;
-                                            rtbContent.ScrollToCaret();
-                                            userScrolled = false; // Reset the flag after auto-scrolling
-                                        }
-
-                                        // Check if the user manually clicked "Scroll to End" button
-                                        if (scrollToEndRequested)
-                                        {
-                                            rtbContent.SelectionStart = rtbContent.Text.Length;
-                                            rtbContent.ScrollToCaret();
-                                            scrollToEndRequested = false;
-                                        }
-
-                                        return; // Exit the loop if successful
+                                        return;
                                     }
                                 }
                             }
                             else
                             {
                                 MessageBox.Show("File not found.");
-                                return; // Exit the loop if file not found
+                                return;
                             }
                         }
                         catch (IOException)
                         {
-                            // Retry after a short delay
                             System.Threading.Thread.Sleep(100);
                         }
                     }
 
-                    // If the loop completes without success, show an error message
                     MessageBox.Show("Error updating file content after multiple attempts.");
                 }
             }
@@ -179,34 +151,18 @@ namespace TTLogViewer
             }
         }
 
-        private void rtbContent_TextChanged(object sender, EventArgs e)
-        {
-            // Check if the user manually scrolled
-            userScrolled = rtbContent.SelectionStart != rtbContent.Text.Length;
-        }
-
-        private void btnLive_Click(object sender, EventArgs e)
-        {
-            // Set the flag to indicate the user requested to scroll to the end
-            scrollToEndRequested = true;
-        }
-
-
         private void timerUpdate_Tick(object sender, EventArgs e)
         {
-            // Invoke the update on the UI thread
             Invoke(new Action(() => UpdateFileContent()));
         }
 
         private void Form1_MouseDown(object sender, MouseEventArgs e)
         {
-            // Capture the current mouse position when the user clicks on the form
             lastMousePosition = new Point(e.X, e.Y);
         }
 
         private void Form1_MouseMove(object sender, MouseEventArgs e)
         {
-            // Move the form based on the difference in mouse position
             if (e.Button == MouseButtons.Left)
             {
                 int deltaX = e.X - lastMousePosition.X;
@@ -217,7 +173,6 @@ namespace TTLogViewer
 
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
-            // Draw a green border around the form
             e.Graphics.DrawRectangle(new Pen(Color.Green, 2), 0, 0, ClientSize.Width - 1, ClientSize.Height - 1);
         }
 
@@ -225,28 +180,23 @@ namespace TTLogViewer
         {
             // Check if the user is at the bottom of the RichTextBox
             autoScrollEnabled = rtbContent.GetPositionFromCharIndex(rtbContent.TextLength - 1).Y <= rtbContent.Height;
+
+            // Update the auto-scroll button state based on autoScrollEnabled
+            btnToggleAutoScroll.Text = autoScrollEnabled ? "Auto Scroll: ON" : "Auto Scroll: OFF";
         }
 
         private void FileWatcher_Changed(object sender, FileSystemEventArgs e)
         {
             if (e.ChangeType == WatcherChangeTypes.Changed || e.ChangeType == WatcherChangeTypes.Created)
             {
-                // Invoke the update on the UI thread
                 Invoke(new Action(() => UpdateFileContent()));
             }
         }
 
-        [DllImport("user32.dll")]
-        private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
-
-        [DllImport("user32.dll")]
-        private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-
-        [DllImport("user32.dll")]
-        private static extern bool SetLayeredWindowAttributes(IntPtr hwnd, uint crKey, byte bAlpha, uint dwFlags);
-
-        private const int GWL_EXSTYLE = -20;
-        private const int WS_EX_LAYERED = 0x80000;
-        private const int LWA_ALPHA = 0x2;
+        private void btnToggleAutoScroll_Click(object sender, EventArgs e)
+        {
+            autoScrollEnabled = !autoScrollEnabled;
+            btnToggleAutoScroll.Text = autoScrollEnabled ? "Auto Scroll: ON" : "Auto Scroll: OFF";
+        }
     }
 }
