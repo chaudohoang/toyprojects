@@ -1,0 +1,10 @@
+D:\Github\toyprojects\ForRadiant\TTLogViewer\bin\Debug\TTLogViewer.exe.config
+D:\Github\toyprojects\ForRadiant\TTLogViewer\bin\Debug\TTLogViewer.exe
+D:\Github\toyprojects\ForRadiant\TTLogViewer\bin\Debug\TTLogViewer.pdb
+D:\Github\toyprojects\ForRadiant\TTLogViewer\obj\Debug\TTLogViewer.csproj.AssemblyReference.cache
+D:\Github\toyprojects\ForRadiant\TTLogViewer\obj\Debug\TTLogViewer.Form1.resources
+D:\Github\toyprojects\ForRadiant\TTLogViewer\obj\Debug\TTLogViewer.Properties.Resources.resources
+D:\Github\toyprojects\ForRadiant\TTLogViewer\obj\Debug\TTLogViewer.csproj.GenerateResource.cache
+D:\Github\toyprojects\ForRadiant\TTLogViewer\obj\Debug\TTLogViewer.csproj.CoreCompileInputs.cache
+D:\Github\toyprojects\ForRadiant\TTLogViewer\obj\Debug\TTLogViewer.exe
+D:\Github\toyprojects\ForRadiant\TTLogViewer\obj\Debug\TTLogViewer.pdb
