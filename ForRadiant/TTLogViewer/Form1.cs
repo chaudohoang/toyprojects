@@ -38,6 +38,7 @@ namespace TTLogViewer
             rtbContent.VScroll += rtbContent_VScroll;
             Paint += Form1_Paint;
             btnToggleAutoScroll.Click += btnToggleAutoScroll_Click;
+
         }
 
         private void SetupFileWatcher()
@@ -51,6 +52,49 @@ namespace TTLogViewer
         {
             LoadFileContent();
         }
+
+        private bool isSnapped = false;
+        private Size originalSize;
+        private Point originalLocation;
+
+        private void btnResizeAndSnap_Click(object sender, EventArgs e)
+        {
+            if (isSnapped)
+            {
+                // Restore the original size and location
+                Size = originalSize;
+                Location = originalLocation;
+
+                // Update the button text
+                btnResizeAndSnap.Text = "Snap";
+            }
+            else
+            {
+                // Save the original size and location
+                originalSize = Size;
+                originalLocation = Location;
+
+                // Set the new size for the form (adjust width and height as needed)
+                Size = new Size(300, 150);
+
+                // Set the new location for the form (snap to the right edge of the screen)
+                int screenWidth = Screen.PrimaryScreen.WorkingArea.Width;
+                int screenHeight = Screen.PrimaryScreen.WorkingArea.Height;
+
+                int newX = screenWidth - Size.Width; // Adjust the X-coordinate as needed
+                int newY = screenHeight - Size.Height; // Adjust the Y-coordinate as needed
+
+                Location = new Point(newX, newY);
+
+                // Update the button text
+                btnResizeAndSnap.Text = "Restore";
+            }
+
+            // Toggle the snapped state
+            isSnapped = !isSnapped;
+        }
+
+
 
         private void LoadFileContent()
         {

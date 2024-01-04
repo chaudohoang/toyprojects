@@ -32,6 +32,7 @@
             this.rtbContent = new System.Windows.Forms.RichTextBox();
             this.timerUpdate = new System.Windows.Forms.Timer(this.components);
             this.btnToggleAutoScroll = new System.Windows.Forms.Button();
+            this.btnResizeAndSnap = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // rtbContent
@@ -52,11 +53,22 @@
             this.btnToggleAutoScroll.Text = "button1";
             this.btnToggleAutoScroll.UseVisualStyleBackColor = true;
             // 
+            // btnResizeAndSnap
+            // 
+            this.btnResizeAndSnap.Location = new System.Drawing.Point(28, 25);
+            this.btnResizeAndSnap.Name = "btnResizeAndSnap";
+            this.btnResizeAndSnap.Size = new System.Drawing.Size(101, 23);
+            this.btnResizeAndSnap.TabIndex = 2;
+            this.btnResizeAndSnap.Text = "Resize and Snap";
+            this.btnResizeAndSnap.UseVisualStyleBackColor = true;
+
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(807, 375);
+            this.Controls.Add(this.btnResizeAndSnap);
             this.Controls.Add(this.btnToggleAutoScroll);
             this.Controls.Add(this.rtbContent);
             this.Name = "Form1";
@@ -70,6 +82,7 @@
         private System.Windows.Forms.RichTextBox rtbContent;
         private System.Windows.Forms.Timer timerUpdate;
         private System.Windows.Forms.Button btnToggleAutoScroll;
+        private System.Windows.Forms.Button btnResizeAndSnap;
     }
 }
 
