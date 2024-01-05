@@ -27,16 +27,11 @@ namespace TTLogViewer
             TopMost = true;
             ShowInTaskbar = false;
 
-            // Make the background transparent
-            TransparencyKey = BackColor;
-            BackColor = Color.LimeGreen; // Change to your desired color
-
             // Attach event handlers
             Load += Form1_Load;
             MouseDown += Form1_MouseDown;
             MouseMove += Form1_MouseMove;
             rtbContent.VScroll += rtbContent_VScroll;
-            Paint += Form1_Paint;
             btnToggleAutoScroll.Click += btnToggleAutoScroll_Click;
 
         }
@@ -55,7 +50,6 @@ namespace TTLogViewer
 
         private bool isSnapped = false;
         private Size originalSize;
-        private Point originalLocation;
 
         private void btnResizeAndSnap_Click(object sender, EventArgs e)
         {
@@ -63,7 +57,6 @@ namespace TTLogViewer
             {
                 // Restore the original size and location
                 Size = originalSize;
-                Location = originalLocation;
 
                 // Update the button text
                 btnResizeAndSnap.Text = "Snap";
@@ -72,19 +65,9 @@ namespace TTLogViewer
             {
                 // Save the original size and location
                 originalSize = Size;
-                originalLocation = Location;
 
                 // Set the new size for the form (adjust width and height as needed)
-                Size = new Size(300, 150);
-
-                // Set the new location for the form (snap to the right edge of the screen)
-                int screenWidth = Screen.PrimaryScreen.WorkingArea.Width;
-                int screenHeight = Screen.PrimaryScreen.WorkingArea.Height;
-
-                int newX = screenWidth - Size.Width; // Adjust the X-coordinate as needed
-                int newY = screenHeight - Size.Height; // Adjust the Y-coordinate as needed
-
-                Location = new Point(newX, newY);
+                Size = new Size(150, 75);
 
                 // Update the button text
                 btnResizeAndSnap.Text = "Restore";
@@ -93,8 +76,6 @@ namespace TTLogViewer
             // Toggle the snapped state
             isSnapped = !isSnapped;
         }
-
-
 
         private void LoadFileContent()
         {
@@ -215,10 +196,6 @@ namespace TTLogViewer
             }
         }
 
-        private void Form1_Paint(object sender, PaintEventArgs e)
-        {
-            e.Graphics.DrawRectangle(new Pen(Color.Green, 2), 0, 0, ClientSize.Width - 1, ClientSize.Height - 1);
-        }
 
         private void rtbContent_VScroll(object sender, EventArgs e)
         {

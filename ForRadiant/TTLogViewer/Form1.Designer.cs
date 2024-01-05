@@ -50,18 +50,19 @@
             this.btnToggleAutoScroll.Name = "btnToggleAutoScroll";
             this.btnToggleAutoScroll.Size = new System.Drawing.Size(112, 23);
             this.btnToggleAutoScroll.TabIndex = 1;
-            this.btnToggleAutoScroll.Text = "button1";
+            this.btnToggleAutoScroll.Text = "Auto Scroll";
             this.btnToggleAutoScroll.UseVisualStyleBackColor = true;
+            this.btnToggleAutoScroll.Click += new System.EventHandler(this.btnToggleAutoScroll_Click);
             // 
             // btnResizeAndSnap
             // 
             this.btnResizeAndSnap.Location = new System.Drawing.Point(28, 25);
             this.btnResizeAndSnap.Name = "btnResizeAndSnap";
-            this.btnResizeAndSnap.Size = new System.Drawing.Size(101, 23);
+            this.btnResizeAndSnap.Size = new System.Drawing.Size(62, 23);
             this.btnResizeAndSnap.TabIndex = 2;
-            this.btnResizeAndSnap.Text = "Resize and Snap";
+            this.btnResizeAndSnap.Text = "Snap";
             this.btnResizeAndSnap.UseVisualStyleBackColor = true;
-
+            this.btnResizeAndSnap.Click += new System.EventHandler(this.btnResizeAndSnap_Click);
             // 
             // Form1
             // 
