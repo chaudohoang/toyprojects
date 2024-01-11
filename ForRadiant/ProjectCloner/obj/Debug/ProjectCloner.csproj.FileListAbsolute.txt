@@ -1,0 +1,10 @@
+D:\Github\toyprojects\ForRadiant\bin\Debug\ProjectCloner\ProjectCloner.exe.config
+D:\Github\toyprojects\ForRadiant\bin\Debug\ProjectCloner\ProjectCloner.exe
+D:\Github\toyprojects\ForRadiant\bin\Debug\ProjectCloner\ProjectCloner.pdb
+D:\Github\toyprojects\ForRadiant\ProjectCloner\obj\Debug\ProjectCloner.csproj.AssemblyReference.cache
+D:\Github\toyprojects\ForRadiant\ProjectCloner\obj\Debug\ProjectCloner.MainForm.resources
+D:\Github\toyprojects\ForRadiant\ProjectCloner\obj\Debug\ProjectCloner.Properties.Resources.resources
+D:\Github\toyprojects\ForRadiant\ProjectCloner\obj\Debug\ProjectCloner.csproj.GenerateResource.cache
+D:\Github\toyprojects\ForRadiant\ProjectCloner\obj\Debug\ProjectCloner.csproj.CoreCompileInputs.cache
+D:\Github\toyprojects\ForRadiant\ProjectCloner\obj\Debug\ProjectCloner.exe
+D:\Github\toyprojects\ForRadiant\ProjectCloner\obj\Debug\ProjectCloner.pdb
