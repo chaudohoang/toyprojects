@@ -1,0 +1,10 @@
+D:\Github\toyprojects\ForRadiant\RVSSnipper\obj\Debug\RVSSnipper.csproj.AssemblyReference.cache
+D:\Github\toyprojects\ForRadiant\RVSSnipper\obj\Debug\RVSSnipper.MainForm.resources
+D:\Github\toyprojects\ForRadiant\RVSSnipper\obj\Debug\RVSSnipper.Properties.Resources.resources
+D:\Github\toyprojects\ForRadiant\RVSSnipper\obj\Debug\RVSSnipper.csproj.GenerateResource.cache
+D:\Github\toyprojects\ForRadiant\RVSSnipper\obj\Debug\RVSSnipper.csproj.CoreCompileInputs.cache
+D:\Github\toyprojects\ForRadiant\RVSSnipper\bin\Debug\RVSSnipper.exe.config
+D:\Github\toyprojects\ForRadiant\RVSSnipper\bin\Debug\RVSSnipper.exe
+D:\Github\toyprojects\ForRadiant\RVSSnipper\bin\Debug\RVSSnipper.pdb
+D:\Github\toyprojects\ForRadiant\RVSSnipper\obj\Debug\RVSSnipper.exe
+D:\Github\toyprojects\ForRadiant\RVSSnipper\obj\Debug\RVSSnipper.pdb
