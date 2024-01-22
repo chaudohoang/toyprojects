@@ -491,4 +491,18 @@ Public Class Apps
         startinfo.FileName = System.IO.Path.Combine(exePath, "RadFlowANISimANI.exe")
         Process.Start(startinfo)
     End Sub
+
+    Private Sub cmdTTLogViewer_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdTTLogViewer.LinkClicked
+        startinfo.WorkingDirectory = exePath
+        startinfo.FileName = System.IO.Path.Combine(exePath, "TTLogViewer.exe")
+        Process.Start(startinfo)
+    End Sub
+
+    Private Sub TabControl1_KeyDown(sender As Object, e As KeyEventArgs) Handles TabControl1.KeyDown
+        If e.KeyCode = Keys.F1 Then
+            startinfo.WorkingDirectory = exePath
+            startinfo.FileName = System.IO.Path.Combine(exePath, "TTLogViewer.exe")
+            Process.Start(startinfo)
+        End If
+    End Sub
 End Class

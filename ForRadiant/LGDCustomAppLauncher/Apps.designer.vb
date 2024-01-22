@@ -36,6 +36,9 @@ Partial Class Apps
         Me.chkSkipRFD = New System.Windows.Forms.CheckBox()
         Me.chkSkipPOI = New System.Windows.Forms.CheckBox()
         Me.TabPage1 = New System.Windows.Forms.TabPage()
+        Me.cmdRadFlowANISimulator = New System.Windows.Forms.LinkLabel()
+        Me.cmdRadFlowSimulator = New System.Windows.Forms.LinkLabel()
+        Me.cmdAutoDeleteData = New System.Windows.Forms.LinkLabel()
         Me.cmdTrueTestWatcher = New System.Windows.Forms.LinkLabel()
         Me.cmdEmu2p1Simulator = New System.Windows.Forms.LinkLabel()
         Me.cmdRenameVNTT = New System.Windows.Forms.LinkLabel()
@@ -53,9 +56,7 @@ Partial Class Apps
         Me.cmdSetSequence = New System.Windows.Forms.LinkLabel()
         Me.cmdButterfly = New System.Windows.Forms.LinkLabel()
         Me.TabControl1 = New System.Windows.Forms.TabControl()
-        Me.cmdAutoDeleteData = New System.Windows.Forms.LinkLabel()
-        Me.cmdRadFlowSimulator = New System.Windows.Forms.LinkLabel()
-        Me.cmdRadFlowANISimulator = New System.Windows.Forms.LinkLabel()
+        Me.cmdTTLogViewer = New System.Windows.Forms.LinkLabel()
         Me.TabPage2.SuspendLayout()
         Me.TabPage1.SuspendLayout()
         Me.TabControl1.SuspendLayout()
@@ -203,6 +204,7 @@ Partial Class Apps
         '
         'TabPage1
         '
+        Me.TabPage1.Controls.Add(Me.cmdTTLogViewer)
         Me.TabPage1.Controls.Add(Me.cmdRadFlowANISimulator)
         Me.TabPage1.Controls.Add(Me.cmdRadFlowSimulator)
         Me.TabPage1.Controls.Add(Me.cmdAutoDeleteData)
@@ -229,6 +231,36 @@ Partial Class Apps
         Me.TabPage1.TabIndex = 0
         Me.TabPage1.Text = "Apps"
         Me.TabPage1.UseVisualStyleBackColor = True
+        '
+        'cmdRadFlowANISimulator
+        '
+        Me.cmdRadFlowANISimulator.AutoSize = True
+        Me.cmdRadFlowANISimulator.Location = New System.Drawing.Point(109, 89)
+        Me.cmdRadFlowANISimulator.Name = "cmdRadFlowANISimulator"
+        Me.cmdRadFlowANISimulator.Size = New System.Drawing.Size(113, 13)
+        Me.cmdRadFlowANISimulator.TabIndex = 10
+        Me.cmdRadFlowANISimulator.TabStop = True
+        Me.cmdRadFlowANISimulator.Text = "RadFlowANI Simulator"
+        '
+        'cmdRadFlowSimulator
+        '
+        Me.cmdRadFlowSimulator.AutoSize = True
+        Me.cmdRadFlowSimulator.Location = New System.Drawing.Point(8, 89)
+        Me.cmdRadFlowSimulator.Name = "cmdRadFlowSimulator"
+        Me.cmdRadFlowSimulator.Size = New System.Drawing.Size(95, 13)
+        Me.cmdRadFlowSimulator.TabIndex = 9
+        Me.cmdRadFlowSimulator.TabStop = True
+        Me.cmdRadFlowSimulator.Text = "RadFlow Simulator"
+        '
+        'cmdAutoDeleteData
+        '
+        Me.cmdAutoDeleteData.AutoSize = True
+        Me.cmdAutoDeleteData.Location = New System.Drawing.Point(404, 63)
+        Me.cmdAutoDeleteData.Name = "cmdAutoDeleteData"
+        Me.cmdAutoDeleteData.Size = New System.Drawing.Size(89, 13)
+        Me.cmdAutoDeleteData.TabIndex = 8
+        Me.cmdAutoDeleteData.TabStop = True
+        Me.cmdAutoDeleteData.Text = "Auto Delete Data"
         '
         'cmdTrueTestWatcher
         '
@@ -400,35 +432,15 @@ Partial Class Apps
         Me.TabControl1.Size = New System.Drawing.Size(519, 291)
         Me.TabControl1.TabIndex = 2
         '
-        'cmdAutoDeleteData
+        'cmdTTLogViewer
         '
-        Me.cmdAutoDeleteData.AutoSize = True
-        Me.cmdAutoDeleteData.Location = New System.Drawing.Point(404, 63)
-        Me.cmdAutoDeleteData.Name = "cmdAutoDeleteData"
-        Me.cmdAutoDeleteData.Size = New System.Drawing.Size(89, 13)
-        Me.cmdAutoDeleteData.TabIndex = 8
-        Me.cmdAutoDeleteData.TabStop = True
-        Me.cmdAutoDeleteData.Text = "Auto Delete Data"
-        '
-        'cmdRadFlowSimulator
-        '
-        Me.cmdRadFlowSimulator.AutoSize = True
-        Me.cmdRadFlowSimulator.Location = New System.Drawing.Point(8, 89)
-        Me.cmdRadFlowSimulator.Name = "cmdRadFlowSimulator"
-        Me.cmdRadFlowSimulator.Size = New System.Drawing.Size(95, 13)
-        Me.cmdRadFlowSimulator.TabIndex = 9
-        Me.cmdRadFlowSimulator.TabStop = True
-        Me.cmdRadFlowSimulator.Text = "RadFlow Simulator"
-        '
-        'cmdRadFlowANISimulator
-        '
-        Me.cmdRadFlowANISimulator.AutoSize = True
-        Me.cmdRadFlowANISimulator.Location = New System.Drawing.Point(109, 89)
-        Me.cmdRadFlowANISimulator.Name = "cmdRadFlowANISimulator"
-        Me.cmdRadFlowANISimulator.Size = New System.Drawing.Size(113, 13)
-        Me.cmdRadFlowANISimulator.TabIndex = 10
-        Me.cmdRadFlowANISimulator.TabStop = True
-        Me.cmdRadFlowANISimulator.Text = "RadFlowANI Simulator"
+        Me.cmdTTLogViewer.AutoSize = True
+        Me.cmdTTLogViewer.Location = New System.Drawing.Point(228, 89)
+        Me.cmdTTLogViewer.Name = "cmdTTLogViewer"
+        Me.cmdTTLogViewer.Size = New System.Drawing.Size(60, 13)
+        Me.cmdTTLogViewer.TabIndex = 10
+        Me.cmdTTLogViewer.TabStop = True
+        Me.cmdTTLogViewer.Text = "Log Viewer"
         '
         'Apps
         '
@@ -481,4 +493,5 @@ Partial Class Apps
     Friend WithEvents cmdAutoDeleteData As LinkLabel
     Friend WithEvents cmdRadFlowSimulator As LinkLabel
     Friend WithEvents cmdRadFlowANISimulator As LinkLabel
+    Friend WithEvents cmdTTLogViewer As LinkLabel
 End Class
