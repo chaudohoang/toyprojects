@@ -18,7 +18,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\bin\Debug\TTLogViewer\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -80,4 +80,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>@echo OFF
+del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.pdb
+del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.xml
+del $(SolutionDir)\bin\$(ConfigurationName)\$(ProjectName)\*.config</PostBuildEvent>
+  </PropertyGroup>
 </Project>

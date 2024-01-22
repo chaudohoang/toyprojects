@@ -67,7 +67,7 @@ namespace TTLogViewer
                 originalSize = Size;
 
                 // Set the new size for the form (adjust width and height as needed)
-                Size = new Size(150, 75);
+                Size = new Size(175, 75);
 
                 // Update the button text
                 btnResizeAndSnap.Text = "Restore";
@@ -218,6 +218,11 @@ namespace TTLogViewer
         {
             autoScrollEnabled = !autoScrollEnabled;
             btnToggleAutoScroll.Text = autoScrollEnabled ? "Auto Scroll: ON" : "Auto Scroll: OFF";
+        }
+
+        private void btnClose_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
     }
 }

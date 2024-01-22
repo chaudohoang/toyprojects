@@ -8,3 +8,9 @@ D:\Github\toyprojects\ForRadiant\TTLogViewer\obj\Debug\TTLogViewer.csproj.Genera
 D:\Github\toyprojects\ForRadiant\TTLogViewer\obj\Debug\TTLogViewer.csproj.CoreCompileInputs.cache
 D:\Github\toyprojects\ForRadiant\TTLogViewer\obj\Debug\TTLogViewer.exe
 D:\Github\toyprojects\ForRadiant\TTLogViewer\obj\Debug\TTLogViewer.pdb
+D:\Github\toyprojects\ForRadiant\bin\Debug\TextToImage\TTLogViewer.exe.config
+D:\Github\toyprojects\ForRadiant\bin\Debug\TextToImage\TTLogViewer.exe
+D:\Github\toyprojects\ForRadiant\bin\Debug\TextToImage\TTLogViewer.pdb
+D:\Github\toyprojects\ForRadiant\bin\Debug\TTLogViewer\TTLogViewer.exe.config
+D:\Github\toyprojects\ForRadiant\bin\Debug\TTLogViewer\TTLogViewer.exe
+D:\Github\toyprojects\ForRadiant\bin\Debug\TTLogViewer\TTLogViewer.pdb

@@ -33,6 +33,7 @@
             this.timerUpdate = new System.Windows.Forms.Timer(this.components);
             this.btnToggleAutoScroll = new System.Windows.Forms.Button();
             this.btnResizeAndSnap = new System.Windows.Forms.Button();
+            this.btnClose = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // rtbContent
@@ -64,11 +65,22 @@
             this.btnResizeAndSnap.UseVisualStyleBackColor = true;
             this.btnResizeAndSnap.Click += new System.EventHandler(this.btnResizeAndSnap_Click);
             // 
+            // btnClose
+            // 
+            this.btnClose.Location = new System.Drawing.Point(96, 25);
+            this.btnClose.Name = "btnClose";
+            this.btnClose.Size = new System.Drawing.Size(62, 23);
+            this.btnClose.TabIndex = 3;
+            this.btnClose.Text = "Close";
+            this.btnClose.UseVisualStyleBackColor = true;
+            this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(807, 375);
+            this.Controls.Add(this.btnClose);
             this.Controls.Add(this.btnResizeAndSnap);
             this.Controls.Add(this.btnToggleAutoScroll);
             this.Controls.Add(this.rtbContent);
@@ -84,6 +96,7 @@
         private System.Windows.Forms.Timer timerUpdate;
         private System.Windows.Forms.Button btnToggleAutoScroll;
         private System.Windows.Forms.Button btnResizeAndSnap;
+        private System.Windows.Forms.Button btnClose;
     }
 }
 
