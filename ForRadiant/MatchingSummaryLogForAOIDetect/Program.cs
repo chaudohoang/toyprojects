@@ -5,7 +5,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using CsvHelper;
 using CsvHelper.Configuration;
-using MatchingSummaryLogForAOIDetect.MatchingSummaryLogForAOIDetect;
 
 namespace MatchingSummaryLogForAOIDetect
 {
@@ -13,14 +12,14 @@ namespace MatchingSummaryLogForAOIDetect
     {
         static void Main()
         {
-            List<string> file1Folders = new List<string>
+            List<string> colorLogFolders = new List<string>
             {
                 "D:\\Trace Spot Mono Camera\\Station 1 Color CSV",
                 "D:\\Trace Spot Mono Camera\\Station 2 Color CSV"
                 // Add more folders as needed
             };
 
-            List<string> file2Folders = new List<string>
+            List<string> monoLogFolders = new List<string>
             {
                 "D:\\Trace Spot Mono Camera\\Station 1 Mono CSV",
                 "D:\\Trace Spot Mono Camera\\Station 2 Mono CSV"
@@ -31,39 +30,38 @@ namespace MatchingSummaryLogForAOIDetect
 
             List<OutputRecord> matchingRecords = new List<OutputRecord>();
 
-            foreach (var file1Folder in file1Folders)
+            foreach (var coloLogFolder in colorLogFolders)
             {
-                List<string> file1Paths = Directory.GetFiles(file1Folder, "*.csv").ToList();
+                List<string> colorCsvs = Directory.GetFiles(coloLogFolder, "*.csv").ToList();
 
-                foreach (var file1Path in file1Paths)
+                foreach (var colorCsv in colorCsvs)
                 {
-                    List<RecordFile1> file1Records = ReadCsvFile<RecordFile1, RecordFile1Map>(file1Path);
+                    List<ColorRecordFile> colorRecords = ReadCsvFile<ColorRecordFile, ColorRecordFileMap>(colorCsv);
 
-                    foreach (var file2Folder in file2Folders)
+                    foreach (var monoLogFolder in monoLogFolders)
                     {
-                        List<string> file2Paths = Directory.GetFiles(file2Folder, "*.csv").ToList();
+                        List<string> monoCsvs = Directory.GetFiles(monoLogFolder, "*.csv").ToList();
 
-                        foreach (var file2Path in file2Paths)
+                        foreach (var monoCsv in monoCsvs)
                         {
-                            List<RecordFile2> file2Records = ReadCsvFile<RecordFile2, RecordFile2Map>(file2Path);
+                            List<MonoRecordFile> monoRecords = ReadCsvFile<MonoRecordFile, MonoRecordFileMap>(monoCsv);
 
-                            foreach (var record1 in file1Records)
+                            foreach (var colorRecord in colorRecords)
                             {
-                                if (record1.Description.IndexOf("spot", StringComparison.OrdinalIgnoreCase) != -1 && !string.IsNullOrEmpty(record1.DefectInfo))
+                                if (colorRecord.Description.IndexOf("spot", StringComparison.OrdinalIgnoreCase) != -1 && !string.IsNullOrEmpty(colorRecord.DefectInfo))
                                 {
-                                    var matchingRecord2 = file2Records.FirstOrDefault(record2 => record2.PID.Equals(record1.PID, StringComparison.OrdinalIgnoreCase));
+                                    var matchingRecord = monoRecords.FirstOrDefault(monoRecord => monoRecord.PID.Equals(colorRecord.PID, StringComparison.OrdinalIgnoreCase));
 
-                                    if (matchingRecord2 != null)
+                                    if (matchingRecord != null)
                                     {
                                         matchingRecords.Add(new OutputRecord
                                         {
-                                            PID = record1.PID,
-                                            MonoStation = matchingRecord2.EQPID,
-                                            ColorStation = record1.EQPID,
-                                            MonoChannel = matchingRecord2.CH,
-                                            ColorChannel = record1.CH,
-                                            Description = record1.Description,
-                                            DefectInfo = record1.DefectInfo
+                                            PID = colorRecord.PID,
+                                            MonoStation = matchingRecord.EQPID,
+                                            ColorStation = colorRecord.EQPID,
+                                            MonoChannel = matchingRecord.CH,
+                                            ColorChannel = colorRecord.CH,
+                                            DefectInfo = colorRecord.DefectInfo
                                         });
                                     }
                                 }
@@ -98,55 +96,53 @@ namespace MatchingSummaryLogForAOIDetect
         }
     }
 
-    namespace MatchingSummaryLogForAOIDetect
+   
+    class ColorRecordFile
     {
-        class RecordFile1
-        {
-            public string PID { get; set; }
-            public string CH { get; set; }
-            public string EQPID { get; set; }
-            public string Description { get; set; }
-            public string DefectInfo { get; set; }
-        }
+        public string PID { get; set; }
+        public string CH { get; set; }
+        public string EQPID { get; set; }
+        public string Description { get; set; }
+        public string DefectInfo { get; set; }
+    }
 
-        class RecordFile2
-        {
-            public string PID { get; set; }
-            public string CH { get; set; }
-            public string EQPID { get; set; }
-        }
+    class MonoRecordFile
+    {
+        public string PID { get; set; }
+        public string CH { get; set; }
+        public string EQPID { get; set; }
+    }
 
-        class OutputRecord
-        {
-            public string PID { get; set; }
-            public string MonoStation { get; set; }
-            public string MonoChannel { get; set; }
-            public string ColorStation { get; set; }            
-            public string ColorChannel { get; set; }
-            public string Description { get; set; }
-            public string DefectInfo { get; set; }
-        }
+    class OutputRecord
+    {
+        public string PID { get; set; }
+        public string MonoStation { get; set; }
+        public string MonoChannel { get; set; }
+        public string ColorStation { get; set; }            
+        public string ColorChannel { get; set; }
+        public string DefectInfo { get; set; }
+    }
 
-        class RecordFile1Map : ClassMap<RecordFile1>
+    class ColorRecordFileMap : ClassMap<ColorRecordFile>
+    {
+        public ColorRecordFileMap()
         {
-            public RecordFile1Map()
-            {
-                Map(m => m.PID).Name("PID");
-                Map(m => m.CH).Name("CH");
-                Map(m => m.EQPID).Name("EQP ID");
-                Map(m => m.Description).Name("Description");
-                Map(m => m.DefectInfo).Name("Defect Info");
-            }
-        }
-
-        class RecordFile2Map : ClassMap<RecordFile2>
-        {
-            public RecordFile2Map()
-            {
-                Map(m => m.PID).Name("PID");
-                Map(m => m.CH).Name("CH");
-                Map(m => m.EQPID).Name("EQP ID");
-            }
+            Map(m => m.PID).Name("PID");
+            Map(m => m.CH).Name("CH");
+            Map(m => m.EQPID).Name("EQP ID");
+            Map(m => m.Description).Name("Description");
+            Map(m => m.DefectInfo).Name("Defect Info");
         }
     }
+
+    class MonoRecordFileMap : ClassMap<MonoRecordFile>
+    {
+        public MonoRecordFileMap()
+        {
+            Map(m => m.PID).Name("PID");
+            Map(m => m.CH).Name("CH");
+            Map(m => m.EQPID).Name("EQP ID");
+        }
+    }
+   
 }

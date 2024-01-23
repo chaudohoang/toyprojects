@@ -21,3 +21,6 @@ D:\Github\toyprojects\ForRadiant\QuickTools\RenameFiiles\obj\Debug\RenameFiiles.
 D:\Github\toyprojects\ForRadiant\bin\Debug\QuickTools\RenameFiiles.exe.config
 D:\Github\toyprojects\ForRadiant\bin\Debug\QuickTools\RenameFiiles.exe
 D:\Github\toyprojects\ForRadiant\bin\Debug\QuickTools\RenameFiiles.pdb
+D:\Github\toyprojects\ForRadiant\QuickTools\bin\Debug\QuickTools\RenameFiiles.exe.config
+D:\Github\toyprojects\ForRadiant\QuickTools\bin\Debug\QuickTools\RenameFiiles.exe
+D:\Github\toyprojects\ForRadiant\QuickTools\bin\Debug\QuickTools\RenameFiiles.pdb
