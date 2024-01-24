@@ -109,7 +109,20 @@ class Program
                         node.InnerText = "0";
                     }
 
-                    doc.Save(file);
+                    // Set XmlWriterSettings to control formatting
+                    XmlWriterSettings settings = new XmlWriterSettings
+                    {
+                        Indent = true,
+                        IndentChars = "\t",
+                        NewLineHandling = NewLineHandling.Entitize
+                    };
+
+                    // Save the document with the specified settings
+                    using (XmlWriter writer = XmlWriter.Create(file, settings))
+                    {
+                        doc.Save(writer);
+                    }
+
                     Console.WriteLine($"Mask/Feature of Interest updated to None in {Path.GetFullPath(file)}");
                     //Console.WriteLine($"XMLMASKFOISETID updated to 0 in {Path.GetFullPath(file)}");
                 }
