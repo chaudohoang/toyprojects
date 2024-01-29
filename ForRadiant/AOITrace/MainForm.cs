@@ -28,7 +28,7 @@ namespace AOITrace
             InitializeComponent();
             processRunTimer = new Timer();
             countdownTimer = new Timer();
-            cmbFileSelection.Items.AddRange(new string[] { "Check All Summary Log Files", "Check Only Summary Log Files Created On Previous Day" });
+            cmbFileSelection.Items.AddRange(new string[] { "Check Only Summary Log Files Created On Previous Day", "Check All Summary Log Files" });
             cmbFileSelection.SelectedIndex = 0; // Default selection
              // Create an instance of Logger
             logger = new Logger(txtLogs); // txtLogs is the TextBox in the logging tab
@@ -113,7 +113,7 @@ namespace AOITrace
                 }
                 else
                 {
-                    logger.LogInfo($"No matching records found. No file created at: {outputCsvFilePath}");
+                    logger.LogInfo($"No matching records found. No result file created.");
                 }
                 logger.LogInfo("Comparison completed.");
             }
