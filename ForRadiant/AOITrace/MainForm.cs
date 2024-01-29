@@ -203,23 +203,23 @@ namespace AOITrace
                         logger.LogMatchingRecordNotification(outputCsvFilePath);
 
                         // Check if the outputCsvFilePath is already in UnreadResult.txt
-                        if (!File.Exists(unreadResultFilePath) || !File.ReadLines(unreadResultFilePath).Contains(outputCsvFilePath))
+                        if (!File.Exists(unreadResultFilePath) || !File.ReadLines(unreadResultFilePath).Any(line => line.StartsWith(outputCsvFilePath)))
                         {
-                            // Write the outputCsvFilePath to UnreadResult.txt
+                            // Write the outputCsvFilePath to UnreadResult.txt along with the number of matching records
                             using (StreamWriter writer = File.AppendText(unreadResultFilePath))
                             {
                                 // Format the line with file path and number of matching records
                                 string line = $"{outputCsvFilePath}, {matchingRecords.Count} matching record(s)";
                                 writer.WriteLine(line);
+                                logger.LogInfo($"Added '{outputCsvFilePath}' to UnreadResult.txt");
                             }
                         }
                         else
                         {
                             // Optionally inform the user or log that the file path already exists
-                            Console.WriteLine($"{outputCsvFilePath} already exists in UnreadResult.txt");
+                            logger.LogInfo($"{outputCsvFilePath} already exists in UnreadResult.txt");
                         }
                     });
-
                 }
                 else
                 {
@@ -729,7 +729,7 @@ namespace AOITrace
                             UpdateNotificationLabel();
 
                             // Inform the user
-                            logger.LogInfo($"Removed '{selectedCsvFile}' from UnreadResult.txt");
+                            logger.LogInfo($"Removed '{filePath}' from UnreadResult.txt");
                         }
                         else
                         {
