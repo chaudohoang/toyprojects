@@ -73,30 +73,17 @@ namespace AOITrace
                 // Use Invoke to update the UI from the UI thread
                 Invoke((MethodInvoker)delegate
                 {
-                    // Read the number of lines from UnreadResult.txt
-                    int numberOfLines = 0;
-
-                    try
-                    {
-                        if (File.Exists(unreadResultFilePath))
-                        {
-                            numberOfLines = File.ReadAllLines(unreadResultFilePath).Length;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        // Handle exceptions as needed (e.g., file in use, etc.)
-                        Console.WriteLine($"Error reading file: {ex.Message}");
-                    }
+                    // Read the lines from UnreadResult.txt
+                    string[] unreadResultLines = File.Exists(unreadResultFilePath) ? File.ReadAllLines(unreadResultFilePath) : new string[0];
 
                     // Update lblNotification based on the number of lines
-                    lblNotification.Text = $"{numberOfLines} Unread Result";
+                    lblNotification.Text = $"{unreadResultLines.Length} Unread Result";
 
                     // Change text color to red when the number of lines is not equal to 0
-                    lblNotification.ForeColor = numberOfLines != 0 ? Color.Red : SystemColors.ControlText;
+                    lblNotification.ForeColor = unreadResultLines.Length != 0 ? Color.Red : SystemColors.ControlText;
 
                     // Update the count of newAOITracesCount
-                    newAOITracesCount = numberOfLines;
+                    newAOITracesCount = unreadResultLines.Length;
                 });
             }
         }
@@ -221,7 +208,9 @@ namespace AOITrace
                             // Write the outputCsvFilePath to UnreadResult.txt
                             using (StreamWriter writer = File.AppendText(unreadResultFilePath))
                             {
-                                writer.WriteLine(outputCsvFilePath);
+                                // Format the line with file path and number of matching records
+                                string line = $"{outputCsvFilePath}, {matchingRecords.Count} matching record(s)";
+                                writer.WriteLine(line);
                             }
                         }
                         else
@@ -392,7 +381,6 @@ namespace AOITrace
         {
             if (lstResultFiles.SelectedItem != null)
             {
- 
                 string selectedCsvFile = lstResultFiles.SelectedItem.ToString();
                 System.Diagnostics.Process.Start(selectedCsvFile);
 
@@ -403,10 +391,12 @@ namespace AOITrace
                     string[] lines = File.ReadAllLines(unreadResultFilePath);
 
                     // Check if the selectedCsvFile is in the lines
-                    if (lines.Contains(selectedCsvFile))
+                    string lineToRemove = lines.FirstOrDefault(line => line.StartsWith(selectedCsvFile, StringComparison.OrdinalIgnoreCase));
+
+                    if (lineToRemove != null)
                     {
                         // Remove the line from the array
-                        lines = lines.Where(line => line != selectedCsvFile).ToArray();
+                        lines = lines.Where(line => line != lineToRemove).ToArray();
 
                         // Write the updated lines back to UnreadResult.txt
                         File.WriteAllLines(unreadResultFilePath, lines);
@@ -709,39 +699,54 @@ namespace AOITrace
         {
             if (lstUnreadResultFiles.SelectedItem != null)
             {
-
                 string selectedCsvFile = lstUnreadResultFiles.SelectedItem.ToString();
-                System.Diagnostics.Process.Start(selectedCsvFile);
 
-                // Check if the file path exists in UnreadResult.txt
-                if (File.Exists(unreadResultFilePath))
+                // Extract the file path from the comma-separated line
+                string[] lineParts = selectedCsvFile.Split(',');
+                if (lineParts.Length > 0)
                 {
-                    // Read all lines from UnreadResult.txt
-                    string[] lines = File.ReadAllLines(unreadResultFilePath);
+                    string filePath = lineParts[0].Trim();
 
-                    // Check if the selectedCsvFile is in the lines
-                    if (lines.Contains(selectedCsvFile))
+                    // Start the process using the corrected file path
+                    System.Diagnostics.Process.Start(filePath);
+
+                    // Check if the file path exists in UnreadResult.txt
+                    if (File.Exists(unreadResultFilePath))
                     {
-                        // Remove the line from the array
-                        lines = lines.Where(line => line != selectedCsvFile).ToArray();
+                        // Read all lines from UnreadResult.txt
+                        string[] lines = File.ReadAllLines(unreadResultFilePath);
 
-                        // Write the updated lines back to UnreadResult.txt
-                        File.WriteAllLines(unreadResultFilePath, lines);
-                        UpdateNotificationLabel();
+                        // Check if the selectedCsvFile is in the lines
+                        string lineToRemove = lines.FirstOrDefault(line => line.StartsWith(selectedCsvFile, StringComparison.OrdinalIgnoreCase));
 
-                        // Inform the user
-                        logger.LogInfo($"Removed '{selectedCsvFile}' from UnreadResult.txt");
+                        if (lineToRemove != null)
+                        {
+                            // Remove the line from the array
+                            lines = lines.Where(line => line != lineToRemove).ToArray();
+
+                            // Write the updated lines back to UnreadResult.txt
+                            File.WriteAllLines(unreadResultFilePath, lines);
+                            UpdateNotificationLabel();
+
+                            // Inform the user
+                            logger.LogInfo($"Removed '{selectedCsvFile}' from UnreadResult.txt");
+                        }
+                        else
+                        {
+                            // Inform the user that the file path was not found in UnreadResult.txt
+                            logger.LogInfo($"'{selectedCsvFile}' not found in UnreadResult.txt");
+                        }
                     }
                     else
                     {
-                        // Inform the user that the file path was not found in UnreadResult.txt
-                        logger.LogInfo($"'{selectedCsvFile}' not found in UnreadResult.txt");
+                        // Inform the user that UnreadResult.txt does not exist
+                        logger.LogInfo("UnreadResult.txt not found");
                     }
                 }
                 else
                 {
-                    // Inform the user that UnreadResult.txt does not exist
-                    logger.LogInfo("UnreadResult.txt not found");
+                    // Handle the case where the line doesn't contain a valid file path
+                    logger.LogInfo($"Invalid format in UnreadResult.txt: '{selectedCsvFile}'");
                 }
             }
         }
