@@ -42,6 +42,7 @@
             this.btnSaveMonoLogFolders = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.cmbFileSelection = new System.Windows.Forms.ComboBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.chkShowAfter = new System.Windows.Forms.CheckBox();
             this.chkShowBefore = new System.Windows.Forms.CheckBox();
@@ -52,14 +53,17 @@
             this.label4 = new System.Windows.Forms.Label();
             this.txtResultFolderPath = new System.Windows.Forms.TextBox();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.lblCountdown = new System.Windows.Forms.Label();
             this.btnScheduleProcessRun = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.dateTimePickerProcessRun = new System.Windows.Forms.DateTimePicker();
-            this.lblCountdown = new System.Windows.Forms.Label();
+            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.txtLogs = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.tabPage3.SuspendLayout();
+            this.tabPage4.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -73,22 +77,22 @@
             // 
             // txtMonoLogFolders
             // 
-            this.txtMonoLogFolders.Location = new System.Drawing.Point(380, 35);
+            this.txtMonoLogFolders.Location = new System.Drawing.Point(380, 62);
             this.txtMonoLogFolders.Multiline = true;
             this.txtMonoLogFolders.Name = "txtMonoLogFolders";
             this.txtMonoLogFolders.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtMonoLogFolders.Size = new System.Drawing.Size(362, 526);
+            this.txtMonoLogFolders.Size = new System.Drawing.Size(362, 499);
             this.txtMonoLogFolders.TabIndex = 6;
             this.txtMonoLogFolders.Text = "D:\\Trace Spot Mono Camera\\Station 1 Mono CSV\r\nD:\\Trace Spot Mono Camera\\Station 2" +
     " Mono CSV";
             // 
             // txtColorLogFolders
             // 
-            this.txtColorLogFolders.Location = new System.Drawing.Point(12, 35);
+            this.txtColorLogFolders.Location = new System.Drawing.Point(12, 66);
             this.txtColorLogFolders.Multiline = true;
             this.txtColorLogFolders.Name = "txtColorLogFolders";
             this.txtColorLogFolders.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtColorLogFolders.Size = new System.Drawing.Size(362, 526);
+            this.txtColorLogFolders.Size = new System.Drawing.Size(362, 495);
             this.txtColorLogFolders.TabIndex = 3;
             this.txtColorLogFolders.Text = "D:\\Trace Spot Mono Camera\\Station 1 Color CSV\r\nD:\\Trace Spot Mono Camera\\Station " +
     "2 Color CSV";
@@ -174,6 +178,7 @@
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage3);
+            this.tabControl1.Controls.Add(this.tabPage4);
             this.tabControl1.Location = new System.Drawing.Point(12, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -182,6 +187,7 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.cmbFileSelection);
             this.tabPage1.Controls.Add(this.label2);
             this.tabPage1.Controls.Add(this.btnSaveMonoLogFolders);
             this.tabPage1.Controls.Add(this.label1);
@@ -200,6 +206,13 @@
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Trace";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // cmbFileSelection
+            // 
+            this.cmbFileSelection.Location = new System.Drawing.Point(15, 35);
+            this.cmbFileSelection.Name = "cmbFileSelection";
+            this.cmbFileSelection.Size = new System.Drawing.Size(727, 21);
+            this.cmbFileSelection.TabIndex = 0;
             // 
             // tabPage2
             // 
@@ -309,6 +322,14 @@
             this.tabPage3.Text = "Run Schedule";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
+            // lblCountdown
+            // 
+            this.lblCountdown.AutoSize = true;
+            this.lblCountdown.Location = new System.Drawing.Point(432, 17);
+            this.lblCountdown.Name = "lblCountdown";
+            this.lblCountdown.Size = new System.Drawing.Size(0, 13);
+            this.lblCountdown.TabIndex = 4;
+            // 
             // btnScheduleProcessRun
             // 
             this.btnScheduleProcessRun.Location = new System.Drawing.Point(351, 12);
@@ -337,13 +358,25 @@
             this.dateTimePickerProcessRun.Size = new System.Drawing.Size(200, 20);
             this.dateTimePickerProcessRun.TabIndex = 0;
             // 
-            // lblCountdown
+            // tabPage4
             // 
-            this.lblCountdown.AutoSize = true;
-            this.lblCountdown.Location = new System.Drawing.Point(432, 17);
-            this.lblCountdown.Name = "lblCountdown";
-            this.lblCountdown.Size = new System.Drawing.Size(0, 13);
-            this.lblCountdown.TabIndex = 4;
+            this.tabPage4.Controls.Add(this.txtLogs);
+            this.tabPage4.Location = new System.Drawing.Point(4, 22);
+            this.tabPage4.Name = "tabPage4";
+            this.tabPage4.Size = new System.Drawing.Size(1123, 593);
+            this.tabPage4.TabIndex = 3;
+            this.tabPage4.Text = "Logs";
+            this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // txtLogs
+            // 
+            this.txtLogs.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtLogs.Location = new System.Drawing.Point(0, 0);
+            this.txtLogs.Multiline = true;
+            this.txtLogs.Name = "txtLogs";
+            this.txtLogs.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtLogs.Size = new System.Drawing.Size(1123, 593);
+            this.txtLogs.TabIndex = 0;
             // 
             // MainForm
             // 
@@ -363,6 +396,8 @@
             this.tabPage2.PerformLayout();
             this.tabPage3.ResumeLayout(false);
             this.tabPage3.PerformLayout();
+            this.tabPage4.ResumeLayout(false);
+            this.tabPage4.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -396,6 +431,9 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.DateTimePicker dateTimePickerProcessRun;
         private System.Windows.Forms.Label lblCountdown;
+        private System.Windows.Forms.ComboBox cmbFileSelection;
+        private System.Windows.Forms.TabPage tabPage4;
+        private System.Windows.Forms.TextBox txtLogs;
     }
 }
 

@@ -13,83 +13,135 @@ namespace AOITrace
         // Declare processRunTimer as a class-level field
         private Timer processRunTimer;
         private Timer countdownTimer;
+        private Logger logger; // Logger instance
+
+        private FileSelectionOption selectedFileOption = FileSelectionOption.All;
+
+        // Enum to represent file selection options
+        private enum FileSelectionOption
+        {
+            All,
+            PreviousDay
+        }
         public MainForm()
         {
             InitializeComponent();
             processRunTimer = new Timer();
-            processRunTimer.Interval = 1000; // Update every second
-            processRunTimer.Tick += ProcessRunTimer_Tick;
             countdownTimer = new Timer();
+            cmbFileSelection.Items.AddRange(new string[] { "Check All Summary Log Files", "Check Only Summary Log Files Created On Previous Day" });
+            cmbFileSelection.SelectedIndex = 0; // Default selection
+             // Create an instance of Logger
+            logger = new Logger(txtLogs); // txtLogs is the TextBox in the logging tab
         }
 
         private void CompareLog()
         {
-            List<string> colorLogFolders = new List<string>(txtColorLogFolders.Lines);
-            List<string> monoLogFolders = new List<string>(txtMonoLogFolders.Lines);
-            string outputCsvFilePath = txtOutputCsvPath.Text + "\\Matched_" + DateTime.Now.ToString("yyyyMMdd") + ".csv";
-
-            List<OutputRecord> matchingRecords = new List<OutputRecord>();
-
-            foreach (var colorLogFolder in colorLogFolders)
+            try
             {
-                List<string> colorCsvs = Directory.GetFiles(colorLogFolder, "*.csv").ToList();
+                logger.LogInfo("Comparison started.");
+                List<string> colorLogFolders = new List<string>(txtColorLogFolders.Lines);
+                List<string> monoLogFolders = new List<string>(txtMonoLogFolders.Lines);
+                string outputCsvFilePath = txtOutputCsvPath.Text + "\\Matched_" + DateTime.Now.ToString("yyyyMMdd") + ".csv";
 
-                foreach (var colorCsv in colorCsvs)
+                List<OutputRecord> matchingRecords = new List<OutputRecord>();
+
+                foreach (var colorLogFolder in colorLogFolders)
                 {
-                    FileInfo fileInfo = new FileInfo(colorCsv);
+                    logger.LogInfo($"Processing color log folder: {colorLogFolder}");
+                    List<string> colorCsvs = Directory.GetFiles(colorLogFolder, "*.csv").ToList();
 
-                    // Check if the file was created today, and exclude it
-                    if (fileInfo.CreationTime.Date == DateTime.Now.Date)
+                    foreach (var colorCsv in colorCsvs)
                     {
-                        continue;
-                    }
+                        FileInfo fileInfo = new FileInfo(colorCsv);
 
-                    List<ColorRecordFile> colorRecords = ReadCsvFile<ColorRecordFile, ColorRecordFileMap>(colorCsv);
-
-                    foreach (var monoLogFolder in monoLogFolders)
-                    {
-                        List<string> monoCsvs = Directory.GetFiles(monoLogFolder, "*.csv").ToList();
-
-                        foreach (var monoCsv in monoCsvs)
+                        // Check based on ComboBox selection
+                        if (ShouldExcludeFile(fileInfo))
                         {
-                            FileInfo monoFileInfo = new FileInfo(monoCsv);
+                            continue;
+                        }
 
-                            // Check if the file was created today, and exclude it
-                            if (monoFileInfo.CreationTime.Date == DateTime.Now.Date)
+                        List<ColorRecordFile> colorRecords = ReadCsvFile<ColorRecordFile, ColorRecordFileMap>(colorCsv);
+
+                        foreach (var monoLogFolder in monoLogFolders)
+                        {
+                            List<string> monoCsvs = Directory.GetFiles(monoLogFolder, "*.csv").ToList();
+
+                            foreach (var monoCsv in monoCsvs)
                             {
-                                continue;
-                            }
+                                FileInfo monoFileInfo = new FileInfo(monoCsv);
 
-                            List<MonoRecordFile> monoRecords = ReadCsvFile<MonoRecordFile, MonoRecordFileMap>(monoCsv);
-
-                            foreach (var colorRecord in colorRecords)
-                            {
-                                if (colorRecord.Description.IndexOf("spot", StringComparison.OrdinalIgnoreCase) != -1 &&
-                                    !string.IsNullOrEmpty(colorRecord.DefectInfo))
+                                // Check based on ComboBox selection
+                                if (ShouldExcludeFile(monoFileInfo))
                                 {
-                                    var matchingRecord = monoRecords.FirstOrDefault(monoRecord =>
-                                        monoRecord.PID.Equals(colorRecord.PID, StringComparison.OrdinalIgnoreCase));
+                                    continue;
+                                }
 
-                                    if (matchingRecord != null)
+                                List<MonoRecordFile> monoRecords = ReadCsvFile<MonoRecordFile, MonoRecordFileMap>(monoCsv);
+
+                                foreach (var colorRecord in colorRecords)
+                                {
+                                    if (colorRecord.Description.IndexOf("spot", StringComparison.OrdinalIgnoreCase) != -1 &&
+                                        !string.IsNullOrEmpty(colorRecord.DefectInfo))
                                     {
-                                        matchingRecords.Add(new OutputRecord
+                                        var matchingRecord = monoRecords.FirstOrDefault(monoRecord =>
+                                            monoRecord.PID.Equals(colorRecord.PID, StringComparison.OrdinalIgnoreCase));
+
+                                        if (matchingRecord != null)
                                         {
-                                            PID = colorRecord.PID,
-                                            MonoStation = matchingRecord.EQPID,
-                                            ColorStation = colorRecord.EQPID,
-                                            MonoChannel = matchingRecord.CH,
-                                            ColorChannel = colorRecord.CH,
-                                            DefectInfo = colorRecord.DefectInfo
-                                        });
+                                            matchingRecords.Add(new OutputRecord
+                                            {
+                                                PID = colorRecord.PID,
+                                                MonoStation = matchingRecord.EQPID,
+                                                ColorStation = colorRecord.EQPID,
+                                                MonoChannel = matchingRecord.CH,
+                                                ColorChannel = colorRecord.CH,
+                                                DefectInfo = colorRecord.DefectInfo
+                                            });
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            WriteCsvFile(outputCsvFilePath, matchingRecords);
+                // Check if there are matching records before creating the result file
+                if (matchingRecords.Any())
+                {
+                    WriteCsvFile(outputCsvFilePath, matchingRecords);
+                    logger.LogInfo($"Comparison completed successfully. Result saved to: {outputCsvFilePath}");
+                }
+                else
+                {
+                    logger.LogInfo($"No matching records found. No file created at: {outputCsvFilePath}");
+                }
+                logger.LogInfo("Comparison completed.");
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                logger.LogError($"Unauthorized access error: {ex.Message}");
+            }
+            catch (IOException ex)
+            {
+                logger.LogError($"I/O error during comparison: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"Error during comparison: {ex.Message}");
+            }
+        }
+
+        private bool ShouldExcludeFile(FileInfo fileInfo)
+        {
+            // Check based on ComboBox selection
+            switch (cmbFileSelection.SelectedItem.ToString())
+            {
+                case "Check Only Summary Log Files Created On Previous Day":
+                    return fileInfo.CreationTime.Date != DateTime.Now.Date.AddDays(-1);
+                // Add more cases for additional options if needed
+                default:
+                    return false; // Default behavior: include all files
+            }
         }
 
         private void btnProcess_Click(object sender, EventArgs e)
@@ -296,12 +348,19 @@ namespace AOITrace
             processRunTimer.Interval = (int)timeUntilScheduled.TotalMilliseconds;
 
             // Set up an event handler for the timer tick
+            processRunTimer.Tick -= ProcessRunTimer_Tick; // Remove the event handler to prevent multiple registrations
             processRunTimer.Tick += ProcessRunTimer_Tick;
 
             processRunTimer.Start();
 
             // Set up the countdown timer
             countdownTimer.Interval = 1000; // Update every second
+            countdownTimer.Tick -= (sender, args) =>
+            {
+                timeUntilScheduled = scheduledTime - DateTime.Now;
+                UpdateCountdownLabel(timeUntilScheduled);
+            };
+
             countdownTimer.Tick += (sender, args) =>
             {
                 timeUntilScheduled = scheduledTime - DateTime.Now;
@@ -309,6 +368,10 @@ namespace AOITrace
             };
 
             countdownTimer.Start();
+
+            // Log the start of the schedule
+            logger.LogInfo("Scheduled process run started.");
+
         }
 
 
@@ -327,6 +390,9 @@ namespace AOITrace
             StopTimer(countdownTimer);
 
             lblCountdown.Text = string.Empty;
+
+            // Log the stop of the schedule
+            logger.LogInfo("Scheduled process run stopped.");
         }
 
 
@@ -341,6 +407,9 @@ namespace AOITrace
 
             // Schedule the next run for the same time on the next day
             StartProcessRunTimer();
+
+            // Log the completion of the process run
+            logger.LogInfo("Scheduled process run completed.");
         }
 
 
@@ -368,7 +437,7 @@ namespace AOITrace
 
         private void StopTimer(Timer timer)
         {
-            timer.Stop();
+            timer.Stop();            
         }
 
     }
@@ -421,6 +490,32 @@ namespace AOITrace
         }
     }
 
+    class Logger
+    {
 
-    
+        private TextBox logTextBox;
+
+        public Logger(TextBox textBox)
+        {
+            logTextBox = textBox;
+        }
+
+        public void LogInfo(string message)
+        {
+            Log($"[INFO] {DateTime.Now}: {message}");
+        }
+
+        public void LogError(string message)
+        {
+            Log($"[ERROR] {DateTime.Now}: {message}");
+        }
+
+        private void Log(string message)
+        {
+            // Append the message to the TextBox
+            logTextBox.AppendText(message + Environment.NewLine);
+        }
+
+    }
+
 }
