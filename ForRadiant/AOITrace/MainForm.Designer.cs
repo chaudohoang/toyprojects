@@ -42,8 +42,11 @@
             this.btnSaveMonoLogFolders = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.btnBrowseOutputFolder = new System.Windows.Forms.Button();
             this.cmbFileSelection = new System.Windows.Forms.ComboBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.lstUnreadResultFiles = new System.Windows.Forms.ListBox();
+            this.label7 = new System.Windows.Forms.Label();
             this.chkShowAfter = new System.Windows.Forms.CheckBox();
             this.chkShowBefore = new System.Windows.Forms.CheckBox();
             this.label6 = new System.Windows.Forms.Label();
@@ -53,12 +56,21 @@
             this.label4 = new System.Windows.Forms.Label();
             this.txtResultFolderPath = new System.Windows.Forms.TextBox();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.cmbTimeUnit = new System.Windows.Forms.ComboBox();
+            this.txtTimeToAdd = new System.Windows.Forms.TextBox();
+            this.btnAddTime = new System.Windows.Forms.Button();
+            this.btnSetCurrentTime = new System.Windows.Forms.Button();
             this.lblCountdown = new System.Windows.Forms.Label();
             this.btnScheduleProcessRun = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.dateTimePickerProcessRun = new System.Windows.Forms.DateTimePicker();
             this.tabPage4 = new System.Windows.Forms.TabPage();
-            this.txtLogs = new System.Windows.Forms.TextBox();
+            this.txtLogs = new System.Windows.Forms.RichTextBox();
+            this.btnClearLogs = new System.Windows.Forms.Button();
+            this.lblNotification = new System.Windows.Forms.Label();
+            this.btnSetLogLimit = new System.Windows.Forms.Button();
+            this.txtLogLimit = new System.Windows.Forms.TextBox();
+            this.label8 = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -119,7 +131,7 @@
             // 
             this.txtOutputCsvPath.Location = new System.Drawing.Point(115, 567);
             this.txtOutputCsvPath.Name = "txtOutputCsvPath";
-            this.txtOutputCsvPath.Size = new System.Drawing.Size(627, 20);
+            this.txtOutputCsvPath.Size = new System.Drawing.Size(546, 20);
             this.txtOutputCsvPath.TabIndex = 7;
             this.txtOutputCsvPath.Text = "D:\\Trace Spot Mono Camera\\Match CSV";
             // 
@@ -179,7 +191,7 @@
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Controls.Add(this.tabPage4);
-            this.tabControl1.Location = new System.Drawing.Point(12, 12);
+            this.tabControl1.Location = new System.Drawing.Point(12, 37);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(1131, 619);
@@ -187,6 +199,7 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.btnBrowseOutputFolder);
             this.tabPage1.Controls.Add(this.cmbFileSelection);
             this.tabPage1.Controls.Add(this.label2);
             this.tabPage1.Controls.Add(this.btnSaveMonoLogFolders);
@@ -207,6 +220,16 @@
             this.tabPage1.Text = "Trace";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // btnBrowseOutputFolder
+            // 
+            this.btnBrowseOutputFolder.Location = new System.Drawing.Point(667, 565);
+            this.btnBrowseOutputFolder.Name = "btnBrowseOutputFolder";
+            this.btnBrowseOutputFolder.Size = new System.Drawing.Size(75, 23);
+            this.btnBrowseOutputFolder.TabIndex = 12;
+            this.btnBrowseOutputFolder.Text = "Browse";
+            this.btnBrowseOutputFolder.UseVisualStyleBackColor = true;
+            this.btnBrowseOutputFolder.Click += new System.EventHandler(this.btnBrowseOutputFolder_Click);
+            // 
             // cmbFileSelection
             // 
             this.cmbFileSelection.Location = new System.Drawing.Point(15, 35);
@@ -216,6 +239,8 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.lstUnreadResultFiles);
+            this.tabPage2.Controls.Add(this.label7);
             this.tabPage2.Controls.Add(this.chkShowAfter);
             this.tabPage2.Controls.Add(this.chkShowBefore);
             this.tabPage2.Controls.Add(this.label6);
@@ -233,10 +258,29 @@
             this.tabPage2.UseVisualStyleBackColor = true;
             this.tabPage2.Enter += new System.EventHandler(this.tabPage2_Enter);
             // 
+            // lstUnreadResultFiles
+            // 
+            this.lstUnreadResultFiles.FormattingEnabled = true;
+            this.lstUnreadResultFiles.Location = new System.Drawing.Point(9, 55);
+            this.lstUnreadResultFiles.Name = "lstUnreadResultFiles";
+            this.lstUnreadResultFiles.ScrollAlwaysVisible = true;
+            this.lstUnreadResultFiles.Size = new System.Drawing.Size(744, 225);
+            this.lstUnreadResultFiles.TabIndex = 18;
+            this.lstUnreadResultFiles.DoubleClick += new System.EventHandler(this.lstUnreadResultFiles_DoubleClick);
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(17, 39);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(253, 13);
+            this.label7.TabIndex = 17;
+            this.label7.Text = "List of Unread Result Files, double click to open files";
+            // 
             // chkShowAfter
             // 
             this.chkShowAfter.AutoSize = true;
-            this.chkShowAfter.Location = new System.Drawing.Point(576, 35);
+            this.chkShowAfter.Location = new System.Drawing.Point(625, 303);
             this.chkShowAfter.Name = "chkShowAfter";
             this.chkShowAfter.Size = new System.Drawing.Size(128, 17);
             this.chkShowAfter.TabIndex = 16;
@@ -247,7 +291,7 @@
             // chkShowBefore
             // 
             this.chkShowBefore.AutoSize = true;
-            this.chkShowBefore.Location = new System.Drawing.Point(433, 35);
+            this.chkShowBefore.Location = new System.Drawing.Point(482, 303);
             this.chkShowBefore.Name = "chkShowBefore";
             this.chkShowBefore.Size = new System.Drawing.Size(137, 17);
             this.chkShowBefore.TabIndex = 15;
@@ -258,15 +302,15 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(6, 38);
+            this.label6.Location = new System.Drawing.Point(15, 304);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(215, 13);
+            this.label6.Size = new System.Drawing.Size(255, 13);
             this.label6.TabIndex = 14;
-            this.label6.Text = "List of Result Files, double click to open files";
+            this.label6.Text = "List of Result Files by Date, double click to open files";
             // 
             // dateTimePickerFilter
             // 
-            this.dateTimePickerFilter.Location = new System.Drawing.Point(227, 32);
+            this.dateTimePickerFilter.Location = new System.Drawing.Point(276, 300);
             this.dateTimePickerFilter.Name = "dateTimePickerFilter";
             this.dateTimePickerFilter.Size = new System.Drawing.Size(200, 20);
             this.dateTimePickerFilter.TabIndex = 12;
@@ -274,7 +318,7 @@
             // 
             // btnBrowseResultFolder
             // 
-            this.btnBrowseResultFolder.Location = new System.Drawing.Point(661, 4);
+            this.btnBrowseResultFolder.Location = new System.Drawing.Point(678, 4);
             this.btnBrowseResultFolder.Name = "btnBrowseResultFolder";
             this.btnBrowseResultFolder.Size = new System.Drawing.Size(75, 23);
             this.btnBrowseResultFolder.TabIndex = 11;
@@ -285,10 +329,10 @@
             // lstResultFiles
             // 
             this.lstResultFiles.FormattingEnabled = true;
-            this.lstResultFiles.Location = new System.Drawing.Point(9, 58);
+            this.lstResultFiles.Location = new System.Drawing.Point(9, 331);
             this.lstResultFiles.Name = "lstResultFiles";
             this.lstResultFiles.ScrollAlwaysVisible = true;
-            this.lstResultFiles.Size = new System.Drawing.Size(727, 524);
+            this.lstResultFiles.Size = new System.Drawing.Size(744, 251);
             this.lstResultFiles.TabIndex = 10;
             this.lstResultFiles.DoubleClick += new System.EventHandler(this.lstResultFiles_DoubleClick);
             // 
@@ -305,12 +349,16 @@
             // 
             this.txtResultFolderPath.Location = new System.Drawing.Point(109, 6);
             this.txtResultFolderPath.Name = "txtResultFolderPath";
-            this.txtResultFolderPath.Size = new System.Drawing.Size(546, 20);
+            this.txtResultFolderPath.Size = new System.Drawing.Size(563, 20);
             this.txtResultFolderPath.TabIndex = 9;
             this.txtResultFolderPath.Text = "D:\\Trace Spot Mono Camera\\Match CSV";
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.cmbTimeUnit);
+            this.tabPage3.Controls.Add(this.txtTimeToAdd);
+            this.tabPage3.Controls.Add(this.btnAddTime);
+            this.tabPage3.Controls.Add(this.btnSetCurrentTime);
             this.tabPage3.Controls.Add(this.lblCountdown);
             this.tabPage3.Controls.Add(this.btnScheduleProcessRun);
             this.tabPage3.Controls.Add(this.label5);
@@ -322,6 +370,42 @@
             this.tabPage3.Text = "Run Schedule";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
+            // cmbTimeUnit
+            // 
+            this.cmbTimeUnit.FormattingEnabled = true;
+            this.cmbTimeUnit.Location = new System.Drawing.Point(214, 51);
+            this.cmbTimeUnit.Name = "cmbTimeUnit";
+            this.cmbTimeUnit.Size = new System.Drawing.Size(83, 21);
+            this.cmbTimeUnit.TabIndex = 8;
+            // 
+            // txtTimeToAdd
+            // 
+            this.txtTimeToAdd.Location = new System.Drawing.Point(177, 51);
+            this.txtTimeToAdd.Name = "txtTimeToAdd";
+            this.txtTimeToAdd.Size = new System.Drawing.Size(31, 20);
+            this.txtTimeToAdd.TabIndex = 7;
+            this.txtTimeToAdd.Text = "10";
+            // 
+            // btnAddTime
+            // 
+            this.btnAddTime.Location = new System.Drawing.Point(130, 49);
+            this.btnAddTime.Name = "btnAddTime";
+            this.btnAddTime.Size = new System.Drawing.Size(41, 23);
+            this.btnAddTime.TabIndex = 6;
+            this.btnAddTime.Text = "Add";
+            this.btnAddTime.UseVisualStyleBackColor = true;
+            this.btnAddTime.Click += new System.EventHandler(this.btnAddTime_Click);
+            // 
+            // btnSetCurrentTime
+            // 
+            this.btnSetCurrentTime.Location = new System.Drawing.Point(30, 49);
+            this.btnSetCurrentTime.Name = "btnSetCurrentTime";
+            this.btnSetCurrentTime.Size = new System.Drawing.Size(94, 23);
+            this.btnSetCurrentTime.TabIndex = 5;
+            this.btnSetCurrentTime.Text = "Set Current Time";
+            this.btnSetCurrentTime.UseVisualStyleBackColor = true;
+            this.btnSetCurrentTime.Click += new System.EventHandler(this.btnSetCurrentTime_Click);
+            // 
             // lblCountdown
             // 
             this.lblCountdown.AutoSize = true;
@@ -332,7 +416,7 @@
             // 
             // btnScheduleProcessRun
             // 
-            this.btnScheduleProcessRun.Location = new System.Drawing.Point(351, 12);
+            this.btnScheduleProcessRun.Location = new System.Drawing.Point(336, 12);
             this.btnScheduleProcessRun.Name = "btnScheduleProcessRun";
             this.btnScheduleProcessRun.Size = new System.Drawing.Size(75, 23);
             this.btnScheduleProcessRun.TabIndex = 2;
@@ -360,7 +444,11 @@
             // 
             // tabPage4
             // 
+            this.tabPage4.Controls.Add(this.label8);
+            this.tabPage4.Controls.Add(this.txtLogLimit);
+            this.tabPage4.Controls.Add(this.btnSetLogLimit);
             this.tabPage4.Controls.Add(this.txtLogs);
+            this.tabPage4.Controls.Add(this.btnClearLogs);
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
             this.tabPage4.Size = new System.Drawing.Size(1123, 593);
@@ -370,19 +458,64 @@
             // 
             // txtLogs
             // 
-            this.txtLogs.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtLogs.Location = new System.Drawing.Point(0, 0);
-            this.txtLogs.Multiline = true;
+            this.txtLogs.Location = new System.Drawing.Point(3, 32);
             this.txtLogs.Name = "txtLogs";
-            this.txtLogs.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtLogs.Size = new System.Drawing.Size(1123, 593);
-            this.txtLogs.TabIndex = 0;
+            this.txtLogs.Size = new System.Drawing.Size(1117, 558);
+            this.txtLogs.TabIndex = 2;
+            this.txtLogs.Text = "";
+            // 
+            // btnClearLogs
+            // 
+            this.btnClearLogs.Location = new System.Drawing.Point(1045, 4);
+            this.btnClearLogs.Name = "btnClearLogs";
+            this.btnClearLogs.Size = new System.Drawing.Size(75, 23);
+            this.btnClearLogs.TabIndex = 1;
+            this.btnClearLogs.Text = "Clear Logs";
+            this.btnClearLogs.UseVisualStyleBackColor = true;
+            this.btnClearLogs.Click += new System.EventHandler(this.btnClearLogs_Click);
+            // 
+            // lblNotification
+            // 
+            this.lblNotification.AutoSize = true;
+            this.lblNotification.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblNotification.Location = new System.Drawing.Point(16, 9);
+            this.lblNotification.Name = "lblNotification";
+            this.lblNotification.Size = new System.Drawing.Size(154, 24);
+            this.lblNotification.TabIndex = 10;
+            this.lblNotification.Text = "0 Unread Result !";
+            // 
+            // btnSetLogLimit
+            // 
+            this.btnSetLogLimit.Location = new System.Drawing.Point(867, 4);
+            this.btnSetLogLimit.Name = "btnSetLogLimit";
+            this.btnSetLogLimit.Size = new System.Drawing.Size(86, 23);
+            this.btnSetLogLimit.TabIndex = 3;
+            this.btnSetLogLimit.Text = "Set Log Limit";
+            this.btnSetLogLimit.UseVisualStyleBackColor = true;
+            // 
+            // txtLogLimit
+            // 
+            this.txtLogLimit.Location = new System.Drawing.Point(959, 6);
+            this.txtLogLimit.Name = "txtLogLimit";
+            this.txtLogLimit.Size = new System.Drawing.Size(42, 20);
+            this.txtLogLimit.TabIndex = 4;
+            this.txtLogLimit.Text = "200";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(1007, 9);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(32, 13);
+            this.label8.TabIndex = 5;
+            this.label8.Text = "Lines";
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1155, 643);
+            this.ClientSize = new System.Drawing.Size(1155, 659);
+            this.Controls.Add(this.lblNotification);
             this.Controls.Add(this.tabControl1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -399,6 +532,7 @@
             this.tabPage4.ResumeLayout(false);
             this.tabPage4.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -433,7 +567,19 @@
         private System.Windows.Forms.Label lblCountdown;
         private System.Windows.Forms.ComboBox cmbFileSelection;
         private System.Windows.Forms.TabPage tabPage4;
-        private System.Windows.Forms.TextBox txtLogs;
+        private System.Windows.Forms.Button btnBrowseOutputFolder;
+        private System.Windows.Forms.Button btnClearLogs;
+        private System.Windows.Forms.Button btnSetCurrentTime;
+        private System.Windows.Forms.ComboBox cmbTimeUnit;
+        private System.Windows.Forms.TextBox txtTimeToAdd;
+        private System.Windows.Forms.Button btnAddTime;
+        private System.Windows.Forms.RichTextBox txtLogs;
+        private System.Windows.Forms.Label lblNotification;
+        private System.Windows.Forms.ListBox lstUnreadResultFiles;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.TextBox txtLogLimit;
+        private System.Windows.Forms.Button btnSetLogLimit;
     }
 }
 

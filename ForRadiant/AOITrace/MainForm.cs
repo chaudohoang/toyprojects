@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using CsvHelper;
 using CsvHelper.Configuration;
@@ -14,15 +16,10 @@ namespace AOITrace
         private Timer processRunTimer;
         private Timer countdownTimer;
         private Logger logger; // Logger instance
+        private int newAOITracesCount = 0;
+        private string unreadResultFilePath;
+        private FileSystemWatcher fileWatcher;
 
-        private FileSelectionOption selectedFileOption = FileSelectionOption.All;
-
-        // Enum to represent file selection options
-        private enum FileSelectionOption
-        {
-            All,
-            PreviousDay
-        }
         public MainForm()
         {
             InitializeComponent();
@@ -30,18 +27,122 @@ namespace AOITrace
             countdownTimer = new Timer();
             cmbFileSelection.Items.AddRange(new string[] { "Check Only Summary Log Files Created On Previous Day", "Check All Summary Log Files" });
             cmbFileSelection.SelectedIndex = 0; // Default selection
-             // Create an instance of Logger
-            logger = new Logger(txtLogs); // txtLogs is the TextBox in the logging tab
+            cmbTimeUnit.Items.AddRange(new string[] { "Seconds", "Minutes", "Hours" });
+            cmbTimeUnit.SelectedIndex = 0; // Default to Seconds
+            // Create an instance of Logger
+            logger = new Logger(txtLogs, this, txtLogLimit, btnSetLogLimit); // Assuming txtLogs is a RichTextBox
+            // Inside the MainForm constructor, after initializing components
+            unreadResultFilePath = Path.Combine(Environment.CurrentDirectory, "UnreadResult.txt");
+            // Initialize FileSystemWatcher
+            InitializeFileSystemWatcher();
         }
+
+        private void InitializeFileSystemWatcher()
+        {
+            fileWatcher = new FileSystemWatcher();
+            fileWatcher.Path = Environment.CurrentDirectory;
+            fileWatcher.Filter = "UnreadResult.txt";
+            fileWatcher.NotifyFilter = NotifyFilters.LastWrite;
+            fileWatcher.Changed += FileWatcher_Changed;
+
+            // Check if the form has been created before enabling FileSystemWatcher
+            if (IsHandleCreated)
+            {
+                fileWatcher.EnableRaisingEvents = true;
+
+                // Initial update of lblNotification
+                UpdateNotificationLabel();
+            }
+            else
+            {
+                // If the handle hasn't been created yet, wait for the form to load
+                Load += (sender, e) =>
+                {
+                    fileWatcher.EnableRaisingEvents = true;
+
+                    // Initial update of lblNotification
+                    UpdateNotificationLabel();
+                };
+            }
+        }
+        private void UpdateNotificationLabel()
+        {
+            // Check if the form has been created before invoking UI updates
+            if (IsHandleCreated)
+            {
+                // Use Invoke to update the UI from the UI thread
+                Invoke((MethodInvoker)delegate
+                {
+                    // Read the number of lines from UnreadResult.txt
+                    int numberOfLines = 0;
+
+                    try
+                    {
+                        if (File.Exists(unreadResultFilePath))
+                        {
+                            numberOfLines = File.ReadAllLines(unreadResultFilePath).Length;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Handle exceptions as needed (e.g., file in use, etc.)
+                        Console.WriteLine($"Error reading file: {ex.Message}");
+                    }
+
+                    // Update lblNotification based on the number of lines
+                    lblNotification.Text = $"{numberOfLines} Unread Result";
+
+                    // Change text color to red when the number of lines is not equal to 0
+                    lblNotification.ForeColor = numberOfLines != 0 ? Color.Red : SystemColors.ControlText;
+
+                    // Update the count of newAOITracesCount
+                    newAOITracesCount = numberOfLines;
+                });
+            }
+        }
+
+
+        private void FileWatcher_Changed(object sender, FileSystemEventArgs e)
+        {
+            // Check if the form has been created before invoking UI updates
+            if (IsHandleCreated)
+            {
+                // Use Invoke to update the UI from the UI thread
+                Invoke((MethodInvoker)delegate
+                {
+                    // Handle file changes, update lblNotification
+                    UpdateNotificationLabel();
+
+                    // Update the UnreadResult ListBox
+                    UpdateUnreadResultListBox();
+                });
+            }
+        }
+
 
         private void CompareLog()
         {
             try
             {
                 logger.LogInfo("Comparison started.");
-                List<string> colorLogFolders = new List<string>(txtColorLogFolders.Lines);
-                List<string> monoLogFolders = new List<string>(txtMonoLogFolders.Lines);
-                string outputCsvFilePath = txtOutputCsvPath.Text + "\\Matched_" + DateTime.Now.ToString("yyyyMMdd") + ".csv";
+                List<string> colorLogFolders = new List<string>();
+                List<string> monoLogFolders = new List<string>();
+                string outputCsvFilePath = string.Empty;
+                // Use Invoke to access UI controls on the UI thread
+                txtColorLogFolders.Invoke((MethodInvoker)delegate
+                {
+                    colorLogFolders = new List<string>(txtColorLogFolders.Lines);
+                });
+
+                txtMonoLogFolders.Invoke((MethodInvoker)delegate
+                {
+                    monoLogFolders = new List<string>(txtMonoLogFolders.Lines);
+                });
+
+                txtOutputCsvPath.Invoke((MethodInvoker)delegate
+                {
+                    outputCsvFilePath = txtOutputCsvPath.Text + "\\Matched_" + DateTime.Now.ToString("yyyyMMdd") + ".csv";
+                });
 
                 List<OutputRecord> matchingRecords = new List<OutputRecord>();
 
@@ -108,8 +209,28 @@ namespace AOITrace
                 // Check if there are matching records before creating the result file
                 if (matchingRecords.Any())
                 {
-                    WriteCsvFile(outputCsvFilePath, matchingRecords);
-                    logger.LogInfo($"Comparison completed successfully. Result saved to: {outputCsvFilePath}");
+                    // Use Invoke to access UI controls on the UI thread
+                    txtOutputCsvPath.Invoke((MethodInvoker)delegate
+                    {
+                        WriteCsvFile(outputCsvFilePath, matchingRecords);
+                        logger.LogMatchingRecordNotification(outputCsvFilePath);
+
+                        // Check if the outputCsvFilePath is already in UnreadResult.txt
+                        if (!File.Exists(unreadResultFilePath) || !File.ReadLines(unreadResultFilePath).Contains(outputCsvFilePath))
+                        {
+                            // Write the outputCsvFilePath to UnreadResult.txt
+                            using (StreamWriter writer = File.AppendText(unreadResultFilePath))
+                            {
+                                writer.WriteLine(outputCsvFilePath);
+                            }
+                        }
+                        else
+                        {
+                            // Optionally inform the user or log that the file path already exists
+                            Console.WriteLine($"{outputCsvFilePath} already exists in UnreadResult.txt");
+                        }
+                    });
+
                 }
                 else
                 {
@@ -133,20 +254,44 @@ namespace AOITrace
 
         private bool ShouldExcludeFile(FileInfo fileInfo)
         {
-            // Check based on ComboBox selection
-            switch (cmbFileSelection.SelectedItem.ToString())
+            bool result = false;
+
+            // Use Invoke to access UI controls on the UI thread
+            cmbFileSelection.Invoke((MethodInvoker)delegate
             {
-                case "Check Only Summary Log Files Created On Previous Day":
-                    return fileInfo.CreationTime.Date != DateTime.Now.Date.AddDays(-1);
-                // Add more cases for additional options if needed
-                default:
-                    return false; // Default behavior: include all files
-            }
+                // Check based on ComboBox selection
+                switch (cmbFileSelection.SelectedItem.ToString())
+                {
+                    case "Check Only Summary Log Files Created On Previous Day":
+                        result = fileInfo.CreationTime.Date != DateTime.Now.Date.AddDays(-1);
+                        break;
+                    // Add more cases for additional options if needed
+                    default:
+                        result = false; // Default behavior: include all files
+                        break;
+                }
+            });
+
+            return result;
         }
 
-        private void btnProcess_Click(object sender, EventArgs e)
+        private async void btnProcess_Click(object sender, EventArgs e)
         {
-            CompareLog();
+            // Disable the button to prevent multiple clicks during the operation
+            btnProcess.Enabled = false;
+
+            try
+            {
+                // Start the heavy operation in the background
+                await Task.Run(() => CompareLog());
+
+                // Update UI or perform any other post-operation tasks if needed
+            }
+            finally
+            {
+                // Enable the button after the operation completes (either successfully or with an exception)
+                btnProcess.Enabled = true;
+            }
         }
 
         static List<T> ReadCsvFile<T, TMap>(string filePath)
@@ -234,17 +379,56 @@ namespace AOITrace
 
         private void tabPage2_Enter(object sender, EventArgs e)
         {
+          
+            // Handle file changes, update lblNotification
             UpdateListBoxBasedOnDate();
+
+            // Update the UnreadResult ListBox
+            UpdateUnreadResultListBox();                
+            
         }
 
         private void lstResultFiles_DoubleClick(object sender, EventArgs e)
         {
             if (lstResultFiles.SelectedItem != null)
             {
+ 
                 string selectedCsvFile = lstResultFiles.SelectedItem.ToString();
                 System.Diagnostics.Process.Start(selectedCsvFile);
+
+                // Check if the file path exists in UnreadResult.txt
+                if (File.Exists(unreadResultFilePath))
+                {
+                    // Read all lines from UnreadResult.txt
+                    string[] lines = File.ReadAllLines(unreadResultFilePath);
+
+                    // Check if the selectedCsvFile is in the lines
+                    if (lines.Contains(selectedCsvFile))
+                    {
+                        // Remove the line from the array
+                        lines = lines.Where(line => line != selectedCsvFile).ToArray();
+
+                        // Write the updated lines back to UnreadResult.txt
+                        File.WriteAllLines(unreadResultFilePath, lines);
+                        UpdateNotificationLabel();
+
+                        // Inform the user
+                        logger.LogInfo($"Removed '{selectedCsvFile}' from UnreadResult.txt");
+                    }
+                    else
+                    {
+                        // Inform the user that the file path was not found in UnreadResult.txt
+                        logger.LogInfo($"'{selectedCsvFile}' not found in UnreadResult.txt");
+                    }
+                }
+                else
+                {
+                    // Inform the user that UnreadResult.txt does not exist
+                    logger.LogInfo("UnreadResult.txt not found");
+                }
             }
         }
+
 
         private void dateTimePickerFilter_ValueChanged(object sender, EventArgs e)
         {
@@ -304,6 +488,24 @@ namespace AOITrace
                 // Update the ListBox
                 lstResultFiles.Items.Clear();
                 lstResultFiles.Items.AddRange(csvFiles);
+            }
+        }
+
+        private void UpdateUnreadResultListBox()
+        {
+            // Check if the form has been created before invoking UI updates
+            if (IsHandleCreated)
+            {
+                // Use Invoke to update the UI from the UI thread
+                Invoke((MethodInvoker)delegate
+                {
+                    // Read the lines from UnreadResult.txt
+                    string[] unreadResultLines = File.Exists(unreadResultFilePath) ? File.ReadAllLines(unreadResultFilePath) : new string[0];
+
+                    // Update the ListBox
+                    lstUnreadResultFiles.Items.Clear();
+                    lstUnreadResultFiles.Items.AddRange(unreadResultLines);
+                });
             }
         }
 
@@ -397,21 +599,25 @@ namespace AOITrace
 
 
 
-        private void ProcessRunTimer_Tick(object sender, EventArgs e)
+        private async void ProcessRunTimer_Tick(object sender, EventArgs e)
         {
-            // Perform the process run logic here
-            CompareLog();
+            try
+            {
+                // Perform the process run logic asynchronously
+                await Task.Run(() => CompareLog());
 
-            // Stop the current timer
-            StopTimer(processRunTimer);
+                // Schedule the next run for the same time on the next day
+                StartProcessRunTimer();
 
-            // Schedule the next run for the same time on the next day
-            StartProcessRunTimer();
-
-            // Log the completion of the process run
-            logger.LogInfo("Scheduled process run completed.");
+                // Log the completion of the process run
+                logger.LogInfo("Scheduled process run completed.");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception details
+                logger.LogError($"An error occurred during scheduled process run: {ex.Message}");
+            }
         }
-
 
         private void ScheduleNextRun()
         {
@@ -440,6 +646,107 @@ namespace AOITrace
             timer.Stop();            
         }
 
+        private void btnBrowseOutputFolder_Click(object sender, EventArgs e)
+        {
+            using (FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog())
+            {
+                if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
+                {
+                    string selectedFolder = folderBrowserDialog.SelectedPath;
+                    txtOutputCsvPath.Text = selectedFolder;
+
+                }
+            }
+        }
+
+        private void btnClearLogs_Click(object sender, EventArgs e)
+        {
+            txtLogs.Text = "";
+        }
+
+        private void btnSetCurrentTime_Click(object sender, EventArgs e)
+        {
+            // Set the time picker value to the current time
+            dateTimePickerProcessRun.Value = DateTime.Now;
+        }
+
+        private void btnAddTime_Click(object sender, EventArgs e)
+        {
+            // Parse the user input for the time to add
+            if (int.TryParse(txtTimeToAdd.Text, out int timeToAdd))
+            {
+                // Determine the time unit based on the selected item in the combobox
+                string selectedTimeUnit = cmbTimeUnit.SelectedItem.ToString();
+
+                // Add the specified time to the current value of dateTimePickerProcessRun
+                DateTime newDateTime = dateTimePickerProcessRun.Value;
+
+                switch (selectedTimeUnit)
+                {
+                    case "Seconds":
+                        newDateTime = newDateTime.AddSeconds(timeToAdd);
+                        break;
+                    case "Minutes":
+                        newDateTime = newDateTime.AddMinutes(timeToAdd);
+                        break;
+                    case "Hours":
+                        newDateTime = newDateTime.AddHours(timeToAdd);
+                        break;
+                        // Add more cases for additional time units if needed
+                }
+
+                // Set the updated value to dateTimePickerProcessRun
+                dateTimePickerProcessRun.Value = newDateTime;
+            }
+            else
+            {
+                // Handle invalid input (non-numeric) if needed
+                MessageBox.Show("Invalid input. Please enter a numeric value for time.");
+            }
+        }
+
+        private void lstUnreadResultFiles_DoubleClick(object sender, EventArgs e)
+        {
+            if (lstUnreadResultFiles.SelectedItem != null)
+            {
+
+                string selectedCsvFile = lstUnreadResultFiles.SelectedItem.ToString();
+                System.Diagnostics.Process.Start(selectedCsvFile);
+
+                // Check if the file path exists in UnreadResult.txt
+                if (File.Exists(unreadResultFilePath))
+                {
+                    // Read all lines from UnreadResult.txt
+                    string[] lines = File.ReadAllLines(unreadResultFilePath);
+
+                    // Check if the selectedCsvFile is in the lines
+                    if (lines.Contains(selectedCsvFile))
+                    {
+                        // Remove the line from the array
+                        lines = lines.Where(line => line != selectedCsvFile).ToArray();
+
+                        // Write the updated lines back to UnreadResult.txt
+                        File.WriteAllLines(unreadResultFilePath, lines);
+                        UpdateNotificationLabel();
+
+                        // Inform the user
+                        logger.LogInfo($"Removed '{selectedCsvFile}' from UnreadResult.txt");
+                    }
+                    else
+                    {
+                        // Inform the user that the file path was not found in UnreadResult.txt
+                        logger.LogInfo($"'{selectedCsvFile}' not found in UnreadResult.txt");
+                    }
+                }
+                else
+                {
+                    // Inform the user that UnreadResult.txt does not exist
+                    logger.LogInfo("UnreadResult.txt not found");
+                }
+            }
+        }
+
+        
     }
 
     class ColorRecordFile
@@ -492,30 +799,108 @@ namespace AOITrace
 
     class Logger
     {
+        private RichTextBox logRichTextBox;
+        private Form mainForm;
+        private int maxLogLines = 200;
 
-        private TextBox logTextBox;
+        private TextBox txtLogLimit;
+        private Button btnSetLogLimit;
 
-        public Logger(TextBox textBox)
+        public Logger(RichTextBox richTextBox, Form form, TextBox logLimitTextBox, Button setLogLimitButton)
         {
-            logTextBox = textBox;
+            logRichTextBox = richTextBox;
+            mainForm = form;
+            txtLogLimit = logLimitTextBox;
+            btnSetLogLimit = setLogLimitButton;
+
+            // Disable the text box by default
+            txtLogLimit.Enabled = false;
+
+            // Attach the button click event
+            btnSetLogLimit.Click += BtnSetLogLimit_Click;
         }
 
         public void LogInfo(string message)
         {
-            Log($"[INFO] {DateTime.Now}: {message}");
+            Log($"[INFO] {DateTime.Now}: {message}", Color.Black);
         }
 
         public void LogError(string message)
         {
-            Log($"[ERROR] {DateTime.Now}: {message}");
+            Log($"[ERROR] {DateTime.Now}: {message}", Color.Red);
         }
 
-        private void Log(string message)
+        public void LogMatchingRecordNotification(string message)
         {
-            // Append the message to the TextBox
-            logTextBox.AppendText(message + Environment.NewLine);
+            Log($"[MATCH] {DateTime.Now}: {message}", Color.Red); // Assuming you want to highlight matching records in red
         }
 
+        private void Log(string message, Color color)
+        {
+            mainForm.Invoke((MethodInvoker)delegate
+            {
+                // Set the color for the entire log message
+                logRichTextBox.SelectionColor = color;
+
+                // Append the message to the RichTextBox
+                logRichTextBox.AppendText(message + Environment.NewLine);
+
+                // Reset the color to default
+                logRichTextBox.SelectionColor = logRichTextBox.ForeColor;
+
+                // Trim excess lines if the log exceeds the maximum
+                TrimExcessLogLines();
+            });
+        }
+
+        private void TrimExcessLogLines()
+        {
+            if (logRichTextBox.Lines.Length > maxLogLines)
+            {
+                // Get the lines beyond the maximum limit
+                string[] remainingLines = logRichTextBox.Lines.Skip(logRichTextBox.Lines.Length - maxLogLines).ToArray();
+
+                // Set the text with the remaining lines
+                logRichTextBox.Lines = remainingLines;
+            }
+        }
+
+        private void BtnSetLogLimit_Click(object sender, EventArgs e)
+        {
+            if (txtLogLimit.Enabled)
+            {
+                // Attempt to set the log limit
+                if (int.TryParse(txtLogLimit.Text, out int newLimit) && newLimit > 0)
+                {
+                    // Update the log limit
+                    maxLogLines = newLimit;
+
+                    // Trim excess lines based on the new limit
+                    TrimExcessLogLines();
+
+                    // Disable the text box
+                    txtLogLimit.Enabled = false;
+
+                    // Change button text back to "Set"
+                    btnSetLogLimit.Text = "Set Log Limit";
+                }
+                else
+                {
+                    // Invalid input, display a message or handle accordingly
+                    MessageBox.Show("Invalid log limit. Please enter a positive integer.");
+                }
+            }
+            else
+            {
+                // Enable the text box
+                txtLogLimit.Enabled = true;
+
+                // Change button text to "Save"
+                btnSetLogLimit.Text = "Save";
+            }
+        }
     }
+
+
 
 }
