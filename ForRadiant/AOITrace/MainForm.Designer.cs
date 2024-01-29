@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.label1 = new System.Windows.Forms.Label();
             this.txtMonoLogFolders = new System.Windows.Forms.TextBox();
             this.txtColorLogFolders = new System.Windows.Forms.TextBox();
@@ -42,18 +43,23 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.chkShowAfter = new System.Windows.Forms.CheckBox();
+            this.chkShowBefore = new System.Windows.Forms.CheckBox();
+            this.label6 = new System.Windows.Forms.Label();
             this.dateTimePickerFilter = new System.Windows.Forms.DateTimePicker();
             this.btnBrowseResultFolder = new System.Windows.Forms.Button();
             this.lstResultFiles = new System.Windows.Forms.ListBox();
             this.label4 = new System.Windows.Forms.Label();
             this.txtResultFolderPath = new System.Windows.Forms.TextBox();
-            this.label6 = new System.Windows.Forms.Label();
-            this.chkShowBefore = new System.Windows.Forms.CheckBox();
-            this.chkShowAfter = new System.Windows.Forms.CheckBox();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.btnScheduleProcessRun = new System.Windows.Forms.Button();
+            this.label5 = new System.Windows.Forms.Label();
+            this.dateTimePickerProcessRun = new System.Windows.Forms.DateTimePicker();
+            this.lblCountdown = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
+            this.tabPage3.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -214,6 +220,37 @@
             this.tabPage2.UseVisualStyleBackColor = true;
             this.tabPage2.Enter += new System.EventHandler(this.tabPage2_Enter);
             // 
+            // chkShowAfter
+            // 
+            this.chkShowAfter.AutoSize = true;
+            this.chkShowAfter.Location = new System.Drawing.Point(576, 35);
+            this.chkShowAfter.Name = "chkShowAfter";
+            this.chkShowAfter.Size = new System.Drawing.Size(128, 17);
+            this.chkShowAfter.TabIndex = 16;
+            this.chkShowAfter.Text = "Show Files After Date";
+            this.chkShowAfter.UseVisualStyleBackColor = true;
+            this.chkShowAfter.CheckedChanged += new System.EventHandler(this.chkShowAfter_CheckedChanged);
+            // 
+            // chkShowBefore
+            // 
+            this.chkShowBefore.AutoSize = true;
+            this.chkShowBefore.Location = new System.Drawing.Point(433, 35);
+            this.chkShowBefore.Name = "chkShowBefore";
+            this.chkShowBefore.Size = new System.Drawing.Size(137, 17);
+            this.chkShowBefore.TabIndex = 15;
+            this.chkShowBefore.Text = "Show Files Before Date";
+            this.chkShowBefore.UseVisualStyleBackColor = true;
+            this.chkShowBefore.CheckedChanged += new System.EventHandler(this.chkShowBefore_CheckedChanged);
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(6, 38);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(215, 13);
+            this.label6.TabIndex = 14;
+            this.label6.Text = "List of Result Files, double click to open files";
+            // 
             // dateTimePickerFilter
             // 
             this.dateTimePickerFilter.Location = new System.Drawing.Point(227, 32);
@@ -259,39 +296,12 @@
             this.txtResultFolderPath.TabIndex = 9;
             this.txtResultFolderPath.Text = "D:\\Trace Spot Mono Camera\\Match CSV";
             // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(6, 38);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(215, 13);
-            this.label6.TabIndex = 14;
-            this.label6.Text = "List of Result Files, double click to open files";
-            // 
-            // chkShowBefore
-            // 
-            this.chkShowBefore.AutoSize = true;
-            this.chkShowBefore.Location = new System.Drawing.Point(433, 35);
-            this.chkShowBefore.Name = "chkShowBefore";
-            this.chkShowBefore.Size = new System.Drawing.Size(137, 17);
-            this.chkShowBefore.TabIndex = 15;
-            this.chkShowBefore.Text = "Show Files Before Date";
-            this.chkShowBefore.UseVisualStyleBackColor = true;
-            this.chkShowBefore.CheckedChanged += new System.EventHandler(this.chkShowBefore_CheckedChanged);
-            // 
-            // chkShowAfter
-            // 
-            this.chkShowAfter.AutoSize = true;
-            this.chkShowAfter.Location = new System.Drawing.Point(576, 35);
-            this.chkShowAfter.Name = "chkShowAfter";
-            this.chkShowAfter.Size = new System.Drawing.Size(128, 17);
-            this.chkShowAfter.TabIndex = 16;
-            this.chkShowAfter.Text = "Show Files After Date";
-            this.chkShowAfter.UseVisualStyleBackColor = true;
-            this.chkShowAfter.CheckedChanged += new System.EventHandler(this.chkShowAfter_CheckedChanged);
-            // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.lblCountdown);
+            this.tabPage3.Controls.Add(this.btnScheduleProcessRun);
+            this.tabPage3.Controls.Add(this.label5);
+            this.tabPage3.Controls.Add(this.dateTimePickerProcessRun);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Size = new System.Drawing.Size(1123, 593);
@@ -299,12 +309,51 @@
             this.tabPage3.Text = "Run Schedule";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
+            // btnScheduleProcessRun
+            // 
+            this.btnScheduleProcessRun.Location = new System.Drawing.Point(351, 12);
+            this.btnScheduleProcessRun.Name = "btnScheduleProcessRun";
+            this.btnScheduleProcessRun.Size = new System.Drawing.Size(75, 23);
+            this.btnScheduleProcessRun.TabIndex = 2;
+            this.btnScheduleProcessRun.Text = "Run";
+            this.btnScheduleProcessRun.UseVisualStyleBackColor = true;
+            this.btnScheduleProcessRun.Click += new System.EventHandler(this.btnScheduleProcessRun_Click);
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(27, 21);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(97, 13);
+            this.label5.TabIndex = 1;
+            this.label5.Text = "AutoRun Schedule";
+            // 
+            // dateTimePickerProcessRun
+            // 
+            this.dateTimePickerProcessRun.Format = System.Windows.Forms.DateTimePickerFormat.Time;
+            this.dateTimePickerProcessRun.Location = new System.Drawing.Point(130, 15);
+            this.dateTimePickerProcessRun.Name = "dateTimePickerProcessRun";
+            this.dateTimePickerProcessRun.ShowUpDown = true;
+            this.dateTimePickerProcessRun.Size = new System.Drawing.Size(200, 20);
+            this.dateTimePickerProcessRun.TabIndex = 0;
+            // 
+            // lblCountdown
+            // 
+            this.lblCountdown.AutoSize = true;
+            this.lblCountdown.Location = new System.Drawing.Point(432, 17);
+            this.lblCountdown.Name = "lblCountdown";
+            this.lblCountdown.Size = new System.Drawing.Size(0, 13);
+            this.lblCountdown.TabIndex = 4;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1155, 643);
             this.Controls.Add(this.tabControl1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Text = "AOITrace";
             this.tabControl1.ResumeLayout(false);
@@ -312,6 +361,8 @@
             this.tabPage1.PerformLayout();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
+            this.tabPage3.ResumeLayout(false);
+            this.tabPage3.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -341,6 +392,10 @@
         private System.Windows.Forms.CheckBox chkShowBefore;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.Button btnScheduleProcessRun;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.DateTimePicker dateTimePickerProcessRun;
+        private System.Windows.Forms.Label lblCountdown;
     }
 }
 

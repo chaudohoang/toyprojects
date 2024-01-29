@@ -10,12 +10,19 @@ namespace AOITrace
 {
     public partial class MainForm : Form
     {
+        // Declare processRunTimer as a class-level field
+        private Timer processRunTimer;
+        private Timer countdownTimer;
         public MainForm()
         {
             InitializeComponent();
+            processRunTimer = new Timer();
+            processRunTimer.Interval = 1000; // Update every second
+            processRunTimer.Tick += ProcessRunTimer_Tick;
+            countdownTimer = new Timer();
         }
 
-        private void btnProcess_Click(object sender, EventArgs e)
+        private void CompareLog()
         {
             List<string> colorLogFolders = new List<string>(txtColorLogFolders.Lines);
             List<string> monoLogFolders = new List<string>(txtMonoLogFolders.Lines);
@@ -29,6 +36,14 @@ namespace AOITrace
 
                 foreach (var colorCsv in colorCsvs)
                 {
+                    FileInfo fileInfo = new FileInfo(colorCsv);
+
+                    // Check if the file was created today, and exclude it
+                    if (fileInfo.CreationTime.Date == DateTime.Now.Date)
+                    {
+                        continue;
+                    }
+
                     List<ColorRecordFile> colorRecords = ReadCsvFile<ColorRecordFile, ColorRecordFileMap>(colorCsv);
 
                     foreach (var monoLogFolder in monoLogFolders)
@@ -37,13 +52,23 @@ namespace AOITrace
 
                         foreach (var monoCsv in monoCsvs)
                         {
+                            FileInfo monoFileInfo = new FileInfo(monoCsv);
+
+                            // Check if the file was created today, and exclude it
+                            if (monoFileInfo.CreationTime.Date == DateTime.Now.Date)
+                            {
+                                continue;
+                            }
+
                             List<MonoRecordFile> monoRecords = ReadCsvFile<MonoRecordFile, MonoRecordFileMap>(monoCsv);
 
                             foreach (var colorRecord in colorRecords)
                             {
-                                if (colorRecord.Description.IndexOf("spot", StringComparison.OrdinalIgnoreCase) != -1 && !string.IsNullOrEmpty(colorRecord.DefectInfo))
+                                if (colorRecord.Description.IndexOf("spot", StringComparison.OrdinalIgnoreCase) != -1 &&
+                                    !string.IsNullOrEmpty(colorRecord.DefectInfo))
                                 {
-                                    var matchingRecord = monoRecords.FirstOrDefault(monoRecord => monoRecord.PID.Equals(colorRecord.PID, StringComparison.OrdinalIgnoreCase));
+                                    var matchingRecord = monoRecords.FirstOrDefault(monoRecord =>
+                                        monoRecord.PID.Equals(colorRecord.PID, StringComparison.OrdinalIgnoreCase));
 
                                     if (matchingRecord != null)
                                     {
@@ -65,6 +90,11 @@ namespace AOITrace
             }
 
             WriteCsvFile(outputCsvFilePath, matchingRecords);
+        }
+
+        private void btnProcess_Click(object sender, EventArgs e)
+        {
+            CompareLog();
         }
 
         static List<T> ReadCsvFile<T, TMap>(string filePath)
@@ -234,6 +264,113 @@ namespace AOITrace
         {
             UpdateListBoxBasedOnDate();
         }
+
+        private void btnScheduleProcessRun_Click(object sender, EventArgs e)
+        {
+            if (btnScheduleProcessRun.Text == "Run")
+            {
+                // Start the process run timer
+                StartProcessRunTimer();
+            }
+            else
+            {
+                // Stop the process run timer
+                StopProcessRunTimer();
+            }
+        }
+
+        private void StartProcessRunTimer()
+        {
+            DateTime scheduledTime = DateTime.Now.Date + dateTimePickerProcessRun.Value.TimeOfDay;
+
+            if (scheduledTime <= DateTime.Now)
+            {
+                scheduledTime = scheduledTime.AddDays(1);
+            }
+
+            TimeSpan timeUntilScheduled = scheduledTime - DateTime.Now;
+
+            UpdateCountdownLabel(timeUntilScheduled);
+
+            btnScheduleProcessRun.Text = "Stop";
+            processRunTimer.Interval = (int)timeUntilScheduled.TotalMilliseconds;
+
+            // Set up an event handler for the timer tick
+            processRunTimer.Tick += ProcessRunTimer_Tick;
+
+            processRunTimer.Start();
+
+            // Set up the countdown timer
+            countdownTimer.Interval = 1000; // Update every second
+            countdownTimer.Tick += (sender, args) =>
+            {
+                timeUntilScheduled = scheduledTime - DateTime.Now;
+                UpdateCountdownLabel(timeUntilScheduled);
+            };
+
+            countdownTimer.Start();
+        }
+
+
+        private void UpdateCountdownLabel(TimeSpan remainingTime)
+        {
+            // Update the label with the remaining time in hours, minutes, and seconds
+            lblCountdown.Text = $"Next Run: {remainingTime.Hours:D2}h {remainingTime.Minutes:D2}m {remainingTime.Seconds:D2}s";
+        }
+
+        private void StopProcessRunTimer()
+        {
+            btnScheduleProcessRun.Text = "Run";
+            StopTimer(processRunTimer);
+
+            // Stop the countdown timer
+            StopTimer(countdownTimer);
+
+            lblCountdown.Text = string.Empty;
+        }
+
+
+
+        private void ProcessRunTimer_Tick(object sender, EventArgs e)
+        {
+            // Perform the process run logic here
+            CompareLog();
+
+            // Stop the current timer
+            StopTimer(processRunTimer);
+
+            // Schedule the next run for the same time on the next day
+            StartProcessRunTimer();
+        }
+
+
+        private void ScheduleNextRun()
+        {
+            // Set the next run time to the selected time on the same day
+            DateTime nextRunTime = DateTime.Now.Date + dateTimePickerProcessRun.Value.TimeOfDay;
+
+            // Calculate the time difference until the next run
+            TimeSpan timeUntilNextRun = nextRunTime - DateTime.Now;
+
+            // Ensure the next run time is in the future
+            if (timeUntilNextRun.TotalSeconds > 0)
+            {
+                // Set the interval to the time difference
+                processRunTimer.Interval = (int)timeUntilNextRun.TotalMilliseconds;
+                processRunTimer.Start();
+            }
+            else
+            {
+                // If the next run time is not in the future, stop the timer (no automatic rescheduling)
+                StopTimer(processRunTimer);
+            }
+        }
+
+        private void StopTimer(Timer timer)
+        {
+            timer.Stop();
+        }
+
     }
 
     class ColorRecordFile
