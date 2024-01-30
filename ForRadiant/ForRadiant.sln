@@ -127,6 +127,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AOITrace", "AOITrace\AOITra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoveFFSPOT", "QuickTools\RemoveFFSPOT\RemoveFFSPOT.csproj", "{00F46E76-532D-4AAD-9A18-51E6551DC442}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SetMaxNewBrightDefects", "QuickTools\SetMaxNewBrightDefects\SetMaxNewBrightDefects.csproj", "{43986DA9-E376-485F-80E2-6A5F408AECDC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -377,6 +379,10 @@ Global
 		{00F46E76-532D-4AAD-9A18-51E6551DC442}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{00F46E76-532D-4AAD-9A18-51E6551DC442}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{00F46E76-532D-4AAD-9A18-51E6551DC442}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43986DA9-E376-485F-80E2-6A5F408AECDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43986DA9-E376-485F-80E2-6A5F408AECDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43986DA9-E376-485F-80E2-6A5F408AECDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43986DA9-E376-485F-80E2-6A5F408AECDC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -390,12 +396,13 @@ Global
 		{C558EC8A-2C1C-47E6-B833-A322FC9C8293} = {62CFD8A0-B705-4B6B-B80F-814562E4DABF}
 		{D94AF84D-8C38-4C84-865F-6B569D58D884} = {62CFD8A0-B705-4B6B-B80F-814562E4DABF}
 		{00F46E76-532D-4AAD-9A18-51E6551DC442} = {62CFD8A0-B705-4B6B-B80F-814562E4DABF}
+		{43986DA9-E376-485F-80E2-6A5F408AECDC} = {62CFD8A0-B705-4B6B-B80F-814562E4DABF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {60C14AFF-CFF7-46E8-9345-65A46A64495F}
-		BuildVersion_StartDate = 2000/1/1
-		BuildVersion_BuildVersioningStyle = None.None.Increment.TimeStamp
-		BuildVersion_UpdateAssemblyVersion = True
 		BuildVersion_UseGlobalSettings = True
+		BuildVersion_UpdateAssemblyVersion = True
+		BuildVersion_BuildVersioningStyle = None.None.Increment.TimeStamp
+		BuildVersion_StartDate = 2000/1/1
+		SolutionGuid = {60C14AFF-CFF7-46E8-9345-65A46A64495F}
 	EndGlobalSection
 EndGlobal

@@ -1,0 +1,10 @@
+D:\Github\toyprojects\ForRadiant\bin\Debug\SetMaxNewBrightDefects\SetMaxNewBrightDefects.exe.config
+D:\Github\toyprojects\ForRadiant\bin\Debug\SetMaxNewBrightDefects\SetMaxNewBrightDefects.exe
+D:\Github\toyprojects\ForRadiant\bin\Debug\SetMaxNewBrightDefects\SetMaxNewBrightDefects.pdb
+D:\Github\toyprojects\ForRadiant\QuickTools\SetMaxNewBrightDefects\obj\Debug\SetMaxNewBrightDefects.csproj.AssemblyReference.cache
+D:\Github\toyprojects\ForRadiant\QuickTools\SetMaxNewBrightDefects\obj\Debug\SetMaxNewBrightDefects.csproj.CoreCompileInputs.cache
+D:\Github\toyprojects\ForRadiant\QuickTools\SetMaxNewBrightDefects\obj\Debug\SetMaxNewBrightDefects.exe
+D:\Github\toyprojects\ForRadiant\QuickTools\SetMaxNewBrightDefects\obj\Debug\SetMaxNewBrightDefects.pdb
+D:\Github\toyprojects\ForRadiant\bin\Debug\QuickTools\SetMaxNewBrightDefects.exe.config
+D:\Github\toyprojects\ForRadiant\bin\Debug\QuickTools\SetMaxNewBrightDefects.exe
+D:\Github\toyprojects\ForRadiant\bin\Debug\QuickTools\SetMaxNewBrightDefects.pdb
