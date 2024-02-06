@@ -28,11 +28,15 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.pictureBoxIn = new System.Windows.Forms.PictureBox();
             this.PastePictureButton = new System.Windows.Forms.Button();
             this.ClearButton = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.label2 = new System.Windows.Forms.Label();
+            this.ResizeRatioTextBox = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.ConvertToStringButton = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabPage3 = new System.Windows.Forms.TabPage();
@@ -42,9 +46,6 @@
             this.textBoxIn = new System.Windows.Forms.TextBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.pictureBoxOut = new System.Windows.Forms.PictureBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.ResizeRatioTextBox = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxIn)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -109,6 +110,31 @@
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Image Input";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(375, 11);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(15, 13);
+            this.label2.TabIndex = 6;
+            this.label2.Text = "%";
+            // 
+            // ResizeRatioTextBox
+            // 
+            this.ResizeRatioTextBox.Location = new System.Drawing.Point(328, 8);
+            this.ResizeRatioTextBox.Name = "ResizeRatioTextBox";
+            this.ResizeRatioTextBox.Size = new System.Drawing.Size(41, 20);
+            this.ResizeRatioTextBox.TabIndex = 5;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(249, 11);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(73, 13);
+            this.label1.TabIndex = 4;
+            this.label1.Text = "With Resize : ";
             // 
             // ConvertToStringButton
             // 
@@ -200,39 +226,16 @@
             this.pictureBoxOut.TabIndex = 1;
             this.pictureBoxOut.TabStop = false;
             // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(249, 11);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(73, 13);
-            this.label1.TabIndex = 4;
-            this.label1.Text = "With Resize : ";
-            // 
-            // ResizeRatioTextBox
-            // 
-            this.ResizeRatioTextBox.Location = new System.Drawing.Point(328, 8);
-            this.ResizeRatioTextBox.Name = "ResizeRatioTextBox";
-            this.ResizeRatioTextBox.Size = new System.Drawing.Size(41, 20);
-            this.ResizeRatioTextBox.TabIndex = 5;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(375, 11);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(15, 13);
-            this.label2.TabIndex = 6;
-            this.label2.Text = "%";
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(918, 530);
             this.Controls.Add(this.tabControl1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainForm";
             this.Text = "TextToImage";
+            this.Load += new System.EventHandler(this.MainForm_Load);
             this.Resize += new System.EventHandler(this.MainForm_Resize);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxIn)).EndInit();
             this.tabControl1.ResumeLayout(false);

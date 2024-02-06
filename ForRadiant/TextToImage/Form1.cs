@@ -16,6 +16,7 @@ namespace TextToImage
         private const int ChunkSize = 20000;
         private int initialTextBoxLeftSpacing;
         private int initialTextBoxTopSpacing;
+        private bool isAuthenticated = false;
 
         public MainForm()
         {
@@ -24,6 +25,27 @@ namespace TextToImage
 
         private async void MainForm_Load(object sender, EventArgs e)
         {
+            // Show the password form on load
+            using (PasswordForm passwordForm = new PasswordForm())
+            {
+                if (passwordForm.ShowDialog() == DialogResult.OK)
+                {
+                    isAuthenticated = true;
+                }
+                else
+                {
+                    // User canceled, close the application or take appropriate action
+                    isAuthenticated = false;
+                }
+            }
+
+            // Proceed based on authentication result
+            if (!isAuthenticated)
+            {
+                // Incorrect password, close the application or take appropriate action
+                Close();
+            }
+
             // Load the image from the clipboard when the form is loaded
             initialTextBoxLeftSpacing = textBoxIn.Left;
             initialTextBoxTopSpacing = textBoxIn.Top;
@@ -159,19 +181,8 @@ namespace TextToImage
         private async void ConvertButton_Click(object sender, EventArgs e)
         {
 
-            using (var passwordForm = new PasswordForm())
-            {
-                if (passwordForm.ShowDialog() == DialogResult.OK)
-                {
-                    await ConvertImageToBase64Async();
-                }
-                else
-                {
-                    // Password is incorrect or dialog was canceled
-                    MessageBox.Show("Incorrect password or canceled.", "Authentication Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            
+            await ConvertImageToBase64Async();
+
         }
 
         private async Task ConvertImageToBase64Async()
@@ -200,14 +211,19 @@ namespace TextToImage
             int newWidth = (int)(image.Width * percentage);
             int newHeight = (int)(image.Height * percentage);
 
-            Bitmap resizedImage = new Bitmap(newWidth, newHeight);
-            using (Graphics g = Graphics.FromImage(resizedImage))
+            using (Bitmap resizedImage = new Bitmap(newWidth, newHeight))
             {
-                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                g.DrawImage(image, 0, 0, newWidth, newHeight);
+                using (Graphics g = Graphics.FromImage(resizedImage))
+                {
+                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                    g.DrawImage(image, 0, 0, newWidth, newHeight);
+                }
+
+                // Clone the resized image to ensure it's independent of the original image
+                return new Bitmap(resizedImage);
             }
-            return resizedImage;
         }
+
 
         private double GetPercentageFromString(string percentageText)
         {
@@ -326,46 +342,29 @@ namespace TextToImage
         private void ConvertToImageBtn_Click(object sender, EventArgs e)
         {
 
-            using (var passwordForm = new PasswordForm())
+            // Get the Base64 string from the TextBox
+            string base64String = textBoxIn.Text.Trim();
+
+            // Check if the Base64 string is not empty
+            if (!string.IsNullOrEmpty(base64String))
             {
-                if (passwordForm.ShowDialog() == DialogResult.OK)
+                try
                 {
-                    // Get the Base64 string from the TextBox
-                    string base64String = textBoxIn.Text.Trim();
+                    // Convert Base64 string to Image
+                    Image convertedImage = Base64ToImage(base64String);
 
-                    // Check if the Base64 string is not empty
-                    if (!string.IsNullOrEmpty(base64String))
-                    {
-                        try
-                        {
-                            // Convert Base64 string to Image
-                            Image convertedImage = Base64ToImage(base64String);
-
-                            // Display the converted image in the PictureBox
-                            pictureBoxOut.Image = convertedImage;
-                        }
-                        catch (Exception ex)
-                        {
-                            // Handle any exceptions (e.g., invalid Base64 string)
-                            MessageBox.Show($"Error converting Base64 to Image: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                    }
-                    else
-                    {
-                        // Display a message if the Base64 string is empty
-                        MessageBox.Show("Please enter a Base64 string.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    // Display the converted image in the PictureBox
+                    pictureBoxOut.Image = convertedImage;
                 }
-                else
+                catch (Exception ex)
                 {
-                    // Password is incorrect or dialog was canceled
-                    MessageBox.Show("Incorrect password or canceled.", "Authentication Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    // Handle any exceptions (e.g., invalid Base64 string)
+                    MessageBox.Show($"Error converting Base64 to Image: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+
+
             }
-
-            
         }
-
         private void ClearInputButton_Click(object sender, EventArgs e)
         {
             textBoxIn.Clear();
@@ -375,5 +374,6 @@ namespace TextToImage
         {
             textBoxIn.AppendText(Clipboard.GetText());
         }
+
     }
 }
