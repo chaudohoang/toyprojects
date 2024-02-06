@@ -1,0 +1,13 @@
+D:\Github\toyprojects\ForRadiant\CopySequenceStep\bin\Debug\CopySequenceStep.exe.config
+D:\Github\toyprojects\ForRadiant\CopySequenceStep\bin\Debug\CopySequenceStep.exe
+D:\Github\toyprojects\ForRadiant\CopySequenceStep\bin\Debug\CopySequenceStep.pdb
+D:\Github\toyprojects\ForRadiant\CopySequenceStep\obj\Debug\CopySequenceStep.csproj.AssemblyReference.cache
+D:\Github\toyprojects\ForRadiant\CopySequenceStep\obj\Debug\CopySequenceStep.Form1.resources
+D:\Github\toyprojects\ForRadiant\CopySequenceStep\obj\Debug\CopySequenceStep.Properties.Resources.resources
+D:\Github\toyprojects\ForRadiant\CopySequenceStep\obj\Debug\CopySequenceStep.csproj.GenerateResource.cache
+D:\Github\toyprojects\ForRadiant\CopySequenceStep\obj\Debug\CopySequenceStep.csproj.CoreCompileInputs.cache
+D:\Github\toyprojects\ForRadiant\CopySequenceStep\obj\Debug\CopySequenceStep.exe
+D:\Github\toyprojects\ForRadiant\CopySequenceStep\obj\Debug\CopySequenceStep.pdb
+D:\Github\toyprojects\ForRadiant\bin\Debug\CopySequenceStep\CopySequenceStep.exe.config
+D:\Github\toyprojects\ForRadiant\bin\Debug\CopySequenceStep\CopySequenceStep.exe
+D:\Github\toyprojects\ForRadiant\bin\Debug\CopySequenceStep\CopySequenceStep.pdb
