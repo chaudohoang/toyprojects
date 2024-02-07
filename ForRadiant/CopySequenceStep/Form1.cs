@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using System.Xml;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace CopySequenceStep
 {
@@ -202,91 +203,134 @@ namespace CopySequenceStep
             }
         }
 
+        // Modify the btnCopy_Click event handler
         private void btnCopy_Click(object sender, EventArgs e)
         {
-            // Check if both source and destination files are selected
-            if (string.IsNullOrEmpty(sourceFilePath) || string.IsNullOrEmpty(destinationFilePath))
+            // Check if the destination file is selected
+            if (string.IsNullOrEmpty(destinationFilePath))
             {
-                MessageBox.Show("Please select both source and destination sequence files.");
+                MessageBox.Show("Please select a destination sequence file.");
+                return;
+            }
+
+            // Check if the source file is opened
+            if (string.IsNullOrEmpty(sourceFilePath))
+            {
+                // If source file is not opened, skip replace functions and only run sorting function
+                SortSequenceItems(destinationFilePath);
+
+                // Uncheck all checkboxes in flpSequenceItemsSource
+                UncheckAllCheckboxes();
+                DisplaySequenceItemsDestination();
+
+                // Display success message
+                MessageBox.Show("SequenceItem elements sorted successfully.");
                 return;
             }
 
             // Find the checked checkboxes in flpSequenceItemsSource and copy their PatternSetup
             List<(string patternSetupName, string userName)> checkedPatternSetups = GetCheckedPatternSetups();
 
-            // Load the destination XML document
-            XmlDocument destinationXmlDoc = new XmlDocument();
-            destinationXmlDoc.Load(destinationFilePath);
-
-            // Sort the SequenceItem elements if no items are selected
-            if (checkedPatternSetups.Count == 0)
-            {
-                // Sort the SequenceItem elements
-                SortSequenceItems(destinationXmlDoc, lstSequenceItemsDestination.Items.Cast<string>().ToList());
-
-                // Display success message for sorting only
-                MessageBox.Show("SequenceItem elements sorted successfully.");
-                return; // Exit the method early
-            }
-
-            // Copy and replace the PatternSetup element for each checked item
             foreach ((string patternSetupName, string userName) in checkedPatternSetups)
             {
                 // Replace PatternSetup
                 ReplacePatternSetup(sourceFilePath, destinationFilePath, patternSetupName);
+            }
 
+            foreach ((string patternSetupName, string userName) in checkedPatternSetups)
+            {
                 // Replace SequenceItem
                 ReplaceSequenceItem(sourceFilePath, destinationFilePath, patternSetupName, userName);
             }
 
-            // Display success message for copying and sorting
+            // Sort the copied SequenceItems based on PatternSetupName and UserName
+            SortSequenceItems(destinationFilePath);
+
+            // Uncheck all checkboxes in flpSequenceItemsSource
+            UncheckAllCheckboxes();
+            DisplaySequenceItemsDestination();
+
+            // Display success message
             MessageBox.Show("PatternSetup and SequenceItem elements copied and sorted successfully.");
         }
 
+        private void UncheckAllCheckboxes()
+        {
+            foreach (Control control in flpSequenceItemsSource.Controls)
+            {
+                if (control is CheckBox checkBox)
+                {
+                    checkBox.Checked = false;
+                }
+            }
+        }
 
-
-
-        private void SortSequenceItems(XmlDocument xmlDoc, List<string> sequenceItemOrder)
+        private void SortSequenceItems(string destinationFilePath)
         {
             try
             {
-                // Find the <Items> element
-                XmlNode itemsNode = xmlDoc.SelectSingleNode("//Items");
+                // Store the order of items in lstSequenceItemsDestination
+                List<string> sequenceItemOrder = new List<string>();
+                foreach (string itemText in lstSequenceItemsDestination.Items)
+                {
+                    sequenceItemOrder.Add(itemText);
+                }
+
+                // Load the destination XML document
+                XmlDocument destinationXmlDoc = new XmlDocument();
+                destinationXmlDoc.Load(destinationFilePath);
+
+                // Find the <Items> element in the destination XML document
+                XmlNode itemsNode = destinationXmlDoc.SelectSingleNode("//Items");
 
                 if (itemsNode != null)
                 {
-                    // Create a dictionary to store the <SequenceItem> nodes by their pattern setup name
-                    Dictionary<string, XmlNode> sequenceItemNodes = new Dictionary<string, XmlNode>();
 
-                    // Iterate through <SequenceItem> elements and store them in the dictionary
-                    foreach (XmlNode sequenceItemNode in itemsNode.SelectNodes("SequenceItem"))
+                    // Re-add the SequenceItem nodes in the original order
+                    foreach (string itemText in sequenceItemOrder)
                     {
-                        string patternSetupName = sequenceItemNode.SelectSingleNode("PatternSetupName")?.InnerText;
+                        // Extract PatternSetupName and UserName from the item text
+                        (string patternSetupName, string userName) = ExtractPatternSetupAndUserName(itemText);
 
-                        if (!string.IsNullOrEmpty(patternSetupName))
+                        try
                         {
-                            sequenceItemNodes[patternSetupName] = sequenceItemNode;
+                            // Find the corresponding SequenceItem nodes in the destination XML document
+                            string xpathQuery = $"//SequenceItem[PatternSetupName='{patternSetupName}' and Analysis/UserName='{userName}']";
+                            XmlNodeList sequenceItemNodes = destinationXmlDoc.SelectNodes(xpathQuery);
+
+                            // Remove existing<SequenceItem> elements with the same PatternSetupName and UserName
+                            foreach (XmlNode existingNode in sequenceItemNodes)
+                            {
+                                existingNode.ParentNode.RemoveChild(existingNode);
+                            }
+
+                            if (sequenceItemNodes != null && sequenceItemNodes.Count > 0)
+                            {
+                                // Append the original SequenceItem nodes
+                                foreach (XmlNode node in sequenceItemNodes)
+                                {
+                                    XmlNode importedNode = destinationXmlDoc.ImportNode(node, true);
+                                    itemsNode.AppendChild(importedNode);
+                                }
+                            }
+                            else
+                            {
+                                MessageBox.Show($"No SequenceItem nodes found for PatternSetupName '{patternSetupName}' and UserName '{userName}'.");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"Error while processing SequenceItem nodes: {ex.Message}");
                         }
                     }
 
-                    // Remove all existing <SequenceItem> nodes
-                    itemsNode.RemoveAll();
+                    destinationXmlDoc.Save(destinationFilePath);
 
-                    // Add <SequenceItem> nodes in the order specified by sequenceItemOrder
-                    foreach (string patternSetupName in sequenceItemOrder)
-                    {
-                        if (sequenceItemNodes.TryGetValue(patternSetupName, out XmlNode sequenceItemNode))
-                        {
-                            itemsNode.AppendChild(sequenceItemNode);
-                        }
-                    }
+                    // Fix empty elements after saving changes
+                    FixEmptyElements(destinationFilePath);
 
-                    // Save the changes to the XML document
-                    xmlDoc.Save(destinationFilePath);
-                }
-                else
-                {
-                    MessageBox.Show("No <Items> element found in destination XML file.");
+                    // Display success message
+                    //MessageBox.Show("SequenceItem elements sorted successfully.");
                 }
             }
             catch (Exception ex)
@@ -295,7 +339,21 @@ namespace CopySequenceStep
             }
         }
 
+        static void SaveXmlDocument(XmlDocument xmlDoc, string filePath)
+        {
+            // Save the modified XML document with single-line empty elements
+            XmlWriterSettings settings = new XmlWriterSettings
+            {
+                Indent = true,
+                IndentChars = "\t",
+                NewLineHandling = NewLineHandling.None
+            };
 
+            using (XmlWriter writer = XmlWriter.Create(filePath, settings))
+            {
+                xmlDoc.Save(writer);
+            }
+        }
 
         private List<(string patternSetupName, string userName)> GetCheckedPatternSetups()
         {
@@ -341,9 +399,6 @@ namespace CopySequenceStep
         }
 
 
-
-
-
         private void ReplacePatternSetup(string sourceFilePath, string destinationFilePath, string itemName)
         {
             try
@@ -379,8 +434,11 @@ namespace CopySequenceStep
                         // Append the imported <PatternSetup> node as a child of <PatternSetupList>
                         patternSetupListNode.AppendChild(importedNode);
 
-                        // Save the changes to the destination XML file
                         destinationXmlDoc.Save(destinationFilePath);
+
+                        // Fix empty elements after saving changes
+                        FixEmptyElements(destinationFilePath);
+
                     }
                     else
                     {
@@ -441,8 +499,10 @@ namespace CopySequenceStep
                             // Append the imported <SequenceItem> node as a child of <Items>
                             itemsNode.AppendChild(importedNode);
 
-                            // Save the changes to the destination XML file
                             destinationXmlDoc.Save(destinationFilePath);
+
+                            // Fix empty elements after saving changes
+                            FixEmptyElements(destinationFilePath);
                         }
                         else
                         {
@@ -459,12 +519,47 @@ namespace CopySequenceStep
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error while copying SequenceItem elements: {ex.Message}");
+                MessageBox.Show($"Error while replacing SequenceItem elements: {ex.Message}");
             }
         }
 
+        private void FixEmptyElements(string filePath)
+        {
+            try
+            {
+                // Load the XML document
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.Load(filePath);
 
+                // Traverse through all elements
+                foreach (XmlNode node in xmlDoc.SelectNodes("//*"))
+                {
+                    // Check if the element is empty (has no child nodes)
+                    if (node.ChildNodes.Count == 0 && node.InnerText.Trim() == "")
+                    {
+                        // Add an empty text node
+                        node.InnerText = "";
+                    }
+                }
 
+                // Save the modified XML document with single-line empty elements
+                XmlWriterSettings settings = new XmlWriterSettings
+                {
+                    Indent = true,
+                    IndentChars = "\t",
+                    NewLineHandling = NewLineHandling.None
+                };
 
+                using (XmlWriter writer = XmlWriter.Create(filePath, settings))
+                {
+                    xmlDoc.Save(writer);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error while fixing empty elements: {ex.Message}");
+            }
+        }
     }
 }

@@ -176,7 +176,7 @@
             this.btnCopy.Name = "btnCopy";
             this.btnCopy.Size = new System.Drawing.Size(66, 47);
             this.btnCopy.TabIndex = 4;
-            this.btnCopy.Text = "Start Copy";
+            this.btnCopy.Text = "COPY";
             this.btnCopy.UseVisualStyleBackColor = true;
             this.btnCopy.Click += new System.EventHandler(this.btnCopy_Click);
             // 
