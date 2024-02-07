@@ -36,6 +36,7 @@ Partial Class Apps
         Me.chkSkipRFD = New System.Windows.Forms.CheckBox()
         Me.chkSkipPOI = New System.Windows.Forms.CheckBox()
         Me.TabPage1 = New System.Windows.Forms.TabPage()
+        Me.cmdTTLogViewer = New System.Windows.Forms.LinkLabel()
         Me.cmdRadFlowANISimulator = New System.Windows.Forms.LinkLabel()
         Me.cmdRadFlowSimulator = New System.Windows.Forms.LinkLabel()
         Me.cmdAutoDeleteData = New System.Windows.Forms.LinkLabel()
@@ -56,7 +57,8 @@ Partial Class Apps
         Me.cmdSetSequence = New System.Windows.Forms.LinkLabel()
         Me.cmdButterfly = New System.Windows.Forms.LinkLabel()
         Me.TabControl1 = New System.Windows.Forms.TabControl()
-        Me.cmdTTLogViewer = New System.Windows.Forms.LinkLabel()
+        Me.cmdTextToImage = New System.Windows.Forms.LinkLabel()
+        Me.cmdCopySequenceStep = New System.Windows.Forms.LinkLabel()
         Me.TabPage2.SuspendLayout()
         Me.TabPage1.SuspendLayout()
         Me.TabControl1.SuspendLayout()
@@ -204,6 +206,8 @@ Partial Class Apps
         '
         'TabPage1
         '
+        Me.TabPage1.Controls.Add(Me.cmdCopySequenceStep)
+        Me.TabPage1.Controls.Add(Me.cmdTextToImage)
         Me.TabPage1.Controls.Add(Me.cmdTTLogViewer)
         Me.TabPage1.Controls.Add(Me.cmdRadFlowANISimulator)
         Me.TabPage1.Controls.Add(Me.cmdRadFlowSimulator)
@@ -231,6 +235,16 @@ Partial Class Apps
         Me.TabPage1.TabIndex = 0
         Me.TabPage1.Text = "Apps"
         Me.TabPage1.UseVisualStyleBackColor = True
+        '
+        'cmdTTLogViewer
+        '
+        Me.cmdTTLogViewer.AutoSize = True
+        Me.cmdTTLogViewer.Location = New System.Drawing.Point(228, 89)
+        Me.cmdTTLogViewer.Name = "cmdTTLogViewer"
+        Me.cmdTTLogViewer.Size = New System.Drawing.Size(60, 13)
+        Me.cmdTTLogViewer.TabIndex = 10
+        Me.cmdTTLogViewer.TabStop = True
+        Me.cmdTTLogViewer.Text = "Log Viewer"
         '
         'cmdRadFlowANISimulator
         '
@@ -432,15 +446,25 @@ Partial Class Apps
         Me.TabControl1.Size = New System.Drawing.Size(519, 291)
         Me.TabControl1.TabIndex = 2
         '
-        'cmdTTLogViewer
+        'cmdTextToImage
         '
-        Me.cmdTTLogViewer.AutoSize = True
-        Me.cmdTTLogViewer.Location = New System.Drawing.Point(228, 89)
-        Me.cmdTTLogViewer.Name = "cmdTTLogViewer"
-        Me.cmdTTLogViewer.Size = New System.Drawing.Size(60, 13)
-        Me.cmdTTLogViewer.TabIndex = 10
-        Me.cmdTTLogViewer.TabStop = True
-        Me.cmdTTLogViewer.Text = "Log Viewer"
+        Me.cmdTextToImage.AutoSize = True
+        Me.cmdTextToImage.Location = New System.Drawing.Point(294, 89)
+        Me.cmdTextToImage.Name = "cmdTextToImage"
+        Me.cmdTextToImage.Size = New System.Drawing.Size(70, 13)
+        Me.cmdTextToImage.TabIndex = 11
+        Me.cmdTextToImage.TabStop = True
+        Me.cmdTextToImage.Text = "TextToImage"
+        '
+        'cmdCopySequenceStep
+        '
+        Me.cmdCopySequenceStep.AutoSize = True
+        Me.cmdCopySequenceStep.Location = New System.Drawing.Point(370, 89)
+        Me.cmdCopySequenceStep.Name = "cmdCopySequenceStep"
+        Me.cmdCopySequenceStep.Size = New System.Drawing.Size(102, 13)
+        Me.cmdCopySequenceStep.TabIndex = 12
+        Me.cmdCopySequenceStep.TabStop = True
+        Me.cmdCopySequenceStep.Text = "CopySequenceStep"
         '
         'Apps
         '
@@ -494,4 +518,6 @@ Partial Class Apps
     Friend WithEvents cmdRadFlowSimulator As LinkLabel
     Friend WithEvents cmdRadFlowANISimulator As LinkLabel
     Friend WithEvents cmdTTLogViewer As LinkLabel
+    Friend WithEvents cmdCopySequenceStep As LinkLabel
+    Friend WithEvents cmdTextToImage As LinkLabel
 End Class

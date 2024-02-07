@@ -505,4 +505,16 @@ Public Class Apps
             Process.Start(startinfo)
         End If
     End Sub
+
+    Private Sub cmdTextToImage_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdTextToImage.LinkClicked
+        startinfo.WorkingDirectory = exePath
+        startinfo.FileName = System.IO.Path.Combine(exePath, "TextToImage.exe")
+        Process.Start(startinfo)
+    End Sub
+
+    Private Sub cmdCopySequenceStep_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdCopySequenceStep.LinkClicked
+        startinfo.WorkingDirectory = exePath
+        startinfo.FileName = System.IO.Path.Combine(exePath, "CopySequenceStep.exe")
+        Process.Start(startinfo)
+    End Sub
 End Class
