@@ -111,6 +111,15 @@ namespace AOITrace
         {
             try
             {
+                if (!Directory.Exists(txtOutputCsvPath.Text))
+                {
+                    Directory.CreateDirectory(txtOutputCsvPath.Text);
+                }
+                if (!Directory.Exists(txtResultFolderPath.Text))
+                {
+                    Directory.CreateDirectory(txtResultFolderPath.Text);
+                }
+
                 logger.LogInfo("Comparison started.");
                 List<string> colorLogFolders = new List<string>();
                 List<string> monoLogFolders = new List<string>();
@@ -168,7 +177,7 @@ namespace AOITrace
 
                                 foreach (var colorRecord in colorRecords)
                                 {
-                                    if (colorRecord.Description.IndexOf("spot", StringComparison.OrdinalIgnoreCase) != -1 &&
+                                    if (colorRecord.Camera_Spot_Detect.IndexOf("spot", StringComparison.OrdinalIgnoreCase) != -1 &&
                                         !string.IsNullOrEmpty(colorRecord.DefectInfo))
                                     {
                                         var matchingRecord = monoRecords.FirstOrDefault(monoRecord =>
@@ -268,7 +277,7 @@ namespace AOITrace
         {
             // Disable the button to prevent multiple clicks during the operation
             btnProcess.Enabled = false;
-
+            
             try
             {
                 // Start the heavy operation in the background
@@ -759,7 +768,7 @@ namespace AOITrace
         public string PID { get; set; }
         public string CH { get; set; }
         public string EQPID { get; set; }
-        public string Description { get; set; }
+        public string Camera_Spot_Detect { get; set; }
         public string DefectInfo { get; set; }
     }
 
@@ -787,7 +796,7 @@ namespace AOITrace
             Map(m => m.PID).Name("PID");
             Map(m => m.CH).Name("CH");
             Map(m => m.EQPID).Name("EQP ID");
-            Map(m => m.Description).Name("Description");
+            Map(m => m.Camera_Spot_Detect).Name("Camera_Spot_Detect");
             Map(m => m.DefectInfo).Name("Defect Info");
         }
     }
