@@ -251,7 +251,7 @@ Public Class MainForm
 			sw2.Restart()
 
 			For childIndex = 0 To node1.ChildNodes.Count - 1
-				If node1.ChildNodes(childIndex).Name = "FilterList" AndAlso
+				If node1.ChildNodes(childIndex).Name.Contains("FilterList") AndAlso
 					node1.ChildNodes(childIndex).SelectSingleNode("FilterList") IsNot Nothing AndAlso
 					node2.ChildNodes(childIndex).SelectSingleNode("FilterList") IsNot Nothing Then
 
@@ -285,7 +285,6 @@ Public Class MainForm
 							End If
 						Next
 					Next
-
 				Else
 					If node1.ChildNodes(childIndex).InnerText.ToLower <> node2.ChildNodes(childIndex).InnerText.ToLower Then
 						equal = False
@@ -1293,10 +1292,10 @@ Public Class MainForm
 			If nodes1(i).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
 				sequence1AnaList.Add(nodes1(i).SelectSingleNode("PatternSetupName").InnerText)
 			End If
-			If (nodes1(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDCustomerAnalysis") Or nodes1(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDNCustomerAnalysis")) AndAlso
-			Not nodes1(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDNPOCB4p1") Then
-				demuraStepList1.Add(nodes1(i).SelectSingleNode("PatternSetupName").InnerText)
-			End If
+			'If (nodes1(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDCustomerAnalysis") Or nodes1(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDNCustomerAnalysis")) AndAlso
+			'Not nodes1(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDNPOCB4p1") Then
+			'	demuraStepList1.Add(nodes1(i).SelectSingleNode("PatternSetupName").InnerText)
+			'End If
 		Next
 		sequence1AnaList = sequence1AnaList.Distinct.ToList()
 		sw2.Stop()
@@ -1307,7 +1306,7 @@ Public Class MainForm
 		For index = 0 To nodes1.Count - 1
 
 			If sequence1AnaList.Contains(nodes1(index).SelectSingleNode("Name").InnerText) Then
-				If demuraStepList1.Contains(nodes1(index).SelectSingleNode("Name").InnerText) Then Continue For
+				'If demuraStepList1.Contains(nodes1(index).SelectSingleNode("Name").InnerText) Then Continue For
 				node1 = nodes1(index).SelectSingleNode("CameraSettingsList")
 				If cbCameraSNStyle.SelectedIndex = 0 Then
 					For Each childNode As XmlNode In node1.ChildNodes
@@ -1349,10 +1348,10 @@ Public Class MainForm
 			If nodes2(i).SelectSingleNode("Selected").InnerText.ToLower = "true" Then
 				sequence2AnaList.Add(nodes2(i).SelectSingleNode("PatternSetupName").InnerText)
 			End If
-			If (nodes2(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDCustomerAnalysis") Or nodes2(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDNCustomerAnalysis")) AndAlso
-			Not nodes2(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDNPOCB4p1") Then
-				demuraStepList2.Add(nodes2(i).SelectSingleNode("PatternSetupName").InnerText)
-			End If
+			'If (nodes2(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDCustomerAnalysis") Or nodes2(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDNCustomerAnalysis")) AndAlso
+			'Not nodes2(i).SelectSingleNode("Analysis").Attributes("xsi:type").Value.Contains("DemuraLGDNPOCB4p1") Then
+			'	demuraStepList2.Add(nodes2(i).SelectSingleNode("PatternSetupName").InnerText)
+			'End If
 		Next
 		sequence2AnaList = sequence2AnaList.Distinct.ToList()
 		sw2.Stop()
@@ -1362,7 +1361,7 @@ Public Class MainForm
 		nodes2 = xmlDoc2.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
 		For index = 0 To nodes2.Count - 1
 			If sequence2AnaList.Contains(nodes2(index).SelectSingleNode("Name").InnerText) Then
-				If demuraStepList2.Contains(nodes2(index).SelectSingleNode("Name").InnerText) Then Continue For
+				'If demuraStepList2.Contains(nodes2(index).SelectSingleNode("Name").InnerText) Then Continue For
 				node2 = nodes2(index).SelectSingleNode("CameraSettingsList")
 				If cbCameraSNStyle.SelectedIndex = 0 Then
 					For Each childNode As XmlNode In node2.ChildNodes
