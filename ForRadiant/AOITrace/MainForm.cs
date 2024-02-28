@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -157,6 +158,32 @@ namespace AOITrace
                             continue;
                         }
 
+                        // Read the header of the CSV file to check if it contains the "Camera_Spot_Detect" header
+                        bool hasCamera_Spot_DetectHeader = false;
+                        using (var reader = new StreamReader(colorCsv))
+                        using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture) { HasHeaderRecord = true }))
+                        {
+                            csv.Read();
+                            csv.ReadHeader();
+
+                            // Check if the header record contains the "Camera_Spot_Detect" header
+                            foreach (string header in csv.HeaderRecord)
+                            {
+                                if (header.Equals("Camera_Spot_Detect", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    hasCamera_Spot_DetectHeader = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (!hasCamera_Spot_DetectHeader)
+                        {
+                            // Skip processing this CSV file
+                            logger.LogInfo($"Skipping processing of '{colorCsv}' because it does not have a 'Camera_Spot_Detect' header.");
+                            continue;
+                        }
+
                         List<ColorRecordFile> colorRecords = ReadCsvFile<ColorRecordFile, ColorRecordFileMap>(colorCsv);
 
                         foreach (var monoLogFolder in monoLogFolders)
@@ -177,8 +204,7 @@ namespace AOITrace
 
                                 foreach (var colorRecord in colorRecords)
                                 {
-                                    if (colorRecord.Camera_Spot_Detect.IndexOf("spot", StringComparison.OrdinalIgnoreCase) != -1 &&
-                                        !string.IsNullOrEmpty(colorRecord.DefectInfo))
+                                    if (colorRecord.Camera_Spot_Detect.IndexOf("spot", StringComparison.OrdinalIgnoreCase) != -1)
                                     {
                                         var matchingRecord = monoRecords.FirstOrDefault(monoRecord =>
                                             monoRecord.PID.Equals(colorRecord.PID, StringComparison.OrdinalIgnoreCase));
@@ -192,7 +218,7 @@ namespace AOITrace
                                                 ColorStation = colorRecord.EQPID,
                                                 MonoChannel = matchingRecord.CH,
                                                 ColorChannel = colorRecord.CH,
-                                                DefectInfo = colorRecord.DefectInfo
+                                                Camera_Spot_Detect = colorRecord.Camera_Spot_Detect
                                             });
                                         }
                                     }
@@ -786,7 +812,7 @@ namespace AOITrace
         public string MonoChannel { get; set; }
         public string ColorStation { get; set; }
         public string ColorChannel { get; set; }
-        public string DefectInfo { get; set; }
+        public string Camera_Spot_Detect { get; set; }
     }
 
     class ColorRecordFileMap : ClassMap<ColorRecordFile>
@@ -797,7 +823,6 @@ namespace AOITrace
             Map(m => m.CH).Name("CH");
             Map(m => m.EQPID).Name("EQP ID");
             Map(m => m.Camera_Spot_Detect).Name("Camera_Spot_Detect");
-            Map(m => m.DefectInfo).Name("Defect Info");
         }
     }
 
