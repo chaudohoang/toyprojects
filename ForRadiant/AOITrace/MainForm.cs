@@ -146,7 +146,7 @@ namespace AOITrace
                 foreach (var colorLogFolder in colorLogFolders)
                 {
                     logger.LogInfo($"Processing color log folder: {colorLogFolder}");
-                    List<string> colorCsvs = Directory.GetFiles(colorLogFolder, "*.csv").ToList();
+                    List<string> colorCsvs = Directory.GetFiles(colorLogFolder, "*.csv", SearchOption.AllDirectories).ToList();
 
                     foreach (var colorCsv in colorCsvs)
                     {
@@ -188,7 +188,7 @@ namespace AOITrace
 
                         foreach (var monoLogFolder in monoLogFolders)
                         {
-                            List<string> monoCsvs = Directory.GetFiles(monoLogFolder, "*.csv").ToList();
+                            List<string> monoCsvs = Directory.GetFiles(monoLogFolder, "*.csv", SearchOption.AllDirectories).ToList();
 
                             foreach (var monoCsv in monoCsvs)
                             {
