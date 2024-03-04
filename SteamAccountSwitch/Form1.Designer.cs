@@ -35,13 +35,13 @@ namespace SteamAccountSwitch
             this.btnSave = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.txtSteamExePath = new System.Windows.Forms.TextBox();
-            this.button1 = new System.Windows.Forms.Button();
+            this.btnBrowse = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
             // btnLogin
             // 
-            this.btnLogin.Location = new System.Drawing.Point(198, 459);
+            this.btnLogin.Location = new System.Drawing.Point(351, 459);
             this.btnLogin.Name = "btnLogin";
             this.btnLogin.Size = new System.Drawing.Size(180, 23);
             this.btnLogin.TabIndex = 10;
@@ -54,7 +54,7 @@ namespace SteamAccountSwitch
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView1.Location = new System.Drawing.Point(13, 52);
             this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.Size = new System.Drawing.Size(367, 401);
+            this.dataGridView1.Size = new System.Drawing.Size(518, 401);
             this.dataGridView1.TabIndex = 9;
             this.dataGridView1.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dataGridView1_CellFormatting);
             // 
@@ -81,25 +81,26 @@ namespace SteamAccountSwitch
             // 
             this.txtSteamExePath.Location = new System.Drawing.Point(11, 25);
             this.txtSteamExePath.Name = "txtSteamExePath";
-            this.txtSteamExePath.Size = new System.Drawing.Size(311, 20);
+            this.txtSteamExePath.Size = new System.Drawing.Size(462, 20);
             this.txtSteamExePath.TabIndex = 12;
-            this.txtSteamExePath.Text = "\"D:\\Games\\Steam\\steam.exe\"";
+            this.txtSteamExePath.Text = "\"E:\\Games\\Steam\\steam.exe\"";
             // 
-            // button1
+            // btnBrowse
             // 
-            this.button1.Location = new System.Drawing.Point(328, 23);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(52, 23);
-            this.button1.TabIndex = 13;
-            this.button1.Text = "Browse";
-            this.button1.UseVisualStyleBackColor = true;
+            this.btnBrowse.Location = new System.Drawing.Point(479, 23);
+            this.btnBrowse.Name = "btnBrowse";
+            this.btnBrowse.Size = new System.Drawing.Size(52, 23);
+            this.btnBrowse.TabIndex = 13;
+            this.btnBrowse.Text = "Browse";
+            this.btnBrowse.UseVisualStyleBackColor = true;
+            this.btnBrowse.Click += new System.EventHandler(this.btnBrowse_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(392, 494);
-            this.Controls.Add(this.button1);
+            this.ClientSize = new System.Drawing.Size(543, 494);
+            this.Controls.Add(this.btnBrowse);
             this.Controls.Add(this.txtSteamExePath);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.btnLogin);
@@ -123,7 +124,7 @@ namespace SteamAccountSwitch
 		private System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox txtSteamExePath;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btnBrowse;
     }
 }
 

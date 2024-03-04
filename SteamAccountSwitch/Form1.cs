@@ -38,7 +38,7 @@ namespace SteamAccountSwitch
             string[] Lines = File.ReadAllLines(CSVFilePathName);
             string[] Fields;
 			//Fields = Lines[0].Split(new char[] { ',' });
-			Fields = "Description,ID,Password".Split(new char[] { ',' });
+			Fields = "ID,Password,Description".Split(new char[] { ',' });
 			int Cols = Fields.GetLength(0);
             DataTable dt = new DataTable();
 
@@ -90,19 +90,39 @@ namespace SteamAccountSwitch
                 if (dataGridView1.CurrentCell != null)
                 {
                     int rowindex = dataGridView1.CurrentCell.RowIndex;
-                    ID = dataGridView1.Rows[rowindex].Cells[1].Value.ToString();
-                    Password = dataGridView1.Rows[rowindex].Cells[2].Value.ToString();
-                    startinfo.FileName = "cmd.exe";
-                    startinfo.Arguments = "/c taskkill.exe /F /IM steam.exe && start \"\" \"" + steamExePath + "\" -noreactlogin -login " + ID + " " + Password + " && timeout 2 >nul && move nul 2>&0";
-                }
+                    ID = dataGridView1.Rows[rowindex].Cells[0].Value.ToString();
+                    Password = dataGridView1.Rows[rowindex].Cells[1].Value.ToString();
 
-                try
-                {
-                    Process.Start(startinfo);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
+                    // Check if steam.exe is running
+                    Process[] processes = Process.GetProcessesByName("steam");
+                    if (processes.Length > 0)
+                    {
+                        // Steam is running, attempt to kill it
+                        try
+                        {
+                            foreach (Process process in processes)
+                            {
+                                process.Kill();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Error killing steam.exe: " + ex.Message);
+                            return;
+                        }
+                    }
+
+                    // Launch the new steam process
+                    startinfo.FileName = steamExePath;
+                    startinfo.Arguments = "-noreactlogin -login " + ID + " " + Password;
+                    try
+                    {
+                        Process.Start(startinfo);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Error launching steam.exe: " + ex.Message);
+                    }
                 }
             }
             else
@@ -114,10 +134,36 @@ namespace SteamAccountSwitch
 
         private void dataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
 		{
-            if (e.ColumnIndex == 2 && e.Value != null)
+            //if (e.ColumnIndex == 1 && e.Value != null)
+            //{
+            //    e.Value = new String('*', e.Value.ToString().Length);
+            //}
+
+            // Set AutoSizeMode to AllCells for all columns
+            foreach (DataGridViewColumn column in dataGridView1.Columns)
             {
-                e.Value = new String('*', e.Value.ToString().Length);
+                column.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
             }
         }
-	}
+
+        private void btnBrowse_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog1 = new OpenFileDialog();
+
+            // Set filter options and filter index.
+            openFileDialog1.Filter = "Executable Files (*.exe)|*.exe|All Files (*.*)|*.*";
+            openFileDialog1.FilterIndex = 1;
+            openFileDialog1.Multiselect = false;
+
+            // Call the ShowDialog method to show the dialog box.
+            DialogResult result = openFileDialog1.ShowDialog();
+
+            // Process input if the user clicked OK.
+            if (result == DialogResult.OK)
+            {
+                // Get the selected file's path and display it in the textbox.
+                txtSteamExePath.Text = openFileDialog1.FileName;
+            }
+        }
+    }
 }
