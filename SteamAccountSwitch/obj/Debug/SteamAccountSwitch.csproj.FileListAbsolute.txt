@@ -1,0 +1,10 @@
+D:\Github\toyprojects\bin\Debug\SteamAccountSwitch\SteamAccountSwitch.exe.config
+D:\Github\toyprojects\bin\Debug\SteamAccountSwitch\SteamAccountSwitch.exe
+D:\Github\toyprojects\bin\Debug\SteamAccountSwitch\SteamAccountSwitch.pdb
+D:\Github\toyprojects\SteamAccountSwitch\obj\Debug\SteamAccountSwitch.csproj.AssemblyReference.cache
+D:\Github\toyprojects\SteamAccountSwitch\obj\Debug\SteamAccountSwitch.Form1.resources
+D:\Github\toyprojects\SteamAccountSwitch\obj\Debug\SteamAccountSwitch.Properties.Resources.resources
+D:\Github\toyprojects\SteamAccountSwitch\obj\Debug\SteamAccountSwitch.csproj.GenerateResource.cache
+D:\Github\toyprojects\SteamAccountSwitch\obj\Debug\SteamAccountSwitch.csproj.CoreCompileInputs.cache
+D:\Github\toyprojects\SteamAccountSwitch\obj\Debug\SteamAccountSwitch.exe
+D:\Github\toyprojects\SteamAccountSwitch\obj\Debug\SteamAccountSwitch.pdb

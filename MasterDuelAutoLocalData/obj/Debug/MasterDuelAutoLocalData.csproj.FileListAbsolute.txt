@@ -1,0 +1,7 @@
+D:\Github\toyprojects\bin\Debug\MasterDuelAutoLocalData\MasterDuelAutoLocalData.exe.config
+D:\Github\toyprojects\bin\Debug\MasterDuelAutoLocalData\MasterDuelAutoLocalData.exe
+D:\Github\toyprojects\bin\Debug\MasterDuelAutoLocalData\MasterDuelAutoLocalData.pdb
+D:\Github\toyprojects\MasterDuelAutoLocalData\obj\Debug\MasterDuelAutoLocalData.csproj.AssemblyReference.cache
+D:\Github\toyprojects\MasterDuelAutoLocalData\obj\Debug\MasterDuelAutoLocalData.csproj.CoreCompileInputs.cache
+D:\Github\toyprojects\MasterDuelAutoLocalData\obj\Debug\MasterDuelAutoLocalData.exe
+D:\Github\toyprojects\MasterDuelAutoLocalData\obj\Debug\MasterDuelAutoLocalData.pdb

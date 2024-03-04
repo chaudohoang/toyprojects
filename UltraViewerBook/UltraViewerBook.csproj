@@ -18,7 +18,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\bin\Debug\UltraViewerBook\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -86,4 +86,11 @@
     <Content Include="Book.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>@echo OFF
+del $(ProjectDir)..\bin\$(ConfigurationName)\$(ProjectName)\*.pdb
+del $(ProjectDir)..\bin\$(ConfigurationName)\$(ProjectName)\*.xml
+del $(ProjectDir)..\bin\$(ConfigurationName)\$(ProjectName)\*.config
+copy /Y $(ProjectDir)\contacts.csv $(ProjectDir)..\bin\$(ConfigurationName)\$(ProjectName)\contacts.csv</PostBuildEvent>
+  </PropertyGroup>
 </Project>
