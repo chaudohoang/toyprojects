@@ -5,9 +5,9 @@ class Program
 {
     static void Main(string[] args)
     {
-        string rootFolder = @"E:\Games\Steam\steamapps\common\Yu-Gi-Oh!  Master Duel\LocalData"; // Update this with the actual path to your LocalData folder
-        string actualFolder = @"E:\Games\Steam\steamapps\common\Yu-Gi-Oh!  Master Duel\0000"; // Update this with the actual path to the actual "0000" folder
-        CheckAndCreateSoftLink(rootFolder, actualFolder);
+        string rootFolder = "LocalData"; // Update this with the actual path to your LocalData folder
+        string actualFolder = "0000"; // Update this with the actual path to the actual "0000" folder
+        CheckAndCreateSoftLink(Path.GetFullPath(rootFolder), Path.GetFullPath(actualFolder));
     }
 
     static void CheckAndCreateSoftLink(string rootFolder, string actualFolder)
