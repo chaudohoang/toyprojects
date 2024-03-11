@@ -1591,8 +1591,7 @@ Namespace AutoDeleteData
                     MessageBox.Show("Error loading lines from file to text box: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
                 End Try
             Else
-                ' If the file does not exist, show a message or handle it accordingly
-                MessageBox.Show("File does not exist: " & "C:\Radiant Vision Systems Data\TrueTest\UserData\autodelete_exclude.txt", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+
             End If
         End Sub
         Private Sub btnReloadList3_Click(sender As Object, e As EventArgs) Handles btnReloadList3.Click
