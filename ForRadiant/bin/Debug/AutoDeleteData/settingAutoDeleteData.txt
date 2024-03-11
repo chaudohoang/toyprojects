@@ -1,2 +1,2 @@
 startminimized=false
-minimizedtotray=false
+minimizedtotray=true

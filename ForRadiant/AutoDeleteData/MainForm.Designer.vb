@@ -42,7 +42,6 @@ Namespace AutoDeleteData
             Me.minimizedToTrayToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.helpToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.aboutToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-            Me.richTextBox1 = New System.Windows.Forms.RichTextBox()
             Me.dataGridView1 = New System.Windows.Forms.DataGridView()
             Me.lblMonitoringStatus = New System.Windows.Forms.Label()
             Me.cmdStopMonitor = New System.Windows.Forms.LinkLabel()
@@ -59,7 +58,6 @@ Namespace AutoDeleteData
             Me.btnDelSelectedFolder = New System.Windows.Forms.Button()
             Me.btnDelAllFolders = New System.Windows.Forms.Button()
             Me.TabPage2 = New System.Windows.Forms.TabPage()
-            Me.richTextBox2 = New System.Windows.Forms.RichTextBox()
             Me.btnClearLogs2 = New System.Windows.Forms.Button()
             Me.btnViewSelectedDiskLog = New System.Windows.Forms.Button()
             Me.btnCheckAllDiskFreeSpace = New System.Windows.Forms.Button()
@@ -69,6 +67,12 @@ Namespace AutoDeleteData
             Me.btnSaveList2 = New System.Windows.Forms.Button()
             Me.Label1 = New System.Windows.Forms.Label()
             Me.txtLogpath = New System.Windows.Forms.TextBox()
+            Me.TabPage3 = New System.Windows.Forms.TabPage()
+            Me.Label2 = New System.Windows.Forms.Label()
+            Me.txtExcludeFileNames = New System.Windows.Forms.TextBox()
+            Me.btnReloadList3 = New System.Windows.Forms.Button()
+            Me.btnSaveList3 = New System.Windows.Forms.Button()
+            Me.btnEnableEditExcludeList = New System.Windows.Forms.Button()
             Me.contextMenuStrip1.SuspendLayout()
             Me.menuStrip1.SuspendLayout()
             CType(Me.dataGridView1, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -77,6 +81,7 @@ Namespace AutoDeleteData
             Me.TabPage1.SuspendLayout()
             Me.TabPage2.SuspendLayout()
             CType(Me.dataGridView3, System.ComponentModel.ISupportInitialize).BeginInit()
+            Me.TabPage3.SuspendLayout()
             Me.SuspendLayout()
             '
             'notifyIcon1
@@ -117,25 +122,25 @@ Namespace AutoDeleteData
             'SaveAllListToolStripMenuItem
             '
             Me.SaveAllListToolStripMenuItem.Name = "SaveAllListToolStripMenuItem"
-            Me.SaveAllListToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+            Me.SaveAllListToolStripMenuItem.Size = New System.Drawing.Size(148, 22)
             Me.SaveAllListToolStripMenuItem.Text = "Save All List"
             '
             'ReloadAllListToolStripMenuItem
             '
             Me.ReloadAllListToolStripMenuItem.Name = "ReloadAllListToolStripMenuItem"
-            Me.ReloadAllListToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+            Me.ReloadAllListToolStripMenuItem.Size = New System.Drawing.Size(148, 22)
             Me.ReloadAllListToolStripMenuItem.Text = "Reload All List"
             '
             'ClearAllLogsToolStripMenuItem
             '
             Me.ClearAllLogsToolStripMenuItem.Name = "ClearAllLogsToolStripMenuItem"
-            Me.ClearAllLogsToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+            Me.ClearAllLogsToolStripMenuItem.Size = New System.Drawing.Size(148, 22)
             Me.ClearAllLogsToolStripMenuItem.Text = "Clear All Logs"
             '
             'exitToolStripMenuItem
             '
             Me.exitToolStripMenuItem.Name = "exitToolStripMenuItem"
-            Me.exitToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+            Me.exitToolStripMenuItem.Size = New System.Drawing.Size(148, 22)
             Me.exitToolStripMenuItem.Text = "Exit"
             '
             'settingsToolStripMenuItem
@@ -147,18 +152,14 @@ Namespace AutoDeleteData
             '
             'startMinimizedToolStripMenuItem
             '
-            Me.startMinimizedToolStripMenuItem.Checked = True
             Me.startMinimizedToolStripMenuItem.CheckOnClick = True
-            Me.startMinimizedToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked
             Me.startMinimizedToolStripMenuItem.Name = "startMinimizedToolStripMenuItem"
             Me.startMinimizedToolStripMenuItem.Size = New System.Drawing.Size(226, 22)
             Me.startMinimizedToolStripMenuItem.Text = "Start Minimized"
             '
             'minimizedToTrayToolStripMenuItem
             '
-            Me.minimizedToTrayToolStripMenuItem.Checked = True
             Me.minimizedToTrayToolStripMenuItem.CheckOnClick = True
-            Me.minimizedToTrayToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked
             Me.minimizedToTrayToolStripMenuItem.Name = "minimizedToTrayToolStripMenuItem"
             Me.minimizedToTrayToolStripMenuItem.Size = New System.Drawing.Size(226, 22)
             Me.minimizedToTrayToolStripMenuItem.Text = "Minimized Hide Taskbar Icon"
@@ -176,21 +177,12 @@ Namespace AutoDeleteData
             Me.aboutToolStripMenuItem.Size = New System.Drawing.Size(107, 22)
             Me.aboutToolStripMenuItem.Text = "About"
             '
-            'richTextBox1
-            '
-            Me.richTextBox1.BackColor = System.Drawing.SystemColors.Menu
-            Me.richTextBox1.Location = New System.Drawing.Point(6, 339)
-            Me.richTextBox1.Name = "richTextBox1"
-            Me.richTextBox1.Size = New System.Drawing.Size(864, 169)
-            Me.richTextBox1.TabIndex = 12
-            Me.richTextBox1.Text = ""
-            '
             'dataGridView1
             '
             Me.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
             Me.dataGridView1.Location = New System.Drawing.Point(6, 6)
             Me.dataGridView1.Name = "dataGridView1"
-            Me.dataGridView1.Size = New System.Drawing.Size(864, 298)
+            Me.dataGridView1.Size = New System.Drawing.Size(864, 474)
             Me.dataGridView1.TabIndex = 10
             '
             'lblMonitoringStatus
@@ -230,7 +222,7 @@ Namespace AutoDeleteData
             Me.dataGridView2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
             Me.dataGridView2.Location = New System.Drawing.Point(6, 6)
             Me.dataGridView2.Name = "dataGridView2"
-            Me.dataGridView2.Size = New System.Drawing.Size(864, 141)
+            Me.dataGridView2.Size = New System.Drawing.Size(864, 127)
             Me.dataGridView2.TabIndex = 41
             '
             'chkMonitorDisk
@@ -261,6 +253,7 @@ Namespace AutoDeleteData
             '
             Me.TabControl1.Controls.Add(Me.TabPage1)
             Me.TabControl1.Controls.Add(Me.TabPage2)
+            Me.TabControl1.Controls.Add(Me.TabPage3)
             Me.TabControl1.Location = New System.Drawing.Point(12, 76)
             Me.TabControl1.Name = "TabControl1"
             Me.TabControl1.SelectedIndex = 0
@@ -276,7 +269,6 @@ Namespace AutoDeleteData
             Me.TabPage1.Controls.Add(Me.btnViewSelectedFolderLog)
             Me.TabPage1.Controls.Add(Me.btnDelSelectedFolder)
             Me.TabPage1.Controls.Add(Me.btnDelAllFolders)
-            Me.TabPage1.Controls.Add(Me.richTextBox1)
             Me.TabPage1.Location = New System.Drawing.Point(4, 22)
             Me.TabPage1.Name = "TabPage1"
             Me.TabPage1.Padding = New System.Windows.Forms.Padding(3)
@@ -287,7 +279,7 @@ Namespace AutoDeleteData
             '
             'btnClearLogs
             '
-            Me.btnClearLogs.Location = New System.Drawing.Point(546, 310)
+            Me.btnClearLogs.Location = New System.Drawing.Point(546, 486)
             Me.btnClearLogs.Name = "btnClearLogs"
             Me.btnClearLogs.Size = New System.Drawing.Size(75, 23)
             Me.btnClearLogs.TabIndex = 52
@@ -296,7 +288,7 @@ Namespace AutoDeleteData
             '
             'btnSaveList1
             '
-            Me.btnSaveList1.Location = New System.Drawing.Point(6, 310)
+            Me.btnSaveList1.Location = New System.Drawing.Point(6, 486)
             Me.btnSaveList1.Name = "btnSaveList1"
             Me.btnSaveList1.Size = New System.Drawing.Size(75, 23)
             Me.btnSaveList1.TabIndex = 45
@@ -305,7 +297,7 @@ Namespace AutoDeleteData
             '
             'btnReloadList1
             '
-            Me.btnReloadList1.Location = New System.Drawing.Point(87, 310)
+            Me.btnReloadList1.Location = New System.Drawing.Point(87, 486)
             Me.btnReloadList1.Name = "btnReloadList1"
             Me.btnReloadList1.Size = New System.Drawing.Size(75, 23)
             Me.btnReloadList1.TabIndex = 46
@@ -314,7 +306,7 @@ Namespace AutoDeleteData
             '
             'btnViewSelectedFolderLog
             '
-            Me.btnViewSelectedFolderLog.Location = New System.Drawing.Point(403, 310)
+            Me.btnViewSelectedFolderLog.Location = New System.Drawing.Point(403, 486)
             Me.btnViewSelectedFolderLog.Name = "btnViewSelectedFolderLog"
             Me.btnViewSelectedFolderLog.Size = New System.Drawing.Size(137, 23)
             Me.btnViewSelectedFolderLog.TabIndex = 51
@@ -323,7 +315,7 @@ Namespace AutoDeleteData
             '
             'btnDelSelectedFolder
             '
-            Me.btnDelSelectedFolder.Location = New System.Drawing.Point(168, 310)
+            Me.btnDelSelectedFolder.Location = New System.Drawing.Point(168, 486)
             Me.btnDelSelectedFolder.Name = "btnDelSelectedFolder"
             Me.btnDelSelectedFolder.Size = New System.Drawing.Size(124, 23)
             Me.btnDelSelectedFolder.TabIndex = 47
@@ -332,7 +324,7 @@ Namespace AutoDeleteData
             '
             'btnDelAllFolders
             '
-            Me.btnDelAllFolders.Location = New System.Drawing.Point(298, 310)
+            Me.btnDelAllFolders.Location = New System.Drawing.Point(298, 486)
             Me.btnDelAllFolders.Name = "btnDelAllFolders"
             Me.btnDelAllFolders.Size = New System.Drawing.Size(99, 23)
             Me.btnDelAllFolders.TabIndex = 48
@@ -341,7 +333,6 @@ Namespace AutoDeleteData
             '
             'TabPage2
             '
-            Me.TabPage2.Controls.Add(Me.richTextBox2)
             Me.TabPage2.Controls.Add(Me.btnClearLogs2)
             Me.TabPage2.Controls.Add(Me.btnViewSelectedDiskLog)
             Me.TabPage2.Controls.Add(Me.btnCheckAllDiskFreeSpace)
@@ -358,18 +349,9 @@ Namespace AutoDeleteData
             Me.TabPage2.Text = "Monitor Disk Free Space"
             Me.TabPage2.UseVisualStyleBackColor = True
             '
-            'richTextBox2
-            '
-            Me.richTextBox2.BackColor = System.Drawing.SystemColors.Menu
-            Me.richTextBox2.Location = New System.Drawing.Point(7, 339)
-            Me.richTextBox2.Name = "richTextBox2"
-            Me.richTextBox2.Size = New System.Drawing.Size(864, 169)
-            Me.richTextBox2.TabIndex = 45
-            Me.richTextBox2.Text = ""
-            '
             'btnClearLogs2
             '
-            Me.btnClearLogs2.Location = New System.Drawing.Point(660, 310)
+            Me.btnClearLogs2.Location = New System.Drawing.Point(658, 486)
             Me.btnClearLogs2.Name = "btnClearLogs2"
             Me.btnClearLogs2.Size = New System.Drawing.Size(75, 23)
             Me.btnClearLogs2.TabIndex = 56
@@ -378,7 +360,7 @@ Namespace AutoDeleteData
             '
             'btnViewSelectedDiskLog
             '
-            Me.btnViewSelectedDiskLog.Location = New System.Drawing.Point(522, 310)
+            Me.btnViewSelectedDiskLog.Location = New System.Drawing.Point(520, 486)
             Me.btnViewSelectedDiskLog.Name = "btnViewSelectedDiskLog"
             Me.btnViewSelectedDiskLog.Size = New System.Drawing.Size(132, 23)
             Me.btnViewSelectedDiskLog.TabIndex = 55
@@ -387,7 +369,7 @@ Namespace AutoDeleteData
             '
             'btnCheckAllDiskFreeSpace
             '
-            Me.btnCheckAllDiskFreeSpace.Location = New System.Drawing.Point(361, 310)
+            Me.btnCheckAllDiskFreeSpace.Location = New System.Drawing.Point(359, 486)
             Me.btnCheckAllDiskFreeSpace.Name = "btnCheckAllDiskFreeSpace"
             Me.btnCheckAllDiskFreeSpace.Size = New System.Drawing.Size(152, 23)
             Me.btnCheckAllDiskFreeSpace.TabIndex = 54
@@ -396,7 +378,7 @@ Namespace AutoDeleteData
             '
             'btnCheckSelectedDiskFreeSpace
             '
-            Me.btnCheckSelectedDiskFreeSpace.Location = New System.Drawing.Point(168, 310)
+            Me.btnCheckSelectedDiskFreeSpace.Location = New System.Drawing.Point(166, 486)
             Me.btnCheckSelectedDiskFreeSpace.Name = "btnCheckSelectedDiskFreeSpace"
             Me.btnCheckSelectedDiskFreeSpace.Size = New System.Drawing.Size(187, 23)
             Me.btnCheckSelectedDiskFreeSpace.TabIndex = 53
@@ -406,14 +388,14 @@ Namespace AutoDeleteData
             'dataGridView3
             '
             Me.dataGridView3.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-            Me.dataGridView3.Location = New System.Drawing.Point(6, 153)
+            Me.dataGridView3.Location = New System.Drawing.Point(7, 139)
             Me.dataGridView3.Name = "dataGridView3"
-            Me.dataGridView3.Size = New System.Drawing.Size(864, 151)
+            Me.dataGridView3.Size = New System.Drawing.Size(864, 341)
             Me.dataGridView3.TabIndex = 42
             '
             'btnReloadList2
             '
-            Me.btnReloadList2.Location = New System.Drawing.Point(87, 310)
+            Me.btnReloadList2.Location = New System.Drawing.Point(85, 486)
             Me.btnReloadList2.Name = "btnReloadList2"
             Me.btnReloadList2.Size = New System.Drawing.Size(75, 23)
             Me.btnReloadList2.TabIndex = 50
@@ -422,7 +404,7 @@ Namespace AutoDeleteData
             '
             'btnSaveList2
             '
-            Me.btnSaveList2.Location = New System.Drawing.Point(6, 310)
+            Me.btnSaveList2.Location = New System.Drawing.Point(4, 486)
             Me.btnSaveList2.Name = "btnSaveList2"
             Me.btnSaveList2.Size = New System.Drawing.Size(75, 23)
             Me.btnSaveList2.TabIndex = 49
@@ -445,6 +427,65 @@ Namespace AutoDeleteData
             Me.txtLogpath.Size = New System.Drawing.Size(274, 20)
             Me.txtLogpath.TabIndex = 53
             Me.txtLogpath.Text = "D:\Program\RVS\AutoDeleteDataLog"
+            '
+            'TabPage3
+            '
+            Me.TabPage3.Controls.Add(Me.btnEnableEditExcludeList)
+            Me.TabPage3.Controls.Add(Me.btnReloadList3)
+            Me.TabPage3.Controls.Add(Me.btnSaveList3)
+            Me.TabPage3.Controls.Add(Me.txtExcludeFileNames)
+            Me.TabPage3.Controls.Add(Me.Label2)
+            Me.TabPage3.Location = New System.Drawing.Point(4, 22)
+            Me.TabPage3.Name = "TabPage3"
+            Me.TabPage3.Size = New System.Drawing.Size(877, 515)
+            Me.TabPage3.TabIndex = 2
+            Me.TabPage3.Text = "Exclude File Names"
+            Me.TabPage3.UseVisualStyleBackColor = True
+            '
+            'Label2
+            '
+            Me.Label2.AutoSize = True
+            Me.Label2.Location = New System.Drawing.Point(20, 18)
+            Me.Label2.Name = "Label2"
+            Me.Label2.Size = New System.Drawing.Size(109, 13)
+            Me.Label2.TabIndex = 0
+            Me.Label2.Text = "Exclude File Names : "
+            '
+            'txtExcludeFileNames
+            '
+            Me.txtExcludeFileNames.Location = New System.Drawing.Point(23, 15)
+            Me.txtExcludeFileNames.Multiline = True
+            Me.txtExcludeFileNames.Name = "txtExcludeFileNames"
+            Me.txtExcludeFileNames.ReadOnly = True
+            Me.txtExcludeFileNames.Size = New System.Drawing.Size(833, 463)
+            Me.txtExcludeFileNames.TabIndex = 1
+            '
+            'btnReloadList3
+            '
+            Me.btnReloadList3.Location = New System.Drawing.Point(206, 484)
+            Me.btnReloadList3.Name = "btnReloadList3"
+            Me.btnReloadList3.Size = New System.Drawing.Size(75, 23)
+            Me.btnReloadList3.TabIndex = 52
+            Me.btnReloadList3.Text = "Reload List"
+            Me.btnReloadList3.UseVisualStyleBackColor = True
+            '
+            'btnSaveList3
+            '
+            Me.btnSaveList3.Location = New System.Drawing.Point(125, 484)
+            Me.btnSaveList3.Name = "btnSaveList3"
+            Me.btnSaveList3.Size = New System.Drawing.Size(75, 23)
+            Me.btnSaveList3.TabIndex = 51
+            Me.btnSaveList3.Text = "Save List"
+            Me.btnSaveList3.UseVisualStyleBackColor = True
+            '
+            'btnEnableEditExcludeList
+            '
+            Me.btnEnableEditExcludeList.Location = New System.Drawing.Point(23, 484)
+            Me.btnEnableEditExcludeList.Name = "btnEnableEditExcludeList"
+            Me.btnEnableEditExcludeList.Size = New System.Drawing.Size(96, 23)
+            Me.btnEnableEditExcludeList.TabIndex = 53
+            Me.btnEnableEditExcludeList.Text = "Edit List"
+            Me.btnEnableEditExcludeList.UseVisualStyleBackColor = True
             '
             'MainForm
             '
@@ -476,6 +517,8 @@ Namespace AutoDeleteData
             Me.TabPage1.ResumeLayout(False)
             Me.TabPage2.ResumeLayout(False)
             CType(Me.dataGridView3, System.ComponentModel.ISupportInitialize).EndInit()
+            Me.TabPage3.ResumeLayout(False)
+            Me.TabPage3.PerformLayout()
             Me.ResumeLayout(False)
             Me.PerformLayout()
 
@@ -493,7 +536,6 @@ Namespace AutoDeleteData
 		Friend WithEvents helpToolStripMenuItem As Windows.Forms.ToolStripMenuItem
 		Friend WithEvents aboutToolStripMenuItem As Windows.Forms.ToolStripMenuItem
         Friend WithEvents startMinimizedToolStripMenuItem As Windows.Forms.ToolStripMenuItem
-        Private WithEvents richTextBox1 As Windows.Forms.RichTextBox
         Private WithEvents dataGridView1 As Windows.Forms.DataGridView
         Private WithEvents lblMonitoringStatus As Windows.Forms.Label
         Friend WithEvents cmdStopMonitor As Windows.Forms.LinkLabel
@@ -520,8 +562,13 @@ Namespace AutoDeleteData
         Friend WithEvents btnClearLogs2 As Windows.Forms.Button
         Friend WithEvents btnViewSelectedDiskLog As Windows.Forms.Button
         Friend WithEvents btnCheckAllDiskFreeSpace As Windows.Forms.Button
-        Private WithEvents richTextBox2 As Windows.Forms.RichTextBox
         Friend WithEvents Label1 As Windows.Forms.Label
         Friend WithEvents txtLogpath As Windows.Forms.TextBox
+        Friend WithEvents TabPage3 As Windows.Forms.TabPage
+        Friend WithEvents txtExcludeFileNames As Windows.Forms.TextBox
+        Friend WithEvents Label2 As Windows.Forms.Label
+        Friend WithEvents btnReloadList3 As Windows.Forms.Button
+        Friend WithEvents btnSaveList3 As Windows.Forms.Button
+        Friend WithEvents btnEnableEditExcludeList As Windows.Forms.Button
     End Class
 End Namespace
