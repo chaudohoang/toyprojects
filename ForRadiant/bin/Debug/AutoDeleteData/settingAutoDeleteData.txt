@@ -1,2 +1,3 @@
 startminimized=false
 minimizedtotray=true
+monitorautomatically=false

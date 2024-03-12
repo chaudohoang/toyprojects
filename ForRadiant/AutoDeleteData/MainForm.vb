@@ -91,6 +91,9 @@ Namespace AutoDeleteData
             End If
             LoadAllList()
             LoadExlusionFileNames()
+            If MonitorAutomaticallyToolStripMenuItem.Checked = True Then
+                startMonitor()
+            End If
         End Sub
 
         Private Sub aboutToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles aboutToolStripMenuItem.Click
@@ -102,6 +105,7 @@ Namespace AutoDeleteData
         End Sub
 
         Private Sub exit2ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles exit2ToolStripMenuItem.Click
+            SaveSettings()
             Application.Exit()
         End Sub
 
@@ -137,7 +141,11 @@ Namespace AutoDeleteData
             Else
                 settings.Add("minimizedtotray", "false")
             End If
-
+            If MonitorAutomaticallyToolStripMenuItem.Checked Then
+                settings.Add("monitorautomatically", "true")
+            Else
+                settings.Add("monitorautomatically", "false")
+            End If
             Dim settingContent As String = ""
             Dim keys() As String = settings.Keys.ToArray
             For Each k As String In keys
@@ -160,7 +168,8 @@ Namespace AutoDeleteData
                             startMinimizedToolStripMenuItem.Checked = If(value = "true", True, False)
                         ElseIf setting = "minimizedtotray" Then
                             minimizedToTrayToolStripMenuItem.Checked = If(value = "true", True, False)
-
+                        ElseIf setting = "monitorautomatically" Then
+                            MonitorAutomaticallyToolStripMenuItem.Checked = If(value = "true", True, False)
                         End If
                     Next
                 End If
@@ -549,7 +558,12 @@ Namespace AutoDeleteData
         End Sub
 
         Private Sub MainForm_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
-            SaveSettings()
+            ' Check if the close reason is user closing the form
+            If e.CloseReason = CloseReason.UserClosing Then
+                ' Minimize the form instead of closing
+                e.Cancel = True
+                Me.WindowState = FormWindowState.Minimized
+            End If
         End Sub
 
         Private Sub DeleteCurrentWithSize(path As String, requiredSizeInGB As Double, logpath As String)
@@ -1609,5 +1623,6 @@ Namespace AutoDeleteData
                 btnEnableEditExcludeList.Text = "Done Editing"
             End If
         End Sub
+
     End Class
 End Namespace
