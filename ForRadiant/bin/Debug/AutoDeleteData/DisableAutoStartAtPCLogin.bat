@@ -32,7 +32,7 @@ echo Done.
 echo Modifying settingAutoDeleteData.txt...
 (
     echo startminimized=false
-    echo minimizedtotray=true
+    echo minimizedtotray=false
     echo monitorautomatically=false
 ) > "%~dp0settingAutoDeleteData.txt"
 echo Done modifying settingAutoDeleteData.txt.
