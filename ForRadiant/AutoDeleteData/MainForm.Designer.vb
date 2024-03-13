@@ -489,6 +489,7 @@ Namespace AutoDeleteData
             Me.txtExcludeFolderNames.Multiline = True
             Me.txtExcludeFolderNames.Name = "txtExcludeFolderNames"
             Me.txtExcludeFolderNames.ReadOnly = True
+            Me.txtExcludeFolderNames.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
             Me.txtExcludeFolderNames.Size = New System.Drawing.Size(721, 212)
             Me.txtExcludeFolderNames.TabIndex = 54
             '
@@ -525,6 +526,7 @@ Namespace AutoDeleteData
             Me.txtExcludeFileNames.Multiline = True
             Me.txtExcludeFileNames.Name = "txtExcludeFileNames"
             Me.txtExcludeFileNames.ReadOnly = True
+            Me.txtExcludeFileNames.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
             Me.txtExcludeFileNames.Size = New System.Drawing.Size(721, 212)
             Me.txtExcludeFileNames.TabIndex = 1
             '
