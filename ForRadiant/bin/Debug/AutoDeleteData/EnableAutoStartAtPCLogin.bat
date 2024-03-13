@@ -25,10 +25,6 @@ if '%errorlevel%' NEQ '0' (
 
 @setlocal enableextensions
 
-set sourceFolder="%~dp0TabletSetting"
-set destinationFolder="C:\Radiant Vision Systems Data\TrueTest\UserData"
-xcopy /Y /S /E %sourceFolder% %destinationFolder%
-
 echo Creating startup task...
 schtasks /create /TR "\"%~dp0AutoDeleteData.exe\"" /TN autodelete /SC ONLOGON /RL HIGHEST /F
 echo Done.

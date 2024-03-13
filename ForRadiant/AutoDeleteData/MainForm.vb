@@ -89,8 +89,9 @@ Namespace AutoDeleteData
             If startMinimizedToolStripMenuItem.Checked = True Then
                 Me.WindowState = FormWindowState.Minimized
             End If
-            LoadAllList()
-            LoadExlusionFileNames()
+            LoadAllMonitorList()
+            LoadExcludedFileNames()
+            LoadExcludedFolderNames()
             If MonitorAutomaticallyToolStripMenuItem.Checked = True Then
                 startMonitor()
             End If
@@ -101,6 +102,7 @@ Namespace AutoDeleteData
         End Sub
 
         Private Sub exitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles exitToolStripMenuItem.Click
+            SaveSettings()
             Application.Exit()
         End Sub
 
@@ -178,7 +180,7 @@ Namespace AutoDeleteData
             End Try
         End Sub
 
-        Private Sub LoadAllList()
+        Private Sub LoadAllMonitorList()
             Dim CSVFilePathName = "C:\Radiant Vision Systems Data\TrueTest\UserData\foldermonitorlist.csv"
             Dim Lines() As String
             If File.Exists(CSVFilePathName) Then
@@ -641,7 +643,17 @@ Namespace AutoDeleteData
             Return exludeFileNameList.Any(Function(pattern) New Regex("^" & Regex.Escape(pattern).Replace("\*", ".*").Replace("\?", ".") & "$", RegexOptions.IgnoreCase).IsMatch(fileName))
         End Function
 
+        Function ShouldExcludeFolder(folderName As String, exludeFolderNameList As List(Of String)) As Boolean
+            Return exludeFolderNameList.Any(Function(pattern) New Regex("^" & Regex.Escape(pattern).Replace("\*", ".*").Replace("\?", ".") & "$", RegexOptions.IgnoreCase).IsMatch(folderName))
+        End Function
+
         Sub DeleteFilesAndFolders(ByVal parentDirectory As DirectoryInfo, ByVal period As Integer, ByVal logpath As String, ByRef deletedSomeFiles As Boolean, ByRef deletedSomeFolders As Boolean, ByVal topLevelDirectoryPath As String)
+
+            Dim excludedFolderNames As New List(Of String)(txtExcludeFolderNames.Text.Split({Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries))
+
+            If ShouldExcludeFolder(parentDirectory.Name, excludedFolderNames) Then
+                Return ' Skip deletion and recursion if parent folder matches the name
+            End If
 
             Dim excludedFileNames As New List(Of String)(txtExcludeFileNames.Text.Split({Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries))
 
@@ -684,10 +696,14 @@ Namespace AutoDeleteData
 
 
         Sub DeleteOldestFilesAndFolders(ByVal parentDirectory As DirectoryInfo, ByVal requiredSizeInGB As Double, ByVal logpath As String, ByRef deletedSomeFiles As Boolean, ByRef deletedSomeFolders As Boolean, ByVal topLevelDirectoryPath As String)
-            ' Save the path of the top-level directory
+
+            Dim excludedFolderNames As New List(Of String)(txtExcludeFolderNames.Text.Split({Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries))
+
+            If ShouldExcludeFolder(parentDirectory.Name, excludedFolderNames) Then
+                Return ' Skip deletion and recursion if parent folder matches the name
+            End If
 
             Dim excludedFileNames As New List(Of String)(txtExcludeFileNames.Text.Split({Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries))
-
             ' Get files in the current directory and sort them by creation time (oldest first)
             Dim files As FileInfo() = parentDirectory.GetFiles().OrderBy(Function(f) f.CreationTime).ToArray()
 
@@ -1057,9 +1073,9 @@ Namespace AutoDeleteData
                                                 btnCheckAllDiskFreeSpace.Enabled = False
                                             End Sub)
 
-            btnEnableEditExcludeList.Invoke(Sub()
-                                                btnEnableEditExcludeList.Enabled = False
-                                            End Sub)
+            btnEnableEditExcludeFileList.Invoke(Sub()
+                                                    btnEnableEditExcludeFileList.Enabled = False
+                                                End Sub)
 
             btnSaveList3.Invoke(Sub()
                                     btnSaveList3.Enabled = False
@@ -1194,9 +1210,9 @@ Namespace AutoDeleteData
                                                 btnCheckAllDiskFreeSpace.Enabled = True
                                             End Sub)
 
-            btnEnableEditExcludeList.Invoke(Sub()
-                                                btnEnableEditExcludeList.Enabled = True
-                                            End Sub)
+            btnEnableEditExcludeFileList.Invoke(Sub()
+                                                    btnEnableEditExcludeFileList.Enabled = True
+                                                End Sub)
 
             btnSaveList3.Invoke(Sub()
                                     btnSaveList3.Enabled = True
@@ -1234,11 +1250,15 @@ Namespace AutoDeleteData
         End Sub
 
         Private Sub SaveAllListToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SaveAllListToolStripMenuItem.Click
-            SaveAllList()
+            SaveAllMonitorList()
+            SaveExcludedFileNames()
+            SaveExcludedFolderNames()
         End Sub
 
         Private Sub ReloadAllListToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ReloadAllListToolStripMenuItem.Click
-            LoadAllList()
+            LoadAllMonitorList()
+            LoadExcludedFileNames()
+            LoadExcludedFolderNames()
         End Sub
 
         Private Sub WriteLog(file As String, content As String)
@@ -1450,7 +1470,7 @@ Namespace AutoDeleteData
             LoadDiskMonitiorist()
         End Sub
 
-        Private Sub SaveAllList()
+        Private Sub SaveAllMonitorList()
             Dim rows = From row As DataGridViewRow In dataGridView1.Rows.Cast(Of DataGridViewRow)()
                        Where Not row.IsNewRow
                        Select Array.ConvertAll(row.Cells.Cast(Of DataGridViewCell).ToArray, Function(c) If(c.Value IsNot Nothing, c.Value.ToString, ""))
@@ -1582,24 +1602,46 @@ Namespace AutoDeleteData
             End Try
         End Sub
 
-        Sub SaveExclustionFileNames()
+        Sub SaveExcludedFileNames()
             Try
                 ' Write the text from the text box to the specified file
-                File.WriteAllText("C:\Radiant Vision Systems Data\TrueTest\UserData\autodelete_exclude.txt", txtExcludeFileNames.Text)
+                File.WriteAllText("C:\Radiant Vision Systems Data\TrueTest\UserData\autodelete_exclude_files.txt", txtExcludeFileNames.Text)
+            Catch ex As Exception
+                ' Handle the exception if writing fails
+                MessageBox.Show("Error writing text box lines to file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            End Try
+        End Sub
+        Sub SaveExcludedFolderNames()
+            Try
+                ' Write the text from the text box to the specified file
+                File.WriteAllText("C:\Radiant Vision Systems Data\TrueTest\UserData\autodelete_exclude_folders.txt", txtExcludeFolderNames.Text)
             Catch ex As Exception
                 ' Handle the exception if writing fails
                 MessageBox.Show("Error writing text box lines to file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
             End Try
         End Sub
         Private Sub btnSaveList3_Click(sender As Object, e As EventArgs) Handles btnSaveList3.Click
-            SaveExclustionFileNames()
+            SaveExcludedFileNames()
         End Sub
 
-        Sub LoadExlusionFileNames()
-            If File.Exists("C:\Radiant Vision Systems Data\TrueTest\UserData\autodelete_exclude.txt") Then
+        Sub LoadExcludedFileNames()
+            If File.Exists("C:\Radiant Vision Systems Data\TrueTest\UserData\autodelete_exclude_files.txt") Then
                 Try
                     ' Read all lines from the file and set them as the text of the text box
-                    txtExcludeFileNames.Text = File.ReadAllText("C:\Radiant Vision Systems Data\TrueTest\UserData\autodelete_exclude.txt")
+                    txtExcludeFileNames.Text = File.ReadAllText("C:\Radiant Vision Systems Data\TrueTest\UserData\autodelete_exclude_files.txt")
+                Catch ex As Exception
+                    ' Handle the exception if reading fails
+                    MessageBox.Show("Error loading lines from file to text box: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                End Try
+            Else
+
+            End If
+        End Sub
+        Sub LoadExcludedFolderNames()
+            If File.Exists("C:\Radiant Vision Systems Data\TrueTest\UserData\autodelete_exclude_folders.txt") Then
+                Try
+                    ' Read all lines from the file and set them as the text of the text box
+                    txtExcludeFolderNames.Text = File.ReadAllText("C:\Radiant Vision Systems Data\TrueTest\UserData\autodelete_exclude_folders.txt")
                 Catch ex As Exception
                     ' Handle the exception if reading fails
                     MessageBox.Show("Error loading lines from file to text box: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -1609,20 +1651,39 @@ Namespace AutoDeleteData
             End If
         End Sub
         Private Sub btnReloadList3_Click(sender As Object, e As EventArgs) Handles btnReloadList3.Click
-            LoadExlusionFileNames()
+            LoadExcludedFileNames()
         End Sub
 
-        Private Sub btnEnableEditExcludeList_Click(sender As Object, e As EventArgs) Handles btnEnableEditExcludeList.Click
+        Private Sub btnEnableEditExcludFileList_Click(sender As Object, e As EventArgs) Handles btnEnableEditExcludeFileList.Click
             ' Toggle the read-only state of the TextBox
             txtExcludeFileNames.ReadOnly = Not txtExcludeFileNames.ReadOnly
 
             ' Change the button text based on the read-only state of the TextBox
             If txtExcludeFileNames.ReadOnly Then
-                btnEnableEditExcludeList.Text = "Edit List"
+                btnEnableEditExcludeFileList.Text = "Edit List"
             Else
-                btnEnableEditExcludeList.Text = "Done Editing"
+                btnEnableEditExcludeFileList.Text = "Done Editing"
             End If
         End Sub
 
+        Private Sub btnEnableEditExcludeFolderList_Click(sender As Object, e As EventArgs) Handles btnEnableEditExcludeFolderList.Click
+            ' Toggle the read-only state of the TextBox
+            txtExcludeFolderNames.ReadOnly = Not txtExcludeFolderNames.ReadOnly
+
+            ' Change the button text based on the read-only state of the TextBox
+            If txtExcludeFolderNames.ReadOnly Then
+                btnEnableEditExcludeFolderList.Text = "Edit List"
+            Else
+                btnEnableEditExcludeFolderList.Text = "Done Editing"
+            End If
+        End Sub
+
+        Private Sub btnSaveList4_Click(sender As Object, e As EventArgs) Handles btnSaveList4.Click
+            SaveExcludedFolderNames()
+        End Sub
+
+        Private Sub btnReloadList4_Click(sender As Object, e As EventArgs) Handles btnReloadList4.Click
+            LoadExcludedFolderNames()
+        End Sub
     End Class
 End Namespace

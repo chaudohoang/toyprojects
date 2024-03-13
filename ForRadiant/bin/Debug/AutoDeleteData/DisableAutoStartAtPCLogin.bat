@@ -25,10 +25,6 @@ if '%errorlevel%' NEQ '0' (
 
 @setlocal enableextensions
 
-set sourceFolder="%~dp0TabletSetting"
-set destinationFolder="C:\Radiant Vision Systems Data\TrueTest\UserData"
-xcopy /Y /S /E %sourceFolder% %destinationFolder%
-
 echo Deleting startup task...
 schtasks /delete /TN autodelete /F
 echo Done.
@@ -43,8 +39,6 @@ echo Done modifying settingAutoDeleteData.txt.
 
 echo Killing previous instances of AutoDeleteData.exe...
 taskkill /f /im AutoDeleteData.exe >nul 2>nul
-echo Launching AutoDeleteData.exe...
-start "" "%~dp0AutoDeleteData.exe"
 
 for /l %%i in (3,-1,1) do (
     echo Closing in %%i seconds...

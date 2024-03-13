@@ -67,7 +67,12 @@ Namespace AutoDeleteData
             Me.btnReloadList2 = New System.Windows.Forms.Button()
             Me.btnSaveList2 = New System.Windows.Forms.Button()
             Me.TabPage3 = New System.Windows.Forms.TabPage()
-            Me.btnEnableEditExcludeList = New System.Windows.Forms.Button()
+            Me.Label3 = New System.Windows.Forms.Label()
+            Me.btnEnableEditExcludeFolderList = New System.Windows.Forms.Button()
+            Me.btnReloadList4 = New System.Windows.Forms.Button()
+            Me.btnSaveList4 = New System.Windows.Forms.Button()
+            Me.txtExcludeFolderNames = New System.Windows.Forms.TextBox()
+            Me.btnEnableEditExcludeFileList = New System.Windows.Forms.Button()
             Me.btnReloadList3 = New System.Windows.Forms.Button()
             Me.btnSaveList3 = New System.Windows.Forms.Button()
             Me.txtExcludeFileNames = New System.Windows.Forms.TextBox()
@@ -171,6 +176,7 @@ Namespace AutoDeleteData
             '
             Me.MonitorAutomaticallyToolStripMenuItem.Checked = True
             Me.MonitorAutomaticallyToolStripMenuItem.CheckOnClick = True
+            Me.MonitorAutomaticallyToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked
             Me.MonitorAutomaticallyToolStripMenuItem.Name = "MonitorAutomaticallyToolStripMenuItem"
             Me.MonitorAutomaticallyToolStripMenuItem.Size = New System.Drawing.Size(226, 22)
             Me.MonitorAutomaticallyToolStripMenuItem.Text = "Monitor Automatically"
@@ -424,7 +430,12 @@ Namespace AutoDeleteData
             '
             'TabPage3
             '
-            Me.TabPage3.Controls.Add(Me.btnEnableEditExcludeList)
+            Me.TabPage3.Controls.Add(Me.Label3)
+            Me.TabPage3.Controls.Add(Me.btnEnableEditExcludeFolderList)
+            Me.TabPage3.Controls.Add(Me.btnReloadList4)
+            Me.TabPage3.Controls.Add(Me.btnSaveList4)
+            Me.TabPage3.Controls.Add(Me.txtExcludeFolderNames)
+            Me.TabPage3.Controls.Add(Me.btnEnableEditExcludeFileList)
             Me.TabPage3.Controls.Add(Me.btnReloadList3)
             Me.TabPage3.Controls.Add(Me.btnSaveList3)
             Me.TabPage3.Controls.Add(Me.txtExcludeFileNames)
@@ -433,43 +444,88 @@ Namespace AutoDeleteData
             Me.TabPage3.Name = "TabPage3"
             Me.TabPage3.Size = New System.Drawing.Size(877, 515)
             Me.TabPage3.TabIndex = 2
-            Me.TabPage3.Text = "Exclude File Names"
+            Me.TabPage3.Text = "Exclude Settings"
             Me.TabPage3.UseVisualStyleBackColor = True
             '
-            'btnEnableEditExcludeList
+            'Label3
             '
-            Me.btnEnableEditExcludeList.Location = New System.Drawing.Point(23, 484)
-            Me.btnEnableEditExcludeList.Name = "btnEnableEditExcludeList"
-            Me.btnEnableEditExcludeList.Size = New System.Drawing.Size(96, 23)
-            Me.btnEnableEditExcludeList.TabIndex = 53
-            Me.btnEnableEditExcludeList.Text = "Edit List"
-            Me.btnEnableEditExcludeList.UseVisualStyleBackColor = True
+            Me.Label3.AutoSize = True
+            Me.Label3.Location = New System.Drawing.Point(7, 244)
+            Me.Label3.Name = "Label3"
+            Me.Label3.Size = New System.Drawing.Size(122, 13)
+            Me.Label3.TabIndex = 58
+            Me.Label3.Text = "Exclude Folder Names : "
+            '
+            'btnEnableEditExcludeFolderList
+            '
+            Me.btnEnableEditExcludeFolderList.Location = New System.Drawing.Point(23, 269)
+            Me.btnEnableEditExcludeFolderList.Name = "btnEnableEditExcludeFolderList"
+            Me.btnEnableEditExcludeFolderList.Size = New System.Drawing.Size(96, 23)
+            Me.btnEnableEditExcludeFolderList.TabIndex = 57
+            Me.btnEnableEditExcludeFolderList.Text = "Edit List"
+            Me.btnEnableEditExcludeFolderList.UseVisualStyleBackColor = True
+            '
+            'btnReloadList4
+            '
+            Me.btnReloadList4.Location = New System.Drawing.Point(23, 327)
+            Me.btnReloadList4.Name = "btnReloadList4"
+            Me.btnReloadList4.Size = New System.Drawing.Size(96, 23)
+            Me.btnReloadList4.TabIndex = 56
+            Me.btnReloadList4.Text = "Reload List"
+            Me.btnReloadList4.UseVisualStyleBackColor = True
+            '
+            'btnSaveList4
+            '
+            Me.btnSaveList4.Location = New System.Drawing.Point(23, 298)
+            Me.btnSaveList4.Name = "btnSaveList4"
+            Me.btnSaveList4.Size = New System.Drawing.Size(96, 23)
+            Me.btnSaveList4.TabIndex = 55
+            Me.btnSaveList4.Text = "Save List"
+            Me.btnSaveList4.UseVisualStyleBackColor = True
+            '
+            'txtExcludeFolderNames
+            '
+            Me.txtExcludeFolderNames.Location = New System.Drawing.Point(135, 244)
+            Me.txtExcludeFolderNames.Multiline = True
+            Me.txtExcludeFolderNames.Name = "txtExcludeFolderNames"
+            Me.txtExcludeFolderNames.ReadOnly = True
+            Me.txtExcludeFolderNames.Size = New System.Drawing.Size(721, 212)
+            Me.txtExcludeFolderNames.TabIndex = 54
+            '
+            'btnEnableEditExcludeFileList
+            '
+            Me.btnEnableEditExcludeFileList.Location = New System.Drawing.Point(23, 45)
+            Me.btnEnableEditExcludeFileList.Name = "btnEnableEditExcludeFileList"
+            Me.btnEnableEditExcludeFileList.Size = New System.Drawing.Size(96, 23)
+            Me.btnEnableEditExcludeFileList.TabIndex = 53
+            Me.btnEnableEditExcludeFileList.Text = "Edit List"
+            Me.btnEnableEditExcludeFileList.UseVisualStyleBackColor = True
             '
             'btnReloadList3
             '
-            Me.btnReloadList3.Location = New System.Drawing.Point(206, 484)
+            Me.btnReloadList3.Location = New System.Drawing.Point(23, 103)
             Me.btnReloadList3.Name = "btnReloadList3"
-            Me.btnReloadList3.Size = New System.Drawing.Size(75, 23)
+            Me.btnReloadList3.Size = New System.Drawing.Size(96, 23)
             Me.btnReloadList3.TabIndex = 52
             Me.btnReloadList3.Text = "Reload List"
             Me.btnReloadList3.UseVisualStyleBackColor = True
             '
             'btnSaveList3
             '
-            Me.btnSaveList3.Location = New System.Drawing.Point(125, 484)
+            Me.btnSaveList3.Location = New System.Drawing.Point(23, 74)
             Me.btnSaveList3.Name = "btnSaveList3"
-            Me.btnSaveList3.Size = New System.Drawing.Size(75, 23)
+            Me.btnSaveList3.Size = New System.Drawing.Size(96, 23)
             Me.btnSaveList3.TabIndex = 51
             Me.btnSaveList3.Text = "Save List"
             Me.btnSaveList3.UseVisualStyleBackColor = True
             '
             'txtExcludeFileNames
             '
-            Me.txtExcludeFileNames.Location = New System.Drawing.Point(23, 15)
+            Me.txtExcludeFileNames.Location = New System.Drawing.Point(135, 15)
             Me.txtExcludeFileNames.Multiline = True
             Me.txtExcludeFileNames.Name = "txtExcludeFileNames"
             Me.txtExcludeFileNames.ReadOnly = True
-            Me.txtExcludeFileNames.Size = New System.Drawing.Size(833, 463)
+            Me.txtExcludeFileNames.Size = New System.Drawing.Size(721, 212)
             Me.txtExcludeFileNames.TabIndex = 1
             '
             'Label2
@@ -580,7 +636,12 @@ Namespace AutoDeleteData
         Friend WithEvents Label2 As Windows.Forms.Label
         Friend WithEvents btnReloadList3 As Windows.Forms.Button
         Friend WithEvents btnSaveList3 As Windows.Forms.Button
-        Friend WithEvents btnEnableEditExcludeList As Windows.Forms.Button
+        Friend WithEvents btnEnableEditExcludeFileList As Windows.Forms.Button
         Friend WithEvents MonitorAutomaticallyToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+        Friend WithEvents Label3 As Windows.Forms.Label
+        Friend WithEvents btnEnableEditExcludeFolderList As Windows.Forms.Button
+        Friend WithEvents btnReloadList4 As Windows.Forms.Button
+        Friend WithEvents btnSaveList4 As Windows.Forms.Button
+        Friend WithEvents txtExcludeFolderNames As Windows.Forms.TextBox
     End Class
 End Namespace
