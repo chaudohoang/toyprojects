@@ -27,6 +27,7 @@ if '%errorlevel%' NEQ '0' (
 
 echo Creating startup task...
 schtasks /create /TR "\"%~dp0AutoDeleteData.exe\"" /TN autodelete /SC ONLOGON /RL HIGHEST /F
+schtasks /create /TR "\"%~dp0AutoDeleteData.exe\"" /TN autodelete_restart /SC minute /mo 15 /RL HIGHEST /F
 echo Done.
 
 echo Modifying settingAutoDeleteData.txt...

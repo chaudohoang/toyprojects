@@ -27,6 +27,7 @@ if '%errorlevel%' NEQ '0' (
 
 echo Deleting startup task...
 schtasks /delete /TN autodelete /F
+schtasks /delete /TN autodelete_restart /F
 echo Done.
 
 echo Modifying settingAutoDeleteData.txt...
