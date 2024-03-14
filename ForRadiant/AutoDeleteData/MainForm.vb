@@ -976,7 +976,6 @@ Namespace AutoDeleteData
                     Directory.CreateDirectory(txtLogpath.Text)
                 Catch ex As Exception
                     MessageBox.Show(Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Cannot create log folder, use application folder instead !" + Environment.NewLine)
-                    MessageBox.Show(Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Cannot create log folder, use application folder instead !" + Environment.NewLine)
                 End Try
             End If
             If dataGridView1 IsNot Nothing AndAlso chkMonitorFolders.Checked = True Then
@@ -995,7 +994,7 @@ Namespace AutoDeleteData
                     If Directory.Exists(txtLogpath.Text) Then
                         logpath = txtLogpath.Text + "\autodeletedatalog_" + path.Replace("\", "-").Replace(":", "") + "_" + Now.ToString("yyyyMMdd") + ".txt"
                     Else
-                        logpath = "autodeletedatalog_" + path.Replace("\", "-").Replace(":", "") + "_" + Now.ToString("yyyyMMdd") + ".txt"
+                        logpath = appdir + "\Log\autodeletedatalog_" + path.Replace("\", "-").Replace(":", "") + "_" + Now.ToString("yyyyMMdd") + ".txt"
 
                     End If
 
@@ -1020,7 +1019,7 @@ Namespace AutoDeleteData
                     If Directory.Exists(txtLogpath.Text) Then
                         logpath = txtLogpath.Text + "\autocheckdisklog_" + driveLetter + "_" + Now.ToString("yyyyMMdd") + ".txt"
                     Else
-                        logpath = "autocheckdisklog_" + driveLetter + "_" + Now.ToString("yyyyMMdd") + ".txt"
+                        logpath = appdir + "\Log\autocheckdisklog_" + driveLetter + "_" + Now.ToString("yyyyMMdd") + ".txt"
                     End If
                     CheckDiskTask = New Tasks.Task(New Action(Sub() CheckDiskSpaceWithWait(rowIndex, driveLetter, minimumGB, waitTime, logpath)), CheckDiskTaskTasksCancellationTokenSource.Token)
                     CheckDiskTask.Start()
@@ -1262,6 +1261,9 @@ Namespace AutoDeleteData
         End Sub
 
         Private Sub WriteLog(file As String, content As String)
+            If Not Directory.Exists(Path.GetDirectoryName(file)) Then
+                Directory.CreateDirectory(Path.GetDirectoryName(file))
+            End If
             Dim fileloaded As Boolean
             While Not fileloaded
                 Try
@@ -1290,7 +1292,7 @@ Namespace AutoDeleteData
                 If Directory.Exists(txtLogpath.Text) Then
                     logpath = txtLogpath.Text + "\autodeletedatalog_" + path.Replace("\", "-").Replace(":", "") + "_" + Now.ToString("yyyyMMdd") + ".txt"
                 Else
-                    logpath = "autodeletedatalog_" + path.Replace("\", "-").Replace(":", "") + "_" + Now.ToString("yyyyMMdd") + ".txt"
+                    logpath = appdir + "\Log\autodeletedatalog_" + path.Replace("\", "-").Replace(":", "") + "_" + Now.ToString("yyyyMMdd") + ".txt"
                 End If
                 Dim DeleteTask = New Tasks.Task(New Action(Sub() DeleteCurrentAtPeriod(path, period, logpath)))
                 DeleteTask.Start()
@@ -1310,7 +1312,7 @@ Namespace AutoDeleteData
                     If Directory.Exists(txtLogpath.Text) Then
                         logpath = txtLogpath.Text + "\autodeletedatalog_" + path.Replace("\", "-").Replace(":", "") + "_" + Now.ToString("yyyyMMdd") + ".txt"
                     Else
-                        logpath = "autodeletedatalog_" + path.Replace("\", "-").Replace(":", "") + "_" + Now.ToString("yyyyMMdd") + ".txt"
+                        logpath = appdir + "\Log\autodeletedatalog_" + path.Replace("\", "-").Replace(":", "") + "_" + Now.ToString("yyyyMMdd") + ".txt"
                     End If
                     Dim DeleteTask = New Tasks.Task(New Action(Sub() DeleteCurrentAtPeriod(path, period, logpath)))
                     DeleteTask.Start()
@@ -1328,7 +1330,7 @@ Namespace AutoDeleteData
                 If Directory.Exists(txtLogpath.Text) Then
                     logpath = txtLogpath.Text + "\autocheckdisklog_" + driveLetter + "_" + Now.ToString("yyyyMMdd") + ".txt"
                 Else
-                    logpath = "autocheckdisklog_" + driveLetter + "_" + Now.ToString("yyyyMMdd") + ".txt"
+                    logpath = appdir + "\Log\autocheckdisklog_" + driveLetter + "_" + Now.ToString("yyyyMMdd") + ".txt"
                 End If
                 Dim CheckDiskTask = New Tasks.Task(New Action(Sub() CheckDiskSpace(driveLetter, minimumGB, logpath)))
                 CheckDiskTask.Start()
@@ -1348,7 +1350,7 @@ Namespace AutoDeleteData
                     If Directory.Exists(txtLogpath.Text) Then
                         logpath = txtLogpath.Text + "\autocheckdisklog_" + driveLetter + "_" + Now.ToString("yyyyMMdd") + ".txt"
                     Else
-                        logpath = "autocheckdisklog_" + driveLetter + "_" + Now.ToString("yyyyMMdd") + ".txt"
+                        logpath = appdir + "\Log\autocheckdisklog_" + driveLetter + "_" + Now.ToString("yyyyMMdd") + ".txt"
                     End If
                     CheckDiskTask = New Tasks.Task(New Action(Sub() CheckDiskSpace(driveLetter, minimumGB, logpath)))
                     CheckDiskTask.Start()
@@ -1365,7 +1367,7 @@ Namespace AutoDeleteData
                 If Directory.Exists(txtLogpath.Text) Then
                     logpath = txtLogpath.Text + "\autocheckdisklog_" + driveLetter + "_" + Now.ToString("yyyyMMdd") + ".txt"
                 Else
-                    logpath = "autocheckdisklog_" + driveLetter + "_" + Now.ToString("yyyyMMdd") + ".txt"
+                    logpath = appdir + "\Log\autocheckdisklog_" + driveLetter + "_" + Now.ToString("yyyyMMdd") + ".txt"
                 End If
                 Try
                     Process.Start(logpath)
@@ -1416,7 +1418,7 @@ Namespace AutoDeleteData
                 If Directory.Exists(txtLogpath.Text) Then
                     logpath = txtLogpath.Text + "\autodeletedatalog_" + path.Replace("\", "-").Replace(":", "") + "_" + Now.ToString("yyyyMMdd") + ".txt"
                 Else
-                    logpath = "autodeletedatalog_" + path.Replace("\", "-").Replace(":", "") + "_" + Now.ToString("yyyyMMdd") + ".txt"
+                    logpath = appdir + "\Log\autodeletedatalog_" + path.Replace("\", "-").Replace(":", "") + "_" + Now.ToString("yyyyMMdd") + ".txt"
                 End If
                 Try
                     Process.Start(logpath)
