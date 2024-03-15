@@ -1161,7 +1161,7 @@ Namespace AutoDeleteData
             If CheckDiskTaskTasksCancellationTokenSource IsNot Nothing Then
                 CheckDiskTaskTasksCancellationTokenSource.Cancel()
             End If
-            If CheckDiskTaskTasksCancellationTokenSource IsNot Nothing Then
+            If CheckDiskTask IsNot Nothing Then
                 If CheckDiskTask.Status <> TaskStatus.RanToCompletion Then
                     'Wait a little longer
                     Dim sw As New Stopwatch
