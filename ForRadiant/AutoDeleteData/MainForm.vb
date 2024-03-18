@@ -664,79 +664,73 @@ Namespace AutoDeleteData
 
         Sub DeleteOldestFilesAndSubfolders(ByVal foldersToDelete As List(Of String), ByVal targetSizeGB As Double, ByVal logpath As String)
 
-            Try
-                WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Start Deleting." + Environment.NewLine)
+            Dim excludedFolderNames As New List(Of String)(txtExcludeFolderNames.Text.Split({Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries))
+            Dim excludedFilesNames As New List(Of String)(txtExcludeFileNames.Text.Split({Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries))
 
-                Dim excludedFolderNames As New List(Of String)(txtExcludeFolderNames.Text.Split({Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries))
-                Dim excludedFilesNames As New List(Of String)(txtExcludeFileNames.Text.Split({Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries))
+            Dim allFiles As New List(Of FileSystemInfo)
+            Dim emptiedFolders As New List(Of DirectoryInfo)
 
-                Dim allFiles As New List(Of FileSystemInfo)
-                Dim emptiedFolders As New List(Of DirectoryInfo)
+            ' Collect files and folders from all specified folders
+            For Each folderPath As String In foldersToDelete
+                Try
+                    Dim directory As New DirectoryInfo(folderPath)
+                    If directory.Exists Then
+                        allFiles.AddRange(GetAllFilesAndFolders(directory))
+                    Else
+                        WriteLog(logpath, $"Directory not found: {folderPath}")
+                    End If
+                Catch ex As Exception
+                    ' Log the exception or handle it as needed
+                    WriteLog(logpath, $"Error processing folder {folderPath}: {ex.Message}")
+                End Try
+            Next
 
-                ' Collect files and folders from all specified folders
-                For Each folderPath As String In foldersToDelete
-                    Try
-                        Dim directory As New DirectoryInfo(folderPath)
-                        If directory.Exists Then
-                            allFiles.AddRange(GetAllFilesAndFolders(directory))
-                        Else
-                            WriteLog(logpath, $"Directory not found: {folderPath}")
+            ' Sort files and folders by creation time in ascending order (oldest first)
+            allFiles.Sort(Function(x, y) GetCreationTime(x).CompareTo(GetCreationTime(y)))
+
+            Dim driveRoot As String = Path.GetPathRoot(foldersToDelete(0))
+            Dim driveInfo As DriveInfo = New DriveInfo(driveRoot)
+            Dim freeSpaceGB As Double = driveInfo.AvailableFreeSpace / 1024 / 1024 / 1024 ' Convert bytes to GB
+
+            If freeSpaceGB >= targetSizeGB Then
+                WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Free space on disk already meets or exceeds the target size." + Environment.NewLine)
+                Return
+            End If
+
+            ' Delete files and track emptied folders
+            For Each item As FileSystemInfo In allFiles
+                Try
+                    If TypeOf item Is FileInfo Then
+                        Dim file As FileInfo = DirectCast(item, FileInfo)
+                        If ShouldStopDeleting(file, excludedFolderNames, excludedFilesNames) Then
+                            WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"File {file.FullName} matches one of the exclude criteria. Stopping deletion." + Environment.NewLine)
+                            Continue For
                         End If
-                    Catch ex As Exception
-                        ' Log the exception or handle it as needed
-                        WriteLog(logpath, $"Error processing folder {folderPath}: {ex.Message}")
-                    End Try
-                Next
-
-                ' Sort files and folders by creation time in ascending order (oldest first)
-                allFiles.Sort(Function(x, y) GetCreationTime(x).CompareTo(GetCreationTime(y)))
-
-                Dim driveRoot As String = Path.GetPathRoot(foldersToDelete(0))
-                Dim driveInfo As DriveInfo = New DriveInfo(driveRoot)
-                Dim freeSpaceGB As Double = driveInfo.AvailableFreeSpace / 1024 / 1024 / 1024 ' Convert bytes to GB
-
-                If freeSpaceGB >= targetSizeGB Then
-                    WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Free space on disk already meets or exceeds the target size." + Environment.NewLine)
-                    Return
-                End If
-
-                ' Delete files and track emptied folders
-                For Each item As FileSystemInfo In allFiles
-                    Try
-                        If TypeOf item Is FileInfo Then
-                            Dim file As FileInfo = DirectCast(item, FileInfo)
-                            If ShouldStopDeleting(file, excludedFolderNames, excludedFilesNames) Then
-                                WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"File {file.FullName} matches one of the exclude criteria. Stopping deletion." + Environment.NewLine)
-                                Continue For
-                            End If
-                            file.Delete()
-                            WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Deleted file: {file.FullName}" + Environment.NewLine)
-                        ElseIf TypeOf item Is DirectoryInfo Then
-                            Dim directory As DirectoryInfo = DirectCast(item, DirectoryInfo)
-                            If DirectoryIsEmpty(directory) AndAlso Not IsFolderInPathExcluded(directory, excludedFolderNames) Then
-                                directory.Delete()
-                                emptiedFolders.Add(directory) ' Track emptied folders
-                                WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Deleted empty folder: {directory.FullName}" + Environment.NewLine)
-                            End If
+                        file.Delete()
+                        WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Deleted file: {file.FullName}" + Environment.NewLine)
+                    ElseIf TypeOf item Is DirectoryInfo Then
+                        Dim directory As DirectoryInfo = DirectCast(item, DirectoryInfo)
+                        If DirectoryIsEmpty(directory) AndAlso Not IsFolderInPathExcluded(directory, excludedFolderNames) Then
+                            directory.Delete()
+                            emptiedFolders.Add(directory) ' Track emptied folders
+                            WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Deleted empty folder: {directory.FullName}" + Environment.NewLine)
                         End If
+                    End If
 
-                        freeSpaceGB = New DriveInfo(driveRoot).AvailableFreeSpace / 1024 / 1024 / 1024
-                        If freeSpaceGB >= targetSizeGB Then
-                            WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Target available size reached. Stopping deletion." + Environment.NewLine)
-                            Return
-                        End If
-                    Catch ex As Exception
-                        WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Failed to delete: {item.FullName}. {ex.Message}" + Environment.NewLine)
-                    End Try
-                Next
+                    freeSpaceGB = New DriveInfo(driveRoot).AvailableFreeSpace / 1024 / 1024 / 1024
+                    If freeSpaceGB >= targetSizeGB Then
+                        WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Target available size reached. Stopping deletion." + Environment.NewLine)
+                        Return
+                    End If
+                Catch ex As Exception
+                    WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Failed to delete: {item.FullName}. {ex.Message}" + Environment.NewLine)
+                End Try
+            Next
 
-                ' Delete emptied folders and their empty parent folders recursively
-                For Each folder As DirectoryInfo In emptiedFolders
-                    DeleteEmptyParentFolders(folder, excludedFolderNames, foldersToDelete, logpath)
-                Next
-            Catch ex As Exception
-                WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Exception : {ex.Message}" + Environment.NewLine)
-            End Try
+            ' Delete emptied folders and their empty parent folders recursively
+            For Each folder As DirectoryInfo In emptiedFolders
+                DeleteEmptyParentFolders(folder, excludedFolderNames, foldersToDelete, logpath)
+            Next
 
         End Sub
 
