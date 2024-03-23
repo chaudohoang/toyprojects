@@ -1,0 +1,6 @@
+RecheckLogFileTimeTextBox:300
+Ch3Ch4FinishActionBox:Run Ch1 Ch2
+Ch1Ch2FinishActionBox:Run Ch3 Ch4
+ActionDelayTextBox:15
+LogStringTextBox:Inspection Complete
+LogFolderTextBox:C:\Users\dh.chau\Downloads\Compressed\GOOIL LOG

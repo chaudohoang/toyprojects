@@ -41,6 +41,12 @@
             this.ViewlogButton = new System.Windows.Forms.Button();
             this.ClearlogButton = new System.Windows.Forms.Button();
             this.lblLastAction = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.Ch1Ch2FinishActionBox = new System.Windows.Forms.ComboBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.Ch3Ch4FinishActionBox = new System.Windows.Forms.ComboBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.RecheckLogFileTimeTextBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // lblStatus
@@ -110,7 +116,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 118);
+            this.label2.Location = new System.Drawing.Point(15, 216);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(81, 13);
             this.label2.TabIndex = 15;
@@ -118,7 +124,7 @@
             // 
             // ActionDelayTextBox
             // 
-            this.ActionDelayTextBox.Location = new System.Drawing.Point(99, 115);
+            this.ActionDelayTextBox.Location = new System.Drawing.Point(104, 213);
             this.ActionDelayTextBox.Name = "ActionDelayTextBox";
             this.ActionDelayTextBox.Size = new System.Drawing.Size(475, 20);
             this.ActionDelayTextBox.TabIndex = 14;
@@ -147,17 +153,84 @@
             // lblLastAction
             // 
             this.lblLastAction.AutoSize = true;
-            this.lblLastAction.Location = new System.Drawing.Point(18, 157);
+            this.lblLastAction.Location = new System.Drawing.Point(17, 257);
             this.lblLastAction.Name = "lblLastAction";
             this.lblLastAction.Size = new System.Drawing.Size(69, 13);
             this.lblLastAction.TabIndex = 18;
             this.lblLastAction.Text = "Last Action : ";
             // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(21, 151);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(120, 13);
+            this.label4.TabIndex = 19;
+            this.label4.Text = "Ch1 Ch2 Finish Action : ";
+            // 
+            // Ch1Ch2FinishActionBox
+            // 
+            this.Ch1Ch2FinishActionBox.FormattingEnabled = true;
+            this.Ch1Ch2FinishActionBox.Items.AddRange(new object[] {
+            "Run Ch1 Ch2",
+            "Run Ch3 Ch4",
+            "Run Any Ch"});
+            this.Ch1Ch2FinishActionBox.Location = new System.Drawing.Point(147, 148);
+            this.Ch1Ch2FinishActionBox.Name = "Ch1Ch2FinishActionBox";
+            this.Ch1Ch2FinishActionBox.Size = new System.Drawing.Size(430, 21);
+            this.Ch1Ch2FinishActionBox.TabIndex = 20;
+            this.Ch1Ch2FinishActionBox.Text = "Run Ch3 Ch4";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(21, 182);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(120, 13);
+            this.label5.TabIndex = 21;
+            this.label5.Text = "Ch3 Ch4 Finish Action : ";
+            // 
+            // Ch3Ch4FinishActionBox
+            // 
+            this.Ch3Ch4FinishActionBox.FormattingEnabled = true;
+            this.Ch3Ch4FinishActionBox.Items.AddRange(new object[] {
+            "Run Ch1 Ch2",
+            "Run Ch3 Ch4",
+            "Run Any Ch"});
+            this.Ch3Ch4FinishActionBox.Location = new System.Drawing.Point(147, 179);
+            this.Ch3Ch4FinishActionBox.Name = "Ch3Ch4FinishActionBox";
+            this.Ch3Ch4FinishActionBox.Size = new System.Drawing.Size(430, 21);
+            this.Ch3Ch4FinishActionBox.TabIndex = 22;
+            this.Ch3Ch4FinishActionBox.Text = "Run Ch1 Ch2";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(21, 119);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(148, 13);
+            this.label6.TabIndex = 23;
+            this.label6.Text = "Recheck Log Files Interval (s)";
+            // 
+            // RecheckLogFileTimeTextBox
+            // 
+            this.RecheckLogFileTimeTextBox.Location = new System.Drawing.Point(177, 116);
+            this.RecheckLogFileTimeTextBox.Name = "RecheckLogFileTimeTextBox";
+            this.RecheckLogFileTimeTextBox.Size = new System.Drawing.Size(397, 20);
+            this.RecheckLogFileTimeTextBox.TabIndex = 24;
+            this.RecheckLogFileTimeTextBox.Text = "300";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(588, 203);
+            this.ClientSize = new System.Drawing.Size(588, 315);
+            this.Controls.Add(this.RecheckLogFileTimeTextBox);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.Ch3Ch4FinishActionBox);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.Ch1Ch2FinishActionBox);
+            this.Controls.Add(this.label4);
             this.Controls.Add(this.lblLastAction);
             this.Controls.Add(this.ClearlogButton);
             this.Controls.Add(this.ViewlogButton);
@@ -177,6 +250,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "AutoClickOnLog";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -196,6 +270,12 @@
         private System.Windows.Forms.Button ViewlogButton;
         private System.Windows.Forms.Button ClearlogButton;
         private System.Windows.Forms.Label lblLastAction;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.ComboBox Ch1Ch2FinishActionBox;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.ComboBox Ch3Ch4FinishActionBox;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.TextBox RecheckLogFileTimeTextBox;
     }
 }
 
