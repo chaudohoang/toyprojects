@@ -264,6 +264,9 @@ Public Class MainForm
 							If FLXmlNode1.ChildNodes(FLChildIndex).ChildNodes(FLGrandChildIndex).Name = "ElapsedMilliseconds" Then
 								FLXmlNode1.ChildNodes(FLChildIndex).RemoveChild(FLXmlNode1.ChildNodes(FLChildIndex).ChildNodes(FLGrandChildIndex))
 							End If
+							If FLXmlNode2.ChildNodes(FLChildIndex).SelectSingleNode(FLXmlNode1.ChildNodes(FLChildIndex).ChildNodes(FLGrandChildIndex).Name) Is Nothing Then
+								FLXmlNode1.ChildNodes(FLChildIndex).RemoveChild(FLXmlNode1.ChildNodes(FLChildIndex).ChildNodes(FLGrandChildIndex))
+							End If
 						Next
 					Next
 
@@ -271,6 +274,9 @@ Public Class MainForm
 						If FLXmlNode2.ChildNodes(FLChildIndex).SelectSingleNode("Selected").InnerText.ToLower = "false" Then Continue For
 						For FLGrandChildIndex = FLXmlNode2.ChildNodes(FLChildIndex).ChildNodes.Count - 1 To 0 Step -1
 							If FLXmlNode2.ChildNodes(FLChildIndex).ChildNodes(FLGrandChildIndex).Name = "ElapsedMilliseconds" Then
+								FLXmlNode2.ChildNodes(FLChildIndex).RemoveChild(FLXmlNode2.ChildNodes(FLChildIndex).ChildNodes(FLGrandChildIndex))
+							End If
+							If FLXmlNode1.ChildNodes(FLChildIndex).SelectSingleNode(FLXmlNode2.ChildNodes(FLChildIndex).ChildNodes(FLGrandChildIndex).Name) Is Nothing Then
 								FLXmlNode2.ChildNodes(FLChildIndex).RemoveChild(FLXmlNode2.ChildNodes(FLChildIndex).ChildNodes(FLGrandChildIndex))
 							End If
 						Next
