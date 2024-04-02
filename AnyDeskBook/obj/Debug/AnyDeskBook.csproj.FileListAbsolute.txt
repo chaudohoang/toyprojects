@@ -1,0 +1,10 @@
+D:\Github\toyprojects\bin\Debug\AnyDeskBook\AnyDeskBook.exe.config
+D:\Github\toyprojects\bin\Debug\AnyDeskBook\AnyDeskBook.exe
+D:\Github\toyprojects\bin\Debug\AnyDeskBook\AnyDeskBook.pdb
+D:\Github\toyprojects\AnyDeskBook\obj\Debug\AnyDeskBook.csproj.AssemblyReference.cache
+D:\Github\toyprojects\AnyDeskBook\obj\Debug\AnyDeskBook.Form1.resources
+D:\Github\toyprojects\AnyDeskBook\obj\Debug\AnyDeskBook.Properties.Resources.resources
+D:\Github\toyprojects\AnyDeskBook\obj\Debug\AnyDeskBook.csproj.GenerateResource.cache
+D:\Github\toyprojects\AnyDeskBook\obj\Debug\AnyDeskBook.csproj.CoreCompileInputs.cache
+D:\Github\toyprojects\AnyDeskBook\obj\Debug\AnyDeskBook.exe
+D:\Github\toyprojects\AnyDeskBook\obj\Debug\AnyDeskBook.pdb
