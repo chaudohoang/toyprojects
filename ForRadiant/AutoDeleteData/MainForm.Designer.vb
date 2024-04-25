@@ -79,6 +79,14 @@ Namespace AutoDeleteData
             Me.Label2 = New System.Windows.Forms.Label()
             Me.Label1 = New System.Windows.Forms.Label()
             Me.txtLogpath = New System.Windows.Forms.TextBox()
+            Me.txtFileLastCreationTimeToSkip = New System.Windows.Forms.TextBox()
+            Me.txtFolderLastCreationTimeToSkip = New System.Windows.Forms.TextBox()
+            Me.Label6 = New System.Windows.Forms.Label()
+            Me.Label7 = New System.Windows.Forms.Label()
+            Me.chkSkipFileLastCreationTime = New System.Windows.Forms.CheckBox()
+            Me.chkSkipFolderLastCreationTime = New System.Windows.Forms.CheckBox()
+            Me.btnSaveTimeCreation = New System.Windows.Forms.Button()
+            Me.btnLoadTimeCreation = New System.Windows.Forms.Button()
             Me.contextMenuStrip1.SuspendLayout()
             Me.menuStrip1.SuspendLayout()
             CType(Me.dataGridView1, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -430,6 +438,14 @@ Namespace AutoDeleteData
             '
             'TabPage3
             '
+            Me.TabPage3.Controls.Add(Me.btnLoadTimeCreation)
+            Me.TabPage3.Controls.Add(Me.btnSaveTimeCreation)
+            Me.TabPage3.Controls.Add(Me.chkSkipFolderLastCreationTime)
+            Me.TabPage3.Controls.Add(Me.chkSkipFileLastCreationTime)
+            Me.TabPage3.Controls.Add(Me.Label7)
+            Me.TabPage3.Controls.Add(Me.Label6)
+            Me.TabPage3.Controls.Add(Me.txtFolderLastCreationTimeToSkip)
+            Me.TabPage3.Controls.Add(Me.txtFileLastCreationTimeToSkip)
             Me.TabPage3.Controls.Add(Me.Label3)
             Me.TabPage3.Controls.Add(Me.btnEnableEditExcludeFolderList)
             Me.TabPage3.Controls.Add(Me.btnReloadList4)
@@ -450,7 +466,7 @@ Namespace AutoDeleteData
             'Label3
             '
             Me.Label3.AutoSize = True
-            Me.Label3.Location = New System.Drawing.Point(7, 244)
+            Me.Label3.Location = New System.Drawing.Point(7, 293)
             Me.Label3.Name = "Label3"
             Me.Label3.Size = New System.Drawing.Size(122, 13)
             Me.Label3.TabIndex = 58
@@ -458,7 +474,7 @@ Namespace AutoDeleteData
             '
             'btnEnableEditExcludeFolderList
             '
-            Me.btnEnableEditExcludeFolderList.Location = New System.Drawing.Point(23, 269)
+            Me.btnEnableEditExcludeFolderList.Location = New System.Drawing.Point(23, 318)
             Me.btnEnableEditExcludeFolderList.Name = "btnEnableEditExcludeFolderList"
             Me.btnEnableEditExcludeFolderList.Size = New System.Drawing.Size(96, 23)
             Me.btnEnableEditExcludeFolderList.TabIndex = 57
@@ -467,7 +483,7 @@ Namespace AutoDeleteData
             '
             'btnReloadList4
             '
-            Me.btnReloadList4.Location = New System.Drawing.Point(23, 327)
+            Me.btnReloadList4.Location = New System.Drawing.Point(23, 376)
             Me.btnReloadList4.Name = "btnReloadList4"
             Me.btnReloadList4.Size = New System.Drawing.Size(96, 23)
             Me.btnReloadList4.TabIndex = 56
@@ -476,7 +492,7 @@ Namespace AutoDeleteData
             '
             'btnSaveList4
             '
-            Me.btnSaveList4.Location = New System.Drawing.Point(23, 298)
+            Me.btnSaveList4.Location = New System.Drawing.Point(23, 347)
             Me.btnSaveList4.Name = "btnSaveList4"
             Me.btnSaveList4.Size = New System.Drawing.Size(96, 23)
             Me.btnSaveList4.TabIndex = 55
@@ -485,7 +501,7 @@ Namespace AutoDeleteData
             '
             'txtExcludeFolderNames
             '
-            Me.txtExcludeFolderNames.Location = New System.Drawing.Point(135, 244)
+            Me.txtExcludeFolderNames.Location = New System.Drawing.Point(135, 293)
             Me.txtExcludeFolderNames.Multiline = True
             Me.txtExcludeFolderNames.Name = "txtExcludeFolderNames"
             Me.txtExcludeFolderNames.ReadOnly = True
@@ -495,7 +511,7 @@ Namespace AutoDeleteData
             '
             'btnEnableEditExcludeFileList
             '
-            Me.btnEnableEditExcludeFileList.Location = New System.Drawing.Point(23, 45)
+            Me.btnEnableEditExcludeFileList.Location = New System.Drawing.Point(23, 94)
             Me.btnEnableEditExcludeFileList.Name = "btnEnableEditExcludeFileList"
             Me.btnEnableEditExcludeFileList.Size = New System.Drawing.Size(96, 23)
             Me.btnEnableEditExcludeFileList.TabIndex = 53
@@ -504,7 +520,7 @@ Namespace AutoDeleteData
             '
             'btnReloadList3
             '
-            Me.btnReloadList3.Location = New System.Drawing.Point(23, 103)
+            Me.btnReloadList3.Location = New System.Drawing.Point(23, 152)
             Me.btnReloadList3.Name = "btnReloadList3"
             Me.btnReloadList3.Size = New System.Drawing.Size(96, 23)
             Me.btnReloadList3.TabIndex = 52
@@ -513,7 +529,7 @@ Namespace AutoDeleteData
             '
             'btnSaveList3
             '
-            Me.btnSaveList3.Location = New System.Drawing.Point(23, 74)
+            Me.btnSaveList3.Location = New System.Drawing.Point(23, 123)
             Me.btnSaveList3.Name = "btnSaveList3"
             Me.btnSaveList3.Size = New System.Drawing.Size(96, 23)
             Me.btnSaveList3.TabIndex = 51
@@ -522,7 +538,7 @@ Namespace AutoDeleteData
             '
             'txtExcludeFileNames
             '
-            Me.txtExcludeFileNames.Location = New System.Drawing.Point(135, 15)
+            Me.txtExcludeFileNames.Location = New System.Drawing.Point(135, 64)
             Me.txtExcludeFileNames.Multiline = True
             Me.txtExcludeFileNames.Name = "txtExcludeFileNames"
             Me.txtExcludeFileNames.ReadOnly = True
@@ -533,7 +549,7 @@ Namespace AutoDeleteData
             'Label2
             '
             Me.Label2.AutoSize = True
-            Me.Label2.Location = New System.Drawing.Point(20, 18)
+            Me.Label2.Location = New System.Drawing.Point(20, 67)
             Me.Label2.Name = "Label2"
             Me.Label2.Size = New System.Drawing.Size(109, 13)
             Me.Label2.TabIndex = 0
@@ -555,6 +571,78 @@ Namespace AutoDeleteData
             Me.txtLogpath.Size = New System.Drawing.Size(274, 20)
             Me.txtLogpath.TabIndex = 53
             Me.txtLogpath.Text = "D:\Program\RVS\AutoDeleteDataLog"
+            '
+            'txtFileLastCreationTimeToSkip
+            '
+            Me.txtFileLastCreationTimeToSkip.Location = New System.Drawing.Point(207, 6)
+            Me.txtFileLastCreationTimeToSkip.Name = "txtFileLastCreationTimeToSkip"
+            Me.txtFileLastCreationTimeToSkip.Size = New System.Drawing.Size(75, 20)
+            Me.txtFileLastCreationTimeToSkip.TabIndex = 61
+            Me.txtFileLastCreationTimeToSkip.Text = "30"
+            '
+            'txtFolderLastCreationTimeToSkip
+            '
+            Me.txtFolderLastCreationTimeToSkip.Location = New System.Drawing.Point(207, 32)
+            Me.txtFolderLastCreationTimeToSkip.Name = "txtFolderLastCreationTimeToSkip"
+            Me.txtFolderLastCreationTimeToSkip.Size = New System.Drawing.Size(75, 20)
+            Me.txtFolderLastCreationTimeToSkip.TabIndex = 62
+            Me.txtFolderLastCreationTimeToSkip.Text = "30"
+            '
+            'Label6
+            '
+            Me.Label6.AutoSize = True
+            Me.Label6.Location = New System.Drawing.Point(288, 9)
+            Me.Label6.Name = "Label6"
+            Me.Label6.Size = New System.Drawing.Size(43, 13)
+            Me.Label6.TabIndex = 63
+            Me.Label6.Text = "minutes"
+            '
+            'Label7
+            '
+            Me.Label7.AutoSize = True
+            Me.Label7.Location = New System.Drawing.Point(288, 35)
+            Me.Label7.Name = "Label7"
+            Me.Label7.Size = New System.Drawing.Size(43, 13)
+            Me.Label7.TabIndex = 64
+            Me.Label7.Text = "minutes"
+            '
+            'chkSkipFileLastCreationTime
+            '
+            Me.chkSkipFileLastCreationTime.AutoSize = True
+            Me.chkSkipFileLastCreationTime.Location = New System.Drawing.Point(10, 8)
+            Me.chkSkipFileLastCreationTime.Name = "chkSkipFileLastCreationTime"
+            Me.chkSkipFileLastCreationTime.Size = New System.Drawing.Size(182, 17)
+            Me.chkSkipFileLastCreationTime.TabIndex = 65
+            Me.chkSkipFileLastCreationTime.Text = "Exclude File created in the last  : "
+            Me.chkSkipFileLastCreationTime.UseVisualStyleBackColor = True
+            '
+            'chkSkipFolderLastCreationTime
+            '
+            Me.chkSkipFolderLastCreationTime.AutoSize = True
+            Me.chkSkipFolderLastCreationTime.Location = New System.Drawing.Point(10, 34)
+            Me.chkSkipFolderLastCreationTime.Name = "chkSkipFolderLastCreationTime"
+            Me.chkSkipFolderLastCreationTime.Size = New System.Drawing.Size(192, 17)
+            Me.chkSkipFolderLastCreationTime.TabIndex = 66
+            Me.chkSkipFolderLastCreationTime.Text = "Exclude Folder created in the last : "
+            Me.chkSkipFolderLastCreationTime.UseVisualStyleBackColor = True
+            '
+            'btnSaveTimeCreation
+            '
+            Me.btnSaveTimeCreation.Location = New System.Drawing.Point(348, 6)
+            Me.btnSaveTimeCreation.Name = "btnSaveTimeCreation"
+            Me.btnSaveTimeCreation.Size = New System.Drawing.Size(119, 20)
+            Me.btnSaveTimeCreation.TabIndex = 67
+            Me.btnSaveTimeCreation.Text = "Save Creation Setting"
+            Me.btnSaveTimeCreation.UseVisualStyleBackColor = True
+            '
+            'btnLoadTimeCreation
+            '
+            Me.btnLoadTimeCreation.Location = New System.Drawing.Point(348, 32)
+            Me.btnLoadTimeCreation.Name = "btnLoadTimeCreation"
+            Me.btnLoadTimeCreation.Size = New System.Drawing.Size(119, 20)
+            Me.btnLoadTimeCreation.TabIndex = 68
+            Me.btnLoadTimeCreation.Text = "Load Creation Setting"
+            Me.btnLoadTimeCreation.UseVisualStyleBackColor = True
             '
             'MainForm
             '
@@ -645,5 +733,13 @@ Namespace AutoDeleteData
         Friend WithEvents btnReloadList4 As Windows.Forms.Button
         Friend WithEvents btnSaveList4 As Windows.Forms.Button
         Friend WithEvents txtExcludeFolderNames As Windows.Forms.TextBox
+        Friend WithEvents Label7 As Windows.Forms.Label
+        Friend WithEvents Label6 As Windows.Forms.Label
+        Friend WithEvents txtFolderLastCreationTimeToSkip As Windows.Forms.TextBox
+        Friend WithEvents txtFileLastCreationTimeToSkip As Windows.Forms.TextBox
+        Friend WithEvents chkSkipFolderLastCreationTime As Windows.Forms.CheckBox
+        Friend WithEvents chkSkipFileLastCreationTime As Windows.Forms.CheckBox
+        Friend WithEvents btnLoadTimeCreation As Windows.Forms.Button
+        Friend WithEvents btnSaveTimeCreation As Windows.Forms.Button
     End Class
 End Namespace

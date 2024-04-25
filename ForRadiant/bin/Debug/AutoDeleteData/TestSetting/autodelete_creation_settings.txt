@@ -1,0 +1,4 @@
+SkipFileLastCreationTime=true
+SkipFolderLastCreationTime=true
+FileLastCreationTime=30
+FolderLastCreationTime=30

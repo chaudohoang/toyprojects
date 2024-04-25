@@ -16,6 +16,7 @@ Imports System.Linq.Expressions
 Imports System.CodeDom
 Imports System.Text.RegularExpressions
 Imports System.Windows.Forms.VisualStyles.VisualStyleElement
+Imports System.Runtime.InteropServices.ComTypes
 
 Namespace AutoDeleteData
     Partial Public Class MainForm
@@ -92,6 +93,7 @@ Namespace AutoDeleteData
             LoadAllMonitorList()
             LoadExcludedFileNames()
             LoadExcludedFolderNames()
+            LoadCreationSetting()
             If MonitorAutomaticallyToolStripMenuItem.Checked = True Then
                 startMonitor()
             End If
@@ -610,19 +612,57 @@ Namespace AutoDeleteData
 
         End Sub
 
-        Function ShouldExcludeFile(fileName As String, exludeFileNameList As List(Of String)) As Boolean
-            Return exludeFileNameList.Any(Function(pattern) New Regex("^" & Regex.Escape(pattern).Replace("\*", ".*").Replace("\?", ".") & "$", RegexOptions.IgnoreCase).IsMatch(fileName))
+        Function ShouldExcludeFile(file As FileInfo, exludeFileNameList As List(Of String), logpath As String) As Boolean
+            ' Check if the checkbox is checked
+            If chkSkipFileLastCreationTime.Checked Then
+                ' Parse the value from txtFileLastCreationTimeToSkip
+                Dim minutesToSkip As Integer
+                If Integer.TryParse(txtFileLastCreationTimeToSkip.Text.Trim(), minutesToSkip) Then
+                    ' Check if the file's creation time is within the specified minutes range
+                    If (DateTime.Now - file.CreationTime).TotalMinutes <= minutesToSkip Then
+                        ' Log a message indicating that the file is excluded based on creation time
+                        WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"File '{file.Name}' is excluded based on creation time specified in txtFileLastCreationTimeToSkip." + Environment.NewLine)
+                        Return True
+                    End If
+                Else
+                    ' Log an error message if the minutes value is invalid
+                    WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Invalid minutes value specified in txtFileLastCreationTimeToSkip. Expected integer value." + Environment.NewLine)
+                End If
+            End If
+
+            ' Continue with the existing logic for excluding files based on the pattern list
+            Return exludeFileNameList.Any(Function(pattern) New Regex("^" & Regex.Escape(pattern).Replace("\*", ".*").Replace("\?", ".") & "$", RegexOptions.IgnoreCase).IsMatch(file.Name))
         End Function
 
-        Function ShouldExcludeFolder(folderName As String, exludeFolderNameList As List(Of String)) As Boolean
-            Return exludeFolderNameList.Any(Function(pattern) New Regex("^" & Regex.Escape(pattern).Replace("\*", ".*").Replace("\?", ".") & "$", RegexOptions.IgnoreCase).IsMatch(folderName))
+        Function ShouldExcludeFolder(ByVal folder As DirectoryInfo, exludeFolderNameList As List(Of String), logpath As String) As Boolean
+            ' Check if the checkbox is checked
+            If chkSkipFolderLastCreationTime.Checked Then
+                ' Parse the value from txtFolderLastCreationTimeToSkip
+                Dim timeToSkipStr As String = txtFolderLastCreationTimeToSkip.Text.Trim()
+                ' Try to parse the minutes value from the text box
+                Dim minutesToSkip As Integer
+                If Integer.TryParse(timeToSkipStr, minutesToSkip) Then
+                    ' Check if the folder's creation time is within the specified minutes range
+                    If (DateTime.Now - folder.CreationTime).TotalMinutes <= minutesToSkip Then
+                        ' Log a message indicating that the folder is excluded based on creation time
+                        WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Folder '{folder.Name}' is excluded based on creation time specified in txtFolderLastCreationTimeToSkip." + Environment.NewLine)
+                        Return True
+                    End If
+                Else
+                    ' Log an error message if the minutes value is invalid
+                    WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Invalid minutes value specified in txtFolderLastCreationTimeToSkip. Expected integer value." + Environment.NewLine)
+                End If
+            End If
+
+            ' Continue with the existing logic for excluding folders based on the pattern list
+            Return exludeFolderNameList.Any(Function(pattern) New Regex("^" & Regex.Escape(pattern).Replace("\*", ".*").Replace("\?", ".") & "$", RegexOptions.IgnoreCase).IsMatch(folder.Name))
         End Function
 
         Sub DeleteFilesAndFolders(ByVal parentDirectory As DirectoryInfo, ByVal period As Integer, ByVal logpath As String, ByVal topLevelDirectoryPath As String)
 
             Dim excludedFolderNames As New List(Of String)(txtExcludeFolderNames.Text.Split({Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries))
 
-            If ShouldExcludeFolder(parentDirectory.Name, excludedFolderNames) Then
+            If ShouldExcludeFolder(parentDirectory, excludedFolderNames, logpath) Then
                 Return ' Skip deletion and recursion if parent folder matches the name
             End If
 
@@ -631,7 +671,7 @@ Namespace AutoDeleteData
             ' Delete files in the current directory
             For Each file As FileInfo In parentDirectory.GetFiles()
 
-                If ShouldExcludeFile(file.Name, excludedFileNames) Then
+                If ShouldExcludeFile(file, excludedFileNames, logpath) Then
                     Continue For ' Skip deletion of excluded files
                 End If
 
@@ -650,14 +690,36 @@ Namespace AutoDeleteData
                 DeleteFilesAndFolders(directory, period, logpath, topLevelDirectoryPath)
             Next
 
-            ' Delete the directory if it's empty and not the parentDirectory
+            ' Delete the parent directory if it's empty and not the top level directory
             If parentDirectory.FullName <> topLevelDirectoryPath AndAlso parentDirectory.GetFiles().Length = 0 AndAlso parentDirectory.GetDirectories().Length = 0 Then
-                Try
-                    parentDirectory.Delete()
-                    WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Deleted " + parentDirectory.FullName + Environment.NewLine)
-                Catch ex As Exception
-                    WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Cannot delete " + parentDirectory.FullName + ", exception : " + ex.Message + Environment.NewLine)
-                End Try
+                ' Check if the checkbox for skipping folder last creation time is checked
+                If chkSkipFolderLastCreationTime.Checked Then
+                    ' Parse the value from txtFolderLastCreationTimeToSkip
+                    Dim minutesToSkip As Integer
+                    If Integer.TryParse(txtFolderLastCreationTimeToSkip.Text.Trim(), minutesToSkip) Then
+                        ' Check if the parent directory's creation time is within the specified minutes range
+                        Dim directoryCreationTime As DateTime = Directory.GetCreationTime(parentDirectory.FullName)
+                        If (DateTime.Now - directoryCreationTime).TotalMinutes <= minutesToSkip Then
+                            ' Log a message indicating that the directory deletion is skipped based on creation time
+                            WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Skipped deleting empty directory '{parentDirectory.FullName}' based on creation time specified in txtFolderLastCreationTimeToSkip." + Environment.NewLine)
+                            Exit Sub ' Skip deletion
+                        End If
+                    Else
+                        ' Log an error message if the minutes value is invalid
+                        WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Invalid minutes value specified in txtFolderLastCreationTimeToSkip. Expected integer value." + Environment.NewLine)
+                    End If
+                End If
+
+                If (Now - parentDirectory.CreationTime).Days > period Then
+                    ' Delete the parent directory if it meets the deletion criteria
+                    Try
+                        parentDirectory.Delete()
+                        WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Deleted " + parentDirectory.FullName + Environment.NewLine)
+                    Catch ex As Exception
+                        WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Cannot delete " + parentDirectory.FullName + ", exception : " + ex.Message + Environment.NewLine)
+                    End Try
+                End If
+
             End If
 
         End Sub
@@ -702,7 +764,7 @@ Namespace AutoDeleteData
                 Try
                     If TypeOf item Is FileInfo Then
                         Dim file As FileInfo = DirectCast(item, FileInfo)
-                        If ShouldStopDeleting(file, excludedFolderNames, excludedFilesNames) Then
+                        If ShouldStopDeleting(file, excludedFolderNames, excludedFilesNames, logpath) Then
                             WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"File {file.FullName} matches one of the exclude criteria. Stopping deletion." + Environment.NewLine)
                             Continue For
                         End If
@@ -711,9 +773,28 @@ Namespace AutoDeleteData
                     ElseIf TypeOf item Is DirectoryInfo Then
                         Dim directory As DirectoryInfo = DirectCast(item, DirectoryInfo)
                         If DirectoryIsEmpty(directory) AndAlso Not IsFolderInPathExcluded(directory, excludedFolderNames) Then
-                            directory.Delete()
-                            emptiedFolders.Add(directory) ' Track emptied folders
-                            WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Deleted empty folder: {directory.FullName}" + Environment.NewLine)
+                            ' Check if the checkbox is checked
+                            If chkSkipFolderLastCreationTime.Checked Then
+                                ' Parse the value from txtFolderLastCreationTimeToSkip as an integer
+                                Dim minutesToSkip As Integer
+                                If Integer.TryParse(txtFolderLastCreationTimeToSkip.Text, minutesToSkip) Then
+                                    ' Check if the folder was created within the specified time frame
+                                    If (DateTime.Now - directory.CreationTime).TotalMinutes > minutesToSkip Then
+                                        directory.Delete()
+                                        emptiedFolders.Add(directory) ' Track emptied folders
+                                        WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Deleted empty folder: {directory.FullName}" + Environment.NewLine)
+                                    Else
+                                        WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Skipped deleting empty folder created in the last {minutesToSkip} minutes: {directory.FullName}" + Environment.NewLine)
+                                    End If
+                                Else
+                                    WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Invalid value in txtFolderLastCreationTimeToSkip. Skipping deletion based on creation time." + Environment.NewLine)
+                                End If
+                            Else
+                                ' If the checkbox is not checked, proceed with deletion without considering creation time
+                                directory.Delete()
+                                emptiedFolders.Add(directory) ' Track emptied folders
+                                WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Deleted empty folder: {directory.FullName}" + Environment.NewLine)
+                            End If
                         End If
                     End If
 
@@ -740,14 +821,28 @@ Namespace AutoDeleteData
             ' Stop deleting if parent folder is one of the top-level folders or matches any of the exclude folders
             If foldersToDelete.Contains(folder.FullName) OrElse excludeFolders.Contains(folder.Name) Then Return
 
-            If DirectoryIsEmpty(folder) Then
+            ' Check if the checkbox is checked
+            If chkSkipFolderLastCreationTime.Checked Then
+                ' Parse the value from txtFolderLastCreationTimeToSkip as an integer
+                Dim minutesToSkip As Integer
+                If Integer.TryParse(txtFolderLastCreationTimeToSkip.Text, minutesToSkip) Then
+                    ' Skip deleting if the folder was created within the specified time frame
+                    If (DateTime.Now - folder.CreationTime).TotalMinutes <= minutesToSkip Then
+                        WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Skipped deleting empty parent folder created in the last {minutesToSkip} minutes: {folder.FullName}" + Environment.NewLine)
+                        Return
+                    End If
+                Else
+                    WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Invalid value in txtFolderLastCreationTimeToSkip. Skipping deletion based on creation time." + Environment.NewLine)
+                End If
+            End If
+
+            If DirectoryIsEmpty(folder.Parent) Then
                 Try
-                    folder.Delete()
-                    WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Deleted empty folder: {folder.FullName}" + Environment.NewLine)
+                    folder.Parent.Delete()
+                    WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Deleted empty parent folder: {folder.Parent.FullName}" + Environment.NewLine)
                     DeleteEmptyParentFolders(folder.Parent, foldersToDelete, excludeFolders, logpath) ' Recursively check and delete empty parent folders
                 Catch ex As Exception
-                    WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Failed to delete empty folder: {folder.FullName}. {ex.Message}" + Environment.NewLine)
-
+                    WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Failed to delete empty parent folder: {folder.Parent.FullName}. {ex.Message}" + Environment.NewLine)
                 End Try
             End If
         End Sub
@@ -780,15 +875,30 @@ Namespace AutoDeleteData
             Return DateTime.MinValue
         End Function
 
-        Function ShouldStopDeleting(ByVal file As FileInfo, ByVal excludeFolders As List(Of String), ByVal excludeFileNames As List(Of String)) As Boolean
-            If excludeFileNames.Contains(file.Name) Then Return True
+        Function ShouldStopDeleting(ByVal file As FileInfo, ByVal excludeFolders As List(Of String), ByVal excludeFileNames As List(Of String), ByVal logpath As String) As Boolean
+
+            If excludeFileNames.Any(Function(pattern) New Regex("^" & Regex.Escape(pattern).Replace("\*", ".*").Replace("\?", ".") & "$", RegexOptions.IgnoreCase).IsMatch(file.Name)) Then Return True
             If IsFolderInPathExcluded(file.Directory, excludeFolders) Then Return True
+
+            ' Check if the checkbox is checked
+            If chkSkipFileLastCreationTime.Checked Then
+                ' Parse the value from txtFileLastCreationTimeToSkip as an integer
+                Dim minutesToSkip As Integer
+                If Integer.TryParse(txtFileLastCreationTimeToSkip.Text.Trim, minutesToSkip) Then
+                    ' Skip files created within the specified time frame
+                    If (DateTime.Now - file.CreationTime).TotalMinutes <= minutesToSkip Then Return True
+                Else
+                    ' Log an error if the value in txtFileLastCreationTimeToSkip is invalid
+                    WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Invalid value in txtFileLastCreationTimeToSkip. Skipping deletion based on creation time." + Environment.NewLine)
+                End If
+            End If
+
             Return False
         End Function
 
         Function IsFolderInPathExcluded(ByVal directory As DirectoryInfo, ByVal excludeFolders As List(Of String)) As Boolean
             If directory Is Nothing Then Return False
-            If excludeFolders.Contains(directory.Name) Then Return True
+            If excludeFolders.Any(Function(pattern) New Regex("^" & Regex.Escape(pattern).Replace("\*", ".*").Replace("\?", ".") & "$", RegexOptions.IgnoreCase).IsMatch(directory.Name)) Then Return True
             Return IsFolderInPathExcluded(directory.Parent, excludeFolders)
         End Function
 
@@ -1144,6 +1254,14 @@ Namespace AutoDeleteData
 
             chkMonitorFolders.Enabled = False
 
+            chkSkipFileLastCreationTime.Enabled = False
+
+            chkSkipFolderLastCreationTime.Enabled = False
+
+            txtFileLastCreationTimeToSkip.Enabled = False
+
+            txtFolderLastCreationTimeToSkip.Enabled = False
+
             SaveAllListToolStripMenuItem.Enabled = False
 
             ReloadAllListToolStripMenuItem.Enabled = False
@@ -1295,6 +1413,14 @@ Namespace AutoDeleteData
 
             chkMonitorFolders.Enabled = True
 
+            chkSkipFileLastCreationTime.Enabled = True
+
+            chkSkipFolderLastCreationTime.Enabled = True
+
+            txtFileLastCreationTimeToSkip.Enabled = True
+
+            txtFolderLastCreationTimeToSkip.Enabled = True
+
             SaveAllListToolStripMenuItem.Enabled = True
 
             ReloadAllListToolStripMenuItem.Enabled = True
@@ -1322,12 +1448,14 @@ Namespace AutoDeleteData
             SaveAllMonitorList()
             SaveExcludedFileNames()
             SaveExcludedFolderNames()
+            SaveCreationSetting()
         End Sub
 
         Private Sub ReloadAllListToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ReloadAllListToolStripMenuItem.Click
             LoadAllMonitorList()
             LoadExcludedFileNames()
             LoadExcludedFolderNames()
+            LoadCreationSetting()
         End Sub
 
         Private Sub WriteLog(file As String, content As String)
@@ -1756,6 +1884,91 @@ Namespace AutoDeleteData
 
         Private Sub btnReloadList4_Click(sender As Object, e As EventArgs) Handles btnReloadList4.Click
             LoadExcludedFolderNames()
+        End Sub
+
+        Sub SaveCreationSetting()
+            Try
+                ' Define the path for the settings file
+                Dim settingsFilePath As String = "C:\Radiant Vision Systems Data\TrueTest\UserData\autodelete_creation_settings.txt"
+
+                ' Initialize the content string
+                Dim content As New StringBuilder()
+
+                ' Check and add the SkipFileLastCreationTime setting
+                content.AppendLine($"SkipFileLastCreationTime={If(chkSkipFileLastCreationTime.Checked, "true", "false")}")
+
+                ' Check and add the SkipFolderLastCreationTime setting
+                content.AppendLine($"SkipFolderLastCreationTime={If(chkSkipFolderLastCreationTime.Checked, "true", "false")}")
+
+                ' Add the FileLastCreationTime setting
+                content.AppendLine($"FileLastCreationTime={txtFileLastCreationTimeToSkip.Text.Trim()}")
+
+                ' Add the FolderLastCreationTime setting
+                content.AppendLine($"FolderLastCreationTime={txtFolderLastCreationTimeToSkip.Text.Trim()}")
+
+                ' Write the content to the settings file
+                File.WriteAllText(settingsFilePath, content.ToString())
+            Catch ex As Exception
+                ' Handle the exception if writing fails
+                MessageBox.Show("Error writing settings to file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            End Try
+        End Sub
+
+
+
+        Private Sub btnSaveTimeCreation_Click(sender As Object, e As EventArgs) Handles btnSaveTimeCreation.Click
+            SaveCreationSetting()
+        End Sub
+        Sub LoadCreationSetting()
+            ' Define the path for the settings file
+            Dim settingsFilePath As String = "C:\Radiant Vision Systems Data\TrueTest\UserData\autodelete_creation_settings.txt"
+
+            If File.Exists(settingsFilePath) Then
+                Try
+                    ' Read all lines from the file
+                    Dim lines As String() = File.ReadAllLines(settingsFilePath)
+
+                    ' Loop through each line
+                    For Each line As String In lines
+                        ' Split the line into key and value
+                        Dim parts As String() = line.Split("="c)
+
+                        ' Check if the line contains SkipFileLastCreationTime setting
+                        If parts(0) = "SkipFileLastCreationTime" Then
+                            ' Set the checkbox state based on the value
+                            chkSkipFileLastCreationTime.Checked = parts(1).ToLower() = "true"
+                        End If
+
+                        ' Check if the line contains SkipFolderLastCreationTime setting
+                        If parts(0) = "SkipFolderLastCreationTime" Then
+                            ' Set the checkbox state based on the value
+                            chkSkipFolderLastCreationTime.Checked = parts(1).ToLower() = "true"
+                        End If
+
+                        ' Check if the line contains FileLastCreationTime setting
+                        If parts(0) = "FileLastCreationTime" Then
+                            ' Set the text box text based on the value
+                            txtFileLastCreationTimeToSkip.Text = parts(1)
+                        End If
+
+                        ' Check if the line contains FolderLastCreationTime setting
+                        If parts(0) = "FolderLastCreationTime" Then
+                            ' Set the text box text based on the value
+                            txtFolderLastCreationTimeToSkip.Text = parts(1)
+                        End If
+                    Next
+                Catch ex As Exception
+                    ' Handle the exception if reading fails
+                    MessageBox.Show("Error loading settings from file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                End Try
+            Else
+                ' If the settings file doesn't exist, do nothing
+            End If
+        End Sub
+
+
+        Private Sub btnLoadTimeCreation_Click(sender As Object, e As EventArgs) Handles btnLoadTimeCreation.Click
+            LoadCreationSetting()
         End Sub
     End Class
 End Namespace
