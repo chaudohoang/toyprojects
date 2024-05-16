@@ -20,15 +20,7 @@ C:\Program Files\Radiant Vision Systems\TrueTest 1.8\POCB4.1Net\LGD_COMP_INI_D96
 C:\Program Files\Radiant Vision Systems\TrueTest 1.8\POCB4.1Net\LGD_COMP_INI_D964_Mono_2nd.ini
 C:\Program Files\Radiant Vision Systems\TrueTest 1.8\POCB4.1Net\LGD_COMP_INI_D964_Mono_DX.ini
 C:\Program Files\Radiant Vision Systems\TrueTest 1.8\POCB4.1Net\LGD_COMP_INI_D965_Color_3rd.ini
-
-
-
-
 [Folders]
-E:\DATABASE\InputIMG\D964-2CB-MP00_ORBIT_CROP
-
-
-
 
 [Extensions]
 ini

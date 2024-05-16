@@ -398,3 +398,4 @@
 5/17/2024 1:43:18 AM: File 'E:\DATABASE\InputIMG\D964-2CB-MP00_ORBIT_CROP\v29\LGD_COMP_INI_D965_Mono_2nd.ini' is now visible.
 5/17/2024 1:43:18 AM: File 'E:\DATABASE\InputIMG\D964-2CB-MP00_ORBIT_CROP\v29\LGD_COMP_INI_D965_Mono_DX.ini' is now visible.
 5/17/2024 1:43:18 AM: Folder '' does not exist.
+5/17/2024 2:00:53 AM: Incorrect password. Operation canceled.
