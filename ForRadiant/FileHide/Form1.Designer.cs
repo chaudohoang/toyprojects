@@ -50,6 +50,7 @@
             this.FilesTextBox.Location = new System.Drawing.Point(6, 19);
             this.FilesTextBox.Multiline = true;
             this.FilesTextBox.Name = "FilesTextBox";
+            this.FilesTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.FilesTextBox.Size = new System.Drawing.Size(625, 375);
             this.FilesTextBox.TabIndex = 1;
             this.FilesTextBox.DragDrop += new System.Windows.Forms.DragEventHandler(this.FilesTextBox_DragDrop);
@@ -151,6 +152,7 @@
             this.FoldersTextBox.Location = new System.Drawing.Point(6, 19);
             this.FoldersTextBox.Multiline = true;
             this.FoldersTextBox.Name = "FoldersTextBox";
+            this.FoldersTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.FoldersTextBox.Size = new System.Drawing.Size(625, 349);
             this.FoldersTextBox.TabIndex = 4;
             this.FoldersTextBox.DragDrop += new System.Windows.Forms.DragEventHandler(this.FoldersTextBox_DragDrop);

@@ -8,7 +8,7 @@ namespace FileHide
     public partial class Form1 : Form
     {
         private const string controlValuesFileName = "settings.txt";
-        private const string logFileName = "filelocklog.txt";
+        private const string logFileName = "filehidelog.txt";
 
         public Form1()
         {
