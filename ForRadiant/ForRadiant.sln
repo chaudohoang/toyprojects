@@ -135,7 +135,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CopySequenceStep", "CopySeq
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoClickOnLog", "AutoClickOnLog\AutoClickOnLog.csproj", "{2E77926C-A822-4A90-B10F-DD15C3BA0D1B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileHide", "FileLock\FileHide.csproj", "{CBAE4D5F-204F-41C6-80F0-18CBE7BD2F30}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileHide", "FileHide\FileHide.csproj", "{CBAE4D5F-204F-41C6-80F0-18CBE7BD2F30}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
