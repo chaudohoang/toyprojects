@@ -1,4 +1,4 @@
-﻿namespace FileLock
+﻿namespace FileHide
 {
     partial class Password
     {
@@ -39,6 +39,7 @@
             this.textBox1.PasswordChar = '*';
             this.textBox1.Size = new System.Drawing.Size(118, 20);
             this.textBox1.TabIndex = 0;
+            this.textBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox1_KeyDown);
             // 
             // button1
             // 

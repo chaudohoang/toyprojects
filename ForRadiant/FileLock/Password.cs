@@ -2,11 +2,11 @@
 using System;
 using System.Windows.Forms;
 
-namespace FileLock
+namespace FileHide
 {
     public partial class Password : Form
     {
-        private const string CorrectPassword = "rvsk1234"; // Change this to your desired password
+        private const string CorrectPassword = "lgd1234"; // Change this to your desired password
 
         public bool IsPasswordCorrect { get; private set; }
 
@@ -21,5 +21,17 @@ namespace FileLock
             Close();
         }
 
+        private void textBox1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                button1_Click(this, new EventArgs());
+            }
+
+            if (e.KeyCode == Keys.Escape)
+            {
+                this.Close();
+            }
+        }
     }
 }

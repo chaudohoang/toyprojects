@@ -1,48 +1,105 @@
 ﻿using System;
 using System.IO;
-using System.Security.AccessControl;
-using System.Security.Principal;
+using System.Linq;
 using System.Windows.Forms;
 
-namespace FileLock
+namespace FileHide
 {
     public partial class Form1 : Form
     {
-        private const string fileListFileName = "filelocklist.txt";
+        private const string controlValuesFileName = "settings.txt";
         private const string logFileName = "filelocklog.txt";
 
         public Form1()
         {
             InitializeComponent();
-            LoadFileList(); // Load file list when the form loads
+            LoadControlValues(); // Load control values when the form loads
+
+            // Add DragEnter and DragDrop events to FoldersTextBox
+            FoldersTextBox.DragEnter += new DragEventHandler(FoldersTextBox_DragEnter);
+            FoldersTextBox.DragDrop += new DragEventHandler(FoldersTextBox_DragDrop);
         }
 
-        private void LoadFileList()
+        private void LoadControlValues()
         {
-            if (File.Exists(fileListFileName))
+            if (File.Exists(controlValuesFileName))
             {
-                string[] fileLines = File.ReadAllLines(fileListFileName);
-                foreach (string line in fileLines)
+                string[] lines = File.ReadAllLines(controlValuesFileName);
+                FilesTextBox.Clear();
+                FoldersTextBox.Clear();
+                ExtensionsTextBox.Clear();
+
+                bool readingFiles = false;
+                bool readingFolders = false;
+                bool readingExtensions = false;
+
+                foreach (string line in lines)
                 {
-                    if (!string.IsNullOrWhiteSpace(line))
+                    if (line == "[Files]")
+                    {
+                        readingFiles = true;
+                        readingFolders = false;
+                        readingExtensions = false;
+                        continue;
+                    }
+                    if (line == "[Folders]")
+                    {
+                        readingFiles = false;
+                        readingFolders = true;
+                        readingExtensions = false;
+                        continue;
+                    }
+                    if (line == "[Extensions]")
+                    {
+                        readingFiles = false;
+                        readingFolders = false;
+                        readingExtensions = true;
+                        continue;
+                    }
+
+                    if (readingFiles)
                     {
                         FilesTextBox.AppendText(line + Environment.NewLine);
+                    }
+                    if (readingFolders)
+                    {
+                        FoldersTextBox.AppendText(line + Environment.NewLine);
+                    }
+                    if (readingExtensions)
+                    {
+                        ExtensionsTextBox.AppendText(line);
                     }
                 }
             }
         }
 
-        private void SaveFileList()
+        private void SaveControlValues()
         {
-            File.WriteAllLines(fileListFileName, FilesTextBox.Lines);
+            using (StreamWriter sw = new StreamWriter(controlValuesFileName))
+            {
+                sw.WriteLine("[Files]");
+                foreach (string line in FilesTextBox.Lines)
+                {
+                    sw.WriteLine(line);
+                }
+
+                sw.WriteLine("[Folders]");
+                foreach (string line in FoldersTextBox.Lines)
+                {
+                    sw.WriteLine(line);
+                }
+
+                sw.WriteLine("[Extensions]");
+                sw.WriteLine(ExtensionsTextBox.Text);
+            }
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            SaveFileList(); // Save file list when the form is closing
+            SaveControlValues(); // Save control values when the form is closing
         }
 
-        private void LockButton_Click(object sender, EventArgs e)
+        private void HideButton_Click(object sender, EventArgs e)
         {
             Password passwordForm = new Password();
             passwordForm.ShowDialog();
@@ -53,10 +110,10 @@ namespace FileLock
                 return;
             }
 
-            LockUnlockFiles(true);
+            HideUnhideFiles(true);
         }
 
-        private void UnlockButton_Click(object sender, EventArgs e)
+        private void UnhideButton_Click(object sender, EventArgs e)
         {
             Password passwordForm = new Password();
             passwordForm.ShowDialog();
@@ -67,92 +124,94 @@ namespace FileLock
                 return;
             }
 
-            LockUnlockFiles(false);
+            HideUnhideFiles(false);
         }
 
-        private void LockUnlockFiles(bool lockFiles)
+        private void HideUnhideFiles(bool hideFiles)
         {
-            string[] files = FilesTextBox.Lines;
+            string[] filePaths = FilesTextBox.Lines;
+            string[] folderPaths = FoldersTextBox.Lines;
+            string[] extensions = ExtensionsTextBox.Text.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                                                          .Select(ext => ext.Trim().ToLower()).ToArray();
 
-            foreach (string filePath in files)
+            bool includeAllFiles = extensions.Contains("*");
+
+            // Process individual files
+            foreach (string filePath in filePaths)
             {
-                try
+                ProcessFile(filePath, hideFiles);
+            }
+
+            // Process folders
+            foreach (string folderPath in folderPaths)
+            {
+                if (string.IsNullOrWhiteSpace(folderPath) || !Directory.Exists(folderPath))
                 {
-                    if (string.IsNullOrWhiteSpace(filePath))
-                    {
-                        continue; // Skip empty lines
-                    }
-
-                    if (!File.Exists(filePath))
-                    {
-                        WriteToLog($"File '{Path.GetFileName(filePath)}' does not exist.");
-                        continue; // Skip processing this file
-                    }
-
-                    if (IsFileLocked(filePath) && lockFiles)
-                    {
-                        WriteToLog($"File '{Path.GetFileName(filePath)}' is already locked.");
-                        continue; // Skip locking this file
-                    }
-
-                    if (!IsFileLocked(filePath) && !lockFiles)
-                    {
-                        WriteToLog($"File '{Path.GetFileName(filePath)}' is already unlocked.");
-                        continue; // Skip unlocking this file
-                    }
-
-                    FileSecurity fileSecurity = File.GetAccessControl(filePath);
-
-                    if (lockFiles)
-                    {
-                        // Lock the file
-                        FileSystemAccessRule rule = new FileSystemAccessRule(
-                            new SecurityIdentifier(WellKnownSidType.WorldSid, null),
-                            FileSystemRights.FullControl,
-                            AccessControlType.Deny);
-                        fileSecurity.AddAccessRule(rule);
-                    }
-                    else
-                    {
-                        // Unlock the file
-                        FileSystemAccessRule rule = new FileSystemAccessRule(
-                            new SecurityIdentifier(WellKnownSidType.WorldSid, null),
-                            FileSystemRights.FullControl,
-                            AccessControlType.Deny);
-                        fileSecurity.RemoveAccessRule(rule);
-                    }
-
-                    File.SetAccessControl(filePath, fileSecurity);
+                    WriteToLog($"Folder '{folderPath}' does not exist.");
+                    continue;
                 }
-                catch (Exception ex)
-                {
-                    WriteToLog($"Error locking/unlocking file '{Path.GetFileName(filePath)}': {ex.Message}");
-                }
+
+                ProcessFolder(folderPath, extensions, includeAllFiles, hideFiles);
             }
         }
 
-        private bool IsFileLocked(string filePath)
+        private void ProcessFile(string filePath, bool hideFiles)
         {
             try
             {
-                FileSecurity fileSecurity = File.GetAccessControl(filePath);
-                AuthorizationRuleCollection rules = fileSecurity.GetAccessRules(true, true, typeof(SecurityIdentifier));
-
-                foreach (FileSystemAccessRule rule in rules)
+                if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
                 {
-                    if (rule.AccessControlType == AccessControlType.Deny &&
-                        rule.FileSystemRights == FileSystemRights.FullControl &&
-                        rule.IdentityReference == new SecurityIdentifier(WellKnownSidType.WorldSid, null))
-                    {
-                        return true; // The file is locked
-                    }
+                    WriteToLog($"File '{filePath}' does not exist.");
+                    return;
                 }
 
-                return false; // The file is not locked
+                FileAttributes attributes = File.GetAttributes(filePath);
+
+                if (hideFiles)
+                {
+                    // Hide the file
+                    attributes |= FileAttributes.Hidden | FileAttributes.System;
+                    File.SetAttributes(filePath, attributes);
+                    WriteToLog($"File '{filePath}' is now hidden.");
+                }
+                else
+                {
+                    // Unhide the file
+                    attributes &= ~FileAttributes.Hidden;
+                    attributes &= ~FileAttributes.System;
+                    File.SetAttributes(filePath, attributes);
+                    WriteToLog($"File '{filePath}' is now visible.");
+                }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return true; // Assume the file is locked if an exception occurs
+                WriteToLog($"Error processing file '{filePath}': {ex.Message}");
+            }
+        }
+
+        private void ProcessFolder(string folderPath, string[] extensions, bool includeAllFiles, bool hideFiles)
+        {
+            try
+            {
+                if (includeAllFiles)
+                {
+                    extensions = new string[] { "*.*" };
+                }
+
+                foreach (string extension in extensions)
+                {
+                    string searchPattern = includeAllFiles ? "*.*" : $"*.{extension}";
+                    string[] files = Directory.GetFiles(folderPath, searchPattern, SearchOption.AllDirectories);
+
+                    foreach (string file in files)
+                    {
+                        ProcessFile(file, hideFiles);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                WriteToLog($"Error processing folder '{folderPath}': {ex.Message}");
             }
         }
 
@@ -175,7 +234,37 @@ namespace FileLock
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
                 foreach (string file in files)
                 {
-                    FilesTextBox.AppendText(file + Environment.NewLine);
+                    if (!FilesTextBox.Lines.Contains(file))
+                    {
+                        FilesTextBox.AppendText(file + Environment.NewLine);
+                    }
+                }
+            }
+        }
+
+        private void FoldersTextBox_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Copy;
+            }
+            else
+            {
+                e.Effect = DragDropEffects.None;
+            }
+        }
+
+        private void FoldersTextBox_DragDrop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] folders = (string[])e.Data.GetData(DataFormats.FileDrop);
+                foreach (string folder in folders)
+                {
+                    if (!FoldersTextBox.Lines.Contains(folder))
+                    {
+                        FoldersTextBox.AppendText(folder + Environment.NewLine);
+                    }
                 }
             }
         }
