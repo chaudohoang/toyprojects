@@ -23,8 +23,10 @@ C:\Program Files\Radiant Vision Systems\TrueTest 1.8\POCB4.1Net\LGD_COMP_INI_D96
 
 
 
+
 [Folders]
 E:\DATABASE\InputIMG\D964-2CB-MP00_ORBIT_CROP
+
 
 
 
