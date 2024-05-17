@@ -9,15 +9,12 @@ namespace FileHide
     {
         private const string controlValuesFileName = "settings.txt";
         private const string logFileName = "filehidelog.txt";
+        private const int maxLogLines = 10000; // Maximum number of lines in the log file
 
         public Form1()
         {
             InitializeComponent();
             LoadControlValues(); // Load control values when the form loads
-
-            // Add DragEnter and DragDrop events to FoldersTextBox
-            FoldersTextBox.DragEnter += new DragEventHandler(FoldersTextBox_DragEnter);
-            FoldersTextBox.DragDrop += new DragEventHandler(FoldersTextBox_DragDrop);
         }
 
         private void LoadControlValues()
@@ -109,7 +106,8 @@ namespace FileHide
                 WriteToLog("Incorrect password. Operation canceled.");
                 return;
             }
-
+            RemoveEmptyLines(FilesTextBox);
+            RemoveEmptyLines(FoldersTextBox);
             HideUnhideFiles(true);
         }
 
@@ -123,7 +121,8 @@ namespace FileHide
                 WriteToLog("Incorrect password. Operation canceled.");
                 return;
             }
-
+            RemoveEmptyLines(FilesTextBox);
+            RemoveEmptyLines(FoldersTextBox);
             HideUnhideFiles(false);
         }
 
@@ -269,13 +268,32 @@ namespace FileHide
             }
         }
 
+        private void RemoveEmptyLines(TextBox textBox)
+        {
+            var lines = textBox.Lines
+                .Where((line, index) => !string.IsNullOrWhiteSpace(line) || index == textBox.Lines.Length - 1)
+                .ToArray();
+            textBox.Lines = lines;
+        }
+
         private void WriteToLog(string message)
         {
             try
             {
-                using (StreamWriter sw = File.AppendText(logFileName))
+                // Trim log file if it exceeds maximum lines
+                if (File.Exists(logFileName))
                 {
-                    sw.WriteLine($"{DateTime.Now}: {message}");
+                    var logLines = File.ReadAllLines(logFileName).ToList();
+                    if (logLines.Count >= maxLogLines)
+                    {
+                        logLines = logLines.Skip(logLines.Count - maxLogLines + 1).ToList();
+                    }
+                    logLines.Add($"{DateTime.Now}: {message}");
+                    File.WriteAllLines(logFileName, logLines);
+                }
+                else
+                {
+                    File.WriteAllText(logFileName, $"{DateTime.Now}: {message}\n");
                 }
             }
             catch (Exception ex)
@@ -283,6 +301,12 @@ namespace FileHide
                 // If logging fails, you might want to handle this accordingly
                 MessageBox.Show($"Error writing to log file: {ex.Message}");
             }
+        }
+
+        private void RemoveEmptyLinesButton_Click(object sender, EventArgs e)
+        {
+            RemoveEmptyLines(FilesTextBox);
+            RemoveEmptyLines(FoldersTextBox);
         }
     }
 }
