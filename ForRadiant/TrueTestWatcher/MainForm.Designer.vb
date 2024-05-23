@@ -57,6 +57,7 @@ Namespace TrueTestWatcher
             Me.chkCompareAppdataFiles = New System.Windows.Forms.CheckBox()
             Me.chkCompareSequenceCalibrations = New System.Windows.Forms.CheckBox()
             Me.chkCompareSequenceParameters = New System.Windows.Forms.CheckBox()
+            Me.chkCompareIniFiles = New System.Windows.Forms.CheckBox()
             Me.contextMenuStrip1.SuspendLayout()
             Me.menuStrip1.SuspendLayout()
             Me.TabControl1.SuspendLayout()
@@ -217,6 +218,7 @@ Namespace TrueTestWatcher
             '
             'TabPage2
             '
+            Me.TabPage2.Controls.Add(Me.chkCompareIniFiles)
             Me.TabPage2.Controls.Add(Me.cbxAutologPath)
             Me.TabPage2.Controls.Add(Me.chkAutolog)
             Me.TabPage2.Controls.Add(Me.cbxAppdataIgnoreList)
@@ -238,7 +240,7 @@ Namespace TrueTestWatcher
             '
             Me.cbxAutologPath.FormattingEnabled = True
             Me.cbxAutologPath.Items.AddRange(New Object() {"", "D:\Program\RVS\TrueTestWatcherLog"})
-            Me.cbxAutologPath.Location = New System.Drawing.Point(156, 124)
+            Me.cbxAutologPath.Location = New System.Drawing.Point(156, 144)
             Me.cbxAutologPath.Name = "cbxAutologPath"
             Me.cbxAutologPath.Size = New System.Drawing.Size(382, 21)
             Me.cbxAutologPath.TabIndex = 33
@@ -249,7 +251,7 @@ Namespace TrueTestWatcher
             Me.chkAutolog.AutoSize = True
             Me.chkAutolog.Checked = True
             Me.chkAutolog.CheckState = System.Windows.Forms.CheckState.Checked
-            Me.chkAutolog.Location = New System.Drawing.Point(9, 126)
+            Me.chkAutolog.Location = New System.Drawing.Point(9, 146)
             Me.chkAutolog.Name = "chkAutolog"
             Me.chkAutolog.Size = New System.Drawing.Size(151, 17)
             Me.chkAutolog.TabIndex = 32
@@ -260,7 +262,7 @@ Namespace TrueTestWatcher
             '
             Me.cbxAppdataIgnoreList.FormattingEnabled = True
             Me.cbxAppdataIgnoreList.Items.AddRange(New Object() {"", "edt.csv,devmode.csv,pixel_log.csv"})
-            Me.cbxAppdataIgnoreList.Location = New System.Drawing.Point(111, 99)
+            Me.cbxAppdataIgnoreList.Location = New System.Drawing.Point(111, 119)
             Me.cbxAppdataIgnoreList.Name = "cbxAppdataIgnoreList"
             Me.cbxAppdataIgnoreList.Size = New System.Drawing.Size(382, 21)
             Me.cbxAppdataIgnoreList.TabIndex = 31
@@ -269,7 +271,7 @@ Namespace TrueTestWatcher
             'Label1
             '
             Me.Label1.AutoSize = True
-            Me.Label1.Location = New System.Drawing.Point(6, 102)
+            Me.Label1.Location = New System.Drawing.Point(6, 122)
             Me.Label1.Name = "Label1"
             Me.Label1.Size = New System.Drawing.Size(99, 13)
             Me.Label1.TabIndex = 30
@@ -279,7 +281,7 @@ Namespace TrueTestWatcher
             '
             Me.cbxIgnoreList.FormattingEnabled = True
             Me.cbxIgnoreList.Items.AddRange(New Object() {"", "Notes,DllOutputPath,DLLDefFolder"})
-            Me.cbxIgnoreList.Location = New System.Drawing.Point(171, 72)
+            Me.cbxIgnoreList.Location = New System.Drawing.Point(171, 92)
             Me.cbxIgnoreList.Name = "cbxIgnoreList"
             Me.cbxIgnoreList.Size = New System.Drawing.Size(382, 21)
             Me.cbxIgnoreList.TabIndex = 29
@@ -288,7 +290,7 @@ Namespace TrueTestWatcher
             'Label4
             '
             Me.Label4.AutoSize = True
-            Me.Label4.Location = New System.Drawing.Point(6, 75)
+            Me.Label4.Location = New System.Drawing.Point(6, 95)
             Me.Label4.Name = "Label4"
             Me.Label4.Size = New System.Drawing.Size(159, 13)
             Me.Label4.TabIndex = 28
@@ -329,6 +331,18 @@ Namespace TrueTestWatcher
             Me.chkCompareSequenceParameters.TabIndex = 25
             Me.chkCompareSequenceParameters.Text = "Compare Sequence Parameters"
             Me.chkCompareSequenceParameters.UseVisualStyleBackColor = True
+            '
+            'chkCompareIniFiles
+            '
+            Me.chkCompareIniFiles.AutoSize = True
+            Me.chkCompareIniFiles.Checked = True
+            Me.chkCompareIniFiles.CheckState = System.Windows.Forms.CheckState.Checked
+            Me.chkCompareIniFiles.Location = New System.Drawing.Point(6, 75)
+            Me.chkCompareIniFiles.Name = "chkCompareIniFiles"
+            Me.chkCompareIniFiles.Size = New System.Drawing.Size(106, 17)
+            Me.chkCompareIniFiles.TabIndex = 34
+            Me.chkCompareIniFiles.Text = "Compare Ini Files"
+            Me.chkCompareIniFiles.UseVisualStyleBackColor = True
             '
             'MainForm
             '
@@ -387,5 +401,6 @@ Namespace TrueTestWatcher
         Friend WithEvents DeleteMasterStatusToolStripMenuItem As Windows.Forms.ToolStripMenuItem
         Friend WithEvents cbxAutologPath As Windows.Forms.ComboBox
         Friend WithEvents chkAutolog As Windows.Forms.CheckBox
+        Friend WithEvents chkCompareIniFiles As Windows.Forms.CheckBox
     End Class
 End Namespace

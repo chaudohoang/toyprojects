@@ -31,6 +31,7 @@ Namespace TrueTestWatcher
         Dim parameterNG As Boolean
         Dim calibrationNG As Boolean
         Dim appdataNG As Boolean
+        Dim iniNG As Boolean
         Dim watchingTask As Tasks.Task
         Dim TasksCancellationTokenSource As New CancellationTokenSource
         Dim needtoCheck As Boolean
@@ -1059,6 +1060,80 @@ Namespace TrueTestWatcher
             CommLogUpdateText("Elapsed time : " + (sw.ElapsedMilliseconds / 1000).ToString + " seconds.")
         End Sub
 
+        Private Sub CompareIniFiles()
+            iniNG = False
+            If Not chkCompareIniFiles.Checked Then
+                CommLogUpdateText("SKIPPED INI COMPARISION !!!")
+                Exit Sub
+            End If
+            Dim sw As New Stopwatch
+            sw.Start()
+            Dim OmitINIFolder As String = "C:\Program Files\Radiant Vision Systems\TrueTest 1.8\ScratchDustDetect_NY"
+            Dim MasterOmitINIFolder As String = "C:\MasterLGD\Omit_INI"
+            If Not Directory.Exists(MasterOmitINIFolder) Then
+                Directory.CreateDirectory(MasterOmitINIFolder)
+            End If
+            Dim Inifiles As IEnumerable(Of String) = IO.Directory.EnumerateFiles(MasterOmitINIFolder)
+            If Inifiles.Count = 0 Then
+                CommLogUpdateText("No files in Master INI folder to compare ! ")
+                Exit Sub
+            End If
+            Dim runningFileMissing As Boolean
+            Dim ngFiles As New List(Of String)
+            Dim okFiles As New List(Of String)
+
+            Dim appdataIgnoreList As New List(Of String)
+            appdataIgnoreList = cbxAppdataIgnoreList.Text.Split(",").ToList
+
+            For Each masterIniFile As String In Inifiles
+
+                Dim filename = Path.GetFileName(masterIniFile)
+                Dim runningFile As String = Path.Combine(OmitINIFolder, filename)
+                If Not File.Exists(runningFile) Then
+                    runningFileMissing = True
+                    iniNG = True
+                    CommLogUpdateText("NG INI file : " + runningFile + " is not existed or deleted !")
+                    Continue For
+                End If
+                If {"ini"}.Contains(Path.GetExtension(masterIniFile).Remove(0, 1)) Then
+                    Dim compareProcess As Process = New Process
+                    Dim startinfo As System.Diagnostics.ProcessStartInfo = New System.Diagnostics.ProcessStartInfo()
+                    startinfo.FileName = System.IO.Path.Combine(My.Application.Info.DirectoryPath, "WinMergeU.exe")
+                    startinfo.Arguments = "-noninteractive -minimize -enableexitcode -cfg Settings/DiffContextV2=0 " + Chr(34) + runningFile + Chr(34) + " " + Chr(34) + masterIniFile + Chr(34)
+                    compareProcess = Process.Start(startinfo)
+
+                    If compareProcess.WaitForExit(15000) Then
+                        Dim ExitCode As Integer = compareProcess.ExitCode
+                        If ExitCode <> 0 Then
+                            ngFiles.Add(runningFile)
+                        Else
+                            okFiles.Add(runningFile)
+                        End If
+                    Else
+                        iniNG = True
+                        CommLogUpdateText("Timed out comparing ini files")
+                    End If
+                End If
+
+            Next
+            If okFiles.Count > 0 Then
+                For Each item As String In okFiles
+                    CommLogUpdateText("OK INI file : " + item)
+                Next
+            End If
+            If ngFiles.Count > 0 Or runningFileMissing Then
+                iniNG = True
+                For Each item As String In ngFiles
+                    CommLogUpdateText("NG Ini file : " + item)
+                Next
+                CommLogUpdateText("Checking Ini File Finished, NG")
+            Else
+                CommLogUpdateText("Checking Ini File Finished, OK")
+            End If
+            sw.Stop()
+            CommLogUpdateText("Elapsed time : " + (sw.ElapsedMilliseconds / 1000).ToString + " seconds.")
+        End Sub
+
         Public Sub GetColorCalRef(SequencePath As String, ByRef RefDict As Dictionary(Of String, String))
             Dim conn As SqlCeConnection
             Dim cmdColorCalibration As New SqlCeCommand
@@ -1754,7 +1829,7 @@ Namespace TrueTestWatcher
             CompareCalSettings(runningSequencePath, masterCalibrationPath)
 
             CompareAppDataFiles()
-
+            CompareIniFiles()
             CommLogUpdateText("Finished Master Functions Check !!!")
 
             Dim status As String = ""
