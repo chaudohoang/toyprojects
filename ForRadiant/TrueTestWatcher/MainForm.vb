@@ -15,6 +15,8 @@ Imports System.Linq
 Imports System.ComponentModel
 Imports System.Drawing
 Imports System.Windows.Forms.VisualStyles.VisualStyleElement
+Imports System.Xml.Linq
+Imports System.Text.RegularExpressions
 
 Namespace TrueTestWatcher
     Partial Public Class MainForm
@@ -31,7 +33,9 @@ Namespace TrueTestWatcher
         Dim parameterNG As Boolean
         Dim calibrationNG As Boolean
         Dim appdataNG As Boolean
-        Dim iniNG As Boolean
+        Dim omitIniNG As Boolean
+        Dim cropIniNG As Boolean
+        Dim vnttIniNG As Boolean
         Dim watchingTask As Tasks.Task
         Dim TasksCancellationTokenSource As New CancellationTokenSource
         Dim needtoCheck As Boolean
@@ -42,7 +46,15 @@ Namespace TrueTestWatcher
         Dim watchPath4 As String = "C:\Radiant Vision Systems Data\TrueTest\AppData"
         Dim watchPath5 As String = "C:\Radiant Vision Systems Data\TrueTest\Master AppData"
         Dim watchPath6 As String = "C:\Radiant Vision Systems Data\TrueTest\UserData"
+        Dim watchPath7 As String = "C:\MasterLGD\ScratchDustDetect_NY"
+        Dim watchPath8 As String = "C:\Program Files\Radiant Vision Systems\TrueTest 1.8\ScratchDustDetect_NY"
+        Dim watchPath9 As String = "C:\MasterLGD\POCB4.1Net"
+        Dim watchPath10 As String = "C:\Program Files\Radiant Vision Systems\TrueTest 1.8\POCB4.1Net"
+        Dim watchPath11 As String = "C:\MasterLGD\InputIMG"
+        Dim watchPath12 As String = "E:\DATABASE\InputIMG"
+        Dim watchPath13 As String = "D:\DATABASE\InputIMG"
         Public watchfolder As FileSystemWatcher
+        Public watchers As List(Of FileSystemWatcher)
 
         <DllImport("User32.dll")>
         Private Shared Function GetLastInputInfo(ByRef plii As MainForm.LASTINPUTINFO) As Boolean
@@ -107,6 +119,13 @@ Namespace TrueTestWatcher
             watchFolder4()
             watchFolder5()
             watchFolder6()
+            watchFolder7()
+            watchFolder8()
+            watchFolder9()
+            watchFolder10()
+            watchFolder11()
+            watchFolder12()
+            watchFolder13()
             If StartMinimizedToolStripMenuItem.Checked = True Then
                 Me.WindowState = FormWindowState.Minimized
             End If
@@ -354,6 +373,270 @@ Namespace TrueTestWatcher
             watchfolder.EnableRaisingEvents = True
 
             'End of code for btn_start_click
+        End Sub
+        Private Sub watchFolder7()
+            watchfolder = New System.IO.FileSystemWatcher()
+
+            'this is the path we want to monitor
+            If Not Directory.Exists(watchPath7) Then
+                Directory.CreateDirectory(watchPath7)
+            End If
+            watchfolder.Path = watchPath7
+
+            'Add a list of Filter we want to specify
+            'make sure you use OR for each Filter as we need to
+            'all of those 
+
+            watchfolder.NotifyFilter = IO.NotifyFilters.DirectoryName
+            watchfolder.NotifyFilter = watchfolder.NotifyFilter Or
+                           IO.NotifyFilters.FileName
+            watchfolder.NotifyFilter = watchfolder.NotifyFilter Or
+                           IO.NotifyFilters.Attributes
+
+            ' add the handler to each event
+            AddHandler watchfolder.Changed, AddressOf logchange7
+            AddHandler watchfolder.Created, AddressOf logchange7
+            AddHandler watchfolder.Deleted, AddressOf logchange7
+
+            ' add the rename handler as the signature is different
+            AddHandler watchfolder.Renamed, AddressOf logrename7
+
+            'Set this property to true to start watching
+            watchfolder.EnableRaisingEvents = True
+
+            'End of code for btn_start_click
+        End Sub
+
+        Private Sub watchFolder8()
+            watchfolder = New System.IO.FileSystemWatcher()
+
+            'this is the path we want to monitor
+            If Not Directory.Exists(watchPath8) Then
+                Directory.CreateDirectory(watchPath8)
+            End If
+            watchfolder.Path = watchPath8
+
+            'Add a list of Filter we want to specify
+            'make sure you use OR for each Filter as we need to
+            'all of those 
+
+            watchfolder.NotifyFilter = IO.NotifyFilters.DirectoryName
+            watchfolder.NotifyFilter = watchfolder.NotifyFilter Or
+                           IO.NotifyFilters.FileName
+            watchfolder.NotifyFilter = watchfolder.NotifyFilter Or
+                           IO.NotifyFilters.Attributes
+
+            ' add the handler to each event
+            AddHandler watchfolder.Changed, AddressOf logchange8
+            AddHandler watchfolder.Created, AddressOf logchange8
+            AddHandler watchfolder.Deleted, AddressOf logchange8
+
+            ' add the rename handler as the signature is different
+            AddHandler watchfolder.Renamed, AddressOf logrename8
+
+            'Set this property to true to start watching
+            watchfolder.EnableRaisingEvents = True
+
+            'End of code for btn_start_click
+        End Sub
+
+        Private Sub watchFolder9()
+            watchfolder = New System.IO.FileSystemWatcher()
+
+            'this is the path we want to monitor
+            If Not Directory.Exists(watchPath9) Then
+                Directory.CreateDirectory(watchPath9)
+            End If
+            watchfolder.Path = watchPath9
+
+            'Add a list of Filter we want to specify
+            'make sure you use OR for each Filter as we need to
+            'all of those 
+
+            watchfolder.NotifyFilter = IO.NotifyFilters.DirectoryName
+            watchfolder.NotifyFilter = watchfolder.NotifyFilter Or
+                           IO.NotifyFilters.FileName
+            watchfolder.NotifyFilter = watchfolder.NotifyFilter Or
+                           IO.NotifyFilters.Attributes
+
+            ' add the handler to each event
+            AddHandler watchfolder.Changed, AddressOf logchange9
+            AddHandler watchfolder.Created, AddressOf logchange9
+            AddHandler watchfolder.Deleted, AddressOf logchange9
+
+            ' add the rename handler as the signature is different
+            AddHandler watchfolder.Renamed, AddressOf logrename9
+
+            'Set this property to true to start watching
+            watchfolder.EnableRaisingEvents = True
+
+            'End of code for btn_start_click
+        End Sub
+
+        Private Sub watchFolder10()
+            watchfolder = New System.IO.FileSystemWatcher()
+
+            'this is the path we want to monitor
+            If Not Directory.Exists(watchPath10) Then
+                Directory.CreateDirectory(watchPath10)
+            End If
+            watchfolder.Path = watchPath10
+
+            'Add a list of Filter we want to specify
+            'make sure you use OR for each Filter as we need to
+            'all of those 
+
+            watchfolder.NotifyFilter = IO.NotifyFilters.DirectoryName
+            watchfolder.NotifyFilter = watchfolder.NotifyFilter Or
+                           IO.NotifyFilters.FileName
+            watchfolder.NotifyFilter = watchfolder.NotifyFilter Or
+                           IO.NotifyFilters.Attributes
+
+            ' add the handler to each event
+            AddHandler watchfolder.Changed, AddressOf logchange10
+            AddHandler watchfolder.Created, AddressOf logchange10
+            AddHandler watchfolder.Deleted, AddressOf logchange10
+
+            ' add the rename handler as the signature is different
+            AddHandler watchfolder.Renamed, AddressOf logrename10
+
+            'Set this property to true to start watching
+            watchfolder.EnableRaisingEvents = True
+
+            'End of code for btn_start_click
+        End Sub
+
+        Private Sub watchFolder11()
+            ' Initialize the list of watchers
+            watchers = New List(Of FileSystemWatcher)
+
+            ' This is the path we want to monitor
+            If Not Directory.Exists(watchPath11) Then
+                Directory.CreateDirectory(watchPath11)
+            End If
+
+            ' Get all immediate subdirectories of watchPath11
+            Dim subdirectories As String() = Directory.GetDirectories(watchPath11)
+
+            For Each subdirectory As String In subdirectories
+                Dim watcher As New FileSystemWatcher()
+
+                ' Set the path to the subdirectory
+                watcher.Path = subdirectory
+
+                ' Add a list of filters we want to specify
+                watcher.NotifyFilter = NotifyFilters.DirectoryName Or
+                               NotifyFilters.FileName Or
+                               NotifyFilters.Attributes
+
+                ' Add the handler to each event
+                AddHandler watcher.Changed, AddressOf logchange11
+                AddHandler watcher.Created, AddressOf logchange11
+                AddHandler watcher.Deleted, AddressOf logchange11
+
+                ' Add the rename handler as the signature is different
+                AddHandler watcher.Renamed, AddressOf logrename11
+
+                ' Set this property to true to start watching
+                watcher.EnableRaisingEvents = True
+
+                ' Add the watcher to the list
+                watchers.Add(watcher)
+            Next
+        End Sub
+
+        Private Sub watchFolder12()
+            ' Initialize the list of watchers
+            watchers = New List(Of FileSystemWatcher)
+
+            Dim driveLetter As String = Path.GetPathRoot(watchPath12)
+
+            If Not Directory.Exists(driveLetter) Then
+                ' Log a message indicating that the hard disk does not exist
+                CommLogUpdateText("Hard disk not found at path: " + driveLetter)
+                Exit Sub ' Exit the subroutine
+            End If
+
+            ' This is the path we want to monitor
+            If Not Directory.Exists(watchPath12) Then
+                Directory.CreateDirectory(watchPath12)
+            End If
+
+            ' Get all immediate subdirectories of watchPath12
+            Dim subdirectories As String() = Directory.GetDirectories(watchPath12)
+
+            For Each subdirectory As String In subdirectories
+                Dim watcher As New FileSystemWatcher()
+
+                ' Set the path to the subdirectory
+                watcher.Path = subdirectory
+
+                ' Add a list of filters we want to specify
+                watcher.NotifyFilter = NotifyFilters.DirectoryName Or
+                               NotifyFilters.FileName Or
+                               NotifyFilters.Attributes
+
+                ' Add the handler to each event
+                AddHandler watcher.Changed, AddressOf logchange12
+                AddHandler watcher.Created, AddressOf logchange12
+                AddHandler watcher.Deleted, AddressOf logchange12
+
+                ' Add the rename handler as the signature is different
+                AddHandler watcher.Renamed, AddressOf logrename12
+
+                ' Set this property to true to start watching
+                watcher.EnableRaisingEvents = True
+
+                ' Add the watcher to the list
+                watchers.Add(watcher)
+            Next
+        End Sub
+
+        Private Sub watchFolder13()
+            ' Initialize the list of watchers
+            watchers = New List(Of FileSystemWatcher)
+
+            Dim driveLetter As String = Path.GetPathRoot(watchPath13)
+
+            If Not Directory.Exists(driveLetter) Then
+                ' Log a message indicating that the hard disk does not exist
+                CommLogUpdateText("Hard disk not found at path: " + driveLetter)
+                Exit Sub ' Exit the subroutine
+            End If
+
+            ' This is the path we want to monitor
+            If Not Directory.Exists(watchPath13) Then
+                Directory.CreateDirectory(watchPath13)
+            End If
+
+            ' Get all immediate subdirectories of watchPath13
+            Dim subdirectories As String() = Directory.GetDirectories(watchPath13)
+
+            For Each subdirectory As String In subdirectories
+                Dim watcher As New FileSystemWatcher()
+
+                ' Set the path to the subdirectory
+                watcher.Path = subdirectory
+
+                ' Add a list of filters we want to specify
+                watcher.NotifyFilter = NotifyFilters.DirectoryName Or
+                               NotifyFilters.FileName Or
+                               NotifyFilters.Attributes
+
+                ' Add the handler to each event
+                AddHandler watcher.Changed, AddressOf logchange13
+                AddHandler watcher.Created, AddressOf logchange13
+                AddHandler watcher.Deleted, AddressOf logchange13
+
+                ' Add the rename handler as the signature is different
+                AddHandler watcher.Renamed, AddressOf logrename13
+
+                ' Set this property to true to start watching
+                watcher.EnableRaisingEvents = True
+
+                ' Add the watcher to the list
+                watchers.Add(watcher)
+            Next
         End Sub
 
         Private Sub aboutToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles aboutToolStripMenuItem.Click
@@ -979,8 +1262,8 @@ Namespace TrueTestWatcher
             If Not Directory.Exists(MasterAppDataFolder) Then
                 Directory.CreateDirectory(MasterAppDataFolder)
             End If
-            Dim files As IEnumerable(Of String) = IO.Directory.EnumerateFiles(MasterAppDataFolder)
-            If files.Count = 0 Then
+            Dim MasterFiles As IEnumerable(Of String) = IO.Directory.EnumerateFiles(MasterAppDataFolder)
+            If MasterFiles.Count = 0 Then
                 CommLogUpdateText("No files in Master AppData folder to compare ! ")
                 Exit Sub
             End If
@@ -991,7 +1274,7 @@ Namespace TrueTestWatcher
             Dim appdataIgnoreList As New List(Of String)
             appdataIgnoreList = cbxAppdataIgnoreList.Text.Split(",").ToList
 
-            For Each masterFile As String In files
+            For Each masterFile As String In MasterFiles
                 Dim skip As Boolean
                 For Each item As String In appdataIgnoreList
                     If HaveCommonSubstrings(item, Path.GetFileNameWithoutExtension(masterFile)) Then
@@ -1060,39 +1343,42 @@ Namespace TrueTestWatcher
             CommLogUpdateText("Elapsed time : " + (sw.ElapsedMilliseconds / 1000).ToString + " seconds.")
         End Sub
 
-        Private Sub CompareIniFiles()
-            iniNG = False
-            If Not chkCompareIniFiles.Checked Then
-                CommLogUpdateText("SKIPPED INI COMPARISION !!!")
+        Private Sub CompareOmitIniFiles()
+            omitIniNG = False
+            If Not chkCompareOmitIniFiles.Checked Then
+                CommLogUpdateText("SKIPPED OMIT INI COMPARISION !!!")
                 Exit Sub
             End If
             Dim sw As New Stopwatch
             sw.Start()
             Dim OmitINIFolder As String = "C:\Program Files\Radiant Vision Systems\TrueTest 1.8\ScratchDustDetect_NY"
-            Dim MasterOmitINIFolder As String = "C:\MasterLGD\Omit_INI"
+            Dim MasterOmitINIFolder As String = "C:\MasterLGD\ScratchDustDetect_NY"
             If Not Directory.Exists(MasterOmitINIFolder) Then
                 Directory.CreateDirectory(MasterOmitINIFolder)
             End If
-            Dim Inifiles As IEnumerable(Of String) = IO.Directory.EnumerateFiles(MasterOmitINIFolder)
-            If Inifiles.Count = 0 Then
-                CommLogUpdateText("No files in Master INI folder to compare ! ")
+            Dim MasterIniFiles As IEnumerable(Of String) = IO.Directory.EnumerateFiles(MasterOmitINIFolder)
+            If MasterIniFiles.Count = 0 Then
+                CommLogUpdateText("No files in Master Omit INI folder to compare ! ")
                 Exit Sub
             End If
             Dim runningFileMissing As Boolean
             Dim ngFiles As New List(Of String)
             Dim okFiles As New List(Of String)
 
-            Dim appdataIgnoreList As New List(Of String)
-            appdataIgnoreList = cbxAppdataIgnoreList.Text.Split(",").ToList
+            Dim IniTobeChecked As New List(Of String)
+            IniTobeChecked = DetectOmitIni(runningSequencePath)
 
-            For Each masterIniFile As String In Inifiles
+            For Each masterIniFile As String In MasterIniFiles
+                If Not IniTobeChecked.Contains(Path.GetFileName(masterIniFile)) Then
+                    Continue For
+                End If
 
                 Dim filename = Path.GetFileName(masterIniFile)
                 Dim runningFile As String = Path.Combine(OmitINIFolder, filename)
                 If Not File.Exists(runningFile) Then
                     runningFileMissing = True
-                    iniNG = True
-                    CommLogUpdateText("NG INI file : " + runningFile + " is not existed or deleted !")
+                    omitIniNG = True
+                    CommLogUpdateText("NG Omit INI file : " + runningFile + " is not existed or deleted !")
                     Continue For
                 End If
                 If {"ini"}.Contains(Path.GetExtension(masterIniFile).Remove(0, 1)) Then
@@ -1110,28 +1396,217 @@ Namespace TrueTestWatcher
                             okFiles.Add(runningFile)
                         End If
                     Else
-                        iniNG = True
-                        CommLogUpdateText("Timed out comparing ini files")
+                        omitIniNG = True
+                        CommLogUpdateText("Timed out comparing omit ini files")
                     End If
                 End If
 
             Next
             If okFiles.Count > 0 Then
                 For Each item As String In okFiles
-                    CommLogUpdateText("OK INI file : " + item)
+                    CommLogUpdateText("OK Omit Ini file : " + item)
                 Next
             End If
             If ngFiles.Count > 0 Or runningFileMissing Then
-                iniNG = True
+                omitIniNG = True
                 For Each item As String In ngFiles
-                    CommLogUpdateText("NG Ini file : " + item)
+                    CommLogUpdateText("NG Omit Ini file : " + item)
                 Next
-                CommLogUpdateText("Checking Ini File Finished, NG")
+                CommLogUpdateText("Checking Omit Ini File Finished, NG")
             Else
-                CommLogUpdateText("Checking Ini File Finished, OK")
+                CommLogUpdateText("Checking Omit Ini File Finished, OK")
             End If
             sw.Stop()
             CommLogUpdateText("Elapsed time : " + (sw.ElapsedMilliseconds / 1000).ToString + " seconds.")
+        End Sub
+
+        Private Sub CompareCropIniFiles()
+            cropIniNG = False
+            If Not chkCompareCropIniFiles.Checked Then
+                CommLogUpdateText("SKIPPED CROP INI COMPARISION !!!")
+                Exit Sub
+            End If
+            Dim sw As New Stopwatch
+            sw.Start()
+            Dim CropINIFolder As String = "C:\Program Files\Radiant Vision Systems\TrueTest 1.8\POCB4.1Net"
+            Dim MasterCropINIFolder As String = "C:\MasterLGD\POCB4.1Net"
+            If Not Directory.Exists(MasterCropINIFolder) Then
+                Directory.CreateDirectory(MasterCropINIFolder)
+            End If
+            Dim MasterIniFiles As IEnumerable(Of String) = IO.Directory.EnumerateFiles(MasterCropINIFolder)
+            If MasterIniFiles.Count = 0 Then
+                CommLogUpdateText("No files in Master Crop INI folder to compare ! ")
+                Exit Sub
+            End If
+            Dim runningFileMissing As Boolean
+            Dim ngFiles As New List(Of String)
+            Dim okFiles As New List(Of String)
+
+            Dim IniTobeChecked As New List(Of String)
+            IniTobeChecked = DetectCropIni(runningSequencePath)
+
+            For Each masterIniFile As String In MasterIniFiles
+                If Not IniTobeChecked.Contains(Path.GetFileName(masterIniFile)) Then
+                    Continue For
+                End If
+                Dim filename = Path.GetFileName(masterIniFile)
+                Dim runningFile As String = Path.Combine(CropINIFolder, filename)
+                If Not File.Exists(runningFile) Then
+                    runningFileMissing = True
+                    cropIniNG = True
+                    CommLogUpdateText("NG Crop INI file : " + runningFile + " is not existed or deleted !")
+                    Continue For
+                End If
+                If {"ini"}.Contains(Path.GetExtension(masterIniFile).Remove(0, 1)) Then
+                    Dim compareProcess As Process = New Process
+                    Dim startinfo As System.Diagnostics.ProcessStartInfo = New System.Diagnostics.ProcessStartInfo()
+                    startinfo.FileName = System.IO.Path.Combine(My.Application.Info.DirectoryPath, "WinMergeU.exe")
+                    startinfo.Arguments = "-noninteractive -minimize -enableexitcode -cfg Settings/DiffContextV2=0 " + Chr(34) + runningFile + Chr(34) + " " + Chr(34) + masterIniFile + Chr(34)
+                    compareProcess = Process.Start(startinfo)
+
+                    If compareProcess.WaitForExit(15000) Then
+                        Dim ExitCode As Integer = compareProcess.ExitCode
+                        If ExitCode <> 0 Then
+                            ngFiles.Add(runningFile)
+                        Else
+                            okFiles.Add(runningFile)
+                        End If
+                    Else
+                        cropIniNG = True
+                        CommLogUpdateText("Timed out comparing crop ini files")
+                    End If
+                End If
+
+            Next
+            If okFiles.Count > 0 Then
+                For Each item As String In okFiles
+                    CommLogUpdateText("OK Crop Ini file : " + item)
+                Next
+            End If
+            If ngFiles.Count > 0 Or runningFileMissing Then
+                cropIniNG = True
+                For Each item As String In ngFiles
+                    CommLogUpdateText("NG Crop Ini file : " + item)
+                Next
+                CommLogUpdateText("Checking Crop Ini File Finished, NG")
+            Else
+                CommLogUpdateText("Checking Crop Ini File Finished, OK")
+            End If
+            sw.Stop()
+            CommLogUpdateText("Elapsed time : " + (sw.ElapsedMilliseconds / 1000).ToString + " seconds.")
+        End Sub
+
+        Private Sub CompareVnttIniFiles()
+            vnttIniNG = False
+            If Not chkCompareVnttIniFiles.Checked Then
+                CommLogUpdateText("SKIPPED VNTT INI COMPARISON !!!")
+                Exit Sub
+            End If
+
+            Dim sw As New Stopwatch
+            sw.Start()
+
+            'Read the contents of the YAML file
+            Dim yamlFilePath As String = "C:\Program Files\Radiant Vision Systems\TrueTest 1.8\POCB4.1Net\ConsoleSetting.yml"
+            Dim yamlContents As String = File.ReadAllText(yamlFilePath)
+
+            ' Define the pattern to match the drive letter followed by a colon
+            Dim pattern As String = "[A-Za-z]:\\\\" '[A-Za-z]:\\\\ matches a drive letter followed by two backslashes
+
+            ' Search for the pattern in the YAML contents
+            Dim match As Match = Regex.Match(yamlContents, pattern)
+
+            ' Extract the drive if a match is found
+            Dim drive As String = ""
+            If match.Success Then
+                drive = match.Value.Substring(0, 1) ' Extract the drive letter
+                CommLogUpdateText("Extract Drive from Console Setting: " & drive)
+            End If
+
+            Dim VnttINIFolder As String = drive + ":\DATABASE\InputIMG"
+            Dim MasterVnttINIFolder As String = "C:\MasterLGD\InputIMG"
+
+            Dim driveLetter As String = Path.GetPathRoot(VnttINIFolder)
+
+            If Not Directory.Exists(driveLetter) Then
+                ' Log a message indicating that the hard disk does not exist
+                CommLogUpdateText("SKIPPED VNTT INI COMPARISON !!!" + " Hard disk not found at path: " + driveLetter)
+                Exit Sub ' Exit the subroutine
+            End If
+
+            If Not Directory.Exists(MasterVnttINIFolder) Then
+                Directory.CreateDirectory(MasterVnttINIFolder)
+            End If
+
+            Dim MasterSubdirectories As String() = Directory.GetDirectories(MasterVnttINIFolder)
+
+            If MasterSubdirectories.Length = 0 Then
+                CommLogUpdateText("No subdirectories in Master Vntt INI folder to compare !")
+                Exit Sub
+            End If
+
+            Dim runningFileMissing As Boolean
+            Dim ngFiles As New List(Of String)
+            Dim okFiles As New List(Of String)
+
+            Dim subFolderToBeChecked As String = Path.Combine(MasterVnttINIFolder, Path.GetFileNameWithoutExtension(runningSequencePath))
+
+            For Each subdirectory As String In MasterSubdirectories
+                If subdirectory <> subFolderToBeChecked Then
+                    Continue For
+                End If
+                Dim masterIniFiles As IEnumerable(Of String) = IO.Directory.EnumerateFiles(subdirectory, "*.ini")
+
+                For Each masterIniFile As String In masterIniFiles
+
+                    Dim filename = Path.GetFileName(masterIniFile)
+                    Dim runningFile As String = Path.Combine(VnttINIFolder, Path.GetFileName(subdirectory), filename)
+
+                    If Not File.Exists(runningFile) Then
+                        runningFileMissing = True
+                        vnttIniNG = True
+                        CommLogUpdateText("NG INI file: " + runningFile + " is not existed or deleted!")
+                        Continue For
+                    End If
+
+                    Dim compareProcess As Process = New Process
+                    Dim startinfo As ProcessStartInfo = New ProcessStartInfo()
+                    startinfo.FileName = Path.Combine(My.Application.Info.DirectoryPath, "WinMergeU.exe")
+                    startinfo.Arguments = "-noninteractive -minimize -enableexitcode -cfg Settings/DiffContextV2=0 " + Chr(34) + runningFile + Chr(34) + " " + Chr(34) + masterIniFile + Chr(34)
+                    compareProcess = Process.Start(startinfo)
+
+                    If compareProcess.WaitForExit(15000) Then
+                        Dim ExitCode As Integer = compareProcess.ExitCode
+                        If ExitCode <> 0 Then
+                            ngFiles.Add(runningFile)
+                        Else
+                            okFiles.Add(runningFile)
+                        End If
+                    Else
+                        vnttIniNG = True
+                        CommLogUpdateText("Timed out comparing vntt ini files")
+                    End If
+                Next
+            Next
+
+            If okFiles.Count > 0 Then
+                For Each item As String In okFiles
+                    CommLogUpdateText("OK Vntt Ini file: " + item)
+                Next
+            End If
+
+            If ngFiles.Count > 0 Or runningFileMissing Then
+                vnttIniNG = True
+                For Each item As String In ngFiles
+                    CommLogUpdateText("NG Vntt Ini file: " + item)
+                Next
+                CommLogUpdateText("Checking Vntt Ini File Finished, NG")
+            Else
+                CommLogUpdateText("Checking Vntt Ini File Finished, OK")
+            End If
+
+            sw.Stop()
+            CommLogUpdateText("Elapsed time: " + (sw.ElapsedMilliseconds / 1000).ToString() + " seconds.")
         End Sub
 
         Public Sub GetColorCalRef(SequencePath As String, ByRef RefDict As Dictionary(Of String, String))
@@ -1331,12 +1806,16 @@ Namespace TrueTestWatcher
 
             CompareAppDataFiles()
 
+            CompareOmitIniFiles()
+            CompareCropIniFiles()
+            CompareVnttIniFiles()
+
             CommLogUpdateText("Finished Master Functions Check !!!")
 
             needtoCheck = False
 
             Dim status As String = ""
-            If Not parameterNG AndAlso Not calibrationNG AndAlso Not appdataNG Then
+            If Not parameterNG AndAlso Not calibrationNG AndAlso Not appdataNG AndAlso Not omitIniNG AndAlso Not cropIniNG AndAlso Not vnttIniNG Then
                 status = "OK"
             ElseIf parameterNG Then
                 status = "Parameter Missmatch"
@@ -1344,6 +1823,12 @@ Namespace TrueTestWatcher
                 status = "Calibration Missmatch"
             ElseIf appdataNG Then
                 status = "Appdata Missmatch"
+            ElseIf omitIniNG Then
+                status = "OmitIni Missmatch"
+            ElseIf cropIniNG Then
+                status = "CropIni Missmatch"
+            ElseIf vnttIniNG Then
+                status = "VnttIni Missmatch"
             End If
             File.WriteAllText(MasterStatusPath, status)
             CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
@@ -1817,7 +2302,598 @@ Namespace TrueTestWatcher
                 CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
 
             End If
+
+            'If Path.GetFileNameWithoutExtension(e.FullPath).Contains("ReceivedSEQCHECK") Then
+            '    Dim receivedTime As String = ""
+            '    Dim fileloaded As Boolean
+            '    While Not fileloaded
+            '        Try
+            '            receivedTime = File.ReadAllText(e.FullPath())
+            '            fileloaded = True
+            '        Catch ex As Exception
+            '            fileloaded = False
+            '        End Try
+            '    End While
+
+            '    If e.ChangeType = IO.WatcherChangeTypes.Changed Then
+            '        CommLogUpdateText("----------Received SEQCHECK at : " & receivedTime & "----------")
+            '    End If
+            '    If e.ChangeType = IO.WatcherChangeTypes.Created Then
+            '        CommLogUpdateText("----------Received SEQCHECK at : " & receivedTime & "----------")
+
+            '    End If
+            '    getSequenceFilePath()
+            '    getCurrentCameraSN()
+            '    CommLogUpdateText("Performing Master Sequence and Calibration Check !!!")
+
+            '    CheckForMatchingSequenceParameters(runningSequencePath, masterSequencePath)
+
+            '    CompareCalSettings(runningSequencePath, masterCalibrationPath)
+
+            '    CommLogUpdateText("Finished Master Sequence and Calibration Check !!!")
+
+            '    CommLogUpdateText("Performing Master Omit Ini Check !!!")
+
+            '    CompareOmitIniFiles()
+
+            '    CommLogUpdateText("Finished Master Omit Ini Check !!!")
+
+            '    CommLogUpdateText("Performing Master Crop Ini Check !!!")
+
+            '    CompareCropIniFiles()
+
+            '    CommLogUpdateText("Finished Master Crop Ini Check !!!")
+
+            '    CommLogUpdateText("Performing Master Vntt Ini Check !!!")
+
+            '    CompareVnttIniFiles()
+
+            '    CommLogUpdateText("Finished Master Vntt Ini Check !!!")
+
+            '    Dim status As String = ""
+            '    If Not parameterNG AndAlso Not calibrationNG AndAlso Not appdataNG AndAlso Not omitIniNG AndAlso Not cropIniNG AndAlso Not vnttIniNG Then
+            '        status = "OK"
+            '    ElseIf parameterNG Then
+            '        status = "Parameter Missmatch"
+            '    ElseIf calibrationNG Then
+            '        status = "Calibration Missmatch"
+            '    ElseIf appdataNG Then
+            '        status = "Appdata Missmatch"
+            '    ElseIf omitIniNG Then
+            '        status = "OmitIni Missmatch"
+            '    ElseIf cropIniNG Then
+            '        status = "CropIni Missmatch"
+            '    ElseIf vnttIniNG Then
+            '        status = "VnttIni Missmatch"
+            '    End If
+            '    File.WriteAllText(MasterStatusPath, status)
+            '    CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
+            'End If
+
         End Sub
+
+        Private Sub logchange7(ByVal source As Object, ByVal e As _
+                        System.IO.FileSystemEventArgs)
+
+            Dim filename As String = Path.GetFileNameWithoutExtension(e.FullPath).ToLower
+
+            Dim Extensions() As String = {".ini"}
+            If Extensions.Contains(Path.GetExtension(e.FullPath)) Then
+                If e.ChangeType = IO.WatcherChangeTypes.Changed Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been modified----------")
+
+                End If
+                If e.ChangeType = IO.WatcherChangeTypes.Created Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been created----------")
+
+                End If
+                If e.ChangeType = IO.WatcherChangeTypes.Deleted Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been deleted----------")
+
+                End If
+                CommLogUpdateText("Performing Master Omit Ini Check !!!")
+                getSequenceFilePath()
+                CompareOmitIniFiles()
+
+                CommLogUpdateText("Finished Master Omit Ini Check !!!")
+
+                Dim status As String = ""
+                If Not omitIniNG Then
+                    status = "OK"
+                Else
+                    status = "OmitIni Missmatch"
+                End If
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
+            End If
+        End Sub
+
+        Public Sub logrename7(ByVal source As Object, ByVal e As _
+                            System.IO.RenamedEventArgs)
+
+            Dim filename As String = Path.GetFileNameWithoutExtension(e.FullPath).ToLower
+
+            Dim Extensions() As String = {".ini"}
+            If Extensions.Contains(Path.GetExtension(e.FullPath)) Then
+                CommLogUpdateText("----------File" & e.OldName & " has been renamed to " & e.Name & "----------")
+
+                CommLogUpdateText("Performing Master Omit Ini Check !!!")
+                getSequenceFilePath()
+                CompareOmitIniFiles()
+
+                CommLogUpdateText("Finished Master Omit Ini Check !!!")
+
+                Dim status As String = ""
+                If Not omitIniNG Then
+                    status = "OK"
+                Else
+                    status = "OmitIni Missmatch"
+                End If
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
+            End If
+        End Sub
+
+        Private Sub logchange8(ByVal source As Object, ByVal e As _
+                        System.IO.FileSystemEventArgs)
+
+            Dim filename As String = Path.GetFileNameWithoutExtension(e.FullPath).ToLower
+
+            Dim Extensions() As String = {".ini"}
+            If Extensions.Contains(Path.GetExtension(e.FullPath)) Then
+                If e.ChangeType = IO.WatcherChangeTypes.Changed Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been modified----------")
+
+                End If
+                If e.ChangeType = IO.WatcherChangeTypes.Created Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been created----------")
+
+                End If
+                If e.ChangeType = IO.WatcherChangeTypes.Deleted Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been deleted----------")
+
+                End If
+                CommLogUpdateText("Performing Master Omit Ini Check !!!")
+                getSequenceFilePath()
+                CompareOmitIniFiles()
+
+                CommLogUpdateText("Finished Master Omit Ini Check !!!")
+
+                Dim status As String = ""
+                If Not omitIniNG Then
+                    status = "OK"
+                Else
+                    status = "OmitIni Missmatch"
+                End If
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
+            End If
+        End Sub
+
+        Public Sub logrename8(ByVal source As Object, ByVal e As _
+                            System.IO.RenamedEventArgs)
+
+            Dim filename As String = Path.GetFileNameWithoutExtension(e.FullPath).ToLower
+
+            Dim Extensions() As String = {".ini"}
+            If Extensions.Contains(Path.GetExtension(e.FullPath)) Then
+                CommLogUpdateText("----------File" & e.OldName & " has been renamed to " & e.Name & "----------")
+
+                CommLogUpdateText("Performing Master Omit Ini Check !!!")
+                getSequenceFilePath()
+                CompareOmitIniFiles()
+
+                CommLogUpdateText("Finished Master Omit Ini Check !!!")
+
+                Dim status As String = ""
+                If Not omitIniNG Then
+                    status = "OK"
+                Else
+                    status = "OmitIni Missmatch"
+                End If
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
+            End If
+        End Sub
+
+        Private Sub logchange9(ByVal source As Object, ByVal e As _
+                        System.IO.FileSystemEventArgs)
+
+            Dim filename As String = Path.GetFileNameWithoutExtension(e.FullPath).ToLower
+
+            Dim Extensions() As String = {".ini"}
+            If Extensions.Contains(Path.GetExtension(e.FullPath)) Then
+                If e.ChangeType = IO.WatcherChangeTypes.Changed Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been modified----------")
+
+                End If
+                If e.ChangeType = IO.WatcherChangeTypes.Created Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been created----------")
+
+                End If
+                If e.ChangeType = IO.WatcherChangeTypes.Deleted Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been deleted----------")
+
+                End If
+                CommLogUpdateText("Performing Master Crop Ini Check !!!")
+                getSequenceFilePath()
+                CompareCropIniFiles()
+
+                CommLogUpdateText("Finished Master Crop Ini Check !!!")
+
+                Dim status As String = ""
+                If Not cropIniNG Then
+                    status = "OK"
+                Else
+                    status = "CropIni Missmatch"
+                End If
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
+            End If
+        End Sub
+
+        Public Sub logrename9(ByVal source As Object, ByVal e As _
+                            System.IO.RenamedEventArgs)
+
+            Dim filename As String = Path.GetFileNameWithoutExtension(e.FullPath).ToLower
+
+            Dim Extensions() As String = {".ini"}
+            If Extensions.Contains(Path.GetExtension(e.FullPath)) Then
+                CommLogUpdateText("----------File" & e.OldName & " has been renamed to " & e.Name & "----------")
+
+                CommLogUpdateText("Performing Master Crop Ini Check !!!")
+                getSequenceFilePath()
+                CompareCropIniFiles()
+
+                CommLogUpdateText("Finished Master Crop Ini Check !!!")
+
+                Dim status As String = ""
+                If Not cropIniNG Then
+                    status = "OK"
+                Else
+                    status = "CropIni Missmatch"
+                End If
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
+            End If
+        End Sub
+
+        Private Sub logchange10(ByVal source As Object, ByVal e As _
+                        System.IO.FileSystemEventArgs)
+
+            Dim filename As String = Path.GetFileNameWithoutExtension(e.FullPath).ToLower
+
+            Dim Extensions() As String = {".ini"}
+            If Extensions.Contains(Path.GetExtension(e.FullPath)) Then
+                If e.ChangeType = IO.WatcherChangeTypes.Changed Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been modified----------")
+
+                End If
+                If e.ChangeType = IO.WatcherChangeTypes.Created Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been created----------")
+
+                End If
+                If e.ChangeType = IO.WatcherChangeTypes.Deleted Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been deleted----------")
+
+                End If
+                CommLogUpdateText("Performing Master Crop Ini Check !!!")
+                getSequenceFilePath()
+                CompareCropIniFiles()
+
+                CommLogUpdateText("Finished Master Crop Ini Check !!!")
+
+                Dim status As String = ""
+                If Not cropIniNG Then
+                    status = "OK"
+                Else
+                    status = "CropIni Missmatch"
+                End If
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
+            End If
+        End Sub
+
+        Public Sub logrename10(ByVal source As Object, ByVal e As _
+                            System.IO.RenamedEventArgs)
+
+            Dim filename As String = Path.GetFileNameWithoutExtension(e.FullPath).ToLower
+
+            Dim Extensions() As String = {".ini"}
+            If Extensions.Contains(Path.GetExtension(e.FullPath)) Then
+                CommLogUpdateText("----------File" & e.OldName & " has been renamed to " & e.Name & "----------")
+
+                CommLogUpdateText("Performing Master Crop Ini Check !!!")
+                getSequenceFilePath()
+                CompareCropIniFiles()
+
+                CommLogUpdateText("Finished Master Crop Ini Check !!!")
+
+                Dim status As String = ""
+                If Not cropIniNG Then
+                    status = "OK"
+                Else
+                    status = "CropIni Missmatch"
+                End If
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
+            End If
+        End Sub
+
+        Private Sub logchange11(ByVal source As Object, ByVal e As _
+                        System.IO.FileSystemEventArgs)
+
+            Dim filename As String = Path.GetFileNameWithoutExtension(e.FullPath).ToLower
+
+            Dim Extensions() As String = {".ini"}
+            If Extensions.Contains(Path.GetExtension(e.FullPath)) Then
+                If e.ChangeType = IO.WatcherChangeTypes.Changed Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been modified----------")
+
+                End If
+                If e.ChangeType = IO.WatcherChangeTypes.Created Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been created----------")
+
+                End If
+                If e.ChangeType = IO.WatcherChangeTypes.Deleted Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been deleted----------")
+
+                End If
+                CommLogUpdateText("Performing Master Vntt Ini Check !!!")
+                getSequenceFilePath()
+                CompareVnttIniFiles()
+
+                CommLogUpdateText("Finished Master Vntt Ini Check !!!")
+
+                Dim status As String = ""
+                If Not vnttIniNG Then
+                    status = "OK"
+                Else
+                    status = "VnttIni Missmatch"
+                End If
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
+            End If
+        End Sub
+
+        Public Sub logrename11(ByVal source As Object, ByVal e As _
+                            System.IO.RenamedEventArgs)
+
+            Dim filename As String = Path.GetFileNameWithoutExtension(e.FullPath).ToLower
+
+            Dim Extensions() As String = {".ini"}
+            If Extensions.Contains(Path.GetExtension(e.FullPath)) Then
+                CommLogUpdateText("----------File" & e.OldName & " has been renamed to " & e.Name & "----------")
+
+                CommLogUpdateText("Performing Master Vntt Ini Check !!!")
+                getSequenceFilePath()
+                CompareVnttIniFiles()
+
+                CommLogUpdateText("Finished Master Vntt Ini Check !!!")
+
+                Dim status As String = ""
+                If Not vnttIniNG Then
+                    status = "OK"
+                Else
+                    status = "VnttIni Missmatch"
+                End If
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
+            End If
+        End Sub
+
+        Private Sub logchange12(ByVal source As Object, ByVal e As _
+                        System.IO.FileSystemEventArgs)
+
+            Dim filename As String = Path.GetFileNameWithoutExtension(e.FullPath).ToLower
+
+            Dim Extensions() As String = {".ini"}
+            If Extensions.Contains(Path.GetExtension(e.FullPath)) Then
+                If e.ChangeType = IO.WatcherChangeTypes.Changed Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been modified----------")
+
+                End If
+                If e.ChangeType = IO.WatcherChangeTypes.Created Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been created----------")
+
+                End If
+                If e.ChangeType = IO.WatcherChangeTypes.Deleted Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been deleted----------")
+
+                End If
+                CommLogUpdateText("Performing Master Vntt Ini Check !!!")
+                getSequenceFilePath()
+                CompareVnttIniFiles()
+
+                CommLogUpdateText("Finished Master Vntt Ini Check !!!")
+
+                Dim status As String = ""
+                If Not vnttIniNG Then
+                    status = "OK"
+                Else
+                    status = "VnttIni Missmatch"
+                End If
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
+            End If
+        End Sub
+
+        Public Sub logrename12(ByVal source As Object, ByVal e As _
+                            System.IO.RenamedEventArgs)
+
+            Dim filename As String = Path.GetFileNameWithoutExtension(e.FullPath).ToLower
+
+            Dim Extensions() As String = {".ini"}
+            If Extensions.Contains(Path.GetExtension(e.FullPath)) Then
+                CommLogUpdateText("----------File" & e.OldName & " has been renamed to " & e.Name & "----------")
+
+                CommLogUpdateText("Performing Master Vntt Ini Check !!!")
+                getSequenceFilePath()
+                CompareVnttIniFiles()
+
+                CommLogUpdateText("Finished Master Vntt Ini Check !!!")
+
+                Dim status As String = ""
+                If Not vnttIniNG Then
+                    status = "OK"
+                Else
+                    status = "VnttIni Missmatch"
+                End If
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
+            End If
+        End Sub
+
+        Private Sub logchange13(ByVal source As Object, ByVal e As _
+                        System.IO.FileSystemEventArgs)
+
+            Dim filename As String = Path.GetFileNameWithoutExtension(e.FullPath).ToLower
+
+            Dim Extensions() As String = {".ini"}
+            If Extensions.Contains(Path.GetExtension(e.FullPath)) Then
+                If e.ChangeType = IO.WatcherChangeTypes.Changed Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been modified----------")
+
+                End If
+                If e.ChangeType = IO.WatcherChangeTypes.Created Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been created----------")
+
+                End If
+                If e.ChangeType = IO.WatcherChangeTypes.Deleted Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been deleted----------")
+
+                End If
+                CommLogUpdateText("Performing Master Vntt Ini Check !!!")
+                getSequenceFilePath()
+                CompareVnttIniFiles()
+
+                CommLogUpdateText("Finished Master Vntt Ini Check !!!")
+
+                Dim status As String = ""
+                If Not vnttIniNG Then
+                    status = "OK"
+                Else
+                    status = "VnttIni Missmatch"
+                End If
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
+            End If
+        End Sub
+
+        Public Sub logrename13(ByVal source As Object, ByVal e As _
+                            System.IO.RenamedEventArgs)
+
+            Dim filename As String = Path.GetFileNameWithoutExtension(e.FullPath).ToLower
+
+            Dim Extensions() As String = {".ini"}
+            If Extensions.Contains(Path.GetExtension(e.FullPath)) Then
+                CommLogUpdateText("----------File" & e.OldName & " has been renamed to " & e.Name & "----------")
+
+                CommLogUpdateText("Performing Master Vntt Ini Check !!!")
+                getSequenceFilePath()
+                CompareVnttIniFiles()
+
+                CommLogUpdateText("Finished Master Vntt Ini Check !!!")
+
+                Dim status As String = ""
+                If Not vnttIniNG Then
+                    status = "OK"
+                Else
+                    status = "VnttIni Missmatch"
+                End If
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
+            End If
+        End Sub
+
+        Function DetectOmitIni(sequenceFilePath As String) As List(Of String)
+            Dim result As New List(Of String)
+            Try
+                ' Load the XML document
+                Dim xmlDoc As XDocument = XDocument.Load(sequenceFilePath)
+
+                ' Step 1: Find all SequenceItem elements
+                Dim sequenceItems = xmlDoc...<SequenceItem>
+
+                ' Step 2: Filter SequenceItem elements where Selected is true
+                Dim selectedItems = From item In sequenceItems
+                                    Where item.<Selected>.Value = "true"
+
+                ' Step 3: Extract OmitINI values from Analysis element of selected items,
+                ' but only include those with non-empty values
+                Dim omitINIValues = From item In selectedItems
+                                    Let omitINI = item.<Analysis>.<OmitIni>.FirstOrDefault()
+                                    Where omitINI IsNot Nothing AndAlso Not String.IsNullOrWhiteSpace(omitINI.Value)
+                                    Select omitINI.Value
+
+                ' Print out the OmitINI values or use them as needed
+                For Each value In omitINIValues
+                    If Not result.Contains(value) Then
+                        result.Add(value)
+                    End If
+                Next
+            Catch ex As Exception
+                ' Handle any exceptions that occur
+                MessageBox.Show("Error: " & ex.Message)
+            End Try
+
+            Return result
+
+        End Function
+
+        Function DetectCropIni(sequenceFilePath As String) As List(Of String)
+            Dim result As New List(Of String)
+            Try
+                ' Load the XML document
+                Dim xmlDoc As XDocument = XDocument.Load(sequenceFilePath)
+
+                ' Step 1: Find all SequenceItem elements
+                Dim sequenceItems = xmlDoc...<SequenceItem>
+
+                ' Step 2: Filter SequenceItem elements where Selected is true
+                Dim selectedItems = From item In sequenceItems
+                                    Where item.<Selected>.Value = "true"
+
+                ' Step 3: Extract IniFile_Crop values or IniFile values from Analysis element of selected items,
+                ' but only include those with non-empty values
+                Dim cropIniValues = From item In selectedItems
+                                    Let iniFileCrop = item.<Analysis>.<INIFile_Crop>.FirstOrDefault()
+                                    Let iniFile = item.<Analysis>.<INIFile>.FirstOrDefault()
+                                    Where (iniFileCrop IsNot Nothing AndAlso Not String.IsNullOrWhiteSpace(iniFileCrop.Value)) OrElse
+                                  (iniFile IsNot Nothing AndAlso Not String.IsNullOrWhiteSpace(iniFile.Value))
+                                    Select If(iniFileCrop IsNot Nothing AndAlso Not String.IsNullOrWhiteSpace(iniFileCrop.Value),
+                                      iniFileCrop.Value,
+                                      iniFile.Value)
+
+                ' Add the values to the result list
+                For Each value In cropIniValues
+                    If Not result.Contains(value) Then
+                        result.Add(value)
+                    End If
+                Next
+            Catch ex As Exception
+                ' Handle any exceptions that occur
+                MessageBox.Show("Error: " & ex.Message)
+            End Try
+
+            Return result
+        End Function
+
 
         Private Sub ManualCheckToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ManualCheckToolStripMenuItem.Click
             CommLogUpdateText("Performing Master Functions Check !!!")
@@ -1829,11 +2905,13 @@ Namespace TrueTestWatcher
             CompareCalSettings(runningSequencePath, masterCalibrationPath)
 
             CompareAppDataFiles()
-            CompareIniFiles()
+            CompareOmitIniFiles()
+            CompareCropIniFiles()
+            CompareVnttIniFiles()
             CommLogUpdateText("Finished Master Functions Check !!!")
 
             Dim status As String = ""
-            If Not parameterNG AndAlso Not calibrationNG AndAlso Not appdataNG Then
+            If Not parameterNG AndAlso Not calibrationNG AndAlso Not appdataNG AndAlso Not omitIniNG AndAlso Not cropIniNG AndAlso Not vnttIniNG Then
                 status = "OK"
             ElseIf parameterNG Then
                 status = "Parameter Missmatch"
@@ -1841,6 +2919,12 @@ Namespace TrueTestWatcher
                 status = "Calibration Missmatch"
             ElseIf appdataNG Then
                 status = "Appdata Missmatch"
+            ElseIf omitIniNG Then
+                status = "OmitIni Missmatch"
+            ElseIf cropIniNG Then
+                status = "CropIni Missmatch"
+            ElseIf vnttIniNG Then
+                status = "VnttIni Missmatch"
             End If
             File.WriteAllText(MasterStatusPath, status)
             CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")

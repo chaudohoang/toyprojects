@@ -48,6 +48,7 @@ Namespace TrueTestWatcher
             Me.TabControl1 = New System.Windows.Forms.TabControl()
             Me.TabPage1 = New System.Windows.Forms.TabPage()
             Me.TabPage2 = New System.Windows.Forms.TabPage()
+            Me.chkCompareOmitIniFiles = New System.Windows.Forms.CheckBox()
             Me.cbxAutologPath = New System.Windows.Forms.ComboBox()
             Me.chkAutolog = New System.Windows.Forms.CheckBox()
             Me.cbxAppdataIgnoreList = New System.Windows.Forms.ComboBox()
@@ -57,7 +58,8 @@ Namespace TrueTestWatcher
             Me.chkCompareAppdataFiles = New System.Windows.Forms.CheckBox()
             Me.chkCompareSequenceCalibrations = New System.Windows.Forms.CheckBox()
             Me.chkCompareSequenceParameters = New System.Windows.Forms.CheckBox()
-            Me.chkCompareIniFiles = New System.Windows.Forms.CheckBox()
+            Me.chkCompareCropIniFiles = New System.Windows.Forms.CheckBox()
+            Me.chkCompareVnttIniFiles = New System.Windows.Forms.CheckBox()
             Me.contextMenuStrip1.SuspendLayout()
             Me.menuStrip1.SuspendLayout()
             Me.TabControl1.SuspendLayout()
@@ -218,7 +220,9 @@ Namespace TrueTestWatcher
             '
             'TabPage2
             '
-            Me.TabPage2.Controls.Add(Me.chkCompareIniFiles)
+            Me.TabPage2.Controls.Add(Me.chkCompareVnttIniFiles)
+            Me.TabPage2.Controls.Add(Me.chkCompareCropIniFiles)
+            Me.TabPage2.Controls.Add(Me.chkCompareOmitIniFiles)
             Me.TabPage2.Controls.Add(Me.cbxAutologPath)
             Me.TabPage2.Controls.Add(Me.chkAutolog)
             Me.TabPage2.Controls.Add(Me.cbxAppdataIgnoreList)
@@ -235,6 +239,18 @@ Namespace TrueTestWatcher
             Me.TabPage2.TabIndex = 1
             Me.TabPage2.Text = "Compare Settings"
             Me.TabPage2.UseVisualStyleBackColor = True
+            '
+            'chkCompareOmitIniFiles
+            '
+            Me.chkCompareOmitIniFiles.AutoSize = True
+            Me.chkCompareOmitIniFiles.Checked = True
+            Me.chkCompareOmitIniFiles.CheckState = System.Windows.Forms.CheckState.Checked
+            Me.chkCompareOmitIniFiles.Location = New System.Drawing.Point(6, 75)
+            Me.chkCompareOmitIniFiles.Name = "chkCompareOmitIniFiles"
+            Me.chkCompareOmitIniFiles.Size = New System.Drawing.Size(130, 17)
+            Me.chkCompareOmitIniFiles.TabIndex = 34
+            Me.chkCompareOmitIniFiles.Text = "Compare Omit Ini Files"
+            Me.chkCompareOmitIniFiles.UseVisualStyleBackColor = True
             '
             'cbxAutologPath
             '
@@ -332,17 +348,29 @@ Namespace TrueTestWatcher
             Me.chkCompareSequenceParameters.Text = "Compare Sequence Parameters"
             Me.chkCompareSequenceParameters.UseVisualStyleBackColor = True
             '
-            'chkCompareIniFiles
+            'chkCompareCropIniFiles
             '
-            Me.chkCompareIniFiles.AutoSize = True
-            Me.chkCompareIniFiles.Checked = True
-            Me.chkCompareIniFiles.CheckState = System.Windows.Forms.CheckState.Checked
-            Me.chkCompareIniFiles.Location = New System.Drawing.Point(6, 75)
-            Me.chkCompareIniFiles.Name = "chkCompareIniFiles"
-            Me.chkCompareIniFiles.Size = New System.Drawing.Size(106, 17)
-            Me.chkCompareIniFiles.TabIndex = 34
-            Me.chkCompareIniFiles.Text = "Compare Ini Files"
-            Me.chkCompareIniFiles.UseVisualStyleBackColor = True
+            Me.chkCompareCropIniFiles.AutoSize = True
+            Me.chkCompareCropIniFiles.Checked = True
+            Me.chkCompareCropIniFiles.CheckState = System.Windows.Forms.CheckState.Checked
+            Me.chkCompareCropIniFiles.Location = New System.Drawing.Point(142, 75)
+            Me.chkCompareCropIniFiles.Name = "chkCompareCropIniFiles"
+            Me.chkCompareCropIniFiles.Size = New System.Drawing.Size(131, 17)
+            Me.chkCompareCropIniFiles.TabIndex = 35
+            Me.chkCompareCropIniFiles.Text = "Compare Crop Ini Files"
+            Me.chkCompareCropIniFiles.UseVisualStyleBackColor = True
+            '
+            'chkCompareVnttIniFiles
+            '
+            Me.chkCompareVnttIniFiles.AutoSize = True
+            Me.chkCompareVnttIniFiles.Checked = True
+            Me.chkCompareVnttIniFiles.CheckState = System.Windows.Forms.CheckState.Checked
+            Me.chkCompareVnttIniFiles.Location = New System.Drawing.Point(278, 75)
+            Me.chkCompareVnttIniFiles.Name = "chkCompareVnttIniFiles"
+            Me.chkCompareVnttIniFiles.Size = New System.Drawing.Size(128, 17)
+            Me.chkCompareVnttIniFiles.TabIndex = 36
+            Me.chkCompareVnttIniFiles.Text = "Compare Vntt Ini Files"
+            Me.chkCompareVnttIniFiles.UseVisualStyleBackColor = True
             '
             'MainForm
             '
@@ -401,6 +429,8 @@ Namespace TrueTestWatcher
         Friend WithEvents DeleteMasterStatusToolStripMenuItem As Windows.Forms.ToolStripMenuItem
         Friend WithEvents cbxAutologPath As Windows.Forms.ComboBox
         Friend WithEvents chkAutolog As Windows.Forms.CheckBox
-        Friend WithEvents chkCompareIniFiles As Windows.Forms.CheckBox
+        Friend WithEvents chkCompareOmitIniFiles As Windows.Forms.CheckBox
+        Friend WithEvents chkCompareVnttIniFiles As Windows.Forms.CheckBox
+        Friend WithEvents chkCompareCropIniFiles As Windows.Forms.CheckBox
     End Class
 End Namespace
