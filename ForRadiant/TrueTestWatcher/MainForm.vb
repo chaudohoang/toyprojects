@@ -2280,23 +2280,34 @@ Namespace TrueTestWatcher
 
                 End If
 
-                CommLogUpdateText("Performing Master Sequence and Calibration Check !!!")
+                CommLogUpdateText("Performing Master Functions Check !!!")
 
                 getSequenceFilePath()
                 getCurrentCameraSN()
                 CheckForMatchingSequenceParameters(runningSequencePath, masterSequencePath)
 
                 CompareCalSettings(runningSequencePath, masterCalibrationPath)
+                CompareOmitIniFiles()
+                CompareCropIniFiles()
+                CompareVnttIniFiles()
 
-                CommLogUpdateText("Finished Master Sequence and Calibration Check !!!")
+                CommLogUpdateText("Finished Master Functions Check !!!")
 
                 Dim status As String = ""
-                If Not parameterNG AndAlso Not calibrationNG Then
+                If Not parameterNG AndAlso Not calibrationNG AndAlso Not appdataNG AndAlso Not omitIniNG AndAlso Not cropIniNG AndAlso Not vnttIniNG Then
                     status = "OK"
                 ElseIf parameterNG Then
                     status = "Parameter Missmatch"
                 ElseIf calibrationNG Then
                     status = "Calibration Missmatch"
+                ElseIf appdataNG Then
+                    status = "Appdata Missmatch"
+                ElseIf omitIniNG Then
+                    status = "OmitIni Missmatch"
+                ElseIf cropIniNG Then
+                    status = "CropIni Missmatch"
+                ElseIf vnttIniNG Then
+                    status = "VnttIni Missmatch"
                 End If
                 File.WriteAllText(MasterStatusPath, status)
                 CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
