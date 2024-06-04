@@ -134,53 +134,68 @@ Namespace AutoDeleteData
             SaveSettings()
         End Sub
         Private Sub SaveSettings()
-            Dim settings As New Dictionary(Of String, String)
-            If startMinimizedToolStripMenuItem.Checked Then
-                settings.Add("startminimized", "true")
-            Else
-                settings.Add("startminimized", "false")
-            End If
-            If minimizedToTrayToolStripMenuItem.Checked Then
-                settings.Add("minimizedtotray", "true")
-            Else
-                settings.Add("minimizedtotray", "false")
-            End If
-            If MonitorAutomaticallyToolStripMenuItem.Checked Then
-                settings.Add("monitorautomatically", "true")
-            Else
-                settings.Add("monitorautomatically", "false")
-            End If
-            Dim settingContent As String = ""
-            Dim keys() As String = settings.Keys.ToArray
-            For Each k As String In keys
-                settingContent += k + "=" + settings(k) + Environment.NewLine
-            Next
             Try
-                File.WriteAllText(settingPath, settingContent)
-            Catch ex As Exception
+                Using writer As New StreamWriter(settingPath)
+                    ' Save control settings
+                    For Each ctrl As Control In Me.Controls
+                        If TypeOf ctrl Is Windows.Forms.TextBox Then
+                            writer.WriteLine($"{ctrl.Name}={ctrl.Text}")
+                        ElseIf TypeOf ctrl Is CheckBox Then
+                            Dim checkBox As CheckBox = DirectCast(ctrl, CheckBox)
+                            writer.WriteLine($"{ctrl.Name}={checkBox.Checked}")
+                        End If
+                    Next
 
+                    ' Save ToolStripMenuItem settings
+                    writer.WriteLine($"startminimized={startMinimizedToolStripMenuItem.Checked}")
+                    writer.WriteLine($"minimizedtotray={minimizedToTrayToolStripMenuItem.Checked}")
+                    writer.WriteLine($"monitorautomatically={MonitorAutomaticallyToolStripMenuItem.Checked}")
+                End Using
+            Catch ex As Exception
+                MessageBox.Show("Error saving settings: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
             End Try
         End Sub
         Private Sub LoadSettings()
-            Try
-                If File.Exists(settingPath) Then
+            If File.Exists(settingPath) Then
+                Try
                     Dim settings() As String = File.ReadAllLines(settingPath)
                     For Each line As String In settings
-                        Dim setting As String = line.Split("=")(0)
-                        Dim value As String = line.Split("=")(1)
-                        If setting = "startminimized" Then
-                            startMinimizedToolStripMenuItem.Checked = If(value = "true", True, False)
-                        ElseIf setting = "minimizedtotray" Then
-                            minimizedToTrayToolStripMenuItem.Checked = If(value = "true", True, False)
-                        ElseIf setting = "monitorautomatically" Then
-                            MonitorAutomaticallyToolStripMenuItem.Checked = If(value = "true", True, False)
+                        Dim parts As String() = line.Split("="c)
+                        If parts.Length = 2 Then
+                            Dim setting As String = parts(0).Trim()
+                            Dim value As String = parts(1).Trim()
+
+                            ' Check for ToolStripMenuItem settings
+                            If setting = "startminimized" Then
+                                startMinimizedToolStripMenuItem.Checked = (value.ToLower() = "true")
+                            ElseIf setting = "minimizedtotray" Then
+                                minimizedToTrayToolStripMenuItem.Checked = (value.ToLower() = "true")
+                            ElseIf setting = "monitorautomatically" Then
+                                MonitorAutomaticallyToolStripMenuItem.Checked = (value.ToLower() = "true")
+                            Else
+                                ' Check for control settings
+                                Dim ctrl As Control = Me.Controls.Find(setting, True).FirstOrDefault()
+                                If ctrl IsNot Nothing Then
+                                    If TypeOf ctrl Is Windows.Forms.TextBox Then
+                                        ctrl.Text = value
+                                    ElseIf TypeOf ctrl Is CheckBox Then
+                                        Dim checkBox As CheckBox = DirectCast(ctrl, CheckBox)
+                                        checkBox.Checked = Boolean.Parse(value)
+                                    End If
+                                End If
+                            End If
                         End If
                     Next
-                End If
-            Catch ex As Exception
-
-            End Try
+                Catch ex As Exception
+                    MessageBox.Show("Error loading settings: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                End Try
+            End If
         End Sub
+
+        Private Function InlineAssignHelper(Of T)(ByRef target As T, ByVal value As T) As T
+            target = value
+            Return value
+        End Function
 
         Private Sub LoadAllMonitorList()
             Dim CSVFilePathName = "C:\Radiant Vision Systems Data\TrueTest\UserData\foldermonitorlist.csv"
