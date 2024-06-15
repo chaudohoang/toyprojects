@@ -1,4 +1,4 @@
-SkipFileLastCreationTime=true
-SkipFolderLastCreationTime=true
+SkipFileLastCreationTime=false
+SkipFolderLastCreationTime=false
 FileLastCreationTime=30
 FolderLastCreationTime=30
