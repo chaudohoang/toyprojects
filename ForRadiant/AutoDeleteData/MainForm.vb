@@ -691,7 +691,7 @@ Namespace AutoDeleteData
                         Continue For ' Skip deletion of excluded files
                     End If
 
-                    If (Now - file.CreationTime).Days > period Then
+                    If (Now - file.CreationTime).Days >= period Then
                         Try
                             file.Delete()
                             WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Deleted " + file.FullName + Environment.NewLine)
@@ -726,7 +726,7 @@ Namespace AutoDeleteData
                         End If
                     End If
 
-                    If (Now - parentDirectory.CreationTime).Days > period Then
+                    If (Now - parentDirectory.CreationTime).Days >= period Then
                         ' Delete the parent directory if it meets the deletion criteria
                         Try
                             parentDirectory.Delete()
