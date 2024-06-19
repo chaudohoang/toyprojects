@@ -53,6 +53,7 @@ Namespace TrueTestWatcher
         Dim watchPath11 As String = "C:\MasterLGD\InputIMG"
         Dim watchPath12 As String = "E:\DATABASE\InputIMG"
         Dim watchPath13 As String = "D:\DATABASE\InputIMG"
+        Dim watchPath14 As String = "C:\DATABASE\InputIMG"
         Public watchfolder As FileSystemWatcher
         Public watchers As List(Of FileSystemWatcher)
 
@@ -126,6 +127,7 @@ Namespace TrueTestWatcher
             watchFolder11()
             watchFolder12()
             watchFolder13()
+            watchFolder14()
             If StartMinimizedToolStripMenuItem.Checked = True Then
                 Me.WindowState = FormWindowState.Minimized
             End If
@@ -630,6 +632,53 @@ Namespace TrueTestWatcher
 
                 ' Add the rename handler as the signature is different
                 AddHandler watcher.Renamed, AddressOf logrename13
+
+                ' Set this property to true to start watching
+                watcher.EnableRaisingEvents = True
+
+                ' Add the watcher to the list
+                watchers.Add(watcher)
+            Next
+        End Sub
+
+        Private Sub watchFolder14()
+            ' Initialize the list of watchers
+            watchers = New List(Of FileSystemWatcher)
+
+            Dim driveLetter As String = Path.GetPathRoot(watchPath14)
+
+            If Not Directory.Exists(driveLetter) Then
+                ' Log a message indicating that the hard disk does not exist
+                CommLogUpdateText("Hard disk not found at path: " + driveLetter)
+                Exit Sub ' Exit the subroutine
+            End If
+
+            ' This is the path we want to monitor
+            If Not Directory.Exists(watchPath14) Then
+                Directory.CreateDirectory(watchPath14)
+            End If
+
+            ' Get all immediate subdirectories of watchPath14
+            Dim subdirectories As String() = Directory.GetDirectories(watchPath14)
+
+            For Each subdirectory As String In subdirectories
+                Dim watcher As New FileSystemWatcher()
+
+                ' Set the path to the subdirectory
+                watcher.Path = subdirectory
+
+                ' Add a list of filters we want to specify
+                watcher.NotifyFilter = NotifyFilters.DirectoryName Or
+                               NotifyFilters.FileName Or
+                               NotifyFilters.Attributes
+
+                ' Add the handler to each event
+                AddHandler watcher.Changed, AddressOf logchange14
+                AddHandler watcher.Created, AddressOf logchange14
+                AddHandler watcher.Deleted, AddressOf logchange14
+
+                ' Add the rename handler as the signature is different
+                AddHandler watcher.Renamed, AddressOf logrename14
 
                 ' Set this property to true to start watching
                 watcher.EnableRaisingEvents = True
@@ -2806,6 +2855,70 @@ Namespace TrueTestWatcher
         End Sub
 
         Public Sub logrename13(ByVal source As Object, ByVal e As _
+                            System.IO.RenamedEventArgs)
+
+            Dim filename As String = Path.GetFileNameWithoutExtension(e.FullPath).ToLower
+
+            Dim Extensions() As String = {".ini"}
+            If Extensions.Contains(Path.GetExtension(e.FullPath)) Then
+                CommLogUpdateText("----------File" & e.OldName & " has been renamed to " & e.Name & "----------")
+
+                CommLogUpdateText("Performing Master Vntt Ini Check !!!")
+                getSequenceFilePath()
+                CompareVnttIniFiles()
+
+                CommLogUpdateText("Finished Master Vntt Ini Check !!!")
+
+                Dim status As String = ""
+                If Not vnttIniNG Then
+                    status = "OK"
+                Else
+                    status = "VnttIni Missmatch"
+                End If
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
+            End If
+        End Sub
+
+        Private Sub logchange14(ByVal source As Object, ByVal e As _
+                        System.IO.FileSystemEventArgs)
+
+            Dim filename As String = Path.GetFileNameWithoutExtension(e.FullPath).ToLower
+
+            Dim Extensions() As String = {".ini"}
+            If Extensions.Contains(Path.GetExtension(e.FullPath)) Then
+                If e.ChangeType = IO.WatcherChangeTypes.Changed Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been modified----------")
+
+                End If
+                If e.ChangeType = IO.WatcherChangeTypes.Created Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been created----------")
+
+                End If
+                If e.ChangeType = IO.WatcherChangeTypes.Deleted Then
+                    CommLogUpdateText("----------File " & e.FullPath & " has been deleted----------")
+
+                End If
+                CommLogUpdateText("Performing Master Vntt Ini Check !!!")
+                getSequenceFilePath()
+                CompareVnttIniFiles()
+
+                CommLogUpdateText("Finished Master Vntt Ini Check !!!")
+
+                Dim status As String = ""
+                If Not vnttIniNG Then
+                    status = "OK"
+                Else
+                    status = "VnttIni Missmatch"
+                End If
+                File.WriteAllText(MasterStatusPath, status)
+                CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
+
+            End If
+        End Sub
+
+        Public Sub logrename14(ByVal source As Object, ByVal e As _
                             System.IO.RenamedEventArgs)
 
             Dim filename As String = Path.GetFileNameWithoutExtension(e.FullPath).ToLower
