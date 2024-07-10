@@ -12,6 +12,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Collections.Generic;
 using System.Threading;
+using System.Text;
 
 namespace RemoteTools
 {
@@ -236,6 +237,45 @@ namespace RemoteTools
 
                 }
 
+            }
+        }
+
+        private void btnSaveList_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                StringBuilder sb = new StringBuilder();
+
+                // Build the header using column names from the DataGridView
+                foreach (DataGridViewColumn column in dataGridView1.Columns)
+                {
+                    sb.Append(column.HeaderText + ',');
+                }
+                sb.AppendLine();
+
+                // Build the rows
+                foreach (DataGridViewRow row in dataGridView1.Rows)
+                {
+                    foreach (DataGridViewCell cell in row.Cells)
+                    {
+                        // Convert cell.Value to string, handle DBNull.Value if necessary
+                        string cellValue = (cell.Value ?? string.Empty).ToString();
+
+                        // Replace any commas in cell value with a space (or handle differently if needed)
+                        cellValue = cellValue.Replace(",", " ");
+
+                        sb.Append(cellValue + ',');
+                    }
+                    sb.AppendLine();
+                }
+
+                // Write to file
+                File.WriteAllText("All.csv", sb.ToString());
+                MessageBox.Show("CSV file saved successfully.");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error saving CSV file: " + ex.Message);
             }
         }
     }

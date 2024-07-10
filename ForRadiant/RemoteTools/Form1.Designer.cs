@@ -36,6 +36,7 @@
             this.button1 = new System.Windows.Forms.Button();
             this.btnPing = new System.Windows.Forms.Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.btnSaveList = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -49,9 +50,9 @@
             // 
             // btnFileShare
             // 
-            this.btnFileShare.Location = new System.Drawing.Point(137, 415);
+            this.btnFileShare.Location = new System.Drawing.Point(172, 415);
             this.btnFileShare.Name = "btnFileShare";
-            this.btnFileShare.Size = new System.Drawing.Size(119, 23);
+            this.btnFileShare.Size = new System.Drawing.Size(84, 23);
             this.btnFileShare.TabIndex = 2;
             this.btnFileShare.Text = "File Share";
             this.btnFileShare.UseVisualStyleBackColor = true;
@@ -87,9 +88,9 @@
             // 
             // btnPing
             // 
-            this.btnPing.Location = new System.Drawing.Point(12, 415);
+            this.btnPing.Location = new System.Drawing.Point(101, 415);
             this.btnPing.Name = "btnPing";
-            this.btnPing.Size = new System.Drawing.Size(119, 23);
+            this.btnPing.Size = new System.Drawing.Size(65, 23);
             this.btnPing.TabIndex = 2;
             this.btnPing.Text = "Ping";
             this.btnPing.UseVisualStyleBackColor = true;
@@ -104,11 +105,22 @@
             this.richTextBox1.TabIndex = 7;
             this.richTextBox1.Text = "";
             // 
+            // btnSaveList
+            // 
+            this.btnSaveList.Location = new System.Drawing.Point(12, 415);
+            this.btnSaveList.Name = "btnSaveList";
+            this.btnSaveList.Size = new System.Drawing.Size(83, 23);
+            this.btnSaveList.TabIndex = 8;
+            this.btnSaveList.Text = "Save List";
+            this.btnSaveList.UseVisualStyleBackColor = true;
+            this.btnSaveList.Click += new System.EventHandler(this.btnSaveList_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(392, 612);
+            this.Controls.Add(this.btnSaveList);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.btnRemoteControl);
@@ -135,6 +147,7 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button btnPing;
         private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.Button btnSaveList;
     }
 }
 
