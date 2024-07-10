@@ -2959,10 +2959,14 @@ Namespace TrueTestWatcher
                                     Where item.<Selected>.Value = "true"
 
                 ' Step 3: Extract OmitINI values from Analysis element of selected items,
-                ' but only include those with non-empty values
+                ' but only include those with non-empty values and PerformScratchDustDetect = true
                 Dim omitINIValues = From item In selectedItems
                                     Let omitINI = item.<Analysis>.<OmitIni>.FirstOrDefault()
-                                    Where omitINI IsNot Nothing AndAlso Not String.IsNullOrWhiteSpace(omitINI.Value)
+                                    Let performScratchDustDetect = item.<Analysis>.<PerformScratchDustDetect>.FirstOrDefault()
+                                    Where omitINI IsNot Nothing AndAlso
+                                  performScratchDustDetect IsNot Nothing AndAlso
+                                  performScratchDustDetect.Value = "true" AndAlso
+                                  Not String.IsNullOrWhiteSpace(omitINI.Value)
                                     Select omitINI.Value
 
                 ' Print out the OmitINI values or use them as needed
@@ -2977,8 +2981,8 @@ Namespace TrueTestWatcher
             End Try
 
             Return result
-
         End Function
+
 
         Function DetectCropIni(sequenceFilePath As String) As List(Of String)
             Dim result As New List(Of String)
