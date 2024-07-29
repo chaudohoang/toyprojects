@@ -1557,7 +1557,33 @@ Namespace TrueTestWatcher
 
             'Read the contents of the YAML file
             Dim yamlFilePath As String = "C:\Program Files\Radiant Vision Systems\TrueTest 1.8\POCB4.1Net\ConsoleSetting.yml"
-            Dim yamlContents As String = File.ReadAllText(yamlFilePath)
+            Dim yamlContents As String = String.Empty
+
+            Dim timeout As Integer = 5000 ' Timeout in milliseconds (5 seconds)
+            Dim retryInterval As Integer = 500 ' Retry interval in milliseconds (0.5 second)
+            Dim endTime As DateTime = DateTime.Now.AddMilliseconds(timeout)
+
+            While DateTime.Now < endTime
+                Try
+                    yamlContents = File.ReadAllText(yamlFilePath)
+                    CommLogUpdateText("File read successfully.")
+                    Exit While
+                Catch ex As IOException
+                    CommLogUpdateText("File is in use. Retrying...")
+                    Thread.Sleep(retryInterval)
+                Catch ex As UnauthorizedAccessException
+                    CommLogUpdateText("Access denied: " & ex.Message)
+                    Exit While
+                Catch ex As FileNotFoundException
+                    CommLogUpdateText("File not found: " & ex.Message)
+                    Exit While
+                End Try
+            End While
+
+            If String.IsNullOrEmpty(yamlContents) Then
+                CommLogUpdateText("Failed to read the file within the timeout period.")
+                Exit Sub
+            End If
 
             ' Define the pattern to match the drive letter followed by a colon
             Dim pattern As String = "[A-Za-z]:\\\\" '[A-Za-z]:\\\\ matches a drive letter followed by two backslashes
@@ -1889,22 +1915,30 @@ Namespace TrueTestWatcher
             Dim xmlDoc1 = New XmlDocument()
             If File.Exists("C:\Radiant Vision Systems Data\TrueTest\UserData\CurrentSequence.txt") Then
                 Dim fileloaded As Boolean
-                While Not fileloaded
+                Dim timeout As Integer = 5000 ' Timeout in milliseconds (5 seconds)
+                Dim retryInterval As Integer = 500 ' Retry interval in milliseconds (0.5 second)
+                Dim endTime As DateTime = DateTime.Now.AddMilliseconds(timeout)
+                While Not fileloaded AndAlso DateTime.Now < endTime
                     Try
                         runningSequencePath = File.ReadAllText("C:\Radiant Vision Systems Data\TrueTest\UserData\CurrentSequence.txt")
                         fileloaded = True
                     Catch ex As Exception
                         fileloaded = False
+                        Thread.Sleep(retryInterval)
                     End Try
                 End While
             Else
                 Dim fileloaded As Boolean
-                While Not fileloaded
+                Dim timeout As Integer = 5000 ' Timeout in milliseconds (10 seconds)
+                Dim retryInterval As Integer = 500 ' Retry interval in milliseconds (0.5 second)
+                Dim endTime As DateTime = DateTime.Now.AddMilliseconds(timeout)
+                While Not fileloaded AndAlso DateTime.Now < endTime
                     Try
                         xmlDoc1.Load("C:\Radiant Vision Systems Data\TrueTest\AppData\1.8\app.settings")
                         fileloaded = True
                     Catch ex As Exception
                         fileloaded = False
+                        Thread.Sleep(retryInterval)
                     End Try
                 End While
                 node1 = xmlDoc1.DocumentElement.SelectSingleNode("/Settings/LastSequenceFile")
@@ -1921,12 +1955,16 @@ Namespace TrueTestWatcher
 
             If File.Exists("C:\Radiant Vision Systems Data\TrueTest\UserData\CameraSN.txt") Then
                 Dim fileloaded As Boolean
-                While Not fileloaded
+                Dim timeout As Integer = 5000 ' Timeout in milliseconds (5 seconds)
+                Dim retryInterval As Integer = 500 ' Retry interval in milliseconds (0.5 second)
+                Dim endTime As DateTime = DateTime.Now.AddMilliseconds(timeout)
+                While Not fileloaded AndAlso DateTime.Now < endTime
                     Try
                         CameraSN = File.ReadAllText("C:\Radiant Vision Systems Data\TrueTest\UserData\CameraSN.txt")
                         fileloaded = True
                     Catch ex As Exception
                         fileloaded = False
+                        Thread.Sleep(retryInterval)
                     End Try
                 End While
 
@@ -2312,12 +2350,16 @@ Namespace TrueTestWatcher
             If Path.GetFileNameWithoutExtension(e.FullPath).Contains("CurrentSequence") Then
                 Dim sequenceName As String = ""
                 Dim fileloaded As Boolean
-                While Not fileloaded
+                Dim timeout As Integer = 5000 ' Timeout in milliseconds (5 seconds)
+                Dim retryInterval As Integer = 500 ' Retry interval in milliseconds (0.5 second)
+                Dim endTime As DateTime = DateTime.Now.AddMilliseconds(timeout)
+                While Not fileloaded AndAlso DateTime.Now < endTime
                     Try
                         sequenceName = File.ReadAllText(e.FullPath())
                         fileloaded = True
                     Catch ex As Exception
                         fileloaded = False
+                        Thread.Sleep(retryInterval)
                     End Try
                 End While
 
