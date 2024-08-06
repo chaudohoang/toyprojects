@@ -1557,6 +1557,7 @@ Namespace TrueTestWatcher
 
             'Read the contents of the YAML file
             Dim yamlFilePath As String = "C:\Program Files\Radiant Vision Systems\TrueTest 1.8\POCB4.1Net\ConsoleSetting.yml"
+            Dim tempFilePath As String = Path.Combine(Path.GetTempPath(), Path.GetFileName(yamlFilePath))
             Dim yamlContents As String = String.Empty
 
             Dim timeout As Integer = 5000 ' Timeout in milliseconds (5 seconds)
@@ -1565,23 +1566,24 @@ Namespace TrueTestWatcher
 
             While DateTime.Now < endTime
                 Try
-                    yamlContents = File.ReadAllText(yamlFilePath)
-                    CommLogUpdateText("File read successfully.")
+                    ' Copy the file to a temporary location
+                    File.Copy(yamlFilePath, tempFilePath, True)
+                    ' Read from the temporary file
+                    yamlContents = File.ReadAllText(tempFilePath)
                     Exit While
                 Catch ex As IOException
-                    CommLogUpdateText("File is in use. Retrying...")
+                    CommLogUpdateText("File is in use or error copying file. Retrying...")
                     Thread.Sleep(retryInterval)
-                Catch ex As UnauthorizedAccessException
-                    CommLogUpdateText("Access denied: " & ex.Message)
-                    Exit While
-                Catch ex As FileNotFoundException
-                    CommLogUpdateText("File not found: " & ex.Message)
-                    Exit While
                 End Try
             End While
 
+            ' Optionally delete the temporary file after reading
+            If File.Exists(tempFilePath) Then
+                File.Delete(tempFilePath)
+            End If
+
             If String.IsNullOrEmpty(yamlContents) Then
-                CommLogUpdateText("Failed to read the file within the timeout period.")
+                CommLogUpdateText("Failed to read the yml file within the timeout period.")
                 Exit Sub
             End If
 
