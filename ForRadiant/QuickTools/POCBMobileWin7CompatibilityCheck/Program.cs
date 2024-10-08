@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;  // Added for file existence checking
+using System.IO;  // For file existence checking
 using System.Security.Principal;
 using Microsoft.Win32;
 
@@ -8,6 +8,7 @@ class Program
 {
     static void Main(string[] args)
     {
+        Console.WriteLine("C:\\Program Files\\Radiant Vision Systems\\TrueTest 1.8\\POCBMobile\\POCBMobile.exe Compatibility Mode Check ");
         // Check if the application is running as administrator
         if (!IsAdministrator())
         {
@@ -20,6 +21,10 @@ class Program
         ToggleCompatibilityMode();
     }
 
+    /// <summary>
+    /// Checks if the current user has administrative privileges.
+    /// </summary>
+    /// <returns>True if administrator, else false.</returns>
     static bool IsAdministrator()
     {
         using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
@@ -29,6 +34,9 @@ class Program
         }
     }
 
+    /// <summary>
+    /// Relaunches the current application with administrative privileges.
+    /// </summary>
     static void RelaunchAsAdministrator()
     {
         try
@@ -53,6 +61,9 @@ class Program
         Environment.Exit(0);
     }
 
+    /// <summary>
+    /// Handles the logic to toggle compatibility mode for the specified executable.
+    /// </summary>
     static void ToggleCompatibilityMode()
     {
         string exePath = @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8\POCBMobile\POCBMobile.exe";
@@ -68,8 +79,8 @@ class Program
 
         try
         {
-            // Open the registry key for HKEY_CURRENT_USER
-            using (RegistryKey key = Registry.CurrentUser.OpenSubKey(registryKeyPath, true))
+            // Open the registry key for HKEY_CURRENT_USER with write access
+            using (RegistryKey key = Registry.CurrentUser.OpenSubKey(registryKeyPath, writable: true))
             {
                 if (key == null)
                 {
@@ -80,43 +91,55 @@ class Program
                 // Read the current compatibility setting for the exe
                 object compatibilitySetting = key.GetValue(exePath);
 
-                bool isWindows7Compat = compatibilitySetting != null && compatibilitySetting.ToString().Contains("WIN7RTM");
+                // Determine current compatibility mode
+                string currentMode = GetCompatibilityMode(compatibilitySetting);
 
-                Console.WriteLine($"Compatibility Mode for Windows 7 is {(isWindows7Compat ? "ENALBED" : "DISABLED")} for {exePath}");
+                Console.WriteLine($"Compatibility Mode for the executable is: {currentMode}");
                 Console.WriteLine("Options:");
-                if (isWindows7Compat)
+
+                if (currentMode == "Disabled")
                 {
-                    Console.WriteLine("1. Toggle Windows 7 Compatibility Mode (Disable it now) ");
+                    Console.WriteLine("1. Enable Compatibility Mode");
+                    Console.WriteLine("2. Exit");
                 }
-                else Console.WriteLine("1. Toggle Windows 7 Compatibility Mode (Enable it now) ");
-
-                Console.WriteLine("2. Exit");
-
-                string choice = Console.ReadLine();
-
-                if (choice == "1")
+                else if (currentMode == "Windows 7")
                 {
-                    if (isWindows7Compat)
-                    {
-                        // Remove compatibility setting
-                        key.DeleteValue(exePath, false);
-                        Console.WriteLine("Windows 7 Compatibility Mode is now disabled.");
-                    }
-                    else
-                    {
-                        // Enable compatibility for Windows 7
-                        string win7CompatValue = "~ WIN7RTM";
-                        key.SetValue(exePath, win7CompatValue, RegistryValueKind.String);
-                        Console.WriteLine("Windows 7 Compatibility Mode is now enabled.");
-                    }
+                    Console.WriteLine("1. Disable Compatibility Mode");
+                    Console.WriteLine("2. Switch to Windows 8 Compatibility Mode");
+                    Console.WriteLine("3. Exit");
                 }
-                else if (choice == "2")
+                else if (currentMode == "Windows 8")
                 {
-                    Console.WriteLine("Exiting...");
+                    Console.WriteLine("1. Disable Compatibility Mode");
+                    Console.WriteLine("2. Switch to Windows 7 Compatibility Mode");
+                    Console.WriteLine("3. Exit");
                 }
                 else
                 {
-                    Console.WriteLine("Invalid option.");
+                    Console.WriteLine("1. Disable Compatibility Mode");
+                    Console.WriteLine("2. Switch Compatibility Mode");
+                    Console.WriteLine("3. Exit");
+                }
+
+                Console.Write("Enter your choice: ");
+                string choice = Console.ReadLine();
+
+                if (currentMode == "Disabled")
+                {
+                    HandleDisabledOptions(choice, key, exePath);
+                }
+                else if (currentMode == "Windows 7")
+                {
+                    HandleEnabledOptions(choice, key, exePath, "Windows 7");
+                }
+                else if (currentMode == "Windows 8")
+                {
+                    HandleEnabledOptions(choice, key, exePath, "Windows 8");
+                }
+                else
+                {
+                    // Handle unknown or other modes
+                    HandleUnknownModeOptions(choice, key, exePath);
                 }
             }
         }
@@ -125,5 +148,191 @@ class Program
             Console.WriteLine("An error occurred:");
             Console.WriteLine(ex.Message);
         }
+    }
+
+    /// <summary>
+    /// Determines the current compatibility mode based on the registry value.
+    /// </summary>
+    /// <param name="compatibilitySetting">The registry value for compatibility.</param>
+    /// <returns>A string representing the current compatibility mode.</returns>
+    static string GetCompatibilityMode(object compatibilitySetting)
+    {
+        if (compatibilitySetting == null)
+        {
+            return "Disabled";
+        }
+
+        string setting = compatibilitySetting.ToString();
+
+        if (setting.Contains("WIN7RTM"))
+        {
+            return "Windows 7";
+        }
+        else if (setting.Contains("WIN8RTM"))
+        {
+            return "Windows 8";
+        }
+        else
+        {
+            return "Unknown or Other";
+        }
+    }
+
+    /// <summary>
+    /// Handles user options when compatibility mode is disabled.
+    /// </summary>
+    /// <param name="choice">User's choice input.</param>
+    /// <param name="key">Registry key.</param>
+    /// <param name="exePath">Path to the executable.</param>
+    static void HandleDisabledOptions(string choice, RegistryKey key, string exePath)
+    {
+        switch (choice)
+        {
+            case "1":
+                // Enable compatibility mode
+                EnableCompatibilityMode(key, exePath);
+                break;
+            case "2":
+                Console.WriteLine("Exiting...");
+                break;
+            default:
+                Console.WriteLine("Invalid option.");
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Handles user options when compatibility mode is enabled.
+    /// </summary>
+    /// <param name="choice">User's choice input.</param>
+    /// <param name="key">Registry key.</param>
+    /// <param name="exePath">Path to the executable.</param>
+    /// <param name="currentMode">Current compatibility mode.</param>
+    static void HandleEnabledOptions(string choice, RegistryKey key, string exePath, string currentMode)
+    {
+        switch (choice)
+        {
+            case "1":
+                // Disable compatibility mode
+                DisableCompatibilityMode(key, exePath);
+                break;
+            case "2":
+                // Switch compatibility mode
+                if (currentMode == "Windows 7")
+                {
+                    SetCompatibilityMode(key, exePath, "WIN8RTM");
+                    Console.WriteLine("Switched to Windows 8 Compatibility Mode.");
+                }
+                else if (currentMode == "Windows 8")
+                {
+                    SetCompatibilityMode(key, exePath, "WIN7RTM");
+                    Console.WriteLine("Switched to Windows 7 Compatibility Mode.");
+                }
+                break;
+            case "3":
+                Console.WriteLine("Exiting...");
+                break;
+            default:
+                Console.WriteLine("Invalid option.");
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Handles user options when compatibility mode is in an unknown state.
+    /// </summary>
+    /// <param name="choice">User's choice input.</param>
+    /// <param name="key">Registry key.</param>
+    /// <param name="exePath">Path to the executable.</param>
+    static void HandleUnknownModeOptions(string choice, RegistryKey key, string exePath)
+    {
+        switch (choice)
+        {
+            case "1":
+                // Disable compatibility mode
+                DisableCompatibilityMode(key, exePath);
+                break;
+            case "2":
+                // Switch compatibility mode
+                Console.WriteLine("Select Compatibility Mode to Switch:");
+                Console.WriteLine("1. Windows 7");
+                Console.WriteLine("2. Windows 8");
+                Console.Write("Enter your choice (1 or 2): ");
+                string modeChoice = Console.ReadLine();
+
+                switch (modeChoice)
+                {
+                    case "1":
+                        SetCompatibilityMode(key, exePath, "WIN7RTM");
+                        Console.WriteLine("Switched to Windows 7 Compatibility Mode.");
+                        break;
+                    case "2":
+                        SetCompatibilityMode(key, exePath, "WIN8RTM");
+                        Console.WriteLine("Switched to Windows 8 Compatibility Mode.");
+                        break;
+                    default:
+                        Console.WriteLine("Invalid choice. Returning to main menu.");
+                        break;
+                }
+                break;
+            case "3":
+                Console.WriteLine("Exiting...");
+                break;
+            default:
+                Console.WriteLine("Invalid option.");
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Enables compatibility mode by prompting the user to choose the OS version.
+    /// </summary>
+    /// <param name="key">Registry key.</param>
+    /// <param name="exePath">Path to the executable.</param>
+    static void EnableCompatibilityMode(RegistryKey key, string exePath)
+    {
+        Console.WriteLine("Select Compatibility Mode to Enable:");
+        Console.WriteLine("1. Windows 7");
+        Console.WriteLine("2. Windows 8");
+        Console.Write("Enter your choice (1 or 2): ");
+        string modeChoice = Console.ReadLine();
+
+        switch (modeChoice)
+        {
+            case "1":
+                SetCompatibilityMode(key, exePath, "WIN7RTM");
+                Console.WriteLine("Windows 7 Compatibility Mode is now enabled.");
+                break;
+            case "2":
+                SetCompatibilityMode(key, exePath, "WIN8RTM");
+                Console.WriteLine("Windows 8 Compatibility Mode is now enabled.");
+                break;
+            default:
+                Console.WriteLine("Invalid choice. Returning to main menu.");
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Disables compatibility mode by removing the registry entry.
+    /// </summary>
+    /// <param name="key">Registry key.</param>
+    /// <param name="exePath">Path to the executable.</param>
+    static void DisableCompatibilityMode(RegistryKey key, string exePath)
+    {
+        key.DeleteValue(exePath, throwOnMissingValue: false);
+        Console.WriteLine("Compatibility Mode has been disabled.");
+    }
+
+    /// <summary>
+    /// Sets the compatibility mode for the executable in the registry.
+    /// </summary>
+    /// <param name="key">The registry key to modify.</param>
+    /// <param name="exePath">The path to the executable.</param>
+    /// <param name="mode">The compatibility mode flag (e.g., "WIN7RTM").</param>
+    static void SetCompatibilityMode(RegistryKey key, string exePath, string mode)
+    {
+        string compatValue = $"~ {mode}";
+        key.SetValue(exePath, compatValue, RegistryValueKind.String);
     }
 }
