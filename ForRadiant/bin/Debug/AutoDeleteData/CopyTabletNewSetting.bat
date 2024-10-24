@@ -1,6 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
-set sourceFolder="%~dp0MobileSetting"
+set sourceFolder="%~dp0TabletNewSetting"
 set destinationFolder="C:\Radiant Vision Systems Data\TrueTest\UserData\AutoDelete\"
 xcopy /Y /S /E %sourceFolder% %destinationFolder%
 

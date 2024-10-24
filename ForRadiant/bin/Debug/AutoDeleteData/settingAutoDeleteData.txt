@@ -1,6 +1,6 @@
 txtLogpath=D:\Program\RVS\AutoDeleteDataLog
 chkMonitorFolders=False
-chkMonitorDisk=True
+chkMonitorDisk=False
 startminimized=False
 minimizedtotray=True
 monitorautomatically=True

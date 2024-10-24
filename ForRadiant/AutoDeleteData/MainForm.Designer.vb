@@ -87,6 +87,11 @@ Namespace AutoDeleteData
             Me.Label2 = New System.Windows.Forms.Label()
             Me.Label1 = New System.Windows.Forms.Label()
             Me.txtLogpath = New System.Windows.Forms.TextBox()
+            Me.txtExcludeFolderPaths = New System.Windows.Forms.TextBox()
+            Me.Label4 = New System.Windows.Forms.Label()
+            Me.btnEnableEditExcludePathList = New System.Windows.Forms.Button()
+            Me.btnReloadList5 = New System.Windows.Forms.Button()
+            Me.btnSaveList5 = New System.Windows.Forms.Button()
             Me.contextMenuStrip1.SuspendLayout()
             Me.menuStrip1.SuspendLayout()
             CType(Me.dataGridView1, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -438,6 +443,11 @@ Namespace AutoDeleteData
             '
             'TabPage3
             '
+            Me.TabPage3.Controls.Add(Me.Label4)
+            Me.TabPage3.Controls.Add(Me.btnEnableEditExcludePathList)
+            Me.TabPage3.Controls.Add(Me.btnReloadList5)
+            Me.TabPage3.Controls.Add(Me.btnSaveList5)
+            Me.TabPage3.Controls.Add(Me.txtExcludeFolderPaths)
             Me.TabPage3.Controls.Add(Me.btnLoadTimeCreation)
             Me.TabPage3.Controls.Add(Me.btnSaveTimeCreation)
             Me.TabPage3.Controls.Add(Me.chkSkipFolderLastCreationTime)
@@ -538,7 +548,7 @@ Namespace AutoDeleteData
             'Label3
             '
             Me.Label3.AutoSize = True
-            Me.Label3.Location = New System.Drawing.Point(7, 293)
+            Me.Label3.Location = New System.Drawing.Point(7, 215)
             Me.Label3.Name = "Label3"
             Me.Label3.Size = New System.Drawing.Size(122, 13)
             Me.Label3.TabIndex = 58
@@ -546,7 +556,7 @@ Namespace AutoDeleteData
             '
             'btnEnableEditExcludeFolderList
             '
-            Me.btnEnableEditExcludeFolderList.Location = New System.Drawing.Point(23, 318)
+            Me.btnEnableEditExcludeFolderList.Location = New System.Drawing.Point(23, 247)
             Me.btnEnableEditExcludeFolderList.Name = "btnEnableEditExcludeFolderList"
             Me.btnEnableEditExcludeFolderList.Size = New System.Drawing.Size(96, 23)
             Me.btnEnableEditExcludeFolderList.TabIndex = 57
@@ -555,7 +565,7 @@ Namespace AutoDeleteData
             '
             'btnReloadList4
             '
-            Me.btnReloadList4.Location = New System.Drawing.Point(23, 376)
+            Me.btnReloadList4.Location = New System.Drawing.Point(23, 305)
             Me.btnReloadList4.Name = "btnReloadList4"
             Me.btnReloadList4.Size = New System.Drawing.Size(96, 23)
             Me.btnReloadList4.TabIndex = 56
@@ -564,7 +574,7 @@ Namespace AutoDeleteData
             '
             'btnSaveList4
             '
-            Me.btnSaveList4.Location = New System.Drawing.Point(23, 347)
+            Me.btnSaveList4.Location = New System.Drawing.Point(23, 276)
             Me.btnSaveList4.Name = "btnSaveList4"
             Me.btnSaveList4.Size = New System.Drawing.Size(96, 23)
             Me.btnSaveList4.TabIndex = 55
@@ -573,12 +583,12 @@ Namespace AutoDeleteData
             '
             'txtExcludeFolderNames
             '
-            Me.txtExcludeFolderNames.Location = New System.Drawing.Point(135, 293)
+            Me.txtExcludeFolderNames.Location = New System.Drawing.Point(135, 212)
             Me.txtExcludeFolderNames.Multiline = True
             Me.txtExcludeFolderNames.Name = "txtExcludeFolderNames"
             Me.txtExcludeFolderNames.ReadOnly = True
             Me.txtExcludeFolderNames.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
-            Me.txtExcludeFolderNames.Size = New System.Drawing.Size(721, 212)
+            Me.txtExcludeFolderNames.Size = New System.Drawing.Size(720, 140)
             Me.txtExcludeFolderNames.TabIndex = 54
             '
             'btnEnableEditExcludeFileList
@@ -615,7 +625,7 @@ Namespace AutoDeleteData
             Me.txtExcludeFileNames.Name = "txtExcludeFileNames"
             Me.txtExcludeFileNames.ReadOnly = True
             Me.txtExcludeFileNames.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
-            Me.txtExcludeFileNames.Size = New System.Drawing.Size(721, 212)
+            Me.txtExcludeFileNames.Size = New System.Drawing.Size(720, 140)
             Me.txtExcludeFileNames.TabIndex = 1
             '
             'Label2
@@ -643,6 +653,52 @@ Namespace AutoDeleteData
             Me.txtLogpath.Size = New System.Drawing.Size(274, 20)
             Me.txtLogpath.TabIndex = 53
             Me.txtLogpath.Text = "D:\Program\RVS\AutoDeleteDataLog"
+            '
+            'txtExcludeFolderPaths
+            '
+            Me.txtExcludeFolderPaths.Location = New System.Drawing.Point(135, 358)
+            Me.txtExcludeFolderPaths.Multiline = True
+            Me.txtExcludeFolderPaths.Name = "txtExcludeFolderPaths"
+            Me.txtExcludeFolderPaths.ReadOnly = True
+            Me.txtExcludeFolderPaths.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
+            Me.txtExcludeFolderPaths.Size = New System.Drawing.Size(720, 140)
+            Me.txtExcludeFolderPaths.TabIndex = 69
+            '
+            'Label4
+            '
+            Me.Label4.AutoSize = True
+            Me.Label4.Location = New System.Drawing.Point(7, 361)
+            Me.Label4.Name = "Label4"
+            Me.Label4.Size = New System.Drawing.Size(116, 13)
+            Me.Label4.TabIndex = 73
+            Me.Label4.Text = "Exclude Folder Paths : "
+            '
+            'btnEnableEditExcludePathList
+            '
+            Me.btnEnableEditExcludePathList.Location = New System.Drawing.Point(23, 393)
+            Me.btnEnableEditExcludePathList.Name = "btnEnableEditExcludePathList"
+            Me.btnEnableEditExcludePathList.Size = New System.Drawing.Size(96, 23)
+            Me.btnEnableEditExcludePathList.TabIndex = 72
+            Me.btnEnableEditExcludePathList.Text = "Edit List"
+            Me.btnEnableEditExcludePathList.UseVisualStyleBackColor = True
+            '
+            'btnReloadList5
+            '
+            Me.btnReloadList5.Location = New System.Drawing.Point(23, 451)
+            Me.btnReloadList5.Name = "btnReloadList5"
+            Me.btnReloadList5.Size = New System.Drawing.Size(96, 23)
+            Me.btnReloadList5.TabIndex = 71
+            Me.btnReloadList5.Text = "Reload List"
+            Me.btnReloadList5.UseVisualStyleBackColor = True
+            '
+            'btnSaveList5
+            '
+            Me.btnSaveList5.Location = New System.Drawing.Point(23, 422)
+            Me.btnSaveList5.Name = "btnSaveList5"
+            Me.btnSaveList5.Size = New System.Drawing.Size(96, 23)
+            Me.btnSaveList5.TabIndex = 70
+            Me.btnSaveList5.Text = "Save List"
+            Me.btnSaveList5.UseVisualStyleBackColor = True
             '
             'MainForm
             '
@@ -683,15 +739,15 @@ Namespace AutoDeleteData
 
 #End Region
         Friend WithEvents notifyIcon1 As Windows.Forms.NotifyIcon
-		Friend WithEvents contextMenuStrip1 As Windows.Forms.ContextMenuStrip
-		Friend WithEvents exit2ToolStripMenuItem As Windows.Forms.ToolStripMenuItem
-		Friend WithEvents menuStrip1 As Windows.Forms.MenuStrip
-		Friend WithEvents commandToolStripMenuItem As Windows.Forms.ToolStripMenuItem
-		Friend WithEvents exitToolStripMenuItem As Windows.Forms.ToolStripMenuItem
-		Friend WithEvents settingsToolStripMenuItem As Windows.Forms.ToolStripMenuItem
-		Friend WithEvents minimizedToTrayToolStripMenuItem As Windows.Forms.ToolStripMenuItem
-		Friend WithEvents helpToolStripMenuItem As Windows.Forms.ToolStripMenuItem
-		Friend WithEvents aboutToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+        Friend WithEvents contextMenuStrip1 As Windows.Forms.ContextMenuStrip
+        Friend WithEvents exit2ToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+        Friend WithEvents menuStrip1 As Windows.Forms.MenuStrip
+        Friend WithEvents commandToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+        Friend WithEvents exitToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+        Friend WithEvents settingsToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+        Friend WithEvents minimizedToTrayToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+        Friend WithEvents helpToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+        Friend WithEvents aboutToolStripMenuItem As Windows.Forms.ToolStripMenuItem
         Friend WithEvents startMinimizedToolStripMenuItem As Windows.Forms.ToolStripMenuItem
         Private WithEvents dataGridView1 As Windows.Forms.DataGridView
         Private WithEvents lblMonitoringStatus As Windows.Forms.Label
@@ -741,5 +797,10 @@ Namespace AutoDeleteData
         Friend WithEvents chkSkipFileLastCreationTime As Windows.Forms.CheckBox
         Friend WithEvents btnLoadTimeCreation As Windows.Forms.Button
         Friend WithEvents btnSaveTimeCreation As Windows.Forms.Button
+        Friend WithEvents Label4 As Windows.Forms.Label
+        Friend WithEvents btnEnableEditExcludePathList As Windows.Forms.Button
+        Friend WithEvents btnReloadList5 As Windows.Forms.Button
+        Friend WithEvents btnSaveList5 As Windows.Forms.Button
+        Friend WithEvents txtExcludeFolderPaths As Windows.Forms.TextBox
     End Class
 End Namespace

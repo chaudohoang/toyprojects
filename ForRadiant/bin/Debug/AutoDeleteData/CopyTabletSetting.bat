@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 set sourceFolder="%~dp0TabletSetting"
-set destinationFolder="C:\Radiant Vision Systems Data\TrueTest\UserData"
+set destinationFolder="C:\Radiant Vision Systems Data\TrueTest\UserData\AutoDelete\"
 xcopy /Y /S /E %sourceFolder% %destinationFolder%
 
 for /l %%i in (3,-1,1) do (
