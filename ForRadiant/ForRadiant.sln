@@ -139,6 +139,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileLister", "QuickTools\Fi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "POCBMobileWin7CompatibilityCheck", "QuickTools\POCBMobileWin7CompatibilityCheck\POCBMobileWin7CompatibilityCheck.csproj", "{221BD4B2-CE89-448A-ABAE-FFAF69ABC29D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SetZone3", "SetZone3\SetZone3.csproj", "{73FDBAFB-D935-42CF-ADDB-642C5E228CA8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -413,6 +415,10 @@ Global
 		{221BD4B2-CE89-448A-ABAE-FFAF69ABC29D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{221BD4B2-CE89-448A-ABAE-FFAF69ABC29D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{221BD4B2-CE89-448A-ABAE-FFAF69ABC29D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73FDBAFB-D935-42CF-ADDB-642C5E228CA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73FDBAFB-D935-42CF-ADDB-642C5E228CA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73FDBAFB-D935-42CF-ADDB-642C5E228CA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73FDBAFB-D935-42CF-ADDB-642C5E228CA8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -431,10 +437,10 @@ Global
 		{221BD4B2-CE89-448A-ABAE-FFAF69ABC29D} = {62CFD8A0-B705-4B6B-B80F-814562E4DABF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		BuildVersion_UseGlobalSettings = True
-		BuildVersion_UpdateAssemblyVersion = True
-		BuildVersion_BuildVersioningStyle = None.None.Increment.TimeStamp
-		BuildVersion_StartDate = 2000/1/1
 		SolutionGuid = {60C14AFF-CFF7-46E8-9345-65A46A64495F}
+		BuildVersion_StartDate = 2000/1/1
+		BuildVersion_BuildVersioningStyle = None.None.Increment.TimeStamp
+		BuildVersion_UpdateAssemblyVersion = True
+		BuildVersion_UseGlobalSettings = True
 	EndGlobalSection
 EndGlobal

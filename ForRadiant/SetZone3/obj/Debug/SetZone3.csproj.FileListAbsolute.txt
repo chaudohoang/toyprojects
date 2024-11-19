@@ -1,0 +1,10 @@
+D:\Github\toyprojects\ForRadiant\SetZone3\bin\Debug\SetZone3.exe.config
+D:\Github\toyprojects\ForRadiant\SetZone3\bin\Debug\SetZone3.exe
+D:\Github\toyprojects\ForRadiant\SetZone3\bin\Debug\SetZone3.pdb
+D:\Github\toyprojects\ForRadiant\SetZone3\obj\Debug\SetZone3.csproj.AssemblyReference.cache
+D:\Github\toyprojects\ForRadiant\SetZone3\obj\Debug\SetZone3.Form1.resources
+D:\Github\toyprojects\ForRadiant\SetZone3\obj\Debug\SetZone3.Properties.Resources.resources
+D:\Github\toyprojects\ForRadiant\SetZone3\obj\Debug\SetZone3.csproj.GenerateResource.cache
+D:\Github\toyprojects\ForRadiant\SetZone3\obj\Debug\SetZone3.csproj.CoreCompileInputs.cache
+D:\Github\toyprojects\ForRadiant\SetZone3\obj\Debug\SetZone3.exe
+D:\Github\toyprojects\ForRadiant\SetZone3\obj\Debug\SetZone3.pdb
