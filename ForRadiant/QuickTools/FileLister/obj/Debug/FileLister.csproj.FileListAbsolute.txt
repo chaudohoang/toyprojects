@@ -19,6 +19,6 @@ D:\Github\toyprojects\ForRadiant\QuickTools\FileLister\bin\Debug\System.Runtime.
 D:\Github\toyprojects\ForRadiant\QuickTools\FileLister\bin\Debug\System.Threading.Tasks.Extensions.xml
 D:\Github\toyprojects\ForRadiant\QuickTools\FileLister\obj\Debug\FileLister.csproj.AssemblyReference.cache
 D:\Github\toyprojects\ForRadiant\QuickTools\FileLister\obj\Debug\FileLister.csproj.CoreCompileInputs.cache
-D:\Github\toyprojects\ForRadiant\QuickTools\FileLister\obj\Debug\FileLister.csproj.CopyComplete
 D:\Github\toyprojects\ForRadiant\QuickTools\FileLister\obj\Debug\FileLister.exe
 D:\Github\toyprojects\ForRadiant\QuickTools\FileLister\obj\Debug\FileLister.pdb
+D:\Github\toyprojects\ForRadiant\QuickTools\FileLister\obj\Debug\FileLister.csproj.Up2Date

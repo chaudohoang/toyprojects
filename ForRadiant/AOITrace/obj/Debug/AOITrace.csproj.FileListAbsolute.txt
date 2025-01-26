@@ -22,9 +22,9 @@ D:\Github\toyprojects\ForRadiant\AOITrace\bin\Debug\System.Memory.xml
 D:\Github\toyprojects\ForRadiant\AOITrace\bin\Debug\System.Numerics.Vectors.xml
 D:\Github\toyprojects\ForRadiant\AOITrace\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
 D:\Github\toyprojects\ForRadiant\AOITrace\bin\Debug\System.Threading.Tasks.Extensions.xml
-D:\Github\toyprojects\ForRadiant\AOITrace\obj\Debug\AOITrace.csproj.CopyComplete
 D:\Github\toyprojects\ForRadiant\AOITrace\obj\Debug\AOITrace.exe
 D:\Github\toyprojects\ForRadiant\AOITrace\obj\Debug\AOITrace.pdb
 D:\Github\toyprojects\ForRadiant\bin\Debug\AOITrace\AOITrace.exe.config
 D:\Github\toyprojects\ForRadiant\bin\Debug\AOITrace\AOITrace.exe
 D:\Github\toyprojects\ForRadiant\bin\Debug\AOITrace\AOITrace.pdb
+D:\Github\toyprojects\ForRadiant\AOITrace\obj\Debug\AOITrace.csproj.Up2Date
