@@ -1,0 +1,7 @@
+D:\Github\toyprojects\ForRadiant\QuickTools\ClearVignettingINI\bin\Debug\ClearVignettingINI.exe.config
+D:\Github\toyprojects\ForRadiant\QuickTools\ClearVignettingINI\bin\Debug\ClearVignettingINI.exe
+D:\Github\toyprojects\ForRadiant\QuickTools\ClearVignettingINI\bin\Debug\ClearVignettingINI.pdb
+D:\Github\toyprojects\ForRadiant\QuickTools\ClearVignettingINI\obj\Debug\ClearVignettingINI.csproj.AssemblyReference.cache
+D:\Github\toyprojects\ForRadiant\QuickTools\ClearVignettingINI\obj\Debug\ClearVignettingINI.csproj.CoreCompileInputs.cache
+D:\Github\toyprojects\ForRadiant\QuickTools\ClearVignettingINI\obj\Debug\ClearVignettingINI.exe
+D:\Github\toyprojects\ForRadiant\QuickTools\ClearVignettingINI\obj\Debug\ClearVignettingINI.pdb
