@@ -180,7 +180,10 @@ Partial Class InitForm
         Me.Controls.Add(Me.txtCompMode)
         Me.Controls.Add(Me.txtDay)
         Me.Controls.Add(Me.txtMonth)
+        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
+        Me.MaximizeBox = False
         Me.Name = "InitForm"
+        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
         Me.Text = "InitForm"
         Me.ResumeLayout(False)
         Me.PerformLayout()

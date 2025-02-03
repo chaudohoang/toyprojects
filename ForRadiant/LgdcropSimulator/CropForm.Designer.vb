@@ -37,7 +37,7 @@ Partial Class CropForm
         '
         Me.BtnOK.Location = New System.Drawing.Point(716, 12)
         Me.BtnOK.Name = "BtnOK"
-        Me.BtnOK.Size = New System.Drawing.Size(72, 72)
+        Me.BtnOK.Size = New System.Drawing.Size(72, 98)
         Me.BtnOK.TabIndex = 29
         Me.BtnOK.Text = "OK"
         Me.BtnOK.UseVisualStyleBackColor = True
@@ -120,7 +120,10 @@ Partial Class CropForm
         Me.Controls.Add(Me.txtCropImage)
         Me.Controls.Add(Me.txtColorIdx)
         Me.Controls.Add(Me.txtPatternIdx)
+        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
+        Me.MaximizeBox = False
         Me.Name = "CropForm"
+        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
         Me.Text = "CropForm"
         Me.ResumeLayout(False)
         Me.PerformLayout()

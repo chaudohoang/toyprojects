@@ -101,9 +101,8 @@ Partial Class MainForm
         Me.lblErrorCode.Font = New System.Drawing.Font("Microsoft Sans Serif", 72.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lblErrorCode.Location = New System.Drawing.Point(156, 65)
         Me.lblErrorCode.Name = "lblErrorCode"
-        Me.lblErrorCode.Size = New System.Drawing.Size(98, 108)
+        Me.lblErrorCode.Size = New System.Drawing.Size(0, 108)
         Me.lblErrorCode.TabIndex = 7
-        Me.lblErrorCode.Text = "0"
         '
         'lblStatus
         '
@@ -119,7 +118,7 @@ Partial Class MainForm
         '
         Me.Label2.AutoSize = True
         Me.Label2.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, CType((System.Drawing.FontStyle.Bold Or System.Drawing.FontStyle.Italic), System.Drawing.FontStyle), System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label2.ForeColor = System.Drawing.Color.FromArgb(CType(CType(255, Byte), Integer), CType(CType(128, Byte), Integer), CType(CType(255, Byte), Integer))
+        Me.Label2.ForeColor = System.Drawing.Color.Red
         Me.Label2.Location = New System.Drawing.Point(153, 36)
         Me.Label2.Name = "Label2"
         Me.Label2.Size = New System.Drawing.Size(111, 20)
@@ -130,7 +129,7 @@ Partial Class MainForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(297, 220)
+        Me.ClientSize = New System.Drawing.Size(392, 267)
         Me.Controls.Add(Me.Label2)
         Me.Controls.Add(Me.lblStatus)
         Me.Controls.Add(Me.lblErrorCode)
@@ -141,7 +140,10 @@ Partial Class MainForm
         Me.Controls.Add(Me.BtnMap)
         Me.Controls.Add(Me.BtnInit)
         Me.Controls.Add(Me.BtnClear)
+        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
+        Me.MaximizeBox = False
         Me.Name = "MainForm"
+        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "LgdcropSimulator"
         Me.ResumeLayout(False)
         Me.PerformLayout()

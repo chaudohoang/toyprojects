@@ -35,7 +35,7 @@ Partial Class MapForm
         '
         Me.BtnOK.Location = New System.Drawing.Point(716, 12)
         Me.BtnOK.Name = "BtnOK"
-        Me.BtnOK.Size = New System.Drawing.Size(72, 46)
+        Me.BtnOK.Size = New System.Drawing.Size(72, 73)
         Me.BtnOK.TabIndex = 29
         Me.BtnOK.Text = "OK"
         Me.BtnOK.UseVisualStyleBackColor = True
@@ -100,7 +100,10 @@ Partial Class MapForm
         Me.Controls.Add(Me.Label1)
         Me.Controls.Add(Me.txtCalImage)
         Me.Controls.Add(Me.txtColorIdx)
+        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
+        Me.MaximizeBox = False
         Me.Name = "MapForm"
+        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
         Me.Text = "MapForm"
         Me.ResumeLayout(False)
         Me.PerformLayout()
