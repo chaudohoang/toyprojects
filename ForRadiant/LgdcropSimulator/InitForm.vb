@@ -10,9 +10,13 @@ Public Class InitForm
     Public Property PID As String
     Public Property INIFile As String
 
+    Private Property LGDCropModel As String
+
     Private SaveFilePath As String = "InitFormLastInput.txt"
+    Private SaveFilePathMainForm As String = "MainFormLastInput.txt"
     Private Sub InitForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         LoadLastInput()
+        LoadLastInputMainForm()
     End Sub
 
     Private Sub BtnOK_Click(sender As Object, e As EventArgs) Handles BtnOK.Click
@@ -23,7 +27,7 @@ Public Class InitForm
         Model = txtModel.Text
         PID = txtPID.Text
         Dim assemblyPath As String = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
-        INIFile = Path.Combine(assemblyPath, "CropDLL", txtINIFile.Text)
+        INIFile = Path.Combine(assemblyPath, "CropDLL" + LGDCropModel, txtINIFile.Text & ".ini")
         SaveLastInput()
         Me.DialogResult = DialogResult.OK
         Me.Close()
@@ -53,6 +57,14 @@ Public Class InitForm
                 txtModel.Text = lines(4)
                 txtPID.Text = lines(5)
                 txtINIFile.Text = lines(6)
+            End If
+        End If
+    End Sub
+    Private Sub LoadLastInputMainForm()
+        If File.Exists(SaveFilePathMainForm) Then
+            Dim lines As String() = File.ReadAllLines(SaveFilePathMainForm)
+            If lines.Length = 1 Then
+                LGDCropModel = lines(0)
             End If
         End If
     End Sub

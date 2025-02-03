@@ -27,6 +27,8 @@ Partial Class MapForm
         Me.Label1 = New System.Windows.Forms.Label()
         Me.txtCalImage = New System.Windows.Forms.TextBox()
         Me.txtColorIdx = New System.Windows.Forms.TextBox()
+        Me.Label3 = New System.Windows.Forms.Label()
+        Me.txtResolution = New System.Windows.Forms.TextBox()
         Me.SuspendLayout()
         '
         'BtnOK
@@ -70,11 +72,29 @@ Partial Class MapForm
         Me.txtColorIdx.Size = New System.Drawing.Size(607, 20)
         Me.txtColorIdx.TabIndex = 15
         '
+        'Label3
+        '
+        Me.Label3.AutoSize = True
+        Me.Label3.Location = New System.Drawing.Point(12, 67)
+        Me.Label3.Name = "Label3"
+        Me.Label3.Size = New System.Drawing.Size(57, 13)
+        Me.Label3.TabIndex = 31
+        Me.Label3.Text = "Resolution"
+        '
+        'txtResolution
+        '
+        Me.txtResolution.Location = New System.Drawing.Point(95, 64)
+        Me.txtResolution.Name = "txtResolution"
+        Me.txtResolution.Size = New System.Drawing.Size(607, 20)
+        Me.txtResolution.TabIndex = 30
+        '
         'MapForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(800, 74)
+        Me.ClientSize = New System.Drawing.Size(800, 97)
+        Me.Controls.Add(Me.Label3)
+        Me.Controls.Add(Me.txtResolution)
         Me.Controls.Add(Me.BtnOK)
         Me.Controls.Add(Me.Label2)
         Me.Controls.Add(Me.Label1)
@@ -92,4 +112,6 @@ Partial Class MapForm
     Friend WithEvents Label1 As Label
     Friend WithEvents txtCalImage As TextBox
     Friend WithEvents txtColorIdx As TextBox
+    Friend WithEvents Label3 As Label
+    Friend WithEvents txtResolution As TextBox
 End Class

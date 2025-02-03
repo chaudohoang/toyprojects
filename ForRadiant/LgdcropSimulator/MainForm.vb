@@ -1,5 +1,6 @@
 ﻿Imports System.Reflection
 Imports System.IO
+Imports System.Reflection.Emit
 
 Public Class MainForm
     Private LgdLoadedAssembly As Assembly
@@ -8,15 +9,34 @@ Public Class MainForm
     Private LGD_COMP_CROP_TO_COMP_DATA_NET_MethodInfo As MethodInfo
     Private LGD_COMP_INIT_NET_MethodInfo As MethodInfo
     Private LGD_COMP_MAPPING_NET_MethodInfo As MethodInfo
+    Private Property LGDCropModel As String
+    Private SaveFilePath As String = "MainFormLastInput.txt"
 
     Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        LoadLastInput()
         LoadDLLAndInitialize()
+    End Sub
+
+    Private Sub SaveLastInput()
+        Dim lines As New List(Of String)
+        lines.Add(txtModel.Text)
+        File.WriteAllLines(SaveFilePath, lines)
+    End Sub
+
+    Private Sub LoadLastInput()
+        If File.Exists(SaveFilePath) Then
+            Dim lines As String() = File.ReadAllLines(SaveFilePath)
+            If lines.Length = 1 Then
+                txtModel.Text = lines(0)
+                LGDCropModel = lines(0)
+            End If
+        End If
     End Sub
 
     Private Sub LoadDLLAndInitialize()
         Try
             Dim assemblyPath As String = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
-            Dim dllPath As String = Path.Combine(assemblyPath, "CropDLL", "LGD_PO_Compensation_Net.dll")
+            Dim dllPath As String = Path.Combine(assemblyPath, "CropDLL" + LGDCropModel, "LGD_PO_Compensation_Net.dll")
             LgdLoadedAssembly = Assembly.LoadFrom(dllPath)
 
             Dim typeName As String = "LGDPOCompensationNet.LGD_PO_Compensation_Net"
@@ -84,33 +104,144 @@ Public Class MainForm
     End Function
 
     Private Sub BtnClear_Click(sender As Object, e As EventArgs) Handles BtnClear.Click
+        Me.Invoke(Sub()
+                      lblStatus.Text = "Clear Running ..."
+                  End Sub)
         Dim result As Integer = UseLGD_COMP_CLEAR_NET_MethodInfo()
-        MessageBox.Show("LGD_COMP_CLEAR_NET executed. Error Code: " & result)
+        Static m_Rnd As New Random
+        Dim tempcolor As Color
+
+        tempcolor = lblErrorCode.ForeColor
+        Do While lblErrorCode.ForeColor = tempcolor
+            ' This should be executed on the UI thread
+            Me.Invoke(Sub()
+                          lblErrorCode.ForeColor = Color.FromArgb(255, m_Rnd.Next(0, 255), m_Rnd.Next(0, 255), m_Rnd.Next(0, 255))
+                      End Sub)
+            Threading.Thread.Sleep(100) ' Add a small delay to avoid freezing the UI
+        Loop
+        Me.Invoke(Sub()
+                      lblErrorCode.Text = result.ToString
+                      lblStatus.Text = "Clear Finished ..."
+                  End Sub)
     End Sub
 
     Private Sub BtnInit_Click(sender As Object, e As EventArgs) Handles BtnInit.Click
         Dim inputForm As New InitForm()
+        Me.Invoke(Sub()
+                      lblStatus.Text = "Init Running ..."
+                  End Sub)
         If inputForm.ShowDialog() = DialogResult.OK Then
+
             Dim result As Integer = UseLGD_COMP_INIT_NET_MethodInfo(inputForm.Month, inputForm.Day, inputForm.CompMode, inputForm.DefaultFolder, inputForm.Model, inputForm.PID, inputForm.INIFile)
-            MessageBox.Show("LGD_COMP_INIT_NET executed. Error Code: " & result)
+            Static m_Rnd As New Random
+            Dim tempcolor As Color
+            tempcolor = lblErrorCode.ForeColor
+            Do While lblErrorCode.ForeColor = tempcolor
+                ' This should be executed on the UI thread
+                Me.Invoke(Sub()
+                              lblErrorCode.ForeColor = Color.FromArgb(255, m_Rnd.Next(0, 255), m_Rnd.Next(0, 255), m_Rnd.Next(0, 255))
+                          End Sub)
+                Threading.Thread.Sleep(100) ' Add a small delay to avoid freezing the UI
+            Loop
+            Me.Invoke(Sub()
+                          lblErrorCode.Text = result.ToString
+                      End Sub)
+
+            Me.Invoke(Sub()
+                          lblStatus.Text = "Init Finished ..."
+                      End Sub)
+
+        Else
+
+            Me.Invoke(Sub()
+                          lblStatus.Text = "Init Cancelled ..."
+                      End Sub)
         End If
+
     End Sub
 
     Private Sub BtnCrop_Click(sender As Object, e As EventArgs) Handles BtnCrop.Click
         Dim inputForm As New CropForm()
         Dim CCDLogData As New List(Of String)
+        Me.Invoke(Sub()
+                      lblStatus.Text = "Cropping Running ..."
+                  End Sub)
         If inputForm.ShowDialog() = DialogResult.OK Then
+
             Dim result As Integer = UseLGD_COMP_CROP_TO_COMP_DATA_NET_MethodInfo(inputForm.PatternIdx, inputForm.ColorIdx, inputForm.MatPTN, CCDLogData)
-            MessageBox.Show("LGD_COMP_CROP_TO_COMP_DATA_NET executed. Error Code: " & result)
+            Static m_Rnd As New Random
+            Dim tempcolor As Color
+            tempcolor = lblErrorCode.ForeColor
+            Do While lblErrorCode.ForeColor = tempcolor
+                ' This should be executed on the UI thread
+                Me.Invoke(Sub()
+                              lblErrorCode.ForeColor = Color.FromArgb(255, m_Rnd.Next(0, 255), m_Rnd.Next(0, 255), m_Rnd.Next(0, 255))
+                          End Sub)
+                Threading.Thread.Sleep(100) ' Add a small delay to avoid freezing the UI
+            Loop
+            Me.Invoke(Sub()
+                          lblErrorCode.Text = result.ToString
+
+                      End Sub)
+
+            Me.Invoke(Sub()
+                          lblStatus.Text = "Cropping Finished ..."
+                      End Sub)
+
+        Else
+            Me.Invoke(Sub()
+                          lblStatus.Text = "Cropping Cancelled ..."
+                      End Sub)
         End If
+
+
     End Sub
 
     Private Sub BtnMap_Click(sender As Object, e As EventArgs) Handles BtnMap.Click
         Dim inputForm As New MapForm()
         Dim MTFLogData As New List(Of String)
+        Me.Invoke(Sub()
+                      lblStatus.Text = "Mapping Running ..."
+                  End Sub)
         If inputForm.ShowDialog() = DialogResult.OK Then
+
             Dim result As Integer = UseLGD_COMP_MAPPING_NET_MethodInfo(inputForm.MatPTN, inputForm.ColorIdx, MTFLogData)
-            MessageBox.Show("LGD_COMP_MAPPING_NET executed. Error Code: " & result)
+            Static m_Rnd As New Random
+            Dim tempcolor As Color
+            tempcolor = lblErrorCode.ForeColor
+            Do While lblErrorCode.ForeColor = tempcolor
+                ' This should be executed on the UI thread
+                Me.Invoke(Sub()
+                              lblErrorCode.ForeColor = Color.FromArgb(255, m_Rnd.Next(0, 255), m_Rnd.Next(0, 255), m_Rnd.Next(0, 255))
+                          End Sub)
+                Threading.Thread.Sleep(100) ' Add a small delay to avoid freezing the UI
+            Loop
+            Me.Invoke(Sub()
+                          lblErrorCode.Text = result.ToString
+                      End Sub)
+            Me.Invoke(Sub()
+
+                          lblStatus.Text = "Mapping Finished ..."
+                      End Sub)
+
+        Else
+
+            Me.Invoke(Sub()
+
+                          lblStatus.Text = "Mapping Cancelled ..."
+                      End Sub)
+
         End If
+
+
+    End Sub
+
+    Private Sub btnRefresh_Click(sender As Object, e As EventArgs) Handles btnRefresh.Click
+        SaveLastInput()
+        Application.Restart()
+    End Sub
+
+    Private Sub MainForm_FormClosed(sender As Object, e As FormClosedEventArgs) Handles MyBase.FormClosed
+        SaveLastInput()
     End Sub
 End Class
