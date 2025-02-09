@@ -1,6 +1,6 @@
 ﻿Imports System.Reflection
 Imports System.IO
-Imports System.Reflection.Emit
+
 
 Public Class MainForm
     Private LgdLoadedAssembly As Assembly
@@ -11,6 +11,7 @@ Public Class MainForm
     Private LGD_COMP_MAPPING_NET_MethodInfo As MethodInfo
     Private Property LGDCropModel As String
     Private SaveFilePath As String = "MainFormLastInput.txt"
+    Public Shared ErrorLog As String = "ErrorLog.txt"
 
     Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         LoadLastInput()
@@ -232,8 +233,6 @@ Public Class MainForm
                       End Sub)
 
         End If
-
-
     End Sub
 
     Private Sub btnRefresh_Click(sender As Object, e As EventArgs) Handles btnRefresh.Click
@@ -241,7 +240,7 @@ Public Class MainForm
         Application.Restart()
     End Sub
 
-    Private Sub MainForm_FormClosed(sender As Object, e As FormClosedEventArgs) Handles MyBase.FormClosed
+    Private Sub MainForm_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
         SaveLastInput()
     End Sub
 End Class
