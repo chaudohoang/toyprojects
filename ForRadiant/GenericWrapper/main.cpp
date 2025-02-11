@@ -1,175 +1,125 @@
-#include "parser.h"
 #include <iostream>
+#include <fstream>
 #include <vector>
+#include <regex>
+#include <string>
+#include <sstream>
 #include "mclmcrrt.h"
 #include "mclcppclass.h"
 #include "APPLE_PUC_Orbit_D963_E1_Mono_LGD_GIB_v7p1.h"
 
-typedef void (*InitializeFunction)();
-typedef void (*TerminateFunction)();
-typedef void (*MainFunction)(
-    int, mwArray&, const mwArray&, const mwArray&, const mwArray&, const mwArray&,
-    const mwArray&, const mwArray&, const mwArray&, const mwArray&, const mwArray&,
-    const mwArray&, const mwArray&, const mwArray&, const mwArray&, const mwArray&,
-    const mwArray&, const mwArray&, const mwArray&, const mwArray&, const mwArray&,
-    const mwArray&, const mwArray&, const mwArray&, const mwArray&, const mwArray&,
-    const mwArray&, const mwArray&, const mwArray&, const mwArray&, const mwArray&,
-    const mwArray&, const mwArray&, const mwArray&, const mwArray&, const mwArray&,
-    const mwArray&, const mwArray&, const mwArray&, const mwArray&, const mwArray&,
-    const mwArray&, const mwArray&, const mwArray&, const mwArray&, const mwArray&,
-    const mwArray&, const mwArray&, const mwArray&, const mwArray&, const mwArray&,
-    const mwArray&, const mwArray&, const mwArray&, const mwArray&, const mwArray&,
-    const mwArray&, const mwArray&, const mwArray&, const mwArray&, const mwArray&,
-    const mwArray&, const mwArray&, const mwArray&, const mwArray&, const mwArray&
-    );
+// Function to read arguments from the input file
+std::vector<std::pair<std::string, std::string>> readArgumentsFromFile(const char* inputFile) {
+    std::vector<std::pair<std::string, std::string>> arguments;
+    std::ifstream file(inputFile);
+    std::string line;
+    std::regex re(R"(\s*(\w+)\s*=\s*\"(.*)\"\s*;\s*)");
+    //std::regex re(R"(\s*(\w+)\s*=\s*"([^"]*)"\s*; \s*)");
 
+    if (!file) {
+        throw std::runtime_error("Failed to open input file: " + std::string(inputFile));
+    }
+
+    while (std::getline(file, line)) {
+        std::smatch match;
+        if (std::regex_match(line, match, re)) {
+            arguments.emplace_back(match[1].str(), match[2].str());
+        }
+    }
+
+    return arguments;
+}
+
+// Function to log mwArray creation
+void logMwArrayCreation(std::ofstream& logFile, const std::string& name, const mwArray& value) {
+    logFile << "Created mwArray " << name << " with value: " << value.ToString() << std::endl;
+    std::cout << "Created mwArray " << name << " with value: " << value.ToString() << std::endl;
+}
+
+// Function to log function call arguments
+void logFunctionCallArguments(std::ofstream& logFile, const std::vector<mwArray>& mwArrays) {
+    std::ostringstream oss;
+    oss << "Function call arguments:\n";
+    for (size_t i = 0; i < mwArrays.size(); ++i) {
+        oss << "mwArrays[" << i << "] = " << mwArrays[i].ToString() << "\n";
+    }
+    logFile << oss.str();
+    std::cout << oss.str();
+}
+
+// Helper function to call the function with unpacked mwArray
+template <typename... Args>
+void callFunctionWithArgs(int nargout, mwArray& C, const std::vector<mwArray>& mwArrays, Args... args) {
+    if (mwArrays.size() == sizeof...(args)) {
+        APPLE_PUC_Orbit_D963_E1_Mono_LGD_GIB_v7p1(nargout, C, args...);
+    } else {
+        throw std::runtime_error("Mismatch between the number of arguments and mwArrays size.");
+    }
+}
+
+// Function to unpack the mwArray vector and call the function
+template <std::size_t... Is>
+void callFunctionHelper(int nargout, mwArray& C, const std::vector<mwArray>& mwArrays, std::index_sequence<Is...>) {
+    callFunctionWithArgs(nargout, C, mwArrays, mwArrays[Is]...);
+}
+
+// Main function to call the APPLE_PUC_Orbit_D963_E1_Mono_LGD_GIB_v7p1
+void callFunction(int nargout, mwArray& C, const std::vector<mwArray>& mwArrays) {
+    if (mwArrays.size() > 0 && mwArrays.size() <= 56) {  // Adjust the maximum number as needed
+        callFunctionHelper(nargout, C, mwArrays, std::make_index_sequence<56>{});  // Adjust the maximum number as needed
+    } else {
+        throw std::runtime_error("Unsupported number of arguments.");
+    }
+}
 
 int main(int argc, char* argv[]) {
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " <DLL_NAME> <HEADER_FILE>" << std::endl;
+    if (argc != 4) {
+        std::cerr << "Usage: " << argv[0] << " <DLL_NAME> <HEADER_FILE> <INPUT_FILE>" << std::endl;
         return -1;
     }
 
-    const char* dllName = argv[1];
-    const char* headerFile = argv[2];
-
-    // Step 1: Initialize the MATLAB Runtime
-    if (!mclInitializeApplication(NULL, 0)) {
-        std::cerr << "Failed to initialize MATLAB application." << std::endl;
+    // Open log file
+    std::ofstream logFile("mwArray_log.txt");
+    if (!logFile) {
+        std::cerr << "Failed to open log file!" << std::endl;
         return -1;
     }
 
-    // Step 2: Load the library
-    void* libHandle = loadLibrary(dllName);
-    if (!libHandle) {
-        std::cerr << "Failed to load library: " << dllName << std::endl;
-        mclTerminateApplication();
+    logFile << "Initialization started.\n";
+
+    // Initialize the function
+    if (!APPLE_PUC_Orbit_D963_E1_Mono_LGD_GIB_v7p1Initialize()) {
+        std::cerr << "Initialization failed!" << std::endl;
         return -1;
     }
 
-    // Step 3: Manually add function names for initialization, main function, and termination
-    const char* initName = "APPLE_PUC_Orbit_D963_E1_Mono_LGD_GIB_v7p1Initialize";
-    const char* mangledMainName = "?APPLE_PUC_Orbit_D963_E1_Mono_LGD_GIB_v7p1@@YAXHAEAVmwArray@@AEBV1@1111111111111111111111111111111111111111111111111111111@Z";
-    const char* termName = "APPLE_PUC_Orbit_D963_E1_Mono_LGD_GIB_v7p1Terminate";
-
-    // Step 4: Call the initialization function
-    InitializeFunction initFunc = (InitializeFunction)loadFunction(libHandle, initName);
-    if (initFunc) {
-        initFunc();
-    }
-    else {
-        std::cerr << "Initialization function not found!" << std::endl;
-        mclTerminateApplication();
-        return -1;
-    }
-
-    // Step 5: Prepare arguments and call the main function
     try {
         mwArray C;
-        mwArray file_hex("D:\\GenericWrapperTest\\d963_gamma.hex");
-        mwArray file_otp("D:\\GenericWrapperTest\\puc_otp_read.txt");
-        mwArray out_file_otp("D:\\GenericWrapperTest\\Output");
-        mwArray panel_ID("TEMP");
-        mwArray data_in_out01("D:\\GenericWrapperTest\\step01_0650NIT_G031_imgY_Crop.tif");
-        mwArray data_in_out02("D:\\GenericWrapperTest\\step01_0650NIT_G035_imgY_Crop.tif");
-        mwArray data_in_out03("D:\\GenericWrapperTest\\step01_0650NIT_G0229_imgY_Crop.tif");
-        mwArray data_in_out04("D:\\GenericWrapperTest\\step01_0650NIT_G0255_imgY_Crop.tif");
-        mwArray data_in_out05("D:\\GenericWrapperTest\\step01_0650NIT_R031_imgY_Crop.tif");
-        mwArray data_in_out06("D:\\GenericWrapperTest\\step01_0650NIT_R035_imgY_Crop.tif");
-        mwArray data_in_out07("D:\\GenericWrapperTest\\step01_0650NIT_R0229_imgY_Crop.tif");
-        mwArray data_in_out08("D:\\GenericWrapperTest\\step01_0650NIT_R0255_imgY_Crop.tif");
-        mwArray data_in_out09("D:\\GenericWrapperTest\\step01_0650NIT_B031_imgY_Crop.tif");
-        mwArray data_in_out10("D:\\GenericWrapperTest\\step01_0650NIT_B035_imgY_Crop.tif");
-        mwArray data_in_out11("D:\\GenericWrapperTest\\step01_0650NIT_B0229_imgY_Crop.tif");
-        mwArray data_in_out12("D:\\GenericWrapperTest\\step01_0650NIT_B0255_imgY_Crop.tif");
-        mwArray data_in_out13("DummyImage.tif");
-        mwArray data_in_out14("DummyImage.tif");
-        mwArray data_in_out15("DummyImage.tif");
-        mwArray data_in_out16("DummyImage.tif");
-        mwArray data_in_out17("DummyImage.tif");
-        mwArray data_in_out18("DummyImage.tif");
-        mwArray data_in_out19("DummyImage.tif");
-        mwArray data_in_out20("DummyImage.tif");
-        mwArray data_in_out21("DummyImage.tif");
-        mwArray data_in_out22("DummyImage.tif");
-        mwArray data_in_out23("DummyImage.tif");
-        mwArray data_in_out24("DummyImage.tif");
-        mwArray data_in_out25("DummyImage.tif");
-        mwArray data_in_out26("DummyImage.tif");
-        mwArray data_in_out27("DummyImage.tif");
-        mwArray data_in_out28("DummyImage.tif");
-        mwArray data_in_out29("DummyImage.tif");
-        mwArray data_in_out30("DummyImage.tif");
-        mwArray data_in_out31("DummyImage.tif");
-        mwArray data_in_out32("DummyImage.tif");
-        mwArray data_in_out33("DummyImage.tif");
-        mwArray data_in_out34("DummyImage.tif");
-        mwArray data_in_out35("DummyImage.tif");
-        mwArray data_in_out36("DummyImage.tif");
-        mwArray data_in_out37("DummyImage.tif");
-        mwArray data_in_out38("DummyImage.tif");
-        mwArray data_in_out39("DummyImage.tif");
-        mwArray data_in_out40("DummyImage.tif");
-        mwArray data_in_out41("DummyImage.tif");
-        mwArray data_in_out42("DummyImage.tif");
-        mwArray data_in_out43("DummyImage.tif");
-        mwArray data_in_out44("DummyImage.tif");
-        mwArray data_in_out45("DummyImage.tif");
-        mwArray data_in_out46("DummyImage.tif");
-        mwArray data_in_out47("DummyImage.tif");
-        mwArray data_in_out48("DummyImage.tif");
-        mwArray file_PUC_hex("DummyPUC.hex");
-        mwArray EN_RCB(0);
-        mwArray EN_GGT(0);
-        mwArray EN_2ND(0);
+        std::vector<std::pair<std::string, std::string>> arguments = readArgumentsFromFile(argv[3]);
 
-        APPLE_PUC_Orbit_D963_E1_Mono_LGD_GIB_v7p1(
-            1, C, file_hex, file_otp, out_file_otp, panel_ID,
-            data_in_out01, data_in_out02, data_in_out03, data_in_out04, data_in_out05,
-            data_in_out06, data_in_out07, data_in_out08, data_in_out09, data_in_out10,
-            data_in_out11, data_in_out12, data_in_out13, data_in_out14, data_in_out15,
-            data_in_out16, data_in_out17, data_in_out18, data_in_out19, data_in_out20,
-            data_in_out21, data_in_out22, data_in_out23, data_in_out24, data_in_out25,
-            data_in_out26, data_in_out27, data_in_out28, data_in_out29, data_in_out30,
-            data_in_out31, data_in_out32, data_in_out33, data_in_out34, data_in_out35,
-            data_in_out36, data_in_out37, data_in_out38, data_in_out39, data_in_out40,
-            data_in_out41, data_in_out42, data_in_out43, data_in_out44, data_in_out45,
-            data_in_out46, data_in_out47, data_in_out48, file_PUC_hex, EN_RCB, EN_GGT, EN_2ND
-        );
-
-       /* MainFunction mainFunc = (MainFunction)loadFunction(libHandle, mangledMainName);
-        if (mainFunc) {
-            mainFunc(
-                1, C, file_hex, file_otp, out_file_otp, panel_ID,
-                data_in_out01, data_in_out02, data_in_out03, data_in_out04, data_in_out05,
-                data_in_out06, data_in_out07, data_in_out08, data_in_out09, data_in_out10,
-                data_in_out11, data_in_out12, data_in_out13, data_in_out14, data_in_out15,
-                data_in_out16, data_in_out17, data_in_out18, data_in_out19, data_in_out20,
-                data_in_out21, data_in_out22, data_in_out23, data_in_out24, data_in_out25,
-                data_in_out26, data_in_out27, data_in_out28, data_in_out29, data_in_out30,
-                data_in_out31, data_in_out32, data_in_out33, data_in_out34, data_in_out35,
-                data_in_out36, data_in_out37, data_in_out38, data_in_out39, data_in_out40,
-                data_in_out41, data_in_out42, data_in_out43, data_in_out44, data_in_out45,
-                data_in_out46, data_in_out47, data_in_out48, file_PUC_hex, EN_RCB, EN_GGT, EN_2ND);
+        // Initialize and log the mwArray objects dynamically
+        std::vector<mwArray> mwArrays;
+        for (const auto& arg : arguments) {
+            mwArray array(arg.second.c_str());
+            mwArrays.push_back(array);
+            logMwArrayCreation(logFile, arg.first, array);
         }
-        else {
-            std::cerr << "Main function not found!" << std::endl;
-        }*/
-    }
-    catch (const std::exception& e) {
+
+        // Log function call arguments
+        logFunctionCallArguments(logFile, mwArrays);
+
+        // Dynamically call the function with variadic arguments
+        callFunction(1, C, mwArrays);
+    } catch (const std::exception& e) {
         std::cerr << "Exception: " << e.what() << std::endl;
     }
-    // Step 6: Call the termination function
-    TerminateFunction termFunc = (TerminateFunction)loadFunction(libHandle, termName);
-    if (termFunc) {
-        termFunc();
-    }
-    else {
-        std::cerr << "Termination function not found!" << std::endl;
-    }
 
-    // Step 7: Terminate the MATLAB Runtime
-    mclTerminateApplication();
+    logFile << "Termination started.\n";
+
+    // Terminate the function
+    APPLE_PUC_Orbit_D963_E1_Mono_LGD_GIB_v7p1Terminate();
+
+    logFile << "Termination completed.\n";
 
     return 0;
 }
