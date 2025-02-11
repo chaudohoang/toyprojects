@@ -1,0 +1,116 @@
+Initialization started.
+Created mwArray file_hex with value: C:\POCB\INPUT\d963_gamma.hex
+Created mwArray file_otp with value: C:\POCB\OTP\puc_otp_read.txt
+Created mwArray out_file_otp with value: E:\POCB\HEX\TEMP
+Created mwArray panel_ID with value: TEMP
+Created mwArray data_in_out01 with value: C:\POCB\INPUT\step01_0650NIT_G031_imgY_Crop.tif
+Created mwArray data_in_out02 with value: C:\POCB\INPUT\step01_0650NIT_G035_imgY_Crop.tif
+Created mwArray data_in_out03 with value: C:\POCB\INPUT\step01_0650NIT_G225_imgY_Crop.tif
+Created mwArray data_in_out04 with value: C:\POCB\INPUT\step01_0650NIT_G255_imgY_Crop.tif
+Created mwArray data_in_out05 with value: C:\POCB\INPUT\step01_0650NIT_R031_imgY_Crop.tif
+Created mwArray data_in_out06 with value: C:\POCB\INPUT\step01_0650NIT_R035_imgY_Crop.tif
+Created mwArray data_in_out07 with value: C:\POCB\INPUT\step01_0650NIT_R229_imgY_Crop.tif
+Created mwArray data_in_out08 with value: C:\POCB\INPUT\step01_0650NIT_R255_imgY_Crop.tif
+Created mwArray data_in_out09 with value: C:\POCB\INPUT\step01_0650NIT_B031_imgY_Crop.tif
+Created mwArray data_in_out10 with value: C:\POCB\INPUT\step01_0650NIT_B035_imgY_Crop.tif
+Created mwArray data_in_out11 with value: C:\POCB\INPUT\step01_0650NIT_B229_imgY_Crop.tif
+Created mwArray data_in_out12 with value: C:\POCB\INPUT\step01_0650NIT_B255_imgY_Crop.tif
+Created mwArray data_in_out13 with value: DummyImage.tif
+Created mwArray data_in_out14 with value: DummyImage.tif
+Created mwArray data_in_out15 with value: DummyImage.tif
+Created mwArray data_in_out16 with value: DummyImage.tif
+Created mwArray data_in_out17 with value: DummyImage.tif
+Created mwArray data_in_out18 with value: DummyImage.tif
+Created mwArray data_in_out19 with value: DummyImage.tif
+Created mwArray data_in_out20 with value: DummyImage.tif
+Created mwArray data_in_out21 with value: DummyImage.tif
+Created mwArray data_in_out22 with value: DummyImage.tif
+Created mwArray data_in_out23 with value: DummyImage.tif
+Created mwArray data_in_out24 with value: DummyImage.tif
+Created mwArray data_in_out25 with value: DummyImage.tif
+Created mwArray data_in_out26 with value: DummyImage.tif
+Created mwArray data_in_out27 with value: DummyImage.tif
+Created mwArray data_in_out28 with value: DummyImage.tif
+Created mwArray data_in_out29 with value: DummyImage.tif
+Created mwArray data_in_out30 with value: DummyImage.tif
+Created mwArray data_in_out31 with value: DummyImage.tif
+Created mwArray data_in_out32 with value: DummyImage.tif
+Created mwArray data_in_out33 with value: DummyImage.tif
+Created mwArray data_in_out34 with value: DummyImage.tif
+Created mwArray data_in_out35 with value: DummyImage.tif
+Created mwArray data_in_out36 with value: DummyImage.tif
+Created mwArray data_in_out37 with value: DummyImage.tif
+Created mwArray data_in_out38 with value: DummyImage.tif
+Created mwArray data_in_out39 with value: DummyImage.tif
+Created mwArray data_in_out40 with value: DummyImage.tif
+Created mwArray data_in_out41 with value: DummyImage.tif
+Created mwArray data_in_out42 with value: DummyImage.tif
+Created mwArray data_in_out43 with value: DummyImage.tif
+Created mwArray data_in_out44 with value: DummyImage.tif
+Created mwArray data_in_out45 with value: DummyImage.tif
+Created mwArray data_in_out46 with value: DummyImage.tif
+Created mwArray data_in_out47 with value: DummyImage.tif
+Created mwArray data_in_out48 with value: DummyImage.tif
+Created mwArray file_PUC_hex with value: C:\POCB\INPUT\NyPucData_TEMP_1st_RCB_0.hex
+Created mwArray EN_RCB with value: 0
+Created mwArray EN_GGT with value: 0
+Created mwArray EN_2ND with value: 0
+Function call arguments:
+mwArrays[0] = C:\POCB\INPUT\d963_gamma.hex
+mwArrays[1] = C:\POCB\OTP\puc_otp_read.txt
+mwArrays[2] = E:\POCB\HEX\TEMP
+mwArrays[3] = TEMP
+mwArrays[4] = C:\POCB\INPUT\step01_0650NIT_G031_imgY_Crop.tif
+mwArrays[5] = C:\POCB\INPUT\step01_0650NIT_G035_imgY_Crop.tif
+mwArrays[6] = C:\POCB\INPUT\step01_0650NIT_G225_imgY_Crop.tif
+mwArrays[7] = C:\POCB\INPUT\step01_0650NIT_G255_imgY_Crop.tif
+mwArrays[8] = C:\POCB\INPUT\step01_0650NIT_R031_imgY_Crop.tif
+mwArrays[9] = C:\POCB\INPUT\step01_0650NIT_R035_imgY_Crop.tif
+mwArrays[10] = C:\POCB\INPUT\step01_0650NIT_R229_imgY_Crop.tif
+mwArrays[11] = C:\POCB\INPUT\step01_0650NIT_R255_imgY_Crop.tif
+mwArrays[12] = C:\POCB\INPUT\step01_0650NIT_B031_imgY_Crop.tif
+mwArrays[13] = C:\POCB\INPUT\step01_0650NIT_B035_imgY_Crop.tif
+mwArrays[14] = C:\POCB\INPUT\step01_0650NIT_B229_imgY_Crop.tif
+mwArrays[15] = C:\POCB\INPUT\step01_0650NIT_B255_imgY_Crop.tif
+mwArrays[16] = DummyImage.tif
+mwArrays[17] = DummyImage.tif
+mwArrays[18] = DummyImage.tif
+mwArrays[19] = DummyImage.tif
+mwArrays[20] = DummyImage.tif
+mwArrays[21] = DummyImage.tif
+mwArrays[22] = DummyImage.tif
+mwArrays[23] = DummyImage.tif
+mwArrays[24] = DummyImage.tif
+mwArrays[25] = DummyImage.tif
+mwArrays[26] = DummyImage.tif
+mwArrays[27] = DummyImage.tif
+mwArrays[28] = DummyImage.tif
+mwArrays[29] = DummyImage.tif
+mwArrays[30] = DummyImage.tif
+mwArrays[31] = DummyImage.tif
+mwArrays[32] = DummyImage.tif
+mwArrays[33] = DummyImage.tif
+mwArrays[34] = DummyImage.tif
+mwArrays[35] = DummyImage.tif
+mwArrays[36] = DummyImage.tif
+mwArrays[37] = DummyImage.tif
+mwArrays[38] = DummyImage.tif
+mwArrays[39] = DummyImage.tif
+mwArrays[40] = DummyImage.tif
+mwArrays[41] = DummyImage.tif
+mwArrays[42] = DummyImage.tif
+mwArrays[43] = DummyImage.tif
+mwArrays[44] = DummyImage.tif
+mwArrays[45] = DummyImage.tif
+mwArrays[46] = DummyImage.tif
+mwArrays[47] = DummyImage.tif
+mwArrays[48] = DummyImage.tif
+mwArrays[49] = DummyImage.tif
+mwArrays[50] = DummyImage.tif
+mwArrays[51] = DummyImage.tif
+mwArrays[52] = C:\POCB\INPUT\NyPucData_TEMP_1st_RCB_0.hex
+mwArrays[53] = 0
+mwArrays[54] = 0
+mwArrays[55] = 0
+Termination started.
+Termination completed.
