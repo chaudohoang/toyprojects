@@ -1,0 +1,3 @@
+DynamicDLLWrapper.exe APPLE_PUC_Orbit_D963_E1_Mono_LGD_GIB_v7p1.h APPLE_PUC_Orbit_D963_E1_Mono_LGD_GIB_v7p1.dll input.txt
+
+pause

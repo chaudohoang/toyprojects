@@ -1,0 +1,7 @@
+﻿  main.cpp
+  parse_header.cpp
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+  All 571 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  DynamicDLLWrapper.vcxproj -> D:\Github\toyprojects\ForRadiant\AITaught\Copilot\DynamicDLLWrapper\x64\Release\DynamicDLLWrapper.exe
