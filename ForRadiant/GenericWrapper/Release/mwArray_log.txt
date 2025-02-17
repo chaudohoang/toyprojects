@@ -1,7 +1,7 @@
 Initialization started.
 Created mwArray file_hex with value: C:\POCB\INPUT\d963_gamma.hex
 Created mwArray file_otp with value: C:\POCB\OTP\puc_otp_read.txt
-Created mwArray out_file_otp with value: E:\POCB\HEX\TEMP
+Created mwArray out_file_otp with value: E:\POCB\HEX\TEMP\
 Created mwArray panel_ID with value: TEMP
 Created mwArray data_in_out01 with value: C:\POCB\INPUT\step01_0650NIT_G031_imgY_Crop.tif
 Created mwArray data_in_out02 with value: C:\POCB\INPUT\step01_0650NIT_G035_imgY_Crop.tif
@@ -51,14 +51,14 @@ Created mwArray data_in_out45 with value: DummyImage.tif
 Created mwArray data_in_out46 with value: DummyImage.tif
 Created mwArray data_in_out47 with value: DummyImage.tif
 Created mwArray data_in_out48 with value: DummyImage.tif
-Created mwArray file_PUC_hex with value: C:\POCB\INPUT\NyPucData_TEMP_1st_RCB_0.hex
+Created mwArray file_PUC_hex with value: DummyPUC.hex
 Created mwArray EN_RCB with value: 0
 Created mwArray EN_GGT with value: 0
 Created mwArray EN_2ND with value: 0
 Function call arguments:
 mwArrays[0] = C:\POCB\INPUT\d963_gamma.hex
 mwArrays[1] = C:\POCB\OTP\puc_otp_read.txt
-mwArrays[2] = E:\POCB\HEX\TEMP
+mwArrays[2] = E:\POCB\HEX\TEMP\
 mwArrays[3] = TEMP
 mwArrays[4] = C:\POCB\INPUT\step01_0650NIT_G031_imgY_Crop.tif
 mwArrays[5] = C:\POCB\INPUT\step01_0650NIT_G035_imgY_Crop.tif
@@ -108,7 +108,7 @@ mwArrays[48] = DummyImage.tif
 mwArrays[49] = DummyImage.tif
 mwArrays[50] = DummyImage.tif
 mwArrays[51] = DummyImage.tif
-mwArrays[52] = C:\POCB\INPUT\NyPucData_TEMP_1st_RCB_0.hex
+mwArrays[52] = DummyPUC.hex
 mwArrays[53] = 0
 mwArrays[54] = 0
 mwArrays[55] = 0

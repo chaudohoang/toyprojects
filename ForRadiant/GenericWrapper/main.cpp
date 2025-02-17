@@ -1,125 +1,134 @@
+// main.cpp - Updated to dynamically load functions and handle decorated names
+#include "PucDLL.h"
+#include <windows.h>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <vector>
 #include <regex>
-#include <string>
-#include <sstream>
-#include "mclmcrrt.h"
-#include "mclcppclass.h"
-#include "APPLE_PUC_Orbit_D963_E1_Mono_LGD_GIB_v7p1.h"
 
-// Function to read arguments from the input file
-std::vector<std::pair<std::string, std::string>> readArgumentsFromFile(const char* inputFile) {
-    std::vector<std::pair<std::string, std::string>> arguments;
-    std::ifstream file(inputFile);
+// Global function pointers
+InitializeFunc PucDLLInitialize = nullptr;
+TerminateFunc PucDLLTerminate = nullptr;
+FunctionCall PucDLL = nullptr;
+
+// Function to parse header file and count function arguments
+int getFunctionArgumentCount(const std::string& headerFile, const std::string& functionName) {
+    std::ifstream file(headerFile);
     std::string line;
-    std::regex re(R"(\s*(\w+)\s*=\s*\"(.*)\"\s*;\s*)");
-    //std::regex re(R"(\s*(\w+)\s*=\s*"([^"]*)"\s*; \s*)");
-
-    if (!file) {
-        throw std::runtime_error("Failed to open input file: " + std::string(inputFile));
-    }
+    std::regex funcRegex(functionName + "\\(([^)]*)\\)");
+    std::smatch match;
 
     while (std::getline(file, line)) {
-        std::smatch match;
-        if (std::regex_match(line, match, re)) {
-            arguments.emplace_back(match[1].str(), match[2].str());
+        if (std::regex_search(line, match, funcRegex)) {
+            std::string args = match[1].str();
+            return std::count(args.begin(), args.end(), ',') + 1;
         }
     }
-
-    return arguments;
+    return 0;
 }
 
-// Function to log mwArray creation
-void logMwArrayCreation(std::ofstream& logFile, const std::string& name, const mwArray& value) {
-    logFile << "Created mwArray " << name << " with value: " << value.ToString() << std::endl;
-    std::cout << "Created mwArray " << name << " with value: " << value.ToString() << std::endl;
-}
+// Function to read input.txt and create mwArray arguments
+std::vector<mwArray> buildInputArguments(const std::string& inputFile, int argCount) {
+    std::vector<mwArray> inputArgs;
+    std::ifstream file(inputFile);
+    std::string value;
 
-// Function to log function call arguments
-void logFunctionCallArguments(std::ofstream& logFile, const std::vector<mwArray>& mwArrays) {
-    std::ostringstream oss;
-    oss << "Function call arguments:\n";
-    for (size_t i = 0; i < mwArrays.size(); ++i) {
-        oss << "mwArrays[" << i << "] = " << mwArrays[i].ToString() << "\n";
+    while (std::getline(file, value) && inputArgs.size() < argCount) {
+        std::size_t eqPos = value.find('=');
+        if (eqPos != std::string::npos) {
+            std::string stringValue = value.substr(eqPos + 1);
+            // Remove spaces and quotes around the string value
+            stringValue.erase(remove(stringValue.begin(), stringValue.end(), ' '), stringValue.end());
+            stringValue.erase(remove(stringValue.begin(), stringValue.end(), '\"'), stringValue.end());
+
+            std::istringstream iss(stringValue);
+            int intValue;
+            // Check if the value can be converted to an integer
+            if (iss >> intValue) {
+                inputArgs.push_back(mwArray(intValue));
+                std::cout << "Created mwArray with integer value: " << intValue << std::endl;
+            }
+            else {
+                inputArgs.push_back(mwArray(stringValue.c_str()));
+                std::cout << "Created mwArray with string value: " << stringValue << std::endl;
+            }
+        }
+        else {
+            std::istringstream iss(value);
+            int intValue;
+            // Check if the value can be converted to an integer
+            if (iss >> intValue) {
+                inputArgs.push_back(mwArray(intValue));
+                std::cout << "Created mwArray with integer value: " << intValue << std::endl;
+            }
+            else {
+                inputArgs.push_back(mwArray(value.c_str()));
+                std::cout << "Created mwArray with string value: " << value << std::endl;
+            }
+        }
     }
-    logFile << oss.str();
-    std::cout << oss.str();
+    return inputArgs;
 }
 
-// Helper function to call the function with unpacked mwArray
-template <typename... Args>
-void callFunctionWithArgs(int nargout, mwArray& C, const std::vector<mwArray>& mwArrays, Args... args) {
-    if (mwArrays.size() == sizeof...(args)) {
-        APPLE_PUC_Orbit_D963_E1_Mono_LGD_GIB_v7p1(nargout, C, args...);
-    } else {
-        throw std::runtime_error("Mismatch between the number of arguments and mwArrays size.");
-    }
-}
-
-// Function to unpack the mwArray vector and call the function
-template <std::size_t... Is>
-void callFunctionHelper(int nargout, mwArray& C, const std::vector<mwArray>& mwArrays, std::index_sequence<Is...>) {
-    callFunctionWithArgs(nargout, C, mwArrays, mwArrays[Is]...);
-}
-
-// Main function to call the APPLE_PUC_Orbit_D963_E1_Mono_LGD_GIB_v7p1
-void callFunction(int nargout, mwArray& C, const std::vector<mwArray>& mwArrays) {
-    if (mwArrays.size() > 0 && mwArrays.size() <= 56) {  // Adjust the maximum number as needed
-        callFunctionHelper(nargout, C, mwArrays, std::make_index_sequence<56>{});  // Adjust the maximum number as needed
-    } else {
-        throw std::runtime_error("Unsupported number of arguments.");
-    }
+// Function to construct decorated function name
+std::string getDecoratedFunctionName(const std::string& baseName, int argCount) {
+    int numOnes = (argCount >= 3) ? (argCount - 3) : 0;
+    return "?" + baseName + "@@YAXHAEAVmwArray@@AEBV1@" + std::string(numOnes, '1') + "@Z";
 }
 
 int main(int argc, char* argv[]) {
-    if (argc != 4) {
-        std::cerr << "Usage: " << argv[0] << " <DLL_NAME> <HEADER_FILE> <INPUT_FILE>" << std::endl;
-        return -1;
+    if (argc < 4) {
+        std::cerr << "Usage: GenericWrapper.exe <DLL> <Header> <Input>" << std::endl;
+        return 1;
     }
 
-    // Open log file
-    std::ofstream logFile("mwArray_log.txt");
-    if (!logFile) {
-        std::cerr << "Failed to open log file!" << std::endl;
-        return -1;
+    std::string dllName = argv[1];
+    std::string headerFile = argv[2];
+    std::string inputFile = argv[3];
+
+    std::string baseName = dllName.substr(0, dllName.find_last_of('.'));
+    std::string initializeFuncName = baseName + "Initialize";
+    std::string terminateFuncName = baseName + "Terminate";
+    int argCount = getFunctionArgumentCount(headerFile, baseName);
+    std::string functionCallName = getDecoratedFunctionName(baseName, argCount);
+
+    std::cout << "Attempting to load: " << dllName << std::endl;
+    HMODULE hModule = LoadLibraryA(dllName.c_str());
+    if (!hModule) {
+        std::cerr << "Failed to load DLL" << std::endl;
+        return 1;
     }
 
-    logFile << "Initialization started.\n";
+    std::cout << "Looking for functions: " << initializeFuncName << ", " << terminateFuncName << ", " << functionCallName << std::endl;
+    PucDLLInitialize = reinterpret_cast<InitializeFunc>(GetProcAddress(hModule, initializeFuncName.c_str()));
+    PucDLLTerminate = reinterpret_cast<TerminateFunc>(GetProcAddress(hModule, terminateFuncName.c_str()));
+    PucDLL = reinterpret_cast<FunctionCall>(GetProcAddress(hModule, functionCallName.c_str()));
 
-    // Initialize the function
-    if (!APPLE_PUC_Orbit_D963_E1_Mono_LGD_GIB_v7p1Initialize()) {
-        std::cerr << "Initialization failed!" << std::endl;
-        return -1;
+    if (!PucDLLInitialize || !PucDLLTerminate || !PucDLL) {
+        std::cerr << "Failed to retrieve function pointers. Verify decorated name." << std::endl;
+        return 1;
     }
 
-    try {
-        mwArray C;
-        std::vector<std::pair<std::string, std::string>> arguments = readArgumentsFromFile(argv[3]);
+    std::cout << "Successfully retrieved function pointers." << std::endl;
 
-        // Initialize and log the mwArray objects dynamically
-        std::vector<mwArray> mwArrays;
-        for (const auto& arg : arguments) {
-            mwArray array(arg.second.c_str());
-            mwArrays.push_back(array);
-            logMwArrayCreation(logFile, arg.first, array);
-        }
-
-        // Log function call arguments
-        logFunctionCallArguments(logFile, mwArrays);
-
-        // Dynamically call the function with variadic arguments
-        callFunction(1, C, mwArrays);
-    } catch (const std::exception& e) {
-        std::cerr << "Exception: " << e.what() << std::endl;
+    // Initialize the application
+    if (!mclInitializeApplication(NULL, 0)) {
+        std::cerr << "Could not initialize the application properly." << std::endl;
+        return 1;
     }
 
-    logFile << "Termination started.\n";
+    PucDLLInitialize();
 
-    // Terminate the function
-    APPLE_PUC_Orbit_D963_E1_Mono_LGD_GIB_v7p1Terminate();
+    mwArray output;
+    std::vector<mwArray> inputArgs = buildInputArguments(inputFile, argCount);
 
-    logFile << "Termination completed.\n";
+    std::cout << "Executing function with " << argCount << " arguments." << std::endl;
+    PucDLL(1, output, inputArgs);
+
+    PucDLLTerminate();
+    mclTerminateApplication();
+    FreeLibrary(hModule);
 
     return 0;
 }

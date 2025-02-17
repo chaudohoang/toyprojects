@@ -1,6 +1,6 @@
 file_hex = "C:\POCB\INPUT\d963_gamma.hex";
 file_otp = "C:\POCB\OTP\puc_otp_read.txt";
-out_file_otp = "E:\POCB\HEX\TEMP";
+out_file_otp = "E:\POCB\HEX\TEMP\";
 panel_ID = "TEMP";
 data_in_out01 = "C:\POCB\INPUT\step01_0650NIT_G031_imgY_Crop.tif";
 data_in_out02 = "C:\POCB\INPUT\step01_0650NIT_G035_imgY_Crop.tif";
@@ -50,7 +50,7 @@ data_in_out45 = "DummyImage.tif";
 data_in_out46 = "DummyImage.tif";
 data_in_out47 = "DummyImage.tif";
 data_in_out48 = "DummyImage.tif";
-file_PUC_hex = "C:\POCB\INPUT\NyPucData_TEMP_1st_RCB_0.hex";
+file_PUC_hex = "DummyPUC.hex";
 EN_RCB = "0";
 EN_GGT = "0";
 EN_2ND = "0";
