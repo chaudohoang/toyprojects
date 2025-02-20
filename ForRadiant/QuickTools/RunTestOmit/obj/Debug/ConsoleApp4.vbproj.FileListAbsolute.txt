@@ -1,0 +1,11 @@
+D:\Local Projects\Visual Studio\ConsoleApp4\bin\Debug\ConsoleApp4.exe.config
+D:\Local Projects\Visual Studio\ConsoleApp4\bin\Debug\ConsoleApp4.exe
+D:\Local Projects\Visual Studio\ConsoleApp4\bin\Debug\ConsoleApp4.pdb
+D:\Local Projects\Visual Studio\ConsoleApp4\bin\Debug\ConsoleApp4.xml
+D:\Local Projects\Visual Studio\ConsoleApp4\obj\Debug\ConsoleApp4.vbproj.AssemblyReference.cache
+D:\Local Projects\Visual Studio\ConsoleApp4\obj\Debug\ConsoleApp4.Resources.resources
+D:\Local Projects\Visual Studio\ConsoleApp4\obj\Debug\ConsoleApp4.vbproj.GenerateResource.cache
+D:\Local Projects\Visual Studio\ConsoleApp4\obj\Debug\ConsoleApp4.vbproj.CoreCompileInputs.cache
+D:\Local Projects\Visual Studio\ConsoleApp4\obj\Debug\ConsoleApp4.exe
+D:\Local Projects\Visual Studio\ConsoleApp4\obj\Debug\ConsoleApp4.xml
+D:\Local Projects\Visual Studio\ConsoleApp4\obj\Debug\ConsoleApp4.pdb

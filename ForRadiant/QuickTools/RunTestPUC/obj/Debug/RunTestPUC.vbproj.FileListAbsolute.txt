@@ -1,0 +1,11 @@
+D:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\bin\Debug\ConsoleApp3.exe.config
+D:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\bin\Debug\ConsoleApp3.exe
+D:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\bin\Debug\ConsoleApp3.pdb
+D:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\bin\Debug\ConsoleApp3.xml
+D:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\obj\Debug\RunTestPUC.vbproj.AssemblyReference.cache
+D:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\obj\Debug\ConsoleApp3.Resources.resources
+D:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\obj\Debug\RunTestPUC.vbproj.GenerateResource.cache
+D:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\obj\Debug\RunTestPUC.vbproj.CoreCompileInputs.cache
+D:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\obj\Debug\ConsoleApp3.exe
+D:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\obj\Debug\ConsoleApp3.xml
+D:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\obj\Debug\ConsoleApp3.pdb

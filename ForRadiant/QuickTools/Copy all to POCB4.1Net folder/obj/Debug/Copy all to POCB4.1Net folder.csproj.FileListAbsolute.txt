@@ -1,0 +1,7 @@
+D:\Github\toyprojects\ForRadiant\QuickTools\Copy all to POCB4.1Net folder\bin\Debug\CopyFilesAndRestartTrueTest.exe.config
+D:\Github\toyprojects\ForRadiant\QuickTools\Copy all to POCB4.1Net folder\bin\Debug\CopyFilesAndRestartTrueTest.exe
+D:\Github\toyprojects\ForRadiant\QuickTools\Copy all to POCB4.1Net folder\bin\Debug\CopyFilesAndRestartTrueTest.pdb
+D:\Github\toyprojects\ForRadiant\QuickTools\Copy all to POCB4.1Net folder\obj\Debug\Copy all to POCB4.1Net folder.csproj.AssemblyReference.cache
+D:\Github\toyprojects\ForRadiant\QuickTools\Copy all to POCB4.1Net folder\obj\Debug\Copy all to POCB4.1Net folder.csproj.CoreCompileInputs.cache
+D:\Github\toyprojects\ForRadiant\QuickTools\Copy all to POCB4.1Net folder\obj\Debug\CopyFilesAndRestartTrueTest.exe
+D:\Github\toyprojects\ForRadiant\QuickTools\Copy all to POCB4.1Net folder\obj\Debug\CopyFilesAndRestartTrueTest.pdb

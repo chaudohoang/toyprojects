@@ -1,0 +1,7 @@
+D:\Github\toyprojects\ForRadiant\QuickTools\Distribute files\bin\Debug\ConsoleApp1.exe.config
+D:\Github\toyprojects\ForRadiant\QuickTools\Distribute files\bin\Debug\ConsoleApp1.exe
+D:\Github\toyprojects\ForRadiant\QuickTools\Distribute files\bin\Debug\ConsoleApp1.pdb
+D:\Github\toyprojects\ForRadiant\QuickTools\Distribute files\obj\Debug\Distribute files.csproj.AssemblyReference.cache
+D:\Github\toyprojects\ForRadiant\QuickTools\Distribute files\obj\Debug\Distribute files.csproj.CoreCompileInputs.cache
+D:\Github\toyprojects\ForRadiant\QuickTools\Distribute files\obj\Debug\ConsoleApp1.exe
+D:\Github\toyprojects\ForRadiant\QuickTools\Distribute files\obj\Debug\ConsoleApp1.pdb

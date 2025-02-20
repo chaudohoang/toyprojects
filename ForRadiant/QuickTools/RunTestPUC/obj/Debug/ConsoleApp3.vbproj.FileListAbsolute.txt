@@ -1,0 +1,11 @@
+D:\Local Projects\Visual Studio\ConsoleApp3\obj\Debug\ConsoleApp3.vbproj.AssemblyReference.cache
+D:\Local Projects\Visual Studio\ConsoleApp3\obj\Debug\ConsoleApp3.Resources.resources
+D:\Local Projects\Visual Studio\ConsoleApp3\obj\Debug\ConsoleApp3.vbproj.GenerateResource.cache
+D:\Local Projects\Visual Studio\ConsoleApp3\obj\Debug\ConsoleApp3.vbproj.CoreCompileInputs.cache
+D:\Local Projects\Visual Studio\ConsoleApp3\bin\Debug\ConsoleApp3.exe.config
+D:\Local Projects\Visual Studio\ConsoleApp3\bin\Debug\ConsoleApp3.exe
+D:\Local Projects\Visual Studio\ConsoleApp3\bin\Debug\ConsoleApp3.pdb
+D:\Local Projects\Visual Studio\ConsoleApp3\bin\Debug\ConsoleApp3.xml
+D:\Local Projects\Visual Studio\ConsoleApp3\obj\Debug\ConsoleApp3.exe
+D:\Local Projects\Visual Studio\ConsoleApp3\obj\Debug\ConsoleApp3.xml
+D:\Local Projects\Visual Studio\ConsoleApp3\obj\Debug\ConsoleApp3.pdb

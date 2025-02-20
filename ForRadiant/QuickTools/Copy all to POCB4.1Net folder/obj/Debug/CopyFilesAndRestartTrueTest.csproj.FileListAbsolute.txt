@@ -1,0 +1,7 @@
+D:\Local Projects\Visual Studio\CopyFilesAndRestartTrueTest\bin\Debug\CopyFilesAndRestartTrueTest.exe.config
+D:\Local Projects\Visual Studio\CopyFilesAndRestartTrueTest\bin\Debug\CopyFilesAndRestartTrueTest.exe
+D:\Local Projects\Visual Studio\CopyFilesAndRestartTrueTest\bin\Debug\CopyFilesAndRestartTrueTest.pdb
+D:\Local Projects\Visual Studio\CopyFilesAndRestartTrueTest\obj\Debug\CopyFilesAndRestartTrueTest.csproj.AssemblyReference.cache
+D:\Local Projects\Visual Studio\CopyFilesAndRestartTrueTest\obj\Debug\CopyFilesAndRestartTrueTest.csproj.CoreCompileInputs.cache
+D:\Local Projects\Visual Studio\CopyFilesAndRestartTrueTest\obj\Debug\CopyFilesAndRestartTrueTest.exe
+D:\Local Projects\Visual Studio\CopyFilesAndRestartTrueTest\obj\Debug\CopyFilesAndRestartTrueTest.pdb

@@ -1,0 +1,11 @@
+D:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\bin\Debug\ConsoleApp4.exe.config
+D:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\bin\Debug\ConsoleApp4.exe
+D:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\bin\Debug\ConsoleApp4.pdb
+D:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\bin\Debug\ConsoleApp4.xml
+D:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\obj\Debug\RunTestOmit.vbproj.AssemblyReference.cache
+D:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\obj\Debug\ConsoleApp4.Resources.resources
+D:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\obj\Debug\RunTestOmit.vbproj.GenerateResource.cache
+D:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\obj\Debug\RunTestOmit.vbproj.CoreCompileInputs.cache
+D:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\obj\Debug\ConsoleApp4.exe
+D:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\obj\Debug\ConsoleApp4.xml
+D:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\obj\Debug\ConsoleApp4.pdb
