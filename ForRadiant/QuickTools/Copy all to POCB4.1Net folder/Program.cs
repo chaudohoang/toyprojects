@@ -151,16 +151,39 @@ class Program
                 continue;
             }
 
-            try
+            bool copySuccessful = false;
+            int retryCount = 3; // Retry limit
+            int retryDelay = 500; // 500 milliseconds delay between retries
+
+            for (int attempt = 1; attempt <= retryCount; attempt++)
             {
-                File.Copy(file, Path.Combine(targetDir, fileName), true);
-                Console.WriteLine($"Copied: {file}");  // This will show the copied file in the console
+                try
+                {
+                    File.Copy(file, Path.Combine(targetDir, fileName), true);
+                    Console.WriteLine($"Copied: {file}");
+                    copySuccessful = true;
+                    break; // Exit the loop if copy is successful
+                }
+                catch (IOException ex) when (attempt < retryCount)
+                {
+                    // If the file is locked, retry
+                    Console.WriteLine($"Failed to copy {file} (Attempt {attempt}/{retryCount}): {ex.Message}. Retrying...");
+                    System.Threading.Thread.Sleep(retryDelay); // Wait before retrying
+                }
+                catch (Exception ex)
+                {
+                    // If an unexpected error occurs, log it and stop retrying
+                    Console.WriteLine($"Failed to copy {file}: {ex.Message}");
+                    break;
+                }
             }
-            catch (Exception ex)
+
+            // If after retries the copy failed, log the failure
+            if (!copySuccessful)
             {
-                Console.WriteLine($"Failed to copy {file}: {ex.Message}");
+                Console.WriteLine($"Failed to copy {file} after {retryCount} attempts.");
             }
-        }                
+        }
 
         if (wasRunning && trueTestPath != null)
         {
@@ -170,10 +193,12 @@ class Program
         {
             // Removed Environment.Exit(0) to allow the program to wait
         }
+
         // Wait for user input before exiting
         Console.WriteLine("Press any key to exit.");
         Console.ReadKey();
     }
+
 
 
     static void PromptExitOrRestart(string trueTestPath)
