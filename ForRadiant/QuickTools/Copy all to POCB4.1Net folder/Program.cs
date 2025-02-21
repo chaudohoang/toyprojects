@@ -1,47 +1,144 @@
 ﻿using System;
 using System.IO;
-using System.Diagnostics;
 using System.Linq;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 class Program
 {
     static void Main()
     {
-        // Detect if TrueTest.exe is running and capture its path before killing it
+        while (true)
+        {
+            Console.WriteLine("Select a target directory:");
+            Console.WriteLine("[1] C:\\Program Files\\Radiant Vision Systems\\TrueTest 1.8\\POCB4.1Net");
+            Console.WriteLine("[2] C:\\Program Files\\Radiant Vision Systems\\TrueTest 1.8 debug Mobile\\POCB4.1Net");
+            char mainChoice = Console.ReadKey().KeyChar;
+            Console.WriteLine();
+
+            if (mainChoice == '0')
+            {
+                if (AuthenticateUser())
+                    ModifyIniFiles();
+            }
+            else if (mainChoice == '1' || mainChoice == '2')
+            {
+                ManageTrueTest(mainChoice);
+                Environment.Exit(0);
+            }
+            else
+            {
+                Console.WriteLine("Invalid choice. Try again.");
+            }
+        }
+    }
+
+    static void ModifyIniFiles()
+    {
+        while (true)
+        {
+            string folderPath = Directory.GetCurrentDirectory();
+            string[] iniFiles = Directory.GetFiles(folderPath, "*.ini");
+
+            Console.WriteLine("Select an option:");
+            Console.WriteLine("1. Apply changes to all files");
+            Console.WriteLine("2. Modify files individually");
+            Console.Write("Enter your choice (1 or 2): ");
+            char choice = Console.ReadKey().KeyChar;
+            Console.WriteLine();
+
+            bool applyToAll = choice == '1';
+            string globalValue = "";
+
+            if (applyToAll)
+            {
+                while (true)
+                {
+                    Console.Write("Enter new value for all files (0 or 1): ");
+                    globalValue = Console.ReadKey().KeyChar.ToString().Trim();
+                    Console.WriteLine();
+                    if (globalValue == "0" || globalValue == "1") break;
+                    Console.WriteLine("Invalid input. Please enter 0 or 1.");
+                }
+            }
+
+            foreach (string iniFile in iniFiles)
+            {
+                if (Regex.IsMatch(Path.GetFileName(iniFile), "DX", RegexOptions.IgnoreCase)) continue;
+
+                var lines = File.ReadAllLines(iniFile).ToList();
+                bool modified = false;
+
+                for (int i = 0; i < lines.Count; i++)
+                {
+                    Match match = Regex.Match(lines[i], "^STEP_3_VIGNETTING_CORRECTION\\s*=\\s*(\\d+\\.?\\d*)");
+                    if (match.Success)
+                    {
+                        Console.Write($"\nFile: {Path.GetFileName(iniFile)}\nCurrent Value: {match.Groups[1].Value} ");
+
+                        string newValue = globalValue;
+                        if (!applyToAll)
+                        {
+                            while (true)
+                            {
+                                Console.Write("Enter new value (0 or 1): ");
+                                newValue = Console.ReadKey().KeyChar.ToString().Trim();
+                                Console.WriteLine();
+                                if (newValue == "0" || newValue == "1") break;
+                                Console.WriteLine("Invalid input. Please enter 0 or 1.");
+                            }
+                        }
+
+                        lines[i] = Regex.Replace(lines[i], "(?<=STEP_3_VIGNETTING_CORRECTION\\s*=\\s*)\\d+\\.?\\d*", newValue);
+                        modified = true;
+                    }
+                }
+
+                if (modified)
+                {
+                    File.WriteAllLines(iniFile, lines);
+                    Console.WriteLine($"File updated with New Value: {globalValue}");
+                }
+            }
+
+            Console.WriteLine("Select an option:");
+            Console.WriteLine("1. Modify INI files again");
+            Console.WriteLine("2. Return to the main menu");
+            char nextAction = Console.ReadKey().KeyChar;
+            Console.WriteLine();
+
+            if (nextAction == '2') break;
+        }
+    }
+
+    static void ManageTrueTest(char choice)
+    {
         string trueTestPath = null;
+        bool wasRunning = false;
         var process = Process.GetProcessesByName("TrueTest").FirstOrDefault();
 
         if (process != null)
         {
-            trueTestPath = process.MainModule.FileName;  // Capture path before terminating
+            trueTestPath = process.MainModule.FileName;
             Console.WriteLine("TrueTest.exe is running. Terminating process...");
             process.Kill();
             Console.WriteLine("Process terminated.");
+            wasRunning = true;
         }
         else
         {
             Console.WriteLine("TrueTest.exe is not running.");
         }
 
-        // Ask user to select target directory
-        Console.WriteLine("Select a target directory:");
-        Console.WriteLine("[1] C:\\Program Files\\Radiant Vision Systems\\TrueTest 1.8\\POCB4.1Net");
-        Console.WriteLine("[2] C:\\Program Files\\Radiant Vision Systems\\TrueTest 1.8 debug Mobile\\POCB4.1Net");
-        char choice = Console.ReadKey().KeyChar;
-
         string targetDir = (choice == '1')
-            ? @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8\POCB4.1Net"
-            : @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8 debug Mobile\POCB4.1Net";
+            ? @"C:\\Program Files\\Radiant Vision Systems\\TrueTest 1.8\\POCB4.1Net"
+            : @"C:\\Program Files\\Radiant Vision Systems\\TrueTest 1.8 debug Mobile\\POCB4.1Net";
 
-        Console.WriteLine(); // Just to add a new line after the choice
-
-        // Ensure the target directory exists
         if (!Directory.Exists(targetDir))
         {
             Directory.CreateDirectory(targetDir);
         }
 
-        // Copy all files except the executable, .tif, .csv, and LGD_VNTT.ini
         string scriptName = Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location);
         var files = Directory.GetFiles(Directory.GetCurrentDirectory());
 
@@ -49,46 +146,89 @@ class Program
         {
             string fileName = Path.GetFileName(file);
             string extension = Path.GetExtension(file).ToLower();
-
-            // Skip files with .tif, .csv, or named "LGD_VNTT.ini"
             if (fileName == scriptName || extension == ".tif" || extension == ".csv" || fileName.Equals("LGD_VNTT.ini", StringComparison.OrdinalIgnoreCase))
             {
-                continue; // Skip without logging
+                continue;
             }
 
             try
             {
                 File.Copy(file, Path.Combine(targetDir, fileName), true);
-                Console.WriteLine($"Copied: {file}");
+                Console.WriteLine($"Copied: {file}");  // This will show the copied file in the console
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to copy {file}: {ex.Message}");
             }
-        }
+        }                
 
-        // Ask user if they want to restart TrueTest.exe
-        if (!string.IsNullOrEmpty(trueTestPath))
+        if (wasRunning && trueTestPath != null)
         {
-            Console.WriteLine("Would you like to restart TrueTest.exe?");
-            Console.WriteLine("[1] Yes");
-            Console.WriteLine("[2] No");
-            choice = Console.ReadKey().KeyChar;
-
-            Console.WriteLine(); // Add new line for better formatting
-
-            if (choice == '1')
-            {
-                Console.WriteLine("Restarting TrueTest.exe...");
-                Process.Start(trueTestPath);
-            }
-            else
-            {
-                Console.WriteLine("Skipping restart.");
-            }
+            PromptExitOrRestart(trueTestPath);
         }
-
+        else
+        {
+            // Removed Environment.Exit(0) to allow the program to wait
+        }
+        // Wait for user input before exiting
         Console.WriteLine("Press any key to exit.");
-        Console.ReadKey(); // Final key press to exit
+        Console.ReadKey();
+    }
+
+
+    static void PromptExitOrRestart(string trueTestPath)
+    {
+        Console.WriteLine("Manage TrueTest completed. Select an option:");
+        Console.WriteLine("1. Restart TrueTest");
+        Console.WriteLine("2. Exit");
+        char nextAction = Console.ReadKey().KeyChar;
+        Console.WriteLine();
+
+        if (nextAction == '1')
+        {
+            Console.WriteLine("Restarting TrueTest...");
+            Process.Start(trueTestPath);
+        }
+        else
+        {
+            Console.WriteLine("Exiting program.");
+            Environment.Exit(0);
+        }
+    }
+
+    static bool AuthenticateUser()
+    {
+        string password = $"{DateTime.Now:HHmm}";
+        Console.Write("Enter password: ");
+        string inputPassword = ReadPassword();
+
+        if (inputPassword != password)
+        {
+            Console.WriteLine("\nIncorrect password. Returning to menu.");
+            return false;
+        }
+        return true;
+    }
+
+    static string ReadPassword()
+    {
+        string password = "";
+        ConsoleKeyInfo key;
+        do
+        {
+            key = Console.ReadKey(true);
+            if (key.Key == ConsoleKey.Backspace && password.Length > 0)
+            {
+                password = password.Substring(0, password.Length - 1);
+                Console.Write("\b \b");
+            }
+            else if (!char.IsControl(key.KeyChar))
+            {
+                password += key.KeyChar;
+                Console.Write("*");
+            }
+        } while (key.Key != ConsoleKey.Enter);
+        Console.WriteLine();
+        return password;
     }
 }

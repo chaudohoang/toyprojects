@@ -1,85 +1,112 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Prompt user to choose an option
-        Console.WriteLine("Select an option:");
-        Console.WriteLine("1: Replace 'STEP_3_VIGNETTING_CORRECTION = 1;' with 'STEP_3_VIGNETTING_CORRECTION = 0;'");
-        Console.WriteLine("2: Replace 'STEP_3_VIGNETTING_CORRECTION = 0;' with 'STEP_3_VIGNETTING_CORRECTION = 1;'");
-        string option = Console.ReadLine();
+        string password = $"lgd{DateTime.Now:HHmm}";
+        Console.Write("Enter password: ");
+        string inputPassword = ReadPassword();
 
-        string searchPattern, replaceText;
-
-        // Determine the regex pattern and replacement text based on the option
-        if (option == "1")
+        if (inputPassword != password)
         {
-            searchPattern = @"(STEP_3_VIGNETTING_CORRECTION\s*=\s*)1;";
-            replaceText = "${1}0;";
-        }
-        else if (option == "2")
-        {
-            searchPattern = @"(STEP_3_VIGNETTING_CORRECTION\s*=\s*)0;";
-            replaceText = "${1}1;";
-        }
-        else
-        {
-            Console.WriteLine("Invalid option selected. Exiting...");
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadKey();
+            Console.WriteLine("\nIncorrect password. Exiting.");
             return;
         }
 
-        // Specify the folder to start searching
-        Console.WriteLine("Enter the path to the folder:");
-        string folderPath = Console.ReadLine();
-
-        // Check if the directory exists
-        if (!Directory.Exists(folderPath))
+        while (true)
         {
-            Console.WriteLine("The specified folder does not exist.");
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadKey();
-            return;
-        }
+            string folderPath = Directory.GetCurrentDirectory(); // Use current folder
+            string[] iniFiles = Directory.GetFiles(folderPath, "*.ini");
 
-        try
-        {
-            // Get all .ini files in the directory and subdirectories
-            string[] iniFiles = Directory.GetFiles(folderPath, "*.ini", SearchOption.AllDirectories);
+            Console.WriteLine("Select an option:");
+            Console.WriteLine("1. Apply changes to all files");
+            Console.WriteLine("2. Modify files individually");
+            Console.Write("Enter your choice (1 or 2): ");
+            string choice = Console.ReadKey().KeyChar.ToString().Trim();
 
-            foreach (string file in iniFiles)
+            bool applyToAll = choice == "1";
+            string globalValue = "";
+
+            if (applyToAll)
             {
-                // Read the file content
-                string content = File.ReadAllText(file);
-
-                // Use regex to replace the line while retaining original formatting
-                if (Regex.IsMatch(content, searchPattern))
+                while (true)
                 {
-                    content = Regex.Replace(content, searchPattern, replaceText);
-
-                    // Write the modified content back to the file
-                    File.WriteAllText(file, content);
-                    Console.WriteLine($"Updated file: {file}");
-                }
-                else
-                {
-                    Console.WriteLine($"No match found in file: {file}");
+                    Console.WriteLine("\nEnter new value for all files (0 or 1): ");
+                    globalValue = Console.ReadKey().KeyChar.ToString().Trim();
+                    if (globalValue == "0" || globalValue == "1")
+                    {
+                        break;
+                    }
+                    Console.WriteLine("Invalid input. Please enter 0 or 1.");
                 }
             }
 
-            Console.WriteLine("Processing complete.");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"An error occurred: {ex.Message}");
-        }
+            foreach (string iniFile in iniFiles)
+            {
+                if (Regex.IsMatch(Path.GetFileName(iniFile), "DX", RegexOptions.IgnoreCase)) continue; // Skip files containing "DX" (case insensitive)
 
-        // Wait for the user to press a key before exiting
-        Console.WriteLine("Press any key to exit...");
-        Console.ReadKey();
+                var lines = File.ReadAllLines(iniFile).ToList();
+                bool modified = false;
+
+                for (int i = 0; i < lines.Count; i++)
+                {
+                    Match match = Regex.Match(lines[i], @"^STEP_3_VIGNETTING_CORRECTION\s*=\s*(\d+\.?\d*)");
+                    if (match.Success)
+                    {
+                        Console.Write($"\nFile: {Path.GetFileName(iniFile)}\nCurrent Value: {match.Groups[1].Value} ");
+
+                        string newValue = globalValue;
+                        if (!applyToAll)
+                        {
+                            while (true)
+                            {
+                                Console.Write("Enter new value (0 or 1): ");
+                                newValue = Console.ReadKey().KeyChar.ToString().Trim();
+                                if (newValue == "0" || newValue == "1")
+                                {
+                                    break;
+                                }
+                                Console.WriteLine("\nInvalid input. Please enter 0 or 1.");
+                            }
+                        }
+
+                        lines[i] = Regex.Replace(lines[i], @"(?<=STEP_3_VIGNETTING_CORRECTION\s*=\s*)\d+\.?\d*", newValue);
+                        modified = true;
+                    }
+                }
+
+                if (modified)
+                {
+                    File.WriteAllLines(iniFile, lines);
+                    Console.WriteLine($"File updated with New Value: {globalValue}");
+                }
+            }
+
+            Console.Write("Restart setting again? (1 for Yes, 2 for No): ");
+            string restartChoice = Console.ReadKey().KeyChar.ToString().Trim();
+            Console.WriteLine();
+            if (restartChoice != "1") break;
+        }
+    }
+
+    static string ReadPassword()
+    {
+        string password = "";
+        ConsoleKeyInfo key;
+        do
+        {
+            key = Console.ReadKey(true);
+            if (key.Key != ConsoleKey.Enter)
+            {
+                password += key.KeyChar;
+                Console.Write("*");
+            }
+        } while (key.Key != ConsoleKey.Enter);
+        Console.WriteLine();
+        return password;
     }
 }
