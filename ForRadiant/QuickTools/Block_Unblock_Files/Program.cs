@@ -5,7 +5,7 @@ class Program
 {
     static void Main()
     {
-        string[] targetDirectories = { @"D:\DATABASE\InputIMG", @"E:\Database\InputIMG", @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8" };
+        string[] targetDirectories = { @"D:\DATABASE\InputIMG", @"E:\DATABASE\InputIMG", @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8" };
 
         Console.WriteLine("Processing the following directories:");
         foreach (string dir in targetDirectories)
