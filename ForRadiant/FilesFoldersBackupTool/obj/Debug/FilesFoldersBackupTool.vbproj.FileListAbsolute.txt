@@ -1,0 +1,12 @@
+D:\Github\toyprojects\ForRadiant\FilesFoldersBackupTool\obj\Debug\FilesFoldersBackupTool.vbproj.AssemblyReference.cache
+D:\Github\toyprojects\ForRadiant\FilesFoldersBackupTool\obj\Debug\FilesFoldersBackupTool.MainForm.resources
+D:\Github\toyprojects\ForRadiant\FilesFoldersBackupTool\obj\Debug\FilesFoldersBackupTool.Resources.resources
+D:\Github\toyprojects\ForRadiant\FilesFoldersBackupTool\obj\Debug\FilesFoldersBackupTool.vbproj.GenerateResource.cache
+D:\Github\toyprojects\ForRadiant\FilesFoldersBackupTool\obj\Debug\FilesFoldersBackupTool.vbproj.CoreCompileInputs.cache
+D:\Github\toyprojects\ForRadiant\FilesFoldersBackupTool\bin\Debug\FilesFoldersBackupTool.exe.config
+D:\Github\toyprojects\ForRadiant\FilesFoldersBackupTool\bin\Debug\FilesFoldersBackupTool.exe
+D:\Github\toyprojects\ForRadiant\FilesFoldersBackupTool\bin\Debug\FilesFoldersBackupTool.pdb
+D:\Github\toyprojects\ForRadiant\FilesFoldersBackupTool\bin\Debug\FilesFoldersBackupTool.xml
+D:\Github\toyprojects\ForRadiant\FilesFoldersBackupTool\obj\Debug\FilesFoldersBackupTool.exe
+D:\Github\toyprojects\ForRadiant\FilesFoldersBackupTool\obj\Debug\FilesFoldersBackupTool.xml
+D:\Github\toyprojects\ForRadiant\FilesFoldersBackupTool\obj\Debug\FilesFoldersBackupTool.pdb
