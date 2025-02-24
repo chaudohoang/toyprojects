@@ -3,28 +3,63 @@ Imports System.Text
 Imports System.Windows.Forms
 Imports System.Collections.Concurrent
 Imports System.Threading
+Imports System.Reflection
+Imports System.Runtime.InteropServices
 
 Public Class MainForm
     Private logFile As String = "backup_log.txt"
     Private maxLogLines As Integer = 200
     Private logFolder As String = "logs"
-    Private settingsFile As String = "settings.txt"
+    Private settingsFile As String = "C:\Radiant Vision Systems Data\TrueTest\UserData\AutoCopy\settings.txt"
     Private logLines As New List(Of String)
     Private watchers As New Dictionary(Of String, FileSystemWatcher)() ' Use Dictionary instead of List
     Private monitoring As Boolean = False ' Monitoring state
     Private processedFiles As New ConcurrentDictionary(Of String, DateTime)()
+    Private processedDirectories As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+    Private lastCopiedFiles As New Dictionary(Of String, DateTime)
+    Private logLock As New Object()
+
+    Private Shared mutex As New Mutex(True, "{F872B98A-4D2A-4D3A-B9BB-6E3C9B42A45A}")
 
     Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        ' Check if another instance is already running
+        If Not mutex.WaitOne(TimeSpan.Zero, True) Then
+            ' If another instance is running, bring it into focus
+            BringAppToFront()
+            Application.Exit()
+        End If
+        ' Proceed with your normal load logic
+        SetVersionInfo()
         LoadSettings()
-
-
-        ' Automatically start monitoring on startup
         ToggleMonitoring()
     End Sub
 
+    Private Sub BringAppToFront()
+        For Each process As Process In Process.GetProcessesByName(Application.ProductName)
+            ' Check if the process is running in the same user session
+            If process.MainWindowHandle <> IntPtr.Zero Then
+                ' Bring the main window of the process into focus
+                SetForegroundWindow(process.MainWindowHandle)
+                Exit Sub
+            End If
+        Next
+    End Sub
 
+    ' API function to set the window to the foreground (requires imports)
+    <DllImport("user32.dll")>
+    Private Shared Function SetForegroundWindow(hwnd As IntPtr) As Boolean
+    End Function
 
-
+    Private Sub SetVersionInfo()
+        Dim versionInfo As Version = Assembly.GetExecutingAssembly().GetName().Version
+        Dim startDate As Date = New DateTime(2000, 1, 1)
+        Dim diffDays = versionInfo.Build
+        Dim computedDate = startDate.AddDays(diffDays)
+        Dim lastBuilt As String = computedDate.ToShortDateString()
+        'this.Text = string.Format("{0} - {1} ({2})",
+        '            this.Text, versionInfo.ToString(), lastBuilt);
+        Text = String.Format("{0} - {1}", Text, versionInfo.ToString())
+    End Sub
 
     Private Sub LoadSettings()
         If Not File.Exists(settingsFile) Then Return
@@ -47,9 +82,6 @@ Public Class MainForm
             DataGridView1.Rows.Add(fixedParts)
         Next
     End Sub
-
-
-
     Private Sub SaveSettings()
         Try
             Using writer As New StreamWriter(settingsFile, False)
@@ -66,34 +98,37 @@ Public Class MainForm
                 Next
             End Using
             ' Only restart watchers if monitoring is active
-            If monitoring Then RestartWatchers()
+            If monitoring Then SetupFileWatchers()
         Catch ex As Exception
             MessageBox.Show("Error saving settings: " & ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
-
-
-
     Private Sub ToggleMonitoring()
         If monitoring Then
             ' Stop Monitoring
+            AppendLog("Stopping monitoring...")
             For Each key In watchers.Keys.ToList() ' Ensure keys don't change during iteration
                 Dim watcher = watchers(key)
                 If watcher IsNot Nothing Then
-                    watcher.EnableRaisingEvents = False
+                    AppendLog($"Disposing watcher for: {key}")
+                    ' Remove handlers explicitly
                     RemoveHandler watcher.Created, AddressOf OnFileCreated
                     RemoveHandler watcher.Changed, AddressOf OnFileChanged
-                    watcher.Dispose()
+
+                    ' Dispose the watcher to ensure it stops listening to events
+                    Try
+                        watcher.Dispose()
+                    Catch ex As Exception
+                        AppendLog($"Error disposing watcher for {key}: {ex.Message}")
+                    End Try
                 End If
             Next
 
             watchers.Clear() ' Ensure no remaining watchers
-
             monitoring = False
             BtnRun.Text = "Run"
             LblStatus.Text = "Status: Stopped"
             LblStatus.ForeColor = Color.Red
-
             AppendLog("Monitoring stopped.")
         Else
             ' Start Monitoring
@@ -103,12 +138,9 @@ Public Class MainForm
             BtnRun.Text = "Stop"
             LblStatus.Text = "Status: Running"
             LblStatus.ForeColor = Color.Green
-
             AppendLog("Monitoring started.")
         End If
     End Sub
-
-
 
     Private Sub SetupFileWatchers()
         Try
@@ -142,20 +174,10 @@ Public Class MainForm
             If Not monitoring Then watchers.Clear()
         End Try
     End Sub
-
-
-    Private Sub RestartWatchers()
-        SetupFileWatchers() ' No need to clear watchers separately, SetupFileWatchers() already does it
-    End Sub
-
-    ' Track last copied file timestamps
-    Private lastCopiedFiles As New Dictionary(Of String, DateTime)
-
     Private Async Sub OnFileCreated(sender As Object, e As FileSystemEventArgs)
         Await Task.Delay(500) ' Allow time for changes before processing
         ProcessFileChange(e)
     End Sub
-
     Private Async Sub OnFileChanged(sender As Object, e As FileSystemEventArgs)
         ' Ignore changes if the file was just copied
         If lastCopiedFiles.ContainsKey(e.FullPath) AndAlso
@@ -163,10 +185,6 @@ Public Class MainForm
         Await Task.Delay(500)
         ProcessFileChange(e)
     End Sub
-
-    ' Add a HashSet to track already processed directories
-    Private processedDirectories As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
-
     Private Sub ProcessFileChange(e As FileSystemEventArgs)
         If e Is Nothing OrElse String.IsNullOrWhiteSpace(e.FullPath) Then
             AppendLog("Error: FileSystemEventArgs is null or empty.")
@@ -219,8 +237,8 @@ Public Class MainForm
                         If Directory.Exists(e.FullPath) Then
                             If Not processedDirectories.Contains(e.FullPath) Then
                                 processedDirectories.Add(e.FullPath) ' Mark directory as processed
-                                AppendLog($"Copying directory: {e.FullPath} -> {destFile}")
                                 DirectoryCopy(e.FullPath, destFile)
+                                AppendLog($"Copied directory: {e.FullPath} -> {destFile}")
                             Else
                                 AppendLog($"Skipping duplicate directory copy: {e.FullPath}")
                             End If
@@ -242,9 +260,6 @@ Public Class MainForm
             End If
         Next
     End Sub
-
-
-
     Private Sub CopyFileWithRetry(sourcePath As String, destPath As String)
         Dim maxRetries As Integer = 5
         Dim retryDelay As Integer = 1000 ' 1 second delay
@@ -271,9 +286,6 @@ Public Class MainForm
             End Try
         Next
     End Sub
-
-
-
     Private Sub DirectoryCopy(sourceDir As String, destDir As String)
         Try
             ' Create the destination directory if it doesn't exist
@@ -299,11 +311,6 @@ Public Class MainForm
             AppendLog($"Error copying directory {sourceDir} -> {destDir}: {ex.Message}")
         End Try
     End Sub
-
-
-
-
-
     Private Sub UpdateLogSize()
         If File.Exists(logFile) Then
             Dim fileSize As Long = New FileInfo(logFile).Length
@@ -329,13 +336,6 @@ Public Class MainForm
             LabelLogSize.Text = "Log Size: 0 KB"
         End If
     End Sub
-
-
-
-
-
-    Private logLock As New Object()
-
     Private Sub AppendLog(message As String)
         Dim logText As String = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}"
         logFile = Path.Combine(logFolder, $"backup_{DateTime.Now:yyyy-MM-dd}.txt")
@@ -369,11 +369,6 @@ Public Class MainForm
             AppendLogToTextBox(logText)
         End If
     End Sub
-
-
-
-
-
     Private Sub AppendLogToTextBox(message As String)
         If TextBoxLog.Lines.Length >= maxLogLines Then
             TextBoxLog.Text = String.Join(Environment.NewLine, TextBoxLog.Lines.Skip(1)) ' Remove oldest log
@@ -381,9 +376,6 @@ Public Class MainForm
 
         TextBoxLog.AppendText(message & Environment.NewLine)
     End Sub
-
-
-
     Private Sub ButtonClearLog_Click(sender As Object, e As EventArgs) Handles ButtonClearLog.Click
         If Directory.Exists(logFolder) Then
             For Each file As String In Directory.GetFiles(logFolder, "backup_*.txt")
@@ -395,16 +387,13 @@ Public Class MainForm
         UpdateLogSize()
     End Sub
 
-
     Private Sub ButtonOpenLogFolder_Click(sender As Object, e As EventArgs) Handles ButtonOpenLogFolder.Click
         Process.Start("explorer.exe", logFolder)
     End Sub
-
     Private Sub ButtonMinimizeToTray_Click(sender As Object, e As EventArgs) Handles ButtonMinimizeToTray.Click
         NotifyIcon1.Visible = True
         Me.Hide()
     End Sub
-
     Private Sub NotifyIcon1_DoubleClick(sender As Object, e As EventArgs) Handles NotifyIcon1.DoubleClick
         Me.Show()
         Me.WindowState = FormWindowState.Normal
@@ -412,23 +401,32 @@ Public Class MainForm
         Me.Activate()
         NotifyIcon1.Visible = False
     End Sub
-
+    Private _mutex As New Mutex()
 
     Private Sub MainForm_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
         NotifyIcon1.Visible = False
+        Try
+            If _mutex.WaitOne(1000) Then ' Ensure the mutex is acquired
+                ' Perform cleanup operations here
+
+                _mutex.ReleaseMutex() ' Release mutex only after it is acquired
+            Else
+                ' Handle the case where mutex was not acquired within the timeout
+            End If
+        Catch ex As ApplicationException
+            ' Handle potential mutex release failure or other errors
+            MessageBox.Show("Mutex release failed: " & ex.Message)
+        End Try
     End Sub
 
     ' Save Settings Button Click
     Private Sub btnSaveList_Click(sender As Object, e As EventArgs) Handles btnSaveList.Click
         SaveSettings()
     End Sub
-
     ' Load Settings Button Click
     Private Sub btnLoadList_Click(sender As Object, e As EventArgs) Handles btnLoadList.Click
         LoadSettings()
     End Sub
-
-
     Private Sub BtnRun_Click(sender As Object, e As EventArgs) Handles BtnRun.Click
         ToggleMonitoring()
     End Sub

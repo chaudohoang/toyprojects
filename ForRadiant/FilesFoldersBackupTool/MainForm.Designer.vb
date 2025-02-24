@@ -44,11 +44,12 @@ Partial Class MainForm
         '
         'DataGridView1
         '
+        Me.DataGridView1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill
         Me.DataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.DataGridView1.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.SourceFolder, Me.DestinationFolder, Me.ExcludedFolders, Me.ExcludedFiles})
         Me.DataGridView1.Location = New System.Drawing.Point(12, 12)
         Me.DataGridView1.Name = "DataGridView1"
-        Me.DataGridView1.Size = New System.Drawing.Size(898, 150)
+        Me.DataGridView1.Size = New System.Drawing.Size(898, 195)
         Me.DataGridView1.TabIndex = 0
         '
         'SourceFolder
@@ -73,12 +74,12 @@ Partial Class MainForm
         '
         'TextBoxLog
         '
-        Me.TextBoxLog.Location = New System.Drawing.Point(12, 178)
+        Me.TextBoxLog.Location = New System.Drawing.Point(12, 221)
         Me.TextBoxLog.Multiline = True
         Me.TextBoxLog.Name = "TextBoxLog"
         Me.TextBoxLog.ReadOnly = True
         Me.TextBoxLog.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.TextBoxLog.Size = New System.Drawing.Size(898, 635)
+        Me.TextBoxLog.Size = New System.Drawing.Size(898, 264)
         Me.TextBoxLog.TabIndex = 1
         Me.TextBoxLog.WordWrap = False
         '
@@ -121,7 +122,7 @@ Partial Class MainForm
         'NotifyIcon1
         '
         Me.NotifyIcon1.Icon = CType(resources.GetObject("NotifyIcon1.Icon"), System.Drawing.Icon)
-        Me.NotifyIcon1.Text = "Files Folders Backup Tool"
+        Me.NotifyIcon1.Text = "AutoCopyData"
         Me.NotifyIcon1.Visible = True
         '
         'BtnRun
@@ -164,7 +165,7 @@ Partial Class MainForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(1032, 825)
+        Me.ClientSize = New System.Drawing.Size(1032, 497)
         Me.Controls.Add(Me.LblStatus)
         Me.Controls.Add(Me.BtnRun)
         Me.Controls.Add(Me.ButtonMinimizeToTray)
@@ -175,7 +176,11 @@ Partial Class MainForm
         Me.Controls.Add(Me.LabelLogSize)
         Me.Controls.Add(Me.TextBoxLog)
         Me.Controls.Add(Me.DataGridView1)
+        Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
+        Me.MaximizeBox = False
         Me.Name = "MainForm"
+        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
+        Me.Text = "AutoCopyData"
         CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
