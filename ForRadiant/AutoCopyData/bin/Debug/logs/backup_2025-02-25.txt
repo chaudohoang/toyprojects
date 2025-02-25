@@ -1,32 +1,12 @@
-﻿2025-02-25 01:52:48 - Copied: C:\DATABASE\31.txt -> D:\DATABASE\31.txt
-2025-02-25 01:52:48 - Copied: C:\DATABASE\31.txt -> D:\DATABASE\31.txt
-2025-02-25 01:54:44 - Copied: C:\DATABASE\31.txt -> D:\DATABASE\31.txt
-2025-02-25 01:54:44 - Copied: C:\DATABASE\31.txt -> D:\DATABASE\31.txt
-2025-02-25 01:57:51 - Monitoring started.
-2025-02-25 01:57:51 - Monitoring started.
-2025-02-25 02:00:40 - Monitoring started.
-2025-02-25 02:00:40 - Monitoring started.
-2025-02-25 02:01:59 - Monitoring started.
-2025-02-25 02:01:59 - Monitoring started.
-2025-02-25 02:02:27 - Monitoring started.
-2025-02-25 02:02:27 - Monitoring started.
-2025-02-25 02:03:10 - Monitoring started.
-2025-02-25 02:03:10 - Monitoring started.
-2025-02-25 02:04:18 - Monitoring started.
-2025-02-25 02:04:18 - Monitoring started.
-2025-02-25 02:04:28 - Monitoring started.
-2025-02-25 02:04:28 - Monitoring started.
-2025-02-25 02:05:23 - Monitoring started.
-2025-02-25 02:05:23 - Monitoring started.
-2025-02-25 02:06:01 - Monitoring started.
-2025-02-25 02:06:01 - Monitoring started.
-2025-02-25 02:07:21 - Monitoring started.
-2025-02-25 02:07:21 - Monitoring started.
-2025-02-25 02:09:19 - Monitoring started.
-2025-02-25 02:09:19 - Monitoring started.
-2025-02-25 02:11:13 - Monitoring started.
-2025-02-25 02:11:13 - Monitoring started.
-2025-02-25 02:11:32 - Monitoring started.
-2025-02-25 02:11:32 - Monitoring started.
-2025-02-25 02:12:02 - Monitoring started.
-2025-02-25 02:12:02 - Monitoring started.
+﻿2025-02-25 07:10:59 - Monitoring started.
+2025-02-25 07:10:59 - Monitoring started.
+2025-02-25 07:11:22 - Monitoring started.
+2025-02-25 07:11:22 - Monitoring started.
+2025-02-25 07:11:48 - Monitoring started.
+2025-02-25 07:11:48 - Monitoring started.
+2025-02-25 07:12:04 - Monitoring started.
+2025-02-25 07:12:04 - Monitoring started.
+2025-02-25 07:12:19 - Monitoring started.
+2025-02-25 07:12:19 - Monitoring started.
+2025-02-25 07:12:24 - Monitoring started.
+2025-02-25 07:12:24 - Monitoring started.

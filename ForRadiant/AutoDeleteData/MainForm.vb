@@ -66,6 +66,14 @@ Namespace AutoDeleteData
             TopMost = top
         End Sub
 
+        Protected Overrides Sub SetVisibleCore(ByVal value As Boolean)
+            If Not allowVisible Then
+                value = False
+                If Not IsHandleCreated Then CreateHandle()
+            End If
+            MyBase.SetVisibleCore(value)
+        End Sub
+
         Private Sub SetVersionInfo()
             Dim versionInfo As Version = Assembly.GetExecutingAssembly().GetName().Version
             Dim startDate As Date = New DateTime(2000, 1, 1)
@@ -77,13 +85,7 @@ Namespace AutoDeleteData
             Text = String.Format("{0} - {1}", Text, versionInfo.ToString())
         End Sub
 
-        Protected Overrides Sub SetVisibleCore(ByVal value As Boolean)
-            If Not allowVisible Then
-                value = False
-                If Not IsHandleCreated Then CreateHandle()
-            End If
-            MyBase.SetVisibleCore(value)
-        End Sub
+
         Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
             SetVersionInfo()
             LoadSettings()
@@ -1673,21 +1675,30 @@ Namespace AutoDeleteData
         End Sub
 
         Private Sub btnViewSelectedDiskLog_Click(sender As Object, e As EventArgs) Handles btnViewSelectedDiskLog.Click
-            If dataGridView2 IsNot Nothing Then
+            If dataGridView2 IsNot Nothing AndAlso dataGridView2.CurrentCell IsNot Nothing Then
                 Dim rowIndex As Integer = dataGridView2.CurrentCell.RowIndex
-                Dim driveLetter As String = dataGridView2.Rows(rowIndex).Cells(0).Value.ToString()
-                Dim logpath As String = ""
-                If Directory.Exists(txtLogpath.Text) Then
-                    logpath = txtLogpath.Text + "\autocheckdisklog_" + driveLetter + "_" + Now.ToString("yyyyMMdd") + ".txt"
-                Else
-                    logpath = appdir + "\Log\autocheckdisklog_" + driveLetter + "_" + Now.ToString("yyyyMMdd") + ".txt"
-                End If
-                Try
-                    Process.Start(logpath)
-                Catch ex As Exception
-                End Try
+                Dim cellValue As Object = dataGridView2.Rows(rowIndex).Cells(0).Value
 
+                ' Validate the cell value before using it
+                Dim driveLetter As String = If(cellValue IsNot Nothing AndAlso Not String.IsNullOrWhiteSpace(cellValue.ToString()), cellValue.ToString(), "")
+
+                If Not String.IsNullOrEmpty(driveLetter) Then
+                    Dim logpath As String = ""
+                    If Directory.Exists(txtLogpath.Text) Then
+                        logpath = txtLogpath.Text + "\autocheckdisklog_" + driveLetter + "_" + Now.ToString("yyyyMMdd") + ".txt"
+                    Else
+                        logpath = appdir + "\Log\autocheckdisklog_" + driveLetter + "_" + Now.ToString("yyyyMMdd") + ".txt"
+                    End If
+                    Try
+                        Process.Start(logpath)
+                    Catch ex As Exception
+                        ' Optional: Handle/log the exception
+                    End Try
+                Else
+                    MessageBox.Show("The selected drive letter is empty or invalid.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                End If
             End If
+
         End Sub
 
         Private Sub ClearAllLogsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ClearAllLogsToolStripMenuItem.Click
@@ -1724,20 +1735,28 @@ Namespace AutoDeleteData
         End Sub
 
         Private Sub btnViewSelectedFolderLog_Click(sender As Object, e As EventArgs) Handles btnViewSelectedFolderLog.Click
-            If dataGridView1 IsNot Nothing Then
+            If dataGridView1 IsNot Nothing AndAlso dataGridView1.CurrentCell IsNot Nothing Then
                 Dim rowIndex As Integer = dataGridView1.CurrentCell.RowIndex
-                Dim path As String = dataGridView1.Rows(rowIndex).Cells(0).Value.ToString()
-                Dim logpath As String = ""
-                If Directory.Exists(txtLogpath.Text) Then
-                    logpath = txtLogpath.Text + "\autodeletedatalog_" + path.Replace("\", "-").Replace(":", "") + "_" + Now.ToString("yyyyMMdd") + ".txt"
-                Else
-                    logpath = appdir + "\Log\autodeletedatalog_" + path.Replace("\", "-").Replace(":", "") + "_" + Now.ToString("yyyyMMdd") + ".txt"
-                End If
-                Try
-                    Process.Start(logpath)
-                Catch ex As Exception
-                End Try
+                Dim cellValue As Object = dataGridView1.Rows(rowIndex).Cells(0).Value
 
+                ' Validate the cell value before using it
+                Dim path As String = If(cellValue IsNot Nothing AndAlso Not String.IsNullOrWhiteSpace(cellValue.ToString()), cellValue.ToString(), "")
+
+                If Not String.IsNullOrEmpty(path) Then
+                    Dim logpath As String = ""
+                    If Directory.Exists(txtLogpath.Text) Then
+                        logpath = txtLogpath.Text + "\autodeletedatalog_" + path.Replace("\", "-").Replace(":", "") + "_" + Now.ToString("yyyyMMdd") + ".txt"
+                    Else
+                        logpath = appdir + "\Log\autodeletedatalog_" + path.Replace("\", "-").Replace(":", "") + "_" + Now.ToString("yyyyMMdd") + ".txt"
+                    End If
+                    Try
+                        Process.Start(logpath)
+                    Catch ex As Exception
+                        ' Optional: Handle/log the exception
+                    End Try
+                Else
+                    MessageBox.Show("The selected path is empty or invalid.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                End If
             End If
         End Sub
 

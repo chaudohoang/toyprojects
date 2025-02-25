@@ -5,7 +5,7 @@
     <OptionInfer>On</OptionInfer>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{71A23078-8BA2-41A2-A40D-E6B6F0C3C7A9}</ProjectGuid>
+    <ProjectGuid>{F0146238-C16A-47D8-8258-D4A96F4FE1C1}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>AutoDeleteData</RootNamespace>
     <AssemblyName>AutoDeleteData</AssemblyName>

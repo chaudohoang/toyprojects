@@ -5,12 +5,13 @@ Imports System.Collections.Concurrent
 Imports System.Threading
 Imports System.Reflection
 Imports System.Runtime.InteropServices
+Imports AutoCopyData.AutoCopyData
 
 Public Class MainForm
     Private logFile As String = "backup_log.txt"
     Private maxLogLines As Integer = 200
     Private logFolder As String = "logs"
-    Private settingsFile As String = "C:\Radiant Vision Systems Data\TrueTest\UserData\AutoCopy\settings.txt"
+    Private settingsFile As String = "C:\Radiant Vision Systems Data\TrueTest\UserData\AutoBackup\settings.txt"
     Private logLines As New List(Of String)
     Private watchers As New Dictionary(Of String, FileSystemWatcher)() ' Use Dictionary instead of List
     Private monitoring As Boolean = False ' Monitoring state
@@ -19,45 +20,20 @@ Public Class MainForm
     Private lastCopiedFiles As New Dictionary(Of String, DateTime)
     Private logLock As New Object()
 
-    Private Shared mutex As New Mutex(True, "{F872B98A-4D2A-4D3A-B9BB-6E3C9B42A45A}")
-
+    ' Entry point for the application (MainForm_Load)
     Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        ' Check if another instance is already running
-        If Not mutex.WaitOne(TimeSpan.Zero, True) Then
-            ' If another instance is running, bring it into focus
-            BringAppToFront()
-            Application.Exit()
-        End If
-        ' Proceed with your normal load logic
         SetVersionInfo()
         LoadSettings()
         ToggleMonitoring()
     End Sub
 
-    Private Sub BringAppToFront()
-        For Each process As Process In Process.GetProcessesByName(Application.ProductName)
-            ' Check if the process is running in the same user session
-            If process.MainWindowHandle <> IntPtr.Zero Then
-                ' Bring the main window of the process into focus
-                SetForegroundWindow(process.MainWindowHandle)
-                Exit Sub
-            End If
-        Next
-    End Sub
-
-    ' API function to set the window to the foreground (requires imports)
-    <DllImport("user32.dll")>
-    Private Shared Function SetForegroundWindow(hwnd As IntPtr) As Boolean
-    End Function
-
+    ' Existing method that handles other application logic
     Private Sub SetVersionInfo()
         Dim versionInfo As Version = Assembly.GetExecutingAssembly().GetName().Version
         Dim startDate As Date = New DateTime(2000, 1, 1)
         Dim diffDays = versionInfo.Build
         Dim computedDate = startDate.AddDays(diffDays)
         Dim lastBuilt As String = computedDate.ToShortDateString()
-        'this.Text = string.Format("{0} - {1} ({2})",
-        '            this.Text, versionInfo.ToString(), lastBuilt);
         Text = String.Format("{0} - {1}", Text, versionInfo.ToString())
     End Sub
 
@@ -67,7 +43,7 @@ Public Class MainForm
 
         For Each line In File.ReadAllLines(settingsFile)
             ' Split using comma `,`
-            Dim parts = line.Split(","c)
+            Dim parts = line.Split("|"c)
 
             ' Ensure at least 3 values are present (avoid incomplete rows)
             If parts.Length < 3 Then Continue For
@@ -93,7 +69,7 @@ Public Class MainForm
                         If(row.Cells(2).Value, ""),
                         If(row.Cells(3).Value, "")
                     }
-                        writer.WriteLine(String.Join(",", values))
+                        writer.WriteLine(String.Join("|", values))
                     End If
                 Next
             End Using
@@ -340,6 +316,11 @@ Public Class MainForm
         Dim logText As String = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}"
         logFile = Path.Combine(logFolder, $"backup_{DateTime.Now:yyyy-MM-dd}.txt")
 
+        ' Check if the directory exists, and create it if it doesn't
+        If Not Directory.Exists(logFolder) Then
+            Directory.CreateDirectory(logFolder)
+        End If
+
         SyncLock logLock
             logLines.Add(logText)
             Dim success As Boolean = False
@@ -401,22 +382,10 @@ Public Class MainForm
         Me.Activate()
         NotifyIcon1.Visible = False
     End Sub
-    Private _mutex As New Mutex()
 
     Private Sub MainForm_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
         NotifyIcon1.Visible = False
-        Try
-            If _mutex.WaitOne(1000) Then ' Ensure the mutex is acquired
-                ' Perform cleanup operations here
 
-                _mutex.ReleaseMutex() ' Release mutex only after it is acquired
-            Else
-                ' Handle the case where mutex was not acquired within the timeout
-            End If
-        Catch ex As ApplicationException
-            ' Handle potential mutex release failure or other errors
-            MessageBox.Show("Mutex release failed: " & ex.Message)
-        End Try
     End Sub
 
     ' Save Settings Button Click
@@ -431,4 +400,8 @@ Public Class MainForm
         ToggleMonitoring()
     End Sub
 
+    Private Sub ExitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem.Click
+        SaveSettings()
+        Application.Exit()
+    End Sub
 End Class
