@@ -322,10 +322,19 @@ Namespace AutoDeleteData
                     If String.IsNullOrWhiteSpace(sourceFolder) OrElse Not Directory.Exists(sourceFolder) Then Continue For
 
                     ' Extract excluded folders (Third cell)
-                    Dim excludedFolders As String() = row.Cells(2).Value?.ToString()?.Split(","c).Select(Function(f) f.Trim()).ToArray()
+                    Dim excludedFolders As String() = If(String.IsNullOrWhiteSpace(row.Cells(2).Value?.ToString()),
+                                     Array.Empty(Of String)(),
+                                     row.Cells(2).Value.ToString().Split(","c).
+                                     Select(Function(f) f.Trim()).
+                                     Where(Function(f) Not String.IsNullOrEmpty(f)).ToArray())
 
                     ' Extract excluded files (Fourth cell)
-                    Dim excludedFileNames As String() = row.Cells(3).Value?.ToString()?.Split(","c).Select(Function(f) f.Trim()).ToArray()
+                    Dim excludedFileNames As String() = If(String.IsNullOrWhiteSpace(row.Cells(3).Value?.ToString()),
+                                       Array.Empty(Of String)(),
+                                       row.Cells(3).Value.ToString().Split(","c).
+                                       Select(Function(f) f.Trim()).
+                                       Where(Function(f) Not String.IsNullOrEmpty(f)).ToArray())
+
 
                     ' Store folder exclusions
                     If excludedFolders IsNot Nothing AndAlso excludedFolders.Length > 0 Then
@@ -347,6 +356,7 @@ Namespace AutoDeleteData
 
                         AddHandler watcher.Created, AddressOf OnFileCreated
                         AddHandler watcher.Changed, AddressOf OnFileChanged
+                        AddHandler watcher.Renamed, AddressOf OnFileRenamed
 
                         watchers.Add(sourceFolder, watcher)
                     End If
@@ -473,6 +483,7 @@ Namespace AutoDeleteData
                     ' Remove handlers explicitly
                     RemoveHandler watcher.Created, AddressOf OnFileCreated
                     RemoveHandler watcher.Changed, AddressOf OnFileChanged
+                    RemoveHandler watcher.Renamed, AddressOf OnFileRenamed
 
                     ' Dispose the watcher to ensure it stops listening to events
                     Try
@@ -500,6 +511,12 @@ Namespace AutoDeleteData
             Await Task.Delay(500)
             ProcessFileChange(e)
         End Sub
+
+        Private Async Sub OnFileRenamed(sender As Object, e As RenamedEventArgs)
+            Await Task.Delay(500) ' Allow time for changes before processing
+            ProcessFileChange(e)
+        End Sub
+
 
         Private Function ShouldExclude(filePath As String) As Boolean
             ' Extract directory and filename from the given file path
@@ -584,9 +601,10 @@ Namespace AutoDeleteData
                             ' Handle directories separately (prevent duplicate processing)
                             If Directory.Exists(e.FullPath) Then
 
-                                Dim excludedFolderList As List(Of String) = excludedPaths(sourcePath)
+                                ' Get excluded lists safely (use empty list if key is missing)
+                                Dim excludedFolderList As List(Of String) = If(excludedPaths.ContainsKey(sourcePath), excludedPaths(sourcePath), New List(Of String)())
 
-                                Dim shouldExcludeFolder As Boolean = excludedFolderList.Any(Function(excluded) e.FullPath.IndexOf(excluded, StringComparison.OrdinalIgnoreCase) >= 0)
+                                Dim shouldExcludeFolder As Boolean = excludedFolderList.Any() AndAlso excludedFolderList.Any(Function(excluded) e.FullPath.IndexOf(excluded, StringComparison.OrdinalIgnoreCase) >= 0)
 
                                 If shouldExcludeFolder Then
                                     AppendLog($"Skipped directory (excluded): {e.FullPath}")
@@ -601,15 +619,16 @@ Namespace AutoDeleteData
                                     'AppendLog($"Skipping duplicate directory copy: {e.FullPath}")
                                 End If
                             Else
+                                ' Get excluded lists safely (use empty list if key is missing)
+                                Dim excludedFileList As List(Of String) = If(excludedFiles.ContainsKey(sourcePath), excludedFiles(sourcePath), New List(Of String)())
+                                Dim excludedFolderList As List(Of String) = If(excludedPaths.ContainsKey(sourcePath), excludedPaths(sourcePath), New List(Of String)())
 
-                                Dim excludedFileList As List(Of String) = excludedFiles(sourcePath)
-                                Dim excludedFolderList As List(Of String) = excludedPaths(sourcePath)
+                                ' Check if e.FullPath contains any excluded pattern, only if the lists are not empty
+                                Dim shouldExcludeFile As Boolean = excludedFileList.Any() AndAlso excludedFileList.Any(Function(excluded) e.FullPath.IndexOf(excluded, StringComparison.OrdinalIgnoreCase) >= 0)
+                                Dim shouldExcludeFolder As Boolean = excludedFolderList.Any() AndAlso excludedFolderList.Any(Function(excluded) e.FullPath.IndexOf(excluded, StringComparison.OrdinalIgnoreCase) >= 0)
 
-                                ' Check if e.FullPath contains any excluded pattern
-                                Dim shouldExcludeFile As Boolean = excludedFileList.Any(Function(excluded) e.FullPath.IndexOf(excluded, StringComparison.OrdinalIgnoreCase) >= 0) _
-                                OrElse excludedFolderList.Any(Function(excluded) e.FullPath.IndexOf(excluded, StringComparison.OrdinalIgnoreCase) >= 0)
 
-                                If shouldExcludeFile Then
+                                If shouldExcludeFile Or shouldExcludeFolder Then
                                     AppendLog($"Skipped file (excluded): {e.FullPath}")
                                 ElseIf Not File.Exists(destFile) OrElse File.GetLastWriteTime(e.FullPath) > File.GetLastWriteTime(destFile) Then
                                     ' Use the retry function instead of File.Copy
