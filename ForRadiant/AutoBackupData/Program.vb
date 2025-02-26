@@ -4,7 +4,7 @@ Imports System.Windows.Forms
 
 Namespace AutoDeleteData
 	Friend Module Program
-		Private mutex As Mutex = New Mutex(True, "AutoDeleteDataDove2p0")
+		Private mutex As Mutex = New Mutex(True, "AutoBackupDataDove2p0")
 		''' <summary>
 		''' The main entry point for the application.
 		''' </summary>
