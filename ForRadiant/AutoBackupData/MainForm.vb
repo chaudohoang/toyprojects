@@ -32,7 +32,9 @@ Namespace AutoDeleteData
         Private backupSettingsFile As String = "C:\Radiant Vision Systems Data\TrueTest\UserData\AutoBackup\backup_settings.txt"
         Private logLines As New List(Of String)
         Private watchers As New Dictionary(Of String, FileSystemWatcher)() ' Use Dictionary instead of List
-        ' Dictionary to store excluded folders per source path
+        ' Dictionary to store excluded folders name per source path
+        Private excludedFolders As New Dictionary(Of String, List(Of String))(StringComparer.OrdinalIgnoreCase)
+        ' Dictionary to store excluded folders path per source path
         Private excludedPaths As New Dictionary(Of String, List(Of String))(StringComparer.OrdinalIgnoreCase)
         ' Dictionary to store excluded files per source path
         Private excludedFiles As New Dictionary(Of String, List(Of String))(StringComparer.OrdinalIgnoreCase)
@@ -114,7 +116,8 @@ Namespace AutoDeleteData
                         If(row.Cells(0).Value, ""),
                         If(row.Cells(1).Value, ""),
                         If(row.Cells(2).Value, ""),
-                        If(row.Cells(3).Value, "")
+                        If(row.Cells(3).Value, ""),
+                        If(row.Cells(4).Value, "")
                     }
                             writer.WriteLine(String.Join("|", values))
                         End If
@@ -134,12 +137,12 @@ Namespace AutoDeleteData
                 ' Split using comma `,`
                 Dim parts = line.Split("|"c)
 
-                ' Ensure at least 3 values are present (avoid incomplete rows)
-                If parts.Length < 3 Then Continue For
+                ' Ensure at least 4 values are present (avoid incomplete rows)
+                If parts.Length < 4 Then Continue For
 
                 ' Create an array with exactly 4 values (fill missing ones with empty strings)
-                Dim fixedParts(3) As String
-                For i As Integer = 0 To Math.Min(parts.Length - 1, 3)
+                Dim fixedParts(4) As String
+                For i As Integer = 0 To Math.Min(parts.Length - 1, 4)
                     fixedParts(i) = parts(i)
                 Next
 
@@ -311,7 +314,8 @@ Namespace AutoDeleteData
                     watcher.Dispose()
                 Next
                 watchers.Clear()
-                excludedPaths.Clear() ' Clear old exclusions
+                excludedPaths.Clear()
+                excludedFolders.Clear() ' Clear old exclusions
                 excludedFiles.Clear()
 
                 ' Loop through DataGridView rows
@@ -322,23 +326,34 @@ Namespace AutoDeleteData
                     If String.IsNullOrWhiteSpace(sourceFolder) OrElse Not Directory.Exists(sourceFolder) Then Continue For
 
                     ' Extract excluded folders (Third cell)
-                    Dim excludedFolders As String() = If(String.IsNullOrWhiteSpace(row.Cells(2).Value?.ToString()),
+                    Dim excludedPaths As String() = If(String.IsNullOrWhiteSpace(row.Cells(2).Value?.ToString()),
                                      Array.Empty(Of String)(),
                                      row.Cells(2).Value.ToString().Split(","c).
                                      Select(Function(f) f.Trim()).
                                      Where(Function(f) Not String.IsNullOrEmpty(f)).ToArray())
 
-                    ' Extract excluded files (Fourth cell)
-                    Dim excludedFileNames As String() = If(String.IsNullOrWhiteSpace(row.Cells(3).Value?.ToString()),
+                    ' Extract excluded folders (Third cell)
+                    Dim excludedFolders As String() = If(String.IsNullOrWhiteSpace(row.Cells(3).Value?.ToString()),
+                                     Array.Empty(Of String)(),
+                                     row.Cells(3).Value.ToString().Split(","c).
+                                     Select(Function(f) f.Trim()).
+                                     Where(Function(f) Not String.IsNullOrEmpty(f)).ToArray())
+
+                    ' Extract excluded files (Fifth cell)
+                    Dim excludedFileNames As String() = If(String.IsNullOrWhiteSpace(row.Cells(4).Value?.ToString()),
                                        Array.Empty(Of String)(),
-                                       row.Cells(3).Value.ToString().Split(","c).
+                                       row.Cells(4).Value.ToString().Split(","c).
                                        Select(Function(f) f.Trim()).
                                        Where(Function(f) Not String.IsNullOrEmpty(f)).ToArray())
 
+                    ' Store folder path exclusions
+                    If excludedPaths IsNot Nothing AndAlso excludedPaths.Length > 0 Then
+                        Me.excludedPaths(sourceFolder) = excludedPaths.ToList()
+                    End If
 
-                    ' Store folder exclusions
+                    ' Store folder name exclusions
                     If excludedFolders IsNot Nothing AndAlso excludedFolders.Length > 0 Then
-                        excludedPaths(sourceFolder) = excludedFolders.ToList()
+                        Me.excludedFolders(sourceFolder) = excludedFolders.ToList()
                     End If
 
                     ' Store file exclusions
@@ -517,41 +532,6 @@ Namespace AutoDeleteData
             ProcessFileChange(e)
         End Sub
 
-
-        Private Function ShouldExclude(filePath As String) As Boolean
-            ' Extract directory and filename from the given file path
-            Dim fileDirectory As String = Path.GetDirectoryName(filePath)
-            Dim fileName As String = Path.GetFileName(filePath)
-
-            ' Loop through each source path in the exclusions dictionary
-            For Each Source In excludedPaths.Keys
-                ' Ensure we only check exclusions for matching source folders
-                If filePath.StartsWith(Source, StringComparison.OrdinalIgnoreCase) Then
-
-                    ' **Check folder exclusions** (Check if any excluded folder name is part of the path)
-                    If excludedPaths.ContainsKey(Source) Then
-                        For Each excludedFolder In excludedPaths(Source)
-                            If fileDirectory.IndexOf(excludedFolder, StringComparison.OrdinalIgnoreCase) >= 0 Then
-                                AppendLog($"Excluded (Folder): {filePath}")
-                                Return True
-                            End If
-                        Next
-                    End If
-
-                    ' **Check file exclusions** (Check if filename contains any excluded keyword)
-                    If excludedFiles.ContainsKey(Source) Then
-                        If excludedFiles(Source).Any(Function(excludedFile) fileName.IndexOf(excludedFile, StringComparison.OrdinalIgnoreCase) >= 0) Then
-                            AppendLog($"Excluded (File): {filePath}")
-                            Return True
-                        End If
-                    End If
-                End If
-            Next
-
-            ' If not excluded, allow processing
-            Return False
-        End Function
-
         Private Sub ProcessFileChange(e As FileSystemEventArgs)
             If e Is Nothing OrElse String.IsNullOrWhiteSpace(e.FullPath) Then
                 AppendLog("Error: FileSystemEventArgs is null or empty.")
@@ -602,11 +582,13 @@ Namespace AutoDeleteData
                             If Directory.Exists(e.FullPath) Then
 
                                 ' Get excluded lists safely (use empty list if key is missing)
-                                Dim excludedFolderList As List(Of String) = If(excludedPaths.ContainsKey(sourcePath), excludedPaths(sourcePath), New List(Of String)())
+                                Dim excludedPathList As List(Of String) = If(excludedPaths.ContainsKey(sourcePath), excludedPaths(sourcePath), New List(Of String)())
+                                Dim shouldExcludePath As Boolean = excludedPathList.Contains(e.FullPath, StringComparer.OrdinalIgnoreCase)
 
-                                Dim shouldExcludeFolder As Boolean = excludedFolderList.Any() AndAlso excludedFolderList.Any(Function(excluded) e.FullPath.IndexOf(excluded, StringComparison.OrdinalIgnoreCase) >= 0)
+                                Dim excludedFolderNameList As List(Of String) = If(excludedFolders.ContainsKey(sourcePath), excludedFolders(sourcePath), New List(Of String)())
+                                Dim shouldExcludeFolderName As Boolean = excludedFolderNameList.Any() AndAlso excludedFolderNameList.Any(Function(excluded) e.FullPath.IndexOf(excluded, StringComparison.OrdinalIgnoreCase) >= 0)
 
-                                If shouldExcludeFolder Then
+                                If shouldExcludeFolderName Or shouldExcludePath Then
                                     AppendLog($"Skipped directory (excluded): {e.FullPath}")
                                 ElseIf Not processedDirectories.Contains(e.FullPath) Then
                                     processedDirectories.Add(e.FullPath)
@@ -621,14 +603,17 @@ Namespace AutoDeleteData
                             Else
                                 ' Get excluded lists safely (use empty list if key is missing)
                                 Dim excludedFileList As List(Of String) = If(excludedFiles.ContainsKey(sourcePath), excludedFiles(sourcePath), New List(Of String)())
-                                Dim excludedFolderList As List(Of String) = If(excludedPaths.ContainsKey(sourcePath), excludedPaths(sourcePath), New List(Of String)())
-
                                 ' Check if e.FullPath contains any excluded pattern, only if the lists are not empty
                                 Dim shouldExcludeFile As Boolean = excludedFileList.Any() AndAlso excludedFileList.Any(Function(excluded) e.FullPath.IndexOf(excluded, StringComparison.OrdinalIgnoreCase) >= 0)
-                                Dim shouldExcludeFolder As Boolean = excludedFolderList.Any() AndAlso excludedFolderList.Any(Function(excluded) e.FullPath.IndexOf(excluded, StringComparison.OrdinalIgnoreCase) >= 0)
 
+                                ' Get excluded lists safely (use empty list if key is missing)
+                                Dim excludedPathList As List(Of String) = If(excludedPaths.ContainsKey(sourcePath), excludedPaths(sourcePath), New List(Of String)())
+                                Dim shouldExcludePath As Boolean = excludedPathList.Contains(e.FullPath, StringComparer.OrdinalIgnoreCase)
 
-                                If shouldExcludeFile Or shouldExcludeFolder Then
+                                Dim excludedFolderNameList As List(Of String) = If(excludedFolders.ContainsKey(sourcePath), excludedFolders(sourcePath), New List(Of String)())
+                                Dim shouldExcludeFolderName As Boolean = excludedFolderNameList.Any() AndAlso excludedFolderNameList.Any(Function(excluded) e.FullPath.IndexOf(excluded, StringComparison.OrdinalIgnoreCase) >= 0)
+
+                                If shouldExcludeFile Or shouldExcludePath Or shouldExcludeFolderName Then
                                     AppendLog($"Skipped file (excluded): {e.FullPath}")
                                 ElseIf Not File.Exists(destFile) OrElse File.GetLastWriteTime(e.FullPath) > File.GetLastWriteTime(destFile) Then
                                     ' Use the retry function instead of File.Copy

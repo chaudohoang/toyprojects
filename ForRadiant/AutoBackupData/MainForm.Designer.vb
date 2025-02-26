@@ -41,10 +41,6 @@ Namespace AutoDeleteData
             Me.helpToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.aboutToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.dataGridView1 = New System.Windows.Forms.DataGridView()
-            Me.SourceFolder = New System.Windows.Forms.DataGridViewTextBoxColumn()
-            Me.DestinationFolder = New System.Windows.Forms.DataGridViewTextBoxColumn()
-            Me.ExcludeFolders = New System.Windows.Forms.DataGridViewTextBoxColumn()
-            Me.ExcludeFiles = New System.Windows.Forms.DataGridViewTextBoxColumn()
             Me.lblMonitoringStatus = New System.Windows.Forms.Label()
             Me.cmdStopMonitor = New System.Windows.Forms.LinkLabel()
             Me.cmdStartMonitor = New System.Windows.Forms.LinkLabel()
@@ -56,6 +52,11 @@ Namespace AutoDeleteData
             Me.btnReloadSettings = New System.Windows.Forms.Button()
             Me.Label1 = New System.Windows.Forms.Label()
             Me.txtLogpath = New System.Windows.Forms.TextBox()
+            Me.SourceFolder = New System.Windows.Forms.DataGridViewTextBoxColumn()
+            Me.DestinationFolder = New System.Windows.Forms.DataGridViewTextBoxColumn()
+            Me.ExcludePaths = New System.Windows.Forms.DataGridViewTextBoxColumn()
+            Me.ExcludeFolders = New System.Windows.Forms.DataGridViewTextBoxColumn()
+            Me.ExcludeFiles = New System.Windows.Forms.DataGridViewTextBoxColumn()
             Me.contextMenuStrip1.SuspendLayout()
             Me.menuStrip1.SuspendLayout()
             CType(Me.dataGridView1, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -151,32 +152,13 @@ Namespace AutoDeleteData
             '
             'dataGridView1
             '
+            Me.dataGridView1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
             Me.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-            Me.dataGridView1.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.SourceFolder, Me.DestinationFolder, Me.ExcludeFolders, Me.ExcludeFiles})
+            Me.dataGridView1.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.SourceFolder, Me.DestinationFolder, Me.ExcludePaths, Me.ExcludeFolders, Me.ExcludeFiles})
             Me.dataGridView1.Location = New System.Drawing.Point(6, 6)
             Me.dataGridView1.Name = "dataGridView1"
             Me.dataGridView1.Size = New System.Drawing.Size(864, 356)
             Me.dataGridView1.TabIndex = 10
-            '
-            'SourceFolder
-            '
-            Me.SourceFolder.HeaderText = "Source Folder"
-            Me.SourceFolder.Name = "SourceFolder"
-            '
-            'DestinationFolder
-            '
-            Me.DestinationFolder.HeaderText = "Destination Folder"
-            Me.DestinationFolder.Name = "DestinationFolder"
-            '
-            'ExcludeFolders
-            '
-            Me.ExcludeFolders.HeaderText = "Exclude Folders"
-            Me.ExcludeFolders.Name = "ExcludeFolders"
-            '
-            'ExcludeFiles
-            '
-            Me.ExcludeFiles.HeaderText = "Exclude Files"
-            Me.ExcludeFiles.Name = "ExcludeFiles"
             '
             'lblMonitoringStatus
             '
@@ -287,6 +269,36 @@ Namespace AutoDeleteData
             Me.txtLogpath.TabIndex = 53
             Me.txtLogpath.Text = "D:\Program\RVS\AutoBackupDataLog"
             '
+            'SourceFolder
+            '
+            Me.SourceFolder.HeaderText = "Source Folder"
+            Me.SourceFolder.Name = "SourceFolder"
+            Me.SourceFolder.Width = 90
+            '
+            'DestinationFolder
+            '
+            Me.DestinationFolder.HeaderText = "Destination Folder"
+            Me.DestinationFolder.Name = "DestinationFolder"
+            Me.DestinationFolder.Width = 107
+            '
+            'ExcludePaths
+            '
+            Me.ExcludePaths.HeaderText = "Exclude Paths"
+            Me.ExcludePaths.Name = "ExcludePaths"
+            Me.ExcludePaths.Width = 92
+            '
+            'ExcludeFolders
+            '
+            Me.ExcludeFolders.HeaderText = "Exclude Folders"
+            Me.ExcludeFolders.Name = "ExcludeFolders"
+            Me.ExcludeFolders.Width = 98
+            '
+            'ExcludeFiles
+            '
+            Me.ExcludeFiles.HeaderText = "Exclude Files"
+            Me.ExcludeFiles.Name = "ExcludeFiles"
+            Me.ExcludeFiles.Width = 87
+            '
             'MainForm
             '
             Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -341,10 +353,11 @@ Namespace AutoDeleteData
         Friend WithEvents Label1 As Windows.Forms.Label
         Friend WithEvents txtLogpath As Windows.Forms.TextBox
         Friend WithEvents MonitorAutomaticallyToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+        Friend WithEvents btnViewLog As Windows.Forms.Button
         Friend WithEvents SourceFolder As Windows.Forms.DataGridViewTextBoxColumn
         Friend WithEvents DestinationFolder As Windows.Forms.DataGridViewTextBoxColumn
+        Friend WithEvents ExcludePaths As Windows.Forms.DataGridViewTextBoxColumn
         Friend WithEvents ExcludeFolders As Windows.Forms.DataGridViewTextBoxColumn
         Friend WithEvents ExcludeFiles As Windows.Forms.DataGridViewTextBoxColumn
-        Friend WithEvents btnViewLog As Windows.Forms.Button
     End Class
 End Namespace
