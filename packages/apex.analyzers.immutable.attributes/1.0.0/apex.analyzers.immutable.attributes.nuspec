@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>Apex.Analyzers.Immutable.Attributes</id>
+    <version>1.0.0</version>
+    <authors>Dominic Bolin</authors>
+    <owners>Dominic Bolin</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <projectUrl>https://github.com/dbolin/Apex.Analyzers</projectUrl>
+    <description>Attributes used by Apex.Analyzers.Immutable</description>
+    <copyright>Copyright (c) 2019 Dominic Bolin</copyright>
+    <tags>Apex.Analyzers.Immutable, immutable, architecture, design, csharp, analyzers</tags>
+    <repository url="https://github.com/dbolin/Apex.Analyzers" />
+    <dependencies>
+      <group targetFramework=".NETStandard2.0" />
+    </dependencies>
+  </metadata>
+</package>
