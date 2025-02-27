@@ -38,24 +38,31 @@ namespace CodeProviders
             FileInfo sourceFile = new FileInfo(sourceName);
             CodeDomProvider provider = null;
             bool compileOk = false;
+            string filePostfix = "";
+
+            // Ensure the "Compiled" directory exists
+            string compiledFolder = Path.Combine(Environment.CurrentDirectory, "Compiled");
+            Directory.CreateDirectory(compiledFolder);
 
             // Select the code provider based on the input file extension.
             switch (sourceFile.Extension.ToUpper(CultureInfo.InvariantCulture))
             {
                 case ".CS":
                     provider = CodeDomProvider.CreateProvider("CSharp");
+                    filePostfix = "_cs";
                     break;
                 case ".VB":
                     provider = CodeDomProvider.CreateProvider("VisualBasic");
+                    filePostfix = "_vb";
                     break;
                 default:
                     Console.WriteLine("Source file must have a .cs or .vb extension");
                     return false;
             }
 
-            // Format the executable file name with timestamp for uniqueness
-            string exeName = Path.Combine(Environment.CurrentDirectory,
-                $"{Path.GetFileNameWithoutExtension(sourceFile.Name)}_{DateTime.Now:yyyyMMddHHmmss}.exe");
+            // Format the executable file name inside the "Compiled" folder
+            string exeName = Path.Combine(compiledFolder,
+                $"{Path.GetFileNameWithoutExtension(sourceFile.Name)}{filePostfix}_{DateTime.Now:yyyyMMddHHmmss}.exe");
 
             CompilerParameters cp = new CompilerParameters
             {
