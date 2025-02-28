@@ -1,0 +1,1 @@
+DelphiCompiler2.exe Console1.pas
