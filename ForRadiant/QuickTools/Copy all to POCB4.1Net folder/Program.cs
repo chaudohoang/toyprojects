@@ -130,13 +130,25 @@ class Program
             Console.WriteLine("TrueTest.exe is not running.");
         }
 
-        string targetDir = (choice == '1')
-            ? @"C:\\Program Files\\Radiant Vision Systems\\TrueTest 1.8\\POCB4.1Net"
-            : @"C:\\Program Files\\Radiant Vision Systems\\TrueTest 1.8 debug Mobile\\POCB4.1Net";
+        // Define multiple target directories based on choice
+        string[] targetDirs = (choice == '1')
+            ? new string[]
+            {
+            @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8\POCB4.1Net",
+            @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8\POCB4.1"
+            }
+            : new string[]
+            {
+            @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8 debug Mobile\POCB4.1Net",
+            @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8 debug Mobile\POCB4.1"
+            };
 
-        if (!Directory.Exists(targetDir))
+        foreach (var targetDir in targetDirs)
         {
-            Directory.CreateDirectory(targetDir);
+            if (!Directory.Exists(targetDir))
+            {
+                Directory.CreateDirectory(targetDir);
+            }
         }
 
         string scriptName = Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location);
@@ -151,37 +163,37 @@ class Program
                 continue;
             }
 
-            bool copySuccessful = false;
-            int retryCount = 3; // Retry limit
-            int retryDelay = 500; // 500 milliseconds delay between retries
-
-            for (int attempt = 1; attempt <= retryCount; attempt++)
+            foreach (var targetDir in targetDirs)
             {
-                try
-                {
-                    File.Copy(file, Path.Combine(targetDir, fileName), true);
-                    Console.WriteLine($"Copied: {file}");
-                    copySuccessful = true;
-                    break; // Exit the loop if copy is successful
-                }
-                catch (IOException ex) when (attempt < retryCount)
-                {
-                    // If the file is locked, retry
-                    Console.WriteLine($"Failed to copy {file} (Attempt {attempt}/{retryCount}): {ex.Message}. Retrying...");
-                    System.Threading.Thread.Sleep(retryDelay); // Wait before retrying
-                }
-                catch (Exception ex)
-                {
-                    // If an unexpected error occurs, log it and stop retrying
-                    Console.WriteLine($"Failed to copy {file}: {ex.Message}");
-                    break;
-                }
-            }
+                bool copySuccessful = false;
+                int retryCount = 3; // Retry limit
+                int retryDelay = 500; // 500 milliseconds delay between retries
 
-            // If after retries the copy failed, log the failure
-            if (!copySuccessful)
-            {
-                Console.WriteLine($"Failed to copy {file} after {retryCount} attempts.");
+                for (int attempt = 1; attempt <= retryCount; attempt++)
+                {
+                    try
+                    {
+                        File.Copy(file, Path.Combine(targetDir, fileName), true);
+                        Console.WriteLine($"Copied: {file} to {targetDir}");
+                        copySuccessful = true;
+                        break; // Exit the loop if copy is successful
+                    }
+                    catch (IOException ex) when (attempt < retryCount)
+                    {
+                        Console.WriteLine($"Failed to copy {file} to {targetDir} (Attempt {attempt}/{retryCount}): {ex.Message}. Retrying...");
+                        System.Threading.Thread.Sleep(retryDelay); // Wait before retrying
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Failed to copy {file} to {targetDir}: {ex.Message}");
+                        break;
+                    }
+                }
+
+                if (!copySuccessful)
+                {
+                    Console.WriteLine($"Failed to copy {file} to {targetDir} after {retryCount} attempts.");
+                }
             }
         }
 

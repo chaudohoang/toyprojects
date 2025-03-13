@@ -1,0 +1,4 @@
+txtLogpath=D:\Program\RVS\AutoBackupDataLog
+startminimized=False
+minimizedtotray=True
+monitorautomatically=True
