@@ -564,24 +564,18 @@ Namespace AutoDeleteData
             For Each row As DataGridViewRow In dataGridView1.Rows
                 If Not row.IsNewRow Then
                     Dim sourcePath As String = row.Cells(0).Value?.ToString()
-                    Dim destinationPath As String = row.Cells(1).Value?.ToString()
+                    Dim destinationPaths As String() = row.Cells(1).Value?.ToString()?.Split(","c).Select(Function(p) p.Trim()).Where(Function(p) Not String.IsNullOrEmpty(p)).ToArray()
 
-                    If String.IsNullOrWhiteSpace(sourcePath) OrElse String.IsNullOrWhiteSpace(destinationPath) Then
-                        'AppendLog("Skipping row: source or destination path is empty.")
-                        Continue For
+                    If String.IsNullOrWhiteSpace(sourcePath) OrElse destinationPaths.Length = 0 Then
+                        Continue For ' Skip row if source or destination is empty
                     End If
 
                     If e.FullPath.StartsWith(sourcePath, StringComparison.OrdinalIgnoreCase) Then
                         Dim relativePath As String = e.FullPath.Substring(sourcePath.Length).TrimStart("\"c)
-                        Dim destFile As String = Path.Combine(destinationPath, relativePath)
 
                         Try
-
-
                             ' Handle directories separately (prevent duplicate processing)
                             If Directory.Exists(e.FullPath) Then
-
-                                ' Get excluded lists safely (use empty list if key is missing)
                                 Dim excludedPathList As List(Of String) = If(excludedPaths.ContainsKey(sourcePath), excludedPaths(sourcePath), New List(Of String)())
                                 Dim shouldExcludePath As Boolean = excludedPathList.Contains(e.FullPath, StringComparer.OrdinalIgnoreCase)
 
@@ -592,21 +586,36 @@ Namespace AutoDeleteData
                                     AppendLog($"Skipped directory (excluded): {e.FullPath}")
                                 ElseIf Not processedDirectories.Contains(e.FullPath) Then
                                     processedDirectories.Add(e.FullPath)
-                                    ' Ensure destination folder exists
-                                    Dim destDir As String = Path.GetDirectoryName(destFile)
-                                    If Not Directory.Exists(destDir) Then Directory.CreateDirectory(destDir)
-                                    DirectoryCopy(e.FullPath, destFile)
-                                    AppendLog($"Copied directory: {e.FullPath} -> {destFile}")
-                                Else
-                                    'AppendLog($"Skipping duplicate directory copy: {e.FullPath}")
+
+                                    ' Copy directory to all destination paths
+                                    For Each destinationPath In destinationPaths
+                                        Dim destFile As String = Path.Combine(destinationPath, relativePath)
+                                        Dim destDir As String = Path.GetDirectoryName(destFile)
+
+                                        Try
+                                            ' Ensure destination directory exists
+                                            If Not Directory.Exists(destDir) Then
+                                                Directory.CreateDirectory(destDir)
+                                            End If
+
+                                            ' Copy the directory recursively
+                                            DirectoryCopy(e.FullPath, destFile)
+                                            AppendLog($"Copied directory: {e.FullPath} -> {destFile}")
+                                        Catch ex As UnauthorizedAccessException
+                                            AppendLog($"Error: No permission to create directory: {destDir}. Skipping this destination.")
+                                        Catch ex As DirectoryNotFoundException
+                                            AppendLog($"Error: Destination drive does not exist: {destDir}. Skipping this destination.")
+                                        Catch ex As Exception
+                                            AppendLog($"Error copying directory {e.FullPath} -> {destFile}: {ex.Message}. Skipping this destination.")
+                                        End Try
+                                    Next
+
                                 End If
                             Else
-                                ' Get excluded lists safely (use empty list if key is missing)
+                                ' Handle files
                                 Dim excludedFileList As List(Of String) = If(excludedFiles.ContainsKey(sourcePath), excludedFiles(sourcePath), New List(Of String)())
-                                ' Check if e.FullPath contains any excluded pattern, only if the lists are not empty
                                 Dim shouldExcludeFile As Boolean = excludedFileList.Any() AndAlso excludedFileList.Any(Function(excluded) e.FullPath.IndexOf(excluded, StringComparison.OrdinalIgnoreCase) >= 0)
 
-                                ' Get excluded lists safely (use empty list if key is missing)
                                 Dim excludedPathList As List(Of String) = If(excludedPaths.ContainsKey(sourcePath), excludedPaths(sourcePath), New List(Of String)())
                                 Dim shouldExcludePath As Boolean = excludedPathList.Contains(e.FullPath, StringComparer.OrdinalIgnoreCase)
 
@@ -615,18 +624,29 @@ Namespace AutoDeleteData
 
                                 If shouldExcludeFile Or shouldExcludePath Or shouldExcludeFolderName Then
                                     AppendLog($"Skipped file (excluded): {e.FullPath}")
-                                ElseIf Not File.Exists(destFile) OrElse File.GetLastWriteTime(e.FullPath) > File.GetLastWriteTime(destFile) Then
-                                    ' Use the retry function instead of File.Copy
-                                    ' Ensure destination folder exists
-                                    Dim destDir As String = Path.GetDirectoryName(destFile)
-                                    If Not Directory.Exists(destDir) Then Directory.CreateDirectory(destDir)
-                                    CopyFileWithRetry(e.FullPath, destFile)
-                                ElseIf Not processedFiles.ContainsKey($"Skipped-{filePath}") Then
+                                Else
+                                    For Each destinationPath In destinationPaths
+                                        Dim destFile As String = Path.Combine(destinationPath, relativePath)
+                                        Dim destDir As String = Path.GetDirectoryName(destFile)
 
-                                    'AppendLog($"Skipped: {e.FullPath} (No changes detected)")
-                                    processedFiles($"Skipped-{filePath}") = DateTime.Now ' Prevent excessive logs
+                                        Try
+                                            ' Ensure destination directory exists
+                                            If Not Directory.Exists(destDir) Then
+                                                Directory.CreateDirectory(destDir)
+                                            End If
+
+                                            ' Use the retry function to copy
+                                            CopyFileWithRetry(e.FullPath, destFile)
+                                        Catch ex As UnauthorizedAccessException
+                                            AppendLog($"Error: No permission to create directory: {destDir}. Skipping this destination.")
+                                        Catch ex As DirectoryNotFoundException
+                                            AppendLog($"Error: Destination drive does not exist: {destDir}. Skipping this destination.")
+                                        Catch ex As Exception
+                                            AppendLog($"Error creating directory {destDir}: {ex.Message}. Skipping this destination.")
+                                        End Try
+                                    Next
+
                                 End If
-
                             End If
                         Catch ex As Exception
                             AppendLog($"Error copying {e.FullPath}: {ex.Message}")
