@@ -13,6 +13,7 @@ class Program
             Console.WriteLine("Select a target directory:");
             Console.WriteLine("[1] C:\\Program Files\\Radiant Vision Systems\\TrueTest 1.8\\POCB4.1Net");
             Console.WriteLine("[2] C:\\Program Files\\Radiant Vision Systems\\TrueTest 1.8 debug Mobile\\POCB4.1Net");
+            Console.WriteLine("[3] C:\\Program Files\\Radiant Vision Systems\\TrueTest 1.8 debug Tablet\\POCB4.1Net"); // New option
             char mainChoice = Console.ReadKey().KeyChar;
             Console.WriteLine();
 
@@ -21,7 +22,7 @@ class Program
                 if (AuthenticateUser())
                     ModifyIniFiles();
             }
-            else if (mainChoice == '1' || mainChoice == '2')
+            else if (mainChoice == '1' || mainChoice == '2' || mainChoice == '3') // Updated condition
             {
                 ManageTrueTest(mainChoice);
                 Environment.Exit(0);
@@ -137,10 +138,16 @@ class Program
             @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8\POCB4.1Net",
             @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8\POCB4.1"
             }
-            : new string[]
+            : (choice == '2')
+            ? new string[]
             {
             @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8 debug Mobile\POCB4.1Net",
             @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8 debug Mobile\POCB4.1"
+            }
+            : new string[]
+            {
+            @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8 debug Tablet\POCB4.1Net", // New directory
+            @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8 debug Tablet\POCB4.1"    // New directory
             };
 
         foreach (var targetDir in targetDirs)

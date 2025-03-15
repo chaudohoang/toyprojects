@@ -133,8 +133,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "POCBMobileWin7Compatibility
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SetZone3", "SetZone3\SetZone3.csproj", "{73FDBAFB-D935-42CF-ADDB-642C5E228CA8}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "LgdcropSimulator", "LgdcropSimulator\LgdcropSimulator.vbproj", "{1250C1F2-68D8-4859-A685-F3E2E851BF53}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClearVignettingINI", "QuickTools\ClearVignettingINI\ClearVignettingINI.csproj", "{9DACD239-5C78-4694-8EC6-B656E8157171}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DynamicDLLWrapper", "DynamicDLLWrapper\DynamicDLLWrapper.vcxproj", "{9F72A902-521E-40D6-AC64-340143700AF4}"
@@ -166,6 +164,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VignetingOn", "QuickTools\VignetingOn\VignetingOn.csproj", "{E1883239-B364-4A62-BB0B-64CF4A18A7D3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VignetingOff", "QuickTools\VignetingOff\VignetingOff.csproj", "{A3DA89A5-597B-461F-AEAD-D63D020D4C77}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "LgdcropSimulator_Net", "LgdcropSimulator_Net\LgdcropSimulator_Net.vbproj", "{1250C1F2-68D8-4859-A685-F3E2E851BF53}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -945,18 +945,6 @@ Global
 		{73FDBAFB-D935-42CF-ADDB-642C5E228CA8}.Release|x64.Build.0 = Release|Any CPU
 		{73FDBAFB-D935-42CF-ADDB-642C5E228CA8}.Release|x86.ActiveCfg = Release|Any CPU
 		{73FDBAFB-D935-42CF-ADDB-642C5E228CA8}.Release|x86.Build.0 = Release|Any CPU
-		{1250C1F2-68D8-4859-A685-F3E2E851BF53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1250C1F2-68D8-4859-A685-F3E2E851BF53}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1250C1F2-68D8-4859-A685-F3E2E851BF53}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{1250C1F2-68D8-4859-A685-F3E2E851BF53}.Debug|x64.Build.0 = Debug|Any CPU
-		{1250C1F2-68D8-4859-A685-F3E2E851BF53}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{1250C1F2-68D8-4859-A685-F3E2E851BF53}.Debug|x86.Build.0 = Debug|Any CPU
-		{1250C1F2-68D8-4859-A685-F3E2E851BF53}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1250C1F2-68D8-4859-A685-F3E2E851BF53}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1250C1F2-68D8-4859-A685-F3E2E851BF53}.Release|x64.ActiveCfg = Release|Any CPU
-		{1250C1F2-68D8-4859-A685-F3E2E851BF53}.Release|x64.Build.0 = Release|Any CPU
-		{1250C1F2-68D8-4859-A685-F3E2E851BF53}.Release|x86.ActiveCfg = Release|Any CPU
-		{1250C1F2-68D8-4859-A685-F3E2E851BF53}.Release|x86.Build.0 = Release|Any CPU
 		{9DACD239-5C78-4694-8EC6-B656E8157171}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9DACD239-5C78-4694-8EC6-B656E8157171}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9DACD239-5C78-4694-8EC6-B656E8157171}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -1149,6 +1137,18 @@ Global
 		{A3DA89A5-597B-461F-AEAD-D63D020D4C77}.Release|x64.Build.0 = Release|Any CPU
 		{A3DA89A5-597B-461F-AEAD-D63D020D4C77}.Release|x86.ActiveCfg = Release|Any CPU
 		{A3DA89A5-597B-461F-AEAD-D63D020D4C77}.Release|x86.Build.0 = Release|Any CPU
+		{1250C1F2-68D8-4859-A685-F3E2E851BF53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1250C1F2-68D8-4859-A685-F3E2E851BF53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1250C1F2-68D8-4859-A685-F3E2E851BF53}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1250C1F2-68D8-4859-A685-F3E2E851BF53}.Debug|x64.Build.0 = Debug|Any CPU
+		{1250C1F2-68D8-4859-A685-F3E2E851BF53}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1250C1F2-68D8-4859-A685-F3E2E851BF53}.Debug|x86.Build.0 = Debug|Any CPU
+		{1250C1F2-68D8-4859-A685-F3E2E851BF53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1250C1F2-68D8-4859-A685-F3E2E851BF53}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1250C1F2-68D8-4859-A685-F3E2E851BF53}.Release|x64.ActiveCfg = Release|Any CPU
+		{1250C1F2-68D8-4859-A685-F3E2E851BF53}.Release|x64.Build.0 = Release|Any CPU
+		{1250C1F2-68D8-4859-A685-F3E2E851BF53}.Release|x86.ActiveCfg = Release|Any CPU
+		{1250C1F2-68D8-4859-A685-F3E2E851BF53}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1176,10 +1176,10 @@ Global
 		{A3DA89A5-597B-461F-AEAD-D63D020D4C77} = {62CFD8A0-B705-4B6B-B80F-814562E4DABF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		BuildVersion_UseGlobalSettings = True
-		BuildVersion_UpdateAssemblyVersion = True
-		BuildVersion_BuildVersioningStyle = None.None.Increment.TimeStamp
-		BuildVersion_StartDate = 2000/1/1
 		SolutionGuid = {60C14AFF-CFF7-46E8-9345-65A46A64495F}
+		BuildVersion_StartDate = 2000/1/1
+		BuildVersion_BuildVersioningStyle = None.None.Increment.TimeStamp
+		BuildVersion_UpdateAssemblyVersion = True
+		BuildVersion_UseGlobalSettings = True
 	EndGlobalSection
 EndGlobal
