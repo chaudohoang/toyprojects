@@ -1,0 +1,15 @@
+D:\Github\toyprojects\ForRadiant\LgdcropSimulator_Cpp\bin\Debug\LgdcropSimulator_Cpp.exe.config
+D:\Github\toyprojects\ForRadiant\LgdcropSimulator_Cpp\bin\Debug\LgdcropSimulator_Cpp.exe
+D:\Github\toyprojects\ForRadiant\LgdcropSimulator_Cpp\bin\Debug\LgdcropSimulator_Cpp.pdb
+D:\Github\toyprojects\ForRadiant\LgdcropSimulator_Cpp\bin\Debug\LgdcropSimulator_Cpp.xml
+D:\Github\toyprojects\ForRadiant\LgdcropSimulator_Cpp\obj\Debug\LgdcropSimulator_Cpp.vbproj.AssemblyReference.cache
+D:\Github\toyprojects\ForRadiant\LgdcropSimulator_Cpp\obj\Debug\LgdcropSimulator_Cpp.CropForm.resources
+D:\Github\toyprojects\ForRadiant\LgdcropSimulator_Cpp\obj\Debug\LgdcropSimulator_Cpp.InitForm.resources
+D:\Github\toyprojects\ForRadiant\LgdcropSimulator_Cpp\obj\Debug\LgdcropSimulator_Cpp.MainForm.resources
+D:\Github\toyprojects\ForRadiant\LgdcropSimulator_Cpp\obj\Debug\LgdcropSimulator_Cpp.MapForm.resources
+D:\Github\toyprojects\ForRadiant\LgdcropSimulator_Cpp\obj\Debug\LgdcropSimulator_Cpp.Resources.resources
+D:\Github\toyprojects\ForRadiant\LgdcropSimulator_Cpp\obj\Debug\LgdcropSimulator_Cpp.vbproj.GenerateResource.cache
+D:\Github\toyprojects\ForRadiant\LgdcropSimulator_Cpp\obj\Debug\LgdcropSimulator_Cpp.vbproj.CoreCompileInputs.cache
+D:\Github\toyprojects\ForRadiant\LgdcropSimulator_Cpp\obj\Debug\LgdcropSimulator_Cpp.exe
+D:\Github\toyprojects\ForRadiant\LgdcropSimulator_Cpp\obj\Debug\LgdcropSimulator_Cpp.xml
+D:\Github\toyprojects\ForRadiant\LgdcropSimulator_Cpp\obj\Debug\LgdcropSimulator_Cpp.pdb

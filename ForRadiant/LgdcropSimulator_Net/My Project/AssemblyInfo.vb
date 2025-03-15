@@ -8,17 +8,17 @@ Imports System.Runtime.InteropServices
 
 ' Review the values of the assembly attributes
 
-<Assembly: AssemblyTitle("LgdcropSimulator")>
+<Assembly: AssemblyTitle("LgdcropSimulator_Net")>
 <Assembly: AssemblyDescription("")>
 <Assembly: AssemblyCompany("HP")>
-<Assembly: AssemblyProduct("LgdcropSimulator")>
+<Assembly: AssemblyProduct("LgdcropSimulator_Net")>
 <Assembly: AssemblyCopyright("Copyright © HP 2025")>
 <Assembly: AssemblyTrademark("")>
 
 <Assembly: ComVisible(False)>
 
 'The following GUID is for the ID of the typelib if this project is exposed to COM
-<Assembly: Guid("7540f593-bc65-4140-a763-2af27ea5e457")>
+<Assembly: Guid("7d9f2c34-8a1b-4e3e-bf5d-2c6a8f7d91e0")>
 
 ' Version information for an assembly consists of the following four values:
 '
