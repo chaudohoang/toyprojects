@@ -661,6 +661,12 @@ Namespace AutoDeleteData
 
             For attempt As Integer = 1 To maxRetries
                 Try
+                    ' Wait for file to finish writing before attempting copy
+                    If Not WaitForFileCompletion(sourcePath) Then
+                        AppendLog($"Source file incomplete or unavailable: {sourcePath}")
+                        Return
+                    End If
+
                     ' Attempt to copy the file only if necessary
                     If Not File.Exists(destPath) OrElse File.GetLastWriteTime(sourcePath) > File.GetLastWriteTime(destPath) Then
 
@@ -687,6 +693,7 @@ Namespace AutoDeleteData
             Next
         End Sub
 
+
         Private Sub DirectoryCopy(sourceDir As String, destDir As String)
             Try
                 ' Create the destination directory if it doesn't exist
@@ -694,11 +701,17 @@ Namespace AutoDeleteData
                     Directory.CreateDirectory(destDir)
                 End If
 
-                ' Copy all files
+                ' Copy all files with completion check
                 For Each file As String In Directory.GetFiles(sourceDir)
                     Dim fileName As String = Path.GetFileName(file)
                     Dim destFile As String = Path.Combine(destDir, fileName)
-                    IO.File.Copy(file, destFile, True)
+
+                    If WaitForFileCompletion(file) Then
+                        IO.File.Copy(file, destFile, True)
+                        AppendLog($"Copied file: {file} -> {destFile}")
+                    Else
+                        AppendLog($"Skipped incomplete file: {file}")
+                    End If
                 Next
 
                 ' Copy all subdirectories recursively
@@ -712,6 +725,30 @@ Namespace AutoDeleteData
                 AppendLog($"Error copying directory {sourceDir} -> {destDir}: {ex.Message}")
             End Try
         End Sub
+
+
+        Private Function WaitForFileCompletion(filePath As String, Optional timeoutSeconds As Integer = 30) As Boolean
+            Dim sw As Stopwatch = Stopwatch.StartNew()
+            Dim lastSize As Long = -1
+            Dim sameCount As Integer = 0
+
+            Do
+                If Not File.Exists(filePath) Then Return False
+
+                Dim currentSize As Long = New FileInfo(filePath).Length
+                If currentSize = lastSize Then
+                    sameCount += 1
+                    If sameCount >= 3 Then Return True ' File size stabilized
+                Else
+                    sameCount = 0
+                    lastSize = currentSize
+                End If
+
+                Thread.Sleep(1000) ' Wait a bit before re-checking
+            Loop While sw.Elapsed.TotalSeconds < timeoutSeconds
+
+            Return False ' Timed out
+        End Function
 
 
         Private Sub WriteLog(file As String, content As String)
