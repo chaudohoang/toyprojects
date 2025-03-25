@@ -1,0 +1,1 @@
+pyinstaller --onefile --noconsole --upx-dir=autohotkey --add-data "autohotkey;autohotkey" RemapGui.py

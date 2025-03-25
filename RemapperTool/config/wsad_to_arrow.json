@@ -1,0 +1,10 @@
+{
+    "target_exe": "",
+    "toggle_key": "!`",
+    "remaps": {
+        "w": "Up",
+        "s": "Down",
+        "a": "Left",
+        "d": "Right"
+    }
+}
