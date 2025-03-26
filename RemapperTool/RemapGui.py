@@ -20,7 +20,7 @@ UPX_PATH = os.path.join(base_path, 'autohotkey', 'upx.exe')
 class RemapGUI(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Remapper GUI - Full Bundle")
+        self.setWindowTitle("Remapper GUI")
         self.resize(600, 500)
 
         layout = QVBoxLayout(self)
