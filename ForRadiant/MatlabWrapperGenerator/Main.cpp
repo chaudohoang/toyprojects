@@ -139,7 +139,8 @@ std::string generate_cpp_from_template(
         std::string lower_arg = to_lowercase(arg);
 
         // If variable contains "_en" (case-insensitive), use atoi()
-        if (lower_arg.find("_en") != std::string::npos) {
+        if (lower_arg.find("_en") != std::string::npos || lower_arg.find("en_") == 0)
+        {
             mwarray_decls += "    mwArray " + to_upper(arg) + "(atoi(" + lower_arg + ".c_str()));\n";
         }
         else {
