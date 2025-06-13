@@ -149,13 +149,23 @@ std::string generate_cpp_from_template(
     }
 
     // 4. Build FUNC_CALL
+    std::string debug_print_all = "    std::cout << \"Arguments:\" << std::endl;\n";
+    for (const auto& arg : args) {
+
+        std::string upper = to_upper(arg);
+
+        debug_print_all += "    std::cout << \"" + upper + " = \" << " + upper + " << std::endl;\n";
+
+    }
+
+    // 5. Build DEBUG_PRINT_ALL
     std::string func_call;
     for (size_t i = 0; i < args.size(); ++i) {
         func_call += to_upper(args[i]);
         if (i != args.size() - 1) func_call += ", ";
     }
 
-    // 5. Replace placeholders
+    // 6. Replace placeholders
     auto replace_all = [](std::string& str, const std::string& from, const std::string& to) {
         size_t pos = 0;
         while ((pos = str.find(from, pos)) != std::string::npos) {
@@ -164,18 +174,19 @@ std::string generate_cpp_from_template(
         }
         };
 
-    // Replace placeholders in template code
+    // 7. Replace placeholders in template code
     replace_all(code, "{{HEADER_FILE}}", func_name + ".h");
     replace_all(code, "{{FUNC_NAME}}", func_name);
     replace_all(code, "{{NUM_ARGS}}", std::to_string(args.size() + 1)); // +1 because argv[0] is exe name
     replace_all(code, "{{ARG_LIST}}", arg_list);
     replace_all(code, "{{MWARRAY_DECLS}}", mwarray_decls);
     replace_all(code, "{{FUNC_CALL}}", func_call);
+    replace_all(code, "{{DEBUG_PRINT_ALL}}", debug_print_all);
 
-    // 6. Generate dynamic usage message based on the arguments
+    // 8. Generate dynamic usage message based on the arguments
     std::string usage_message = generate_usage_message(args);
 
-    // Replace the placeholder in your template with the generated usage message
+    // 9. Replace the placeholder in your template with the generated usage message
     replace_all(code, "{{USAGE_MESSAGE}}", usage_message);
 
     return code;
