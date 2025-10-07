@@ -159,7 +159,6 @@ Namespace FTPUploaderVB
 									 lblFileStatus.Text = "Uploading " + sourceFile + " ..."
 								 End Sub)
 
-
 			Try
 				If TasksCancellationTokenSource.IsCancellationRequested Then
 					Exit Sub
@@ -191,8 +190,7 @@ Namespace FTPUploaderVB
 					transferOptions.TransferMode = TransferMode.Binary
 
 					Dim transferResult As TransferOperationResult
-					transferResult =
-					session.PutFiles(sourceFile, destFile, False, transferOptions)
+					transferResult = session.PutFiles(sourceFile, destFile, False, transferOptions)
 
 					' Throw on any error
 					transferResult.Check()
@@ -225,6 +223,8 @@ Namespace FTPUploaderVB
 
 				logContent = Me.Text + vbTab + Now.ToString("HH:mm:ss.fff") + vbTab + "Upload failed with exception : " + e.Message + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
 				File.AppendAllText(failLogPath, logContent)
+
+				' Fail count mechanism
 				If Not Directory.Exists(Path.GetDirectoryName(failCountPath)) Then
 					Directory.CreateDirectory(Path.GetDirectoryName(failCountPath))
 				End If
@@ -238,13 +238,28 @@ Namespace FTPUploaderVB
 					failCount = CInt(failLines(0))
 					failCount += 1
 					File.WriteAllText(failCountPath, failCount.ToString)
-
 				End If
 
 				If Not Int32.TryParse(txtMaximumFailRetry.Text, failRetry) Then
 					failRetry = 0
 				End If
 				If failCount >= failRetry Then
+
+					' Append to index and host files with "- failed"
+					If TasksCancellationTokenSource.IsCancellationRequested Then
+						Exit Sub
+					End If
+					File.AppendAllText(sourceIndexFile, destFile + "@" + channelIndex + " - failed" + System.Environment.NewLine)
+					File.AppendAllText(sourceHostFile, destFile + "@" + channelIndex + " - failed" + System.Environment.NewLine)
+
+					' Log when max fail count reached
+					logContent = Me.Text + vbTab + Now.ToString("HH:mm:ss.fff") + vbTab + "Maximum fail count reached (" + failCount.ToString + "/" + failRetry.ToString + "), deleting queue: " + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
+					File.AppendAllText(failLogPath, logContent)
+
+					' Backup before deleting - FAILED
+					If backupQueueAfterUploadToolStripMenuItem.Checked Then
+						BackupInfoFile(InfoFile, "Backedup Failed Queue")
+					End If
 					File.Delete(InfoFile)
 					File.Delete(failCountPath)
 					UpdateSummaryLogFail(summaryLogPath, PID, destFile, e.Message)
@@ -252,6 +267,10 @@ Namespace FTPUploaderVB
 
 			End Try
 			If uploaded Then
+				' Backup before deleting - SUCCEEDED
+				If backupQueueAfterUploadToolStripMenuItem.Checked Then
+					BackupInfoFile(InfoFile, "Backedup Succeed Queue")
+				End If
 				File.Delete(InfoFile)
 				UpdateSummaryLogSucceed(summaryLogPath, PID, destFile)
 				If File.Exists(failCountPath) Then
@@ -278,6 +297,8 @@ Namespace FTPUploaderVB
 			Dim sourceFile = lines(7)
 			Dim destFile = lines(8)
 
+			Dim failCountPath = txtUploadListPath.Text + "\Fail Count\IndexHost\" + Path.GetFileName(InfoFile)
+
 			Static m_Rnd As New Random
 			Dim tempcolor As Color
 			tempcolor = lblFileUploadStatus.ForeColor
@@ -292,16 +313,14 @@ Namespace FTPUploaderVB
 				Directory.CreateDirectory(Path.GetDirectoryName(failLogPath))
 			End If
 
-
 			lblFileStatus.Invoke(Sub()
 									 lblFileStatus.Text = "Uploading " + sourceFile + " ..."
 								 End Sub)
-
-
 			Try
 				If TasksCancellationTokenSource.IsCancellationRequested Then
 					Exit Sub
 				End If
+
 				' Setup session options
 				Dim sessionOptions As New SessionOptions
 				With sessionOptions
@@ -311,7 +330,6 @@ Namespace FTPUploaderVB
 					.Password = password
 					.TimeoutInMilliseconds = 20000
 				End With
-
 				Using session As New Session
 					session.ExecutablePath = exePath
 					If Not Directory.Exists(Path.GetDirectoryName(sessionLogPath)) Then
@@ -320,18 +338,13 @@ Namespace FTPUploaderVB
 					session.SessionLogPath = sessionLogPath
 					' Connect
 					session.Open(sessionOptions)
-
 					' Upload files
 					Dim transferOptions As New TransferOptions
 					transferOptions.TransferMode = TransferMode.Binary
-
 					Dim transferResult As TransferOperationResult
-					transferResult =
-					session.PutFiles(sourceFile, destFile, False, transferOptions)
-
+					transferResult = session.PutFiles(sourceFile, destFile, False, transferOptions)
 					' Throw on any error
 					transferResult.Check()
-
 					' Print results
 					For Each transfer In transferResult.Transfers
 					Next
@@ -340,7 +353,6 @@ Namespace FTPUploaderVB
 				lblFileUploadStatus.Invoke(Sub()
 											   lblFileUploadStatus.Text = "Succeeded "
 										   End Sub)
-
 				logContent = Now.ToString("HH:mm:ss.fff") + vbTab + "Upload succeeded " + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
 				File.AppendAllText(succeedLogPath, logContent)
 
@@ -348,13 +360,53 @@ Namespace FTPUploaderVB
 				lblFileUploadStatus.Invoke(Sub()
 											   lblFileUploadStatus.Text = "Failed "
 										   End Sub)
-
 				logContent = Now.ToString("HH:mm:ss.fff") + vbTab + "Upload failed with exception : " + e.Message + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
 				File.AppendAllText(failLogPath, logContent)
+
+				' Fail count mechanism
+				If Not Directory.Exists(Path.GetDirectoryName(failCountPath)) Then
+					Directory.CreateDirectory(Path.GetDirectoryName(failCountPath))
+				End If
+				Dim failCount As Integer = 0
+				Dim failRetry As Integer = 0
+				If Not File.Exists(failCountPath) Then
+					failCount = 1
+					File.WriteAllText(failCountPath, "1")
+				Else
+					Dim failLines = File.ReadAllLines(failCountPath)
+					failCount = CInt(failLines(0))
+					failCount += 1
+					File.WriteAllText(failCountPath, failCount.ToString)
+				End If
+
+				If Not Int32.TryParse(txtMaximumFailRetry.Text, failRetry) Then
+					failRetry = 0
+				End If
+				If failCount >= failRetry Then
+					' Log when max fail count reached
+					logContent = Now.ToString("HH:mm:ss.fff") + vbTab + "Maximum fail count reached (" + failCount.ToString + "/" + failRetry.ToString + "), deleting queue: " + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
+					File.AppendAllText(failLogPath, logContent)
+
+					' Backup before deleting - FAILED
+					If backupQueueAfterUploadToolStripMenuItem.Checked Then
+						BackupInfoFile(InfoFile, "Backedup Failed Queue\IndexHost")
+					End If
+					File.Delete(InfoFile)
+					File.Delete(failCountPath)
+				End If
+				Exit Sub ' Don't delete if not reached max retry
 			End Try
 
-			File.Delete(InfoFile)
-
+			If uploaded Then
+				' Backup before deleting - SUCCEEDED
+				If backupQueueAfterUploadToolStripMenuItem.Checked Then
+					BackupInfoFile(InfoFile, "Backedup Succeed Queue\IndexHost")
+				End If
+				File.Delete(InfoFile)
+				If File.Exists(failCountPath) Then
+					File.Delete(failCountPath)
+				End If
+			End If
 		End Sub
 
 		Private Sub CreateIndexAndHostQueue(InfoFile As String)
@@ -362,18 +414,26 @@ Namespace FTPUploaderVB
 				Exit Sub
 			End If
 			Dim lines = File.ReadAllLines(InfoFile)
-
 			Dim OutputIndexInfoFile = lines(9)
 			Dim OutputHostInfoFile = lines(12)
+			Dim sourceIndexFile = lines(10)
+			Dim sourceHostFile = lines(13)
+
 			If TasksCancellationTokenSource.IsCancellationRequested Then
 				Exit Sub
 			End If
+
+			' Clean the source files by removing lines with " - failed" before uploading
+			RemoveFailedLines(sourceIndexFile)
+			RemoveFailedLines(sourceHostFile)
+
 			If Not File.Exists(OutputIndexInfoFile) AndAlso OutputIndexInfoFile <> InfoFile Then
 				lines(7) = lines(10)
 				lines(8) = lines(11)
 				File.WriteAllLines(OutputIndexInfoFile, lines)
 			End If
 			UploadIndexAndHost(OutputIndexInfoFile)
+
 			If Not File.Exists(OutputHostInfoFile) AndAlso OutputHostInfoFile <> InfoFile Then
 				lines(7) = lines(13)
 				lines(8) = lines(14)
@@ -697,5 +757,41 @@ Namespace FTPUploaderVB
 		Private Sub MainForm_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
 			SaveSettings()
 		End Sub
+
+
+		Private Sub RemoveFailedLines(filePath As String)
+			If Not File.Exists(filePath) Then
+				Exit Sub
+			End If
+
+			Dim allLines = File.ReadAllLines(filePath)
+			Dim cleanedLines = allLines.Where(Function(line) Not line.Contains(" - failed")).ToArray()
+
+			' Only write back if there were changes
+			If cleanedLines.Length <> allLines.Length Then
+				File.WriteAllLines(filePath, cleanedLines)
+			End If
+		End Sub
+
+		Private Sub BackupInfoFile(infoFilePath As String, backupFolder As String)
+			If Not File.Exists(infoFilePath) Then
+				Exit Sub
+			End If
+
+			Try
+				Dim backupPath = Path.Combine(txtUploadListPath.Text, backupFolder)
+				If Not Directory.Exists(backupPath) Then
+					Directory.CreateDirectory(backupPath)
+				End If
+
+				Dim backupFileName = Now.ToString("yyyyMMdd_HHmmss_fff") + "_" + Path.GetFileName(infoFilePath)
+				Dim fullBackupPath = Path.Combine(backupPath, backupFileName)
+				File.Copy(infoFilePath, fullBackupPath, True)
+			Catch ex As Exception
+				' Log backup failure but don't stop the process
+				Debug.WriteLine("Backup failed: " + ex.Message)
+			End Try
+		End Sub
+
 	End Class
 End Namespace

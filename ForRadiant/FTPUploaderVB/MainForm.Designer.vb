@@ -52,6 +52,7 @@ Namespace FTPUploaderVB
             Me.cmdStopUpload = New System.Windows.Forms.LinkLabel()
             Me.txtMaximumFailRetry = New System.Windows.Forms.TextBox()
             Me.Label4 = New System.Windows.Forms.Label()
+            Me.backupQueueAfterUploadToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.contextMenuStrip1.SuspendLayout()
             Me.menuStrip1.SuspendLayout()
             Me.SuspendLayout()
@@ -99,7 +100,7 @@ Namespace FTPUploaderVB
             '
             'settingsToolStripMenuItem
             '
-            Me.settingsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.startMinimizedToolStripMenuItem, Me.minimizedToTrayToolStripMenuItem})
+            Me.settingsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.startMinimizedToolStripMenuItem, Me.minimizedToTrayToolStripMenuItem, Me.backupQueueAfterUploadToolStripMenuItem})
             Me.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem"
             Me.settingsToolStripMenuItem.Size = New System.Drawing.Size(61, 20)
             Me.settingsToolStripMenuItem.Text = "Settings"
@@ -236,7 +237,7 @@ Namespace FTPUploaderVB
             Me.txtMaximumFailRetry.Name = "txtMaximumFailRetry"
             Me.txtMaximumFailRetry.Size = New System.Drawing.Size(365, 20)
             Me.txtMaximumFailRetry.TabIndex = 16
-            Me.txtMaximumFailRetry.Text = "3"
+            Me.txtMaximumFailRetry.Text = "5"
             '
             'Label4
             '
@@ -246,6 +247,13 @@ Namespace FTPUploaderVB
             Me.Label4.Size = New System.Drawing.Size(98, 13)
             Me.Label4.TabIndex = 17
             Me.Label4.Text = "Maximum Fail Retry"
+            '
+            'backupQueueAfterUploadToolStripMenuItem
+            '
+            Me.backupQueueAfterUploadToolStripMenuItem.CheckOnClick = True
+            Me.backupQueueAfterUploadToolStripMenuItem.Name = "backupQueueAfterUploadToolStripMenuItem"
+            Me.backupQueueAfterUploadToolStripMenuItem.Size = New System.Drawing.Size(226, 22)
+            Me.backupQueueAfterUploadToolStripMenuItem.Text = "Backup Queue After Upload"
             '
             'MainForm
             '
@@ -306,5 +314,6 @@ Namespace FTPUploaderVB
 		Friend WithEvents startMinimizedToolStripMenuItem As Windows.Forms.ToolStripMenuItem
 		Private WithEvents txtMaximumFailRetry As Windows.Forms.TextBox
 		Private WithEvents Label4 As Windows.Forms.Label
-	End Class
+        Friend WithEvents backupQueueAfterUploadToolStripMenuItem As Windows.Forms.ToolStripMenuItem
+    End Class
 End Namespace
