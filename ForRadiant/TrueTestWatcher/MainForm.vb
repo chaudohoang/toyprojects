@@ -40,6 +40,7 @@ Namespace TrueTestWatcher
         Dim TasksCancellationTokenSource As New CancellationTokenSource
         Dim needtoCheck As Boolean
         Dim MasterStatusPath As String = "C:\Radiant Vision Systems Data\TrueTest\UserData\MasterStatus.txt"
+        Dim DllVersionPath As String = "C:\Radiant Vision Systems Data\TrueTest\UserData\DLLVersion.txt"
         Dim watchPath1 As String = "C:\Radiant Vision Systems Data\TrueTest\Sequence"
         Dim watchPath2 As String = "C:\Radiant Vision Systems Data\TrueTest\Sequence\Master"
         Dim watchPath3 As String = "C:\Radiant Vision Systems Data\TrueTest\Sequence\Calibration"
@@ -2405,6 +2406,39 @@ Namespace TrueTestWatcher
                 File.WriteAllText(MasterStatusPath, status)
                 CommLogUpdateText("Wrote Master Status " + Chr(34) + status + Chr(34) + " to : " + MasterStatusPath + " !!!")
 
+            ElseIf Path.GetFileNameWithoutExtension(e.FullPath).Contains("PucDLLVersion") Then
+
+                Dim dllVersion As String = ""
+                Dim fileloaded As Boolean
+                Dim timeout As Integer = 5000 ' Timeout in milliseconds (5 seconds)
+                Dim retryInterval As Integer = 500 ' Retry interval in milliseconds (0.5 second)
+                Dim endTime As DateTime = DateTime.Now.AddMilliseconds(timeout)
+                While Not fileloaded AndAlso DateTime.Now < endTime
+                    Try
+                        dllVersion = File.ReadAllText(e.FullPath())
+                        fileloaded = True
+                    Catch ex As Exception
+                        fileloaded = False
+                        Thread.Sleep(retryInterval)
+                    End Try
+                End While
+
+                If e.ChangeType = IO.WatcherChangeTypes.Changed Then
+                    CommLogUpdateText("----------DLL Version Changed To: " & dllVersion & "----------")
+                End If
+                If e.ChangeType = IO.WatcherChangeTypes.Created Then
+                    CommLogUpdateText("----------DLL Version Changed To: " & dllVersion & "----------")
+
+                End If
+
+                Static originalTitle As String = Nothing
+
+                If originalTitle Is Nothing Then
+                    originalTitle = Me.Text   ' Store only once
+                End If
+
+                Me.Text = originalTitle & " | " & dllVersion
+
             End If
 
             'If Path.GetFileNameWithoutExtension(e.FullPath).Contains("ReceivedSEQCHECK") Then
@@ -3133,6 +3167,7 @@ Namespace TrueTestWatcher
 
             Return False
         End Function
+
 
     End Class
 End Namespace

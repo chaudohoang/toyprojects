@@ -13,41 +13,74 @@ namespace CodeProviders
         [STAThread]
         static void Main(string[] args)
         {
-            if (args.Length > 0)
+            string exeFolder = AppDomain.CurrentDomain.BaseDirectory;
+            string logFile = Path.Combine(exeFolder, "log.txt");
+
+            int exitCode = 0; // ✅ Default: success
+
+            // ✅ Overwrite log file every run (no append)
+            using (var logWriter = new StreamWriter(logFile, append: false))
             {
-                if (File.Exists(args[0]))
+                try
                 {
-                    CompileExecutable(args[0]);
+                    logWriter.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] --- CompileCode2.exe Started ---");
+
+                    if (args.Length > 0)
+                    {
+                        if (File.Exists(args[0]))
+                        {
+                            logWriter.WriteLine($"Compiling: {args[0]}");
+                            bool result = CompileExecutable(args[0], logWriter);
+                            logWriter.WriteLine($"Compile result: {(result ? "SUCCESS" : "FAIL")}");
+
+                            if (!result)
+                                exitCode = 1; // ❌ Compilation failed → non-zero exit
+                        }
+                        else
+                        {
+                            string msg = $"Input source file not found - {args[0]}";
+                            Console.WriteLine(msg);
+                            logWriter.WriteLine(msg);
+                            exitCode = 2; // ❌ Source file missing
+                        }
+                    }
+                    else
+                    {
+                        string msg = "Input source file not specified on command line!";
+                        Console.WriteLine(msg);
+                        logWriter.WriteLine(msg);
+                        exitCode = 3; // ❌ No argument provided
+                    }
+
+                    logWriter.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] --- CompileCode2.exe Finished ---");
                 }
-                else
+                catch (Exception ex)
                 {
-                    Console.WriteLine($"Input source file not found - {args[0]}");
+                    string msg = $"Unexpected error: {ex}";
+                    Console.WriteLine(msg);
+                    logWriter.WriteLine(msg);
+                    exitCode = 99; // ❌ Unexpected runtime error
                 }
-            }
-            else
-            {
-                Console.WriteLine("Input source file not specified on command line!");
             }
 
-            // Keep console window open
-            Console.WriteLine("Press Enter to exit...");
-            Console.ReadLine();
+            Environment.Exit(exitCode); // ✅ Exit with proper code
         }
 
-        public static bool CompileExecutable(string sourceName)
+        public static bool CompileExecutable(string sourceName, StreamWriter logWriter)
         {
-            FileInfo sourceFile = new FileInfo(sourceName);
+            var sourceFile = new FileInfo(sourceName);
             bool compileOk = false;
             string filePostfix = "";
 
-            // Ensure the "Compiled" directory exists
-            string compiledFolder = Path.Combine(Environment.CurrentDirectory, "Compiled");
+            // ✅ Use the script's folder, not the compiler's working folder
+            string scriptDir = sourceFile.DirectoryName ?? Directory.GetCurrentDirectory();
+            string compiledFolder = Path.Combine(scriptDir, "Compiled");
             Directory.CreateDirectory(compiledFolder);
 
-            // Read the source file content
+            // Read the source
             string sourceCode = File.ReadAllText(sourceName);
 
-            // Determine the language provider
+            // Pick language
             Compilation compilation = null;
             switch (sourceFile.Extension.ToUpper(CultureInfo.InvariantCulture))
             {
@@ -60,35 +93,49 @@ namespace CodeProviders
                     filePostfix = "_vb";
                     break;
                 default:
-                    Console.WriteLine("Source file must have a .cs or .vb extension");
+                    string msg = "Source file must have a .cs or .vb extension";
+                    Console.WriteLine(msg);
+                    logWriter.WriteLine(msg);
                     return false;
             }
 
             if (compilation == null)
             {
-                Console.WriteLine("Compilation object could not be created.");
+                string msg = "Compilation object could not be created.";
+                Console.WriteLine(msg);
+                logWriter.WriteLine(msg);
                 return false;
             }
 
-            // Format the executable file name inside the "Compiled" folder
-            string exeName = Path.Combine(compiledFolder,
-                $"{Path.GetFileNameWithoutExtension(sourceFile.Name)}{filePostfix}_{DateTime.Now:yyyyMMddHHmmss}.exe");
+            // Output EXE inside the script's Compiled folder
+            string exeName = Path.Combine(
+                compiledFolder,
+                $"{Path.GetFileNameWithoutExtension(sourceFile.Name)}{filePostfix}_{DateTime.Now:yyyyMMddHHmmss}.exe"
+            );
 
-            // Emit (compile) the executable
             var result = compilation.Emit(exeName);
 
             if (!result.Success)
             {
-                Console.WriteLine($"Errors compiling {sourceName}:");
-                foreach (var diagnostic in result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error))
+                string msg = $"Errors compiling {sourceName}:";
+                Console.WriteLine(msg);
+                logWriter.WriteLine(msg);
+
+                foreach (var d in result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error))
                 {
-                    Console.WriteLine(diagnostic);
+                    Console.WriteLine(d);
+                    logWriter.WriteLine(d.ToString());
                 }
-                Console.WriteLine($"Total Errors: {result.Diagnostics.Count(d => d.Severity == DiagnosticSeverity.Error)}");
+
+                string totalErr = $"Total Errors: {result.Diagnostics.Count(d => d.Severity == DiagnosticSeverity.Error)}";
+                Console.WriteLine(totalErr);
+                logWriter.WriteLine(totalErr);
             }
             else
             {
-                Console.WriteLine($"Compilation successful: {exeName}");
+                string msg = $"Compilation successful: {exeName}";
+                Console.WriteLine(msg);
+                logWriter.WriteLine(msg);
                 compileOk = true;
             }
 

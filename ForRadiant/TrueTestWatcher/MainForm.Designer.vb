@@ -2,30 +2,30 @@
 Imports System
 
 Namespace TrueTestWatcher
-	Partial Class MainForm
-		''' <summary>
-		''' Required designer variable.
-		''' </summary>
-		Private components As ComponentModel.IContainer = Nothing
+    Partial Class MainForm
+        ''' <summary>
+        ''' Required designer variable.
+        ''' </summary>
+        Private components As ComponentModel.IContainer = Nothing
 
-		''' <summary>
-		''' Clean up any resources being used.
-		''' </summary>
-		''' <paramname="disposing">true if managed resources should be disposed; otherwise, false.</param>
-		Protected Overrides Sub Dispose(ByVal disposing As Boolean)
-			If disposing AndAlso components IsNot Nothing Then
-				components.Dispose()
-			End If
-			MyBase.Dispose(disposing)
-		End Sub
+        ''' <summary>
+        ''' Clean up any resources being used.
+        ''' </summary>
+        ''' <paramname="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        Protected Overrides Sub Dispose(ByVal disposing As Boolean)
+            If disposing AndAlso components IsNot Nothing Then
+                components.Dispose()
+            End If
+            MyBase.Dispose(disposing)
+        End Sub
 
 #Region "Windows Form Designer generated code"
 
-		''' <summary>
-		''' Required method for Designer support - do not modify
-		''' the contents of this method with the code editor.
-		''' </summary>
-		Private Sub InitializeComponent()
+        ''' <summary>
+        ''' Required method for Designer support - do not modify
+        ''' the contents of this method with the code editor.
+        ''' </summary>
+        Private Sub InitializeComponent()
             Me.components = New System.ComponentModel.Container()
             Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(MainForm))
             Me.notifyIcon1 = New System.Windows.Forms.NotifyIcon(Me.components)
@@ -48,6 +48,8 @@ Namespace TrueTestWatcher
             Me.TabControl1 = New System.Windows.Forms.TabControl()
             Me.TabPage1 = New System.Windows.Forms.TabPage()
             Me.TabPage2 = New System.Windows.Forms.TabPage()
+            Me.chkCompareVnttIniFiles = New System.Windows.Forms.CheckBox()
+            Me.chkCompareCropIniFiles = New System.Windows.Forms.CheckBox()
             Me.chkCompareOmitIniFiles = New System.Windows.Forms.CheckBox()
             Me.cbxAutologPath = New System.Windows.Forms.ComboBox()
             Me.chkAutolog = New System.Windows.Forms.CheckBox()
@@ -58,8 +60,6 @@ Namespace TrueTestWatcher
             Me.chkCompareAppdataFiles = New System.Windows.Forms.CheckBox()
             Me.chkCompareSequenceCalibrations = New System.Windows.Forms.CheckBox()
             Me.chkCompareSequenceParameters = New System.Windows.Forms.CheckBox()
-            Me.chkCompareCropIniFiles = New System.Windows.Forms.CheckBox()
-            Me.chkCompareVnttIniFiles = New System.Windows.Forms.CheckBox()
             Me.contextMenuStrip1.SuspendLayout()
             Me.menuStrip1.SuspendLayout()
             Me.TabControl1.SuspendLayout()
@@ -240,6 +240,30 @@ Namespace TrueTestWatcher
             Me.TabPage2.Text = "Compare Settings"
             Me.TabPage2.UseVisualStyleBackColor = True
             '
+            'chkCompareVnttIniFiles
+            '
+            Me.chkCompareVnttIniFiles.AutoSize = True
+            Me.chkCompareVnttIniFiles.Checked = True
+            Me.chkCompareVnttIniFiles.CheckState = System.Windows.Forms.CheckState.Checked
+            Me.chkCompareVnttIniFiles.Location = New System.Drawing.Point(278, 75)
+            Me.chkCompareVnttIniFiles.Name = "chkCompareVnttIniFiles"
+            Me.chkCompareVnttIniFiles.Size = New System.Drawing.Size(128, 17)
+            Me.chkCompareVnttIniFiles.TabIndex = 36
+            Me.chkCompareVnttIniFiles.Text = "Compare Vntt Ini Files"
+            Me.chkCompareVnttIniFiles.UseVisualStyleBackColor = True
+            '
+            'chkCompareCropIniFiles
+            '
+            Me.chkCompareCropIniFiles.AutoSize = True
+            Me.chkCompareCropIniFiles.Checked = True
+            Me.chkCompareCropIniFiles.CheckState = System.Windows.Forms.CheckState.Checked
+            Me.chkCompareCropIniFiles.Location = New System.Drawing.Point(142, 75)
+            Me.chkCompareCropIniFiles.Name = "chkCompareCropIniFiles"
+            Me.chkCompareCropIniFiles.Size = New System.Drawing.Size(131, 17)
+            Me.chkCompareCropIniFiles.TabIndex = 35
+            Me.chkCompareCropIniFiles.Text = "Compare Crop Ini Files"
+            Me.chkCompareCropIniFiles.UseVisualStyleBackColor = True
+            '
             'chkCompareOmitIniFiles
             '
             Me.chkCompareOmitIniFiles.AutoSize = True
@@ -347,30 +371,6 @@ Namespace TrueTestWatcher
             Me.chkCompareSequenceParameters.TabIndex = 25
             Me.chkCompareSequenceParameters.Text = "Compare Sequence Parameters"
             Me.chkCompareSequenceParameters.UseVisualStyleBackColor = True
-            '
-            'chkCompareCropIniFiles
-            '
-            Me.chkCompareCropIniFiles.AutoSize = True
-            Me.chkCompareCropIniFiles.Checked = True
-            Me.chkCompareCropIniFiles.CheckState = System.Windows.Forms.CheckState.Checked
-            Me.chkCompareCropIniFiles.Location = New System.Drawing.Point(142, 75)
-            Me.chkCompareCropIniFiles.Name = "chkCompareCropIniFiles"
-            Me.chkCompareCropIniFiles.Size = New System.Drawing.Size(131, 17)
-            Me.chkCompareCropIniFiles.TabIndex = 35
-            Me.chkCompareCropIniFiles.Text = "Compare Crop Ini Files"
-            Me.chkCompareCropIniFiles.UseVisualStyleBackColor = True
-            '
-            'chkCompareVnttIniFiles
-            '
-            Me.chkCompareVnttIniFiles.AutoSize = True
-            Me.chkCompareVnttIniFiles.Checked = True
-            Me.chkCompareVnttIniFiles.CheckState = System.Windows.Forms.CheckState.Checked
-            Me.chkCompareVnttIniFiles.Location = New System.Drawing.Point(278, 75)
-            Me.chkCompareVnttIniFiles.Name = "chkCompareVnttIniFiles"
-            Me.chkCompareVnttIniFiles.Size = New System.Drawing.Size(128, 17)
-            Me.chkCompareVnttIniFiles.TabIndex = 36
-            Me.chkCompareVnttIniFiles.Text = "Compare Vntt Ini Files"
-            Me.chkCompareVnttIniFiles.UseVisualStyleBackColor = True
             '
             'MainForm
             '

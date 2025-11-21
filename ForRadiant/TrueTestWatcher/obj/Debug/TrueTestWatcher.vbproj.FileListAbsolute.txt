@@ -9,3 +9,14 @@ D:\GitHub\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTestWatcher.vbpro
 D:\GitHub\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTestWatcher.exe
 D:\GitHub\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTestWatcher.pdb
 D:\Github\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTest.D88FBE8B.Up2Date
+E:\Github\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTestWatcher.vbproj.AssemblyReference.cache
+E:\Github\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTestWatcher.TrueTestWatcher.MainForm.resources
+E:\Github\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTestWatcher.Resources.resources
+E:\Github\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTestWatcher.vbproj.GenerateResource.cache
+E:\Github\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTestWatcher.vbproj.CoreCompileInputs.cache
+E:\Github\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTestWatcher.exe
+E:\Github\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTestWatcher.pdb
+E:\Github\toyprojects\ForRadiant\bin\Debug\TrueTestWatcher\TrueTestWatcher.exe.config
+E:\Github\toyprojects\ForRadiant\bin\Debug\TrueTestWatcher\TrueTestWatcher.exe
+E:\Github\toyprojects\ForRadiant\bin\Debug\TrueTestWatcher\TrueTestWatcher.pdb
+E:\Github\toyprojects\ForRadiant\TrueTestWatcher\obj\Debug\TrueTest.D88FBE8B.Up2Date
