@@ -1,0 +1,15 @@
+E:\Github\toyprojects\MasterDuel0000SymLinkCreator\MasterDuel0000SymLinkCreator\bin\Debug\net8.0\MasterDuel0000SymLinkCreator.exe
+E:\Github\toyprojects\MasterDuel0000SymLinkCreator\MasterDuel0000SymLinkCreator\bin\Debug\net8.0\MasterDuel0000SymLinkCreator.deps.json
+E:\Github\toyprojects\MasterDuel0000SymLinkCreator\MasterDuel0000SymLinkCreator\bin\Debug\net8.0\MasterDuel0000SymLinkCreator.runtimeconfig.json
+E:\Github\toyprojects\MasterDuel0000SymLinkCreator\MasterDuel0000SymLinkCreator\bin\Debug\net8.0\MasterDuel0000SymLinkCreator.dll
+E:\Github\toyprojects\MasterDuel0000SymLinkCreator\MasterDuel0000SymLinkCreator\bin\Debug\net8.0\MasterDuel0000SymLinkCreator.pdb
+E:\Github\toyprojects\MasterDuel0000SymLinkCreator\MasterDuel0000SymLinkCreator\obj\Debug\net8.0\MasterDuel0000SymLinkCreator.GeneratedMSBuildEditorConfig.editorconfig
+E:\Github\toyprojects\MasterDuel0000SymLinkCreator\MasterDuel0000SymLinkCreator\obj\Debug\net8.0\MasterDuel0000SymLinkCreator.AssemblyInfoInputs.cache
+E:\Github\toyprojects\MasterDuel0000SymLinkCreator\MasterDuel0000SymLinkCreator\obj\Debug\net8.0\MasterDuel0000SymLinkCreator.AssemblyInfo.cs
+E:\Github\toyprojects\MasterDuel0000SymLinkCreator\MasterDuel0000SymLinkCreator\obj\Debug\net8.0\MasterDuel0000SymLinkCreator.csproj.CoreCompileInputs.cache
+E:\Github\toyprojects\MasterDuel0000SymLinkCreator\MasterDuel0000SymLinkCreator\obj\Debug\net8.0\MasterDuel0000SymLinkCreator.sourcelink.json
+E:\Github\toyprojects\MasterDuel0000SymLinkCreator\MasterDuel0000SymLinkCreator\obj\Debug\net8.0\MasterDuel0000SymLinkCreator.dll
+E:\Github\toyprojects\MasterDuel0000SymLinkCreator\MasterDuel0000SymLinkCreator\obj\Debug\net8.0\refint\MasterDuel0000SymLinkCreator.dll
+E:\Github\toyprojects\MasterDuel0000SymLinkCreator\MasterDuel0000SymLinkCreator\obj\Debug\net8.0\MasterDuel0000SymLinkCreator.pdb
+E:\Github\toyprojects\MasterDuel0000SymLinkCreator\MasterDuel0000SymLinkCreator\obj\Debug\net8.0\MasterDuel0000SymLinkCreator.genruntimeconfig.cache
+E:\Github\toyprojects\MasterDuel0000SymLinkCreator\MasterDuel0000SymLinkCreator\obj\Debug\net8.0\ref\MasterDuel0000SymLinkCreator.dll
