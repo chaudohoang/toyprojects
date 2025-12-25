@@ -1,0 +1,37 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "E:\\Github\\toyprojects\\MasterDuel0000SymLinkCreator\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{F50A7F11-6AF5-4E72-8158-D26873917FE8}|MasterDuel0000SymLinkCreator\\MasterDuel0000SymLinkCreator.csproj|e:\\github\\toyprojects\\masterduel0000symlinkcreator\\masterduel0000symlinkcreator\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F50A7F11-6AF5-4E72-8158-D26873917FE8}|MasterDuel0000SymLinkCreator\\MasterDuel0000SymLinkCreator.csproj|solutionrelative:masterduel0000symlinkcreator\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "E:\\Github\\toyprojects\\MasterDuel0000SymLinkCreator\\MasterDuel0000SymLinkCreator\\Program.cs",
+              "RelativeDocumentMoniker": "MasterDuel0000SymLinkCreator\\Program.cs",
+              "ToolTip": "E:\\Github\\toyprojects\\MasterDuel0000SymLinkCreator\\MasterDuel0000SymLinkCreator\\Program.cs*",
+              "RelativeToolTip": "MasterDuel0000SymLinkCreator\\Program.cs*",
+              "ViewState": "AgIAADIAAAAAAAAAAAAAADkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-25T11:15:09.412Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
