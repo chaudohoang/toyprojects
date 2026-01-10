@@ -13,12 +13,12 @@ using System.Windows.Forms;
 
 namespace SteamAccountSwitch
 {
-	public partial class Form1 : Form
-	{
-		public Form1()
-		{
-			InitializeComponent();
-		}
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
         private void SetVersionInfo()
         {
             Version versionInfo = Assembly.GetExecutingAssembly().GetName().Version;
@@ -31,15 +31,51 @@ namespace SteamAccountSwitch
             this.Text = string.Format("{0} - {1}",
                         this.Text, versionInfo.ToString());
         }
+
+        private void LoadSettings()
+        {
+            string settingsFile = "settings.txt";
+            try
+            {
+                if (File.Exists(settingsFile))
+                {
+                    string steamPath = File.ReadAllText(settingsFile).Trim();
+                    if (!string.IsNullOrEmpty(steamPath))
+                    {
+                        txtSteamExePath.Text = steamPath;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error loading settings: " + ex.Message);
+            }
+        }
+
+        private void SaveSettings()
+        {
+            string settingsFile = "settings.txt";
+            try
+            {
+                File.WriteAllText(settingsFile, txtSteamExePath.Text);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error saving settings: " + ex.Message);
+            }
+        }
+
         private void Form1_Load(object sender, EventArgs e)
-		{
+        {
             SetVersionInfo();
+            LoadSettings(); // Load saved Steam exe path
+
             string CSVFilePathName = @"accounts.csv";
             string[] Lines = File.ReadAllLines(CSVFilePathName);
             string[] Fields;
-			//Fields = Lines[0].Split(new char[] { ',' });
-			Fields = "ID,Password,Description".Split(new char[] { ',' });
-			int Cols = Fields.GetLength(0);
+            //Fields = Lines[0].Split(new char[] { ',' });
+            Fields = "ID,Password,Description".Split(new char[] { ',' });
+            int Cols = Fields.GetLength(0);
             DataTable dt = new DataTable();
 
             //1st row must be column names; force lower case to ensure matching later on.
@@ -57,11 +93,16 @@ namespace SteamAccountSwitch
             dataGridView1.DataSource = dt;
         }
 
-		private void btnSave_Click(object sender, EventArgs e)
-		{
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            SaveSettings(); // Save Steam exe path when form closes
+        }
+
+        private void btnSave_Click(object sender, EventArgs e)
+        {
             System.IO.StreamWriter strWri = new System.IO.StreamWriter("accounts.csv");
 
-            for (int i = 0; i < dataGridView1.Rows.Count-1; i++)
+            for (int i = 0; i < dataGridView1.Rows.Count - 1; i++)
             {
                 string strRowVal = "";
                 for (int j = 0; j < dataGridView1.Rows[i].Cells.Count; j++)
@@ -133,7 +174,7 @@ namespace SteamAccountSwitch
 
 
         private void dataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
-		{
+        {
             //if (e.ColumnIndex == 1 && e.Value != null)
             //{
             //    e.Value = new String('*', e.Value.ToString().Length);
@@ -165,5 +206,6 @@ namespace SteamAccountSwitch
                 txtSteamExePath.Text = openFileDialog1.FileName;
             }
         }
+
     }
 }

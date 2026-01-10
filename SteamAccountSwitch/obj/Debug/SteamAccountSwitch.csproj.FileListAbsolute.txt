@@ -8,3 +8,13 @@ D:\Github\toyprojects\SteamAccountSwitch\obj\Debug\SteamAccountSwitch.csproj.Gen
 D:\Github\toyprojects\SteamAccountSwitch\obj\Debug\SteamAccountSwitch.csproj.CoreCompileInputs.cache
 D:\Github\toyprojects\SteamAccountSwitch\obj\Debug\SteamAccountSwitch.exe
 D:\Github\toyprojects\SteamAccountSwitch\obj\Debug\SteamAccountSwitch.pdb
+E:\Github\toyprojects\bin\Debug\SteamAccountSwitch\SteamAccountSwitch.exe.config
+E:\Github\toyprojects\bin\Debug\SteamAccountSwitch\SteamAccountSwitch.exe
+E:\Github\toyprojects\bin\Debug\SteamAccountSwitch\SteamAccountSwitch.pdb
+E:\Github\toyprojects\SteamAccountSwitch\obj\Debug\SteamAccountSwitch.csproj.AssemblyReference.cache
+E:\Github\toyprojects\SteamAccountSwitch\obj\Debug\SteamAccountSwitch.Form1.resources
+E:\Github\toyprojects\SteamAccountSwitch\obj\Debug\SteamAccountSwitch.Properties.Resources.resources
+E:\Github\toyprojects\SteamAccountSwitch\obj\Debug\SteamAccountSwitch.csproj.GenerateResource.cache
+E:\Github\toyprojects\SteamAccountSwitch\obj\Debug\SteamAccountSwitch.csproj.CoreCompileInputs.cache
+E:\Github\toyprojects\SteamAccountSwitch\obj\Debug\SteamAccountSwitch.exe
+E:\Github\toyprojects\SteamAccountSwitch\obj\Debug\SteamAccountSwitch.pdb
