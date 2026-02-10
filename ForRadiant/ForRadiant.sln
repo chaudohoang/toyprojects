@@ -173,6 +173,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MatlabWrapperGenerator", "M
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FtpUploadQeueModify", "QuickTools\FtpUploadQeueModify\FtpUploadQeueModify.csproj", "{FE7B38B5-A743-4002-8E92-77FA03F2CA6F}"
 EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "FOIsetCopyTool", "FOIsetCopyTool\FOIsetCopyTool.vbproj", "{991B1684-C2AC-4003-C916-4411E2A6BB09}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1191,6 +1193,18 @@ Global
 		{FE7B38B5-A743-4002-8E92-77FA03F2CA6F}.Release|x64.Build.0 = Release|Any CPU
 		{FE7B38B5-A743-4002-8E92-77FA03F2CA6F}.Release|x86.ActiveCfg = Release|Any CPU
 		{FE7B38B5-A743-4002-8E92-77FA03F2CA6F}.Release|x86.Build.0 = Release|Any CPU
+		{991B1684-C2AC-4003-C916-4411E2A6BB09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{991B1684-C2AC-4003-C916-4411E2A6BB09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{991B1684-C2AC-4003-C916-4411E2A6BB09}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{991B1684-C2AC-4003-C916-4411E2A6BB09}.Debug|x64.Build.0 = Debug|Any CPU
+		{991B1684-C2AC-4003-C916-4411E2A6BB09}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{991B1684-C2AC-4003-C916-4411E2A6BB09}.Debug|x86.Build.0 = Debug|Any CPU
+		{991B1684-C2AC-4003-C916-4411E2A6BB09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{991B1684-C2AC-4003-C916-4411E2A6BB09}.Release|Any CPU.Build.0 = Release|Any CPU
+		{991B1684-C2AC-4003-C916-4411E2A6BB09}.Release|x64.ActiveCfg = Release|Any CPU
+		{991B1684-C2AC-4003-C916-4411E2A6BB09}.Release|x64.Build.0 = Release|Any CPU
+		{991B1684-C2AC-4003-C916-4411E2A6BB09}.Release|x86.ActiveCfg = Release|Any CPU
+		{991B1684-C2AC-4003-C916-4411E2A6BB09}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1220,10 +1234,10 @@ Global
 		{FE7B38B5-A743-4002-8E92-77FA03F2CA6F} = {62CFD8A0-B705-4B6B-B80F-814562E4DABF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		BuildVersion_UseGlobalSettings = True
-		BuildVersion_UpdateAssemblyVersion = True
-		BuildVersion_BuildVersioningStyle = None.None.Increment.TimeStamp
-		BuildVersion_StartDate = 2000/1/1
 		SolutionGuid = {60C14AFF-CFF7-46E8-9345-65A46A64495F}
+		BuildVersion_StartDate = 2000/1/1
+		BuildVersion_BuildVersioningStyle = None.None.Increment.TimeStamp
+		BuildVersion_UpdateAssemblyVersion = True
+		BuildVersion_UseGlobalSettings = True
 	EndGlobalSection
 EndGlobal
