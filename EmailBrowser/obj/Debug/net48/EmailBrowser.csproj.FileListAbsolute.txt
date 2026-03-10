@@ -1,0 +1,11 @@
+E:\Github\toyprojects\EmailBrowser\bin\Debug\net48\EmailBrowser.exe.config
+E:\Github\toyprojects\EmailBrowser\bin\Debug\net48\EmailBrowser.exe
+E:\Github\toyprojects\EmailBrowser\bin\Debug\net48\EmailBrowser.pdb
+E:\Github\toyprojects\EmailBrowser\obj\Debug\net48\EmailBrowser.csproj.AssemblyReference.cache
+E:\Github\toyprojects\EmailBrowser\obj\Debug\net48\EmailBrowser.GeneratedMSBuildEditorConfig.editorconfig
+E:\Github\toyprojects\EmailBrowser\obj\Debug\net48\EmailBrowser.AssemblyInfoInputs.cache
+E:\Github\toyprojects\EmailBrowser\obj\Debug\net48\EmailBrowser.AssemblyInfo.cs
+E:\Github\toyprojects\EmailBrowser\obj\Debug\net48\EmailBrowser.csproj.CoreCompileInputs.cache
+E:\Github\toyprojects\EmailBrowser\obj\Debug\net48\EmailBrowser.sourcelink.json
+E:\Github\toyprojects\EmailBrowser\obj\Debug\net48\EmailBrowser.exe
+E:\Github\toyprojects\EmailBrowser\obj\Debug\net48\EmailBrowser.pdb
