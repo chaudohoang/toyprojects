@@ -18,6 +18,7 @@ Namespace SetSequenceVB
 		Private imagescalingID As String = ""
 		Private flatfieldID As String = ""
 		Private cameraRotation As String = ""
+		Private demosaicAlgorithm As String = ""
 		Public Sub New()
 			InitializeComponent()
 		End Sub
@@ -75,7 +76,7 @@ Namespace SetSequenceVB
 		Private Sub btnApply_Click(sender As Object, e As EventArgs) Handles btnApply.Click
 			btnApply.Enabled = False
 
-			GetValues(lblSequencePath.Text, cbSubframe.Text, cbCalBox.Text, cbFocusDistance.Text, cbFNumber.Text, cbCameraRotation.Text)
+			GetValues(lblSequencePath.Text, cbSubframe.Text, cbCalBox.Text, cbFocusDistance.Text, cbFNumber.Text, cbCameraRotation.Text, cbDemosaicAlgorithm.Text)
 			SetValues(lblSequencePath.Text)
 
 			Try
@@ -117,90 +118,101 @@ Namespace SetSequenceVB
 			End If
 		End Sub
 
-		Private Sub GetValues(xmlFile As String, subframeSetting As String, calSetting As String, focusSetting As String, fNumberSetting As String, rotationSetting As String)
-			Dim node As XmlNode
+		Private Sub GetValues(xmlFile As String, subframeSetting As String, calSetting As String,
+					  focusSetting As String, fNumberSetting As String, rotationSetting As String,
+					  demosaicSetting As String)
+
 			Dim nodes As XmlNodeList
 
 			Dim xmlDoc = New XmlDocument()
-			If File.Exists(xmlFile) Then
-				xmlDoc.Load(xmlFile)
+			If Not File.Exists(xmlFile) Then Return
+			xmlDoc.Load(xmlFile)
 
-				If Equals(subframeSetting, "Copy from first step") Then
-					node = xmlDoc.DocumentElement.SelectSingleNode("/Sequence/Items/SequenceItem/PatternSetupName")
-					Dim firstPatternName = node.InnerText
-					nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
-					For index = 0 To nodes.Count - 1
-						If Equals(nodes(index).SelectSingleNode("Name").InnerText, firstPatternName) Then
-							subframeregion = nodes(index).SelectSingleNode("CameraSettingsList/CameraSettings/SubFrameRegion").InnerText
-						End If
-					Next
-				Else
-					subframeregion = subframeSetting
-				End If
-
-				If Equals(calSetting, "Copy from first step") Then
-					node = xmlDoc.DocumentElement.SelectSingleNode("/Sequence/Items/SequenceItem/PatternSetupName")
-					Dim firstPatternName = node.InnerText
-					nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
-					For index = 0 To nodes.Count - 1
-						If Equals(nodes(index).SelectSingleNode("Name").InnerText, firstPatternName) Then
-							colorcalID = nodes(index).SelectSingleNode("CameraSettingsList/CameraSettings/ColorCalID").InnerText
-							imagescalingID = nodes(index).SelectSingleNode("CameraSettingsList/CameraSettings/ImageScalingCalibrationID").InnerText
-							flatfieldID = nodes(index).SelectSingleNode("CameraSettingsList/CameraSettings/FlatFieldID").InnerText
-						End If
-					Next
-				Else
-					Dim values = calSetting.Split(","c)
-					colorcalID = values(1)
-					imagescalingID = values(2)
-					flatfieldID = values(3)
-				End If
-
-				If Equals(focusSetting, "Copy from first step") Then
-					node = xmlDoc.DocumentElement.SelectSingleNode("/Sequence/Items/SequenceItem/PatternSetupName")
-					Dim firstPatternName = node.InnerText
-					nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
-					For index = 0 To nodes.Count - 1
-						If Equals(nodes(index).SelectSingleNode("Name").InnerText, firstPatternName) Then
-							lensdistance = nodes(index).SelectSingleNode("LensDistance").InnerText
-						End If
-					Next
-				Else
-					lensdistance = focusSetting
-				End If
-
-				If Equals(fNumberSetting, "Copy from first step") Then
-					node = xmlDoc.DocumentElement.SelectSingleNode("/Sequence/Items/SequenceItem/PatternSetupName")
-					Dim firstPatternName = node.InnerText
-					nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
-					For index = 0 To nodes.Count - 1
-						If Equals(nodes(index).SelectSingleNode("Name").InnerText, firstPatternName) Then
-							fnumber = nodes(index).SelectSingleNode("LensfStop").InnerText
-						End If
-					Next
-				Else
-					Select Case fNumberSetting
-						Case "8.0"
-							fnumber = "6"
-						Case Else
-							fnumber = fNumberSetting
-					End Select
-
-				End If
-
-				If Equals(rotationSetting, "Copy from first step") Then
-					node = xmlDoc.DocumentElement.SelectSingleNode("/Sequence/Items/SequenceItem/PatternSetupName")
-					Dim firstPatternName = node.InnerText
-					nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
-					For index = 0 To nodes.Count - 1
-						If Equals(nodes(index).SelectSingleNode("Name").InnerText, firstPatternName) Then
-							cameraRotation = nodes(index).SelectSingleNode("CameraRotation").InnerText
-						End If
-					Next
-				Else
-					cameraRotation = rotationSetting
-				End If
+			' Shared helper: resolve the first step's PatternSetup node
+			Dim firstSetup As XmlNode = Nothing
+			Dim firstNameNode = xmlDoc.DocumentElement.SelectSingleNode("/Sequence/Items/SequenceItem/PatternSetupName")
+			If firstNameNode IsNot Nothing Then
+				Dim firstName = firstNameNode.InnerText
+				nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup")
+				For i = 0 To nodes.Count - 1
+					Dim nameNode = nodes(i).SelectSingleNode("Name")
+					If nameNode IsNot Nothing AndAlso Equals(nameNode.InnerText, firstName) Then
+						firstSetup = nodes(i)
+						Exit For
+					End If
+				Next
 			End If
+
+			' SubFrameRegion
+			If Equals(subframeSetting, "Copy from first step") Then
+				If firstSetup IsNot Nothing Then
+					Dim n = firstSetup.SelectSingleNode("CameraSettingsList/CameraSettings/SubFrameRegion")
+					If n IsNot Nothing Then subframeregion = n.InnerText
+				End If
+			Else
+				subframeregion = subframeSetting
+			End If
+
+			' ColorCalID / ImageScalingCalibrationID / FlatFieldID
+			If Equals(calSetting, "Copy from first step") Then
+				If firstSetup IsNot Nothing Then
+					Dim nColor = firstSetup.SelectSingleNode("CameraSettingsList/CameraSettings/ColorCalID")
+					Dim nScale = firstSetup.SelectSingleNode("CameraSettingsList/CameraSettings/ImageScalingCalibrationID")
+					Dim nFlat = firstSetup.SelectSingleNode("CameraSettingsList/CameraSettings/FlatFieldID")
+					If nColor IsNot Nothing Then colorcalID = nColor.InnerText
+					If nScale IsNot Nothing Then imagescalingID = nScale.InnerText
+					If nFlat IsNot Nothing Then flatfieldID = nFlat.InnerText
+				End If
+			Else
+				Dim values = calSetting.Split(","c)
+				colorcalID = values(1)
+				imagescalingID = values(2)
+				flatfieldID = values(3)
+			End If
+
+			' LensDistance
+			If Equals(focusSetting, "Copy from first step") Then
+				If firstSetup IsNot Nothing Then
+					Dim n = firstSetup.SelectSingleNode("LensDistance")
+					If n IsNot Nothing Then lensdistance = n.InnerText
+				End If
+			Else
+				lensdistance = focusSetting
+			End If
+
+			' LensfStop
+			If Equals(fNumberSetting, "Copy from first step") Then
+				If firstSetup IsNot Nothing Then
+					Dim n = firstSetup.SelectSingleNode("LensfStop")
+					If n IsNot Nothing Then fnumber = n.InnerText
+				End If
+			Else
+				Select Case fNumberSetting
+					Case "8.0" : fnumber = "6"
+					Case Else : fnumber = fNumberSetting
+				End Select
+			End If
+
+			' CameraRotation
+			If Equals(rotationSetting, "Copy from first step") Then
+				If firstSetup IsNot Nothing Then
+					Dim n = firstSetup.SelectSingleNode("CameraRotation")
+					If n IsNot Nothing Then cameraRotation = n.InnerText
+				End If
+			Else
+				cameraRotation = rotationSetting
+			End If
+
+			' DemosaicAlgorithm
+			If Equals(demosaicSetting, "Copy from first step") Then
+				If firstSetup IsNot Nothing Then
+					Dim n = firstSetup.SelectSingleNode("ExtraProperties/IMeasSetupProperties/DemosaicAlgorithm")
+					If n IsNot Nothing Then demosaicAlgorithm = n.InnerText
+				End If
+			Else
+				demosaicAlgorithm = demosaicSetting
+			End If
+
 		End Sub
 
 		Private Sub SetValues(xmlFile As String)
@@ -258,6 +270,14 @@ Namespace SetSequenceVB
 						nodes(index).InnerText = cameraRotation
 					End If
 				Next
+
+				nodes = xmlDoc.DocumentElement.SelectNodes("/Sequence/PatternSetupList/PatternSetup/ExtraProperties/IMeasSetupProperties/DemosaicAlgorithm")
+				For index = 0 To nodes.Count - 1
+					If Not Equals(demosaicAlgorithm, "") Then
+						nodes(index).InnerText = demosaicAlgorithm
+					End If
+				Next
+
 
 				Dim settings As XmlWriterSettings = New XmlWriterSettings With {
 					.Indent = True

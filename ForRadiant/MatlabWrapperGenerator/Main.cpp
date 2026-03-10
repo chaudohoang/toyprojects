@@ -135,12 +135,26 @@ std::string generate_cpp_from_template(
     // 3. Build MWARRAY_DECLS
     std::string mwarray_decls;
     mwarray_decls += "    mwArray C;\n"; // Declare mwArray C
+
+    //old version
+    //for (const auto& arg : args) {
+    //    std::string lower_arg = to_lowercase(arg);
+
+    //    // If variable contains "_en" (case-insensitive), use atoi()
+    //    if (lower_arg.find("_en") != std::string::npos || lower_arg.find("en_") == 0)
+    //    {
+    //        mwarray_decls += "    mwArray " + to_upper(arg) + "(atoi(" + lower_arg + ".c_str()));\n";
+    //    }
+    //    else {
+    //        mwarray_decls += "    mwArray " + to_upper(arg) + "(" + lower_arg + ".c_str());\n";
+    //    }
+    //}
+
     for (const auto& arg : args) {
         std::string lower_arg = to_lowercase(arg);
 
-        // If variable contains "_en" (case-insensitive), use atoi()
-        if (lower_arg.find("_en") != std::string::npos || lower_arg.find("en_") == 0)
-        {
+        // If variable is "nstep" (case-insensitive), use atoi()
+        if (lower_arg == "nstep") {
             mwarray_decls += "    mwArray " + to_upper(arg) + "(atoi(" + lower_arg + ".c_str()));\n";
         }
         else {

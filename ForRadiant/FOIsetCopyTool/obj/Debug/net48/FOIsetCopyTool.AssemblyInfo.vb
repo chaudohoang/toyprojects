@@ -16,7 +16,7 @@ Imports System.Reflection
 <Assembly: System.Reflection.AssemblyCompanyAttribute("FOIsetCopyTool"),  _
  Assembly: System.Reflection.AssemblyConfigurationAttribute("Debug"),  _
  Assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0"),  _
- Assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+22cfa45679c47da461df4d6d325e427bbc504f19"),  _
+ Assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+29be7df61e4ba6e7edf5652f7c53b23bac05a3f2"),  _
  Assembly: System.Reflection.AssemblyProductAttribute("FOIsetCopyTool"),  _
  Assembly: System.Reflection.AssemblyTitleAttribute("FOIsetCopyTool"),  _
  Assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")> 
