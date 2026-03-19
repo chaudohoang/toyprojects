@@ -5,3 +5,10 @@ D:\Github\toyprojects\ForRadiant\QuickTools\Copy all to POCB4.1Net folder\obj\De
 D:\Github\toyprojects\ForRadiant\QuickTools\Copy all to POCB4.1Net folder\obj\Debug\Copy all to POCB4.1Net folder.csproj.CoreCompileInputs.cache
 D:\Github\toyprojects\ForRadiant\QuickTools\Copy all to POCB4.1Net folder\obj\Debug\CopyFilesAndRestartTrueTest.exe
 D:\Github\toyprojects\ForRadiant\QuickTools\Copy all to POCB4.1Net folder\obj\Debug\CopyFilesAndRestartTrueTest.pdb
+E:\Github\toyprojects\ForRadiant\QuickTools\Copy all to POCB4.1Net folder\bin\Debug\CopyFilesAndRestartTrueTest.exe.config
+E:\Github\toyprojects\ForRadiant\QuickTools\Copy all to POCB4.1Net folder\bin\Debug\CopyFilesAndRestartTrueTest.exe
+E:\Github\toyprojects\ForRadiant\QuickTools\Copy all to POCB4.1Net folder\bin\Debug\CopyFilesAndRestartTrueTest.pdb
+E:\Github\toyprojects\ForRadiant\QuickTools\Copy all to POCB4.1Net folder\obj\Debug\Copy all to POCB4.1Net folder.csproj.AssemblyReference.cache
+E:\Github\toyprojects\ForRadiant\QuickTools\Copy all to POCB4.1Net folder\obj\Debug\Copy all to POCB4.1Net folder.csproj.CoreCompileInputs.cache
+E:\Github\toyprojects\ForRadiant\QuickTools\Copy all to POCB4.1Net folder\obj\Debug\CopyFilesAndRestartTrueTest.exe
+E:\Github\toyprojects\ForRadiant\QuickTools\Copy all to POCB4.1Net folder\obj\Debug\CopyFilesAndRestartTrueTest.pdb

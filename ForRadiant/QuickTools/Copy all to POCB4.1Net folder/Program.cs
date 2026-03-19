@@ -13,7 +13,9 @@ class Program
             Console.WriteLine("Select a target directory:");
             Console.WriteLine("[1] C:\\Program Files\\Radiant Vision Systems\\TrueTest 1.8\\POCB4.1Net");
             Console.WriteLine("[2] C:\\Program Files\\Radiant Vision Systems\\TrueTest 1.8 debug Mobile\\POCB4.1Net");
-            Console.WriteLine("[3] C:\\Program Files\\Radiant Vision Systems\\TrueTest 1.8 debug Tablet\\POCB4.1Net"); // New option
+            Console.WriteLine("[3] C:\\Program Files\\Radiant Vision Systems\\TrueTest 1.8 debug Tablet\\POCB4.1Net");
+            Console.WriteLine("[4] C:\\Program Files\\Radiant Vision Systems\\TrueTest 1.9\\POCB4.1Net");
+            Console.WriteLine("[5] C:\\Program Files\\Radiant Vision Systems\\TrueTest 1.9 debug\\POCB4.1Net");
             char mainChoice = Console.ReadKey().KeyChar;
             Console.WriteLine();
 
@@ -22,7 +24,7 @@ class Program
                 if (AuthenticateUser())
                     ModifyIniFiles();
             }
-            else if (mainChoice == '1' || mainChoice == '2' || mainChoice == '3') // Updated condition
+            else if (mainChoice == '1' || mainChoice == '2' || mainChoice == '3' || mainChoice == '4' || mainChoice == '5')
             {
                 ManageTrueTest(mainChoice);
                 Environment.Exit(0);
@@ -132,30 +134,53 @@ class Program
         }
 
         // Define multiple target directories based on choice
-        string[] targetDirs = (choice == '1')
-            ? new string[]
-            {
-            @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8\POCB4.1Net",
-            @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8\POCB4.1"
-            }
-            : (choice == '2')
-            ? new string[]
-            {
-            @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8 debug Mobile\POCB4.1Net",
-            @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8 debug Mobile\POCB4.1"
-            }
-            : new string[]
-            {
-            @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8 debug Tablet\POCB4.1Net", // New directory
-            @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8 debug Tablet\POCB4.1"    // New directory
-            };
+        string[] targetDirs;
+        switch (choice)
+        {
+            case '1':
+                targetDirs = new[]
+                {
+                    @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8\POCB4.1Net",
+                    @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8\POCB4.1"
+                };
+                break;
+            case '2':
+                targetDirs = new[]
+                {
+                    @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8 debug Mobile\POCB4.1Net",
+                    @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8 debug Mobile\POCB4.1"
+                };
+                break;
+            case '3':
+                targetDirs = new[]
+                {
+                    @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8 debug Tablet\POCB4.1Net",
+                    @"C:\Program Files\Radiant Vision Systems\TrueTest 1.8 debug Tablet\POCB4.1"
+                };
+                break;
+            case '4':
+                targetDirs = new[]
+                {
+                    @"C:\Program Files\Radiant Vision Systems\TrueTest 1.9\POCB4.1Net",
+                    @"C:\Program Files\Radiant Vision Systems\TrueTest 1.9\POCB4.1"
+                };
+                break;
+            case '5':
+                targetDirs = new[]
+                {
+                    @"C:\Program Files\Radiant Vision Systems\TrueTest 1.9 Debug\POCB4.1Net",
+                    @"C:\Program Files\Radiant Vision Systems\TrueTest 1.9 Debug\POCB4.1"
+                };
+                break;
+            default:
+                targetDirs = Array.Empty<string>();
+                break;
+        }
 
         foreach (var targetDir in targetDirs)
         {
             if (!Directory.Exists(targetDir))
-            {
                 Directory.CreateDirectory(targetDir);
-            }
         }
 
         string scriptName = Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location);
@@ -166,15 +191,13 @@ class Program
             string fileName = Path.GetFileName(file);
             string extension = Path.GetExtension(file).ToLower();
             if (fileName == scriptName || extension == ".tif" || extension == ".csv" || fileName.Equals("LGD_VNTT.ini", StringComparison.OrdinalIgnoreCase))
-            {
                 continue;
-            }
 
             foreach (var targetDir in targetDirs)
             {
                 bool copySuccessful = false;
-                int retryCount = 3; // Retry limit
-                int retryDelay = 500; // 500 milliseconds delay between retries
+                int retryCount = 3;
+                int retryDelay = 500;
 
                 for (int attempt = 1; attempt <= retryCount; attempt++)
                 {
@@ -183,12 +206,12 @@ class Program
                         File.Copy(file, Path.Combine(targetDir, fileName), true);
                         Console.WriteLine($"Copied: {file} to {targetDir}");
                         copySuccessful = true;
-                        break; // Exit the loop if copy is successful
+                        break;
                     }
                     catch (IOException ex) when (attempt < retryCount)
                     {
                         Console.WriteLine($"Failed to copy {file} to {targetDir} (Attempt {attempt}/{retryCount}): {ex.Message}. Retrying...");
-                        System.Threading.Thread.Sleep(retryDelay); // Wait before retrying
+                        System.Threading.Thread.Sleep(retryDelay);
                     }
                     catch (Exception ex)
                     {
@@ -198,27 +221,16 @@ class Program
                 }
 
                 if (!copySuccessful)
-                {
                     Console.WriteLine($"Failed to copy {file} to {targetDir} after {retryCount} attempts.");
-                }
             }
         }
 
         if (wasRunning && trueTestPath != null)
-        {
             PromptExitOrRestart(trueTestPath);
-        }
-        else
-        {
-            // Removed Environment.Exit(0) to allow the program to wait
-        }
 
-        // Wait for user input before exiting
         Console.WriteLine("Press any key to exit.");
         Console.ReadKey();
     }
-
-
 
     static void PromptExitOrRestart(string trueTestPath)
     {
