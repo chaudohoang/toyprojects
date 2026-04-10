@@ -1,0 +1,4 @@
+﻿Provider,Email,Password,Recovery Email
+Gmail,chau.main@gmail.com,GmailPass123,chau.backup@yahoo.com
+Outlook,chau.work@outlook.com,OutlookPass456,
+Yahoo,chau.backup@yahoo.com,YahooPass789,chau.main@gmail.com

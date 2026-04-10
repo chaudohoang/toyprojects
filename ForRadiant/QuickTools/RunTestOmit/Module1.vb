@@ -23,6 +23,8 @@ Module Module1
         Dim workingDirs As String() = {
             "C:\Program Files\Radiant Vision Systems\TrueTest 1.8\ScratchDustDetect_NY",
             "C:\Program Files\Radiant Vision Systems\TrueTest 1.8 debug Mobile\ScratchDustDetect_NY",
+            "C:\Program Files\Radiant Vision Systems\TrueTest 1.9\ScratchDustDetect_NY",
+            "C:\Program Files\Radiant Vision Systems\TrueTest 1.9 debug\ScratchDustDetect_NY",
             "D:\Batch\ScratchNY_Custom\Exe Files"
         }
 
@@ -33,11 +35,13 @@ Module Module1
             Console.WriteLine("[1] " & workingDirs(0))
             Console.WriteLine("[2] " & workingDirs(1))
             Console.WriteLine("[3] " & workingDirs(2))
-            Console.Write("Press 1, 2, or 3: ")
+            Console.WriteLine("[4] " & workingDirs(3))
+            Console.WriteLine("[5] " & workingDirs(4))
+            Console.Write("Press 1, 2, 3, 4, or 5: ")
 
             Dim key As ConsoleKeyInfo = Console.ReadKey(True)
             Select Case key.KeyChar
-                Case "1"c, "2"c, "3"c
+                Case "1"c, "2"c, "3"c, "4"c, "5"c
                     selectedDir = workingDirs(CInt(key.KeyChar.ToString()) - 1)
                 Case Else
                     Console.WriteLine(vbCrLf & "Invalid choice. Try again.")
@@ -140,7 +144,6 @@ Module Module1
                 End Select
                 Exit Do
             Loop
-
 
             Console.WriteLine(vbCrLf & "Running again...")
         Loop

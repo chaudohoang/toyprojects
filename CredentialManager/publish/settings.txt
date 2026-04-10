@@ -1,0 +1,2 @@
+﻿E:\Github\toyprojects\CredentialManager\email.csv
+E:\Github\toyprojects\CredentialManager\games.csv

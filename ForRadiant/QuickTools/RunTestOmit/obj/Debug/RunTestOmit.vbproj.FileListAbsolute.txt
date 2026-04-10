@@ -9,3 +9,14 @@ D:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\obj\Debug\RunTestOmit.vb
 D:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\obj\Debug\ConsoleApp4.exe
 D:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\obj\Debug\ConsoleApp4.xml
 D:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\obj\Debug\ConsoleApp4.pdb
+E:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\bin\Debug\ConsoleApp4.exe.config
+E:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\bin\Debug\ConsoleApp4.exe
+E:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\bin\Debug\ConsoleApp4.pdb
+E:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\bin\Debug\ConsoleApp4.xml
+E:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\obj\Debug\RunTestOmit.vbproj.AssemblyReference.cache
+E:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\obj\Debug\ConsoleApp4.Resources.resources
+E:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\obj\Debug\RunTestOmit.vbproj.GenerateResource.cache
+E:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\obj\Debug\RunTestOmit.vbproj.CoreCompileInputs.cache
+E:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\obj\Debug\ConsoleApp4.exe
+E:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\obj\Debug\ConsoleApp4.xml
+E:\Github\toyprojects\ForRadiant\QuickTools\RunTestOmit\obj\Debug\ConsoleApp4.pdb
