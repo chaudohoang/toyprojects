@@ -622,13 +622,13 @@ namespace CredentialManager
                 bool   isPw = col.ToLower().Contains("pass");
 
                 // Column label
-                card.Controls.Add(new Label { Left = 14, Top = y + 5, Width = 88, Height = 20, Font = new Font("Segoe UI", 8.5f), ForeColor = TextHint, Text = col });
+                card.Controls.Add(new Label { Left = 14, Top = y + 5, Width = 120, Height = 20, Font = new Font("Segoe UI", 8.5f), ForeColor = TextHint, Text = col, AutoEllipsis = true });
 
                 int fieldW  = width - 28;
                 int btnAreaW = isPw ? 118 : 72;
                 int right    = 14 + fieldW;
 
-                var txt = MakeField(val, 106, y + 3, fieldW - 88 - 6 - btnAreaW - 4, readOnly: true);
+                var txt = MakeField(val, 138, y + 3, fieldW - 124 - btnAreaW - 4, readOnly: true);
                 SetCueBanner(txt, isPw ? "••••••••••" : "empty");
                 if (isPw) { txt.UseSystemPasswordChar = true; txt.Text = val; }
 
