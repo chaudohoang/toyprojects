@@ -14,12 +14,15 @@ namespace CredentialManager
     {
         private Panel           pnlSidebar, pnlMain, pnlTitleBar, pnlHeader, pnlFooter;
         private Label           lblCategories, lblSectionTitle, lblSectionSub;
-        private Button          btnLoadCsv, btnAddEntry;
+        private Button          btnLoadCsv, btnNewCategory, btnAddEntry;
         private FlowLayoutPanel pnlTabs, pnlCards;
         private TextBox         txtSearch;
 
         private readonly List<CsvCategory> _categories = new List<CsvCategory>();
         private CsvCategory _activeCategory;
+
+        // Card panel cache: avoids rebuilding UI on every category switch
+        private readonly Dictionary<CsvCategory, List<Panel>> _cardCache = new Dictionary<CsvCategory, List<Panel>>();
 
         // Drag-reorder
         private Button _dragTab;
@@ -117,6 +120,10 @@ namespace CredentialManager
             pnlTabs.DragDrop += PnlTabs_DragDrop;
             pnlSidebar.Controls.Add(pnlTabs);
 
+            btnNewCategory = MakeSidebarBtn("+ New category", -1, isAdd: true);
+            btnNewCategory.Click += BtnNewCategory_Click;
+            pnlSidebar.Controls.Add(btnNewCategory);
+
             btnLoadCsv = MakeSidebarBtn("+ Load CSV", -1, isAdd: true);
             btnLoadCsv.Click += BtnLoadCsv_Click;
             pnlSidebar.Controls.Add(btnLoadCsv);
@@ -176,7 +183,13 @@ namespace CredentialManager
             ResumeLayout(false);
         }
 
-        private void PositionLoadBtn() { btnLoadCsv.Left = 8; btnLoadCsv.Top = pnlSidebar.Height - btnLoadCsv.Height - 12; }
+        private void PositionLoadBtn()
+        {
+            btnLoadCsv.Left     = 8;
+            btnLoadCsv.Top      = pnlSidebar.Height - btnLoadCsv.Height - 10;
+            btnNewCategory.Left = 8;
+            btnNewCategory.Top  = btnLoadCsv.Top - btnNewCategory.Height - 4;
+        }
 
         // ═════════════════════════════════════════════════════════════
         //  CSV LOADING
@@ -192,13 +205,82 @@ namespace CredentialManager
             if (_activeCategory == null && _categories.Count > 0) ActivateCategory(_categories[0]);
         }
 
+        private void BtnNewCategory_Click(object sender, EventArgs e)
+        {
+            // Ask for category name
+            string name = PromptDialog("New category", "Category name (becomes the filename):", "");
+            if (string.IsNullOrWhiteSpace(name)) return;
+            name = name.Trim();
+
+            // Sanitise: strip characters not valid in filenames
+            foreach (char c in Path.GetInvalidFileNameChars()) name = name.Replace(c.ToString(), "");
+            if (string.IsNullOrWhiteSpace(name)) { MessageBox.Show("That name contains no valid characters.", "Invalid name", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+
+            // Ask where to save
+            string savePath;
+            using (var dlg = new SaveFileDialog
+            {
+                Title      = "Save new category CSV",
+                FileName   = name + ".csv",
+                Filter     = "CSV files (*.csv)|*.csv",
+                DefaultExt = "csv"
+            })
+            {
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+                savePath = dlg.FileName;
+            }
+
+            // Ask for column names (comma-separated)
+            string colInput = PromptDialog("Columns", "Column names (comma-separated):", "Name,Username,Password,Email");
+            if (colInput == null) return;   // cancelled
+            var columns = colInput.Split(',').Select(c => c.Trim()).Where(c => c.Length > 0).ToList();
+            if (columns.Count == 0) columns = new List<string> { "Name" };
+
+            // Write header-only CSV
+            try
+            {
+                File.WriteAllText(savePath, string.Join(",", columns) + Environment.NewLine, Encoding.UTF8);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Could not create file:\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            TryLoadFile(savePath);
+            RebuildSidebar();
+            var created = _categories.FirstOrDefault(c => c.FilePath == savePath);
+            if (created != null) ActivateCategory(created);
+        }
+
+        // Simple one-line input dialog
+        private string PromptDialog(string title, string prompt, string defaultValue)
+        {
+            var form  = new Form { Text = title, Size = new Size(380, 140), StartPosition = FormStartPosition.CenterParent, FormBorderStyle = FormBorderStyle.FixedDialog, MaximizeBox = false, MinimizeBox = false, Font = new Font("Segoe UI", 9.5f) };
+            var lbl   = new Label  { Left = 16, Top = 14, Width = 340, Text = prompt, AutoSize = false, Height = 20 };
+            var txt   = new TextBox{ Left = 16, Top = 36, Width = 340, Text = defaultValue, BorderStyle = BorderStyle.FixedSingle };
+            var ok    = new Button { Text = "OK",     Left = 196, Top = 68, Width = 80, Height = 28, DialogResult = DialogResult.OK,     FlatStyle = FlatStyle.System };
+            var cancel= new Button { Text = "Cancel", Left = 284, Top = 68, Width = 80, Height = 28, DialogResult = DialogResult.Cancel, FlatStyle = FlatStyle.System };
+            txt.SelectAll();
+            form.Controls.AddRange(new Control[] { lbl, txt, ok, cancel });
+            form.AcceptButton = ok;
+            form.CancelButton = cancel;
+            return form.ShowDialog(this) == DialogResult.OK ? txt.Text : null;
+        }
+
         private void TryLoadFile(string path)
         {
             try
             {
                 var cat      = CsvCategory.FromFile(path);
                 var existing = _categories.FirstOrDefault(c => c.Name.Equals(cat.Name, StringComparison.OrdinalIgnoreCase));
-                if (existing != null) { int idx = _categories.IndexOf(existing); _categories[idx] = cat; if (_activeCategory == existing) _activeCategory = cat; }
+                if (existing != null)
+                {
+                    InvalidateCache(existing);
+                    int idx = _categories.IndexOf(existing);
+                    _categories[idx] = cat;
+                    if (_activeCategory == existing) _activeCategory = cat;
+                }
                 else _categories.Add(cat);
             }
             catch (Exception ex) { MessageBox.Show($"Could not load {Path.GetFileName(path)}:\n{ex.Message}", "Load error", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
@@ -280,36 +362,84 @@ namespace CredentialManager
         }
 
         // ── Drag-reorder ──────────────────────────────────────────────
-        private void TabBtn_MouseDown(object sender, MouseEventArgs e) { if (e.Button == MouseButtons.Left) { _dragTab = sender as Button; _dragStartY = e.Y; _dragging = false; } }
+        // ── Drag-reorder ──────────────────────────────────────────────
+        // We pass the tab index as a string because Button is not OLE-serializable.
+        private void TabBtn_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                _dragTab    = sender as Button;
+                _dragStartY = e.Y;
+                _dragging   = false;
+            }
+        }
+
         private void TabBtn_MouseMove(object sender, MouseEventArgs e)
         {
-            if (_dragTab == null || e.Button != MouseButtons.Left || Math.Abs(e.Y - _dragStartY) < 8) return;
-            _dragging = true; _dragTab.DoDragDrop(_dragTab, DragDropEffects.Move); _dragTab = null; _dragging = false;
+            if (_dragTab == null || e.Button != MouseButtons.Left) return;
+            if (Math.Abs(e.Y - _dragStartY) < 8) return;
+
+            // Find the index of the button being dragged
+            int idx = pnlTabs.Controls.IndexOf(_dragTab);
+            if (idx < 0) return;
+
+            _dragging = true;
+            _dragTab.DoDragDrop(idx.ToString(), DragDropEffects.Move);
+            _dragTab  = null;
+            _dragging = false;
         }
+
         private void TabBtn_MouseUp(object sender, MouseEventArgs e) { _dragTab = null; _dragging = false; }
 
         private void PnlTabs_DragOver(object sender, DragEventArgs e)
         {
+            if (!e.Data.GetDataPresent(DataFormats.StringFormat)) { e.Effect = DragDropEffects.None; return; }
             e.Effect = DragDropEffects.Move;
             var pt = pnlTabs.PointToClient(new Point(e.X, e.Y));
+            var target = ClosestTabAt(pt.Y);
             foreach (Control c in pnlTabs.Controls)
-                if (c is Button b && b.Tag is CsvCategory) b.BackColor = b.Bounds.Contains(pt) ? DragHover : Color.Transparent;
+                if (c is Button b && b.Tag is CsvCategory)
+                    b.BackColor = (b == target) ? DragHover : Color.Transparent;
         }
 
         private void PnlTabs_DragDrop(object sender, DragEventArgs e)
         {
-            foreach (Control c in pnlTabs.Controls) if (c is Button b) b.BackColor = Color.Transparent;
-            var draggedBtn = e.Data?.GetData(typeof(Button)) as Button;
-            if (draggedBtn == null) return;
-            var pt = pnlTabs.PointToClient(new Point(e.X, e.Y));
-            var targetBtn = pnlTabs.Controls.OfType<Button>().FirstOrDefault(b => b.Bounds.Contains(pt));
-            if (targetBtn == null || targetBtn == draggedBtn) { RebuildSidebar(); return; }
-            var dc = draggedBtn.Tag as CsvCategory; var tc = targetBtn.Tag as CsvCategory;
-            if (dc == null || tc == null) return;
-            int from = _categories.IndexOf(dc), to = _categories.IndexOf(tc);
-            if (from < 0 || to < 0) return;
-            _categories.RemoveAt(from); _categories.Insert(to, dc);
-            RebuildSidebar(); HighlightActiveTab();
+            foreach (Control c in pnlTabs.Controls)
+                if (c is Button b) b.BackColor = Color.Transparent;
+
+            if (!e.Data.GetDataPresent(DataFormats.StringFormat)) return;
+            int fromIdx;
+            if (!int.TryParse((string)e.Data.GetData(DataFormats.StringFormat), out fromIdx)) return;
+
+            var pt    = pnlTabs.PointToClient(new Point(e.X, e.Y));
+            var toBtn = ClosestTabAt(pt.Y);
+            if (toBtn == null) { RebuildSidebar(); return; }
+
+            int toIdx = pnlTabs.Controls.IndexOf(toBtn);
+            if (fromIdx == toIdx || fromIdx < 0 || toIdx < 0
+                || fromIdx >= _categories.Count || toIdx >= _categories.Count)
+            { RebuildSidebar(); return; }
+
+            var moved = _categories[fromIdx];
+            _categories.RemoveAt(fromIdx);
+            _categories.Insert(toIdx, moved);
+            RebuildSidebar();
+            HighlightActiveTab();
+        }
+
+        // Find the tab button whose vertical midpoint is closest to a given Y
+        private Button ClosestTabAt(int y)
+        {
+            Button best    = null;
+            int    bestDist = int.MaxValue;
+            foreach (Control c in pnlTabs.Controls)
+            {
+                if (!(c is Button b) || !(b.Tag is CsvCategory)) continue;
+                int mid  = b.Top + b.Height / 2;
+                int dist = Math.Abs(mid - y);
+                if (dist < bestDist) { bestDist = dist; best = b; }
+            }
+            return best;
         }
 
         // ═════════════════════════════════════════════════════════════
@@ -338,27 +468,58 @@ namespace CredentialManager
         }
 
         // ═════════════════════════════════════════════════════════════
-        //  CARD RENDERING
+        //  CARD RENDERING  (cached per category)
         // ═════════════════════════════════════════════════════════════
+
+        // Call this whenever a category's data changes so it gets rebuilt next switch
+        private void InvalidateCache(CsvCategory cat)
+        {
+            if (cat != null && _cardCache.ContainsKey(cat))
+                _cardCache.Remove(cat);
+        }
+
         private void RenderCards()
         {
             pnlCards.Controls.Clear();
             if (_activeCategory == null) return;
 
-            var filter      = txtSearch.Text.Trim().ToLower();
+            var filter       = txtSearch.Text.Trim().ToLower();
             bool isFiltering = filter.Length > 0;
-            var rows        = _activeCategory.Rows;
+
+            // ── Build or retrieve cached cards ────────────────────────
+            if (!_cardCache.ContainsKey(_activeCategory))
+            {
+                var built = new List<Panel>();
+                foreach (var row in _activeCategory.Rows)
+                    built.Add(BuildCard(row, 560));
+                _cardCache[_activeCategory] = built;
+            }
+
+            var allCards = _cardCache[_activeCategory];
+
+            // ── Apply filter (just pick matching cards, no rebuild) ───
+            List<Panel> visible;
             if (isFiltering)
-                rows = rows.Where(r => r.Values.Any(v => v.ToLower().Contains(filter))).ToList();
+            {
+                visible = new List<Panel>();
+                for (int i = 0; i < allCards.Count; i++)
+                {
+                    var row = _activeCategory.Rows[i];
+                    if (row.Values.Any(v => v.ToLower().Contains(filter)))
+                        visible.Add(allCards[i]);
+                }
+            }
+            else
+            {
+                visible = allCards;
+            }
 
-            lblSectionTitle.Text = $"{_activeCategory.Name}  ({rows.Count} accounts)";
+            foreach (var card in visible)
+                pnlCards.Controls.Add(card);
 
-            int cardWidth = 560;
-            foreach (var row in rows)
-                pnlCards.Controls.Add(BuildCard(row, cardWidth));
-
-            // Hide footer Add button while filtering
-            pnlFooter.Visible = !isFiltering;
+            int count = isFiltering ? visible.Count : _activeCategory.Rows.Count;
+            lblSectionTitle.Text = $"{_activeCategory.Name}  ({count} accounts)";
+            pnlFooter.Visible    = !isFiltering;
         }
 
         // ═════════════════════════════════════════════════════════════
@@ -440,6 +601,7 @@ namespace CredentialManager
                 if (MessageBox.Show($"Remove \"{label}\"?", "Confirm remove", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
                 _activeCategory.Rows.Remove(row);
                 SaveCategory(_activeCategory);
+                InvalidateCache(_activeCategory);
                 RenderCards();
             };
             card.Controls.Add(btnEdit);
@@ -532,6 +694,7 @@ namespace CredentialManager
                         if (tb.Tag is Action save) save();
 
                     SaveCategory(_activeCategory);
+                    InvalidateCache(_activeCategory);
 
                     // Switch back to read-only
                     SetFieldsReadOnly(editableFields, readOnly: true);
@@ -582,12 +745,14 @@ namespace CredentialManager
         private void AddNewEntry()
         {
             if (_activeCategory == null) return;
-            var columns = _activeCategory.Rows.Count > 0
-                ? _activeCategory.Rows[0].Columns
-                : new List<string> { "Name" };
+            // Use the category's defined columns (always available from the header)
+            var columns = _activeCategory.Columns;
+            if (columns == null || columns.Count == 0)
+                columns = new List<string> { "Name" };
             var newRow = new CredentialRow { Columns = columns, Values = columns.Select(_ => "").ToList() };
             _activeCategory.Rows.Add(newRow);
             SaveCategory(_activeCategory);
+            InvalidateCache(_activeCategory);
             RenderCards();
             pnlMain.AutoScrollPosition = new Point(0, pnlMain.DisplayRectangle.Height);
         }
@@ -686,6 +851,7 @@ namespace CredentialManager
     {
         public string              Name     { get; private set; }
         public string              FilePath { get; private set; }
+        public List<string>        Columns  { get; private set; }   // header columns, always available
         public List<CredentialRow> Rows     { get; private set; }
 
         public static CsvCategory FromFile(string path)
@@ -702,7 +868,7 @@ namespace CredentialManager
                 while (values.Count < columns.Count) values.Add(string.Empty);
                 rows.Add(new CredentialRow { Columns = columns, Values = values });
             }
-            return new CsvCategory { Name = Path.GetFileNameWithoutExtension(path), FilePath = path, Rows = rows };
+            return new CsvCategory { Name = Path.GetFileNameWithoutExtension(path), FilePath = path, Columns = columns, Rows = rows };
         }
 
         private static List<string> ParseCsvLine(string line)

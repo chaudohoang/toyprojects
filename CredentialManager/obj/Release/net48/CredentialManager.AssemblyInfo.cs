@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CredentialManager")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+58e72fb9a9d415c3c813754e2a4e4baa07b37f07")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+12fd51b59fcc2fdcf25ff542d0210f36208681ab")]
 [assembly: System.Reflection.AssemblyProductAttribute("CredentialManager")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CredentialManager")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
