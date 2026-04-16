@@ -1,0 +1,71 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "E:\\Log\\Fixture_Company_Server_Simulator\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|Fixture_Company_Server_Simulator.vbproj|e:\\log\\fixture_company_server_simulator\\server.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|Fixture_Company_Server_Simulator.vbproj|solutionrelative:server.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|Fixture_Company_Server_Simulator.vbproj|e:\\log\\fixture_company_server_simulator\\program.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|Fixture_Company_Server_Simulator.vbproj|solutionrelative:program.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|Fixture_Company_Server_Simulator.vbproj|e:\\log\\fixture_company_server_simulator\\ui.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|Fixture_Company_Server_Simulator.vbproj|solutionrelative:ui.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Program.vb",
+              "DocumentMoniker": "E:\\Log\\Fixture_Company_Server_Simulator\\Program.vb",
+              "RelativeDocumentMoniker": "Program.vb",
+              "ToolTip": "E:\\Log\\Fixture_Company_Server_Simulator\\Program.vb",
+              "RelativeToolTip": "Program.vb",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-04-16T02:47:48.042Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "UI.vb",
+              "DocumentMoniker": "E:\\Log\\Fixture_Company_Server_Simulator\\UI.vb",
+              "RelativeDocumentMoniker": "UI.vb",
+              "ToolTip": "E:\\Log\\Fixture_Company_Server_Simulator\\UI.vb",
+              "RelativeToolTip": "UI.vb",
+              "ViewState": "AgIAAP8AAAAAAAAAAAAIwA0BAAAzAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-04-16T02:47:44.064Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Server.vb",
+              "DocumentMoniker": "E:\\Log\\Fixture_Company_Server_Simulator\\Server.vb",
+              "RelativeDocumentMoniker": "Server.vb",
+              "ToolTip": "E:\\Log\\Fixture_Company_Server_Simulator\\Server.vb",
+              "RelativeToolTip": "Server.vb",
+              "ViewState": "AgIAAKcBAAAAAAAAAAAIwK0BAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-04-16T02:43:39.158Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

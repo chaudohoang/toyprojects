@@ -1,0 +1,12 @@
+E:\Log\Radiant_TrueTest_Client_Simulator\obj\Debug\Radiant_TrueTest_Client_Simulator.vbproj.AssemblyReference.cache
+E:\Log\Radiant_TrueTest_Client_Simulator\obj\Debug\Radiant_TrueTest_Client_Simulator.vbproj.CoreCompileInputs.cache
+E:\Log\Radiant_TrueTest_Client_Simulator\bin\Debug\Radiant_TrueTest_Client_Simulator.exe
+E:\Log\Radiant_TrueTest_Client_Simulator\bin\Debug\Radiant_TrueTest_Client_Simulator.pdb
+E:\Log\Radiant_TrueTest_Client_Simulator\obj\Debug\Radiant_TrueTest_Client_Simulator.exe
+E:\Log\Radiant_TrueTest_Client_Simulator\obj\Debug\Radiant_TrueTest_Client_Simulator.pdb
+E:\Log\New Fixture Protocol Simulator\Radiant_TrueTest_Client_Simulator\bin\Debug\Radiant_TrueTest_Client_Simulator.exe
+E:\Log\New Fixture Protocol Simulator\Radiant_TrueTest_Client_Simulator\bin\Debug\Radiant_TrueTest_Client_Simulator.pdb
+E:\Log\New Fixture Protocol Simulator\Radiant_TrueTest_Client_Simulator\obj\Debug\Radiant_TrueTest_Client_Simulator.vbproj.AssemblyReference.cache
+E:\Log\New Fixture Protocol Simulator\Radiant_TrueTest_Client_Simulator\obj\Debug\Radiant_TrueTest_Client_Simulator.vbproj.CoreCompileInputs.cache
+E:\Log\New Fixture Protocol Simulator\Radiant_TrueTest_Client_Simulator\obj\Debug\Radiant_TrueTest_Client_Simulator.exe
+E:\Log\New Fixture Protocol Simulator\Radiant_TrueTest_Client_Simulator\obj\Debug\Radiant_TrueTest_Client_Simulator.pdb
