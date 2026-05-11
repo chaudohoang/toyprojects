@@ -1,0 +1,1 @@
+﻿LoadedPlatforms=VNC,UltraViewer,RustDesk,AnyDesk
