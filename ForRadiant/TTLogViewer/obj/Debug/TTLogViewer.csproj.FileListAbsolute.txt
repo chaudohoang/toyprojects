@@ -14,3 +14,13 @@ D:\Github\toyprojects\ForRadiant\bin\Debug\TextToImage\TTLogViewer.pdb
 D:\Github\toyprojects\ForRadiant\bin\Debug\TTLogViewer\TTLogViewer.exe.config
 D:\Github\toyprojects\ForRadiant\bin\Debug\TTLogViewer\TTLogViewer.exe
 D:\Github\toyprojects\ForRadiant\bin\Debug\TTLogViewer\TTLogViewer.pdb
+E:\Github\toyprojects\ForRadiant\bin\Debug\TTLogViewer\TTLogViewer.exe.config
+E:\Github\toyprojects\ForRadiant\bin\Debug\TTLogViewer\TTLogViewer.exe
+E:\Github\toyprojects\ForRadiant\bin\Debug\TTLogViewer\TTLogViewer.pdb
+E:\Github\toyprojects\ForRadiant\TTLogViewer\obj\Debug\TTLogViewer.csproj.AssemblyReference.cache
+E:\Github\toyprojects\ForRadiant\TTLogViewer\obj\Debug\TTLogViewer.Form1.resources
+E:\Github\toyprojects\ForRadiant\TTLogViewer\obj\Debug\TTLogViewer.Properties.Resources.resources
+E:\Github\toyprojects\ForRadiant\TTLogViewer\obj\Debug\TTLogViewer.csproj.GenerateResource.cache
+E:\Github\toyprojects\ForRadiant\TTLogViewer\obj\Debug\TTLogViewer.csproj.CoreCompileInputs.cache
+E:\Github\toyprojects\ForRadiant\TTLogViewer\obj\Debug\TTLogViewer.exe
+E:\Github\toyprojects\ForRadiant\TTLogViewer\obj\Debug\TTLogViewer.pdb

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AssemblyName>LnkBulkEditor</AssemblyName>
+    <RootNamespace>LnkBulkEditor</RootNamespace>
+    <ApplicationIcon />
+    <StartupObject>LnkBulkEditor.Program</StartupObject>
+    <!-- Needed for C# dynamic keyword on .NET Framework SDK-style projects -->
+    <DefineConstants>$(DefineConstants)</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- dynamic keyword requires Microsoft.CSharp on .NET Framework -->
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+</Project>

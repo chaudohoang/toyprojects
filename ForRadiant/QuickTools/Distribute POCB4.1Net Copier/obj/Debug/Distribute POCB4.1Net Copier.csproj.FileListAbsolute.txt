@@ -5,3 +5,10 @@ D:\Github\toyprojects\ForRadiant\QuickTools\Distribute POCB4.1Net Copier\obj\Deb
 D:\Github\toyprojects\ForRadiant\QuickTools\Distribute POCB4.1Net Copier\obj\Debug\Distribute POCB4.1Net Copier.csproj.CoreCompileInputs.cache
 D:\Github\toyprojects\ForRadiant\QuickTools\Distribute POCB4.1Net Copier\obj\Debug\ConsoleApp2.exe
 D:\Github\toyprojects\ForRadiant\QuickTools\Distribute POCB4.1Net Copier\obj\Debug\ConsoleApp2.pdb
+E:\Github\toyprojects\ForRadiant\QuickTools\Distribute POCB4.1Net Copier\bin\Debug\ConsoleApp2.exe.config
+E:\Github\toyprojects\ForRadiant\QuickTools\Distribute POCB4.1Net Copier\bin\Debug\ConsoleApp2.exe
+E:\Github\toyprojects\ForRadiant\QuickTools\Distribute POCB4.1Net Copier\bin\Debug\ConsoleApp2.pdb
+E:\Github\toyprojects\ForRadiant\QuickTools\Distribute POCB4.1Net Copier\obj\Debug\Distribute POCB4.1Net Copier.csproj.AssemblyReference.cache
+E:\Github\toyprojects\ForRadiant\QuickTools\Distribute POCB4.1Net Copier\obj\Debug\Distribute POCB4.1Net Copier.csproj.CoreCompileInputs.cache
+E:\Github\toyprojects\ForRadiant\QuickTools\Distribute POCB4.1Net Copier\obj\Debug\ConsoleApp2.exe
+E:\Github\toyprojects\ForRadiant\QuickTools\Distribute POCB4.1Net Copier\obj\Debug\ConsoleApp2.pdb

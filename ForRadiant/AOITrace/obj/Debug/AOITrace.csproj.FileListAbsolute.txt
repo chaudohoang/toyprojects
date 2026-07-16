@@ -28,3 +28,14 @@ D:\Github\toyprojects\ForRadiant\bin\Debug\AOITrace\AOITrace.exe.config
 D:\Github\toyprojects\ForRadiant\bin\Debug\AOITrace\AOITrace.exe
 D:\Github\toyprojects\ForRadiant\bin\Debug\AOITrace\AOITrace.pdb
 D:\Github\toyprojects\ForRadiant\AOITrace\obj\Debug\AOITrace.csproj.Up2Date
+E:\Github\toyprojects\ForRadiant\bin\Debug\AOITrace\AOITrace.exe.config
+E:\Github\toyprojects\ForRadiant\bin\Debug\AOITrace\AOITrace.exe
+E:\Github\toyprojects\ForRadiant\bin\Debug\AOITrace\AOITrace.pdb
+E:\Github\toyprojects\ForRadiant\AOITrace\obj\Debug\AOITrace.csproj.AssemblyReference.cache
+E:\Github\toyprojects\ForRadiant\AOITrace\obj\Debug\AOITrace.MainForm.resources
+E:\Github\toyprojects\ForRadiant\AOITrace\obj\Debug\AOITrace.Properties.Resources.resources
+E:\Github\toyprojects\ForRadiant\AOITrace\obj\Debug\AOITrace.csproj.GenerateResource.cache
+E:\Github\toyprojects\ForRadiant\AOITrace\obj\Debug\AOITrace.csproj.CoreCompileInputs.cache
+E:\Github\toyprojects\ForRadiant\AOITrace\obj\Debug\AOITrace.csproj.Up2Date
+E:\Github\toyprojects\ForRadiant\AOITrace\obj\Debug\AOITrace.exe
+E:\Github\toyprojects\ForRadiant\AOITrace\obj\Debug\AOITrace.pdb

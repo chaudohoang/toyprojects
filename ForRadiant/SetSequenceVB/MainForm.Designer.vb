@@ -53,9 +53,10 @@ Namespace SetSequenceVB
             'cmdBrowseSequence
             '
             Me.cmdBrowseSequence.AutoSize = True
-            Me.cmdBrowseSequence.Location = New System.Drawing.Point(155, 9)
+            Me.cmdBrowseSequence.Location = New System.Drawing.Point(207, 11)
+            Me.cmdBrowseSequence.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
             Me.cmdBrowseSequence.Name = "cmdBrowseSequence"
-            Me.cmdBrowseSequence.Size = New System.Drawing.Size(92, 13)
+            Me.cmdBrowseSequence.Size = New System.Drawing.Size(115, 16)
             Me.cmdBrowseSequence.TabIndex = 2
             Me.cmdBrowseSequence.TabStop = True
             Me.cmdBrowseSequence.Text = "Browse sequence"
@@ -63,18 +64,20 @@ Namespace SetSequenceVB
             'lblAddtionalTarget
             '
             Me.lblAddtionalTarget.AutoSize = True
-            Me.lblAddtionalTarget.Location = New System.Drawing.Point(12, 55)
+            Me.lblAddtionalTarget.Location = New System.Drawing.Point(16, 68)
+            Me.lblAddtionalTarget.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
             Me.lblAddtionalTarget.Name = "lblAddtionalTarget"
-            Me.lblAddtionalTarget.Size = New System.Drawing.Size(148, 13)
+            Me.lblAddtionalTarget.Size = New System.Drawing.Size(184, 16)
             Me.lblAddtionalTarget.TabIndex = 64
             Me.lblAddtionalTarget.Text = "Additional Target Sequence : "
             '
             'cmdUseLastModifiedSequence
             '
             Me.cmdUseLastModifiedSequence.AutoSize = True
-            Me.cmdUseLastModifiedSequence.Location = New System.Drawing.Point(12, 9)
+            Me.cmdUseLastModifiedSequence.Location = New System.Drawing.Point(16, 11)
+            Me.cmdUseLastModifiedSequence.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
             Me.cmdUseLastModifiedSequence.Name = "cmdUseLastModifiedSequence"
-            Me.cmdUseLastModifiedSequence.Size = New System.Drawing.Size(137, 13)
+            Me.cmdUseLastModifiedSequence.Size = New System.Drawing.Size(174, 16)
             Me.cmdUseLastModifiedSequence.TabIndex = 1
             Me.cmdUseLastModifiedSequence.TabStop = True
             Me.cmdUseLastModifiedSequence.Text = "Use last modified sequence"
@@ -83,17 +86,19 @@ Namespace SetSequenceVB
             '
             Me.cbCameraRotation.FormattingEnabled = True
             Me.cbCameraRotation.Items.AddRange(New Object() {"", "Copy from first step", "None", "Clockwise90", "Rotate180", "Counterclockwise90"})
-            Me.cbCameraRotation.Location = New System.Drawing.Point(112, 232)
+            Me.cbCameraRotation.Location = New System.Drawing.Point(149, 286)
+            Me.cbCameraRotation.Margin = New System.Windows.Forms.Padding(4)
             Me.cbCameraRotation.Name = "cbCameraRotation"
-            Me.cbCameraRotation.Size = New System.Drawing.Size(148, 21)
+            Me.cbCameraRotation.Size = New System.Drawing.Size(196, 24)
             Me.cbCameraRotation.TabIndex = 6
             Me.cbCameraRotation.Text = "Copy from first step"
             '
             'btnApply
             '
-            Me.btnApply.Location = New System.Drawing.Point(269, 151)
+            Me.btnApply.Location = New System.Drawing.Point(359, 186)
+            Me.btnApply.Margin = New System.Windows.Forms.Padding(4)
             Me.btnApply.Name = "btnApply"
-            Me.btnApply.Size = New System.Drawing.Size(91, 156)
+            Me.btnApply.Size = New System.Drawing.Size(121, 192)
             Me.btnApply.TabIndex = 8
             Me.btnApply.Text = "Apply"
             Me.btnApply.UseVisualStyleBackColor = True
@@ -101,18 +106,20 @@ Namespace SetSequenceVB
             'lblSubframe
             '
             Me.lblSubframe.AutoSize = True
-            Me.lblSubframe.Location = New System.Drawing.Point(12, 154)
+            Me.lblSubframe.Location = New System.Drawing.Point(16, 190)
+            Me.lblSubframe.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
             Me.lblSubframe.Name = "lblSubframe"
-            Me.lblSubframe.Size = New System.Drawing.Size(52, 13)
+            Me.lblSubframe.Size = New System.Drawing.Size(65, 16)
             Me.lblSubframe.TabIndex = 59
             Me.lblSubframe.Text = "Subframe"
             '
             'lblCameraRotatioin
             '
             Me.lblCameraRotatioin.AutoSize = True
-            Me.lblCameraRotatioin.Location = New System.Drawing.Point(12, 235)
+            Me.lblCameraRotatioin.Location = New System.Drawing.Point(16, 289)
+            Me.lblCameraRotatioin.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
             Me.lblCameraRotatioin.Name = "lblCameraRotatioin"
-            Me.lblCameraRotatioin.Size = New System.Drawing.Size(86, 13)
+            Me.lblCameraRotatioin.Size = New System.Drawing.Size(108, 16)
             Me.lblCameraRotatioin.TabIndex = 61
             Me.lblCameraRotatioin.Text = "Camera Rotation"
             '
@@ -120,37 +127,41 @@ Namespace SetSequenceVB
             '
             Me.cbFocusDistance.FormattingEnabled = True
             Me.cbFocusDistance.Items.AddRange(New Object() {"", "Copy from first step"})
-            Me.cbFocusDistance.Location = New System.Drawing.Point(112, 178)
+            Me.cbFocusDistance.Location = New System.Drawing.Point(149, 219)
+            Me.cbFocusDistance.Margin = New System.Windows.Forms.Padding(4)
             Me.cbFocusDistance.Name = "cbFocusDistance"
-            Me.cbFocusDistance.Size = New System.Drawing.Size(148, 21)
+            Me.cbFocusDistance.Size = New System.Drawing.Size(196, 24)
             Me.cbFocusDistance.TabIndex = 4
             Me.cbFocusDistance.Text = "Copy from first step"
             '
             'cbSubframe
             '
             Me.cbSubframe.FormattingEnabled = True
-            Me.cbSubframe.Items.AddRange(New Object() {"", "Copy from first step", "800,450,2784,5676", "700,250,2984,6076", "1000,1300,4576,1784"})
-            Me.cbSubframe.Location = New System.Drawing.Point(112, 151)
+            Me.cbSubframe.Items.AddRange(New Object() {"", "Copy from first step", "800,450,2784,5676", "700,250,2984,6076", "1000,1300,4576,1784", "2400,1200,5800,11700", "2200,600,6300,12900", "1048,1096,8510,11922"})
+            Me.cbSubframe.Location = New System.Drawing.Point(149, 186)
+            Me.cbSubframe.Margin = New System.Windows.Forms.Padding(4)
             Me.cbSubframe.Name = "cbSubframe"
-            Me.cbSubframe.Size = New System.Drawing.Size(148, 21)
+            Me.cbSubframe.Size = New System.Drawing.Size(196, 24)
             Me.cbSubframe.TabIndex = 3
             Me.cbSubframe.Text = "Copy from first step"
             '
             'lblCalibrationIDs
             '
             Me.lblCalibrationIDs.AutoSize = True
-            Me.lblCalibrationIDs.Location = New System.Drawing.Point(12, 262)
+            Me.lblCalibrationIDs.Location = New System.Drawing.Point(16, 322)
+            Me.lblCalibrationIDs.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
             Me.lblCalibrationIDs.Name = "lblCalibrationIDs"
-            Me.lblCalibrationIDs.Size = New System.Drawing.Size(75, 13)
+            Me.lblCalibrationIDs.Size = New System.Drawing.Size(94, 16)
             Me.lblCalibrationIDs.TabIndex = 62
             Me.lblCalibrationIDs.Text = "Calibration IDs"
             '
             'lblFocusDistance
             '
             Me.lblFocusDistance.AutoSize = True
-            Me.lblFocusDistance.Location = New System.Drawing.Point(12, 181)
+            Me.lblFocusDistance.Location = New System.Drawing.Point(16, 223)
+            Me.lblFocusDistance.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
             Me.lblFocusDistance.Name = "lblFocusDistance"
-            Me.lblFocusDistance.Size = New System.Drawing.Size(81, 13)
+            Me.lblFocusDistance.Size = New System.Drawing.Size(100, 16)
             Me.lblFocusDistance.TabIndex = 60
             Me.lblFocusDistance.Text = "Focus Distance"
             '
@@ -158,9 +169,10 @@ Namespace SetSequenceVB
             '
             Me.cbCalBox.FormattingEnabled = True
             Me.cbCalBox.Items.AddRange(New Object() {"", "Copy from first step", "1,1,1,1"})
-            Me.cbCalBox.Location = New System.Drawing.Point(112, 259)
+            Me.cbCalBox.Location = New System.Drawing.Point(149, 319)
+            Me.cbCalBox.Margin = New System.Windows.Forms.Padding(4)
             Me.cbCalBox.Name = "cbCalBox"
-            Me.cbCalBox.Size = New System.Drawing.Size(148, 21)
+            Me.cbCalBox.Size = New System.Drawing.Size(196, 24)
             Me.cbCalBox.TabIndex = 7
             Me.cbCalBox.Text = "Copy from first step"
             '
@@ -168,62 +180,69 @@ Namespace SetSequenceVB
             '
             Me.label1.AutoSize = True
             Me.label1.Font = New System.Drawing.Font("Microsoft Sans Serif", 36.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-            Me.label1.Location = New System.Drawing.Point(366, 165)
+            Me.label1.Location = New System.Drawing.Point(488, 203)
+            Me.label1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
             Me.label1.Name = "label1"
-            Me.label1.Size = New System.Drawing.Size(0, 55)
+            Me.label1.Size = New System.Drawing.Size(0, 69)
             Me.label1.TabIndex = 72
             '
             'cbFNumber
             '
             Me.cbFNumber.FormattingEnabled = True
             Me.cbFNumber.Items.AddRange(New Object() {"", "Copy from first step", "8.0"})
-            Me.cbFNumber.Location = New System.Drawing.Point(112, 205)
+            Me.cbFNumber.Location = New System.Drawing.Point(149, 252)
+            Me.cbFNumber.Margin = New System.Windows.Forms.Padding(4)
             Me.cbFNumber.Name = "cbFNumber"
-            Me.cbFNumber.Size = New System.Drawing.Size(148, 21)
+            Me.cbFNumber.Size = New System.Drawing.Size(196, 24)
             Me.cbFNumber.TabIndex = 5
             Me.cbFNumber.Text = "Copy from first step"
             '
             'lblFNumber
             '
             Me.lblFNumber.AutoSize = True
-            Me.lblFNumber.Location = New System.Drawing.Point(12, 208)
+            Me.lblFNumber.Location = New System.Drawing.Point(16, 256)
+            Me.lblFNumber.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
             Me.lblFNumber.Name = "lblFNumber"
-            Me.lblFNumber.Size = New System.Drawing.Size(53, 13)
+            Me.lblFNumber.Size = New System.Drawing.Size(67, 16)
             Me.lblFNumber.TabIndex = 73
             Me.lblFNumber.Text = "F-Number"
             '
             'lblAbout
             '
             Me.lblAbout.AutoSize = True
-            Me.lblAbout.Location = New System.Drawing.Point(571, 9)
+            Me.lblAbout.Location = New System.Drawing.Point(761, 11)
+            Me.lblAbout.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
             Me.lblAbout.Name = "lblAbout"
-            Me.lblAbout.Size = New System.Drawing.Size(16, 13)
+            Me.lblAbout.Size = New System.Drawing.Size(16, 16)
             Me.lblAbout.TabIndex = 74
             Me.lblAbout.Text = "..."
             '
             'lblSequencePath
             '
             Me.lblSequencePath.AutoSize = True
-            Me.lblSequencePath.Location = New System.Drawing.Point(119, 33)
+            Me.lblSequencePath.Location = New System.Drawing.Point(159, 41)
+            Me.lblSequencePath.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
             Me.lblSequencePath.Name = "lblSequencePath"
-            Me.lblSequencePath.Size = New System.Drawing.Size(0, 13)
+            Me.lblSequencePath.Size = New System.Drawing.Size(0, 16)
             Me.lblSequencePath.TabIndex = 75
             '
             'txtAdditionalSequence
             '
             Me.txtAdditionalSequence.AllowDrop = True
-            Me.txtAdditionalSequence.Location = New System.Drawing.Point(17, 71)
+            Me.txtAdditionalSequence.Location = New System.Drawing.Point(23, 87)
+            Me.txtAdditionalSequence.Margin = New System.Windows.Forms.Padding(4)
             Me.txtAdditionalSequence.Multiline = True
             Me.txtAdditionalSequence.Name = "txtAdditionalSequence"
             Me.txtAdditionalSequence.ScrollBars = System.Windows.Forms.ScrollBars.Both
-            Me.txtAdditionalSequence.Size = New System.Drawing.Size(491, 73)
+            Me.txtAdditionalSequence.Size = New System.Drawing.Size(653, 89)
             Me.txtAdditionalSequence.TabIndex = 76
             '
             'btnBrowseAdditional
             '
-            Me.btnBrowseAdditional.Location = New System.Drawing.Point(514, 71)
+            Me.btnBrowseAdditional.Location = New System.Drawing.Point(685, 87)
+            Me.btnBrowseAdditional.Margin = New System.Windows.Forms.Padding(4)
             Me.btnBrowseAdditional.Name = "btnBrowseAdditional"
-            Me.btnBrowseAdditional.Size = New System.Drawing.Size(70, 73)
+            Me.btnBrowseAdditional.Size = New System.Drawing.Size(93, 90)
             Me.btnBrowseAdditional.TabIndex = 77
             Me.btnBrowseAdditional.Text = "Browse"
             Me.btnBrowseAdditional.UseVisualStyleBackColor = True
@@ -231,18 +250,20 @@ Namespace SetSequenceVB
             'lblTargetSequence
             '
             Me.lblTargetSequence.AutoSize = True
-            Me.lblTargetSequence.Location = New System.Drawing.Point(14, 33)
+            Me.lblTargetSequence.Location = New System.Drawing.Point(19, 41)
+            Me.lblTargetSequence.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
             Me.lblTargetSequence.Name = "lblTargetSequence"
-            Me.lblTargetSequence.Size = New System.Drawing.Size(99, 13)
+            Me.lblTargetSequence.Size = New System.Drawing.Size(121, 16)
             Me.lblTargetSequence.TabIndex = 75
             Me.lblTargetSequence.Text = "Target Sequence : "
             '
             'Label2
             '
             Me.Label2.AutoSize = True
-            Me.Label2.Location = New System.Drawing.Point(12, 289)
+            Me.Label2.Location = New System.Drawing.Point(16, 356)
+            Me.Label2.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
             Me.Label2.Name = "Label2"
-            Me.Label2.Size = New System.Drawing.Size(94, 13)
+            Me.Label2.Size = New System.Drawing.Size(121, 16)
             Me.Label2.TabIndex = 79
             Me.Label2.Text = "Demosaic Algoritm"
             '
@@ -250,17 +271,18 @@ Namespace SetSequenceVB
             '
             Me.cbDemosaicAlgorithm.FormattingEnabled = True
             Me.cbDemosaicAlgorithm.Items.AddRange(New Object() {"", "Copy from first step", "Quarter Resolution"})
-            Me.cbDemosaicAlgorithm.Location = New System.Drawing.Point(112, 286)
+            Me.cbDemosaicAlgorithm.Location = New System.Drawing.Point(149, 352)
+            Me.cbDemosaicAlgorithm.Margin = New System.Windows.Forms.Padding(4)
             Me.cbDemosaicAlgorithm.Name = "cbDemosaicAlgorithm"
-            Me.cbDemosaicAlgorithm.Size = New System.Drawing.Size(148, 21)
+            Me.cbDemosaicAlgorithm.Size = New System.Drawing.Size(196, 24)
             Me.cbDemosaicAlgorithm.TabIndex = 78
             Me.cbDemosaicAlgorithm.Text = "Copy from first step"
             '
             'MainForm
             '
-            Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+            Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
             Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-            Me.ClientSize = New System.Drawing.Size(596, 313)
+            Me.ClientSize = New System.Drawing.Size(795, 385)
             Me.Controls.Add(Me.Label2)
             Me.Controls.Add(Me.cbDemosaicAlgorithm)
             Me.Controls.Add(Me.btnBrowseAdditional)
@@ -285,6 +307,7 @@ Namespace SetSequenceVB
             Me.Controls.Add(Me.cbCalBox)
             Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
             Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
+            Me.Margin = New System.Windows.Forms.Padding(4)
             Me.MaximizeBox = False
             Me.Name = "MainForm"
             Me.Text = "SetSequenceVB"

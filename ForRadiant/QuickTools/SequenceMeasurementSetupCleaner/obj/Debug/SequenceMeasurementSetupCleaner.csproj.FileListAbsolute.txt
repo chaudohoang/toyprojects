@@ -12,3 +12,10 @@ D:\Github\toyprojects\ForRadiant\QuickTools\SequenceMeasurementSetupCleaner\obj\
 D:\Github\toyprojects\ForRadiant\QuickTools\SequenceMeasurementSetupCleaner\obj\Debug\SequenceMeasurementSetupCleaner.csproj.CoreCompileInputs.cache
 D:\Github\toyprojects\ForRadiant\QuickTools\SequenceMeasurementSetupCleaner\obj\Debug\SequenceMeasurementSetupCleaner.exe
 D:\Github\toyprojects\ForRadiant\QuickTools\SequenceMeasurementSetupCleaner\obj\Debug\SequenceMeasurementSetupCleaner.pdb
+E:\Github\toyprojects\ForRadiant\QuickTools\SequenceMeasurementSetupCleaner\bin\Debug\SequenceMeasurementSetupCleaner.exe.config
+E:\Github\toyprojects\ForRadiant\QuickTools\SequenceMeasurementSetupCleaner\bin\Debug\SequenceMeasurementSetupCleaner.exe
+E:\Github\toyprojects\ForRadiant\QuickTools\SequenceMeasurementSetupCleaner\bin\Debug\SequenceMeasurementSetupCleaner.pdb
+E:\Github\toyprojects\ForRadiant\QuickTools\SequenceMeasurementSetupCleaner\obj\Debug\SequenceMeasurementSetupCleaner.csproj.AssemblyReference.cache
+E:\Github\toyprojects\ForRadiant\QuickTools\SequenceMeasurementSetupCleaner\obj\Debug\SequenceMeasurementSetupCleaner.csproj.CoreCompileInputs.cache
+E:\Github\toyprojects\ForRadiant\QuickTools\SequenceMeasurementSetupCleaner\obj\Debug\SequenceMeasurementSetupCleaner.exe
+E:\Github\toyprojects\ForRadiant\QuickTools\SequenceMeasurementSetupCleaner\obj\Debug\SequenceMeasurementSetupCleaner.pdb

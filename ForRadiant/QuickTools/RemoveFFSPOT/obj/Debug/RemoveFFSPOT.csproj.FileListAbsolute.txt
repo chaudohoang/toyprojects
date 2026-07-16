@@ -15,3 +15,10 @@ D:\Github\toyprojects\ForRadiant\QuickTools\RemoveFFSPOT\obj\Debug\RemoveFFSPOT.
 D:\Github\toyprojects\ForRadiant\QuickTools\RemoveFFSPOT\obj\Debug\RemoveFFSPOT.csproj.CoreCompileInputs.cache
 D:\Github\toyprojects\ForRadiant\QuickTools\RemoveFFSPOT\obj\Debug\RemoveFFSPOT.exe
 D:\Github\toyprojects\ForRadiant\QuickTools\RemoveFFSPOT\obj\Debug\RemoveFFSPOT.pdb
+E:\Github\toyprojects\ForRadiant\bin\Debug\QuickTools\RemoveFFSPOT.exe.config
+E:\Github\toyprojects\ForRadiant\bin\Debug\QuickTools\RemoveFFSPOT.exe
+E:\Github\toyprojects\ForRadiant\bin\Debug\QuickTools\RemoveFFSPOT.pdb
+E:\Github\toyprojects\ForRadiant\QuickTools\RemoveFFSPOT\obj\Debug\RemoveFFSPOT.csproj.AssemblyReference.cache
+E:\Github\toyprojects\ForRadiant\QuickTools\RemoveFFSPOT\obj\Debug\RemoveFFSPOT.csproj.CoreCompileInputs.cache
+E:\Github\toyprojects\ForRadiant\QuickTools\RemoveFFSPOT\obj\Debug\RemoveFFSPOT.exe
+E:\Github\toyprojects\ForRadiant\QuickTools\RemoveFFSPOT\obj\Debug\RemoveFFSPOT.pdb

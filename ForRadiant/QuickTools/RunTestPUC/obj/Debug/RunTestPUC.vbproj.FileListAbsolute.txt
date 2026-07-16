@@ -9,3 +9,14 @@ D:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\obj\Debug\RunTestPUC.vbpr
 D:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\obj\Debug\ConsoleApp3.exe
 D:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\obj\Debug\ConsoleApp3.xml
 D:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\obj\Debug\ConsoleApp3.pdb
+E:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\bin\Debug\ConsoleApp3.exe.config
+E:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\bin\Debug\ConsoleApp3.exe
+E:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\bin\Debug\ConsoleApp3.pdb
+E:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\bin\Debug\ConsoleApp3.xml
+E:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\obj\Debug\RunTestPUC.vbproj.AssemblyReference.cache
+E:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\obj\Debug\ConsoleApp3.Resources.resources
+E:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\obj\Debug\RunTestPUC.vbproj.GenerateResource.cache
+E:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\obj\Debug\RunTestPUC.vbproj.CoreCompileInputs.cache
+E:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\obj\Debug\ConsoleApp3.exe
+E:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\obj\Debug\ConsoleApp3.xml
+E:\Github\toyprojects\ForRadiant\QuickTools\RunTestPUC\obj\Debug\ConsoleApp3.pdb
