@@ -8,3 +8,13 @@ D:\Github\toyprojects\ForRadiant\ProjectCloner\obj\Debug\ProjectCloner.csproj.Ge
 D:\Github\toyprojects\ForRadiant\ProjectCloner\obj\Debug\ProjectCloner.csproj.CoreCompileInputs.cache
 D:\Github\toyprojects\ForRadiant\ProjectCloner\obj\Debug\ProjectCloner.exe
 D:\Github\toyprojects\ForRadiant\ProjectCloner\obj\Debug\ProjectCloner.pdb
+E:\Github\toyprojects\ForRadiant\bin\Debug\ProjectCloner\ProjectCloner.exe.config
+E:\Github\toyprojects\ForRadiant\bin\Debug\ProjectCloner\ProjectCloner.exe
+E:\Github\toyprojects\ForRadiant\bin\Debug\ProjectCloner\ProjectCloner.pdb
+E:\Github\toyprojects\ForRadiant\ProjectCloner\obj\Debug\ProjectCloner.csproj.AssemblyReference.cache
+E:\Github\toyprojects\ForRadiant\ProjectCloner\obj\Debug\ProjectCloner.MainForm.resources
+E:\Github\toyprojects\ForRadiant\ProjectCloner\obj\Debug\ProjectCloner.Properties.Resources.resources
+E:\Github\toyprojects\ForRadiant\ProjectCloner\obj\Debug\ProjectCloner.csproj.GenerateResource.cache
+E:\Github\toyprojects\ForRadiant\ProjectCloner\obj\Debug\ProjectCloner.csproj.CoreCompileInputs.cache
+E:\Github\toyprojects\ForRadiant\ProjectCloner\obj\Debug\ProjectCloner.exe
+E:\Github\toyprojects\ForRadiant\ProjectCloner\obj\Debug\ProjectCloner.pdb

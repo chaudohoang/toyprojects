@@ -1,0 +1,10 @@
+C:\Users\Chau\Downloads\LnkBulkEditor\bin\Release\net48\LnkBulkEditor.exe.config
+C:\Users\Chau\Downloads\LnkBulkEditor\bin\Release\net48\LnkBulkEditor.exe
+C:\Users\Chau\Downloads\LnkBulkEditor\bin\Release\net48\LnkBulkEditor.pdb
+C:\Users\Chau\Downloads\LnkBulkEditor\obj\Release\net48\LnkBulkEditor.csproj.AssemblyReference.cache
+C:\Users\Chau\Downloads\LnkBulkEditor\obj\Release\net48\LnkBulkEditor.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Chau\Downloads\LnkBulkEditor\obj\Release\net48\LnkBulkEditor.AssemblyInfoInputs.cache
+C:\Users\Chau\Downloads\LnkBulkEditor\obj\Release\net48\LnkBulkEditor.AssemblyInfo.cs
+C:\Users\Chau\Downloads\LnkBulkEditor\obj\Release\net48\LnkBulkEditor.csproj.CoreCompileInputs.cache
+C:\Users\Chau\Downloads\LnkBulkEditor\obj\Release\net48\LnkBulkEditor.exe
+C:\Users\Chau\Downloads\LnkBulkEditor\obj\Release\net48\LnkBulkEditor.pdb

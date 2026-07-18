@@ -25,3 +25,11 @@ D:\Github\toyprojects\ForRadiant\bin\Debug\MatchingSummaryLogForAOIDetect\Matchi
 D:\Github\toyprojects\ForRadiant\bin\Debug\MatchingSummaryLogForAOIDetect\MatchingSummaryLogForAOIDetect.exe
 D:\Github\toyprojects\ForRadiant\bin\Debug\MatchingSummaryLogForAOIDetect\MatchingSummaryLogForAOIDetect.pdb
 D:\Github\toyprojects\ForRadiant\MatchingSummaryLogForAOIDetect\obj\Debug\Matching.DB3C31CE.Up2Date
+E:\Github\toyprojects\ForRadiant\bin\Debug\MatchingSummaryLogForAOIDetect\MatchingSummaryLogForAOIDetect.exe.config
+E:\Github\toyprojects\ForRadiant\bin\Debug\MatchingSummaryLogForAOIDetect\MatchingSummaryLogForAOIDetect.exe
+E:\Github\toyprojects\ForRadiant\bin\Debug\MatchingSummaryLogForAOIDetect\MatchingSummaryLogForAOIDetect.pdb
+E:\Github\toyprojects\ForRadiant\MatchingSummaryLogForAOIDetect\obj\Debug\MatchingSummaryLogForAOIDetect.csproj.AssemblyReference.cache
+E:\Github\toyprojects\ForRadiant\MatchingSummaryLogForAOIDetect\obj\Debug\MatchingSummaryLogForAOIDetect.csproj.CoreCompileInputs.cache
+E:\Github\toyprojects\ForRadiant\MatchingSummaryLogForAOIDetect\obj\Debug\Matching.DB3C31CE.Up2Date
+E:\Github\toyprojects\ForRadiant\MatchingSummaryLogForAOIDetect\obj\Debug\MatchingSummaryLogForAOIDetect.exe
+E:\Github\toyprojects\ForRadiant\MatchingSummaryLogForAOIDetect\obj\Debug\MatchingSummaryLogForAOIDetect.pdb

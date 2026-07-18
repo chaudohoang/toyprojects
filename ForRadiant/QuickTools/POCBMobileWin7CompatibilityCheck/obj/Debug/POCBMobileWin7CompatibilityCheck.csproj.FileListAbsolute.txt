@@ -5,3 +5,10 @@ D:\Github\toyprojects\ForRadiant\QuickTools\POCBMobileWin7CompatibilityCheck\obj
 D:\Github\toyprojects\ForRadiant\QuickTools\POCBMobileWin7CompatibilityCheck\obj\Debug\POCBMobileWin7CompatibilityCheck.csproj.CoreCompileInputs.cache
 D:\Github\toyprojects\ForRadiant\QuickTools\POCBMobileWin7CompatibilityCheck\obj\Debug\POCBMobileWin7CompatibilityCheck.exe
 D:\Github\toyprojects\ForRadiant\QuickTools\POCBMobileWin7CompatibilityCheck\obj\Debug\POCBMobileWin7CompatibilityCheck.pdb
+E:\Github\toyprojects\ForRadiant\QuickTools\POCBMobileWin7CompatibilityCheck\bin\Debug\POCBMobileWin7CompatibilityCheck.exe.config
+E:\Github\toyprojects\ForRadiant\QuickTools\POCBMobileWin7CompatibilityCheck\bin\Debug\POCBMobileWin7CompatibilityCheck.exe
+E:\Github\toyprojects\ForRadiant\QuickTools\POCBMobileWin7CompatibilityCheck\bin\Debug\POCBMobileWin7CompatibilityCheck.pdb
+E:\Github\toyprojects\ForRadiant\QuickTools\POCBMobileWin7CompatibilityCheck\obj\Debug\POCBMobileWin7CompatibilityCheck.csproj.AssemblyReference.cache
+E:\Github\toyprojects\ForRadiant\QuickTools\POCBMobileWin7CompatibilityCheck\obj\Debug\POCBMobileWin7CompatibilityCheck.csproj.CoreCompileInputs.cache
+E:\Github\toyprojects\ForRadiant\QuickTools\POCBMobileWin7CompatibilityCheck\obj\Debug\POCBMobileWin7CompatibilityCheck.exe
+E:\Github\toyprojects\ForRadiant\QuickTools\POCBMobileWin7CompatibilityCheck\obj\Debug\POCBMobileWin7CompatibilityCheck.pdb

@@ -32,3 +32,15 @@ D:\GitHub\toyprojects\ForRadiant\LGDCustomAppLauncher\obj\Debug\LGDCustomAppLaun
 D:\GitHub\toyprojects\ForRadiant\LGDCustomAppLauncher\obj\Debug\Apps.exe
 D:\GitHub\toyprojects\ForRadiant\LGDCustomAppLauncher\obj\Debug\Apps.xml
 D:\GitHub\toyprojects\ForRadiant\LGDCustomAppLauncher\obj\Debug\Apps.pdb
+E:\Github\toyprojects\ForRadiant\bin\Debug\LGDCustomAppLauncher\Apps.exe.config
+E:\Github\toyprojects\ForRadiant\bin\Debug\LGDCustomAppLauncher\Apps.exe
+E:\Github\toyprojects\ForRadiant\bin\Debug\LGDCustomAppLauncher\Apps.pdb
+E:\Github\toyprojects\ForRadiant\bin\Debug\LGDCustomAppLauncher\Apps.xml
+E:\Github\toyprojects\ForRadiant\LGDCustomAppLauncher\obj\Debug\LGDCustomAppLauncher.vbproj.AssemblyReference.cache
+E:\Github\toyprojects\ForRadiant\LGDCustomAppLauncher\obj\Debug\Apps.Apps.resources
+E:\Github\toyprojects\ForRadiant\LGDCustomAppLauncher\obj\Debug\Apps.Resources.resources
+E:\Github\toyprojects\ForRadiant\LGDCustomAppLauncher\obj\Debug\LGDCustomAppLauncher.vbproj.GenerateResource.cache
+E:\Github\toyprojects\ForRadiant\LGDCustomAppLauncher\obj\Debug\LGDCustomAppLauncher.vbproj.CoreCompileInputs.cache
+E:\Github\toyprojects\ForRadiant\LGDCustomAppLauncher\obj\Debug\Apps.exe
+E:\Github\toyprojects\ForRadiant\LGDCustomAppLauncher\obj\Debug\Apps.xml
+E:\Github\toyprojects\ForRadiant\LGDCustomAppLauncher\obj\Debug\Apps.pdb

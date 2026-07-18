@@ -11,3 +11,10 @@ D:\Github\toyprojects\ForRadiant\bin\DebugCppProjectCloner\CppProjectCloner.pdb
 D:\Github\toyprojects\ForRadiant\bin\Debug\CppProjectCloner\CppProjectCloner.exe.config
 D:\Github\toyprojects\ForRadiant\bin\Debug\CppProjectCloner\CppProjectCloner.exe
 D:\Github\toyprojects\ForRadiant\bin\Debug\CppProjectCloner\CppProjectCloner.pdb
+E:\Github\toyprojects\ForRadiant\bin\Debug\CppProjectCloner\CppProjectCloner.exe.config
+E:\Github\toyprojects\ForRadiant\bin\Debug\CppProjectCloner\CppProjectCloner.exe
+E:\Github\toyprojects\ForRadiant\bin\Debug\CppProjectCloner\CppProjectCloner.pdb
+E:\Github\toyprojects\ForRadiant\CppProjectCloner\obj\Debug\CppProjectCloner.csproj.AssemblyReference.cache
+E:\Github\toyprojects\ForRadiant\CppProjectCloner\obj\Debug\CppProjectCloner.csproj.CoreCompileInputs.cache
+E:\Github\toyprojects\ForRadiant\CppProjectCloner\obj\Debug\CppProjectCloner.exe
+E:\Github\toyprojects\ForRadiant\CppProjectCloner\obj\Debug\CppProjectCloner.pdb

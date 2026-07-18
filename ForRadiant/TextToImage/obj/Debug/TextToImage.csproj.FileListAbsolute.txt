@@ -20,3 +20,14 @@ D:\Github\toyprojects\ForRadiant\TextToImage\obj\Debug\TextToImage.csproj.Genera
 D:\Github\toyprojects\ForRadiant\TextToImage\obj\Debug\TextToImage.csproj.CoreCompileInputs.cache
 D:\Github\toyprojects\ForRadiant\TextToImage\obj\Debug\TextToImage.exe
 D:\Github\toyprojects\ForRadiant\TextToImage\obj\Debug\TextToImage.pdb
+E:\Github\toyprojects\ForRadiant\bin\Debug\TextToImage\TextToImage.exe.config
+E:\Github\toyprojects\ForRadiant\bin\Debug\TextToImage\TextToImage.exe
+E:\Github\toyprojects\ForRadiant\bin\Debug\TextToImage\TextToImage.pdb
+E:\Github\toyprojects\ForRadiant\TextToImage\obj\Debug\TextToImage.csproj.AssemblyReference.cache
+E:\Github\toyprojects\ForRadiant\TextToImage\obj\Debug\TextToImage.MainForm.resources
+E:\Github\toyprojects\ForRadiant\TextToImage\obj\Debug\RVSSnipper.PasswordForm.resources
+E:\Github\toyprojects\ForRadiant\TextToImage\obj\Debug\TextToImage.Properties.Resources.resources
+E:\Github\toyprojects\ForRadiant\TextToImage\obj\Debug\TextToImage.csproj.GenerateResource.cache
+E:\Github\toyprojects\ForRadiant\TextToImage\obj\Debug\TextToImage.csproj.CoreCompileInputs.cache
+E:\Github\toyprojects\ForRadiant\TextToImage\obj\Debug\TextToImage.exe
+E:\Github\toyprojects\ForRadiant\TextToImage\obj\Debug\TextToImage.pdb
