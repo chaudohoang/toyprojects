@@ -1,0 +1,8 @@
+E:\Github\toyprojects\ForRadiant\FTPUploaderCS1\obj\Debug\FTPUploaderCS1.csproj.AssemblyReference.cache
+E:\Github\toyprojects\ForRadiant\FTPUploaderCS1\obj\Debug\FTPUploaderCS1.csproj.CoreCompileInputs.cache
+E:\Github\toyprojects\ForRadiant\FTPUploaderCS1\bin\Debug\FTPUploaderCS1.exe
+E:\Github\toyprojects\ForRadiant\FTPUploaderCS1\bin\Debug\FTPUploaderCS1.pdb
+E:\Github\toyprojects\ForRadiant\FTPUploaderCS1\bin\Debug\WinSCPnet.dll
+E:\Github\toyprojects\ForRadiant\FTPUploaderCS1\obj\Debug\FTPUploa.9094DFB5.Up2Date
+E:\Github\toyprojects\ForRadiant\FTPUploaderCS1\obj\Debug\FTPUploaderCS1.exe
+E:\Github\toyprojects\ForRadiant\FTPUploaderCS1\obj\Debug\FTPUploaderCS1.pdb

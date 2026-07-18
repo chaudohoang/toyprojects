@@ -1,0 +1,6 @@
+E:\Github\toyprojects\SeqxcEditor\bin\Release\SeqxcEditor.exe
+E:\Github\toyprojects\SeqxcEditor\bin\Release\SeqxcEditor.pdb
+E:\Github\toyprojects\SeqxcEditor\obj\Release\SeqxcEditor.csproj.AssemblyReference.cache
+E:\Github\toyprojects\SeqxcEditor\obj\Release\SeqxcEditor.csproj.CoreCompileInputs.cache
+E:\Github\toyprojects\SeqxcEditor\obj\Release\SeqxcEditor.exe
+E:\Github\toyprojects\SeqxcEditor\obj\Release\SeqxcEditor.pdb
