@@ -1,0 +1,58 @@
+<Application x:Class="SeqxcToolset.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+
+            <SolidColorBrush x:Key="BgAppBrush" Color="#FFF3F3F3"/>
+            <SolidColorBrush x:Key="BgPanelBrush" Color="#FFFFFFFF"/>
+            <SolidColorBrush x:Key="BgSidebarBrush" Color="#FFEAEAEA"/>
+            <SolidColorBrush x:Key="BorderBrush2" Color="#FFD0D0D0"/>
+            <SolidColorBrush x:Key="AccentBrush" Color="#FF2563EB"/>
+            <SolidColorBrush x:Key="AccentLightBrush" Color="#FFDCE7FB"/>
+            <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FF1A1A1A"/>
+            <SolidColorBrush x:Key="TextMutedBrush" Color="#FF6B6B6B"/>
+            <SolidColorBrush x:Key="DirtyBrush" Color="#FFFFF3CD"/>
+            <SolidColorBrush x:Key="AliasBrush" Color="#FFE9E2FF"/>
+            <SolidColorBrush x:Key="ErrorBrush" Color="#FFDC2626"/>
+
+            <Style TargetType="Button">
+                <Setter Property="Padding" Value="12,6"/>
+                <Setter Property="Background" Value="{StaticResource BgPanelBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush2}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="4">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  Margin="{TemplateBinding Padding}"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="{StaticResource AccentLightBrush}"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Opacity" Value="0.5"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+            </Style>
+
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

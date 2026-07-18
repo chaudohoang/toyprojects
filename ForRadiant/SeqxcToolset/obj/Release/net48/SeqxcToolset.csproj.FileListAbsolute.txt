@@ -1,0 +1,25 @@
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\bin\Release\net48\Seqxc Toolset.exe
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\bin\Release\net48\Seqxc Toolset.exe.config
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\bin\Release\net48\Seqxc Toolset.pdb
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\SeqxcToolset.csproj.AssemblyReference.cache
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\MainWindow.baml
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\PatternNumberTask\PatternNumberView.baml
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\PatternNumberTask\ResolveMatchWindow.baml
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\App.baml
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\MainWindow.g.cs
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\PatternNumberTask\PatternNumberView.g.cs
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\PatternNumberTask\ResolveMatchWindow.g.cs
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\App.g.cs
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Seqxc Toolset_MarkupCompile.cache
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Seqxc Toolset.g.resources
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\SeqxcToolset.GeneratedMSBuildEditorConfig.editorconfig
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\SeqxcToolset.AssemblyInfoInputs.cache
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\SeqxcToolset.AssemblyInfo.cs
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\SeqxcToolset.csproj.CoreCompileInputs.cache
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\SeqxcToolset.sourcelink.json
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Seqxc Toolset.exe
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Seqxc Toolset.pdb
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\ExposureTimeTask\ExposureTimeView.baml
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\ExposureTimeTask\ExposureTimeView.g.cs
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\LuminanceScaleTask\LuminanceScaleView.baml
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\LuminanceScaleTask\LuminanceScaleView.g.cs

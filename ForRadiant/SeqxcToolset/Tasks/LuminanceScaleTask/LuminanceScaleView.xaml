@@ -1,0 +1,84 @@
+<UserControl x:Class="SeqxcToolset.Tasks.LuminanceScaleTask.LuminanceScaleView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <!-- Disables (and visually dims) the New cells for rows whose Analysis
+             type doesn't carry Luminance Scale at all — nothing there to apply to. -->
+        <Style x:Key="NewCellStyle" TargetType="DataGridCell">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding HasLuminanceFields}" Value="False">
+                    <Setter Property="IsEnabled" Value="False"/>
+                    <Setter Property="Background" Value="#FFEDEDED"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="260"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left: grid of sequence items -->
+        <DockPanel Grid.Column="0" Margin="0,0,12,0">
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                <TextBlock Text="Luminance Scale" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                <CheckBox x:Name="ShowAllCheck" Content="Show all items (incl. unselected)"
+                          Margin="20,0,0,0" VerticalAlignment="Center"
+                          Checked="ShowAllCheck_Changed" Unchecked="ShowAllCheck_Changed"/>
+            </StackPanel>
+
+            <DataGrid x:Name="ItemsGrid" AutoGenerateColumns="False" CanUserAddRows="False"
+                      SelectionUnit="Cell" SelectionMode="Extended"
+                      Background="{StaticResource BgPanelBrush}" RowHeaderWidth="0"
+                      GridLinesVisibility="Horizontal" HeadersVisibility="Column">
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsDirty}" Value="True">
+                                <Setter Property="Background" Value="{StaticResource DirtyBrush}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="#" Binding="{Binding DisplayIndex}" Width="35" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Pattern Setup Name" Binding="{Binding PatternSetupName}" Width="160" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Analysis" Binding="{Binding AnalysisType}" Width="150" IsReadOnly="True"/>
+
+                    <DataGridTextColumn Header="Red" Binding="{Binding Red}" Width="60" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="New" Binding="{Binding NewRed, UpdateSourceTrigger=PropertyChanged}" Width="60" CellStyle="{StaticResource NewCellStyle}"/>
+
+                    <DataGridTextColumn Header="Green" Binding="{Binding Green}" Width="60" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="New" Binding="{Binding NewGreen, UpdateSourceTrigger=PropertyChanged}" Width="60" CellStyle="{StaticResource NewCellStyle}"/>
+
+                    <DataGridTextColumn Header="Blue" Binding="{Binding Blue}" Width="60" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="New" Binding="{Binding NewBlue, UpdateSourceTrigger=PropertyChanged}" Width="60" CellStyle="{StaticResource NewCellStyle}"/>
+
+                    <DataGridTextColumn Header="New (all)" Binding="{Binding NewAll, UpdateSourceTrigger=PropertyChanged}" Width="70" CellStyle="{StaticResource NewCellStyle}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+
+        <!-- Right: actions -->
+        <Border Grid.Column="1" Background="{StaticResource BgPanelBrush}"
+                BorderBrush="{StaticResource BorderBrush2}" BorderThickness="1"
+                CornerRadius="6" Padding="14">
+            <StackPanel>
+                <TextBlock Text="Editing" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextMutedBrush}" FontSize="11" Margin="0,0,0,10">
+                    LuminanceScaleRed/Green/Blue live on the SequenceItem's own
+                    Analysis element, not in PatternSetup — only some Analysis
+                    types have them (blank Red/Green/Blue = not applicable to
+                    that step). "New (all)" fills Red/Green/Blue at once, the
+                    common case where they match. Bulk import from Excel isn't
+                    wired up yet.
+                </TextBlock>
+                <Button Content="Save Changes..." Style="{StaticResource PrimaryButton}"
+                        Command="{Binding SaveCommand}"/>
+                <Button Content="Clear New Values" Margin="0,8,0,0"
+                        Command="{Binding ClearNewValuesCommand}"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

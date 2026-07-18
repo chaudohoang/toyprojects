@@ -1,0 +1,78 @@
+<UserControl x:Class="SeqxcToolset.Tasks.ExposureTimeTask.ExposureTimeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="260"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left: grid of sequence items -->
+        <DockPanel Grid.Column="0" Margin="0,0,12,0">
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                <TextBlock Text="Exposure Time" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                <CheckBox x:Name="ShowAllCheck" Content="Show all items (incl. unselected)"
+                          Margin="20,0,0,0" VerticalAlignment="Center"
+                          Checked="ShowAllCheck_Changed" Unchecked="ShowAllCheck_Changed"/>
+            </StackPanel>
+
+            <DataGrid x:Name="ItemsGrid" AutoGenerateColumns="False" CanUserAddRows="False"
+                      SelectionUnit="Cell" SelectionMode="Extended"
+                      Background="{StaticResource BgPanelBrush}" RowHeaderWidth="0"
+                      GridLinesVisibility="Horizontal" HeadersVisibility="Column">
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsDirty}" Value="True">
+                                <Setter Property="Background" Value="{StaticResource DirtyBrush}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="#" Binding="{Binding DisplayIndex}" Width="35" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Pattern Setup Name" Binding="{Binding PatternSetupName}" Width="160" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Analysis" Binding="{Binding AnalysisType}" Width="120" IsReadOnly="True"/>
+
+                    <DataGridCheckBoxColumn Header="Y (Green)" Binding="{Binding YCapture}" Width="70" IsReadOnly="True"/>
+                    <DataGridCheckBoxColumn Header="New" Binding="{Binding NewYCapture, UpdateSourceTrigger=PropertyChanged}" Width="45" IsThreeState="True"/>
+                    <DataGridTextColumn Header="Y Exp (ms)" Binding="{Binding YExposure}" Width="75" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="New" Binding="{Binding NewYExposure, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
+
+                    <DataGridCheckBoxColumn Header="X (Red)" Binding="{Binding XCapture}" Width="70" IsReadOnly="True"/>
+                    <DataGridCheckBoxColumn Header="New" Binding="{Binding NewXCapture, UpdateSourceTrigger=PropertyChanged}" Width="45" IsThreeState="True"/>
+                    <DataGridTextColumn Header="X Exp (ms)" Binding="{Binding XExposure}" Width="75" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="New" Binding="{Binding NewXExposure, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
+
+                    <DataGridCheckBoxColumn Header="Z (Blue)" Binding="{Binding ZCapture}" Width="70" IsReadOnly="True"/>
+                    <DataGridCheckBoxColumn Header="New" Binding="{Binding NewZCapture, UpdateSourceTrigger=PropertyChanged}" Width="45" IsThreeState="True"/>
+                    <DataGridTextColumn Header="Z Exp (ms)" Binding="{Binding ZExposure}" Width="75" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="New" Binding="{Binding NewZExposure, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
+
+                    <DataGridTextColumn Header="New Exp (all)" Binding="{Binding NewExpAll, UpdateSourceTrigger=PropertyChanged}" Width="90"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+
+        <!-- Right: actions -->
+        <Border Grid.Column="1" Background="{StaticResource BgPanelBrush}"
+                BorderBrush="{StaticResource BorderBrush2}" BorderThickness="1"
+                CornerRadius="6" Padding="14">
+            <StackPanel>
+                <TextBlock Text="Editing" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextMutedBrush}" FontSize="11" Margin="0,0,0,10">
+                    "New Exp (all)" fills Y/X/Z exposure at once — the common
+                    case where all three match. Click a "New" checkbox to
+                    override Capture (cycles checked → unchecked → back to
+                    "no change"). Per-channel exposure cells still work
+                    individually if one needs to differ. Bulk import from
+                    Excel isn't wired up yet.
+                </TextBlock>
+                <Button Content="Save Changes..." Style="{StaticResource PrimaryButton}"
+                        Command="{Binding SaveCommand}"/>
+                <Button Content="Clear New Values" Margin="0,8,0,0"
+                        Command="{Binding ClearNewValuesCommand}"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

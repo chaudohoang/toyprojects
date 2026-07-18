@@ -1,0 +1,25 @@
+<Window x:Class="SeqxcToolset.Tasks.PatternNumberTask.ResolveMatchWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Which item should this apply to?" Height="480" Width="440"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource BgAppBrush}" FontFamily="Segoe UI" FontSize="13">
+    <DockPanel Margin="14">
+        <TextBlock x:Name="MessageText" DockPanel.Dock="Top" TextWrapping="Wrap" Margin="0,0,0,10"/>
+
+        <TextBox x:Name="FilterBox" DockPanel.Dock="Top" Margin="0,0,0,8"
+                 Text="" TextChanged="FilterBox_TextChanged" KeyDown="FilterBox_KeyDown"
+                 ToolTip="Type to filter... (Enter = apply top/selected match, Esc = ignore)"/>
+
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="Ignore All Remaining" Margin="0,0,8,0" Click="IgnoreAll_Click"/>
+            <Button Content="Ignore This" Margin="0,0,8,0" Click="Ignore_Click"/>
+            <Button Content="Apply" Style="{StaticResource PrimaryButton}" Click="Apply_Click"/>
+        </StackPanel>
+
+        <ListBox x:Name="CandidateList" DisplayMemberPath="Label"
+                 Foreground="{StaticResource TextPrimaryBrush}" Background="{StaticResource BgPanelBrush}"
+                 FontSize="13"
+                 MouseDoubleClick="CandidateList_MouseDoubleClick"/>
+    </DockPanel>
+</Window>
