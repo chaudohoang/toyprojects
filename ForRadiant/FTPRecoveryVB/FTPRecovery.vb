@@ -45,6 +45,17 @@ Module Program
     Public ForceIncomplete As Boolean = False
     Public SkipMissingSource As Boolean = False
     Public Reconstruct As Boolean = False
+    ' When set, uploads go to this server instead of the one named on line 0 of the
+    ' queue file. Everything else - credentials, dest paths, everything - still comes
+    ' from the queue file. Empty means "use whatever the queue says".
+    Public HostOverride As String = ""
+
+    ' The server a given entry should actually be sent to.
+    Public Function EffectiveHost(e As QueueEntry) As String
+        If HostOverride <> "" Then Return HostOverride
+        Return e.Host
+    End Function
+
     Public MaxRetry As Integer = 3
     ' Circuit breaker for FILE-level failures (server reachable, transfers refused).
     ' 0 disables. Connection outages are handled separately - see ServerDown below.
@@ -331,6 +342,11 @@ Module Program
     '   2. Skip missing - decides whether a file with no image still counts
     '   3. Force        - decides whether to send a manifest that is still short
     Public Sub LogOptionNotes()
+        If HostOverride <> "" Then
+            Log("*** HOST OVERRIDE: everything will be sent to " & HostOverride)
+            Log("    The server named in the queue files is being ignored. Destination")
+            Log("    paths and credentials still come from the queue files.")
+        End If
         If SkipMissingSource AndAlso ForceIncomplete Then
             Log("NOTE: 'Skip missing source' and 'Force incomplete' work against each other.")
             Log("      Skip leaves those queue files in place, so the panel will reappear on")
@@ -438,6 +454,10 @@ Module Program
                     SkipMissingSource = True
                 Case "-reconstruct", "/reconstruct"
                     Reconstruct = True
+                Case "-host", "/host"
+                    i += 1
+                    If i >= args.Length Then Return False
+                    HostOverride = args(i).Trim()
                 Case "-help", "/?", "-?", "/help"
                     Return False
                 Case "-root", "/root"
@@ -1212,6 +1232,11 @@ Module Program
 
         Log("---------------------------------------------------------------")
         Log("PID " & p.PID)
+        If p.Entries.Count > 0 Then
+            Dim h = EffectiveHost(p.Entries(0))
+            Log("  sending to  : " & h & If(HostOverride <> "", "   (OVERRIDE - queue says " &
+                p.Entries(0).Host & ")", ""))
+        End If
         Log("  host file   : " & p.HostSrc)
         Log("  total needed: " & p.Total.ToString() & "   host now: " & hostBefore.ToString() &
             "   pending: " & pending.ToString() & " (" & dupCount.ToString() & " done, " &
@@ -1229,13 +1254,20 @@ Module Program
             Log("  note: " & p.Leftovers.Count.ToString() & " stale index/host queue file(s) present.")
         End If
         If p.RebuiltCount > 0 AndAlso Reconstruct Then
-            Log("  RECONSTRUCTED " & st.Rebuilt.ToString() & " entr(ies) from disk:")
-            If p.InferredExts.Count > 0 Then
-                Log("     dest folder INFERRED from a donor panel for: " & String.Join(", ", p.InferredExts))
+            Log("  RECONSTRUCTED " & st.Rebuilt.ToString() & " entr(ies) from disk" &
+                If(DoExecute, ":", ""))
+            ' Detail only when uploading. On a 5,000-panel scan this section was
+            ' emitting hundreds of near-identical lines and burying everything else;
+            ' the run-level totals already report it.
+            If DoExecute Then
+                If p.InferredExts.Count > 0 Then
+                    Log("     dest folder INFERRED from a donor panel for: " & String.Join(", ", p.InferredExts))
+                End If
+                For Each e In p.Entries.Where(Function(x) x.IsReconstructed)
+                    Log("     " & Path.GetFileName(e.SourceFile) &
+                        "  ->  ftp://" & EffectiveHost(e) & e.DestFile)
+                Next
             End If
-            For Each e In p.Entries.Where(Function(x) x.IsReconstructed)
-                Log("     " & Path.GetFileName(e.SourceFile) & "  ->  " & e.DestFile)
-            Next
         ElseIf p.RebuiltCount > 0 Then
             Log("  note: " & p.RebuiltCount.ToString() &
                 " rebuilt entr(ies) from an earlier scan are IGNORED (Reconstruct is off).")
@@ -1333,9 +1365,10 @@ Module Program
             Dim err As String = ""
             Dim connErr As Boolean = False
             If TryUpload(e, e.SourceFile, e.DestFile, err, connErr) Then
-                Log("    [ ok ] " & Path.GetFileName(e.SourceFile) & " -> " & e.DestFile)
+                Log("    [ ok ] " & Path.GetFileName(e.SourceFile) &
+                    " -> ftp://" & EffectiveHost(e) & e.DestFile)
                 AppendLog(e.SucceedLog, "Recovery: upload succeeded " & e.SourceFile &
-                          " to: ftp://" & e.Host & e.DestFile)
+                          " to: ftp://" & EffectiveHost(e) & e.DestFile)
                 If isRetry Then
                     ' Placeholder becomes a clean record - replace, do not append.
                     ReplaceRecord(e)
@@ -1365,7 +1398,7 @@ Module Program
                     Log("    [FAIL] " & Path.GetFileName(e.SourceFile) & " : " & err)
                     AppendLog(e.FailLog, "Recovery: upload failed after " & MaxRetry.ToString() &
                               " attempt(s): " & err & " " & e.SourceFile &
-                              " to: ftp://" & e.Host & e.DestFile)
+                              " to: ftp://" & EffectiveHost(e) & e.DestFile)
                     If Not isRetry Then AppendRecord(e, True)   ' placeholder already present on a retry
                     recorded(rec) = True
                     BackupAndDelete(e.FilePath, "Backedup Recovery Queue\Failed")
@@ -1500,9 +1533,9 @@ Module Program
 
         If File.Exists(idxUpload) Then
             If TryUpload(ref, idxUpload, p.IndexDst, err) Then
-                Log("  [ ok ] INDEX -> " & p.IndexDst)
+                Log("  [ ok ] INDEX -> ftp://" & EffectiveHost(ref) & p.IndexDst)
                 AppendLog(ref.SucceedLog, "Recovery: index uploaded " & p.IndexSrc &
-                          " to: ftp://" & ref.Host & p.IndexDst)
+                          " to: ftp://" & EffectiveHost(ref) & p.IndexDst)
             Else
                 Log("  [FAIL] INDEX : " & err)
                 AppendLog(ref.FailLog, "Recovery: index upload failed: " & err)
@@ -1515,9 +1548,9 @@ Module Program
 
         If File.Exists(hstUpload) Then
             If TryUpload(ref, hstUpload, p.HostDst, err) Then
-                Log("  [ ok ] HOST  -> " & p.HostDst)
+                Log("  [ ok ] HOST  -> ftp://" & EffectiveHost(ref) & p.HostDst)
                 AppendLog(ref.SucceedLog, "Recovery: host uploaded " & p.HostSrc &
-                          " to: ftp://" & ref.Host & p.HostDst)
+                          " to: ftp://" & EffectiveHost(ref) & p.HostDst)
             Else
                 Log("  [FAIL] HOST  : " & err)
                 AppendLog(ref.FailLog, "Recovery: host upload failed: " & err)
@@ -1568,8 +1601,9 @@ Module Program
     Private CurUser As String = ""
 
     Private Function GetSession(e As QueueEntry) As Session
+        Dim useHost = EffectiveHost(e)
         If CurSession IsNot Nothing AndAlso CurSession.Opened _
-           AndAlso String.Equals(CurHost, e.Host, StringComparison.OrdinalIgnoreCase) _
+           AndAlso String.Equals(CurHost, useHost, StringComparison.OrdinalIgnoreCase) _
            AndAlso String.Equals(CurUser, e.User, StringComparison.OrdinalIgnoreCase) Then
             Return CurSession
         End If
@@ -1578,7 +1612,7 @@ Module Program
 
         Dim opts As New SessionOptions()
         opts.Protocol = Protocol.Ftp
-        opts.HostName = e.Host
+        opts.HostName = useHost
         opts.UserName = e.User
         opts.Password = e.Pass
         opts.TimeoutInMilliseconds = 20000
@@ -1595,7 +1629,7 @@ Module Program
 
         s.Open(opts)
         CurSession = s
-        CurHost = e.Host
+        CurHost = useHost
         CurUser = e.User
         Return s
     End Function
@@ -1667,9 +1701,9 @@ Module Program
 
         ' Cheap socket check before handing over to WinSCP, so a dead server costs
         ' 3 seconds rather than an OS-level TCP timeout.
-        If Not ServerReachable(e.Host) Then
+        If Not ServerReachable(EffectiveHost(e)) Then
             connError = True
-            err = "cannot connect to " & e.Host & " (no answer within 3s)"
+            err = "cannot connect to " & EffectiveHost(e) & " (no answer within 3s)"
             ' Must set ServerDown here too. This branch returns early, so without
             ' it the flag was never raised and every file paid the full 3s socket
             ' timeout instead of being skipped instantly.
@@ -1679,7 +1713,7 @@ Module Program
                 Log("      server appears to be down - remaining files will be left for a")
                 Log("      later run, with a re-check every " & PROBE_INTERVAL_SECONDS.ToString() & "s.")
             ElseIf probing Then
-                Log("      still no answer from " & e.Host & ".")
+                Log("      still no answer from " & EffectiveHost(e) & ".")
                 LastProbe = DateTime.Now
             End If
             Return False

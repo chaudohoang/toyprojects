@@ -11,6 +11,10 @@ REM Edit the variables below to change the shape of the test population.
 REM ===========================================================================
 
 REM ---- configuration --------------------------------------------------------
+REM Optional arguments:  ResetTestSet.bat [panels] [dummyFileSizeKB]
+REM   ResetTestSet.bat              ->  500 panels, 4 KB files   (normal testing)
+REM   ResetTestSet.bat 5000 1       ->  5000 panels, 1 KB files  (scale testing)
+REM 5000 panels is ~125,000 queue files and takes about 7 minutes to generate.
 set "QUEUE=D:\Program\RVS\UploadQueue"
 set "TEMPLATE=D:\Program\RVS\UploadQueueTemplate"
 set "SRCROOT=E:\POCB\HEX\D994-CB-MP00_MATHON\08\19"
@@ -19,6 +23,8 @@ set "SCRIPT=%~dp0MakeTestQueues.ps1"
 set "OLDPID=AAA"
 set "COUNT=500"
 set "SIZEKB=4"
+if not "%~1"=="" set "COUNT=%~1"
+if not "%~2"=="" set "SIZEKB=%~2"
 
 REM Random scenario mix. Each panel gets one of six real-world states so the
 REM recovery tool is exercised on all of them. Weights need not sum to 100.

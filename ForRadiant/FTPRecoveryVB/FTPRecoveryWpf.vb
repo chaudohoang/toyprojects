@@ -111,6 +111,7 @@ Public Class RecoveryWindow
     Private chkForce As CheckBox
     Private chkSkipMissing As CheckBox
     Private chkReconstruct As CheckBox
+    Private cboHost As ComboBox
     Private numRetry As ComboBox
     Private dg As DataGrid
     Private txtLog As TextBox
@@ -287,9 +288,23 @@ Public Class RecoveryWindow
             AddHandler cb.Unchecked, AddressOf OnOptionToggled
         Next
 
+        ' Send to a specific server instead of the one named in the queue files.
+        ' "Auto" keeps the queue's own host, which is the normal case.
+        Dim lblHost As New TextBlock() With {
+            .Text = "Send to:", .VerticalAlignment = VerticalAlignment.Center,
+            .Margin = New Thickness(12, 0, 6, 0)}
+        cboHost = New ComboBox() With {
+            .Width = 165, .VerticalContentAlignment = VerticalAlignment.Center}
+        cboHost.Items.Add("Auto (from queue)")
+        cboHost.Items.Add("10.119.211.173")
+        cboHost.Items.Add("10.119.211.174")
+        cboHost.SelectedIndex = 0
+        AddHandler cboHost.SelectionChanged, AddressOf OnHostOverrideChanged
+
         Dim lblRetry As New TextBlock() With {
             .Text = "Retries:", .VerticalAlignment = VerticalAlignment.Center,
             .Margin = New Thickness(12, 0, 6, 0)}
+
         numRetry = New ComboBox() With {
             .Width = 55, .VerticalContentAlignment = VerticalAlignment.Center,
             .Margin = New Thickness(0, 0, 0, 0)}
@@ -301,6 +316,8 @@ Public Class RecoveryWindow
         opts.Children.Add(chkReconstruct)
         opts.Children.Add(chkForce)
         opts.Children.Add(chkSkipMissing)
+        opts.Children.Add(lblHost)
+        opts.Children.Add(cboHost)
         opts.Children.Add(lblRetry)
         opts.Children.Add(numRetry)
         Grid.SetColumn(opts, 1)
@@ -535,23 +552,34 @@ Public Class RecoveryWindow
                          Dim idx = i
                          Dim label As String
                          Dim colour As Brush
+                         ' Test the FTP port, not ICMP. A network can block ping and
+                         ' still allow FTP, or answer ping while the port is closed -
+                         ' either way an ICMP result would be misleading about
+                         ' whether an upload can actually happen.
+                         Dim sw = System.Diagnostics.Stopwatch.StartNew()
+                         Dim ok As Boolean = False
                          Try
-                             Using p As New Ping()
-                                 Dim r = p.Send(targets(idx), 1000)
-                                 If r IsNot Nothing AndAlso r.Status = IPStatus.Success Then
-                                     label = r.RoundtripTime.ToString() & " ms"
-                                     colour = If(r.RoundtripTime > 100,
-                                                 CType(Brushes.DarkOrange, Brush),
-                                                 CType(Brushes.Green, Brush))
-                                 Else
-                                     label = "no reply"
-                                     colour = Brushes.Red
+                             Using c As New Net.Sockets.TcpClient()
+                                 Dim ar = c.BeginConnect(targets(idx), 21, Nothing, Nothing)
+                                 If ar.AsyncWaitHandle.WaitOne(2000) Then
+                                     c.EndConnect(ar)
+                                     ok = c.Connected
                                  End If
                              End Using
                          Catch
-                             label = "unreachable"
-                             colour = Brushes.Red
+                             ok = False
                          End Try
+                         sw.Stop()
+
+                         If ok Then
+                             Dim ms = CInt(sw.Elapsed.TotalMilliseconds)
+                             label = ms.ToString() & " ms"
+                             colour = If(ms > 200, CType(Brushes.DarkOrange, Brush),
+                                                   CType(Brushes.Green, Brush))
+                         Else
+                             label = "no FTP"
+                             colour = Brushes.Red
+                         End If
 
                          Dim text = targets(idx) & "  " & label
                          Dispatcher.BeginInvoke(New Action(
@@ -657,6 +685,7 @@ Public Class RecoveryWindow
         chkReconstruct.IsEnabled = Not state
         chkForce.IsEnabled = Not state
         chkSkipMissing.IsEnabled = Not state
+        cboHost.IsEnabled = Not state
         numRetry.IsEnabled = Not state
         ' Deliberately NOT setting a wait cursor. The window stays fully
         ' responsive during a run, and a spinning cursor reads as "frozen" -
@@ -668,12 +697,29 @@ Public Class RecoveryWindow
         Return r IsNot Nothing AndAlso r.CanUpload
     End Function
 
+    ' Changing the destination server does not alter the table - only where the
+    ' files go - so no re-classify is needed. It is loud in the log instead,
+    ' because sending to the wrong server is not something to do by accident.
+    Private Sub OnHostOverrideChanged(sender As Object, e As SelectionChangedEventArgs)
+        If cboHost Is Nothing OrElse busy Then Return
+        AppendLog("")
+        If cboHost.SelectedIndex > 0 Then
+            AppendLog(">>> SEND TO: " & Convert.ToString(cboHost.SelectedItem) &
+                      "  - the server named in the queue files will be IGNORED.")
+        Else
+            AppendLog(">>> SEND TO: Auto - each panel goes to the server named in its own queue file.")
+        End If
+    End Sub
+
     Private Sub ApplySettings(execute As Boolean)
         Program.QueueRoot = txtRoot.Text.TrimEnd("\"c)
         Program.DoExecute = execute
         Program.ForceIncomplete = chkForce.IsChecked.GetValueOrDefault()
         Program.SkipMissingSource = chkSkipMissing.IsChecked.GetValueOrDefault()
         Program.Reconstruct = chkReconstruct.IsChecked.GetValueOrDefault()
+        ' Index 0 is "Auto (from queue)" - anything else is a literal host.
+        Program.HostOverride = If(cboHost.SelectedIndex > 0,
+                                  Convert.ToString(cboHost.SelectedItem), "")
         Dim r As Integer = 3
         Integer.TryParse(CStr(numRetry.SelectedItem), r)
         Program.MaxRetry = r

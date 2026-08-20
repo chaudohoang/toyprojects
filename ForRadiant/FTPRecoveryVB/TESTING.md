@@ -3,12 +3,16 @@
 ## One click
 
 ```
-ResetTestSet.bat
+ResetTestSet.bat                 500 panels, 4 KB files   (~30 s)
+ResetTestSet.bat 5000 1         5000 panels, 1 KB files   (~7 min)
 ```
 
-~30 seconds. Deletes every generated panel (queue files, dummy images, index/host
-files, recovery logs, backups, fail counters) and builds a fresh 500-panel
-population covering every case the recovery tool has to handle.
+Deletes every generated panel (queue files, dummy images, index/host files,
+recovery logs, backups, fail counters) and builds a fresh population covering every
+case the recovery tool has to handle.
+
+Arguments are optional: first is the panel count, second is the dummy file size in
+KB. Use 1 KB at 5,000 panels — 125,000 files at 4 KB would be 500 MB.
 
 Needs three things, all checked **before** it deletes anything:
 
@@ -122,6 +126,34 @@ Rebuilt from disk      : 206
 
 The 103 short manifests line up with the 107 missing images — deliberately deleted
 by the generator. On production those would be something to investigate, not accept.
+
+---
+
+## Scale test — 5,000 panels
+
+`ResetTestSet.bat 5000 1` produces a population comparable to a real backlog:
+
+| | |
+|---|---|
+| Queue files | 96,820 |
+| Panels discovered | 4,990 |
+| Generation time | ~7 min |
+| **Scan, no reconstruct** | **15.5 s** |
+| **Scan with reconstruct** | **15.9 s** |
+| Entries rebuilt from disk | 1,882 |
+| Junk accepted | 0 |
+| Panels able to complete | 4,990 / 4,990 |
+
+Scaling is linear — ten times the data, ten times the time. Reconstruction costs
+about a second even while enumerating 5,000 source folders. The GUI handles it
+because the grid virtualizes rows and the log flushes in batches.
+
+Note the dummy files are 1 KB. On real data the transfer time dominates completely,
+so scan time is not the constraint — the network is.
+
+This test also caught a logging problem worth remembering: the per-panel
+`dest folder INFERRED` line fired 411 times and buried everything else. Per-panel
+reconstruction detail is now only logged when actually uploading, not when scanning.
 
 ---
 
