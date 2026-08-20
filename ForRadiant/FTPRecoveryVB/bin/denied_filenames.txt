@@ -1,0 +1,23 @@
+# =============================================================================
+# DENIED FILENAMES - names that must NEVER be reconstructed and uploaded.
+#
+# Denials beat every other source. A name listed here is removed even if it
+# appears in allowed_filenames.txt, in real queue files, in the learned cache,
+# or in the backup archive.
+#
+# This is how you permanently exclude a name that was learned by mistake -
+# for example from an incorrect template - without having to purge caches.
+#
+# Rules:
+#   - one filename per line, exactly as it appears on disk
+#   - case does not matter
+#   - lines starting with # are ignored, blank lines are ignored
+#   - @PID@ stands for the panel's local file PID (the part that changes per panel)
+#
+# This file ships WITH the exe - keep it in the same folder as FTPRecoveryGUI.exe.
+# It is never written by the tool.
+# =============================================================================
+
+# Example - remove the # to activate:
+#step99_*.tif
+

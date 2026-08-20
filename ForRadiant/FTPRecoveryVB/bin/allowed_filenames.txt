@@ -1,0 +1,56 @@
+# =============================================================================
+# ALLOWED FILENAMES - rule file for "Reconstruct from disk".
+#
+# By default these names are ADDED to whatever the tool learns from real queue
+# files. That way a name that no longer appears anywhere is still permitted,
+# while genuinely new names are still picked up automatically.
+#
+# Put  !strict  on a line by itself to use ONLY this file and learn nothing.
+# Use that when the learned cache has picked up wrong names.
+#
+# To permanently exclude a name that was learned by mistake, put it in
+# denied_filenames.txt in this same folder. Denials beat every other source.
+#
+# (known_filenames.txt is only a learned cache. The tool rewrites it on every
+#  scan, so edits there do not survive. Edit THIS file instead.)
+#
+# Rules:
+#   - one filename per line, exactly as it appears on disk
+#   - case does not matter
+#   - lines starting with # are ignored, blank lines are ignored
+#   - @PID@ stands for the panel's local file PID (the part that changes per panel)
+#
+# This file ships WITH the exe - keep it in the same folder as FTPRecoveryGUI.exe.
+# The queue folder is only an input, so nothing needs to be placed there.
+# (If a queue folder does contain its own copy, that copy wins for that folder.)
+#
+# Source: FTPupload image list for D99x 1stPUC / 2ndPUC MP
+# =============================================================================
+
+# Uncomment to ignore everything not listed below:
+#!strict
+
+
+# ---- non-image files -------------------------------------------------------
+*_gamma.hex
+NyPucData_@PID@_*.hex
+puc_otp_read.txt
+
+# ---- 1st PUC ---------------------------------------------------------------
+step01_0650NIT_B056_imgY_Crop.tif
+step01_0650NIT_B224_imgY_Crop.tif
+step01_0650NIT_G056_imgY_Crop.tif
+step01_0650NIT_G224_imgY_Crop.tif
+step01_0650NIT_R056_imgY_Crop.tif
+step01_0650NIT_R224_imgY_Crop.tif
+step02_0650NIT_B192_imgY_Crop.tif
+step02_0650NIT_G192_imgY_Crop.tif
+step02_0650NIT_R192_imgY_Crop.tif
+step99_0650NIT_UDIRVibMap_imgY_Crop.tif
+
+# ---- 2nd PUC ---------------------------------------------------------------
+step03_0010NIT_G076_imgY_Crop.tif
+step03_0010NIT_G016_imgY_Crop.tif
+step03_0300NIT_G176_imgY_Crop.tif
+step04_0010NIT_G020_imgY_Crop.tif
+step05_0010NIT_G016_imgY_Crop.tif

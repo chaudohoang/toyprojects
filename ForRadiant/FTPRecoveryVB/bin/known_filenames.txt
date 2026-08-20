@@ -1,0 +1,31 @@
+# Canonical source filenames LEARNED from real FTPUploaderVB queue files.
+# @PID@ stands for the panel's local file PID.
+#
+# THIS FILE IS REGENERATED ON EVERY SCAN - edits here do not survive.
+# It holds only what was learned; names from allowed_filenames.txt are NOT
+# copied here, so removing one from that file really does remove it.
+d994_gamma.hex
+nypucdata_@pid@_1st.hex
+nypucdata_@pid@_2nd.hex
+puc_otp_read.txt
+step01_0650nit_b048_imgy_crop.tif
+step01_0650nit_b056_imgy_crop.tif
+step01_0650nit_b192_imgy_crop.tif
+step01_0650nit_b224_imgy_crop.tif
+step01_0650nit_g048_imgy_crop.tif
+step01_0650nit_g056_imgy_crop.tif
+step01_0650nit_g192_imgy_crop.tif
+step01_0650nit_g224_imgy_crop.tif
+step01_0650nit_r048_imgy_crop.tif
+step01_0650nit_r056_imgy_crop.tif
+step01_0650nit_r192_imgy_crop.tif
+step01_0650nit_r224_imgy_crop.tif
+step02_0650nit_b016_imgy_crop.tif
+step02_0650nit_b048_imgy_crop.tif
+step02_0650nit_b192_imgy_crop.tif
+step02_0650nit_g016_imgy_crop.tif
+step02_0650nit_g048_imgy_crop.tif
+step02_0650nit_g192_imgy_crop.tif
+step02_0650nit_r016_imgy_crop.tif
+step02_0650nit_r048_imgy_crop.tif
+step02_0650nit_r192_imgy_crop.tif

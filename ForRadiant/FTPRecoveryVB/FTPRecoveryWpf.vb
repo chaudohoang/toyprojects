@@ -17,6 +17,7 @@ Imports System.Collections.ObjectModel
 Imports System.ComponentModel
 Imports System.IO
 Imports System.Linq
+Imports System.Net.NetworkInformation
 Imports System.Threading.Tasks
 Imports System.Windows
 Imports System.Windows.Controls
@@ -29,13 +30,31 @@ Module WpfProgram
     <STAThread>
     Sub Main()
         ' Anything that escapes must land in a file - a silent swallow leaves the
-        ' window sitting in a busy state with no explanation.
+        ' window sitting in a busy state with no explanation, and a silent EXIT
+        ' leaves no explanation at all.
         AddHandler AppDomain.CurrentDomain.UnhandledException, AddressOf OnDomainCrash
+        ' Exceptions inside Task.Run are captured by the Task, not thrown - without
+        ' this they vanish completely.
+        AddHandler TaskScheduler.UnobservedTaskException, AddressOf OnTaskCrash
+        AddHandler AppDomain.CurrentDomain.ProcessExit, AddressOf OnProcessExit
+
+        CrashLog("start", "FTPRecoveryGUI started, pid " &
+                 System.Diagnostics.Process.GetCurrentProcess().Id.ToString())
+
         Dim app As New Application()
         AddHandler app.DispatcherUnhandledException, AddressOf OnDispatcherCrash
         app.ShutdownMode = ShutdownMode.OnMainWindowClose
         Dim w As New RecoveryWindow()
         app.Run(w)
+    End Sub
+
+    Private Sub OnTaskCrash(sender As Object, e As UnobservedTaskExceptionEventArgs)
+        CrashLog("Task", e.Exception.ToString())
+        e.SetObserved()
+    End Sub
+
+    Private Sub OnProcessExit(sender As Object, e As EventArgs)
+        CrashLog("exit", "process exiting normally")
     End Sub
 
     Friend Sub CrashLog(context As String, text As String)
@@ -98,6 +117,21 @@ Public Class RecoveryWindow
     Private bar As ProgressBar
     Private lblStatus As TextBlock
 
+    ' Live reachability of the FTP servers this queue is configured for. Hosts are
+    ' read from line 0 of the queue files, not hardcoded, so the strip is correct
+    ' on any machine. A stalled upload is very often a network problem, so it
+    ' should be visible without leaving the window.
+    '
+    ' Always monitored, in this order. Any additional host named by the queue files
+    ' (line 0) is appended, so a machine pointed at a different server still shows it.
+    Private ReadOnly EXTRA_PING_HOSTS As String() = {"127.0.0.1", "10.119.211.173", "10.119.211.174"}
+
+    Private pingHosts As New List(Of String)()
+    Private pingPanel As StackPanel = Nothing
+    Private pingLabels As New List(Of TextBlock)()
+    Private pingTimer As System.Windows.Threading.DispatcherTimer = Nothing
+    Private pingBusy As Boolean = False
+
     Private panels As New List(Of Program.Panel)()
     Private rows As New ObservableCollection(Of PanelRow)()
     Private busy As Boolean = False
@@ -113,6 +147,40 @@ Public Class RecoveryWindow
         Content = BuildUi()
         txtRoot.Text = Program.DefaultQueueRoot()
         StartLogTimer()
+        SetPingHosts(New List(Of String)())     ' extras only until the queue is read
+        RefreshPingHosts()
+        StartPingTimer()
+        AddHandler Me.Closing, AddressOf OnWindowClosing
+    End Sub
+
+    ' Closing the window kills the upload thread with it. That is survivable - the
+    ' next scan works the state out from disk - but it should be deliberate, and it
+    ' must be recorded, or a mid-run close looks exactly like a crash afterwards.
+    Private Sub OnWindowClosing(sender As Object, e As ComponentModel.CancelEventArgs)
+        If busy Then
+            Dim r = MessageBox.Show(Me,
+                "An upload is still running." & vbCrLf & vbCrLf &
+                "Closing now stops it immediately. Nothing is lost - files already " &
+                "sent are recorded, and the queue files that were not sent stay put - " &
+                "but the panel being worked on will not have its index/host sent." &
+                vbCrLf & vbCrLf & "Close anyway?",
+                "Upload in progress", MessageBoxButton.YesNo, MessageBoxImage.Warning)
+            If r <> MessageBoxResult.Yes Then
+                e.Cancel = True
+                Return
+            End If
+            Program.CancelRequested = True
+            WpfProgram.CrashLog("close", "window closed by the user DURING an upload")
+            ' The engine's file log is written as it goes, but close the writers so
+            ' the last lines are on disk rather than sitting in a buffer.
+            Try
+                Program.CloseSessionPublic()
+                Program.CloseLogsPublic()
+            Catch
+            End Try
+        Else
+            WpfProgram.CrashLog("close", "window closed by the user (idle)")
+        End If
     End Sub
 
     ' =====================================================================
@@ -213,6 +281,11 @@ Public Class RecoveryWindow
         chkReconstruct = MakeCheck("Reconstruct from disk")
         chkForce = MakeCheck("Force incomplete")
         chkSkipMissing = MakeCheck("Skip missing source")
+        ' All three change what the table says, so all three re-classify.
+        For Each cb In New CheckBox() {chkReconstruct, chkForce, chkSkipMissing}
+            AddHandler cb.Checked, AddressOf OnOptionToggled
+            AddHandler cb.Unchecked, AddressOf OnOptionToggled
+        Next
 
         Dim lblRetry As New TextBlock() With {
             .Text = "Retries:", .VerticalAlignment = VerticalAlignment.Center,
@@ -354,11 +427,16 @@ Public Class RecoveryWindow
 
     Private Function BuildStatusBar() As UIElement
         Dim g As New Grid() With {.Margin = New Thickness(0, 8, 0, 0)}
+        g.ColumnDefinitions.Add(New ColumnDefinition() With {.Width = GridLength.Auto})
         g.ColumnDefinitions.Add(New ColumnDefinition() With {.Width = New GridLength(1, GridUnitType.Star)})
         g.ColumnDefinitions.Add(New ColumnDefinition() With {.Width = GridLength.Auto})
 
-        bar = New ProgressBar() With {.Height = 18, .Minimum = 0, .Maximum = 1, .Value = 0}
-        Grid.SetColumn(bar, 0)
+        Dim pings = BuildPingStrip()
+        Grid.SetColumn(pings, 0)
+
+        bar = New ProgressBar() With {.Height = 18, .Minimum = 0, .Maximum = 1, .Value = 0,
+                                      .Margin = New Thickness(12, 0, 0, 0)}
+        Grid.SetColumn(bar, 1)
 
         lblStatus = New TextBlock() With {
             .Text = "Idle",
@@ -366,13 +444,128 @@ Public Class RecoveryWindow
             .Margin = New Thickness(10, 0, 0, 0),
             .MinWidth = 160,
             .TextTrimming = TextTrimming.CharacterEllipsis}
-        Grid.SetColumn(lblStatus, 1)
+        Grid.SetColumn(lblStatus, 2)
 
+        g.Children.Add(pings)
         g.Children.Add(bar)
         g.Children.Add(lblStatus)
         Grid.SetRow(g, 3)
         Return g
     End Function
+
+    Private Function BuildPingStrip() As UIElement
+        pingPanel = New StackPanel() With {.Orientation = Orientation.Horizontal,
+                                           .VerticalAlignment = VerticalAlignment.Center}
+        Return pingPanel
+    End Function
+
+    ' Rebuild the strip for a given set of hosts. Called at startup and after every
+    ' scan, so changing the queue folder retargets the monitor automatically.
+    Private Sub SetPingHosts(hosts As List(Of String))
+        Dim merged As New List(Of String)()
+        Dim seen As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+        ' Fixed list first, in the order given, then anything extra the queue names.
+        For Each h In EXTRA_PING_HOSTS
+            If h <> "" AndAlso seen.Add(h) Then merged.Add(h)
+        Next
+        For Each h In hosts
+            If h <> "" AndAlso seen.Add(h) Then merged.Add(h)
+        Next
+
+        ' Nothing changed - don't rebuild and lose the current readings.
+        If merged.Count = pingHosts.Count AndAlso
+           merged.SequenceEqual(pingHosts, StringComparer.OrdinalIgnoreCase) Then Exit Sub
+
+        pingHosts = merged
+        pingPanel.Children.Clear()
+        pingLabels.Clear()
+
+        If pingHosts.Count = 0 Then
+            pingPanel.Children.Add(New TextBlock() With {
+                .Text = "no FTP host found in the queue",
+                .Foreground = Brushes.Gray,
+                .FontFamily = New FontFamily("Consolas"),
+                .FontSize = 11.5,
+                .VerticalAlignment = VerticalAlignment.Center})
+            Exit Sub
+        End If
+
+        For Each h In pingHosts
+            Dim t As New TextBlock() With {
+                .Text = h & "  ...",
+                .Margin = New Thickness(0, 0, 16, 0),
+                .VerticalAlignment = VerticalAlignment.Center,
+                .FontFamily = New FontFamily("Consolas"),
+                .FontSize = 11.5,
+                .Foreground = Brushes.Gray}
+            pingLabels.Add(t)
+            pingPanel.Children.Add(t)
+        Next
+    End Sub
+
+    ' Look at the queue folder for the hosts to watch, off the UI thread.
+    Private Sub RefreshPingHosts()
+        Dim rootPath = txtRoot.Text.TrimEnd("\"c)
+        Task.Run(Sub()
+                     Dim hosts = Program.HostsInQueue(rootPath)
+                     Dispatcher.BeginInvoke(New Action(Sub() SetPingHosts(hosts)))
+                 End Sub)
+    End Sub
+
+    ' =====================================================================
+    ' Ping
+    ' =====================================================================
+
+    Private Sub StartPingTimer()
+        PingTick(Nothing, Nothing)                     ' first reading immediately
+        pingTimer = New System.Windows.Threading.DispatcherTimer()
+        pingTimer.Interval = TimeSpan.FromSeconds(3)
+        AddHandler pingTimer.Tick, AddressOf PingTick
+        pingTimer.Start()
+    End Sub
+
+    Private Sub PingTick(sender As Object, e As EventArgs)
+        If pingBusy Then Return                        ' don't stack slow rounds
+        Dim targets = pingHosts.ToList()               ' snapshot: the list can be rebuilt
+        If targets.Count = 0 Then Return
+        pingBusy = True
+
+        Task.Run(Sub()
+                     For i = 0 To targets.Count - 1
+                         Dim idx = i
+                         Dim label As String
+                         Dim colour As Brush
+                         Try
+                             Using p As New Ping()
+                                 Dim r = p.Send(targets(idx), 1000)
+                                 If r IsNot Nothing AndAlso r.Status = IPStatus.Success Then
+                                     label = r.RoundtripTime.ToString() & " ms"
+                                     colour = If(r.RoundtripTime > 100,
+                                                 CType(Brushes.DarkOrange, Brush),
+                                                 CType(Brushes.Green, Brush))
+                                 Else
+                                     label = "no reply"
+                                     colour = Brushes.Red
+                                 End If
+                             End Using
+                         Catch
+                             label = "unreachable"
+                             colour = Brushes.Red
+                         End Try
+
+                         Dim text = targets(idx) & "  " & label
+                         Dispatcher.BeginInvoke(New Action(
+                             Sub()
+                                 ' The strip may have been rebuilt mid-round.
+                                 If idx < pingLabels.Count AndAlso
+                                    String.Equals(pingHosts(idx), targets(idx), StringComparison.OrdinalIgnoreCase) Then
+                                     pingLabels(idx).Text = text
+                                     pingLabels(idx).Foreground = colour
+                                 End If
+                             End Sub))
+                     Next
+                 End Sub).ContinueWith(Sub() pingBusy = False)
+    End Sub
 
     ' =====================================================================
     ' Dispatcher-safe UI updates
@@ -512,6 +705,7 @@ Public Class RecoveryWindow
         SetBusy(True)
         rows.Clear()
         txtLog.Clear()
+        RefreshPingHosts()          ' the folder may have changed since last time
         ' An explicit Scan starts a fresh session - drop the completed-panel history.
         Program.ClearOutcomes()
         ApplySettings(False)
@@ -558,6 +752,11 @@ Public Class RecoveryWindow
 
         Dim green = New SolidColorBrush(Color.FromRgb(232, 245, 233))
         Dim amber = New SolidColorBrush(Color.FromRgb(255, 244, 224))
+        ' Ready, but only because entries were rebuilt from disk - worth telling
+        ' apart from a panel whose queue was complete all along.
+        Dim lilac = New SolidColorBrush(Color.FromRgb(243, 236, 255))
+        ' Will be sent, but short, because Force is on - not blocked, but not clean.
+        Dim orange = New SolidColorBrush(Color.FromRgb(255, 226, 196))
 
         Dim live As New List(Of PanelRow)()
         Dim liveKeys As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
@@ -579,10 +778,16 @@ Public Class RecoveryWindow
                 .Verdict = st.Verdict,
                 .CanUpload = True}
             If Not st.CanComplete Then
-                r.RowBrush = pink
+                ' Force turns "blocked" into "will send, short" - colour it as an
+                ' outcome to check rather than an obstacle.
+                r.RowBrush = If(st.WillForce, orange, pink)
             Else
                 ready += 1
-                If st.NewCount = 0 AndAlso st.RetryCount = 0 Then r.RowBrush = blue
+                If st.Rebuilt > 0 Then
+                    r.RowBrush = lilac          ' ready only thanks to reconstruction
+                ElseIf st.NewCount = 0 AndAlso st.RetryCount = 0 Then
+                    r.RowBrush = blue
+                End If
             End If
             live.Add(r)
         Next
@@ -619,6 +824,14 @@ Public Class RecoveryWindow
 
         AppendLog("")
         AppendLog(ready.ToString() & " of " & panels.Count.ToString() & " pending panel(s) can complete.")
+        Dim viaRebuild = live.Where(Function(r) r.Rebuilt > 0).Count()
+        If viaRebuild > 0 Then
+            AppendLog(viaRebuild.ToString() & " of those depend on rebuilt entries (shown in lilac).")
+        End If
+        Dim forced = live.Where(Function(r) r.Verdict.StartsWith("FORCED")).Count()
+        If forced > 0 Then
+            AppendLog(forced.ToString() & " panel(s) will be FORCED and sent short (shown in orange).")
+        End If
         If done.Count > 0 Then
             AppendLog(done.Count.ToString() & " completed panel(s) kept below the pending ones.")
         End If
@@ -628,6 +841,51 @@ Public Class RecoveryWindow
     Private Sub OnGridSelection(sender As Object, e As SelectionChangedEventArgs)
         Dim r = TryCast(dg.SelectedItem, PanelRow)
         If Not busy Then btnUploadOne.IsEnabled = (r IsNot Nothing AndAlso r.CanUpload)
+    End Sub
+
+    ' Any option change alters what the table should say, so re-classify the panels
+    ' already in memory. No disk re-scan of the queue is needed - only the
+    ' interpretation changes - but switching Reconstruct ON does need a look at the
+    ' source folders, so that part runs off the UI thread.
+    Private Sub OnOptionToggled(sender As Object, e As RoutedEventArgs)
+        If busy OrElse panels.Count = 0 Then Return
+
+        Dim wantReconstruct = chkReconstruct.IsChecked.GetValueOrDefault()
+        ApplySettings(False)                       ' pushes all four settings + log sink
+
+        Dim needsWork = wantReconstruct AndAlso panels.Any(Function(p) Not p.ReconstructApplied)
+        If Not needsWork Then
+            AppendLog("")
+            AppendLog(">>> Options changed - table re-checked.")
+            Program.LogOptionNotes()
+            FillGrid()
+            Return
+        End If
+
+        SetBusy(True)
+        AppendLog("")
+        AppendLog(">>> 'Reconstruct from disk' switched on - looking for forgotten files ...")
+        Task.Run(Sub()
+                     Try
+                         For Each p In panels
+                             Program.EnsureReconstructed(p)
+                         Next
+                     Catch ex As Exception
+                         AppendLog("Reconstruct failed: " & ex.Message)
+                         WpfProgram.CrashLog("OptionToggle", ex.ToString())
+                     End Try
+                 End Sub).ContinueWith(
+            Sub()
+                Dispatcher.BeginInvoke(New Action(
+                    Sub()
+                        Try
+                            FillGrid()
+                        Finally
+                            SetBusy(False)
+                            SetStatus(panels.Count.ToString() & " panel(s)")
+                        End Try
+                    End Sub))
+            End Sub)
     End Sub
 
     ' =====================================================================
@@ -675,6 +933,7 @@ Public Class RecoveryWindow
         AppendLog("")
         AppendLog(">>> Uploading " & what & "  (FTPUploaderVB must be stopped - both " &
                   "processes append to the same host file with no locking)")
+        Program.LogOptionNotes()
 
         Task.Run(Sub()
                      Try

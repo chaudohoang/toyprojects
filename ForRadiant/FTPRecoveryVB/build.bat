@@ -58,12 +58,20 @@ if errorlevel 1 goto :failed
 
 copy /y "lib\WinSCPnet.dll" "bin\WinSCPnet.dll" >nul
 
+REM Rule files ship with the exe. Only seed them if absent, so local edits in
+REM bin\ are never overwritten by a rebuild.
+if not exist "bin\allowed_filenames.txt" copy /y "allowed_filenames.sample.txt" "bin\allowed_filenames.txt" >nul
+if not exist "bin\denied_filenames.txt"  copy /y "denied_filenames.sample.txt"  "bin\denied_filenames.txt"  >nul
+
 echo.
 echo BUILD OK
 echo   bin\FTPRecovery.exe      (command line)
 echo   bin\FTPRecoveryGUI.exe   (double-click)
 echo.
-echo Deploy the exe you want PLUS bin\WinSCPnet.dll into the queue folder.
+echo bin\ is a ready-to-ship bundle. Copy these to any machine:
+echo   FTPRecoveryGUI.exe  WinSCPnet.dll
+echo   allowed_filenames.txt  denied_filenames.txt
+echo.
 echo WinSCP.exe is located via line 3 of each queue file - no need to copy it.
 goto :eof
 

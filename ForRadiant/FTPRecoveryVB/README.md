@@ -1,412 +1,434 @@
-# FTPRecovery
+# FTP Recovery — User Guide
 
-Repairs stalled `FTPUploaderVB` upload queues: uploads the files that never went,
-then sends the index and host manifests so the panel finally completes.
+*Tiếng Việt: [README.vi.md](README.vi.md)*
 
-Two programs, same engine:
+This tool finishes uploads that got stuck.
 
-| | |
+Panels sometimes stop part-way through uploading to the customer's server. The
+images are on the machine, some may already be on the server, but the panel never
+finishes — so the customer never receives the final list of files, and as far as
+they're concerned nothing arrived at all.
+
+This tool finds those panels, uploads whatever is still owed, and sends the final
+lists so the panel is properly completed.
+
+---
+
+## When you need it
+
+Any of these:
+
+- Panels sitting in the upload folder for hours or days with nothing happening
+- The customer says files are missing for a panel
+- The upload folder keeps growing and never empties
+- After a network outage or server problem, when uploads stopped part-way
+
+---
+
+## Before you start
+
+**1. Stop FTPUploader.**
+
+This matters. Both programs write to the same files, and if they run at the same
+time they will interfere with each other and can corrupt the record of what has
+been sent. Stop it and leave it stopped until you're finished.
+
+**2. Check the customer's server is reachable.**
+
+If it isn't, the tool will stop by itself after a few failures rather than waste
+time — but it's quicker to check first.
+
+**3. Nothing else is needed.**
+
+You can run the tool as many times as you like. It never uploads the same file
+twice, so if you're unsure, run it and look at the results before doing anything.
+
+---
+
+## Using it
+
+Double-click **FTPRecoveryGUI.exe**. The window opens full-screen.
+
+The upload folder is filled in for you. If it's wrong, click **Browse**.
+
+### Step 1 — Look first
+
+Click **Start Scan**.
+
+This only looks. Nothing is uploaded. After a few seconds you get a table of every
+stuck panel and what would happen to each one.
+
+### Step 2 — Read the table
+
+Each row is one panel:
+
+| Column | Means |
 |---|---|
-| `FTPRecoveryGUI.exe` | double-click. Scan, review a table, upload per panel or all. |
-| `FTPRecovery.exe` | command line, for scripting across many machines. |
+| **PID** | the panel's ID |
+| **Total** | how many files this panel should have |
+| **Host now** | how many are recorded as sent so far |
+| **Done** | already sent, nothing more needed |
+| **Retry** | failed before, will be tried again |
+| **New** | not sent yet |
+| **Rebuilt** | files found on the machine that had been forgotten about |
+| **Projected** | where the count will end up |
+| **Verdict** | what will happen |
 
----
-
-## 1. The problem
-
-`FTPUploaderVB` sends the index/host manifests from **one place only** — the
-success path of `Upload()`:
-
-```vb
-File.AppendAllText(sourceIndexFile, destFile + "@" + channelIndex + vbCrLf)
-File.AppendAllText(sourceHostFile,  destFile + "@" + channelIndex + vbCrLf)
-Dim uploadedCount As Integer = File.ReadAllLines(sourceHostFile).Length
-If uploadedCount = Int32.Parse(totalFileCount) Then
-    CreateIndexAndHostQueue(InfoFile)      ' <- the only trigger
-End If
-```
-
-A file that fails but has **not yet used up its retries** writes nothing. Its queue
-file stays on disk waiting for another go — but the main loop picks work with
-
-```vb
-OrderByDescending(GetCreationTime).Take(maximumUpload)
-```
-
-**newest first.** Once the folder holds more than `maximumUpload` files, older
-retrying files fall out of the window and are never looked at again. Their fail
-count freezes, they never write a line, the count never reaches `totalFileCount`,
-and the manifests are never sent. The panel is stuck for good.
-
-Second hole: when a failure *does* use up its retries and happens to be the last
-file, the ` - failed` lines are written inside the `Catch` block, which never
-re-checks the count. The queue file is then deleted, so nothing can retrigger it.
-
----
-
-## 2. How a panel is put back together
-
-Panels are grouped by **line 13** (`sourceHostFile`) — the field the completion
-logic actually keys on. `totalFileCount` comes from **line 15** of the queue file,
-per panel, so a 25-file recipe and a 40-file recipe both work with no changes.
-
-For each file, three questions decide what happens: is there a queue file, is the
-image on disk, and what does the host file already say?
-
-| Queue file | Image on disk | Host file says | What happens | Host line after |
-|---|---|---|---|---|
-| yes | yes | nothing | upload it | new clean line |
-| yes | yes | already done | skip, retire the queue file | unchanged |
-| yes | yes | ` - failed` | **try again**; if it works, fix the line | ` - failed` → clean |
-| yes | **no** | nothing | can't upload, note it | ` - failed` placeholder |
-| yes | **no** | ` - failed` | leave alone | unchanged |
-| **no** | yes | nothing | **rebuild the entry**, upload | new clean line |
-| **no** | yes | already done | nothing owed | unchanged |
-| **no** | yes | ` - failed` | **rebuild**, try again, fix the line | ` - failed` → clean |
-| **no** | no | nothing | invisible, unrecoverable | — |
-
-Only files *missing* from the host file add a line. Retries reuse their existing
-line, duplicates add nothing. That is why a panel can never end up with more lines
-than `totalFileCount`.
-
-Then the panel decides whether to send the manifests:
-
-| Situation | Decision | Shown as |
-|---|---|---|
-| host lines ≥ line 15 | strip placeholders, send index + host | `INDEX+HOST SENT` |
-| got there using rebuilt entries | same | `INDEX+HOST SENT (n rebuilt)` |
-| got there, but n placeholders stripped | sends — **manifest is short by n** | `SENT-SHORT (n missing)` |
-| can't get there | **refuses** | `SKIPPED-INCOMPLETE` |
-| can't get there, `-force` given | sends short anyway | `SENT-FORCED-SHORT (n missing)` |
-| stopped or aborted mid-panel | does not send | `STOPPED` / `ABORTED` |
-| no queue files at all | never discovered | absent |
-
-A short manifest is never reported as a clean success. Filter the report CSV on
-`SHORT` after any production run.
-
----
-
-## 3. The four options
-
-**Reconstruct from disk** — see section 4. Recommended on.
-
-**Force incomplete** — send the manifests even when the count can't be reached,
-i.e. deliberately ship a manifest listing fewer files than the panel should have.
-Leave off unless you've decided that's what you want for a specific panel.
-
-**Skip missing source** — changes what happens when a queue file points at an image
-that's gone. Off (default): mark it ` - failed` so the count still advances and the
-panel completes, short by that file. On: leave it alone, panel stays stuck, nothing
-written. Turn it on if you want to investigate missing images first.
-
-**Retries** — attempts per file, default 3. Each attempt reopens the FTP session,
-so a brief network glitch gets a fresh connection.
-
-Suggested first real run: **Reconstruct on, Force off, Skip missing off, Retries 3.**
-That recovers everything recoverable without shipping any short manifests. Then look
-at what's left as `SKIPPED-INCOMPLETE` and decide those case by case.
-
----
-
-## 4. Reconstruction (`-reconstruct` / the checkbox)
-
-**The problem it solves.** An image sitting on disk with no queue file is invisible:
-it never uploads, *and* it holds the panel below `totalFileCount` forever. Nothing
-else can fix that.
-
-**Why it's possible.** 15 of the 17 queue lines are identical for every file in a
-panel. A surviving sibling supplies all of them; only lines 7 and 8 need working out.
-
-| Line | Where it comes from |
-|---|---|
-| 0–6, 9–16 | any surviving queue file in the same panel — including the channel, since a panel never mixes channels |
-| 7 (source) | the file's actual path on disk |
-| 8 (dest) | the dest folder for that file type + the same filename |
-
-**Three gates, so nothing junk is ever sent.**
-
-**Gate 1 — the filename must be one we've genuinely seen.** Not a pattern, an exact
-match. Your template gives 25 known names:
-
-```
-d994_gamma.hex
-nypucdata_@pid@_1st.hex          <- @PID@ is the only part allowed to vary
-step01_0650nit_b048_imgy_crop.tif
-...
-```
-
-So `step01_0650NIT_B999_imgY_Crop.tif` and `step99_0650NIT_B048_imgY_Crop.tif` are
-**rejected** — an unexpected number is not treated as family. `thumbs.db` and
-`*.bak` likewise. Verified by planting all four and confirming they were skipped.
-
-The list is drawn from three places, so it never shrinks as work gets done:
-
-| Source | Why needed |
-|---|---|
-| live queue files | the obvious one |
-| `Log\Recovery\known_filenames.txt` | once every panel with a given filename is finished, no live queue file would remember that name existed |
-| the `Backedup*` folders | archived real queue files |
-
-That whitelist file is plain text and safe to review. Delete a line and that name
-will never be reconstructed again.
-
-**Gate 2 — dest folder from a sibling of the same file type.** No guessing at all.
-
-**Gate 3 — only if gate 2 can't be met, the folder is worked out from a donor
-panel.** There are two folders in play:
-
-```
-.hex, .txt  ->  /data1h1/HN_DATA/POCB/HEX  /07/28/.../<serverPID>/<stamp>/
-.tif        ->  /data1h1/HN_DATA/POCB/IMAGE/07/28/.../<serverPID>/<stamp>/
-                                    ^^^^^ exactly one segment differs
-```
-
-If a panel lost all four `.hex`/`.txt` queue files, nothing in it knows where `HEX/`
-files go. So another panel is consulted, and **only that one differing segment** is
-copied across — this panel's own server PID and timestamp are kept. It refuses
-unless the donor pair differs in exactly one segment and all three paths have the
-same depth. When this happens the log says so, per panel:
-
-```
-dest folder INFERRED from a donor panel for: .hex, .txt
-```
-
-Those lines are the only place a dest path is *worked out* rather than *read*. If
-anything ever lands in the wrong folder, that's where to look. Everything else came
-verbatim from a queue file.
-
-> This assumes one product line per queue folder, which is how the machines are set
-> up. Mixing products in one folder would break gate 3.
-
----
-
-## 5. Interrupting it
-
-**All progress is on disk, not in memory** — which queue files remain, and what the
-host file says. Nothing is lost by stopping or crashing; the next scan works it out
-again.
-
-**Stop** finishes the file in flight, then stops. An interrupted panel never sends
-its manifests, even with Force on, because the missing files are only missing
-because we hadn't got to them yet.
-
-**Closing or crashing** mid-run is safe. Worst case a file already on the server is
-uploaded again — same path, same bytes.
-
-| Killed here | Next run |
-|---|---|
-| after upload, before the host line was written | uploads again, then writes the line |
-| after the line, before the queue file was retired | sees it's done, retires the queue file |
-| after index went up, before host | sends both again |
-
-Two things make that true, and both were bugs first:
-
-- **Appends are idempotent per file.** Index and host are separate writes; a crash
-  between them used to leave index with the line and host without, and because
-  dedupe only reads the host file, the next run added a *second* index line and
-  shipped a duplicate. Each file is now checked before appending.
-- **Placeholder stripping doesn't touch the original.** A cleaned **copy** is
-  uploaded. Stripping the real file first meant a crash before the upload left it
-  permanently below `totalFileCount` — panel stranded, no queue files left to
-  recover from.
-
-**If the server is down**, 25 consecutive failures aborts the run rather than
-burning every panel's retries on timeouts:
-
-```
-*** ABORTING: 25 uploads failed back-to-back. The server looks unreachable.
-*** Remaining panels left untouched. Fix the connection and re-run;
-*** already-uploaded files are recorded and will not be sent twice.
-```
-
-One success resets the counter, so isolated failures don't trip it.
-
-> **Stop FTPUploaderVB before running.** Both write to the same host file with no
-> locking, and that defeats every guarantee above.
-
----
-
-## 6. The GUI
-
-Drop `FTPRecoveryGUI.exe` + `WinSCPnet.dll` anywhere and run it. Opens maximized.
-
-The queue path is filled in for you: the exe's own folder if that folder holds queue
-files, otherwise `D:\Program\RVS\UploadQueue`. Browse to change it.
-
-**Start Scan** builds the table. Nothing is uploaded.
-
-| PID | Total | Host now | Done | Retry | New | Rebuilt | Projected | Verdict | |
-|---|---|---|---|---|---|---|---|---|---|
-| TSN…001 | 25 | 0 | 0 | 0 | 25 | 0 | 25 / 25 | READY - 25 to upload | `Upload` |
-
-`Host now` is how many lines the host file already has — 0 means nothing recorded
-yet (the file doesn't exist until the first upload). `Projected` is where the count
-will land.
-
-Row colours:
+The colour tells you the state at a glance:
 
 | Colour | Meaning |
 |---|---|
-| white | pending, will complete |
-| blue | pending, only the manifests left to send |
-| pink | pending, **can't** complete |
-| green | finished — `INDEX+HOST SENT` |
-| amber | finished, but short / skipped / stopped |
+| White | will finish normally |
+| Blue | files are all sent; only the final lists left to send |
+| **Lilac** | will finish, but **only because forgotten files were found on disk** |
+| **Pink** | **cannot finish** — see the verdict for why |
+| Green | finished successfully |
+| Amber | finished, but incomplete — worth checking |
 
-Pending rows sort to the top; finished ones collect below with their result, so the
-table becomes a record of the session. Their `Upload` buttons are disabled. On
-finished rows the numbers mean the end state: `Host now` is the final count and
-`Done` is how many files *that run* sent.
+Lilac rows are worth a second look. They're ready, but the destination for the
+recovered files was worked out rather than read from an instruction. The Rebuilt
+column and the verdict both show how many.
 
-Clicking **Start Scan** again clears the finished rows and starts fresh.
+Panels still to do are at the top. Once you've uploaded some, they move to the
+bottom with their result, so the table becomes a record of what you did.
 
-**Ticking an option does nothing on its own** — options are read when you click
-Upload, so ticking Reconstruct and pressing Upload applies it to just those panels.
-No re-scan needed either way.
+### Step 3 — Try one panel first
 
-**Stop** works throughout. The window stays responsive; the progress bar, the
-`461 / 496` counter and the streaming log are the signs of life. (There's
-deliberately no spinning cursor — it reads as "frozen" when it isn't.)
+Click **Upload** on a single row. Watch the log on the right.
 
-The log pane trims itself on long runs. **The log file is the complete record.**
+If it looks right, carry on. This is always safer than starting with everything.
+
+### Step 4 — Do the rest
+
+Click **Upload ALL panels**.
+
+You can press **Stop** at any time. It finishes the file it's working on and stops
+cleanly. Nothing is lost — run it again later and it carries on from where it got to.
 
 ---
 
-## 7. The command line
+## What the verdicts mean
 
-```
-FTPRecovery.exe [root] [options]
-```
+### Good
 
-| Option | Meaning |
+| Verdict | Meaning |
 |---|---|
-| `root` / `-root <path>` | queue folder; defaults as in section 6 |
-| `-go` | actually do it. **Without this it's a dry run.** |
-| `-reconstruct` | rebuild entries for images with no queue file |
-| `-force` | send manifests even when short |
-| `-retry <n>` | attempts per file (default 3) |
-| `-pid <text>` | only panels whose PID contains this |
-| `-skipmissing` | leave queue files whose image is gone |
+| `READY - 22 to upload` | 22 files to send, then the panel finishes properly |
+| `READY - index/host only` | all files already sent, only the final lists to go |
+| `INDEX+HOST SENT` | **done correctly** |
+| `INDEX+HOST SENT (4 rebuilt)` | done, and 4 forgotten files were found and sent |
 
-```bat
-REM 1. stop FTPUploaderVB
-FTPRecovery.exe                                  REM look first
-FTPRecovery.exe -reconstruct                     REM look, including rebuilds
-FTPRecovery.exe -pid <onePID> -reconstruct -go    REM prove it on one
-FTPRecovery.exe -reconstruct -go                  REM the rest
-FTPRecovery.exe -reconstruct -force -go           REM last resort for leftovers
-```
+### Needs your attention
 
----
+| Verdict | Meaning | What to do |
+|---|---|---|
+| `SENT-SHORT (2 missing)` | finished, but 2 files were never sent | see below |
+| `SENT-FORCED-SHORT (3 missing)` | you chose to finish it knowing 3 were missing | expected if you ticked Force |
 
-## 8. What it writes
+**A "short" panel means the customer receives a list of files that doesn't include
+everything.** Usually because the images are no longer on the machine. Worth
+checking why before accepting it.
 
-In `<queue>\Log\Recovery\`:
+### Cannot finish
 
-| File | Use |
+| Verdict | Meaning |
 |---|---|
-| `<stamp>_recovery.log` | full per-file trace — the complete record |
-| `<stamp>_recovery_report.csv` | **one row per panel — start here** |
-| `<stamp>_winscp.log` | raw FTP protocol log |
-| `known_filenames.txt` | the reconstruction whitelist (section 4) |
+| `INCOMPLETE - 3 source file(s) missing` | 3 images are gone from the machine |
+| `INCOMPLETE - 4 queue file(s) missing` | 4 upload instructions are gone |
+| `INCOMPLETE - 1 source file(s) missing, 2 queue file(s) missing` | both problems |
 
-```
-PID,Total,HostBefore,Pending,Uploaded,Failed,MissingSource,AlreadyRecorded,HostAfter,Result
-```
+There's an important difference:
 
-```powershell
-# how did the run go?
-Import-Csv '<stamp>_recovery_report.csv' | Group-Object Result | Sort-Object Count -Descending
-
-# which panels shipped short manifests?
-Import-Csv '<stamp>_recovery_report.csv' | Where-Object Result -match 'SHORT'
-```
-
-Successes and failures are also appended to each panel's own succeed/fail logs
-(lines 5 and 6 of its queue file), prefixed `FTPRecovery`, so the existing audit
-trail stays continuous.
-
-Retired queue files are archived under `Backedup Recovery Queue\` in
-`Succeeded` / `AlreadyRecorded` / `MissingSource` / `Failed` / `StaleIndexHost`,
-timestamp-prefixed. These are useful beyond an audit trail:
-
-- **`MissingSource` is a worklist** — images the customer will never receive:
-  ```powershell
-  Get-ChildItem '...\Backedup Recovery Queue\MissingSource' |
-    ForEach-Object { (Get-Content $_.FullName)[7] } | Sort-Object -Unique
-  ```
-- **They feed reconstruction** — filename whitelist and donor panels both fall back
-  to them. Keep at least one panel's worth, or folder inference stops working once
-  the live queue is drained.
-- Prune old ones freely; keep `MissingSource` and `Failed` longer than `Succeeded`.
+- **Missing images** — the file itself is gone. Nothing can bring it back. Find out
+  why it was deleted.
+- **Missing instructions** — the file may still be on the machine, just forgotten
+  about. **Tick "Reconstruct from disk" and scan again** — this usually fixes it.
 
 ---
 
-## 9. Building
+## The four options
 
-```
-copy ..\FTPUploaderVB\lib\WinSCPnet.dll lib\
-build.bat
-```
+### Reconstruct from disk — usually leave ON
 
-Produces both exes in `bin\`. Deploy the one you want plus `WinSCPnet.dll` —
-`WinSCP.exe` is found via line 3 of each queue file, so it doesn't need copying.
+Finds images sitting on the machine that have been forgotten about, works out where
+they belong, and sends them.
 
-Notes for anyone touching the build:
+This is what rescues most stuck panels. Without it they can never finish.
 
-- One engine file, two entry points (`/main:Program` vs `/main:WpfProgram`), so the
-  logic exists once.
-- WPF is written in code, no XAML, so plain `vbc` builds it. Its assemblies live in
-  `%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\WPF\`, hence the `/libpath`.
-- `System.Windows.Forms.dll` is referenced only for the folder-picker dialog.
-- `/optionstrict+` is on deliberately — it caught `List.Count` shadowing LINQ's
-  `Count(predicate)` and parameters named `path` shadowing `System.IO.Path`.
-- The icon is optional; the build skips it if `FTPRecovery.ico` is missing.
+It is careful about what it sends. A file is only picked up if its name is one the
+tool recognises — see **Controlling what may be sent** below. Anything unexpected —
+a temporary file, a backup copy, a file with an unusual number in the name — is
+skipped and listed in the log. It will never invent something to send.
 
----
+### Force incomplete — leave OFF unless you mean it
 
-## 10. Queue file format (17 lines, 0-based)
+Finishes a panel even when files are missing, sending the customer a list that
+doesn't include everything.
 
-| Line | Field |
+Only use this when you've looked at a panel, understand what's missing, and have
+decided finishing it is better than leaving it stuck.
+
+### Skip missing source — usually leave OFF
+
+Changes what happens when an image has gone missing from the machine.
+
+| | Result |
 |---|---|
-| 0–3 | host, username, password, WinSCP.exe path |
-| 4–6 | session log, succeed log, fail log |
-| 7–8 | source file → dest path |
-| 9–11 | OutputIndexInfoFile, sourceIndexFile, destIndexFile |
-| 12–14 | OutputHostInfoFile, sourceHostFile, destHostFile |
-| 15–16 | totalFileCount, channelIndex |
+| **Off** (normal) | the panel finishes without that file — customer gets a short list |
+| **On** | the panel stays stuck, nothing is written |
 
-Index and host lines look like `destPath@channelIndex`, the channel coming from
-line 16. **When parsing, strip the `@channel` before taking the filename after the
-last `/`** — forgetting this caused 1,555 phantom rebuilds during development.
+Turn it on when you want to investigate missing images before letting panels finish.
 
-Two identifiers vary per panel:
+### Retries — leave at 3
 
-| | Appears in |
+How many times to retry a file before giving up. Each attempt makes a fresh
+connection, so a brief network glitch usually recovers on its own.
+
+### Using them together
+
+All three can be ticked at once, but in practice only two settings are worth using.
+Here is what each combination actually does, measured on a folder of 490 stuck
+panels:
+
+| Reconstruct | Skip missing | Force | Panels finished | of those, short lists | Left stuck |
+|:---:|:---:|:---:|---:|---:|---:|
+| – | – | – | 435 | 55 | 55 |
+| **on** | – | – | **490** | 58 | **0** |
+| – | on | – | 380 | **0** | 110 |
+| – | – | on | 490 | **110** | 0 |
+| **on** | **on** | – | 432 | **0** | 58 |
+| on | – | on | 490 | 58 | 0 |
+| – | on | on | 490 | **110** | 0 |
+| on | on | on | 490 | 58 | 0 |
+
+**The two sensible choices:**
+
+| Setting | Use when |
 |---|---|
-| **local file PID** (`AAA`) | queue filenames, the `E:\POCB\...` source folder, session-log folder |
-| **server PID** (`A4XN6600PN05BD5`) | every `/data1h1/...` dest path, the `.idx` and host filenames |
+| **Reconstruct only** | you want every panel finished. 490 finish; 58 send a short list because those images are genuinely gone. |
+| **Reconstruct + Skip missing** | you must never send a short list. 432 finish cleanly; 58 are held back for you to investigate. |
 
-`FTPUploaderVB` calls the *server* PID the PID, and so does this tool.
+**Two combinations to avoid:**
+
+- **Force while Reconstruct is on** did nothing in this test, because Reconstruct
+  had already unblocked every panel. It is not useless in general — a file missing
+  **both** its instruction *and* its image cannot be recovered, and only Force will
+  finish that panel. The log tells you which case you are in: if Force was ticked
+  but never needed, the summary says so.
+- **Skip + Force** gives the same result as Force alone — Force cancels Skip
+  completely, so you get the worst outcome, 110 short lists, plus those panels
+  reappear on the next scan because Skip left their instructions in place.
+
+**Force on its own is the worst setting** — 110 short lists, twice as many as
+necessary, because the missing files were still on the machine and Reconstruct
+would have found them.
+
+The program warns you if you pick either of the pointless combinations.
 
 ---
 
-## 11. Testing
+## Controlling what may be sent
 
-`ResetTestSet.bat` — one click, ~30 s, builds a 500-panel population covering every
-case. See `TESTING.md`.
+**This only affects "Reconstruct from disk".** A file that has its own upload
+instruction is always sent — TrueTest already decided it belongs. The rules below
+apply only to files found lying on the machine with no instruction, where the tool
+would otherwise be guessing.
+
+Two text files sit next to `FTPRecoveryGUI.exe` and travel with it:
+
+| File | What it does |
+|---|---|
+| `allowed_filenames.txt` | names that may be sent |
+| `denied_filenames.txt` | names that must never be sent — beats everything else |
+
+Open them in Notepad. One filename per line. Lines starting with `#` are notes and
+are ignored.
+
+```
+step01_0650NIT_B056_imgY_Crop.tif
+step99_0650NIT_UDIRVibMap_imgY_Crop.tif
+```
+
+You can use `*` for "anything here":
+
+```
+*_gamma.hex               matches d994_gamma.hex, d995_gamma.hex, ...
+NyPucData_@PID@_*.hex     matches _1st.hex, _2nd.hex, _3rd.hex, ...
+```
+
+`@PID@` stands for the part of the name that changes from panel to panel.
+
+### Learning
+
+By default the tool also **learns** names from the real upload instructions it
+finds, and remembers them in `known_filenames.txt`. That file is written by the
+tool — **editing it has no effect**, it is rebuilt on every scan.
+
+Learning is normally what you want: the instructions come from TrueTest, so the
+names in them are correct by definition, and remembering them means a name still
+works after every panel using it has finished.
+
+If you want **only** the names in `allowed_filenames.txt` to be accepted and
+nothing learned, put this on a line by itself in that file:
+
+```
+!strict
+```
+
+Use it when you have the official image list and want nothing outside it sent.
+
+### Checking before you rely on it
+
+Run a scan with Reconstruct ticked and read the log for lines saying
+`not a known filename`. Each one is a file the tool refused to send. If the list is
+empty, your rules cover everything on the machine. If a legitimate file appears
+there, add its name to `allowed_filenames.txt`.
 
 ---
 
-## 12. Still owed in FTPUploaderVB itself
+## Common situations
 
-This tool is a mitigation. The real fixes:
+**"Lots of pink rows saying queue file(s) missing"**
+Tick **Reconstruct from disk** and click **Start Scan** again. Most should turn
+white.
 
-1. Move the count check into a helper called from **both** the `Try` and the `Catch`
-   paths, before `File.Delete(InfoFile)`.
-2. `uploadedCount = totalFileCount` → `>=`.
-3. `OrderByDescending` → `OrderBy`, so retries get priority instead of starving.
-4. Guard `failMessage.IndexOf(".")` returning `-1` in `UpdateSummaryLogFail` — it
-   throws from inside a `Catch` block and kills the rest of that cycle's batch.
-5. Only call `UploadIndexAndHost` on a freshly written `Output*InfoFile`, never a
-   stale leftover.
+**"Still pink after reconstruct"**
+Those images are genuinely gone from the machine. Look at the log to see which
+files, and find out why they were deleted. Only use Force once you've decided a
+short list is acceptable.
+
+**"It stopped by itself"**
+The customer's server stopped responding, so it aborted rather than mark hundreds
+of files as failed for no reason. Fix the connection and run it again — it picks up
+where it left off.
+
+**"Nothing happens when I click Upload"**
+Check the row's verdict. Pink rows can't finish, so nothing is sent.
+
+**"The window looks frozen"**
+Check the log on the right and the counter at the bottom. If they're moving, it's
+working. A file that's failing takes about a minute before it moves on, so pauses
+are normal.
+
+**"A file on the machine was not sent"**
+Look in the log for `not a known filename`. If it's there, add the name to
+`allowed_filenames.txt` — see **Controlling what may be sent**.
+
+**"I closed it by accident"**
+No harm done. Open it again, Scan, and carry on. Nothing is lost.
+
+**"I ran it twice by mistake"**
+No harm done. It knows what has already been sent and won't send anything twice.
+
+---
+
+## Where the records are
+
+Everything the program writes is in a **Log\Recovery** folder next to
+`FTPRecoveryGUI.exe` — not in the upload folder. The upload folder is only an input.
+
+| File | What it's for |
+|---|---|
+| `..._recovery_report.csv` | **one line per panel — open this first**, in Excel |
+| `..._recovery.log` | the full detail of everything that happened |
+| `..._winscp.log` | the raw connection log, for when a transfer misbehaves |
+
+The panel on the right of the window shows the same detail as it happens, but it
+trims itself on long runs. **The log file is the complete record.**
+
+Open the CSV in Excel and sort by the last column to see how the run went at a
+glance, and which panels ended up short.
+
+### The files that travel with the program
+
+Next to `FTPRecoveryGUI.exe`:
+
+| File | |
+|---|---|
+| `FTPRecoveryGUI.exe` | the program |
+| `WinSCPnet.dll` | required, don't delete |
+| `allowed_filenames.txt` | **you edit** — names that may be sent |
+| `denied_filenames.txt` | **you edit** — names that must never be sent |
+| `known_filenames.txt` | written by the program, editing it does nothing |
+| `Log\Recovery\` | all logs and reports |
+
+Copy those to any machine and it's ready to run. The upload folder is only an
+input — nothing needs to be placed there, and nothing is written there.
+
+---
+
+## If the network drops
+
+The program is built to be left running unattended, so it does **not** stop when the
+server becomes unreachable. It keeps going and protects your data:
+
+- **Nothing is marked failed.** A file that could not be sent because the server was
+  down is left exactly as it was, with its upload instruction intact.
+- **No lists are sent** for those panels. They report `SERVER-OFFLINE`. Sending a
+  list during an outage would tell the customer those files are never coming, when
+  in fact they were never attempted.
+- **It does not sit there for hours.** Once the server stops answering, the rest of
+  the files are skipped in a fraction of a second each, so the run finishes quickly.
+- **It recovers by itself.** Every 30 seconds it re-checks the server. If it comes
+  back mid-run you'll see `server is reachable again - resuming normally` and it
+  carries on at full speed.
+
+In the log this looks like:
+
+```
+[conn] server unreachable, queue file kept: step01_0650NIT_B192_imgY_Crop.tif
+```
+
+and at the end:
+
+```
+Left for a later run : 4182  (server unreachable - queue files kept, nothing marked failed)
+```
+
+**Just run it again once the connection is back.** It carries on from where it got
+to, with nothing lost and nothing sent twice.
+
+There is an important difference between two things that look the same:
+
+| | Upload failed | Server unreachable |
+|---|---|---|
+| What happened | the connection worked, but **this file** would not transfer | the server could not be reached at all |
+| Likely cause | permission denied, remote disk full, file locked | server stopped, network down, wrong password |
+| Instruction file | removed | **kept** |
+| Result | panel finishes, list is short by that file | panel untouched, nothing sent |
+
+If a transfer is taking a while, the log says so rather than going silent:
+
+```
+... waiting 5s on step01_0650NIT_B048_imgY_Crop.tif  (attempt 1/3)
+attempt 1/3 failed after 14s: <reason>
+```
+
+---
+
+## Words you'll see
+
+| Word | Meaning |
+|---|---|
+| **Panel** | one display and all the files belonging to it |
+| **PID** | the panel's ID, as the customer's system knows it |
+| **Queue file** | a small instruction file: "send this image to this place" |
+| **Host / index** | the final lists sent at the end, telling the customer what arrived |
+| **Short** | finished, but the list doesn't include everything |
+| **Reconstruct** | working out an instruction that went missing, from the file on disk |
+
+---
+
+## If you get stuck
+
+Send whoever supports this tool:
+
+1. The `..._recovery_report.csv` for the run
+2. The `..._recovery.log` for the run
+3. Which options were ticked
+
+That's enough to see exactly what happened.
+
+---
+
+*For installation, testing, and how the tool works internally, see `DEVELOPER.md`.*

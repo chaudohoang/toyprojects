@@ -127,9 +127,9 @@ by the generator. On production those would be something to investigate, not acc
 
 ## Testing the filename gate
 
-Reconstruction only rebuilds a file whose exact name came from a real queue file.
-Confirmed by deleting one genuine queue file and planting four impostors in the
-same folder:
+Reconstruction only rebuilds a file whose name is permitted — see the rule files in
+`DEVELOPER.md` §4. Confirmed by deleting one genuine queue file and planting four
+impostors in the same folder:
 
 | File | Result |
 |---|---|
@@ -145,10 +145,24 @@ skipped 4 unrecognised file(s) in the source folder:
    ...
 ```
 
-Note the test set only ever contains legitimate files, so `0 skipped` on a normal
-run proves nothing about junk tolerance. **On real machines, read the
+**The gate applies only to reconstruction.** A file with its own queue file uploads
+unconditionally. So the deliberately-wrong test template is useful rather than a
+nuisance: it produces queue files whose names are not on the official list, which is
+exactly the adversarial case. With `!strict`, an orphan `B048` on disk is rejected
+while a `B048` *with* a queue file still uploads.
+
+Verified behaviour of the three modes against the same folder:
+
+| Mode | Vocabulary | Rejected |
+|---|---|---|
+| rules + learning (default) | 31 names + 2 wildcards | none |
+| same, plus `denied_filenames.txt` | 29 names | 6 candidates |
+| `!strict` | 18 rules only | 13 candidates |
+
+Note the test set contains only legitimate files, so `0 skipped` on a normal run
+proves nothing about junk tolerance. **On real machines, read the
 `not a known filename` lines** — that list tells you whether the gate is tight
-enough for what's actually in those folders.
+enough for what is actually in those folders.
 
 ---
 

@@ -46,12 +46,21 @@ Module Program
     Public SkipMissingSource As Boolean = False
     Public Reconstruct As Boolean = False
     Public MaxRetry As Integer = 3
-    ' Circuit breaker: if this many uploads fail back-to-back the server is very
-    ' likely down, and grinding through the rest would burn every panel's retry
-    ' budget and mark thousands of files failed for no reason. 0 disables.
-    Public AbortAfterConsecutiveFailures As Integer = 25
+    ' Circuit breaker for FILE-level failures (server reachable, transfers refused).
+    ' 0 disables. Connection outages are handled separately - see ServerDown below.
+    Public AbortAfterConsecutiveFailures As Integer = 0
     Public ConsecutiveFailures As Integer = 0
     Public Aborted As Boolean = False
+
+    ' Outage handling, designed for unattended runs: the tool never stops, never
+    ' consumes a queue file it could not send, and never marks a good file failed
+    ' just because the network was down. Once the server looks unreachable it stops
+    ' paying the full retry cost on every file, and re-probes periodically so a
+    ' server that comes back mid-run is picked up automatically.
+    Private ServerDown As Boolean = False
+    Private LastProbe As DateTime = DateTime.MinValue
+    Private Const PROBE_INTERVAL_SECONDS As Integer = 30
+    Private nSkippedOffline As Integer = 0
     Public OnlyPid As String = ""
 
     ' Optional extra log destination (the GUI hooks its textbox in here).
@@ -77,6 +86,7 @@ Module Program
     Private nRetried As Integer = 0
     Private nRebuilt As Integer = 0
     Private nPanelsShort As Integer = 0
+    Private nPanelsForced As Integer = 0
 
     ' =========================================================================
     ' Data model
@@ -138,6 +148,12 @@ Module Program
         Public Projected As Integer = 0
         Public CanComplete As Boolean = False
         Public Rebuilt As Integer = 0
+        Public MissingSrc As Integer = 0
+        Public ShortBySource As Integer = 0
+        Public ShortByQueue As Integer = 0
+        ' True when the panel cannot reach the total but Force is on, so it WILL be
+        ' sent - short. The table must predict that rather than showing INCOMPLETE.
+        Public WillForce As Boolean = False
         Public Verdict As String = ""
     End Class
 
@@ -153,16 +169,57 @@ Module Program
         s.DoneCount = eff.Where(Function(e) recorded.ContainsKey(Normalize(e.Record)) AndAlso Not recorded(Normalize(e.Record))).Count()
         s.RetryCount = eff.Where(Function(e) recorded.ContainsKey(Normalize(e.Record)) AndAlso recorded(Normalize(e.Record))).Count()
         s.NewCount = s.Pending - s.DoneCount - s.RetryCount
+
+        ' How many of the outstanding files have lost their image on disk. With
+        ' "skip missing source" on, those write nothing at all, so they cannot move
+        ' the count towards totalFileCount - the panel genuinely cannot complete.
+        ' With it off they get a " - failed" placeholder, which does advance the
+        ' count, but the manifest ends up short by that many.
+        s.MissingSrc = eff.Where(Function(e) _
+            (Not recorded.ContainsKey(Normalize(e.Record)) OrElse recorded(Normalize(e.Record))) _
+            AndAlso Not File.Exists(e.SourceFile)).Count()
+
+        If SkipMissingSource Then s.NewCount -= s.MissingSrc
+        If s.NewCount < 0 Then s.NewCount = 0
+
         s.Projected = s.HostNow + s.NewCount
         s.CanComplete = (s.Projected >= p.Total)
+
         If s.CanComplete Then
-            If s.NewCount = 0 AndAlso s.RetryCount = 0 Then
-                s.Verdict = "READY - index/host only"
+            ' Flag panels that only reach the total because entries were rebuilt -
+            ' they are ready, but for a different reason than a clean panel, and
+            ' the dest paths of the rebuilt files were derived rather than read.
+            Dim rebuiltNote = If(s.Rebuilt > 0, " (" & s.Rebuilt.ToString() & " rebuilt)", "")
+            If s.MissingSrc > 0 Then
+                ' Completes, but n files can never be sent - manifest will be short.
+                s.Verdict = "READY - " & (s.NewCount + s.RetryCount).ToString() &
+                            " to upload, " & s.MissingSrc.ToString() &
+                            " source file(s) missing -> SHORT" & rebuiltNote
+            ElseIf s.NewCount = 0 AndAlso s.RetryCount = 0 Then
+                s.Verdict = "READY - index/host only" & rebuiltNote
             Else
-                s.Verdict = "READY - " & (s.NewCount + s.RetryCount).ToString() & " to upload"
+                s.Verdict = "READY - " & (s.NewCount + s.RetryCount).ToString() &
+                            " to upload" & rebuiltNote
             End If
         Else
-            s.Verdict = "INCOMPLETE - missing " & (p.Total - s.Projected).ToString()
+            ' Split the shortfall into its two causes so the reason is explicit.
+            Dim shortfall = p.Total - s.Projected
+            s.ShortBySource = If(SkipMissingSource, Math.Min(s.MissingSrc, shortfall), 0)
+            s.ShortByQueue = shortfall - s.ShortBySource
+            Dim parts As New List(Of String)()
+            If s.ShortBySource > 0 Then parts.Add(s.ShortBySource.ToString() & " source file(s) missing")
+            If s.ShortByQueue > 0 Then parts.Add(s.ShortByQueue.ToString() & " queue file(s) missing")
+            If parts.Count = 0 Then parts.Add(shortfall.ToString() & " file(s) short")
+
+            If ForceIncomplete Then
+                ' Force is on, so this panel WILL be sent despite the gap. Say so,
+                ' with the cost, rather than showing it as blocked.
+                s.WillForce = True
+                s.Verdict = "FORCED - will send, manifest short by " & shortfall.ToString() &
+                            " of " & p.Total.ToString() & " (" & String.Join(", ", parts) & ")"
+            Else
+                s.Verdict = "INCOMPLETE - " & String.Join(", ", parts)
+            End If
         End If
         Return s
     End Function
@@ -214,20 +271,77 @@ Module Program
     ' The standard queue location on the TrueTest machines.
     Public Const STANDARD_QUEUE As String = "D:\Program\RVS\UploadQueue"
 
-    ' Where to look when no path is given. The exe's own folder wins if it already
-    ' looks like a queue folder (so dropping the exe into a non-standard queue
-    ' still works); otherwise the standard path; otherwise the exe folder.
+    ' The rule files are .txt and sit beside the exe, which may also be a queue
+    ' folder. They must never be mistaken for queue files.
+    Public Function IsRuleFileName(name As String) As Boolean
+        Return String.Equals(name, ALLOW_FILE, StringComparison.OrdinalIgnoreCase) OrElse
+               String.Equals(name, DENY_FILE, StringComparison.OrdinalIgnoreCase) OrElse
+               String.Equals(name, KNOWN_FILE, StringComparison.OrdinalIgnoreCase)
+    End Function
+
+    ' Where to look when no path is given. The exe's own folder wins only if it
+    ' actually contains QUEUE files - the rule files shipped alongside the exe are
+    ' .txt too, so their presence must not make bin\ look like a queue folder.
     Public Function DefaultQueueRoot() As String
         Dim here = AppDomain.CurrentDomain.BaseDirectory.TrimEnd("\"c)
         Try
-            If Directory.EnumerateFiles(here, "*.txt", SearchOption.TopDirectoryOnly).Any() Then
-                Return here
-            End If
+            For Each f In Directory.EnumerateFiles(here, "*.txt", SearchOption.TopDirectoryOnly)
+                If IsRuleFileName(Path.GetFileName(f)) Then Continue For
+                If ParseQueueFile(f) IsNot Nothing Then Return here
+            Next
         Catch
         End Try
         If Directory.Exists(STANDARD_QUEUE) Then Return STANDARD_QUEUE
         Return here
     End Function
+
+    ' Distinct FTP hosts named by the queue files in a folder (line 0), so the UI
+    ' can monitor the servers this queue is actually configured for rather than a
+    ' hardcoded list. Reads a bounded number of files - one host per machine is
+    ' the norm, so there is no need to crawl thousands.
+    Public Function HostsInQueue(root As String, Optional maxFiles As Integer = 300) As List(Of String)
+        Dim found As New List(Of String)()
+        Dim seen As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+        If Not Directory.Exists(root) Then Return found
+        Dim n As Integer = 0
+        Try
+            For Each f In Directory.EnumerateFiles(root, "*.txt", SearchOption.TopDirectoryOnly)
+                n += 1
+                If n > maxFiles Then Exit For
+                If IsRuleFileName(Path.GetFileName(f)) Then Continue For
+                Try
+                    ' Parse properly rather than trusting line 0 - a rule file's
+                    ' comment banner would otherwise be read as a hostname.
+                    Dim e = ParseQueueFile(f)
+                    If e Is Nothing Then Continue For
+                    If e.Host <> "" AndAlso seen.Add(e.Host) Then found.Add(e.Host)
+                Catch
+                End Try
+            Next
+        Catch
+        End Try
+        found.Sort(StringComparer.OrdinalIgnoreCase)
+        Return found
+    End Function
+
+    ' The three options are independent and can be combined, but they are applied
+    ' in a fixed order and one pairing is self-contradictory. Say so plainly.
+    '
+    '   1. Reconstruct  - decides WHAT can be uploaded (adds rebuilt entries)
+    '   2. Skip missing - decides whether a file with no image still counts
+    '   3. Force        - decides whether to send a manifest that is still short
+    Public Sub LogOptionNotes()
+        If SkipMissingSource AndAlso ForceIncomplete Then
+            Log("NOTE: 'Skip missing source' and 'Force incomplete' work against each other.")
+            Log("      Skip leaves those queue files in place, so the panel will reappear on")
+            Log("      the next scan even though Force has already sent its manifest.")
+            Log("      Untick Skip if you want forced panels to finish cleanly.")
+        End If
+        If ForceIncomplete AndAlso Not Reconstruct Then
+            Log("NOTE: 'Force incomplete' without 'Reconstruct from disk' may send short")
+            Log("      manifests for files that are still on disk. Try Reconstruct first.")
+        End If
+    End Sub
 
     Sub Main(args As String())
         If Not ParseArgs(args) Then
@@ -255,6 +369,7 @@ Module Program
         Log("Max retry   : " & MaxRetry.ToString())
         Log("Force       : " & ForceIncomplete.ToString())
         If OnlyPid <> "" Then Log("Filter PID  : " & OnlyPid)
+        LogOptionNotes()
         Log("")
 
         Try
@@ -280,9 +395,20 @@ Module Program
         Log("Panels scanned        : " & nPanels.ToString())
         Log("Panels index/host sent: " & nPanelsFired.ToString())
         Log("  ...of which SHORT   : " & nPanelsShort.ToString())
+        If ForceIncomplete Then
+            If nPanelsForced = 0 Then
+                Log("  ...Force was ON but was not needed - nothing was blocked.")
+            Else
+                Log("  ...of which FORCED  : " & nPanelsForced.ToString())
+            End If
+        End If
         Log("Panels still short    : " & nPanelsIncomplete.ToString())
         Log("Files uploaded        : " & nUploaded.ToString())
         Log("Files failed          : " & nFailed.ToString())
+        If nSkippedOffline > 0 Then
+            Log("Left for a later run  : " & nSkippedOffline.ToString() &
+                "  (server unreachable - queue files kept, nothing marked failed)")
+        End If
         Log("Files source missing  : " & nMissing.ToString())
         Log("Files already recorded: " & nAlready.ToString())
         Log("Failed->clean retries : " & nRetried.ToString())
@@ -409,6 +535,46 @@ Module Program
     End Function
 
     Private GlobalNames As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+    ' Only the names genuinely LEARNED from queue files. Kept separate from
+    ' GlobalNames because the cache must not absorb rule-file entries: if it did,
+    ' deleting a name from allowed_filenames.txt would have no effect, since the
+    ' cache would keep permitting it.
+    Private LearnedNames As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+    ' Wildcard rules from the hand-maintained files. Only ever come from those two
+    ' files - nothing learned is ever turned into a pattern.
+    Private AllowPatterns As New List(Of Regex)()
+    Private DenyPatterns As New List(Of Regex)()
+
+    Private Function IsGlob(s As String) As Boolean
+        Return s.Contains("*") OrElse s.Contains("?")
+    End Function
+
+    ' "*_gamma.hex" -> ^.*_gamma\.hex$      "step0?_*.tif" -> ^step0._.*\.tif$
+    Private Function GlobToRegex(glob As String) As Regex
+        Dim sb As New StringBuilder("^")
+        For Each ch In glob
+            Select Case ch
+                Case "*"c : sb.Append(".*")
+                Case "?"c : sb.Append(".")
+                Case Else : sb.Append(Regex.Escape(ch.ToString()))
+            End Select
+        Next
+        sb.Append("$")
+        Return New Regex(sb.ToString(), RegexOptions.IgnoreCase Or RegexOptions.Compiled)
+    End Function
+
+    ' A candidate filename is acceptable when it is named exactly, or matches an
+    ' allow wildcard - and is not excluded by name or by a deny wildcard.
+    Private Function IsAllowedName(canonical As String) As Boolean
+        For Each rx In DenyPatterns
+            If rx.IsMatch(canonical) Then Return False
+        Next
+        If GlobalNames.Contains(canonical) Then Return True
+        For Each rx In AllowPatterns
+            If rx.IsMatch(canonical) Then Return True
+        Next
+        Return False
+    End Function
     ' Per-panel ext->dest folder maps from the whole scan, used as donors when a
     ' panel has lost every queue file of a given extension.
     Private DonorMaps As New List(Of Dictionary(Of String, String))()
@@ -464,9 +630,9 @@ Module Program
                     If src = "" Then Continue For
                     ' skip the index/host queue files themselves
                     If src = l(10).Trim() OrElse src = l(13).Trim() Then Continue For
-                    If GlobalNames.Add(CanonicalName(Path.GetFileName(src), LocalToken(src))) Then
-                        added += 1
-                    End If
+                    Dim cn = CanonicalName(Path.GetFileName(src), LocalToken(src))
+                    LearnedNames.Add(cn)
+                    If GlobalNames.Add(cn) Then added += 1
                 Catch
                 End Try
             Next
@@ -479,8 +645,111 @@ Module Program
     ' file of a given name has been consumed, nothing in a later scan would know
     ' that name was ever legitimate - and reconstruction would start rejecting
     ' real files. So it is remembered on disk between runs.
+    ' Rule files ship WITH the exe: copy the exe and these three files to a machine
+    ' and it is ready to run against any queue folder. The queue folder is only an
+    ' input, so nothing needs to be placed there.
+    '
+    ' Search order:
+    '   1. beside the exe                   <- normal place, ships with the tool
+    '   2. the queue folder                 <- per-folder override, if you want one
+    '   3. <queue>\Log\Recovery             <- where older versions kept them
+    ' known_filenames.txt is written beside the exe, falling back to the queue
+    ' folder if that location is not writable (e.g. a read-only share).
+    Public Const ALLOW_FILE As String = "allowed_filenames.txt"
+    Public Const DENY_FILE As String = "denied_filenames.txt"
+    Public Const KNOWN_FILE As String = "known_filenames.txt"
+
+    Private Function ExeDir() As String
+        Return AppDomain.CurrentDomain.BaseDirectory.TrimEnd("\"c)
+    End Function
+
+    Private Function RuleFile(name As String) As String
+        Dim beside = Path.Combine(ExeDir(), name)
+        If File.Exists(beside) Then Return beside
+        Dim inQueue = Path.Combine(QueueRoot, name)
+        If File.Exists(inQueue) Then Return inQueue
+        Dim legacy = Path.Combine(LegacyRuleDir(), name)
+        If File.Exists(legacy) Then Return legacy
+        Return beside                       ' default location for writing
+    End Function
+
     Private Function VocabPath() As String
-        Return Path.Combine(RecoveryLogDir(), "known_filenames.txt")
+        Return RuleFile(KNOWN_FILE)
+    End Function
+
+    ' A hand-maintained rule file. By default its names are ADDED to whatever is
+    ' learned from real queue files, so a name that no longer appears anywhere is
+    ' still allowed. Put "!strict" on a line by itself to use ONLY this file and
+    ' learn nothing - useful when the learned cache has been polluted.
+    Private Function AllowListPath() As String
+        Return RuleFile(ALLOW_FILE)
+    End Function
+
+    ' Names here are removed after everything else, whatever their source. This is
+    ' how a wrong name that got learned is permanently excluded.
+    Private Function DenyListPath() As String
+        Return RuleFile(DENY_FILE)
+    End Function
+
+    Private AllowListStrict As Boolean = False
+
+    Private Function LoadAllowList() As Integer
+        AllowListStrict = False
+        Dim p = AllowListPath()
+        If Not File.Exists(p) Then Return 0
+        Dim n As Integer = 0
+        Try
+            For Each l In File.ReadAllLines(p)
+                Dim s = l.Trim()
+                If s = "" OrElse s.StartsWith("#") Then Continue For
+                If String.Equals(s, "!strict", StringComparison.OrdinalIgnoreCase) Then
+                    AllowListStrict = True
+                    Continue For
+                End If
+                If IsGlob(s) Then
+                    AllowPatterns.Add(GlobToRegex(s))
+                Else
+                    GlobalNames.Add(s)
+                End If
+                n += 1
+            Next
+        Catch ex As Exception
+            Log("  ! could not read allowed_filenames.txt: " & ex.Message)
+        End Try
+        Return n
+    End Function
+
+    Private Function ApplyDenyList() As Integer
+        Dim p = DenyListPath()
+        If Not File.Exists(p) Then Return 0
+        Dim n As Integer = 0
+        Try
+            For Each l In File.ReadAllLines(p)
+                Dim s = l.Trim()
+                If s = "" OrElse s.StartsWith("#") Then Continue For
+                If IsGlob(s) Then
+                    ' Applied at match time, and also strips anything already
+                    ' learned that the pattern covers - including from the cache,
+                    ' so a denied name does not reappear on the next scan.
+                    Dim rx = GlobToRegex(s)
+                    DenyPatterns.Add(rx)
+                    Dim hit = GlobalNames.Where(Function(k) rx.IsMatch(k)).ToList()
+                    For Each k In hit
+                        GlobalNames.Remove(k)
+                        LearnedNames.Remove(k)
+                    Next
+                    n += hit.Count
+                ElseIf GlobalNames.Remove(s) Then
+                    LearnedNames.Remove(s)
+                    n += 1
+                Else
+                    LearnedNames.Remove(s)
+                End If
+            Next
+        Catch ex As Exception
+            Log("  ! could not read denied_filenames.txt: " & ex.Message)
+        End Try
+        Return n
     End Function
 
     Private Sub LoadVocab()
@@ -489,23 +758,37 @@ Module Program
             If Not File.Exists(p) Then Exit Sub
             For Each l In File.ReadAllLines(p)
                 Dim s = l.Trim()
-                If s <> "" AndAlso Not s.StartsWith("#") Then GlobalNames.Add(s)
+                If s <> "" AndAlso Not s.StartsWith("#") Then
+                    LearnedNames.Add(s)
+                    GlobalNames.Add(s)
+                End If
             Next
         Catch
         End Try
     End Sub
 
     Private Sub SaveVocab()
+        Dim lines As New List(Of String)()
+        lines.Add("# Canonical source filenames LEARNED from real FTPUploaderVB queue files.")
+        lines.Add("# @PID@ stands for the panel's local file PID.")
+        lines.Add("#")
+        lines.Add("# THIS FILE IS REGENERATED ON EVERY SCAN - edits here do not survive.")
+        lines.Add("# It holds only what was learned; names from allowed_filenames.txt are NOT")
+        lines.Add("# copied here, so removing one from that file really does remove it.")
+        lines.AddRange(LearnedNames.OrderBy(Function(s) s))
+
+        ' Beside the exe by default; fall back to the queue folder if that is not
+        ' writable, so a read-only or shared install still works.
+        Dim primary = VocabPath()
         Try
-            Dim lines As New List(Of String)()
-            lines.Add("# Canonical source filenames seen in real FTPUploaderVB queue files.")
-            lines.Add("# @PID@ stands for the panel's local file PID.")
-            lines.Add("# Reconstruction will only rebuild a file whose name is listed here.")
-            lines.Add("# Safe to review; delete a line to stop that name being reconstructed.")
-            lines.AddRange(GlobalNames.OrderBy(Function(s) s))
-            File.WriteAllLines(VocabPath(), lines)
+            File.WriteAllLines(primary, lines)
+            Return
+        Catch
+        End Try
+        Try
+            File.WriteAllLines(Path.Combine(QueueRoot, KNOWN_FILE), lines)
         Catch ex As Exception
-            Log("  ! could not save filename vocabulary: " & ex.Message)
+            Log("  ! could not save filename cache: " & ex.Message)
         End Try
     End Sub
 
@@ -605,7 +888,7 @@ Module Program
             If known.Contains(fname) Then Continue For
 
             Dim ext = Path.GetExtension(fname)
-            Dim matched = GlobalNames.Contains(CanonicalName(fname, ourToken))
+            Dim matched = IsAllowedName(CanonicalName(fname, ourToken))
 
             If Not matched Then
                 p.SkippedJunk.Add(fname & " (not a known filename for this product)")
@@ -663,6 +946,10 @@ Module Program
         Dim bad As Integer = 0
 
         For Each f In files
+            ' The rule files sit beside the exe, which is often the queue folder
+            ' itself. They are .txt, so exclude them by name.
+            If IsRuleFileName(Path.GetFileName(f)) Then Continue For
+
             Dim e = ParseQueueFile(f)
             If e Is Nothing Then
                 bad += 1
@@ -777,33 +1064,57 @@ Module Program
             ' vanish from the vocabulary and reconstruction would start rejecting
             ' genuine files.
             GlobalNames = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+            LearnedNames = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+            AllowPatterns.Clear()
+            DenyPatterns.Clear()
+
+            ' Rule file first, so "!strict" is known before deciding whether to learn.
+            Dim fromRules = LoadAllowList()
+            If fromRules > 0 Then Log("Reconstruction: rules from " & AllowListPath())
+            If File.Exists(DenyListPath()) Then Log("Reconstruction: denials from " & DenyListPath())
 
             Dim fromLive As Integer = 0
-            For Each e In entries
-                If e.IsIndexOrHostQueue Then Continue For
-                If GlobalNames.Add(CanonicalName(Path.GetFileName(e.SourceFile),
-                                                 LocalToken(e.SourceFile))) Then fromLive += 1
-            Next
-
-            Dim beforeRemembered = GlobalNames.Count
-            LoadVocab()
-            Dim fromMemory = GlobalNames.Count - beforeRemembered
-
+            Dim fromMemory As Integer = 0
             Dim fromBackup As Integer = 0
-            Dim crawled As Integer = 0
-            For Each bdir In New String() {"Backedup Recovery Queue", "Backedup Succeed Queue",
-                                           "Backedup Failed Queue"}
-                Dim n As Integer = 0
-                fromBackup += LearnNamesFrom(Path.Combine(QueueRoot, bdir), n)
-                crawled += n
-            Next
 
-            SaveVocab()
+            If Not AllowListStrict Then
+                For Each e In entries
+                    If e.IsIndexOrHostQueue Then Continue For
+                    Dim cn = CanonicalName(Path.GetFileName(e.SourceFile), LocalToken(e.SourceFile))
+                    LearnedNames.Add(cn)
+                    If GlobalNames.Add(cn) Then fromLive += 1
+                Next
 
-            Log("Reconstruction: vocabulary = " & GlobalNames.Count.ToString() &
-                " filename(s)  (" & fromLive.ToString() & " from live queue, " &
-                fromMemory.ToString() & " remembered, " & fromBackup.ToString() &
-                " from backups)")
+                Dim beforeRemembered = GlobalNames.Count
+                LoadVocab()
+                fromMemory = GlobalNames.Count - beforeRemembered
+
+                For Each bdir In New String() {"Backedup Recovery Queue", "Backedup Succeed Queue",
+                                               "Backedup Failed Queue"}
+                    Dim n As Integer = 0
+                    fromBackup += LearnNamesFrom(Path.Combine(QueueRoot, bdir), n)
+                Next
+            End If
+
+            ' Denials win over every source, including the rule file. Applied BEFORE
+            ' the cache is written, or a denied name would be saved and come back.
+            Dim denied = ApplyDenyList()
+            If Not AllowListStrict Then SaveVocab()
+
+            If AllowListStrict Then
+                Log("Reconstruction: STRICT - allowed_filenames.txt only, " &
+                    fromRules.ToString() & " name(s). Nothing learned.")
+            Else
+                Log("Reconstruction: vocabulary = " & GlobalNames.Count.ToString() &
+                    " filename(s) + " & AllowPatterns.Count.ToString() & " wildcard(s)  (" &
+                    fromRules.ToString() & " from rules, " &
+                    fromLive.ToString() & " from live queue, " &
+                    fromMemory.ToString() & " remembered, " & fromBackup.ToString() &
+                    " from backups)")
+            End If
+            If denied > 0 Then
+                Log("Reconstruction: " & denied.ToString() & " name(s) removed by denied_filenames.txt")
+            End If
 
             ' Donor ext->folder maps, so a panel that lost every queue file of one
             ' extension can still place it. Only the ext->ext RELATIONSHIP is taken
@@ -906,6 +1217,11 @@ Module Program
             "   pending: " & pending.ToString() & " (" & dupCount.ToString() & " done, " &
             retryCount.ToString() & " failed-retry, " & newCount.ToString() & " new)")
         Log("  projected   : " & projected.ToString() & " / " & p.Total.ToString())
+        If st.MissingSrc > 0 Then
+            Log("  " & st.MissingSrc.ToString() & " source image(s) missing from disk - " &
+                If(SkipMissingSource, "left in place, so the panel cannot complete.",
+                                      "will be marked failed, so the manifest will be short."))
+        End If
         If p.TotalMismatch Then
             Log("  WARNING: queue files disagree on totalFileCount. Using " & p.Total.ToString() & ".")
         End If
@@ -933,15 +1249,38 @@ Module Program
 
         Dim canComplete = (projected >= p.Total)
         If Not canComplete AndAlso Not ForceIncomplete Then
-            Log("  VERDICT: CANNOT COMPLETE - " & (p.Total - projected).ToString() &
-                " queue file(s) missing. Skipped. Use -force to send anyway.")
+            ' Show every option that applies, best first, so the choice is the
+            ' operator's. Force alone would ship a short manifest for files that
+            ' are often still sitting on disk, so it is never the only suggestion.
+            Dim gap = p.Total - projected
+            Dim opts As New List(Of String)()
+
+            If st.ShortByQueue > 0 AndAlso Not Reconstruct Then
+                opts.Add("'Reconstruct from disk' (-reconstruct) - rebuilds the missing entries " &
+                         "if the images are still on disk. Try this first.")
+            End If
+            If st.ShortBySource > 0 AndAlso SkipMissingSource Then
+                opts.Add("Untick 'Skip missing source' - lets the panel finish without those " &
+                         st.ShortBySource.ToString() & " file(s).")
+            End If
+            If st.ShortByQueue > 0 AndAlso Reconstruct Then
+                opts.Add("Nothing left to recover - the images are not on disk either.")
+            End If
+            opts.Add("'Force incomplete' (-force) - sends now; the customer gets a manifest " &
+                     "short by " & gap.ToString() & " of " & p.Total.ToString() & ".")
+
+            Log("  VERDICT: " & st.Verdict & ". Skipped.")
+            Log("  Options:")
+            For i = 0 To opts.Count - 1
+                Log("    " & (i + 1).ToString() & ") " & opts(i))
+            Next
             nPanelsIncomplete += 1
             ReportRow(p, hostBefore, pending, 0, 0, 0, dupCount, hostBefore, "SKIPPED-INCOMPLETE")
             Return
         End If
 
         If Not DoExecute Then
-            Log("  VERDICT: would upload " & realPending.ToString() & " file(s), then send index + host.")
+            Log("  VERDICT: " & st.Verdict)
             nPanelsFired += 1
             ReportRow(p, hostBefore, pending, realPending, 0, 0, dupCount, projected, "DRYRUN-WOULD-FIRE")
             Return
@@ -992,7 +1331,8 @@ Module Program
             End If
 
             Dim err As String = ""
-            If TryUpload(e, e.SourceFile, e.DestFile, err) Then
+            Dim connErr As Boolean = False
+            If TryUpload(e, e.SourceFile, e.DestFile, err, connErr) Then
                 Log("    [ ok ] " & Path.GetFileName(e.SourceFile) & " -> " & e.DestFile)
                 AppendLog(e.SucceedLog, "Recovery: upload succeeded " & e.SourceFile &
                           " to: ftp://" & e.Host & e.DestFile)
@@ -1009,26 +1349,44 @@ Module Program
                 up += 1 : nUploaded += 1
                 If e.IsReconstructed Then nRebuilt += 1
             Else
-                Log("    [FAIL] " & Path.GetFileName(e.SourceFile) & " : " & err)
-                AppendLog(e.FailLog, "Recovery: upload failed after " & MaxRetry.ToString() &
-                          " attempt(s): " & err & " " & e.SourceFile &
-                          " to: ftp://" & e.Host & e.DestFile)
-                If Not isRetry Then AppendRecord(e, True)   ' placeholder already present on a retry
-                recorded(rec) = True
-                BackupAndDelete(e.FilePath, "Backedup Recovery Queue\Failed")
-                fl += 1 : nFailed += 1
+                If connErr Then
+                    ' Server unreachable - nothing wrong with this file. Leave the
+                    ' queue file alone and write no placeholder, so a re-run after
+                    ' the connection is fixed picks it up exactly as it was.
+                    ' Deliberately does NOT stop the run: this must work unattended.
+                    ' Every skip is listed: during an outage this is the record of
+                    ' exactly which files still need sending, and it is cheap now
+                    ' that the socket pre-check makes each one instant.
+                    Log("    [conn] server unreachable, queue file kept: " &
+                        Path.GetFileName(e.SourceFile))
+                    AppendLog(e.FailLog, "Recovery: server unreachable, queue file kept: " & err)
+                    nSkippedOffline += 1
+                Else
+                    Log("    [FAIL] " & Path.GetFileName(e.SourceFile) & " : " & err)
+                    AppendLog(e.FailLog, "Recovery: upload failed after " & MaxRetry.ToString() &
+                              " attempt(s): " & err & " " & e.SourceFile &
+                              " to: ftp://" & e.Host & e.DestFile)
+                    If Not isRetry Then AppendRecord(e, True)   ' placeholder already present on a retry
+                    recorded(rec) = True
+                    BackupAndDelete(e.FilePath, "Backedup Recovery Queue\Failed")
+                    fl += 1 : nFailed += 1
+                End If
 
-                ConsecutiveFailures += 1
-                If AbortAfterConsecutiveFailures > 0 AndAlso
-                   ConsecutiveFailures >= AbortAfterConsecutiveFailures Then
-                    Aborted = True
-                    CancelRequested = True
-                    Log("")
-                    Log("  *** ABORTING: " & ConsecutiveFailures.ToString() &
-                        " uploads failed back-to-back. The server looks unreachable.")
-                    Log("  *** Remaining panels left untouched. Fix the connection and re-run;")
-                    Log("  *** already-uploaded files are recorded and will not be sent twice.")
-                    Exit For
+                ' Only file-level failures count towards the breaker, and it is off
+                ' by default - an unattended run should keep going and mark what it
+                ' can, not stop and wait for someone to notice.
+                If Not connErr Then
+                    ConsecutiveFailures += 1
+                    If AbortAfterConsecutiveFailures > 0 AndAlso
+                       ConsecutiveFailures >= AbortAfterConsecutiveFailures Then
+                        Aborted = True
+                        CancelRequested = True
+                        Log("")
+                        Log("  *** ABORTING: " & ConsecutiveFailures.ToString() &
+                            " uploads failed back-to-back with the server reachable.")
+                        Log("  *** Remaining panels left untouched.")
+                        Exit For
+                    End If
                 End If
             End If
         Next
@@ -1062,6 +1420,17 @@ Module Program
             Return
         End If
 
+        If ServerDown Then
+            ' Files were skipped because the server was unreachable, not because
+            ' they are unavailable. Sending the manifest now - even with Force -
+            ' would tell the customer those files are never coming.
+            Log("  index/host NOT sent - the server was unreachable during this panel.")
+            Log("  Nothing was consumed; run Upload again once the connection is back.")
+            nPanelsIncomplete += 1
+            ReportRow(p, hostBefore, pending, up, fl, ms, dupCount, hostAfter, "SERVER-OFFLINE")
+            Return
+        End If
+
         If hostAfter >= p.Total OrElse ForceIncomplete Then
             Dim forced = (hostAfter < p.Total)
             If forced Then
@@ -1069,11 +1438,24 @@ Module Program
                     " - sending index/host anyway (-force).")
             End If
             If shortBy > 0 Then
+                ' Spell out both causes. "1 source image missing" alone reads as
+                ' though the manifest should be short by 1, when files that never
+                ' had a queue file are usually the bigger part of the gap.
+                Dim causes As New List(Of String)()
+                If placeholders > 0 Then
+                    causes.Add(placeholders.ToString() & " image(s) missing from disk")
+                End If
+                Dim noQueue = shortBy - placeholders
+                If noQueue > 0 Then
+                    causes.Add(noQueue.ToString() & " file(s) with no queue file" &
+                               If(Reconstruct, " and not recoverable from disk", " (try Reconstruct)"))
+                End If
                 Log("  WARNING: manifest will be SHORT by " & shortBy.ToString() &
-                    " file(s) of " & p.Total.ToString() & ".")
+                    " of " & p.Total.ToString() & " - " & String.Join(", ", causes))
             End If
             If FinalizePanel(p) Then
                 nPanelsFired += 1
+                If forced Then nPanelsForced += 1
                 If shortBy > 0 Then
                     nPanelsShort += 1
                     note = If(forced, "SENT-FORCED-SHORT (" & shortBy.ToString() & " missing)",
@@ -1230,22 +1612,149 @@ Module Program
         End If
     End Sub
 
-    Private Function TryUpload(e As QueueEntry, src As String, dst As String, ByRef err As String) As Boolean
+    ' connError comes back True when the session itself could not be established -
+    ' i.e. the server is unreachable rather than this particular file being bad.
+    ' That distinction matters: a file that failed because of an outage must keep
+    ' its queue file, or a five-minute network problem would permanently retire
+    ' hundreds of perfectly good files.
+    ' A plain TCP connect with a short timeout. WinSCP's TimeoutInMilliseconds only
+    ' governs waiting for a response on an established connection - it does not cap
+    ' a connect to a dead port, which falls through to the OS TCP timeout and can
+    ' block for minutes. Checking the socket first is what makes an outage fast
+    ' and visible instead of a silent stall.
+    Private Function ServerReachable(host As String, Optional timeoutMs As Integer = 3000) As Boolean
+        If host = "" Then Return False
+        Dim h = host
+        Dim port As Integer = 21
+        Dim colon = h.LastIndexOf(":"c)
+        If colon > 0 Then
+            Dim pp As Integer
+            If Integer.TryParse(h.Substring(colon + 1), pp) Then
+                port = pp
+                h = h.Substring(0, colon)
+            End If
+        End If
+        Try
+            Using c As New Net.Sockets.TcpClient()
+                Dim ar = c.BeginConnect(h, port, Nothing, Nothing)
+                If Not ar.AsyncWaitHandle.WaitOne(timeoutMs) Then Return False
+                c.EndConnect(ar)
+                Return c.Connected
+            End Using
+        Catch
+            Return False
+        End Try
+    End Function
+
+    Private Function TryUpload(e As QueueEntry, src As String, dst As String,
+                               ByRef err As String, Optional ByRef connError As Boolean = False) As Boolean
         err = ""
-        For attempt = 1 To MaxRetry
+        connError = False
+
+        ' While the server is known to be down, don't pay 3 x timeout on every
+        ' file. Try once every PROBE_INTERVAL_SECONDS; the rest fail instantly.
+        Dim probing As Boolean = False
+        If ServerDown Then
+            If DateTime.Now.Subtract(LastProbe).TotalSeconds < PROBE_INTERVAL_SECONDS Then
+                connError = True
+                err = "server offline (skipped without retrying)"
+                Return False
+            End If
+            probing = True
+            LastProbe = DateTime.Now
+            Log("      probing the server again ...")
+        End If
+
+        ' Cheap socket check before handing over to WinSCP, so a dead server costs
+        ' 3 seconds rather than an OS-level TCP timeout.
+        If Not ServerReachable(e.Host) Then
+            connError = True
+            err = "cannot connect to " & e.Host & " (no answer within 3s)"
+            ' Must set ServerDown here too. This branch returns early, so without
+            ' it the flag was never raised and every file paid the full 3s socket
+            ' timeout instead of being skipped instantly.
+            If Not ServerDown Then
+                ServerDown = True
+                LastProbe = DateTime.Now
+                Log("      server appears to be down - remaining files will be left for a")
+                Log("      later run, with a re-check every " & PROBE_INTERVAL_SECONDS.ToString() & "s.")
+            ElseIf probing Then
+                Log("      still no answer from " & e.Host & ".")
+                LastProbe = DateTime.Now
+            End If
+            Return False
+        End If
+
+        Dim attempts = If(probing, 1, MaxRetry)      ' a probe is a single attempt
+        For attempt = 1 To attempts
+            Dim thisAttempt = attempt          ' captured by the heartbeat lambda
+            Dim opening As Boolean = True
+            Dim sw = Diagnostics.Stopwatch.StartNew()
+            Dim finished As Boolean = False
+            ' PutFiles blocks, and a dropped connection can sit at the TCP level for
+            ' far longer than the WinSCP timeout. Without a heartbeat the tool looks
+            ' hung, so tick every 5s to show it is still waiting and for how long.
+            Dim beat As Threading.Timer = Nothing
             Try
+                Dim cb As New Threading.TimerCallback(
+                    Sub(o)
+                        If Not finished Then
+                            Log("      ... waiting " & CInt(sw.Elapsed.TotalSeconds).ToString() &
+                                "s on " & Path.GetFileName(src) &
+                                "  (attempt " & thisAttempt.ToString() & "/" & attempts.ToString() & ")")
+                        End If
+                    End Sub)
+                beat = New Threading.Timer(cb, Nothing, 5000, 5000)
+
                 Dim s = GetSession(e)
+                opening = False
                 Dim topts As New TransferOptions()
                 topts.TransferMode = TransferMode.Binary
                 Dim r = s.PutFiles(src, dst, False, topts)
                 r.Check()
+                finished = True
+                If ServerDown Then
+                    Log("      server is reachable again - resuming normally.")
+                    ServerDown = False
+                End If
+                connError = False
                 Return True
             Catch ex As Exception
+                finished = True
                 err = ex.Message
+                connError = opening          ' failed before the transfer started
+                Log("      attempt " & attempt.ToString() & "/" & attempts.ToString() &
+                    " failed after " & CInt(sw.Elapsed.TotalSeconds).ToString() & "s" &
+                    If(opening, " (cannot reach server)", "") & ": " & err)
                 CloseSession()   ' force a fresh connection on the next attempt
-                If attempt < MaxRetry Then Threading.Thread.Sleep(1000)
+                If attempt < attempts Then Threading.Thread.Sleep(1000)
+            Finally
+                finished = True
+                If beat IsNot Nothing Then beat.Dispose()
             End Try
         Next
+
+        If Not connError Then
+            ' The session opened, so this looks like a problem with the file. But a
+            ' network drop DURING a transfer looks identical at this point, and
+            ' marking a good file failed for that reason would be wrong. Settle it
+            ' by asking whether the server is still there at all.
+            Try
+                CloseSession()
+                GetSession(e)
+            Catch
+                connError = True
+                Log("      ...server is no longer reachable - treating as a connection")
+                Log("         problem, not a bad file. Queue file kept.")
+            End Try
+        End If
+
+        If connError AndAlso Not ServerDown Then
+            ServerDown = True
+            LastProbe = DateTime.Now
+            Log("      server appears to be down - remaining files will be left for a")
+            Log("      later run, with a re-check every " & PROBE_INTERVAL_SECONDS.ToString() & "s.")
+        End If
         Return False
     End Function
 
@@ -1403,8 +1912,10 @@ Module Program
         Try
             Dim dir = Path.Combine(QueueRoot, subFolder)
             If Not Directory.Exists(dir) Then Directory.CreateDirectory(dir)
-            Dim name = DateTime.Now.ToString("yyyyMMdd_HHmmss_fff") & "_" & Path.GetFileName(fpath)
-            File.Copy(fpath, Path.Combine(dir, name), True)
+            ' Plain copy under the original name - queue filenames are already
+            ' unique per panel, and keeping the name means a file can be restored
+            ' to the queue folder by copying it straight back.
+            File.Copy(fpath, Path.Combine(dir, Path.GetFileName(fpath)), True)
         Catch ex As Exception
             Log("      ! backup failed: " & ex.Message)
         End Try
@@ -1437,10 +1948,27 @@ Module Program
     ' Logging / report
     ' =========================================================================
 
+    ' Logs live with the exe, alongside the rule files, so everything the tool owns
+    ' is in one folder and the queue folder stays purely an input. Falls back to the
+    ' queue folder if the exe's folder is not writable (read-only share, etc).
     Private Function RecoveryLogDir() As String
-        Dim d = Path.Combine(QueueRoot, "Log\Recovery")
-        If Not Directory.Exists(d) Then Directory.CreateDirectory(d)
-        Return d
+        Dim d = Path.Combine(ExeDir(), "Log\Recovery")
+        Try
+            If Not Directory.Exists(d) Then Directory.CreateDirectory(d)
+            Return d
+        Catch
+        End Try
+        Dim fallback = Path.Combine(QueueRoot, "Log\Recovery")
+        Try
+            If Not Directory.Exists(fallback) Then Directory.CreateDirectory(fallback)
+        Catch
+        End Try
+        Return fallback
+    End Function
+
+    ' Where earlier versions kept the rule files - still honoured when reading.
+    Private Function LegacyRuleDir() As String
+        Return Path.Combine(QueueRoot, "Log\Recovery")
     End Function
 
     Private Sub OpenLogs()
@@ -1484,8 +2012,9 @@ Module Program
     Public Sub ResetRun()
         nPanels = 0 : nPanelsFired = 0 : nPanelsIncomplete = 0
         nUploaded = 0 : nFailed = 0 : nMissing = 0 : nAlready = 0 : nRetried = 0
-        nRebuilt = 0 : nPanelsShort = 0
+        nRebuilt = 0 : nPanelsShort = 0 : nPanelsForced = 0
         ConsecutiveFailures = 0 : Aborted = False
+        ServerDown = False : LastProbe = DateTime.MinValue : nSkippedOffline = 0
         CancelRequested = False
         RunStamp = DateTime.Now.ToString("yyyyMMdd_HHmmss")
     End Sub
@@ -1507,6 +2036,7 @@ Module Program
             "Panels scanned        : " & nPanels.ToString(),
             "Panels index/host sent: " & nPanelsFired.ToString(),
             "  ...of which SHORT   : " & nPanelsShort.ToString(),
+            "  ...of which FORCED  : " & nPanelsForced.ToString(),
             "Panels still short    : " & nPanelsIncomplete.ToString(),
             "Files uploaded        : " & nUploaded.ToString(),
             "Files failed          : " & nFailed.ToString(),
