@@ -50,6 +50,16 @@ Module Program
     ' from the queue file. Empty means "use whatever the queue says".
     Public HostOverride As String = ""
 
+    ' How many files to send down one FTP session before closing it and opening a
+    ' fresh one. LGD asked for 100. 0 means "one session for the whole run".
+    ' A very long-lived session can be dropped by the server or a firewall, and
+    ' recycling it periodically is cheap - but every reconnect is a login, so this
+    ' should not be small.
+    Public FilesPerSession As Integer = 100
+    ' Public so the UI can show them live - they scroll away instantly in the log.
+    Public FilesThisSession As Integer = 0
+    Public SessionNumber As Integer = 0
+
     ' The server a given entry should actually be sent to.
     Public Function EffectiveHost(e As QueueEntry) As String
         If HostOverride <> "" Then Return HostOverride
@@ -72,6 +82,41 @@ Module Program
     Private LastProbe As DateTime = DateTime.MinValue
     Private Const PROBE_INTERVAL_SECONDS As Integer = 30
     Private nSkippedOffline As Integer = 0
+
+    ' When True, every file gets its full retry allowance even after the server has
+    ' been found unreachable - nothing is fast-skipped.
+    '
+    ' ON by default, by request: a file is only reported as offline after it has
+    ' genuinely been tried. The cost is that a long outage means 3 attempts x
+    ' connect timeout for EVERY file, so a large backlog can take hours to work
+    ' through while failing. Turn it off (-noretryall) to have the first failure
+    ' mark the server down and skip the rest instantly, with a probe every 30s that
+    ' resumes automatically. Either way no queue file is consumed and nothing is
+    ' marked failed.
+    Public RetryEveryFileWhenDown As Boolean = True
+    Private LoggedWinScpPath As Boolean = False
+
+    ' How much per-file detail to log. Off, a healthy run logs only panel headers,
+    ' warnings and results - which is far easier to follow when files fly past at
+    ' several per second. The log FILE is unaffected in either case only insofar as
+    ' it receives whatever is logged, so turn this on when investigating.
+    Public VerboseFileLog As Boolean = True
+
+    ' Abort a transfer that has produced nothing for this long. When a server
+    ' disappears mid-transfer there is no RST, so the socket just goes quiet and
+    ' the OS can sit on it for minutes. WinSCP's own timeout does not cover this,
+    ' but Session.Abort() can be called from another thread - which is what the
+    ' heartbeat timer does. 0 disables.
+    '
+    ' Must be comfortably longer than a legitimate large-image transfer on a slow
+    ' link, or good uploads get killed.
+    Public StallTimeoutSeconds As Integer = 30
+
+    ' Live throughput, read by the UI. Bytes are taken from the file on disk, and
+    ' the clock starts at the first upload attempt rather than at scan time, so the
+    ' rate reflects transferring rather than reading the queue folder.
+    Public UploadedBytes As Long = 0
+    Public UploadStart As DateTime = DateTime.MinValue
     Public OnlyPid As String = ""
 
     ' Optional extra log destination (the GUI hooks its textbox in here).
@@ -90,7 +135,7 @@ Module Program
     Private nPanels As Integer = 0
     Private nPanelsFired As Integer = 0
     Private nPanelsIncomplete As Integer = 0
-    Private nUploaded As Integer = 0
+    Public nUploaded As Integer = 0
     Private nFailed As Integer = 0
     Private nMissing As Integer = 0
     Private nAlready As Integer = 0
@@ -382,13 +427,16 @@ Module Program
         Return "unknown"
     End Function
 
-    ' Where to find WinSCP.exe. The queue file names the path on the machine that
-    ' created it, which is right in production but wrong anywhere else - so fall
-    ' back to a copy shipped beside this exe, then to one on PATH.
+    ' Where to find WinSCP.exe.
+    '
+    ' The copy shipped beside this exe wins: it is the version that was tested with
+    ' this build, and it means the tool behaves the same on every machine. The path
+    ' named in the queue file is the TrueTest install on whichever machine created
+    ' it, which may be a different version or may not exist here at all.
     Public Function WinScpPath(preferred As String) As String
-        If preferred <> "" AndAlso File.Exists(preferred) Then Return preferred
         Dim beside = Path.Combine(ExeDir(), "WinSCP.exe")
         If File.Exists(beside) Then Return beside
+        If preferred <> "" AndAlso File.Exists(preferred) Then Return preferred
         Try
             For Each pd In (Environment.GetEnvironmentVariable("PATH")).Split(";"c)
                 If pd.Trim() = "" Then Continue For
@@ -461,6 +509,16 @@ Module Program
         End If
         Log("Panels still short    : " & nPanelsIncomplete.ToString())
         Log("Files uploaded        : " & nUploaded.ToString())
+        If UploadStart <> DateTime.MinValue AndAlso nUploaded > 0 Then
+            Dim secs = Math.Max(1, DateTime.Now.Subtract(UploadStart).TotalSeconds)
+            Log("  transferred         : " & (UploadedBytes / 1048576.0).ToString("0.0") &
+                " MB in " & (secs / 60).ToString("0.0") & " min  ->  " &
+                (nUploaded / secs).ToString("0.0") & " files/s, " &
+                ((UploadedBytes / 1048576.0) / secs).ToString("0.00") & " MB/s")
+        End If
+        Log("FTP sessions opened   : " & SessionNumber.ToString() &
+            If(FilesPerSession > 0, "  (limit " & FilesPerSession.ToString() & " file(s) each)",
+                                    "  (no limit)"))
         Log("Files failed          : " & nFailed.ToString())
         If nSkippedOffline > 0 Then
             Log("Left for a later run  : " & nSkippedOffline.ToString() &
@@ -493,12 +551,26 @@ Module Program
                     ForceIncomplete = True
                 Case "-skipmissing", "/skipmissing"
                     SkipMissingSource = True
+                Case "-retryall", "/retryall"
+                    RetryEveryFileWhenDown = True
+                Case "-noretryall", "/noretryall"
+                    RetryEveryFileWhenDown = False
+                Case "-stall", "/stall"
+                    i += 1
+                    If i >= args.Length Then Return False
+                    If Not Integer.TryParse(args(i), StallTimeoutSeconds) Then Return False
+                    If StallTimeoutSeconds < 0 Then StallTimeoutSeconds = 0
                 Case "-reconstruct", "/reconstruct"
                     Reconstruct = True
                 Case "-host", "/host"
                     i += 1
                     If i >= args.Length Then Return False
                     HostOverride = args(i).Trim()
+                Case "-persession", "/persession"
+                    i += 1
+                    If i >= args.Length Then Return False
+                    If Not Integer.TryParse(args(i), FilesPerSession) Then Return False
+                    If FilesPerSession < 0 Then FilesPerSession = 0
                 Case "-help", "/?", "-?", "/help"
                     Return False
                 Case "-root", "/root"
@@ -1122,7 +1194,25 @@ Module Program
 
         ' Rebuild entries for files sitting on disk with no queue file.
         BuildPanelsTail(list, entries)
-        Return list.OrderBy(Function(p) p.PID).ToList()
+
+        ' Group by server, then PID. A queue folder normally names one server, but
+        ' if it names several, processing them interleaved would force a session
+        ' switch per panel. Grouping means one session per server instead.
+        Dim hostOf = Function(p As Panel) As String
+                         If p.Entries.Count > 0 Then Return p.Entries(0).Host
+                         If p.Leftovers.Count > 0 Then Return p.Leftovers(0).Host
+                         Return ""
+                     End Function
+        Dim distinctHosts = list.Select(Function(p) hostOf(p)).
+                                 Distinct(StringComparer.OrdinalIgnoreCase).Count()
+        If distinctHosts > 1 Then
+            Log("Note: this queue names " & distinctHosts.ToString() &
+                " different servers - panels are grouped by server to avoid")
+            Log("      reconnecting between every panel.")
+        End If
+
+        Return list.OrderBy(Function(p) hostOf(p), StringComparer.OrdinalIgnoreCase).
+                    ThenBy(Function(p) p.PID).ToList()
     End Function
 
     ' Vocabulary + donor maps shared by every panel. Split out so it can be built
@@ -1328,10 +1418,15 @@ Module Program
                 If p.InferredExts.Count > 0 Then
                     Log("     dest folder INFERRED from a donor panel for: " & String.Join(", ", p.InferredExts))
                 End If
-                For Each e In p.Entries.Where(Function(x) x.IsReconstructed)
-                    Log("     " & Path.GetFileName(e.SourceFile) &
-                        "  ->  ftp://" & EffectiveHost(e) & e.DestFile)
-                Next
+                If VerboseFileLog Then
+                    For Each e In p.Entries.Where(Function(x) x.IsReconstructed)
+                        ' "will send" - these are the rebuilt entries and their planned
+                        ' destinations, printed BEFORE any upload. Using the same "->"
+                        ' as the [ ok ] lines made them look like completed uploads.
+                        Log("     will send: " & Path.GetFileName(e.SourceFile) &
+                            "  ->  ftp://" & EffectiveHost(e) & e.DestFile)
+                    Next
+                End If
             End If
         ElseIf p.RebuiltCount > 0 Then
             Log("  note: " & p.RebuiltCount.ToString() &
@@ -1429,9 +1524,22 @@ Module Program
 
             Dim err As String = ""
             Dim connErr As Boolean = False
+            ' Name the file BEFORE attempting it. Otherwise a slow or failing
+            ' upload shows several seconds of attempt lines with no indication of
+            ' what is being worked on.
+            If VerboseFileLog Then Log("    -> " & Path.GetFileName(e.SourceFile))
+            If UploadStart = DateTime.MinValue Then UploadStart = DateTime.Now
+            Dim fileBytes As Long = 0
+            Try
+                fileBytes = New FileInfo(e.SourceFile).Length
+            Catch
+            End Try
             If TryUpload(e, e.SourceFile, e.DestFile, err, connErr) Then
-                Log("    [ ok ] " & Path.GetFileName(e.SourceFile) &
-                    " -> ftp://" & EffectiveHost(e) & e.DestFile)
+                UploadedBytes += fileBytes
+                If VerboseFileLog Then
+                    Log("    [ ok ] " & Path.GetFileName(e.SourceFile) &
+                        " -> ftp://" & EffectiveHost(e) & e.DestFile)
+                End If
                 AppendLog(e.SucceedLog, "Recovery: upload succeeded " & e.SourceFile &
                           " to: ftp://" & EffectiveHost(e) & e.DestFile)
                 If isRetry Then
@@ -1457,12 +1565,12 @@ Module Program
                     ' that the socket pre-check makes each one instant.
                     Log("    [conn] server unreachable, queue file kept: " &
                         Path.GetFileName(e.SourceFile))
-                    AppendLog(e.FailLog, "Recovery: server unreachable, queue file kept: " & err)
+                    AppendLog(e.FailLog, "Recovery: server unreachable, queue file kept: " & OneLine(err))
                     nSkippedOffline += 1
                 Else
-                    Log("    [FAIL] " & Path.GetFileName(e.SourceFile) & " : " & err)
+                    Log("    [FAIL] " & Path.GetFileName(e.SourceFile) & " : " & OneLine(err))
                     AppendLog(e.FailLog, "Recovery: upload failed after " & MaxRetry.ToString() &
-                              " attempt(s): " & err & " " & e.SourceFile &
+                              " attempt(s): " & OneLine(err) & " " & e.SourceFile &
                               " to: ftp://" & EffectiveHost(e) & e.DestFile)
                     If Not isRetry Then AppendRecord(e, True)   ' placeholder already present on a retry
                     recorded(rec) = True
@@ -1717,12 +1825,23 @@ Module Program
 
     Private Function GetSession(e As QueueEntry) As Session
         Dim useHost = EffectiveHost(e)
+
+        ' Recycle the session every FilesPerSession files, as LGD asked.
+        If FilesPerSession > 0 AndAlso CurSession IsNot Nothing AndAlso
+           FilesThisSession >= FilesPerSession Then
+            CloseSession("reached the " & FilesPerSession.ToString() & "-file limit")
+        End If
+
         If CurSession IsNot Nothing AndAlso CurSession.Opened _
            AndAlso String.Equals(CurHost, useHost, StringComparison.OrdinalIgnoreCase) _
            AndAlso String.Equals(CurUser, e.User, StringComparison.OrdinalIgnoreCase) Then
             Return CurSession
         End If
 
+        ' Different server or different account - the session cannot be reused.
+        If CurSession IsNot Nothing Then
+            CloseSession("switching to " & useHost & " as " & e.User)
+        End If
         CloseSession()
 
         Dim opts As New SessionOptions()
@@ -1737,6 +1856,13 @@ Module Program
         If scp <> "" Then
             s.ExecutablePath = scp
         End If
+        ' Say which WinSCP is actually being used - but only once per run. It used
+        ' to key off SessionNumber, which never advances while the server is
+        ' refusing, so this line repeated on every failed attempt.
+        If Not LoggedWinScpPath Then
+            LoggedWinScpPath = True
+            Log("    using WinSCP: " & If(scp = "", "(WinSCP's own default)", scp))
+        End If
         Try
             Dim dir = RecoveryLogDir()
             s.SessionLogPath = Path.Combine(dir, RunStamp & "_winscp.log")
@@ -1747,11 +1873,21 @@ Module Program
         CurSession = s
         CurHost = useHost
         CurUser = e.User
+        SessionNumber += 1
+        FilesThisSession = 0
+        Log("    FTP session #" & SessionNumber.ToString() & " opened to " & useHost &
+            " as " & e.User &
+            If(FilesPerSession > 0, "  (" & FilesPerSession.ToString() & " file(s) per session)",
+                                    "  (one session for the whole run)"))
         Return s
     End Function
 
-    Private Sub CloseSession()
+    Private Sub CloseSession(Optional reason As String = "")
         If CurSession IsNot Nothing Then
+            If reason <> "" Then
+                Log("    FTP session #" & SessionNumber.ToString() & " closed after " &
+                    FilesThisSession.ToString() & " file(s) - " & reason)
+            End If
             Try
                 CurSession.Dispose()
             Catch
@@ -1772,29 +1908,40 @@ Module Program
     ' a connect to a dead port, which falls through to the OS TCP timeout and can
     ' block for minutes. Checking the socket first is what makes an outage fast
     ' and visible instead of a silent stall.
-    Private Function ServerReachable(host As String, Optional timeoutMs As Integer = 3000) As Boolean
-        If host = "" Then Return False
-        Dim h = host
-        Dim port As Integer = 21
-        Dim colon = h.LastIndexOf(":"c)
-        If colon > 0 Then
-            Dim pp As Integer
-            If Integer.TryParse(h.Substring(colon + 1), pp) Then
-                port = pp
-                h = h.Substring(0, colon)
-            End If
-        End If
-        Try
-            Using c As New Net.Sockets.TcpClient()
-                Dim ar = c.BeginConnect(h, port, Nothing, Nothing)
-                If Not ar.AsyncWaitHandle.WaitOne(timeoutMs) Then Return False
-                c.EndConnect(ar)
-                Return c.Connected
-            End Using
-        Catch
-            Return False
-        End Try
+    ' Does this error suggest the connection is gone, rather than a problem with
+    ' one file? Decides whether the session is worth keeping - dropping it after a
+    ' file-level failure forces a fresh login, and a burst of logins is what the
+    ' customer's server treats as flooding.
+    ' WinSCP errors arrive as several lines ("Connection failed." / "No connection
+    ' could be made..." / "Connection failed."), which turns one failure into three
+    ' log lines and makes an outage unreadable. Flatten and de-duplicate.
+    Private Function OneLine(msg As String) As String
+        If msg Is Nothing Then Return ""
+        Dim parts = msg.Replace(vbCr, vbLf).Split(New Char() {ChrW(10)},
+                                StringSplitOptions.RemoveEmptyEntries)
+        Dim seen As New List(Of String)()
+        For Each p In parts
+            Dim t = p.Trim()
+            If t <> "" AndAlso Not seen.Contains(t) Then seen.Add(t)
+        Next
+        Dim s = String.Join(" ", seen)
+        If s.Length > 200 Then s = s.Substring(0, 200) & "..."
+        Return s
     End Function
+
+    Private Function LooksLikeConnectionError(msg As String) As Boolean
+        If msg Is Nothing Then Return False
+        Dim m = msg.ToLowerInvariant()
+        For Each s In New String() {"connection", "timed out", "timeout", "network",
+                                    "refused", "unreachable", "closed", "reset",
+                                    "lost", "disconnect", "not logged in", "421"}
+            If m.Contains(s) Then Return True
+        Next
+        Return False
+    End Function
+
+    ' (ServerReachable removed - the tool no longer opens any TCP connection to
+    '  the FTP port outside of the transfers themselves.)
 
     Private Function TryUpload(e As QueueEntry, src As String, dst As String,
                                ByRef err As String, Optional ByRef connError As Boolean = False) As Boolean
@@ -1804,7 +1951,7 @@ Module Program
         ' While the server is known to be down, don't pay 3 x timeout on every
         ' file. Try once every PROBE_INTERVAL_SECONDS; the rest fail instantly.
         Dim probing As Boolean = False
-        If ServerDown Then
+        If ServerDown AndAlso Not RetryEveryFileWhenDown Then
             If DateTime.Now.Subtract(LastProbe).TotalSeconds < PROBE_INTERVAL_SECONDS Then
                 connError = True
                 err = "server offline (skipped without retrying)"
@@ -1815,25 +1962,12 @@ Module Program
             Log("      probing the server again ...")
         End If
 
-        ' Cheap socket check before handing over to WinSCP, so a dead server costs
-        ' 3 seconds rather than an OS-level TCP timeout.
-        If Not ServerReachable(EffectiveHost(e)) Then
-            connError = True
-            err = "cannot connect to " & EffectiveHost(e) & " (no answer within 3s)"
-            ' Must set ServerDown here too. This branch returns early, so without
-            ' it the flag was never raised and every file paid the full 3s socket
-            ' timeout instead of being skipped instantly.
-            If Not ServerDown Then
-                ServerDown = True
-                LastProbe = DateTime.Now
-                Log("      server appears to be down - remaining files will be left for a")
-                Log("      later run, with a re-check every " & PROBE_INTERVAL_SECONDS.ToString() & "s.")
-            ElseIf probing Then
-                Log("      still no answer from " & EffectiveHost(e) & ".")
-                LastProbe = DateTime.Now
-            End If
-            Return False
-        End If
+        ' No pre-check. It used to open a TCP connection to port 21 before opening
+        ' the session, which the customer's server counted as another connection.
+        ' Opening the session is itself the test: if it fails, connError is set
+        ' below, ServerDown is raised, and every following file is skipped
+        ' instantly. The only cost is that the FIRST failure waits for WinSCP's own
+        ' connect timeout - and the heartbeat makes that visible rather than silent.
 
         Dim attempts = If(probing, 1, MaxRetry)      ' a probe is a single attempt
         For attempt = 1 To attempts
@@ -1845,24 +1979,42 @@ Module Program
             ' far longer than the WinSCP timeout. Without a heartbeat the tool looks
             ' hung, so tick every 5s to show it is still waiting and for how long.
             Dim beat As Threading.Timer = Nothing
+            Dim stalled As Boolean = False
+            Dim activeSession As Session = Nothing
             Try
                 Dim cb As New Threading.TimerCallback(
                     Sub(o)
-                        If Not finished Then
-                            Log("      ... waiting " & CInt(sw.Elapsed.TotalSeconds).ToString() &
-                                "s on " & Path.GetFileName(src) &
-                                "  (attempt " & thisAttempt.ToString() & "/" & attempts.ToString() & ")")
+                        If finished Then Return
+                        Dim secs = CInt(sw.Elapsed.TotalSeconds)
+                        ' Kill a transfer that has hung. Abort() is the supported
+                        ' way to interrupt WinSCP from another thread; without it
+                        ' a server that vanished mid-transfer leaves the socket
+                        ' silent and the OS can wait minutes before giving up.
+                        If StallTimeoutSeconds > 0 AndAlso secs >= StallTimeoutSeconds _
+                           AndAlso activeSession IsNot Nothing AndAlso Not stalled Then
+                            stalled = True
+                            Log("      no response for " & secs.ToString() &
+                                "s - aborting this transfer.")
+                            Try
+                                activeSession.Abort()
+                            Catch
+                            End Try
+                            Return
                         End If
+                        Log("      ... still waiting " & secs.ToString() &
+                            "s  (attempt " & thisAttempt.ToString() & "/" & attempts.ToString() & ")")
                     End Sub)
                 beat = New Threading.Timer(cb, Nothing, 5000, 5000)
 
                 Dim s = GetSession(e)
+                activeSession = s
                 opening = False
                 Dim topts As New TransferOptions()
                 topts.TransferMode = TransferMode.Binary
                 Dim r = s.PutFiles(src, dst, False, topts)
                 r.Check()
                 finished = True
+                FilesThisSession += 1
                 If ServerDown Then
                     Log("      server is reachable again - resuming normally.")
                     ServerDown = False
@@ -1873,10 +2025,25 @@ Module Program
                 finished = True
                 err = ex.Message
                 connError = opening          ' failed before the transfer started
-                Log("      attempt " & attempt.ToString() & "/" & attempts.ToString() &
+                If stalled Then
+                    ' We aborted it - the server stopped responding. That is a
+                    ' connection problem, so the queue file must be kept.
+                    connError = True
+                    err = "no response for " & StallTimeoutSeconds.ToString() &
+                          "s, transfer aborted"
+                End If
+                Log("      " & Path.GetFileName(src) & ": attempt " & attempt.ToString() &
+                    "/" & attempts.ToString() &
                     " failed after " & CInt(sw.Elapsed.TotalSeconds).ToString() & "s" &
-                    If(opening, " (cannot reach server)", "") & ": " & err)
-                CloseSession()   ' force a fresh connection on the next attempt
+                    If(opening, " (cannot reach server)", "") & ": " & OneLine(err))
+                ' Only drop the session when the connection itself is suspect.
+                ' Closing after a file-level failure (permission denied, remote
+                ' disk full) forces a fresh login for the next file - and the
+                ' customer's server treats a burst of logins as flooding, then
+                ' starts refusing. Keep the session when it is still good.
+                If opening OrElse stalled OrElse LooksLikeConnectionError(err) Then
+                    CloseSession("connection looks broken, will reconnect")
+                End If
                 If attempt < attempts Then Threading.Thread.Sleep(1000)
             Finally
                 finished = True
@@ -1884,19 +2051,21 @@ Module Program
             End Try
         Next
 
-        If Not connError Then
-            ' The session opened, so this looks like a problem with the file. But a
-            ' network drop DURING a transfer looks identical at this point, and
-            ' marking a good file failed for that reason would be wrong. Settle it
-            ' by asking whether the server is still there at all.
-            Try
-                CloseSession()
-                GetSession(e)
-            Catch
-                connError = True
-                Log("      ...server is no longer reachable - treating as a connection")
-                Log("         problem, not a bad file. Queue file kept.")
-            End Try
+        ' No post-failure reachability test either - that was one more connection
+        ' per failed file, at exactly the moment the server is least able to take
+        ' it. A transfer that failed with the session still open is treated as a
+        ' file problem; if the connection really is gone, the NEXT file fails to
+        ' open a session and is correctly classified then.
+
+        ' A drop DURING a transfer looks like a file failure - the session had
+        ' already opened - but the file is fine and its queue file must be kept.
+        ' The error text is enough to tell: "Connection failed", "timed out",
+        ' "reset", "421" and so on all mean the link, not the file. This replaces
+        ' the old reachability re-test, which cost an extra connection per failure.
+        If Not connError AndAlso LooksLikeConnectionError(err) Then
+            connError = True
+            Log("      (connection lost mid-transfer - treated as a connection" &
+                " problem, not a bad file. Queue file kept.)")
         End If
 
         If connError AndAlso Not ServerDown Then
@@ -2168,6 +2337,8 @@ Module Program
         nRebuilt = 0 : nPanelsShort = 0 : nPanelsForced = 0
         ConsecutiveFailures = 0 : Aborted = False
         ServerDown = False : LastProbe = DateTime.MinValue : nSkippedOffline = 0
+        SessionNumber = 0 : FilesThisSession = 0 : LoggedWinScpPath = False
+        UploadedBytes = 0 : UploadStart = DateTime.MinValue
         CancelRequested = False
         RunStamp = DateTime.Now.ToString("yyyyMMdd_HHmmss")
     End Sub

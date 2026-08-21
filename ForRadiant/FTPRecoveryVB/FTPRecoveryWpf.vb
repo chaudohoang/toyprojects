@@ -110,13 +110,18 @@ Public Class RecoveryWindow
     Private btnStop As Button
     Private chkForce As CheckBox
     Private chkSkipMissing As CheckBox
+    Private chkRetryAll As CheckBox
+    Private chkVerbose As CheckBox
     Private chkReconstruct As CheckBox
     Private cboHost As ComboBox
+    Private cboPerSession As ComboBox
+    Private cboStall As ComboBox
     Private numRetry As ComboBox
     Private dg As DataGrid
     Private txtLog As TextBox
     Private bar As ProgressBar
     Private lblStatus As TextBlock
+    Private lblSession As TextBlock
 
     ' Live reachability of the FTP servers this queue is configured for. Hosts are
     ' read from line 0 of the queue files, not hardcoded, so the strip is correct
@@ -286,6 +291,20 @@ Public Class RecoveryWindow
         chkReconstruct.IsChecked = True
         chkForce = MakeCheck("Force incomplete")
         chkSkipMissing = MakeCheck("Skip missing source")
+        chkRetryAll = MakeCheck("Keep retrying if server down")
+        chkRetryAll.IsChecked = True
+        ' Untick to stop the per-file lines. Panel headers, warnings and results
+        ' still appear - much easier to follow when files go past several a second.
+        chkVerbose = MakeCheck("Log every file")
+        chkVerbose.IsChecked = True
+        ' Takes effect immediately, even mid-run - it only changes what is printed.
+        AddHandler chkVerbose.Checked,
+            Sub() Program.VerboseFileLog = True
+        AddHandler chkVerbose.Unchecked,
+            Sub()
+                Program.VerboseFileLog = False
+                AppendLog(">>> per-file logging off - panel results still shown.")
+            End Sub
         ' All three change what the table says, so all three re-classify.
         For Each cb In New CheckBox() {chkReconstruct, chkForce, chkSkipMissing}
             AddHandler cb.Checked, AddressOf OnOptionToggled
@@ -305,10 +324,31 @@ Public Class RecoveryWindow
         cboHost.SelectedIndex = 0
         AddHandler cboHost.SelectionChanged, AddressOf OnHostOverrideChanged
 
+        ' How many files to send down one FTP session before opening a fresh one.
+        ' LGD asked for 100; too many rapid logins is what their server refuses.
+        Dim lblPer As New TextBlock() With {
+            .Text = "Files/session:", .VerticalAlignment = VerticalAlignment.Center,
+            .Margin = New Thickness(12, 0, 6, 0)}
+        cboPerSession = New ComboBox() With {
+            .Width = 95, .VerticalContentAlignment = VerticalAlignment.Center}
+        For Each v In New String() {"50", "100", "200", "500", "No limit"}
+            cboPerSession.Items.Add(v)
+        Next
+        cboPerSession.SelectedIndex = 1          ' 100, as LGD asked
+
+        Dim lblStall As New TextBlock() With {
+            .Text = "Stall:", .VerticalAlignment = VerticalAlignment.Center,
+            .Margin = New Thickness(12, 0, 6, 0)}
+        cboStall = New ComboBox() With {
+            .Width = 85, .VerticalContentAlignment = VerticalAlignment.Center}
+        For Each v In New String() {"30s", "60s", "90s", "180s", "No limit"}
+            cboStall.Items.Add(v)
+        Next
+        cboStall.SelectedIndex = 0          ' 30s
+
         Dim lblRetry As New TextBlock() With {
             .Text = "Retries:", .VerticalAlignment = VerticalAlignment.Center,
             .Margin = New Thickness(12, 0, 6, 0)}
-
         numRetry = New ComboBox() With {
             .Width = 55, .VerticalContentAlignment = VerticalAlignment.Center,
             .Margin = New Thickness(0, 0, 0, 0)}
@@ -320,8 +360,14 @@ Public Class RecoveryWindow
         opts.Children.Add(chkReconstruct)
         opts.Children.Add(chkForce)
         opts.Children.Add(chkSkipMissing)
+        opts.Children.Add(chkRetryAll)
+        opts.Children.Add(chkVerbose)
         opts.Children.Add(lblHost)
         opts.Children.Add(cboHost)
+        opts.Children.Add(lblPer)
+        opts.Children.Add(cboPerSession)
+        opts.Children.Add(lblStall)
+        opts.Children.Add(cboStall)
         opts.Children.Add(lblRetry)
         opts.Children.Add(numRetry)
         Grid.SetColumn(opts, 1)
@@ -449,15 +495,28 @@ Public Class RecoveryWindow
     Private Function BuildStatusBar() As UIElement
         Dim g As New Grid() With {.Margin = New Thickness(0, 8, 0, 0)}
         g.ColumnDefinitions.Add(New ColumnDefinition() With {.Width = GridLength.Auto})
+        g.ColumnDefinitions.Add(New ColumnDefinition() With {.Width = GridLength.Auto})
         g.ColumnDefinitions.Add(New ColumnDefinition() With {.Width = New GridLength(1, GridUnitType.Star)})
         g.ColumnDefinitions.Add(New ColumnDefinition() With {.Width = GridLength.Auto})
 
         Dim pings = BuildPingStrip()
         Grid.SetColumn(pings, 0)
 
+        ' Fixed readout of the current FTP session - in the log it scrolls away
+        ' within a second, and it is the thing to watch when the customer's server
+        ' is refusing connections.
+        lblSession = New TextBlock() With {
+            .Text = "no FTP session",
+            .VerticalAlignment = VerticalAlignment.Center,
+            .Margin = New Thickness(16, 0, 0, 0),
+            .FontFamily = New FontFamily("Consolas"),
+            .FontSize = 11.5,
+            .Foreground = Brushes.Gray}
+        Grid.SetColumn(lblSession, 1)
+
         bar = New ProgressBar() With {.Height = 18, .Minimum = 0, .Maximum = 1, .Value = 0,
                                       .Margin = New Thickness(12, 0, 0, 0)}
-        Grid.SetColumn(bar, 1)
+        Grid.SetColumn(bar, 2)
 
         lblStatus = New TextBlock() With {
             .Text = "Idle",
@@ -465,9 +524,10 @@ Public Class RecoveryWindow
             .Margin = New Thickness(10, 0, 0, 0),
             .MinWidth = 160,
             .TextTrimming = TextTrimming.CharacterEllipsis}
-        Grid.SetColumn(lblStatus, 2)
+        Grid.SetColumn(lblStatus, 3)
 
         g.Children.Add(pings)
+        g.Children.Add(lblSession)
         g.Children.Add(bar)
         g.Children.Add(lblStatus)
         Grid.SetRow(g, 3)
@@ -540,13 +600,30 @@ Public Class RecoveryWindow
     Private Sub StartPingTimer()
         PingTick(Nothing, Nothing)                     ' first reading immediately
         pingTimer = New System.Windows.Threading.DispatcherTimer()
-        pingTimer.Interval = TimeSpan.FromSeconds(3)
+        ' 30s, not 3s. Each check is a real TCP connect to port 21, so at 3s with
+        ' three hosts this was 1,200 connections per hour to each FTP server, all
+        ' day, whether or not anything was being uploaded. The customer's server
+        ' counts those.
+        pingTimer.Interval = TimeSpan.FromSeconds(30)
         AddHandler pingTimer.Tick, AddressOf PingTick
         pingTimer.Start()
     End Sub
 
     Private Sub PingTick(sender As Object, e As EventArgs)
         If pingBusy Then Return                        ' don't stack slow rounds
+
+        ' Do not probe while uploading. The upload itself is the proof of
+        ' reachability, and adding a connection every 30s to a server that is
+        ' already busy receiving files is exactly the load the customer objected
+        ' to. The session readout beside this strip shows the real state anyway.
+        If busy Then
+            ' Grey the readings so they don't look live while probing is paused.
+            For Each t In pingLabels
+                t.Foreground = Brushes.Silver
+            Next
+            Return
+        End If
+
         Dim targets = pingHosts.ToList()               ' snapshot: the list can be rebuilt
         If targets.Count = 0 Then Return
         pingBusy = True
@@ -554,36 +631,33 @@ Public Class RecoveryWindow
         Task.Run(Sub()
                      For i = 0 To targets.Count - 1
                          Dim idx = i
+                         ' ICMP ping, NOT a connect to port 21. A TCP check would
+                         ' be a better test of "can we actually upload", but it is
+                         ' another connection to the FTP server every time it runs,
+                         ' and the customer's server counts those. Ping touches no
+                         ' FTP port at all.
+                         '
+                         ' Caveat: a network can block ping while allowing FTP, so
+                         ' red here does not always mean uploads will fail.
                          Dim label As String
                          Dim colour As Brush
-                         ' Test the FTP port, not ICMP. A network can block ping and
-                         ' still allow FTP, or answer ping while the port is closed -
-                         ' either way an ICMP result would be misleading about
-                         ' whether an upload can actually happen.
-                         Dim sw = System.Diagnostics.Stopwatch.StartNew()
-                         Dim ok As Boolean = False
                          Try
-                             Using c As New Net.Sockets.TcpClient()
-                                 Dim ar = c.BeginConnect(targets(idx), 21, Nothing, Nothing)
-                                 If ar.AsyncWaitHandle.WaitOne(2000) Then
-                                     c.EndConnect(ar)
-                                     ok = c.Connected
+                             Using pg As New Ping()
+                                 Dim r = pg.Send(targets(idx), 1500)
+                                 If r IsNot Nothing AndAlso r.Status = IPStatus.Success Then
+                                     label = r.RoundtripTime.ToString() & " ms"
+                                     colour = If(r.RoundtripTime > 200,
+                                                 CType(Brushes.DarkOrange, Brush),
+                                                 CType(Brushes.Green, Brush))
+                                 Else
+                                     label = "no reply"
+                                     colour = Brushes.Red
                                  End If
                              End Using
                          Catch
-                             ok = False
-                         End Try
-                         sw.Stop()
-
-                         If ok Then
-                             Dim ms = CInt(sw.Elapsed.TotalMilliseconds)
-                             label = ms.ToString() & " ms"
-                             colour = If(ms > 200, CType(Brushes.DarkOrange, Brush),
-                                                   CType(Brushes.Green, Brush))
-                         Else
-                             label = "no FTP"
+                             label = "unreachable"
                              colour = Brushes.Red
-                         End If
+                         End Try
 
                          Dim text = targets(idx) & "  " & label
                          Dispatcher.BeginInvoke(New Action(
@@ -632,7 +706,42 @@ Public Class RecoveryWindow
         logTimer.Start()
     End Sub
 
+    ' Live FTP session readout. Green while a session is open, and it shows how
+    ' many files have gone down it - so "are we opening too many sessions?" is
+    ' answerable at a glance instead of by scrolling the log.
+    Private Sub UpdateSessionLabel()
+        If lblSession Is Nothing Then Return
+        Dim n = Program.SessionNumber
+        If n = 0 Then
+            lblSession.Text = "no FTP session"
+            lblSession.Foreground = Brushes.Gray
+            Return
+        End If
+        Dim used = Program.FilesThisSession
+        Dim cap = Program.FilesPerSession
+        Dim txt = "FTP session #" & n.ToString() & "  " &
+                  used.ToString() & If(cap > 0, " / " & cap.ToString(), "") & " file(s)"
+
+        ' Live throughput. Files/sec is the number that matters for an ETA; MB/sec
+        ' shows whether the link or the per-file overhead is the limit.
+        If Program.UploadStart <> DateTime.MinValue Then
+            Dim secs = DateTime.Now.Subtract(Program.UploadStart).TotalSeconds
+            If secs >= 1 Then
+                Dim fps = Program.nUploaded / secs
+                Dim mbps = (Program.UploadedBytes / 1048576.0) / secs
+                txt &= "   |   " & fps.ToString("0.0") & " files/s  " &
+                       mbps.ToString("0.00") & " MB/s"
+            End If
+        End If
+
+        lblSession.Text = txt
+        lblSession.Foreground = If(busy, CType(Brushes.Green, Brush), CType(Brushes.Gray, Brush))
+    End Sub
+
     Private Sub FlushLog(sender As Object, e As EventArgs)
+        ' Before the early-out below: the rate must keep ticking even when no new
+        ' log lines are arriving, e.g. during one slow file.
+        UpdateSessionLabel()
         Dim chunk As String = ""
         Dim dropped As Boolean = False
         SyncLock logLock
@@ -649,8 +758,11 @@ Public Class RecoveryWindow
         If txtLog.Text.Length > 400000 Then txtLog.Clear()
         If dropped Then txtLog.AppendText("... (older lines dropped - see the log file for the full trace)" & Environment.NewLine)
         If chunk <> "" Then
+            ' Only follow the tail if the view is already at the bottom. Scroll up
+            ' to read and it stays put; scroll back down and it resumes following.
+            Dim atBottom = (txtLog.VerticalOffset + txtLog.ViewportHeight) >= (txtLog.ExtentHeight - 4)
             txtLog.AppendText(chunk)
-            txtLog.ScrollToEnd()
+            If atBottom Then txtLog.ScrollToEnd()
         End If
     End Sub
 
@@ -689,7 +801,12 @@ Public Class RecoveryWindow
         chkReconstruct.IsEnabled = Not state
         chkForce.IsEnabled = Not state
         chkSkipMissing.IsEnabled = Not state
+        chkRetryAll.IsEnabled = Not state
+        ' Verbose is safe to change mid-run - it only affects what is printed.
+        chkVerbose.IsEnabled = True
         cboHost.IsEnabled = Not state
+        cboPerSession.IsEnabled = Not state
+        cboStall.IsEnabled = Not state
         numRetry.IsEnabled = Not state
         ' Deliberately NOT setting a wait cursor. The window stays fully
         ' responsive during a run, and a spinning cursor reads as "frozen" -
@@ -720,10 +837,18 @@ Public Class RecoveryWindow
         Program.DoExecute = execute
         Program.ForceIncomplete = chkForce.IsChecked.GetValueOrDefault()
         Program.SkipMissingSource = chkSkipMissing.IsChecked.GetValueOrDefault()
+        Program.RetryEveryFileWhenDown = chkRetryAll.IsChecked.GetValueOrDefault()
+        Program.VerboseFileLog = chkVerbose.IsChecked.GetValueOrDefault()
         Program.Reconstruct = chkReconstruct.IsChecked.GetValueOrDefault()
         ' Index 0 is "Auto (from queue)" - anything else is a literal host.
         Program.HostOverride = If(cboHost.SelectedIndex > 0,
                                   Convert.ToString(cboHost.SelectedItem), "")
+        Dim per As Integer = 0
+        Integer.TryParse(Convert.ToString(cboPerSession.SelectedItem), per)   ' "No limit" -> 0
+        Program.FilesPerSession = per
+        Dim stall As Integer = 0
+        Integer.TryParse(Convert.ToString(cboStall.SelectedItem).Replace("s", ""), stall)
+        Program.StallTimeoutSeconds = stall      ' "No limit" -> 0
         Dim r As Integer = 3
         Integer.TryParse(CStr(numRetry.SelectedItem), r)
         Program.MaxRetry = r
