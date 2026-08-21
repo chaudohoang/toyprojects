@@ -53,6 +53,18 @@ param(
     [int]$PctOrphanFail = 10,
     [int]$PctIncomplete = 10,
     [int]$PctMissingSource = 15,
+    # Scenarios taken from the real LGD production report, which the earlier
+    # weights did not cover at all:
+    #   ALLGONE     every image deleted, all queue files present  (1453 panels)
+    #   MOSTLYLOST  nearly every queue file gone, images intact    (322 panels)
+    #   INDEXONLY   only the index/host queue file left            (12 panels)
+    [int]$PctAllGone = 20,
+    [int]$PctMostlyLost = 10,
+    [int]$PctIndexOnly = 2,
+    # Real panels are not all the same size - the report shows 10, 12, 16 and 17
+    # file recipes. Off by default so existing tests keep the template's own count.
+    [switch]$VaryTotal,
+    [int[]]$TotalSizes = @(10, 12, 16, 17),
     [string]$HostOverride = "",
     [string]$WinScpOverride = "",
     [switch]$FixTotal,
@@ -69,8 +81,10 @@ $script:tally   = @{}
 # Weighted pick of a panel scenario. Each models a real state the queue folder
 # can end up in, so the recovery tool gets exercised on all of them.
 function Pick-Scenario {
-    $names   = @('FRESH','PARTIAL','DUP','RETRY','ORPHANFAIL','INCOMPLETE')
-    $weights = @($PctFresh, $PctPartial, $PctDup, $PctRetry, $PctOrphanFail, $PctIncomplete)
+    $names   = @('FRESH','PARTIAL','DUP','RETRY','ORPHANFAIL','INCOMPLETE',
+                 'ALLGONE','MOSTLYLOST','INDEXONLY')
+    $weights = @($PctFresh, $PctPartial, $PctDup, $PctRetry, $PctOrphanFail, $PctIncomplete,
+                 $PctAllGone, $PctMostlyLost, $PctIndexOnly)
     $total = 0
     foreach ($w in $weights) { $total += $w }
     if ($total -le 0) { return 'FRESH' }
@@ -250,7 +264,16 @@ for ($i = 0; $i -lt $Count; $i++) {
     $qPaths   = New-Object System.Collections.Generic.List[string]
     $srcPaths = New-Object System.Collections.Generic.List[string]
 
-    foreach ($t in $dataTpl) {
+    # Real panels come in several recipe sizes. Take the first N template files and
+    # write N into line 15, so totalFileCount genuinely varies between panels.
+    $useTpl = $dataTpl
+    if ($VaryTotal) {
+        $want = $TotalSizes[$script:rng.Next(0, $TotalSizes.Count)]
+        if ($want -lt $dataTpl.Count) { $useTpl = $dataTpl[0..($want - 1)] }
+    }
+    $panelTotal = $useTpl.Count
+
+    foreach ($t in $useTpl) {
 
         $lines = @($t.Lines | ForEach-Object {
             $s = $_.Replace($OldPid, $newPid).Replace($OldServerPid, $newSrv)
@@ -261,7 +284,7 @@ for ($i = 0; $i -lt $Count; $i++) {
 
         if ($HostOverride)    { $lines[0] = $HostOverride }
         if ($WinScpOverride)  { $lines[3] = $WinScpOverride }
-        if ($FixTotal)        { $lines[15] = $dataTpl.Count.ToString() }
+        if ($FixTotal -or $VaryTotal) { $lines[15] = $panelTotal.ToString() }
 
         $srcFile  = $lines[7].Trim()
         $destFile = $lines[8].Trim()
@@ -281,6 +304,7 @@ for ($i = 0; $i -lt $Count; $i++) {
         if ($Go) { [System.IO.File]::WriteAllLines($qPath, $lines) }
         $qPaths.Add($qPath)   | Out-Null
         $srcPaths.Add($srcFile) | Out-Null
+        $lastLines = $lines       # kept for INDEXONLY, which needs lines 9-14
         $script:created++
     }
 
@@ -294,6 +318,8 @@ for ($i = 0; $i -lt $Count; $i++) {
         $n = $records.Count
         $seedLines = New-Object System.Collections.Generic.List[string]
         $killQueues = New-Object System.Collections.Generic.List[int]
+        $script:killAllImages   = $false
+        $script:writeIndexQueue = $false
 
         switch ($sc) {
 
@@ -348,6 +374,29 @@ for ($i = 0; $i -lt $Count; $i++) {
                 $k = $script:rng.Next(2, 6)
                 for ($j = 0; $j -lt $k; $j++) { $killQueues.Add($j) | Out-Null }
             }
+
+            'ALLGONE' {
+                # EVERY image deleted from disk, all queue files present. This is
+                # the 1,453-panel case from the LGD report: without a guard the
+                # tool marks all of them failed, strips every placeholder and
+                # uploads an EMPTY manifest. Recovery must refuse to send.
+                $script:killAllImages = $true
+            }
+
+            'MOSTLYLOST' {
+                # Nearly every queue file gone, images still on disk - the 322-panel
+                # case (Total 17, Pending 1). Reconstruction should recover these.
+                $keep = $script:rng.Next(1, 4)
+                for ($j = 0; $j -lt ($n - $keep); $j++) { $killQueues.Add($j) | Out-Null }
+            }
+
+            'INDEXONLY' {
+                # Every data queue file gone, but an index/host queue file left
+                # behind - the 12-panel case, where the panel is visible with
+                # nothing pending.
+                for ($j = 0; $j -lt $n; $j++) { $killQueues.Add($j) | Out-Null }
+                $script:writeIndexQueue = $true
+            }
         }
 
         # Independently, some panels lose local source files from disk.
@@ -373,6 +422,25 @@ for ($i = 0; $i -lt $Count; $i++) {
             foreach ($j in $killQueues) {
                 if (Test-Path -LiteralPath $qPaths[$j]) {
                     Remove-Item -LiteralPath $qPaths[$j] -Force
+                }
+            }
+            # ALLGONE: wipe every image, leaving the queue files intact.
+            if ($script:killAllImages) {
+                foreach ($sp in $srcPaths) {
+                    if (Test-Path -LiteralPath $sp) { Remove-Item -LiteralPath $sp -Force }
+                }
+            }
+            # INDEXONLY: leave an index/host queue file so the panel is still
+            # discovered even though no data queue file remains.
+            if ($script:writeIndexQueue -and $lastLines) {
+                foreach ($pair in @(@($lastLines[9],  $lastLines[10], $lastLines[11]),
+                                    @($lastLines[12], $lastLines[13], $lastLines[14]))) {
+                    if ([string]::IsNullOrWhiteSpace($pair[0])) { continue }
+                    $ql = @($lastLines)
+                    $ql[7] = $pair[1]
+                    $ql[8] = $pair[2]
+                    Ensure-DirFor $pair[0]
+                    [System.IO.File]::WriteAllLines($pair[0], $ql)
                 }
             }
         }

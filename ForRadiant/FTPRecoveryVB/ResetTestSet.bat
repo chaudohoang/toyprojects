@@ -34,6 +34,10 @@ REM   DUP        host has clean lines, queue files STILL there (dedupe test)
 REM   RETRY      host has " - failed" lines, queue files STILL there (retry test)
 REM   ORPHANFAIL host has clean + failed lines, those queue files gone
 REM   INCOMPLETE queue files vanished, nothing recorded (needs -force)
+REM   ALLGONE    every image deleted, queue files intact  <- empty-manifest case
+REM   MOSTLYLOST nearly all queue files gone, images fine <- reconstruct case
+REM   INDEXONLY  only an index/host queue file remains
+REM The last three come from the real LGD production report.
 set "RANDOMIZE=1"
 set "SEED=20260819"
 set "P_FRESH=20"
@@ -43,6 +47,12 @@ set "P_RETRY=20"
 set "P_ORPHAN=10"
 set "P_INCOMPLETE=10"
 set "P_MISSINGSRC=15"
+set "P_ALLGONE=20"
+set "P_MOSTLYLOST=10"
+set "P_INDEXONLY=2"
+
+REM Real panels are not all one size - production shows 10/12/16/17 file recipes.
+set "VARYTOTAL=1"
 
 REM Used only when RANDOMIZE=0 - fixed seeding of a contiguous subset.
 set "SEEDFROM=401"
@@ -128,14 +138,19 @@ if "%REMOVE_AAA%"=="1" (
 echo       done.
 
 echo.
+REM Set outside the block below: %VT% inside parentheses expands at parse time.
+set "VT="
+if "%VARYTOTAL%"=="1" set "VT=-VaryTotal"
+
 if "%RANDOMIZE%"=="1" (
     echo [2/2] Generating %COUNT% panels with a random scenario mix ...
     powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT%" ^
         -Template "%TEMPLATE%" -Root "%QUEUE%" -OldPid %OLDPID% ^
         -StartIndex 1 -Count %COUNT% -FileSizeKB %SIZEKB% ^
-        -Random -RandomSeed %SEED% ^
+        -Random -RandomSeed %SEED% %VT% ^
         -PctFresh %P_FRESH% -PctPartial %P_PARTIAL% -PctDup %P_DUP% ^
         -PctRetry %P_RETRY% -PctOrphanFail %P_ORPHAN% -PctIncomplete %P_INCOMPLETE% ^
+        -PctAllGone %P_ALLGONE% -PctMostlyLost %P_MOSTLYLOST% -PctIndexOnly %P_INDEXONLY% ^
         -PctMissingSource %P_MISSINGSRC% -Go
     if errorlevel 1 goto :failed
     goto :report

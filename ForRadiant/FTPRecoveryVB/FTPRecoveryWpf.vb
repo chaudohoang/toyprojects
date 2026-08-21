@@ -138,7 +138,7 @@ Public Class RecoveryWindow
     Private busy As Boolean = False
 
     Public Sub New()
-        Title = "FTP Recovery - stalled queue repair"
+        Title = "FTP Recovery - stalled queue repair      [build " & Program.BuildStamp() & "]"
         Width = 1180
         Height = 800
         MinWidth = 900
@@ -280,6 +280,10 @@ Public Class RecoveryWindow
 
         Dim opts As New WrapPanel() With {.HorizontalAlignment = HorizontalAlignment.Right}
         chkReconstruct = MakeCheck("Reconstruct from disk")
+        ' On by default: without it, panels whose upload instructions were lost are
+        ' reported as unfixable when the images are usually still on disk. It only
+        ' ever adds files that pass the allow/deny rules, so it is safe to leave on.
+        chkReconstruct.IsChecked = True
         chkForce = MakeCheck("Force incomplete")
         chkSkipMissing = MakeCheck("Skip missing source")
         ' All three change what the table says, so all three re-classify.
@@ -761,6 +765,7 @@ Public Class RecoveryWindow
 
         Task.Run(Sub()
                      Try
+                         AppendLog("FTP Recovery  [build " & Program.BuildStamp() & "]")
                          AppendLog("Scanning " & Program.QueueRoot & " ...")
                          Dim entries = Program.ScanQueueFiles()
                          AppendLog("Parsed " & entries.Count.ToString() & " queue file(s).")

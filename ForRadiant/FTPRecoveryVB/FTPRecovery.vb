@@ -197,6 +197,14 @@ Module Program
         s.CanComplete = (s.Projected >= p.Total)
 
         If s.CanComplete Then
+            ' Every file missing means the manifest would list nothing at all.
+            ' Flag it as its own outcome rather than "READY", because sending an
+            ' empty manifest is never wanted.
+            If s.MissingSrc >= p.Total AndAlso s.HostNow = 0 Then
+                s.CanComplete = False
+                s.Verdict = "NOTHING TO SEND - all " & p.Total.ToString() & " images gone from disk"
+                Return s
+            End If
             ' Flag panels that only reach the total because entries were rebuilt -
             ' they are ready, but for a different reason than a clean panel, and
             ' the dest paths of the rebuilt files were derived rather than read.
@@ -359,6 +367,39 @@ Module Program
         End If
     End Sub
 
+    ' When this exe was built. Taken from the file itself rather than a hardcoded
+    ' constant, so it can never disagree with the binary that is actually running -
+    ' which matters when several machines have different copies deployed.
+    Public Function BuildStamp() As String
+        Try
+            Dim asm = Reflection.Assembly.GetEntryAssembly()
+            Dim loc = If(asm Is Nothing, "", asm.Location)
+            If loc <> "" AndAlso File.Exists(loc) Then
+                Return File.GetLastWriteTime(loc).ToString("yyyy-MM-dd HH:mm")
+            End If
+        Catch
+        End Try
+        Return "unknown"
+    End Function
+
+    ' Where to find WinSCP.exe. The queue file names the path on the machine that
+    ' created it, which is right in production but wrong anywhere else - so fall
+    ' back to a copy shipped beside this exe, then to one on PATH.
+    Public Function WinScpPath(preferred As String) As String
+        If preferred <> "" AndAlso File.Exists(preferred) Then Return preferred
+        Dim beside = Path.Combine(ExeDir(), "WinSCP.exe")
+        If File.Exists(beside) Then Return beside
+        Try
+            For Each pd In (Environment.GetEnvironmentVariable("PATH")).Split(";"c)
+                If pd.Trim() = "" Then Continue For
+                Dim cand = Path.Combine(pd.Trim(), "WinSCP.exe")
+                If File.Exists(cand) Then Return cand
+            Next
+        Catch
+        End Try
+        Return ""
+    End Function
+
     Sub Main(args As String())
         If Not ParseArgs(args) Then
             PrintUsage()
@@ -379,7 +420,7 @@ Module Program
 
         OpenLogs()
 
-        Log("FTPRecovery  run " & RunStamp)
+        Log("FTPRecovery  run " & RunStamp & "   [build " & BuildStamp() & "]")
         Log("Queue root  : " & QueueRoot)
         Log("Mode        : " & If(DoExecute, "EXECUTE", "DRY RUN (add -go to execute)"))
         Log("Max retry   : " & MaxRetry.ToString())
@@ -964,6 +1005,9 @@ Module Program
         Dim result As New List(Of QueueEntry)()
         Dim files = Directory.EnumerateFiles(QueueRoot, "*.txt", SearchOption.TopDirectoryOnly)
         Dim bad As Integer = 0
+        Dim seen As Integer = 0
+        Dim sw = Diagnostics.Stopwatch.StartNew()
+        Dim nextReport As Integer = 2000
 
         For Each f In files
             ' The rule files sit beside the exe, which is often the queue folder
@@ -975,6 +1019,16 @@ Module Program
                 bad += 1
             Else
                 result.Add(e)
+            End If
+
+            ' Reading tens of thousands of small files is slow on a mechanical
+            ' disk - minutes, not seconds. Report progress so it is obviously
+            ' working rather than appearing to hang.
+            seen += 1
+            If seen >= nextReport Then
+                Log("  ... read " & seen.ToString() & " queue file(s)  (" &
+                    CInt(sw.Elapsed.TotalSeconds).ToString() & "s)")
+                nextReport += 2000
             End If
         Next
 
@@ -1178,11 +1232,22 @@ Module Program
         Dim rebuilt As Integer = 0
         Dim junk As Integer = 0
         Dim inferredPanels As Integer = 0
+        Dim done As Integer = 0
+        Dim swR = Diagnostics.Stopwatch.StartNew()
+        Dim nextR As Integer = 500
         For Each p In list
             AddReconstructed(p)
             rebuilt += p.RebuiltCount
             junk += p.SkippedJunk.Count
             If p.InferredExts.Count > 0 Then inferredPanels += 1
+            ' One folder enumeration per panel - slow on a mechanical disk.
+            done += 1
+            If done >= nextR Then
+                Log("  ... checked " & done.ToString() & " / " & list.Count.ToString() &
+                    " panel(s) for forgotten files  (" &
+                    CInt(swR.Elapsed.TotalSeconds).ToString() & "s)")
+                nextR += 500
+            End If
         Next
         Log("Reconstruction: rebuilt " & rebuilt.ToString() & " entr(ies) from disk, " &
             junk.ToString() & " candidate(s) skipped as unrecognised.")
@@ -1440,6 +1505,7 @@ Module Program
             End Try
         End If
         Dim shortBy = Math.Max(0, p.Total - (hostAfter - placeholders))
+        Dim realEntries = hostAfter - placeholders
 
         If Aborted OrElse CancelRequested Then
             ' Never finalize a panel that was interrupted part-way: with -force
@@ -1461,6 +1527,20 @@ Module Program
             Log("  Nothing was consumed; run Upload again once the connection is back.")
             nPanelsIncomplete += 1
             ReportRow(p, hostBefore, pending, up, fl, ms, dupCount, hostAfter, "SERVER-OFFLINE")
+            Return
+        End If
+
+        ' If every record is a placeholder there is nothing to declare. Stripping
+        ' them would upload an EMPTY manifest - telling the customer the panel is
+        ' complete with no files in it, which is worse than sending nothing at all.
+        ' This overrides Force: an empty manifest is never the right answer.
+        If realEntries <= 0 Then
+            Log("  index/host NOT sent - every file is missing, the manifest would be EMPTY.")
+            Log("  All " & p.Total.ToString() & " image(s) are gone from disk;" &
+                " nothing can be delivered for this panel.")
+            nPanelsIncomplete += 1
+            ReportRow(p, hostBefore, pending, up, fl, ms, dupCount, hostAfter,
+                      "SKIPPED-NOTHING-TO-SEND (all " & p.Total.ToString() & " images gone)")
             Return
         End If
 
@@ -1587,10 +1667,45 @@ Module Program
                     BackupAndDelete(pth, "Backedup Recovery Queue\StaleIndexHost")
                 End If
             Next
+        Else
+            ' The files are on the server but the manifest is not. Every data queue
+            ' file was consumed as its file uploaded, so without this the panel
+            ' would be INVISIBLE to the next scan - the uploaded files would sit on
+            ' the customer's server forever, unusable and taking space, with nothing
+            ' left to retry from. Leave an index/host queue file behind so the next
+            ' run finds the panel and sends the manifest.
+            WriteIndexHostQueue(p, ref)
         End If
 
         Return ok
     End Function
+
+    ' Recreate the index/host queue files the way FTPUploaderVB does: a copy of a
+    ' real queue file with lines 7/8 pointing at the index (or host) instead of an
+    ' image. A later scan sees the panel, finds nothing pending, and retries just
+    ' the manifest.
+    Private Sub WriteIndexHostQueue(p As Panel, ref As QueueEntry)
+        Try
+            For Each pair In New Object() {
+                New String() {ref.OutIndexInfo, ref.IndexSrc, ref.IndexDst},
+                New String() {ref.OutHostInfo, ref.HostSrc, ref.HostDst}}
+                Dim a = CType(pair, String())
+                If a(0) = "" Then Continue For
+                Dim lines = CType(ref.Raw.Clone(), String())
+                lines(7) = a(1)
+                lines(8) = a(2)
+                EnsureDirFor(a(0))
+                File.WriteAllLines(a(0), lines)
+            Next
+            Log("  left an index/host queue file so the manifest can be retried:")
+            Log("    " & ref.OutIndexInfo)
+            Log("    " & ref.OutHostInfo)
+        Catch ex As Exception
+            Log("  ! could not leave a retry queue file: " & ex.Message)
+            Log("  ! WARNING: the uploaded files have no manifest and this panel may")
+            Log("  !          not be found again. PID " & p.PID)
+        End Try
+    End Sub
 
     ' =========================================================================
     ' WinSCP session - one connection reused across files and panels
@@ -1618,8 +1733,9 @@ Module Program
         opts.TimeoutInMilliseconds = 20000
 
         Dim s As New Session()
-        If e.ExePath <> "" AndAlso File.Exists(e.ExePath) Then
-            s.ExecutablePath = e.ExePath
+        Dim scp = WinScpPath(e.ExePath)
+        If scp <> "" Then
+            s.ExecutablePath = scp
         End If
         Try
             Dim dir = RecoveryLogDir()
@@ -2012,7 +2128,7 @@ Module Program
             LogWriter.AutoFlush = True
             ReportWriter = New StreamWriter(Path.Combine(d, RunStamp & "_recovery_report.csv"), False, Encoding.UTF8)
             ReportWriter.AutoFlush = True
-            ReportWriter.WriteLine("PID,Total,HostBefore,Pending,Uploaded,Failed,MissingSource,AlreadyRecorded,HostAfter,Result")
+            ReportWriter.WriteLine("Time,PID,Total,HostBefore,Pending,Uploaded,Failed,MissingSource,AlreadyRecorded,HostAfter,Result")
         Catch ex As Exception
             Console.WriteLine("Warning: could not open log files: " & ex.Message)
         End Try
@@ -2027,16 +2143,19 @@ Module Program
     End Sub
 
     Private Sub Log(text As String)
-        Console.WriteLine(text)
+        ' Every line is timestamped. Without this there is no way to say when an
+        ' outage started, or to line the run up against the FTP server's own logs.
+        Dim stamped = DateTime.Now.ToString("HH:mm:ss") & "  " & text
+        Console.WriteLine(stamped)
         If LogSink IsNot Nothing Then
             Try
-                LogSink(text)
+                LogSink(stamped)
             Catch
             End Try
         End If
         If LogWriter IsNot Nothing Then
             Try
-                LogWriter.WriteLine(text)
+                LogWriter.WriteLine(stamped)
             Catch
             End Try
         End If
@@ -2094,6 +2213,7 @@ Module Program
         If ReportWriter Is Nothing Then Exit Sub
         Try
             ReportWriter.WriteLine(String.Join(",", New String() {
+                DateTime.Now.ToString("HH:mm:ss"),
                 Csv(p.PID), p.Total.ToString(), hostBefore.ToString(), pending.ToString(),
                 up.ToString(), fl.ToString(), ms.ToString(), dup.ToString(),
                 hostAfter.ToString(), Csv(note)}))
