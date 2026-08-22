@@ -40,7 +40,176 @@ Namespace FTPUploaderVB
 			appdir = Path.GetDirectoryName(apppath)
 			settingPath = Path.Combine(appdir, "settingFTPUploader.txt")
 			InitializeComponent()
+			BuildStatusStrip()
 		End Sub
+
+		' ===================================================================
+		' Extra controls, built in code so the designer file is untouched.
+		'
+		' A strip along the bottom of the form: FTP server reachability, how many
+		' files share one session, when to give up on a stalled transfer, and which
+		' server to send to.
+		' ===================================================================
+		Private lblPingA As Label
+		Private lblPingB As Label
+		Private lblSpeed As Label
+		Private cboPerSession As ComboBox
+		Private cboStall As ComboBox
+		Private cboHost As ComboBox
+		Private pingTimer As System.Windows.Forms.Timer
+		Private speedTimer As System.Windows.Forms.Timer
+		Private pingBusy As Boolean = False
+		Private ReadOnly PingHosts As String() = {"10.119.211.173", "10.119.211.174"}
+
+		' Live throughput. Counted here rather than derived from the logs so the
+		' figure is available while a run is in progress.
+		Private UploadedFiles As Long = 0
+		Private UploadedBytes As Long = 0
+		Private UploadClock As Stopwatch = Nothing
+
+		Private Sub BuildStatusStrip()
+			Dim strip As New Panel With {
+				.Dock = DockStyle.Bottom,
+				.Height = 30,
+				.Padding = New Padding(6, 4, 6, 4)
+			}
+
+			lblPingA = New Label With {.AutoSize = True, .Location = New Point(6, 7),
+									   .ForeColor = Color.Gray, .Text = PingHosts(0) & " ..."}
+			lblPingB = New Label With {.AutoSize = True, .Location = New Point(170, 7),
+									   .ForeColor = Color.Gray, .Text = PingHosts(1) & " ..."}
+
+			Dim lblSend As New Label With {.AutoSize = True, .Location = New Point(340, 7), .Text = "Send to:"}
+			cboHost = New ComboBox With {.Location = New Point(395, 3), .Width = 150,
+										 .DropDownStyle = ComboBoxStyle.DropDownList}
+			cboHost.Items.AddRange(New Object() {"Auto (from queue)", PingHosts(0), PingHosts(1)})
+			cboHost.SelectedIndex = 0
+
+			Dim lblPer As New Label With {.AutoSize = True, .Location = New Point(560, 7), .Text = "Files/session:"}
+			cboPerSession = New ComboBox With {.Location = New Point(645, 3), .Width = 85,
+											   .DropDownStyle = ComboBoxStyle.DropDownList}
+			cboPerSession.Items.AddRange(New Object() {"50", "100", "200", "500", "No limit"})
+			cboPerSession.SelectedIndex = 1                 ' 100
+
+			Dim lblStall As New Label With {.AutoSize = True, .Location = New Point(745, 7), .Text = "Stall:"}
+			cboStall = New ComboBox With {.Location = New Point(785, 3), .Width = 85,
+										  .DropDownStyle = ComboBoxStyle.DropDownList}
+			cboStall.Items.AddRange(New Object() {"30s", "60s", "90s", "180s", "No limit"})
+			cboStall.SelectedIndex = 0                      ' 30s
+
+			lblSpeed = New Label With {.AutoSize = True, .Location = New Point(880, 7),
+									   .ForeColor = Color.Gray, .Text = "idle"}
+
+			strip.Controls.AddRange(New Control() {lblPingA, lblPingB, lblSend, cboHost,
+												   lblPer, cboPerSession, lblStall, cboStall,
+												   lblSpeed})
+			Controls.Add(strip)
+
+			' ICMP, not a connect to port 21 - a status light must not add
+			' connections to the FTP server it is reporting on.
+			pingTimer = New System.Windows.Forms.Timer With {.Interval = 30000}
+			AddHandler pingTimer.Tick, AddressOf PingTick
+			pingTimer.Start()
+			PingTick(Nothing, Nothing)
+
+			speedTimer = New System.Windows.Forms.Timer With {.Interval = 1000}
+			AddHandler speedTimer.Tick, AddressOf SpeedTick
+			speedTimer.Start()
+		End Sub
+
+		' files/s says how fast the queue is draining; MB/s says whether the link or
+		' the per-file overhead is the limit. A rate that collapses is usually the
+		' first sign something is stuck.
+		Private Sub SpeedTick(sender As Object, e As EventArgs)
+			If lblSpeed Is Nothing Then Exit Sub
+			If UploadClock Is Nothing OrElse UploadedFiles = 0 Then
+				lblSpeed.Text = "idle"
+				lblSpeed.ForeColor = Color.Gray
+				Exit Sub
+			End If
+			Dim secs = Math.Max(1.0R, UploadClock.Elapsed.TotalSeconds)
+			Dim fps = UploadedFiles / secs
+			Dim mbps = (UploadedBytes / 1048576.0R) / secs
+			Dim cap = FilesPerSessionSetting()
+			' Session number plus how far through its file budget it is: the answer
+			' to "are we opening too many sessions?" at a glance.
+			lblSpeed.Text = "session #" & SessionNumber.ToString() & " (" &
+							FilesThisSession.ToString() &
+							If(cap > 0, "/" & cap.ToString(), "") & ")   " &
+							fps.ToString("0.0") & " files/s   " &
+							mbps.ToString("0.00") & " MB/s"
+			lblSpeed.ForeColor = Color.Black
+		End Sub
+
+		Private Sub PingTick(sender As Object, e As EventArgs)
+			If pingBusy Then Exit Sub
+			pingBusy = True
+			Task.Run(Sub()
+						 For i = 0 To PingHosts.Length - 1
+							 Dim idx = i
+							 Dim text As String
+							 Dim colour As Color
+							 Try
+								 Using p As New Net.NetworkInformation.Ping()
+									 Dim r = p.Send(PingHosts(idx), 1500)
+									 If r IsNot Nothing AndAlso r.Status = Net.NetworkInformation.IPStatus.Success Then
+										 text = PingHosts(idx) & "  " & r.RoundtripTime.ToString() & " ms"
+										 colour = If(r.RoundtripTime > 200, Color.DarkOrange, Color.Green)
+									 Else
+										 text = PingHosts(idx) & "  no reply"
+										 colour = Color.Red
+									 End If
+								 End Using
+							 Catch
+								 text = PingHosts(idx) & "  unreachable"
+								 colour = Color.Red
+							 End Try
+							 Dim lbl = If(idx = 0, lblPingA, lblPingB)
+							 Try
+								 lbl.Invoke(Sub()
+												lbl.Text = text
+												lbl.ForeColor = colour
+											End Sub)
+							 Catch
+							 End Try
+						 Next
+					 End Sub).ContinueWith(Sub() pingBusy = False)
+		End Sub
+
+		' Chosen server, or the one from the queue file when set to Auto.
+		Private Function EffectiveHost(queueHost As String) As String
+			Try
+				If cboHost IsNot Nothing AndAlso cboHost.SelectedIndex > 0 Then
+					Return Convert.ToString(cboHost.SelectedItem)
+				End If
+			Catch
+			End Try
+			Return queueHost
+		End Function
+
+		Private Function FilesPerSessionSetting() As Integer
+			Try
+				Dim n As Integer
+				If cboPerSession IsNot Nothing AndAlso
+				   Integer.TryParse(Convert.ToString(cboPerSession.SelectedItem), n) Then
+					Return n
+				End If
+			Catch
+			End Try
+			Return 0                                        ' "No limit"
+		End Function
+
+		Private Function StallSecondsSetting() As Integer
+			Try
+				Dim n As Integer
+				If cboStall IsNot Nothing AndAlso
+				   Integer.TryParse(Convert.ToString(cboStall.SelectedItem).Replace("s", ""), n) Then
+					Return n
+				End If
+			Catch
+			End Try
+			Return 0                                        ' "No limit"
+		End Function
 
 		Protected Overrides Sub WndProc(ByRef m As Message)
 			If m.Msg = NativeMethods.WM_SHOWME Then
@@ -115,6 +284,150 @@ Namespace FTPUploaderVB
 			ShowInTaskbar = True
 			WindowState = FormWindowState.Normal
 		End Sub
+		' ===================================================================
+		' Shared FTP session
+		'
+		' Previously every file opened its own WinSCP session: connect, login,
+		' handshake, STOR, quit - about two logins per file once retries are
+		' counted. That is why an HDD machine could never keep up while an SSD
+		' machine managed 99%: most of the time went on connection setup, not
+		' transferring. The customer also asked us to stop opening so many
+		' sessions, since a burst of logins gets queued and then refused.
+		'
+		' One session is now reused across files and recycled every
+		' FILES_PER_SESSION uploads.
+		' ===================================================================
+		Private CurSession As Session = Nothing
+		Private CurHost As String = ""
+		Private CurUser As String = ""
+		Private FilesThisSession As Integer = 0
+		Private SessionNumber As Integer = 0
+		Private LastSessionUse As DateTime = DateTime.MinValue
+		' A session left idle longer than this is replaced rather than used. The
+		' server or a firewall will have dropped it, and discovering that on the
+		' next upload costs a failed file.
+		Private Const SESSION_IDLE_SECONDS As Integer = 120
+		Private Const FILES_PER_SESSION As Integer = 100
+
+		Private Function GetSession(host As String, username As String, password As String,
+									exePath As String, sessionLogPath As String) As Session
+			Dim useHost = EffectiveHost(host)
+			Dim perSession = FilesPerSessionSetting()
+			If CurSession IsNot Nothing AndAlso perSession > 0 AndAlso FilesThisSession >= perSession Then
+				CloseSession()
+			End If
+			If CurSession IsNot Nothing AndAlso LastSessionUse <> DateTime.MinValue _
+			   AndAlso DateTime.Now.Subtract(LastSessionUse).TotalSeconds > SESSION_IDLE_SECONDS Then
+				CloseSession()
+			End If
+			If CurSession IsNot Nothing AndAlso CurSession.Opened _
+			   AndAlso String.Equals(CurHost, useHost, StringComparison.OrdinalIgnoreCase) _
+			   AndAlso String.Equals(CurUser, username, StringComparison.OrdinalIgnoreCase) Then
+				LastSessionUse = DateTime.Now
+				Return CurSession
+			End If
+
+			CloseSession()
+
+			Dim sessionOptions As New SessionOptions
+			With sessionOptions
+				.Protocol = Protocol.Ftp
+				.HostName = useHost
+				.UserName = username
+				.Password = password
+				.TimeoutInMilliseconds = 20000
+			End With
+
+			Dim s As New Session
+			s.ExecutablePath = exePath
+			Try
+				If Not Directory.Exists(Path.GetDirectoryName(sessionLogPath)) Then
+					Directory.CreateDirectory(Path.GetDirectoryName(sessionLogPath))
+				End If
+				s.SessionLogPath = sessionLogPath
+			Catch
+			End Try
+			s.Open(sessionOptions)
+
+			CurSession = s
+			CurHost = useHost
+			CurUser = username
+			FilesThisSession = 0
+			SessionNumber += 1
+			LastSessionUse = DateTime.Now
+			LogSession("session #" & SessionNumber.ToString() & " opened to " & useHost &
+					   " as " & username &
+					   If(perSession > 0, "  (limit " & perSession.ToString() & " file(s))",
+										  "  (no limit)"))
+			Return s
+		End Function
+
+		' One line per session, so afterwards you can see how many files each login
+		' actually carried - the number the customer cares about.
+		Private Sub LogSession(text As String)
+			Try
+				' Uploading runs on a background task, so the textbox cannot be read
+				' directly from here.
+				Dim root As String = ""
+				If txtUploadListPath.InvokeRequired Then
+					txtUploadListPath.Invoke(Sub() root = txtUploadListPath.Text)
+				Else
+					root = txtUploadListPath.Text
+				End If
+				If root = "" Then Exit Sub
+
+				Dim dir = Path.Combine(root, "Log")
+				If Not Directory.Exists(dir) Then Directory.CreateDirectory(dir)
+				Dim f = Path.Combine(dir, Now.ToString("yyyyMMdd") & "_session.log")
+				File.AppendAllText(f, Now.ToString("HH:mm:ss.fff") & vbTab & text &
+									  System.Environment.NewLine)
+			Catch
+			End Try
+		End Sub
+
+		Private Sub CloseSession()
+			If CurSession IsNot Nothing Then
+				LogSession("session #" & SessionNumber.ToString() & " closed after " &
+						   FilesThisSession.ToString() & " file(s) to " & CurHost)
+				Try
+					CurSession.Dispose()
+				Catch
+				End Try
+				CurSession = Nothing
+				CurHost = ""
+				CurUser = ""
+				FilesThisSession = 0
+			End If
+		End Sub
+
+		' Errors that will give the same answer however many times we try.
+		Private Function IsPermanentError(msg As String) As Boolean
+			If msg Is Nothing Then Return False
+			Dim m = msg.ToLower()
+			For Each s In New String() {"does not exist", "cannot find the file",
+										"cannot find the path", "no such file",
+										"permission denied", "access is denied",
+										"550"}
+				If m.Contains(s) Then Return True
+			Next
+			Return False
+		End Function
+
+		' Does the error mean the connection died rather than this file being bad?
+		' It matters: during an outage EVERY file fails, and treating those as file
+		' failures marks good images failed and deletes their queue files. That is
+		' how panels ended up with nothing left to send.
+		Private Function LooksLikeConnectionError(msg As String) As Boolean
+			If msg Is Nothing Then Return False
+			Dim m = msg.ToLower()
+			For Each s In New String() {"connection", "timed out", "timeout", "network",
+										"refused", "unreachable", "closed", "reset",
+										"lost", "disconnect", "not logged in", "421"}
+				If m.Contains(s) Then Return True
+			Next
+			Return False
+		End Function
+
 		Public Sub Upload(InfoFile As String)
 			If Not File.Exists(InfoFile) Then
 				Exit Sub
@@ -167,39 +480,119 @@ Namespace FTPUploaderVB
 					Exit Sub
 				End If
 
-				' Setup session options
-				Dim sessionOptions As New SessionOptions
-				With sessionOptions
-					.Protocol = Protocol.Ftp
-					.HostName = host
-					.UserName = username
-					.Password = password
-					.TimeoutInMilliseconds = 10000
-				End With
-				Using session As New Session
-					session.ExecutablePath = exePath
-					If Not Directory.Exists(Path.GetDirectoryName(sessionLogPath)) Then
-						Directory.CreateDirectory(Path.GetDirectoryName(sessionLogPath))
+				' A missing source file will not appear by trying again - retrying it
+				' five times just burns five seconds per file. Fail it once, now.
+				If Not File.Exists(sourceFile) Then
+					Throw New Exception("Source file missing on disk: " & sourceFile)
+				End If
+
+				Dim fileBytes As Long = 0
+				Try
+					fileBytes = New FileInfo(sourceFile).Length
+				Catch
+				End Try
+
+				' ---------------------------------------------------------------
+				' All retries for THIS file happen here, before moving to the next
+				' one. Previously a failure just moved on and the file waited for a
+				' later cycle - and because work was picked newest-first, a file
+				' that fell outside the window was never looked at again. That is
+				' what let a backlog build up and never drain.
+				' ---------------------------------------------------------------
+				Dim maxAttempts As Integer = 0
+				If Not Int32.TryParse(txtMaximumFailRetry.Text, maxAttempts) Then
+					maxAttempts = 3
+				End If
+				If maxAttempts < 1 Then maxAttempts = 1
+
+				Dim lastError As String = ""
+				Dim connectionProblem As Boolean = False
+
+				For attempt = 1 To maxAttempts
+					If TasksCancellationTokenSource.IsCancellationRequested Then
+						Exit Sub
 					End If
-					session.SessionLogPath = sessionLogPath
-					' Connect
-					session.Open(sessionOptions)
+					Dim openingSession As Boolean = True
+					Dim stalled As Boolean = False
+					Dim watchdog As System.Threading.Timer = Nothing
+					Dim activeSession As Session = Nothing
+					Try
+						Dim session = GetSession(host, username, password, exePath, sessionLogPath)
+						openingSession = False
+						activeSession = session
 
-					' Upload files
-					Dim transferOptions As New TransferOptions
-					transferOptions.TransferMode = TransferMode.Binary
+						' When a server disappears mid-transfer there is no reset -
+						' the socket just goes quiet, and Windows can sit on it for
+						' minutes. Session.Abort() is the supported way to break out.
+						Dim stallSecs = StallSecondsSetting()
+						If stallSecs > 0 Then
+							watchdog = New System.Threading.Timer(
+								Sub(o)
+									If activeSession IsNot Nothing AndAlso Not stalled Then
+										stalled = True
+										Try
+											activeSession.Abort()
+										Catch
+										End Try
+									End If
+								End Sub, Nothing, stallSecs * 1000, System.Threading.Timeout.Infinite)
+						End If
 
-					Dim transferResult As TransferOperationResult
-					transferResult = session.PutFiles(sourceFile, destFile, False, transferOptions)
+						Dim transferOptions As New TransferOptions
+						transferOptions.TransferMode = TransferMode.Binary
 
-					' Throw on any error
-					transferResult.Check()
+						Dim transferResult As TransferOperationResult
+						transferResult = session.PutFiles(sourceFile, destFile, False, transferOptions)
 
-					' Print results
-					For Each transfer In transferResult.Transfers
-					Next
-				End Using
-				uploaded = True
+						' Throw on any error
+						transferResult.Check()
+
+						FilesThisSession += 1
+						' Clock starts at the first successful upload, so idle time
+						' between cycles does not drag the average down.
+						If UploadClock Is Nothing Then UploadClock = Stopwatch.StartNew()
+						UploadedFiles += 1
+						UploadedBytes += fileBytes
+						uploaded = True
+						connectionProblem = False
+						Exit For
+					Catch exUp As Exception
+						lastError = exUp.Message
+						connectionProblem = openingSession OrElse LooksLikeConnectionError(lastError)
+						If stalled Then
+							' We aborted it because the server stopped responding.
+							' That is the connection, not the file.
+							connectionProblem = True
+							lastError = "no response for " & StallSecondsSetting().ToString() &
+										"s, transfer aborted"
+						End If
+
+						logContent = Me.Text + vbTab + Now.ToString("HH:mm:ss.fff") + vbTab +
+									 "Attempt " + attempt.ToString + "/" + maxAttempts.ToString +
+									 " failed : " + lastError + " " + sourceFile +
+									 System.Environment.NewLine
+						File.AppendAllText(failLogPath, logContent)
+
+						' Only throw the session away when the connection itself is
+						' suspect. Reconnecting after a file-level error just adds
+						' another login for the server to queue.
+						If connectionProblem Then CloseSession()
+
+						' Some failures cannot be fixed by trying again - a missing
+						' file, a refused permission, a dest folder that does not
+						' exist. Stop early instead of repeating the same error.
+						If Not connectionProblem AndAlso IsPermanentError(lastError) Then
+							Exit For
+						End If
+						If attempt < maxAttempts Then System.Threading.Thread.Sleep(1000)
+					Finally
+						If watchdog IsNot Nothing Then watchdog.Dispose()
+					End Try
+				Next
+
+				If Not uploaded Then
+					Throw New Exception(If(connectionProblem, "CONNECTION: ", "") & lastError)
+				End If
 				lblFileUploadStatus.Invoke(Sub()
 											   lblFileUploadStatus.Text = "Succeeded "
 										   End Sub)
@@ -212,7 +605,12 @@ Namespace FTPUploaderVB
 				File.AppendAllText(sourceIndexFile, destFile + "@" + channelIndex + System.Environment.NewLine)
 				File.AppendAllText(sourceHostFile, destFile + "@" + channelIndex + System.Environment.NewLine)
 				Dim uploadedCount As Integer = File.ReadAllLines(sourceHostFile).Length
-				If uploadedCount = Int32.Parse(totalFileCount) Then
+				Dim needTotal As Integer = 0
+				' >= not = : if the count ever drifts past the total (a duplicate
+				' line, a restored backup) an exact match never happens again and
+				' the panel can never complete.
+				If Int32.TryParse(totalFileCount, needTotal) AndAlso needTotal > 0 _
+				   AndAlso uploadedCount >= needTotal Then
 					CreateIndexAndHostQueue(InfoFile)
 				End If
 
@@ -224,46 +622,56 @@ Namespace FTPUploaderVB
 				logContent = Me.Text + vbTab + Now.ToString("HH:mm:ss.fff") + vbTab + "Upload failed with exception : " + e.Message + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
 				File.AppendAllText(failLogPath, logContent)
 
-				' Fail count mechanism
-				If Not Directory.Exists(Path.GetDirectoryName(failCountPath)) Then
-					Directory.CreateDirectory(Path.GetDirectoryName(failCountPath))
-				End If
-				Dim failCount As Integer = 0
-				Dim failRetry As Integer = 0
-				If Not File.Exists(failCountPath) Then
-					failCount = 1
-					File.WriteAllText(failCountPath, "1")
-				Else
-					Dim failLines = File.ReadAllLines(failCountPath)
-					failCount = CInt(failLines(0))
-					failCount += 1
-					File.WriteAllText(failCountPath, failCount.ToString)
-				End If
-
-				If Not Int32.TryParse(txtMaximumFailRetry.Text, failRetry) Then
-					failRetry = 0
-				End If
-				If failCount >= failRetry Then
-
-					' Append to index and host files with "- failed"
-					If TasksCancellationTokenSource.IsCancellationRequested Then
-						Exit Sub
-					End If
-					File.AppendAllText(sourceIndexFile, destFile + "@" + channelIndex + " - failed" + System.Environment.NewLine)
-					File.AppendAllText(sourceHostFile, destFile + "@" + channelIndex + " - failed" + System.Environment.NewLine)
-
-					' Log when max fail count reached
-					logContent = Me.Text + vbTab + Now.ToString("HH:mm:ss.fff") + vbTab + "Maximum fail count reached (" + failCount.ToString + "/" + failRetry.ToString + "), deleting queue: " + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
+				' The server was unreachable, so nothing is wrong with this file.
+				' Leave the queue file alone, write no " - failed" marker and do not
+				' count it against the retry budget: an outage would otherwise burn
+				' through every panel and mark thousands of good images as failed,
+				' leaving the customer with manifests missing files that were never
+				' actually attempted.
+				If e.Message.StartsWith("CONNECTION: ") Then
+					logContent = Me.Text + vbTab + Now.ToString("HH:mm:ss.fff") + vbTab +
+								 "Server unreachable - queue kept for a later cycle: " + sourceFile +
+								 System.Environment.NewLine
 					File.AppendAllText(failLogPath, logContent)
-
-					' Backup before deleting - FAILED
-					If backupQueueAfterUploadToolStripMenuItem.Checked Then
-						BackupInfoFile(InfoFile, "Backedup Failed Queue")
-					End If
-					File.Delete(InfoFile)
-					File.Delete(failCountPath)
-					UpdateSummaryLogFail(summaryLogPath, PID, destFile, e.Message)
+					Exit Sub
 				End If
+
+				' All retries for this file have already been used, above. There is
+				' no longer a fail count spread across cycles - a file that has
+				' failed every attempt with the server reachable is a bad file, so
+				' it is marked now rather than being picked up again later.
+				If TasksCancellationTokenSource.IsCancellationRequested Then
+					Exit Sub
+				End If
+
+				' Append to index and host files with "- failed"
+				File.AppendAllText(sourceIndexFile, destFile + "@" + channelIndex + " - failed" + System.Environment.NewLine)
+				File.AppendAllText(sourceHostFile, destFile + "@" + channelIndex + " - failed" + System.Environment.NewLine)
+
+				logContent = Me.Text + vbTab + Now.ToString("HH:mm:ss.fff") + vbTab + "All retries used, deleting queue: " + sourceFile + " to: " + "ftp://" + host + destFile + System.Environment.NewLine
+				File.AppendAllText(failLogPath, logContent)
+
+				' The panel may have just reached its total on THIS line. The check
+				' only existed in the success path, so if the last file of a panel
+				' failed, the index and host were never sent and the panel stayed
+				' stuck for good. Checked here too, and with >= rather than =, so a
+				' count that has drifted past the total still completes.
+				Dim failedCount As Integer = File.ReadAllLines(sourceHostFile).Length
+				Dim wantTotal As Integer = 0
+				If Int32.TryParse(totalFileCount, wantTotal) AndAlso wantTotal > 0 _
+				   AndAlso failedCount >= wantTotal Then
+					CreateIndexAndHostQueue(InfoFile)
+				End If
+
+				' Backup before deleting - FAILED
+				If backupQueueAfterUploadToolStripMenuItem.Checked Then
+					BackupInfoFile(InfoFile, "Backedup Failed Queue")
+				End If
+				File.Delete(InfoFile)
+				If File.Exists(failCountPath) Then
+					File.Delete(failCountPath)
+				End If
+				UpdateSummaryLogFail(summaryLogPath, PID, destFile, e.Message)
 
 			End Try
 			If uploaded Then
@@ -321,34 +729,22 @@ Namespace FTPUploaderVB
 					Exit Sub
 				End If
 
-				' Setup session options
-				Dim sessionOptions As New SessionOptions
-				With sessionOptions
-					.Protocol = Protocol.Ftp
-					.HostName = host
-					.UserName = username
-					.Password = password
-					.TimeoutInMilliseconds = 20000
-				End With
-				Using session As New Session
-					session.ExecutablePath = exePath
-					If Not Directory.Exists(Path.GetDirectoryName(sessionLogPath)) Then
-						Directory.CreateDirectory(Path.GetDirectoryName(sessionLogPath))
-					End If
-					session.SessionLogPath = sessionLogPath
-					' Connect
-					session.Open(sessionOptions)
-					' Upload files
-					Dim transferOptions As New TransferOptions
-					transferOptions.TransferMode = TransferMode.Binary
-					Dim transferResult As TransferOperationResult
-					transferResult = session.PutFiles(sourceFile, destFile, False, transferOptions)
-					' Throw on any error
-					transferResult.Check()
-					' Print results
-					For Each transfer In transferResult.Transfers
-					Next
-				End Using
+				' Same shared session as the data files - no separate login just to
+				' send the index or the host file.
+				Dim session = GetSession(host, username, password, exePath, sessionLogPath)
+				Dim transferOptions As New TransferOptions
+				transferOptions.TransferMode = TransferMode.Binary
+				Dim transferResult As TransferOperationResult
+				transferResult = session.PutFiles(sourceFile, destFile, False, transferOptions)
+				' Throw on any error
+				transferResult.Check()
+				FilesThisSession += 1
+				If UploadClock Is Nothing Then UploadClock = Stopwatch.StartNew()
+				UploadedFiles += 1
+				Try
+					UploadedBytes += New FileInfo(sourceFile).Length
+				Catch
+				End Try
 				uploaded = True
 				lblFileUploadStatus.Invoke(Sub()
 											   lblFileUploadStatus.Text = "Succeeded "
@@ -449,7 +845,12 @@ Namespace FTPUploaderVB
 			Dim failedFileName As String = ""
 			Dim failedFileReason As String = ""
 			Dim spacePos As Integer = failMessage.IndexOf(".")
-			failMessage = failMessage.Substring(0, spacePos)
+			' IndexOf returns -1 when the message has no full stop, and Substring
+			' then throws - from inside a Catch block, which aborted the rest of
+			' the batch for that cycle.
+			If spacePos > 0 Then
+				failMessage = failMessage.Substring(0, spacePos)
+			End If
 
 			If Path.GetFileNameWithoutExtension(destFile).ToLower.Contains("otp") Then
 				failedFileName = "OTP"
@@ -638,6 +1039,12 @@ Namespace FTPUploaderVB
 									 End Sub)
 
 				Finally
+					' Deliberately NOT closing the session here. This runs at the end
+					' of every polling cycle, and a cycle may carry only a handful of
+					' files - closing here meant one login per cycle, which is what
+					' the shared session was supposed to avoid. The session is now
+					' kept across cycles and closed only when it hits the file limit,
+					' when the connection breaks, or after being idle (see GetSession).
 					lblStatus.Invoke(Sub()
 										 lblStatus.Text = "Reset timer for uploading ."
 									 End Sub)
@@ -676,6 +1083,9 @@ Namespace FTPUploaderVB
 			If TasksCancellationTokenSource IsNot Nothing Then
 				TasksCancellationTokenSource.Cancel()
 			End If
+			' The session is kept across cycles now, so it has to be closed here -
+			' otherwise a login stays open on the server after Stop.
+			CloseSession()
 			If uploadTask IsNot Nothing Then
 				If uploadTask.Status <> TaskStatus.RanToCompletion Then
 					'Wait a little longer
