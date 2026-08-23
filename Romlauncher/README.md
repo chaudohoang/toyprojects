@@ -54,6 +54,7 @@ Right-click a row for launch / favorite / open containing folder / copy path.
 
 Per system, in **Systems...**:
 
+- **Filter box** (above the system list) — type any substring to narrow the list, e.g. `ne` shows `nes`, `neogeo`, `snes`. Up/Down moves the selection without leaving the box, Esc clears it. The plain ListBox type-ahead only matched single characters, which is useless with 100+ systems.
 - **Emulator exe** — full path.
 - **Arguments** — template with placeholders:
   - `{rom}` full ROM path
