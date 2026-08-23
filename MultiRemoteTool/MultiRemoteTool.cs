@@ -1229,7 +1229,8 @@ namespace MultiRemoteTool
                 AutoSize  = false, Location = new Point(10, 0),
                 Size      = new Size(320, 38),
                 Font      = new Font("Segoe UI", 9f, FontStyle.Bold),
-                ForeColor = Color.FromArgb(0, 80, 160),
+                ForeColor = Color.FromArgb(160, 160, 180),
+                Text      = "Click a row to select a contact",
                 TextAlign = ContentAlignment.MiddleLeft
             };
             _btnConnect = MakeActionBarBtn("Connect", ColAccent,  Color.White);
@@ -1238,6 +1239,10 @@ namespace MultiRemoteTool
             _btnConnect.Click       += delegate { if (_selectedContact != null) OnConnect(_selectedContact); };
             _btnEditContact.Click   += delegate { if (_selectedContact != null) OnEdit(_selectedContact); };
             _btnDeleteContact.Click += delegate { if (_selectedContact != null) OnDelete(_selectedContact); };
+
+            _btnConnect.Enabled       = false;
+            _btnEditContact.Enabled   = false;
+            _btnDeleteContact.Enabled = false;
             _contactActionBar.Controls.AddRange(new Control[]
                 { _lblActionContact, _btnConnect, _btnEditContact, _btnDeleteContact });
             _contactActionBar.Resize += delegate { LayoutActionBar(); };
@@ -1331,13 +1336,15 @@ namespace MultiRemoteTool
 
         private void SetPlatformSelected(bool yes)
         {
-            _colHeader.Visible     = yes;
-            _btnAddContact.Visible = yes;
-            _btnReload.Visible     = yes;
-            _btnImport.Visible     = yes;
-            _btnExport.Visible     = yes;
-            _txtSearch.Visible     = yes;
-            if (!yes) { _contactActionBar.Visible = false; ClearSelection(); }
+            _colHeader.Visible            = yes;
+            _btnAddContact.Visible        = yes;
+            _btnReload.Visible            = yes;
+            _btnImport.Visible            = yes;
+            _btnExport.Visible            = yes;
+            _txtSearch.Visible            = yes;
+            _contactActionBar.Visible     = yes;   // always visible when platform selected
+
+            if (yes) ClearSelection();             // reset to hint state
 
             _lblNoPlat.Visible = !yes;
             if (!yes && _platforms.Count > 0)
@@ -1350,7 +1357,12 @@ namespace MultiRemoteTool
         {
             _selectedContact = null;
             _contactListView.ClearSelection();
-            _contactActionBar.Visible = false;
+            // Keep action bar visible but show empty/hint state — never hide it so rows don't shift
+            _lblActionContact.Text        = "Click a row to select a contact";
+            _lblActionContact.ForeColor   = Color.FromArgb(160, 160, 180);
+            _btnConnect.Enabled           = false;
+            _btnEditContact.Enabled       = false;
+            _btnDeleteContact.Enabled     = false;
         }
 
         private void OnRowClicked(Contact c)
@@ -1359,8 +1371,11 @@ namespace MultiRemoteTool
             _selectedContact = c;
             string name = string.IsNullOrWhiteSpace(c.Name) ? "(no name)" : c.Name;
             int rowNum = _contactListView.SelectedIndex + 1;
-            _lblActionContact.Text    = rowNum + ".  " + name + "   " + c.Id;
-            _contactActionBar.Visible = true;
+            _lblActionContact.Text        = rowNum + ".  " + name + "   " + c.Id;
+            _lblActionContact.ForeColor   = Color.FromArgb(0, 80, 160);
+            _btnConnect.Enabled           = true;
+            _btnEditContact.Enabled       = true;
+            _btnDeleteContact.Enabled     = true;
             LayoutActionBar();
         }
 
