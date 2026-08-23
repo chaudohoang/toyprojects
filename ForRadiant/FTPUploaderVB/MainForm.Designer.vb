@@ -37,6 +37,7 @@ Namespace FTPUploaderVB
             Me.settingsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.startMinimizedToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.minimizedToTrayToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+            Me.backupQueueAfterUploadToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.helpToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.aboutToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.txtInterval = New System.Windows.Forms.TextBox()
@@ -52,7 +53,6 @@ Namespace FTPUploaderVB
             Me.cmdStopUpload = New System.Windows.Forms.LinkLabel()
             Me.txtMaximumFailRetry = New System.Windows.Forms.TextBox()
             Me.Label4 = New System.Windows.Forms.Label()
-            Me.backupQueueAfterUploadToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
             Me.contextMenuStrip1.SuspendLayout()
             Me.menuStrip1.SuspendLayout()
             Me.SuspendLayout()
@@ -68,12 +68,12 @@ Namespace FTPUploaderVB
             '
             Me.contextMenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.exit2ToolStripMenuItem})
             Me.contextMenuStrip1.Name = "contextMenuStrip1"
-            Me.contextMenuStrip1.Size = New System.Drawing.Size(94, 26)
+            Me.contextMenuStrip1.Size = New System.Drawing.Size(93, 26)
             '
             'exit2ToolStripMenuItem
             '
             Me.exit2ToolStripMenuItem.Name = "exit2ToolStripMenuItem"
-            Me.exit2ToolStripMenuItem.Size = New System.Drawing.Size(93, 22)
+            Me.exit2ToolStripMenuItem.Size = New System.Drawing.Size(92, 22)
             Me.exit2ToolStripMenuItem.Text = "Exit"
             '
             'menuStrip1
@@ -81,7 +81,7 @@ Namespace FTPUploaderVB
             Me.menuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.commandToolStripMenuItem, Me.settingsToolStripMenuItem, Me.helpToolStripMenuItem})
             Me.menuStrip1.Location = New System.Drawing.Point(0, 0)
             Me.menuStrip1.Name = "menuStrip1"
-            Me.menuStrip1.Size = New System.Drawing.Size(547, 24)
+            Me.menuStrip1.Size = New System.Drawing.Size(1104, 24)
             Me.menuStrip1.TabIndex = 1
             Me.menuStrip1.Text = "menuStrip1"
             '
@@ -95,7 +95,7 @@ Namespace FTPUploaderVB
             'exitToolStripMenuItem
             '
             Me.exitToolStripMenuItem.Name = "exitToolStripMenuItem"
-            Me.exitToolStripMenuItem.Size = New System.Drawing.Size(93, 22)
+            Me.exitToolStripMenuItem.Size = New System.Drawing.Size(92, 22)
             Me.exitToolStripMenuItem.Text = "Exit"
             '
             'settingsToolStripMenuItem
@@ -109,15 +109,22 @@ Namespace FTPUploaderVB
             '
             Me.startMinimizedToolStripMenuItem.CheckOnClick = True
             Me.startMinimizedToolStripMenuItem.Name = "startMinimizedToolStripMenuItem"
-            Me.startMinimizedToolStripMenuItem.Size = New System.Drawing.Size(226, 22)
+            Me.startMinimizedToolStripMenuItem.Size = New System.Drawing.Size(227, 22)
             Me.startMinimizedToolStripMenuItem.Text = "Start Minimized"
             '
             'minimizedToTrayToolStripMenuItem
             '
             Me.minimizedToTrayToolStripMenuItem.CheckOnClick = True
             Me.minimizedToTrayToolStripMenuItem.Name = "minimizedToTrayToolStripMenuItem"
-            Me.minimizedToTrayToolStripMenuItem.Size = New System.Drawing.Size(226, 22)
+            Me.minimizedToTrayToolStripMenuItem.Size = New System.Drawing.Size(227, 22)
             Me.minimizedToTrayToolStripMenuItem.Text = "Minimized Hide Taskbar Icon"
+            '
+            'backupQueueAfterUploadToolStripMenuItem
+            '
+            Me.backupQueueAfterUploadToolStripMenuItem.CheckOnClick = True
+            Me.backupQueueAfterUploadToolStripMenuItem.Name = "backupQueueAfterUploadToolStripMenuItem"
+            Me.backupQueueAfterUploadToolStripMenuItem.Size = New System.Drawing.Size(227, 22)
+            Me.backupQueueAfterUploadToolStripMenuItem.Text = "Backup Queue After Upload"
             '
             'helpToolStripMenuItem
             '
@@ -138,7 +145,7 @@ Namespace FTPUploaderVB
             Me.txtInterval.Name = "txtInterval"
             Me.txtInterval.Size = New System.Drawing.Size(365, 20)
             Me.txtInterval.TabIndex = 3
-            Me.txtInterval.Text = "10"
+            Me.txtInterval.Text = "100"
             '
             'label1
             '
@@ -248,18 +255,11 @@ Namespace FTPUploaderVB
             Me.Label4.TabIndex = 17
             Me.Label4.Text = "Maximum Fail Retry"
             '
-            'backupQueueAfterUploadToolStripMenuItem
-            '
-            Me.backupQueueAfterUploadToolStripMenuItem.CheckOnClick = True
-            Me.backupQueueAfterUploadToolStripMenuItem.Name = "backupQueueAfterUploadToolStripMenuItem"
-            Me.backupQueueAfterUploadToolStripMenuItem.Size = New System.Drawing.Size(226, 22)
-            Me.backupQueueAfterUploadToolStripMenuItem.Text = "Backup Queue After Upload"
-            '
             'MainForm
             '
             Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
             Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-            Me.ClientSize = New System.Drawing.Size(547, 216)
+            Me.ClientSize = New System.Drawing.Size(1104, 258)
             Me.Controls.Add(Me.txtMaximumFailRetry)
             Me.Controls.Add(Me.Label4)
             Me.Controls.Add(Me.cmdStopUpload)
