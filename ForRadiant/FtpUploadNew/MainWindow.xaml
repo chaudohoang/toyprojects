@@ -1,0 +1,971 @@
+<Window x:Class="FtpUpload.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        Title="FTP Upload Job Manager"
+        Width="1180" Height="820"
+        MinWidth="900" MinHeight="600"
+        WindowState="Maximized"
+        WindowStartupLocation="CenterScreen"
+        Background="#F4F6FA"
+        FontFamily="Segoe UI">
+
+    <Window.Resources>
+
+        <!-- collapse/expand support for the NG panel cards -->
+        <BooleanToVisibilityConverter x:Key="BoolVis"/>
+
+        <!-- a whole card header that behaves as a click target (collapse toggle) but carries no
+             button chrome, so it reads as a plain header. -->
+        <Style x:Key="CardHeaderToggle" TargetType="ToggleButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- pill badge -->
+        <Style x:Key="Badge" TargetType="Border">
+            <Setter Property="CornerRadius" Value="999"/>
+            <Setter Property="Padding" Value="10,3"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+        <Style x:Key="BadgeText" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="10.5"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+
+        <!-- card -->
+        <Style x:Key="Card" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="BorderBrush" Value="#ECEFF5"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+        </Style>
+
+        <!-- buttons -->
+        <Style x:Key="FlatButton" TargetType="Button">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="11,5"/>
+            <Setter Property="Margin" Value="4,0,0,0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}"
+                                CornerRadius="7" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ForceButton" TargetType="Button" BasedOn="{StaticResource FlatButton}">
+            <Setter Property="Background" Value="#EAF1FF"/>
+            <Setter Property="Foreground" Value="#2F6FED"/>
+        </Style>
+        <Style x:Key="DeleteRowButton" TargetType="Button" BasedOn="{StaticResource FlatButton}">
+            <Setter Property="Background" Value="#FDECEB"/>
+            <Setter Property="Foreground" Value="#E0483F"/>
+        </Style>
+        <Style x:Key="DeleteJobButton" TargetType="Button" BasedOn="{StaticResource FlatButton}">
+            <Setter Property="Background" Value="#E0483F"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+
+        <Style x:Key="ColHeader" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#8891A3"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <!-- one file row -->
+        <DataTemplate x:Key="FileRowTemplate">
+            <Border BorderBrush="#F5F6FA" BorderThickness="0,0,0,1" Padding="16,7"
+                    Background="{Binding RowBg}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="105"/>
+                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition Width="95"/>
+                        <ColumnDefinition Width="70"/>
+                        <ColumnDefinition Width="200"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="{Binding FileName}" FontSize="12"
+                               FontWeight="SemiBold" Foreground="#3A4256" VerticalAlignment="Center"/>
+
+                    <TextBlock Grid.Column="1" Text="{Binding RemotePathFull}" FontSize="10.5"
+                               FontFamily="Consolas" Foreground="#6B7386" TextWrapping="Wrap"
+                               VerticalAlignment="Center" Margin="0,0,10,0"
+                               ToolTip="{Binding RemotePathFull}"/>
+
+                    <Border Grid.Column="2" Style="{StaticResource Badge}"
+                            Background="{Binding StatusBg}" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding StatusText}" Style="{StaticResource BadgeText}"
+                                   Foreground="{Binding StatusFg}"/>
+                    </Border>
+
+                    <TextBlock Grid.Column="3" Text="{Binding SucceedTime}" FontSize="11"
+                               Foreground="{Binding SucceedBrush}" VerticalAlignment="Center"/>
+
+                    <TextBlock Grid.Column="4" Text="{Binding FailTimes}" FontSize="11"
+                               Foreground="{Binding FailBrush}" VerticalAlignment="Center"/>
+
+                    <Border Grid.Column="5" Style="{StaticResource Badge}" CornerRadius="7"
+                            Padding="8,2" Background="{Binding RetryBg}" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding RetryText}" Style="{StaticResource BadgeText}"
+                                   Foreground="{Binding RetryFg}"/>
+                    </Border>
+
+                    <StackPanel Grid.Column="6" Orientation="Horizontal"
+                                HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Button Style="{StaticResource ForceButton}"
+                                Content="{Binding ForceText}"
+                                IsEnabled="{Binding CanForce}"
+                                Click="ForceUpload_Click"/>
+                        <Button Style="{StaticResource DeleteRowButton}"
+                                Content="Delete"
+                                Click="DeleteFile_Click"/>
+                    </StackPanel>
+
+                    <!-- outlined highlight box around the file currently uploading. Sits on top
+                         of the whole row, transparent fill, no hit-testing so the buttons still
+                         work. BorderThickness is 0 unless this row is in flight. -->
+                    <Border Grid.Column="0" Grid.ColumnSpan="7" IsHitTestVisible="False"
+                            BorderBrush="#4D8CFF" BorderThickness="{Binding RowBox}"
+                            CornerRadius="6" Margin="-10,-4,-10,-4"/>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <!-- one job card -->
+        <DataTemplate x:Key="JobCardTemplate">
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <ToggleButton Style="{StaticResource CardHeaderToggle}"
+                                  IsChecked="{Binding IsExpanded, Mode=TwoWay}">
+                    <Border Background="White" CornerRadius="14,14,0,0"
+                            BorderBrush="#F2F3F7" BorderThickness="0,0,0,1" Padding="16,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="{Binding ExpandGlyph}"
+                                       FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="#8891A3"
+                                       VerticalAlignment="Center" Margin="0,0,10,0"/>
+
+                            <TextBlock Grid.Column="1" Text="{Binding Pid}" FontSize="14.5"
+                                       FontWeight="Bold" Foreground="#14203C" VerticalAlignment="Center"/>
+
+                            <TextBlock Grid.Column="2" Text="{Binding Tally}" FontSize="12"
+                                       Foreground="#6B7386" VerticalAlignment="Center" Margin="14,0,0,0"/>
+
+                            <Border Grid.Column="3" Style="{StaticResource Badge}"
+                                    Background="{Binding OverallBg}" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding OverallText}" Style="{StaticResource BadgeText}"
+                                           Foreground="{Binding OverallFg}"/>
+                            </Border>
+
+                            <Button Grid.Column="4" Style="{StaticResource DeleteJobButton}"
+                                    Content="Delete Job" Margin="12,0,0,0" Click="DeleteJob_Click"/>
+                        </Grid>
+                    </Border>
+                    </ToggleButton>
+
+                    <StackPanel Visibility="{Binding IsExpanded, Converter={StaticResource BoolVis}}">
+                    <Border Background="#F8F9FC" Padding="16,6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="105"/>
+                                <ColumnDefinition Width="90"/>
+                                <ColumnDefinition Width="95"/>
+                                <ColumnDefinition Width="70"/>
+                                <ColumnDefinition Width="200"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="FILE" Style="{StaticResource ColHeader}"/>
+                            <TextBlock Grid.Column="1" Text="TARGET PATH" Style="{StaticResource ColHeader}"/>
+                            <TextBlock Grid.Column="2" Text="STATUS" Style="{StaticResource ColHeader}"/>
+                            <TextBlock Grid.Column="3" Text="SUCCEEDED" Style="{StaticResource ColHeader}"/>
+                            <TextBlock Grid.Column="4" Text="FAILED AT" Style="{StaticResource ColHeader}"/>
+                            <TextBlock Grid.Column="5" Text="RETRIES" Style="{StaticResource ColHeader}"/>
+                        </Grid>
+                    </Border>
+
+                    <ItemsControl ItemsSource="{Binding Files}"
+                                  ItemTemplate="{StaticResource FileRowTemplate}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <Style x:Key="StatNum" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#14203C"/>
+        </Style>
+        <Style x:Key="StatLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="#8891A3"/>
+            <Setter Property="Margin" Value="0,1,0,0"/>
+        </Style>
+
+        <!-- shared by both tab lists: strips the selection highlight so the cards are not
+             selectable items, and lets virtualization kick in. -->
+        <Style x:Key="CardListItem" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <ContentPresenter/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- one row in the NG-retry console: an item (from any day) that ended FAILED or
+             TIMEDOUT, with its running retry count, current NG-retry state, and last IP used. -->
+        <DataTemplate x:Key="NgRowTemplate">
+            <Border Style="{StaticResource Card}" Padding="16,9" Margin="0,0,0,8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition Width="95"/>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="115"/>
+                        <ColumnDefinition Width="80"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="{Binding Pid}" FontSize="13"
+                               FontWeight="Bold" Foreground="#14203C" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="1" Text="{Binding FileName}" FontSize="12"
+                               FontWeight="SemiBold" Foreground="#3A4256" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="2" Text="{Binding RemotePath}" FontSize="10.5"
+                               FontFamily="Consolas" Foreground="#6B7386" TextTrimming="CharacterEllipsis"
+                               VerticalAlignment="Center" Margin="0,0,10,0" ToolTip="{Binding RemotePath}"/>
+
+                    <Border Grid.Column="3" Style="{StaticResource Badge}"
+                            Background="{Binding OrigBg}" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding OrigText}" Style="{StaticResource BadgeText}"
+                                   Foreground="{Binding OrigFg}"/>
+                    </Border>
+                    <Border Grid.Column="4" Style="{StaticResource Badge}"
+                            Background="{Binding StateBg}" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding StateText}" Style="{StaticResource BadgeText}"
+                                   Foreground="{Binding StateFg}"/>
+                    </Border>
+
+                    <TextBlock Grid.Column="5" Text="{Binding RetriesText}" FontSize="12"
+                               Foreground="#4A5268" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="6" Text="{Binding LastHost}" FontSize="10.5"
+                               FontFamily="Consolas" Foreground="#6B7386" VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis"/>
+
+                    <Button Grid.Column="7" Style="{StaticResource ForceButton}" Content="Retry"
+                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                            IsEnabled="{Binding CanRetry}" Click="Retry_Click"/>
+
+                    <!-- highlight box on the NG item currently being uploaded by the NG pump -->
+                    <Border Grid.Column="0" Grid.ColumnSpan="8" IsHitTestVisible="False"
+                            BorderBrush="#4D8CFF" BorderThickness="{Binding RowBox}"
+                            CornerRadius="6" Margin="-10,-4,-10,-4"/>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <!-- one file row INSIDE an NG panel card (PID lives in the card header, so it's dropped
+             here). Column widths line up with the card's own column-header bar. -->
+        <DataTemplate x:Key="NgGroupRowTemplate">
+            <Border Background="{Binding RowBg}" Padding="16,7">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition Width="95"/>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="115"/>
+                        <ColumnDefinition Width="80"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="{Binding FileName}" FontSize="12"
+                               FontWeight="SemiBold" Foreground="#3A4256" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="1" Text="{Binding RemotePathFull}" FontSize="10.5"
+                               FontFamily="Consolas" Foreground="#6B7386" TextWrapping="Wrap"
+                               VerticalAlignment="Center" Margin="0,0,10,0" ToolTip="{Binding RemotePathFull}"/>
+
+                    <Border Grid.Column="2" Style="{StaticResource Badge}"
+                            Background="{Binding OrigBg}" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding OrigText}" Style="{StaticResource BadgeText}"
+                                   Foreground="{Binding OrigFg}"/>
+                    </Border>
+                    <Border Grid.Column="3" Style="{StaticResource Badge}"
+                            Background="{Binding StateBg}" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding StateText}" Style="{StaticResource BadgeText}"
+                                   Foreground="{Binding StateFg}"/>
+                    </Border>
+
+                    <TextBlock Grid.Column="4" Text="{Binding RetriesText}" FontSize="12"
+                               Foreground="#4A5268" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="5" Text="{Binding LastHost}" FontSize="10.5"
+                               FontFamily="Consolas" Foreground="#6B7386" VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis"/>
+
+                    <Button Grid.Column="6" Style="{StaticResource ForceButton}" Content="Retry"
+                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                            IsEnabled="{Binding CanRetry}" Click="Retry_Click"/>
+
+                    <!-- highlight box on the NG item currently being uploaded by the NG pump -->
+                    <Border Grid.Column="0" Grid.ColumnSpan="7" IsHitTestVisible="False"
+                            BorderBrush="#4D8CFF" BorderThickness="{Binding RowBox}"
+                            CornerRadius="6" Margin="-10,-4,-10,-4"/>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <!-- one PANEL (PID) card on the NG tab — mirrors the live Today-Jobs card, but its header
+             is a collapse toggle and it shows "X failed / Y recovered". -->
+        <DataTemplate x:Key="NgCardTemplate">
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <!-- clickable header row: chevron + PID + "X failed / Y recovered" -->
+                    <ToggleButton Style="{StaticResource CardHeaderToggle}"
+                                  IsChecked="{Binding IsExpanded, Mode=TwoWay}">
+                        <Border Background="White" CornerRadius="14,14,0,0" Padding="16,12">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding ExpandGlyph}"
+                                           FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                           Foreground="#8891A3" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Pid}" FontSize="15"
+                                           FontWeight="Bold" Foreground="#14203C" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="2" Text="{Binding Tally}" FontSize="12"
+                                           Foreground="#6B7386" VerticalAlignment="Center" Margin="14,0,0,0"/>
+                                <Border Grid.Column="3" Style="{StaticResource Badge}"
+                                        Background="{Binding HeaderBg}" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding HeaderText}" Style="{StaticResource BadgeText}"
+                                               Foreground="{Binding HeaderFg}"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </ToggleButton>
+
+                    <!-- collapsible body: column headers + the panel's file rows -->
+                    <StackPanel Visibility="{Binding IsExpanded, Converter={StaticResource BoolVis}}">
+                        <Border Background="#F8F9FC" Padding="16,6">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="150"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="90"/>
+                                    <ColumnDefinition Width="95"/>
+                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition Width="115"/>
+                                    <ColumnDefinition Width="80"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="FILE" Style="{StaticResource ColHeader}"/>
+                                <TextBlock Grid.Column="1" Text="TARGET PATH" Style="{StaticResource ColHeader}"/>
+                                <TextBlock Grid.Column="2" Text="ORIGINAL" Style="{StaticResource ColHeader}"/>
+                                <TextBlock Grid.Column="3" Text="RETRY STATE" Style="{StaticResource ColHeader}"/>
+                                <TextBlock Grid.Column="4" Text="RETRIES" Style="{StaticResource ColHeader}"/>
+                                <TextBlock Grid.Column="5" Text="LAST IP" Style="{StaticResource ColHeader}"/>
+                            </Grid>
+                        </Border>
+                        <ItemsControl ItemsSource="{Binding Items}"
+                                      ItemTemplate="{StaticResource NgGroupRowTemplate}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <!-- settings form styles -->
+        <Style x:Key="SectionHeader" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#14203C"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+        <Style x:Key="SettingLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="#4A5268"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="SettingBox" TargetType="TextBox">
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="Padding" Value="8,5"/>
+            <Setter Property="BorderBrush" Value="#D6DBE6"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+
+        <!-- flat, modern tab headers instead of the dated default TabControl chrome -->
+        <Style x:Key="PillTab" TargetType="TabItem">
+            <!-- default (unselected) text colour; the IsSelected trigger overrides it. Set on
+                 the TabItem, not on the ContentPresenter, so a local value can't beat the
+                 trigger and leave selected text grey on the dark pill. -->
+            <Setter Property="TextBlock.Foreground" Value="#6B7386"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="bd" Padding="16,8" Margin="0,0,6,0" CornerRadius="9"
+                                Background="White" BorderBrush="#ECEFF5" BorderThickness="1">
+                            <ContentPresenter ContentSource="Header"
+                                              TextBlock.FontSize="13" TextBlock.FontWeight="SemiBold"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#14203C"/>
+                                <Setter TargetName="bd" Property="BorderBrush" Value="#14203C"/>
+                                <Setter Property="TextBlock.Foreground" Value="White"/>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsSelected" Value="False"/>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="bd" Property="Background" Value="#EAF1FF"/>
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20,16,20,16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- masthead -->
+        <Grid Grid.Row="0" Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="FTP Upload Job Manager" FontSize="20" FontWeight="Bold"
+                           Foreground="#14203C"/>
+                <TextBlock x:Name="SubTitle" FontSize="12.5" Foreground="#6B7386" Margin="0,2,0,0"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <!-- host reachability, pinged every 30s -->
+                <Border Background="White" CornerRadius="9" BorderBrush="#ECEFF5" BorderThickness="1"
+                        Padding="10,6" Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse x:Name="PingPrimaryDot" Width="9" Height="9" Fill="#C7CDD9"
+                                 VerticalAlignment="Center" Margin="0,0,7,0"/>
+                        <TextBlock Text="Primary" FontSize="11.5" Foreground="#6B7386" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="PingPrimaryText" Text="—" FontSize="11.5" FontWeight="SemiBold"
+                                   Foreground="#3A4256" VerticalAlignment="Center" Margin="7,0,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="White" CornerRadius="9" BorderBrush="#ECEFF5" BorderThickness="1"
+                        Padding="10,6">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse x:Name="PingSecondaryDot" Width="9" Height="9" Fill="#C7CDD9"
+                                 VerticalAlignment="Center" Margin="0,0,7,0"/>
+                        <TextBlock Text="Secondary" FontSize="11.5" Foreground="#6B7386" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="PingSecondaryText" Text="—" FontSize="11.5" FontWeight="SemiBold"
+                                   Foreground="#3A4256" VerticalAlignment="Center" Margin="7,0,0,0"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        <!-- stats -->
+        <!-- Two views of the SAME single job list:
+               • All Jobs   — every panel, grouped into cards (as before)
+               • NG List    — a flat list of files that FAILED (used up every attempt). These
+                              are NOT retried automatically; the operator retries them with the
+                              per-row Retry button or Retry All. Derived live from the job list
+                              (Status == Failed), not a separate persisted file.
+             Both lists are ListBoxes so they bring their own ScrollViewer and virtualize:
+             only the cards on screen are built. -->
+        <TabControl x:Name="Tabs" Grid.Row="1" Background="Transparent"
+                    BorderThickness="0" Padding="0">
+
+            <TabItem x:Name="AllTab" Header="Today Jobs" Style="{StaticResource PillTab}">
+                <Grid Margin="0,10,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- live pump's own "Now Uploading" strip (matches the NG "Now Retrying") -->
+                    <Border Grid.Row="0" Background="#14203C" CornerRadius="13" Padding="16,12" Margin="0,0,0,10">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                <Ellipse x:Name="LiveDot" Width="9" Height="9" Fill="#5A6478"
+                                         VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <TextBlock Text="Now Uploading" FontSize="13.5" FontWeight="Bold"
+                                           Foreground="White" VerticalAlignment="Center"/>
+                                <Border x:Name="LiveRunningBadge" Background="#1F9D55" CornerRadius="7"
+                                        Padding="8,1" Margin="10,0,0,0" VerticalAlignment="Center"
+                                        Visibility="Collapsed">
+                                    <TextBlock Text="MONITORING" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                                </Border>
+                                <TextBlock x:Name="LiveCount" FontSize="11.5" Foreground="#A9B3CC"
+                                           VerticalAlignment="Center" Margin="10,0,0,0"/>
+
+                                <!-- compact counts, on the header line -->
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="18,0,0,0">
+                                    <TextBlock x:Name="StatJobs" Text="0" Foreground="White" FontSize="11.5" FontWeight="SemiBold"/>
+                                    <TextBlock Text="Jobs" Foreground="#8A97BD" FontSize="11.5" Margin="4,0,14,0"/>
+                                    <TextBlock x:Name="StatFiles" Text="0" Foreground="White" FontSize="11.5" FontWeight="SemiBold"/>
+                                    <TextBlock Text="Files" Foreground="#8A97BD" FontSize="11.5" Margin="4,0,14,0"/>
+                                    <TextBlock x:Name="StatOk" Text="0" Foreground="#3FCF7F" FontSize="11.5" FontWeight="SemiBold"/>
+                                    <TextBlock Text="Succeeded" Foreground="#8A97BD" FontSize="11.5" Margin="4,0,14,0"/>
+                                    <TextBlock x:Name="StatPending" Text="0" Foreground="#4D8CFF" FontSize="11.5" FontWeight="SemiBold"/>
+                                    <TextBlock Text="Pending" Foreground="#8A97BD" FontSize="11.5" Margin="4,0,14,0"/>
+                                    <TextBlock x:Name="StatFailed" Text="0" Foreground="#FF6B61" FontSize="11.5" FontWeight="SemiBold"/>
+                                    <TextBlock Text="Failed" Foreground="#8A97BD" FontSize="11.5" Margin="4,0,14,0"/>
+                                    <TextBlock x:Name="StatSpeed" Text="" Foreground="#7FE0A8" FontSize="11.5" FontWeight="SemiBold"/>
+                                    <TextBlock x:Name="StatSession" Text="" Foreground="#8FB4FF" FontSize="11.5" FontWeight="SemiBold" Margin="14,0,0,0"/>
+                                </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                    <Button x:Name="LiveStartBtn" Style="{StaticResource ForceButton}"
+                                            Content="Auto Upload" VerticalAlignment="Center" Click="LiveStart_Click"/>
+                                    <Button x:Name="LiveStopBtn" Style="{StaticResource DeleteRowButton}"
+                                            Content="Stop" Margin="6,0,18,0" VerticalAlignment="Center" Click="LiveStop_Click"/>
+                                    <Button x:Name="LiveViewLogBtn" Style="{StaticResource ForceButton}"
+                                            Content="View Log" Margin="0,0,8,0" VerticalAlignment="Center"
+                                            ToolTip="Build an HTML report of today's upload log and open it" Click="ViewLiveLog_Click"/>
+                                    <Button x:Name="LiveExpandAllBtn" Style="{StaticResource ForceButton}"
+                                            Content="&#xE949;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                            Margin="0,0,4,0" VerticalAlignment="Center"
+                                            ToolTip="Expand all panels" Click="LiveExpandAll_Click"/>
+                                    <Button x:Name="LiveCollapseAllBtn" Style="{StaticResource ForceButton}"
+                                            Content="&#xE94A;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                            Margin="0,0,18,0" VerticalAlignment="Center"
+                                            ToolTip="Collapse all panels" Click="LiveCollapseAll_Click"/>
+                                    <TextBlock Text="PID" FontSize="11" FontWeight="SemiBold" Foreground="#8A97BD"
+                                               VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <Border Background="White" CornerRadius="9" BorderBrush="#2B3A5C" BorderThickness="1"
+                                            Padding="10,4" VerticalAlignment="Center">
+                                        <TextBox x:Name="FilterBox" Width="150" BorderThickness="0" FontSize="12.5"
+                                                 Background="Transparent" TextChanged="FilterBox_TextChanged"/>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+                            <Grid Height="22" Margin="0,9,0,0">
+                                <TextBlock x:Name="LiveIdle" Text="Idle — no uploads in progress right now."
+                                           FontSize="12" Foreground="#A9B3CC" VerticalAlignment="Center"/>
+                                <Grid x:Name="LiveRow" Visibility="Collapsed">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="130"/>
+                                        <ColumnDefinition Width="90"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="70"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="LivePid" Grid.Column="0" FontSize="12" FontWeight="Bold"
+                                               Foreground="White" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="LiveFile" Grid.Column="1" FontSize="12"
+                                               Foreground="#CBD4EE" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="LivePath" Grid.Column="2" FontSize="10.5" FontFamily="Consolas"
+                                               Foreground="#8A97BD" TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="LiveElapsed" Grid.Column="3" FontSize="12" Foreground="#FFCE6B"
+                                               HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <ListBox x:Name="JobList" Grid.Row="1"
+                             ItemTemplate="{StaticResource JobCardTemplate}"
+                             ItemContainerStyle="{StaticResource CardListItem}"
+                             Background="Transparent" BorderThickness="0"
+                             HorizontalContentAlignment="Stretch"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"
+                             ScrollViewer.CanContentScroll="True"
+                             VirtualizingStackPanel.IsVirtualizing="True"
+                             VirtualizingStackPanel.VirtualizationMode="Recycling"/>
+
+                    <Border Grid.Row="2" Background="#0F1729" CornerRadius="12" Padding="14,10"
+                            Margin="0,10,0,0" Height="140">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <TextBlock x:Name="LogText" FontFamily="Consolas" FontSize="11"
+                                       Foreground="#CBD4EE" TextWrapping="Wrap" LineHeight="17"/>
+                        </ScrollViewer>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <TabItem x:Name="NgTab" Header="NG List" Style="{StaticResource PillTab}">
+                <Grid Margin="0,10,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- NG pump's own "Now Retrying" strip (separate from the live Now Uploading) -->
+                    <Border Grid.Row="0" Background="#14203C" CornerRadius="13" Padding="16,12" Margin="0,0,0,10">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                <Ellipse x:Name="NgDot" Width="9" Height="9" Fill="#5A6478"
+                                         VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <TextBlock Text="Now Retrying" FontSize="13.5" FontWeight="Bold"
+                                           Foreground="White" VerticalAlignment="Center"/>
+                                <Border x:Name="NgRunningBadge" Background="#1F9D55" CornerRadius="7"
+                                        Padding="8,1" Margin="10,0,0,0" VerticalAlignment="Center"
+                                        Visibility="Collapsed">
+                                    <TextBlock Text="MONITORING" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                                </Border>
+                                <TextBlock x:Name="NgCount" FontSize="11.5" Foreground="#A9B3CC"
+                                           VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                    <TextBlock Text="Day" FontSize="11" Foreground="#8A97BD"
+                                               VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <DatePicker x:Name="NgDate" Width="120" SelectedDateChanged="NgDate_Changed"
+                                                VerticalAlignment="Center"/>
+                                    <TextBlock Text="IP" FontSize="11" Foreground="#8A97BD"
+                                               VerticalAlignment="Center" Margin="12,0,6,0"/>
+                                    <ComboBox x:Name="NgIp" Width="100" SelectionChanged="NgIp_Changed"
+                                              VerticalAlignment="Center">
+                                        <ComboBoxItem Content="Auto" IsSelected="True"/>
+                                        <ComboBoxItem Content="Primary"/>
+                                        <ComboBoxItem Content="Secondary"/>
+                                    </ComboBox>
+                                    <Button x:Name="NgStartBtn" Style="{StaticResource ForceButton}"
+                                            Content="Auto Retry" Margin="12,0,0,0" VerticalAlignment="Center" Click="NgStart_Click"/>
+                                    <Button x:Name="NgStopBtn" Style="{StaticResource DeleteRowButton}"
+                                            Content="Stop" Margin="6,0,18,0" VerticalAlignment="Center" Click="NgStop_Click"/>
+                                    <Button x:Name="NgViewLogBtn" Style="{StaticResource ForceButton}"
+                                            Content="View Log" Margin="0,0,8,0" VerticalAlignment="Center"
+                                            ToolTip="Build an HTML report of this day's NG-retry log and open it" Click="ViewNgLog_Click"/>
+                                    <Button x:Name="NgExpandAllBtn" Style="{StaticResource ForceButton}"
+                                            Content="&#xE949;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                            Margin="0,0,4,0" VerticalAlignment="Center"
+                                            ToolTip="Expand all panels" Click="NgExpandAll_Click"/>
+                                    <Button x:Name="NgCollapseAllBtn" Style="{StaticResource ForceButton}"
+                                            Content="&#xE94A;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                            Margin="0,0,18,0" VerticalAlignment="Center"
+                                            ToolTip="Collapse all panels" Click="NgCollapseAll_Click"/>
+                                    <TextBlock Text="PID" FontSize="11" FontWeight="SemiBold" Foreground="#8A97BD"
+                                               VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <Border Background="White" CornerRadius="9" BorderBrush="#2B3A5C" BorderThickness="1"
+                                            Padding="10,4" VerticalAlignment="Center">
+                                        <TextBox x:Name="NgFilterBox" Width="150" BorderThickness="0" FontSize="12.5"
+                                                 Background="Transparent" TextChanged="NgFilterBox_TextChanged"/>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+                            <Grid Height="22" Margin="0,9,0,0">
+                                <TextBlock x:Name="NgIdle" FontSize="12" Foreground="#A9B3CC"
+                                           VerticalAlignment="Center"
+                                           Text="Idle — press Auto Retry to recover this day's NG items."/>
+                                <Grid x:Name="NgRow" Visibility="Collapsed">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition Width="90"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="90"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="NgCurPid" Grid.Column="0" FontSize="12" FontWeight="Bold"
+                                               Foreground="White" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="NgCurFile" Grid.Column="1" FontSize="12"
+                                               Foreground="#CBD4EE" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="NgCurPath" Grid.Column="2" FontSize="10.5" FontFamily="Consolas"
+                                               Foreground="#8A97BD" TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="NgCurIp" Grid.Column="3" FontSize="10.5" FontFamily="Consolas"
+                                               Foreground="#CBD4EE" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="NgCurElapsed" Grid.Column="4" FontSize="12" Foreground="#FFCE6B"
+                                               HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- (column headers now live inside each panel card, so no shared header bar) -->
+
+                    <Grid Grid.Row="2">
+                        <ListBox x:Name="NgList"
+                                 ItemTemplate="{StaticResource NgCardTemplate}"
+                                 ItemContainerStyle="{StaticResource CardListItem}"
+                                 Background="Transparent" BorderThickness="0"
+                                 HorizontalContentAlignment="Stretch"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 ScrollViewer.CanContentScroll="True"
+                                 VirtualizingStackPanel.IsVirtualizing="True"
+                                 VirtualizingStackPanel.VirtualizationMode="Recycling"/>
+                        <TextBlock x:Name="NgEmpty"
+                                   Text="No NG items for this day."
+                                   FontSize="12.5" Foreground="#8891A3"
+                                   HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,24,0,0"
+                                   Visibility="Collapsed"/>
+                    </Grid>
+
+                    <Border Grid.Row="3" Background="#0F1729" CornerRadius="12" Padding="14,10"
+                            Margin="0,10,0,0" Height="140">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <TextBlock x:Name="NgLogText" FontFamily="Consolas" FontSize="11"
+                                       Foreground="#CBD4EE" TextWrapping="Wrap" LineHeight="17"/>
+                        </ScrollViewer>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <TabItem x:Name="SettingsTab" Header="Settings" Style="{StaticResource PillTab}">
+                <Grid Margin="0,10,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                        <StackPanel MaxWidth="820" HorizontalAlignment="Left">
+
+                            <!-- Connection -->
+                            <Border Style="{StaticResource Card}" Padding="18,16" Margin="0,0,0,12">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                        <TextBlock Text="Connection" Style="{StaticResource SectionHeader}" Margin="0"/>
+                                        <Border Background="#FCE8D8" CornerRadius="6" Padding="7,1" Margin="10,1,0,0" VerticalAlignment="Center">
+                                            <TextBlock Text="restart required" FontSize="10" FontWeight="SemiBold" Foreground="#B5651D"/>
+                                        </Border>
+                                    </StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="190"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Primary host" Style="{StaticResource SettingLabel}"/>
+                                        <TextBox   Grid.Row="0" Grid.Column="1" x:Name="SetPrimaryHost" Style="{StaticResource SettingBox}"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Secondary host" Style="{StaticResource SettingLabel}"/>
+                                        <TextBox   Grid.Row="1" Grid.Column="1" x:Name="SetSecondaryHost" Style="{StaticResource SettingBox}"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Port" Style="{StaticResource SettingLabel}"/>
+                                        <TextBox   Grid.Row="2" Grid.Column="1" x:Name="SetPort" Style="{StaticResource SettingBox}"/>
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="User" Style="{StaticResource SettingLabel}"/>
+                                        <TextBox   Grid.Row="3" Grid.Column="1" x:Name="SetUser" Style="{StaticResource SettingBox}"/>
+                                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Password" Style="{StaticResource SettingLabel}"/>
+                                        <TextBox   Grid.Row="4" Grid.Column="1" x:Name="SetPassword" Style="{StaticResource SettingBox}"/>
+                                        <TextBlock Grid.Row="5" Grid.Column="0" Text="FTP security" Style="{StaticResource SettingLabel}"/>
+                                        <ComboBox  Grid.Row="5" Grid.Column="1" x:Name="SetFtpSecure" Margin="0,0,0,8" Height="30">
+                                            <ComboBoxItem Content="None"/>
+                                            <ComboBoxItem Content="Explicit"/>
+                                            <ComboBoxItem Content="Implicit"/>
+                                        </ComboBox>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Folders -->
+                            <Border Style="{StaticResource Card}" Padding="18,16" Margin="0,0,0,12">
+                                <StackPanel>
+                                    <TextBlock Text="Folders" Style="{StaticResource SectionHeader}"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="190"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Queue folder (.panel)" Style="{StaticResource SettingLabel}"/>
+                                        <TextBox   Grid.Row="0" Grid.Column="1" x:Name="SetQueueFolder" Style="{StaticResource SettingBox}"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Recipe path" Style="{StaticResource SettingLabel}"/>
+                                        <TextBox   Grid.Row="1" Grid.Column="1" x:Name="SetRecipePath" Style="{StaticResource SettingBox}"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Panel backup folder" Style="{StaticResource SettingLabel}"/>
+                                        <TextBox   Grid.Row="2" Grid.Column="1" x:Name="SetBackupFolder" Style="{StaticResource SettingBox}"
+                                                   ToolTip="Empty = a 'Backup Jobs' folder inside the queue folder"/>
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Jobs folder  (restart)" Style="{StaticResource SettingLabel}"/>
+                                        <TextBox   Grid.Row="3" Grid.Column="1" x:Name="SetJobsFolder" Style="{StaticResource SettingBox}"/>
+                                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Log folder  (restart)" Style="{StaticResource SettingLabel}"/>
+                                        <TextBox   Grid.Row="4" Grid.Column="1" x:Name="SetLogFolder" Style="{StaticResource SettingBox}"/>
+                                        <TextBlock Grid.Row="5" Grid.Column="0" Text="State folder  (restart)" Style="{StaticResource SettingLabel}"/>
+                                        <TextBox   Grid.Row="5" Grid.Column="1" x:Name="SetStateFolder" Style="{StaticResource SettingBox}"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Timing / retries -->
+                            <Border Style="{StaticResource Card}" Padding="18,16" Margin="0,0,0,12">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                        <TextBlock Text="Timing &amp; retries" Style="{StaticResource SectionHeader}" Margin="0"/>
+                                        <Border Background="#FCE8D8" CornerRadius="6" Padding="7,1" Margin="10,1,0,0" VerticalAlignment="Center">
+                                            <TextBlock Text="restart required" FontSize="10" FontWeight="SemiBold" Foreground="#B5651D"/>
+                                        </Border>
+                                    </StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="190"/>
+                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Connect timeout (s)" Style="{StaticResource SettingLabel}"/>
+                                        <TextBox   Grid.Row="0" Grid.Column="1" x:Name="SetTimeout" Style="{StaticResource SettingBox}"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Primary retries" Style="{StaticResource SettingLabel}"/>
+                                        <TextBox   Grid.Row="1" Grid.Column="1" x:Name="SetPrimaryRetries" Style="{StaticResource SettingBox}"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Secondary retries" Style="{StaticResource SettingLabel}"/>
+                                        <TextBox   Grid.Row="2" Grid.Column="1" x:Name="SetSecondaryRetries" Style="{StaticResource SettingBox}"/>
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Panel timeout (s)" Style="{StaticResource SettingLabel}"/>
+                                        <TextBox   Grid.Row="3" Grid.Column="1" x:Name="SetPanelTimeout" Style="{StaticResource SettingBox}"
+                                                   ToolTip="0 = no per-panel timeout"/>
+                                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Poll interval (ms)" Style="{StaticResource SettingLabel}"/>
+                                        <TextBox   Grid.Row="4" Grid.Column="1" x:Name="SetPollInterval" Style="{StaticResource SettingBox}"/>
+                                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Log retention (days)" Style="{StaticResource SettingLabel}"/>
+                                        <TextBox   Grid.Row="5" Grid.Column="1" x:Name="SetLogRetention" Style="{StaticResource SettingBox}"
+                                                   ToolTip="Auto-delete date-stamped logs/reports older than this many days. 0 = keep forever."/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Session (transfer connection reuse) -->
+                            <Border Style="{StaticResource Card}" Padding="18,16" Margin="0,0,0,12">
+                                <StackPanel>
+                                    <TextBlock Text="Session" Style="{StaticResource SectionHeader}"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="190"/>
+                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="Max files / session" Style="{StaticResource SettingLabel}"/>
+                                        <ComboBox  Grid.Column="1" x:Name="SetMaxFilesPerSession" Height="30" Margin="0,0,0,8"
+                                                   ToolTip="Files one FTP connection sends before reconnecting. Unlimited = reuse until failover/error.">
+                                            <ComboBoxItem Content="Unlimited"/>
+                                            <ComboBoxItem Content="100"/>
+                                            <ComboBoxItem Content="300"/>
+                                            <ComboBoxItem Content="500"/>
+                                        </ComboBox>
+                                        <TextBlock Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,8"
+                                                   FontSize="11" Foreground="#8891A3" TextWrapping="Wrap"
+                                                   Text="One connection uploads this many files, then reconnects (also on failover / dead connection). Applies live."/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Startup -->
+                            <Border Style="{StaticResource Card}" Padding="18,16" Margin="0,0,0,12">
+                                <StackPanel>
+                                    <TextBlock Text="Startup" Style="{StaticResource SectionHeader}"/>
+                                    <CheckBox x:Name="SetAutoUpload" Content="Auto-start uploading on launch"
+                                              FontSize="12.5" Foreground="#4A5268" Margin="0,0,0,8"/>
+                                    <CheckBox x:Name="SetAutoRetry" Content="Auto-start NG retrying on launch"
+                                              FontSize="12.5" Foreground="#4A5268"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Recipe editor -->
+                            <Border Style="{StaticResource Card}" Padding="18,16" Margin="0,0,0,12">
+                                <StackPanel>
+                                    <TextBlock Text="Upload recipe (allowed_filenames.txt)" Style="{StaticResource SectionHeader}"/>
+                                    <TextBlock Text="One filename or pattern per line. '*'/'?' wildcards, '@PID@' = local PID, '#' comment."
+                                               FontSize="11" Foreground="#8891A3" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                                    <TextBox x:Name="SetRecipeText" FontFamily="Consolas" FontSize="12"
+                                             AcceptsReturn="True" AcceptsTab="False" TextWrapping="NoWrap"
+                                             VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                                             Height="200" BorderBrush="#D6DBE6" BorderThickness="1" Padding="8,6"/>
+                                    <TextBlock x:Name="SetRecipePathLabel" FontSize="10.5" Foreground="#8891A3" Margin="0,6,0,0"/>
+                                </StackPanel>
+                            </Border>
+
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- save bar -->
+                    <Border Grid.Row="1" Background="#0F1729" CornerRadius="12" Padding="14,10" Margin="0,10,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="SettingsHint" Grid.Column="0" VerticalAlignment="Center"
+                                       FontSize="11.5" Foreground="#A9B3CC"
+                                       Text="Most settings take effect after a restart."/>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <Button x:Name="SettingsSaveBtn" Style="{StaticResource ForceButton}"
+                                        Content="Save" VerticalAlignment="Center" Click="SettingsSave_Click"/>
+                                <Button x:Name="SettingsSaveRestartBtn" Style="{StaticResource DeleteRowButton}"
+                                        Content="Save &amp; Restart" Margin="8,0,0,0" VerticalAlignment="Center"
+                                        Click="SettingsSaveRestart_Click"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <!-- activity log -->
+    </Grid>
+</Window>

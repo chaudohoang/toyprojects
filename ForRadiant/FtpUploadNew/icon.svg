@@ -1,0 +1,26 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1E2D4D"/>
+      <stop offset="1" stop-color="#0F1A33"/>
+    </linearGradient>
+    <linearGradient id="arrow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6FA8FF"/>
+      <stop offset="1" stop-color="#2F6FED"/>
+    </linearGradient>
+  </defs>
+
+  <!-- rounded square background -->
+  <rect x="8" y="8" width="240" height="240" rx="52" fill="url(#bg)"/>
+
+  <!-- upload arrow -->
+  <g fill="url(#arrow)">
+    <!-- shaft -->
+    <rect x="112" y="96" width="32" height="86" rx="8"/>
+    <!-- head -->
+    <path d="M128 56 L182 116 Q188 124 178 124 L78 124 Q68 124 74 116 Z"/>
+  </g>
+
+  <!-- server/base tray, suggesting upload to a server -->
+  <rect x="72" y="196" width="112" height="20" rx="10" fill="#8FB4FF" opacity="0.55"/>
+</svg>

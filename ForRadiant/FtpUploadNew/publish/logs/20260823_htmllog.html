@@ -1,0 +1,1432 @@
+﻿<!doctype html>
+<html><head><meta charset='utf-8'>
+<title>FTP Upload log 20260823</title>
+<style>
+  body{font-family:Segoe UI,Arial,sans-serif;margin:24px;color:#14203C;background:#F4F6FA;}
+  h1{font-size:22px;margin:0 0 2px;} h2{font-size:15px;margin:26px 0 10px;color:#3A4256;}
+  .sub{color:#6B7386;font-size:12.5px;margin-bottom:18px;}
+  .cards{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px;}
+  .card{background:#fff;border:1px solid #ECEFF5;border-radius:10px;padding:12px 16px;min-width:120px;}
+  .card.clickable{cursor:pointer;user-select:none;transition:transform .05s ease,box-shadow .1s ease,border-color .1s ease;}
+  .card.clickable:hover{box-shadow:0 3px 10px rgba(20,32,60,.13);transform:translateY(-1px);}
+  .card.clickable.active{border-color:#4D8CFF;box-shadow:0 0 0 2px rgba(77,140,255,.35);}
+  .fhint{font-size:11.5px;color:#8891A3;margin:2px 0 4px;}
+  .fhint b{color:#6B7386;}
+  .fhint #fcount{color:#4D8CFF;font-weight:600;margin-left:6px;}
+  .card .n{font-size:22px;font-weight:700;} .card .l{font-size:11px;color:#8891A3;text-transform:uppercase;letter-spacing:.04em;}
+  .n.ok{color:#1F9D55;} .n.bad{color:#E0483F;} .n.pend{color:#4D8CFF;} .n.to{color:#7C3AED;}
+  table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #ECEFF5;border-radius:10px;overflow:hidden;}
+  th{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#8891A3;text-align:left;padding:9px 12px;background:#F8F9FC;border-bottom:1px solid #ECEFF5;}
+  td{padding:9px 12px;border-bottom:1px solid #F2F4F8;font-size:12.5px;vertical-align:top;}
+  td.pid{font-weight:700;} td.file{font-weight:600;color:#3A4256;} td.t{color:#4A5268;} td.r{color:#4A5268;white-space:nowrap;}
+  .panel{background:#fff;border:1px solid #ECEFF5;border-radius:12px;margin-bottom:14px;overflow:hidden;}
+  .phead{display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #F2F4F8;background:#FCFDFF;}
+  .phead .ppid{font-weight:700;font-size:14px;}
+  .phead .ptally{color:#6B7386;font-size:12px;}
+  .phead .pov{margin-left:auto;}
+  .panel .ptable{border:0;border-radius:0;}
+  .panel .ptable th{background:#F8F9FC;}
+  .b{display:inline-block;padding:2px 9px;border-radius:8px;font-size:11px;font-weight:600;}
+  .b.ok{background:#E4F7EA;color:#1F9D55;} .b.bad{background:#FDECEB;color:#E0483F;} .b.pend{background:#EEF0F4;color:#8891A3;}
+  .b.to{background:#F3E8FF;color:#7C3AED;}
+  .chips{line-height:2;}
+  .chip{display:inline-block;padding:2px 8px;margin:0 2px 2px 0;border-radius:7px;font-size:11px;border:1px solid transparent;white-space:nowrap;}
+  .chip.ok{background:#E4F7EA;color:#1F9D55;} .chip.bad{background:#FDECEB;color:#E0483F;}
+  .chip.pri{border-color:#4D8CFF;} .chip.sec{border-color:#B8860B;}
+  .legend{font-size:11.5px;color:#6B7386;margin:8px 0 0;}
+  .legend .chip{cursor:default;}</style></head><body>
+<h1>FTP Upload &mdash; 20260823</h1>
+<div class='sub'>from E:\Github\toyprojects\ForRadiant\FtpUploadNew\publish\logs\20260823_rawlog.txt &nbsp;&middot;&nbsp; generated 2026-08-23 20:31:27</div>
+<div class='cards'>
+  <div class='card'><div class='n'>184</div><div class='l'>Files</div></div>
+  <div class='card clickable' data-filter='SUCCEEDED'><div class='n ok'>184</div><div class='l'>Succeeded</div></div>
+  <div class='card clickable' data-filter='FAILED'><div class='n bad'>0</div><div class='l'>Failed</div></div>
+  <div class='card clickable' data-filter='TIMEDOUT'><div class='n to'>0</div><div class='l'>Timed out</div></div>
+  <div class='card clickable' data-filter='PENDING'><div class='n pend'>0</div><div class='l'>Pending</div></div>
+  <div class='card'><div class='n'>184&nbsp;/&nbsp;0</div><div class='l'>Primary ok / fail (127.0.0.1)</div></div>
+  <div class='card'><div class='n'>0&nbsp;/&nbsp;0</div><div class='l'>Secondary ok / fail (127.0.0.1)</div></div>
+</div>
+<div class='fhint'>Click <b>Succeeded / Failed / Timed out / Pending</b> to show only the matching files (panels with none are hidden; click several to combine; click again to clear). <span id='fcount'></span></div>
+<div class='legend'>Attempts:
+  <span class='chip ok pri'>Primary &#10003;</span>
+  <span class='chip bad pri'>Primary &#10007;</span>
+  <span class='chip ok sec'>Secondary &#10003;</span>
+  <span class='chip bad sec'>Secondary &#10007;</span>
+  &nbsp;(blue border = primary IP, amber = secondary; green = uploaded, red = failed)
+</div>
+<h2>Files</h2>
+
+<div class='panel' data-statuses='SUCCEEDED'>
+  <div class='phead'>
+    <span class='ppid'>GH3HV701JVN3014DV</span>
+    <span class='ptally'>46/46 succeeded &middot; 0 failed</span>
+    <span class='b ok pov'>Success</span>
+  </div>
+  <table class='ptable'>
+    <thead><tr><th>File</th><th>Status</th><th>Succeeded</th><th>Failed at</th><th>Retries</th><th>Attempts (IP &amp; outcome)</th></tr></thead>
+    <tbody><tr data-status='SUCCEEDED'>
+  <td class='file'>d994_gamma.hex</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:51</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>NyPucData_TEMP_1st.hex</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:51</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>NyPucData_TEMP_2nd.hex</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:51</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>puc_otp_read.txt</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:51</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B048_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:52</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B048_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:52</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B056_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:52</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B056_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:52</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B192_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:52</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B192_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:52</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B224_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:52</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B224_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:53</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G048_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:53</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G048_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:53</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G056_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:53</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G056_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:53</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G192_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:53</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G192_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:53</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G224_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:54</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G224_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:54</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R048_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:54</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R048_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:54</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R056_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:54</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R056_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:54</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R192_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:54</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R192_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:55</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R224_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:55</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R224_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:55</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_B016_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:55</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_B016_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:55</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_B048_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:55</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_B048_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:55</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_B192_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:56</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_B192_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:56</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_G016_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:56</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_G016_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:56</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_G048_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:56</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_G048_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:56</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_G192_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:56</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_G192_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:57</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_R016_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:57</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_R016_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:57</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_R048_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:57</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_R048_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:57</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_R192_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:57</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_R192_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;16:29:57</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr></tbody>
+  </table>
+</div>
+<div class='panel' data-statuses='SUCCEEDED'>
+  <div class='phead'>
+    <span class='ppid'>i9i9i9i9</span>
+    <span class='ptally'>46/46 succeeded &middot; 0 failed</span>
+    <span class='b ok pov'>Success</span>
+  </div>
+  <table class='ptable'>
+    <thead><tr><th>File</th><th>Status</th><th>Succeeded</th><th>Failed at</th><th>Retries</th><th>Attempts (IP &amp; outcome)</th></tr></thead>
+    <tbody><tr data-status='SUCCEEDED'>
+  <td class='file'>d994_gamma.hex</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:09</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>NyPucData_TEMP_1st.hex</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:09</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>NyPucData_TEMP_2nd.hex</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:09</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>puc_otp_read.txt</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:10</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B048_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:10</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B048_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:10</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B056_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:10</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B056_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:10</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B192_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:10</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B192_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:10</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B224_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:11</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B224_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:11</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G048_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:11</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G048_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:11</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G056_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:11</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G056_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:11</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G192_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:11</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G192_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:12</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G224_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:12</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G224_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:12</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R048_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:12</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R048_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:12</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R056_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:12</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R056_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:12</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R192_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:13</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R192_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:13</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R224_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:13</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R224_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:13</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_B016_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:13</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_B016_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:13</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_B048_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:13</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_B048_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:13</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_B192_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:14</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_B192_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:14</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_G016_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:14</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_G016_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:14</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_G048_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:14</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_G048_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:14</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_G192_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:14</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_G192_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:15</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_R016_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:15</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_R016_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:15</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_R048_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:15</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_R048_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:15</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_R192_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:15</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_R192_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:14:15</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr></tbody>
+  </table>
+</div>
+<div class='panel' data-statuses='SUCCEEDED'>
+  <div class='phead'>
+    <span class='ppid'>OOO</span>
+    <span class='ptally'>46/46 succeeded &middot; 0 failed</span>
+    <span class='b ok pov'>Success</span>
+  </div>
+  <table class='ptable'>
+    <thead><tr><th>File</th><th>Status</th><th>Succeeded</th><th>Failed at</th><th>Retries</th><th>Attempts (IP &amp; outcome)</th></tr></thead>
+    <tbody><tr data-status='SUCCEEDED'>
+  <td class='file'>d994_gamma.hex</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:26:58</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>NyPucData_TEMP_1st.hex</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:26:58</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>NyPucData_TEMP_2nd.hex</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:26:58</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>puc_otp_read.txt</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:26:58</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B048_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:26:59</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B048_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:26:59</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B056_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:26:59</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B056_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:26:59</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B192_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:26:59</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B192_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:26:59</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B224_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:26:59</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B224_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:26:59</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G048_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:00</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G048_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:00</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G056_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:00</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G056_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:00</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G192_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:00</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G192_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:00</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G224_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:00</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G224_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:01</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R048_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:01</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R048_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:01</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R056_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:01</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R056_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:01</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R192_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:01</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R192_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:01</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R224_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:02</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R224_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:02</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_B016_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:02</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_B016_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:02</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_B048_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:02</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_B048_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:02</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_B192_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:02</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_B192_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:02</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_G016_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:03</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_G016_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:03</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_G048_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:03</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_G048_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:03</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_G192_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:03</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_G192_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:03</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_R016_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:03</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_R016_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:04</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_R048_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:04</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_R048_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:04</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_R192_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:04</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_R192_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:27:04</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr></tbody>
+  </table>
+</div>
+<div class='panel' data-statuses='SUCCEEDED'>
+  <div class='phead'>
+    <span class='ppid'>PPP</span>
+    <span class='ptally'>46/46 succeeded &middot; 0 failed</span>
+    <span class='b ok pov'>Success</span>
+  </div>
+  <table class='ptable'>
+    <thead><tr><th>File</th><th>Status</th><th>Succeeded</th><th>Failed at</th><th>Retries</th><th>Attempts (IP &amp; outcome)</th></tr></thead>
+    <tbody><tr data-status='SUCCEEDED'>
+  <td class='file'>d994_gamma.hex</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:16</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>NyPucData_TEMP_1st.hex</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:16</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>NyPucData_TEMP_2nd.hex</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:16</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>puc_otp_read.txt</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:16</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B048_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:16</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B048_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:16</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B056_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:17</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B056_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:17</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B192_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:17</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B192_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:17</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B224_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:17</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_B224_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:17</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G048_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:17</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G048_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:17</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G056_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:18</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G056_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:18</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G192_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:18</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G192_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:18</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G224_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:18</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_G224_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:18</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R048_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:18</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R048_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:19</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R056_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:19</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R056_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:19</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R192_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:19</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R192_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:19</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R224_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:19</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step01_0650NIT_R224_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:19</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_B016_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:20</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_B016_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:20</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_B048_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:20</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_B048_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:20</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_B192_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:20</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_B192_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:20</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_G016_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:20</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_G016_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:21</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_G048_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:21</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_G048_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:21</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_G192_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:21</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_G192_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:21</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_R016_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:21</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_R016_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:21</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_R048_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:22</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_R048_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:22</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_R192_imgY_Crop.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:22</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr><tr data-status='SUCCEEDED'>
+  <td class='file'>step02_0650NIT_R192_imgY_Crop_ori.tif</td>
+  <td><span class='b ok'>Succeeded</span></td>
+  <td class='t'>1.&nbsp;20:29:22</td>
+  <td class='t'>&mdash;</td>
+  <td class='r'>0 / 4</td>
+  <td class='chips'><span class='chip ok pri' title='attempt 1 via 127.0.0.1'>1&nbsp;Primary&nbsp;&#10003;</span> </td>
+</tr></tbody>
+  </table>
+</div>
+
+<script>
+(function(){
+  var active = new Set();
+  var cards  = document.querySelectorAll('.card.clickable');
+  var panels = document.querySelectorAll('.panel');
+  var fcount = document.getElementById('fcount');
+  function apply(){
+    var shown = 0;
+    panels.forEach(function(p){
+      var rows = p.querySelectorAll('tbody tr');
+      if (active.size === 0) {
+        // no filter: show every panel and every row
+        p.style.display = '';
+        rows.forEach(function(r){ r.style.display = ''; });
+        shown++;
+        return;
+      }
+      // filter on: show only rows whose status is selected, and hide panels with no match
+      var any = false;
+      rows.forEach(function(r){
+        var match = active.has(r.getAttribute('data-status'));
+        r.style.display = match ? '' : 'none';
+        if (match) any = true;
+      });
+      p.style.display = any ? '' : 'none';
+      if (any) shown++;
+    });
+    if (fcount) fcount.textContent = active.size === 0
+      ? '' : ('Showing ' + shown + ' of ' + panels.length + ' panels (matching rows only)');
+  }
+  cards.forEach(function(c){
+    c.addEventListener('click', function(){
+      var f = c.getAttribute('data-filter');
+      if (active.has(f)) { active.delete(f); c.classList.remove('active'); }
+      else { active.add(f); c.classList.add('active'); }
+      apply();
+    });
+  });
+})();
+</script>
+</body></html>

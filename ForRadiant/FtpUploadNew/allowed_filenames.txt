@@ -1,0 +1,5 @@
+﻿# uploadable file patterns - folder n recipe = files to upload + total count
+*otp*.txt
+*gamma*.hex
+*nypucdata*
+step*.tif

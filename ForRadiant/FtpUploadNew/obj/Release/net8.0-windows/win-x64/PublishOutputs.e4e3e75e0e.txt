@@ -1,0 +1,7 @@
+E:\Github\toyprojects\ForRadiant\FtpUploadNew\publish\FtpUpload.pdb
+E:\Github\toyprojects\ForRadiant\FtpUploadNew\publish\D3DCompiler_47_cor3.dll
+E:\Github\toyprojects\ForRadiant\FtpUploadNew\publish\PenImc_cor3.dll
+E:\Github\toyprojects\ForRadiant\FtpUploadNew\publish\PresentationNative_cor3.dll
+E:\Github\toyprojects\ForRadiant\FtpUploadNew\publish\vcruntime140_cor3.dll
+E:\Github\toyprojects\ForRadiant\FtpUploadNew\publish\wpfgfx_cor3.dll
+E:\Github\toyprojects\ForRadiant\FtpUploadNew\publish\FtpUpload.exe
