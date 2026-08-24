@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -34,6 +35,15 @@ namespace RomLauncher
         public int Score;          // transient, recomputed on every search
     }
 
+    // One named emulator choice (an alternate to a system's primary emulator).
+    class EmuChoice
+    {
+        public string Name = "";
+        public string Emulator = "";
+        public string Args = "\"{rom}\"";
+        public override string ToString() { return Name; }
+    }
+
     class SystemConfig
     {
         public string Name = "";
@@ -42,6 +52,7 @@ namespace RomLauncher
         public string Args = "\"{rom}\"";
         public string Extensions = "";   // csv whitelist, empty = auto
         public bool Enabled = true;
+        public List<EmuChoice> Alts = new List<EmuChoice>();   // pick at launch
 
         public override string ToString() { return Name; }
     }
@@ -119,6 +130,8 @@ namespace RomLauncher
                     else if (Eq(key, "Args")) cur.Args = val;
                     else if (Eq(key, "Extensions")) cur.Extensions = val;
                     else if (Eq(key, "Enabled")) cur.Enabled = val != "0";
+                    else if (key.StartsWith("Alt", StringComparison.OrdinalIgnoreCase))
+                        ParseAltKey(cur, key, val);
                 }
                 else if (Eq(section, "General"))
                 {
@@ -154,6 +167,15 @@ namespace RomLauncher
                 sb.AppendLine("Args=" + s.Args);
                 sb.AppendLine("Extensions=" + s.Extensions);
                 sb.AppendLine("Enabled=" + (s.Enabled ? "1" : "0"));
+                int an = 1;
+                foreach (EmuChoice a in s.Alts)
+                {
+                    if (string.IsNullOrEmpty(a.Name) && string.IsNullOrEmpty(a.Emulator)) continue;
+                    sb.AppendLine("Alt" + an + "Name=" + a.Name);
+                    sb.AppendLine("Alt" + an + "Emulator=" + a.Emulator);
+                    sb.AppendLine("Alt" + an + "Args=" + a.Args);
+                    an++;
+                }
             }
             try { File.WriteAllText(Paths.Ini, sb.ToString(), Encoding.UTF8); }
             catch (Exception ex) { Debug.WriteLine(ex.Message); }
@@ -162,6 +184,22 @@ namespace RomLauncher
         static bool Eq(string a, string b)
         {
             return string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
+        }
+
+        // Parse "Alt<n><Field>" keys (Alt1Name / Alt1Emulator / Alt1Args, 1-based)
+        // into the system's alternate-emulator list, growing it as needed.
+        static void ParseAltKey(SystemConfig cur, string key, string val)
+        {
+            Match m = Regex.Match(key, @"^Alt(\d+)(Name|Emulator|Args)$", RegexOptions.IgnoreCase);
+            if (!m.Success) return;
+            int idx = int.Parse(m.Groups[1].Value);
+            if (idx < 1 || idx > 999) return;
+            while (cur.Alts.Count < idx) cur.Alts.Add(new EmuChoice());
+            EmuChoice a = cur.Alts[idx - 1];
+            string field = m.Groups[2].Value;
+            if (Eq(field, "Name")) a.Name = val;
+            else if (Eq(field, "Emulator")) a.Emulator = val;
+            else if (Eq(field, "Args")) a.Args = val;
         }
     }
 
@@ -350,13 +388,17 @@ namespace RomLauncher
 
     static class Store
     {
+        // Bump whenever scan rules change (ignore list, dedup, etc.) so an old
+        // cache written by a previous build is rejected and a rescan is forced.
+        const int CACHE_VER = 2;
+
         public static void SaveCache(string root, List<RomEntry> list)
         {
             try
             {
                 using (StreamWriter w = new StreamWriter(Paths.Cache, false, Encoding.UTF8))
                 {
-                    w.WriteLine("#root\t" + root);
+                    w.WriteLine("#ver\t" + CACHE_VER.ToString(CultureInfo.InvariantCulture) + "\t" + root);
                     foreach (RomEntry e in list)
                         w.WriteLine(e.SystemName + "\t" + e.FullPath);
                 }
@@ -373,8 +415,13 @@ namespace RomLauncher
             {
                 string[] lines = File.ReadAllLines(Paths.Cache, Encoding.UTF8);
                 if (lines.Length == 0) return list;
-                if (!lines[0].StartsWith("#root\t")) return list;
-                if (!string.Equals(lines[0].Substring(6), root, StringComparison.OrdinalIgnoreCase)) return list;
+
+                // Header: "#ver \t <n> \t <root>"
+                string[] h = lines[0].Split('\t');
+                if (h.Length < 3 || h[0] != "#ver") return list;      // old/unknown format -> rescan
+                int ver;
+                if (!int.TryParse(h[1], out ver) || ver != CACHE_VER) return list;   // stale rules -> rescan
+                if (!string.Equals(h[2], root, StringComparison.OrdinalIgnoreCase)) return list;
 
                 for (int i = 1; i < lines.Length; i++)
                 {
@@ -504,9 +551,68 @@ namespace RomLauncher
     static class Native
     {
         const int EM_SETCUEBANNER = 0x1501;
+        const int EM_SETMARGINS = 0xD3;
+        const int EC_RIGHTMARGIN = 0x2;
 
         [DllImport("user32.dll", CharSet = CharSet.Unicode)]
         static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, string lParam);
+
+        [DllImport("user32.dll")]
+        static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+
+        const int SW_SHOWMAXIMIZED = 3;
+        const int SW_RESTORE = 9;
+
+        [DllImport("user32.dll")]
+        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        public static void Maximize(IntPtr hWnd)
+        {
+            try { if (hWnd != IntPtr.Zero) ShowWindow(hWnd, SW_SHOWMAXIMIZED); }
+            catch (Exception ex) { Debug.WriteLine(ex.Message); }
+        }
+
+        public static void Restore(IntPtr hWnd)
+        {
+            try { if (hWnd != IntPtr.Zero) ShowWindow(hWnd, SW_RESTORE); }
+            catch (Exception ex) { Debug.WriteLine(ex.Message); }
+        }
+
+        const int WM_SYSCOMMAND = 0x0112;
+        const int SC_MAXIMIZE = 0xF030;
+        const int SC_RESTORE = 0xF120;
+
+        [DllImport("user32.dll")]
+        static extern bool ClipCursor(IntPtr lpRect);
+
+        // Replicate the title-bar maximize/restore *buttons* (WM_SYSCOMMAND), which
+        // is not quite the same as ShowWindow and is what makes RetroArch re-evaluate
+        // its viewport and cursor clip.
+        public static void SysRestore(IntPtr hWnd)
+        {
+            try { if (hWnd != IntPtr.Zero) SendMessage(hWnd, WM_SYSCOMMAND, (IntPtr)SC_RESTORE, IntPtr.Zero); }
+            catch (Exception ex) { Debug.WriteLine(ex.Message); }
+        }
+
+        public static void SysMaximize(IntPtr hWnd)
+        {
+            try { if (hWnd != IntPtr.Zero) SendMessage(hWnd, WM_SYSCOMMAND, (IntPtr)SC_MAXIMIZE, IntPtr.Zero); }
+            catch (Exception ex) { Debug.WriteLine(ex.Message); }
+        }
+
+        // Release any cursor confinement (a stale ClipCursor rect is what leaves the
+        // mouse "locked" to the old window size after a programmatic maximize).
+        public static void ReleaseCursorClip()
+        {
+            try { ClipCursor(IntPtr.Zero); }
+            catch (Exception ex) { Debug.WriteLine(ex.Message); }
+        }
+
+        public static void SetRightMargin(TextBox box, int px)
+        {
+            try { if (box.IsHandleCreated) SendMessage(box.Handle, EM_SETMARGINS, (IntPtr)EC_RIGHTMARGIN, (IntPtr)(px << 16)); }
+            catch (Exception ex) { Debug.WriteLine(ex.Message); }
+        }
 
         public static void SetPlaceholder(TextBox box, string text)
         {
@@ -539,7 +645,7 @@ namespace RomLauncher
         TextBox txtSearch;
         ComboBox cboSystem, cboSort;
         CheckBox chkFav;
-        Button btnRescan, btnSystems, btnLaunch;
+        Button btnRescan, btnSystems, btnLaunch, btnClear;
         FastListView list;
         StatusStrip status;
         ToolStripStatusLabel lblStatus, lblCount;
@@ -560,7 +666,15 @@ namespace RomLauncher
             KeyPreview = true;
 
             BuildUi();
+            LoadWindowIcon();
             Load += delegate { LoadInitial(); };
+        }
+
+        // Use the icon embedded in the exe for the title bar / taskbar.
+        void LoadWindowIcon()
+        {
+            try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); }
+            catch (Exception ex) { Debug.WriteLine(ex.Message); }
         }
 
         // ----------------------------------------------------------- ui setup
@@ -577,9 +691,30 @@ namespace RomLauncher
             txtSearch.Font = new Font("Segoe UI", 14f);
             txtSearch.Location = new Point(8, 8);
             txtSearch.Width = 520;
-            txtSearch.TextChanged += delegate { debounce.Stop(); debounce.Start(); };
+            txtSearch.TextChanged += delegate
+            {
+                if (btnClear != null) btnClear.Visible = txtSearch.TextLength > 0;
+                debounce.Stop(); debounce.Start();
+            };
             txtSearch.KeyDown += SearchKeyDown;
             top.Controls.Add(txtSearch);
+
+            // Clear "x", overlaid on the right edge of the search box.
+            btnClear = new Button();
+            btnClear.Text = "\u2715";                 // ✕
+            btnClear.Font = new Font("Segoe UI", 9f);
+            btnClear.Size = new Size(22, 22);
+            btnClear.FlatStyle = FlatStyle.Flat;
+            btnClear.FlatAppearance.BorderSize = 0;
+            btnClear.FlatAppearance.MouseOverBackColor = Color.FromArgb(230, 90, 90);
+            btnClear.BackColor = txtSearch.BackColor;
+            btnClear.ForeColor = Color.Gray;
+            btnClear.TabStop = false;
+            btnClear.Cursor = Cursors.Default;
+            btnClear.Visible = false;
+            btnClear.Click += delegate { txtSearch.Clear(); txtSearch.Focus(); };
+            top.Controls.Add(btnClear);
+            btnClear.BringToFront();
 
             btnLaunch = new Button();
             btnLaunch.Text = "Launch";
@@ -658,6 +793,8 @@ namespace RomLauncher
 
             ContextMenuStrip menu = new ContextMenuStrip();
             menu.Items.Add("Launch", null, delegate { LaunchSelected(); });
+            ToolStripMenuItem launchWith = new ToolStripMenuItem("Launch with");
+            menu.Items.Add(launchWith);
             menu.Items.Add("Toggle favorite (F2)", null, delegate { ToggleFav(); });
             menu.Items.Add("Open containing folder", null, delegate { OpenFolder(); });
             menu.Items.Add("Copy path", null, delegate { CopyPath(); });
@@ -667,6 +804,7 @@ namespace RomLauncher
                 RomEntry r = Current();
                 OpenSystems(r == null ? null : r.SystemName);
             });
+            menu.Opening += delegate { BuildLaunchWithMenu(launchWith); };
             list.ContextMenuStrip = menu;
 
             status = new StatusStrip();
@@ -687,16 +825,27 @@ namespace RomLauncher
             Shown += delegate
             {
                 Native.SetPlaceholder(txtSearch, "Type a game name...");
+                Native.SetRightMargin(txtSearch, 26);
+                PositionClearButton();
                 txtSearch.Focus();
                 LayoutColumns();
             };
             FormClosing += delegate
             {
                 cancelScan = true;
-                cfg.LastSystem = cboSystem.SelectedItem == null ? "" : cboSystem.SelectedItem.ToString();
+                cfg.LastSystem = SelectedSystemName() ?? "";
                 Ini.Save(cfg);
                 Store.SaveStats(all);
             };
+        }
+
+        void PositionClearButton()
+        {
+            if (btnClear == null) return;
+            int x = txtSearch.Left + txtSearch.Width - btnClear.Width - 3;
+            int y = txtSearch.Top + (txtSearch.Height - btnClear.Height) / 2;
+            btnClear.Location = new Point(x, y);
+            btnClear.BringToFront();
         }
 
         // Purely proportional columns; must never leave a horizontal scrollbar.
@@ -808,16 +957,58 @@ namespace RomLauncher
             catch (Exception) { return false; }
         }
 
+        // Dropdown item that shows "name (1,234)" but reports the bare system name.
+        class SysItem
+        {
+            public string Name;      // "" means the "All systems" entry
+            public int Count;
+            public override string ToString()
+            {
+                string label = Name.Length == 0 ? "All systems" : Name;
+                return label + "  (" + Count.ToString("N0", CultureInfo.CurrentCulture) + ")";
+            }
+        }
+
+        // The currently selected system name, or null for "All systems".
+        string SelectedSystemName()
+        {
+            SysItem it = cboSystem.SelectedItem as SysItem;
+            if (it == null || it.Name.Length == 0) return null;
+            return it.Name;
+        }
+
         void FillSystems()
         {
-            string prev = cboSystem.SelectedItem == null ? cfg.LastSystem : cboSystem.SelectedItem.ToString();
-            cboSystem.Items.Clear();
-            cboSystem.Items.Add("All systems");
-            foreach (SystemConfig s in cfg.Systems)
-                if (s.Enabled) cboSystem.Items.Add(s.Name);
+            // Remember the previously selected system by name.
+            SysItem prevItem = cboSystem.SelectedItem as SysItem;
+            string prev = prevItem != null ? prevItem.Name : cfg.LastSystem;
 
-            int idx = string.IsNullOrEmpty(prev) ? 0 : cboSystem.Items.IndexOf(prev);
-            cboSystem.SelectedIndex = idx < 0 ? 0 : idx;
+            // Count ROMs per system in a single pass.
+            Dictionary<string, int> counts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            for (int i = 0; i < all.Count; i++)
+            {
+                int c;
+                counts.TryGetValue(all[i].SystemName, out c);
+                counts[all[i].SystemName] = c + 1;
+            }
+
+            cboSystem.BeginUpdate();
+            cboSystem.Items.Clear();
+            cboSystem.Items.Add(new SysItem { Name = "", Count = all.Count });
+
+            int selIdx = 0, row = 0;
+            foreach (SystemConfig s in cfg.Systems)
+            {
+                if (!s.Enabled) continue;
+                int c;
+                counts.TryGetValue(s.Name, out c);
+                cboSystem.Items.Add(new SysItem { Name = s.Name, Count = c });
+                row++;
+                if (!string.IsNullOrEmpty(prev) && string.Equals(s.Name, prev, StringComparison.OrdinalIgnoreCase))
+                    selIdx = row;
+            }
+            cboSystem.EndUpdate();
+            cboSystem.SelectedIndex = selIdx;
         }
 
         void StartScan()
@@ -853,6 +1044,7 @@ namespace RomLauncher
                         lblStatus.Text = found.Count == 0
                             ? "Scan found 0 ROMs. See RomLauncher.scan.log next to the exe for why."
                             : "Scan complete: " + found.Count.ToString("N0", CultureInfo.CurrentCulture) + " ROMs.";
+                        FillSystems();   // refresh per-system counts now that all[] is populated
                         Refilter();
                     });
                 }
@@ -871,9 +1063,7 @@ namespace RomLauncher
                 ? new string[0]
                 : q.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
-            string sysFilter = null;
-            if (cboSystem.SelectedIndex > 0 && cboSystem.SelectedItem != null)
-                sysFilter = cboSystem.SelectedItem.ToString();
+            string sysFilter = SelectedSystemName();
 
             bool favOnly = chkFav.Checked;
             List<RomEntry> res = new List<RomEntry>(Math.Min(all.Count, 4096));
@@ -1081,6 +1271,20 @@ namespace RomLauncher
                 return;
             }
 
+            LaunchWith(r, emu, sys.Args);
+        }
+
+        // Launch a specific ROM with a specific emulator + argument template.
+        // Used by the default launch and by the "Launch with" alternate picker.
+        void LaunchWith(RomEntry r, string emu, string argsTemplate)
+        {
+            if (r == null) return;
+            if (string.IsNullOrEmpty(emu))
+            {
+                MessageBox.Show(this, "This emulator entry has no executable set.", "ROM Launcher",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             if (!File.Exists(emu))
             {
                 MessageBox.Show(this, "Emulator not found:\n" + emu, "ROM Launcher",
@@ -1088,7 +1292,7 @@ namespace RomLauncher
                 return;
             }
 
-            string args = (string.IsNullOrEmpty(sys.Args) ? "\"{rom}\"" : sys.Args)
+            string args = (string.IsNullOrEmpty(argsTemplate) ? "\"{rom}\"" : argsTemplate)
                 .Replace("{rom}", r.FullPath)
                 .Replace("{romdir}", Path.GetDirectoryName(r.FullPath))
                 .Replace("{romname}", r.Name)
@@ -1099,7 +1303,9 @@ namespace RomLauncher
                 ProcessStartInfo psi = new ProcessStartInfo(emu, args);
                 psi.WorkingDirectory = Path.GetDirectoryName(emu);
                 psi.UseShellExecute = false;
-                Process.Start(psi);
+                Process p = Process.Start(psi);
+                if (p != null && args.IndexOf("romlauncher_maximized.cfg", StringComparison.OrdinalIgnoreCase) >= 0)
+                    MaximizeWhenReady(p);
                 MarkPlayed(r);
             }
             catch (Exception ex)
@@ -1107,6 +1313,34 @@ namespace RomLauncher
                 MessageBox.Show(this, "Launch failed:\n" + ex.Message, "ROM Launcher",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        // Populate the "Launch with" submenu for the currently selected ROM:
+        // the system's default emulator plus each configured alternate.
+        void BuildLaunchWithMenu(ToolStripMenuItem parent)
+        {
+            parent.DropDownItems.Clear();
+            RomEntry r = Current();
+            SystemConfig sys = r == null ? null : cfg.Find(r.SystemName);
+            if (sys == null) { parent.Enabled = false; return; }
+
+            string defName = string.IsNullOrEmpty(sys.Emulator)
+                ? "Default"
+                : "Default (" + Path.GetFileName(sys.Emulator) + ")";
+            parent.DropDownItems.Add(new ToolStripMenuItem(defName, null, delegate { LaunchSelected(); }));
+
+            foreach (EmuChoice c in sys.Alts)
+            {
+                if (string.IsNullOrEmpty(c.Emulator) && string.IsNullOrEmpty(c.Name)) continue;
+                EmuChoice cc = c;   // capture per iteration
+                string label = string.IsNullOrEmpty(cc.Name) ? Path.GetFileName(cc.Emulator) : cc.Name;
+                parent.DropDownItems.Add(new ToolStripMenuItem(label, null, delegate
+                {
+                    RomEntry rr = Current();
+                    if (rr != null) LaunchWith(rr, cc.Emulator, cc.Args);
+                }));
+            }
+            parent.Enabled = parent.DropDownItems.Count > 0;
         }
 
         void RunShell(RomEntry r)
@@ -1135,9 +1369,74 @@ namespace RomLauncher
             list.Invalidate();
             if (cfg.MinimizeOnLaunch) WindowState = FormWindowState.Minimized;
         }
+
+        // For the "Maximized" window mode: wait for the emulator's main window to
+        // appear, then maximize it. RetroArch can't reliably start maximized, so we
+        // do it here. Some cores (notably PS2) bring their video context up a beat
+        // later and ignore an early maximize -- leaving the viewport/mouse offset --
+        // so after the core settles we do a real restore->maximize "nudge", which is
+        // exactly what manually un-maximizing and re-maximizing does. Runs on a
+        // background thread.
+        static void MaximizeWhenReady(Process p)
+        {
+            Thread t = new Thread(delegate()
+            {
+                try
+                {
+                    IntPtr h = IntPtr.Zero;
+                    for (int i = 0; i < 100; i++)
+                    {
+                        if (p.HasExited) return;
+                        p.Refresh();
+                        h = p.MainWindowHandle;
+                        if (h != IntPtr.Zero) break;
+                        Thread.Sleep(100);
+                    }
+                    if (h == IntPtr.Zero) return;
+
+                    // Do NOT maximize early: doing it before the core's video/input
+                    // is up leaves the mouse clipped to the initial window size (the
+                    // "locked mouse"). Wait for the core to settle, then maximize once
+                    // via the title-bar button path (WM_SYSCOMMAND) -- that's the path
+                    // RetroArch reacts to, the same as clicking maximize by hand. Then
+                    // clear any stale cursor clip for good measure.
+                    Thread.Sleep(1300);
+                    if (p.HasExited) return;
+                    p.Refresh();
+                    IntPtr h2 = p.MainWindowHandle;
+                    if (h2 == IntPtr.Zero) h2 = h;
+                    Native.SysMaximize(h2);
+                    for (int k = 0; k < 5; k++)
+                    {
+                        if (p.HasExited) return;
+                        Thread.Sleep(250);
+                        Native.ReleaseCursorClip();
+                    }
+                }
+                catch (Exception ex) { Debug.WriteLine(ex.Message); }
+            });
+            t.IsBackground = true;
+            t.Start();
+        }
     }
 
     // ---------------------------------------------------------- systems dialog
+
+    // A standalone-emulator preset: candidate exe names plus the argument
+    // templates for fullscreen and windowed launches. Args verified against each
+    // emulator's current CLI docs.
+    class EmuPreset
+    {
+        public string Name;
+        public string[] ExeNames;
+        public string ArgsFull;
+        public string ArgsWin;
+        public EmuPreset(string name, string[] exeNames, string argsFull, string argsWin)
+        {
+            Name = name; ExeNames = exeNames; ArgsFull = argsFull; ArgsWin = argsWin;
+        }
+        public override string ToString() { return Name; }
+    }
 
     class SystemsForm : Form
     {
@@ -1146,6 +1445,8 @@ namespace RomLauncher
         TextBox txtSysFilter;
         TextBox txtRoot, txtEmu, txtArgs, txtExt, txtRetro;
         ComboBox cboCore;
+        ComboBox cboWinMode;
+        ComboBox cboPreset;
         CheckBox chkEnabled, chkMinimize, chkDupes;
         bool loading;
         SystemConfig cur;
@@ -1160,7 +1461,7 @@ namespace RomLauncher
 
             Text = "Systems & emulators";
             StartPosition = FormStartPosition.CenterParent;
-            ClientSize = new Size(860, 520);
+            ClientSize = new Size(860, 610);
             MinimizeBox = false;
             MaximizeBox = false;
             FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -1295,6 +1596,52 @@ namespace RomLauncher
             bApply.Click += delegate { ApplyCore(); };
             Controls.Add(bApply);
 
+            ry += 30;
+            Controls.Add(MakeLabel("Window mode:", rx, ry + 4));
+            cboWinMode = new ComboBox();
+            cboWinMode.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboWinMode.Location = new Point(rx + 95, ry);
+            cboWinMode.Width = 250;
+            cboWinMode.Items.AddRange(new object[] { "Window", "Maximized", "Fullscreen" });
+            cboWinMode.SelectedIndex = 1;   // default to maximized (real window)
+            cboWinMode.SelectedIndexChanged += delegate
+            {
+                if (loading || cur == null) return;
+                string na = SetWinModeInArgs(txtArgs.Text, cboWinMode.SelectedIndex);
+                if (na != txtArgs.Text) txtArgs.Text = na;   // persisted via txtArgs.TextChanged
+            };
+            Controls.Add(cboWinMode);
+            Label hintWin = new Label();
+            hintWin.Text = "rewrites RetroArch args";
+            hintWin.AutoSize = true;
+            hintWin.ForeColor = Color.Gray;
+            hintWin.Location = new Point(rx + 350, ry + 4);
+            Controls.Add(hintWin);
+
+            ry += 30;
+            Controls.Add(MakeLabel("Emulator preset:", rx, ry + 4));
+            cboPreset = new ComboBox();
+            cboPreset.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboPreset.Location = new Point(rx + 95, ry);
+            cboPreset.Width = 380;
+            cboPreset.Items.AddRange(Presets);
+            Controls.Add(cboPreset);
+
+            Button bPreset = new Button();
+            bPreset.Text = "Apply\u2026";
+            bPreset.Location = new Point(rx + 483, ry - 1);
+            bPreset.Size = new Size(75, 24);
+            bPreset.Click += delegate { ApplyPreset(); };
+            Controls.Add(bPreset);
+
+            ry += 26;
+            Label hintPre = new Label();
+            hintPre.Text = "Standalone emulators: fills exe + args. Window mode = Window gives windowed, else fullscreen.";
+            hintPre.AutoSize = true;
+            hintPre.ForeColor = Color.Gray;
+            hintPre.Location = new Point(rx + 95, ry);
+            Controls.Add(hintPre);
+
             ry += 34;
             Controls.Add(MakeLabel("Extensions:", rx, ry + 4));
             txtExt = new TextBox();
@@ -1318,6 +1665,18 @@ namespace RomLauncher
             bCopy.Size = new Size(240, 28);
             bCopy.Click += delegate { CopyToAll(); };
             Controls.Add(bCopy);
+
+            Button bAlts = new Button();
+            bAlts.Text = "Alternate emulators\u2026";
+            bAlts.Location = new Point(rx + 250, ry);
+            bAlts.Size = new Size(180, 28);
+            bAlts.Click += delegate
+            {
+                if (cur == null) { MessageBox.Show(this, "Select a system on the left first."); return; }
+                using (AltEmusForm f = new AltEmusForm(cur))
+                    f.ShowDialog(this);
+            };
+            Controls.Add(bAlts);
 
             ry += 46;
             chkMinimize = new CheckBox();
@@ -1343,7 +1702,13 @@ namespace RomLauncher
             ok.Click += delegate
             {
                 cfg.RootPath = txtRoot.Text.Trim();
-                cfg.RetroArchPath = txtRetro.Text.Trim();
+                string newRetro = txtRetro.Text.Trim();
+                // Changing the RetroArch path re-anchors every RetroArch system to
+                // the new folder (only when it points at a real retroarch.exe).
+                if (!string.Equals(cfg.RetroArchPath, newRetro, StringComparison.OrdinalIgnoreCase)
+                    && File.Exists(newRetro))
+                    ReanchorRetroArch(newRetro);
+                cfg.RetroArchPath = newRetro;
                 cfg.MinimizeOnLaunch = chkMinimize.Checked;
                 cfg.HideDiscDupes = chkDupes.Checked;
             };
@@ -1418,7 +1783,182 @@ namespace RomLauncher
             if (!File.Exists(exe)) { MessageBox.Show(this, "Set the RetroArch path first."); return; }
             string core = Path.Combine(Path.Combine(Path.GetDirectoryName(exe), "cores"), cboCore.SelectedItem.ToString());
             txtEmu.Text = exe;
-            txtArgs.Text = "-L \"" + core + "\" -f \"{rom}\"";
+
+            string args = "-L \"" + core + "\" ";
+            // 0 = Window, 1 = Maximized (launcher maximizes it), 2 = Fullscreen
+            args += "--appendconfig \"" + WriteWinModeCfg(exe, cboWinMode.SelectedIndex) + "\" ";
+            args += "\"{rom}\"";
+            txtArgs.Text = args;
+        }
+
+        // Verified standalone-emulator presets (CLI checked against current docs).
+        internal static readonly EmuPreset[] Presets = new EmuPreset[]
+        {
+            new EmuPreset("DuckStation (PS1)",
+                new string[] { "duckstation-qt-x64-ReleaseLTCG.exe", "duckstation-qt.exe", "duckstation.exe" },
+                "-batch -fullscreen \"{rom}\"", "-batch \"{rom}\""),
+            new EmuPreset("PCSX2 (PS2)",
+                new string[] { "pcsx2-qt.exe", "pcsx2x64-avx2.exe", "pcsx2x64.exe", "pcsx2.exe" },
+                "-batch -fullscreen -- \"{rom}\"", "-batch -- \"{rom}\""),
+            new EmuPreset("PPSSPP (PSP)",
+                new string[] { "PPSSPPWindows64.exe", "PPSSPPWindows.exe" },
+                "--escape-exit --fullscreen \"{rom}\"", "--escape-exit \"{rom}\""),
+            new EmuPreset("Dolphin (GC / Wii)",
+                new string[] { "Dolphin.exe" },
+                "-b --config=Dolphin.Display.Fullscreen=True -e \"{rom}\"",
+                "-b --config=Dolphin.Display.Fullscreen=False -e \"{rom}\""),
+            new EmuPreset("Flycast (Dreamcast / NAOMI)",
+                new string[] { "flycast.exe" },
+                "-config window:fullscreen=yes \"{rom}\"", "-config window:fullscreen=no \"{rom}\""),
+            new EmuPreset("Yaba Sanshiro (Saturn)",
+                new string[] { "yabasanshiro.exe" },
+                "-i \"{rom}\" -a -fullscreen", "-i \"{rom}\" -a"),
+        };
+
+        // Fill the emulator exe + args for the selected system from a preset.
+        // Window mode drives fullscreen vs windowed: only "Window" gives windowed;
+        // "Maximized"/"Fullscreen" both give the preset's fullscreen args (Maximized
+        // isn't meaningful for standalone emulators, so it maps to fullscreen).
+        void ApplyPreset()
+        {
+            if (cur == null) { MessageBox.Show(this, "Select a system on the left first."); return; }
+            EmuPreset p = cboPreset.SelectedItem as EmuPreset;
+            if (p == null) { MessageBox.Show(this, "Pick an emulator preset first."); return; }
+
+            OpenFileDialog od = new OpenFileDialog();
+            od.Title = "Locate the " + p.Name + " executable";
+            od.Filter = "Executable (*.exe)|*.exe|All files (*.*)|*.*";
+            if (p.ExeNames.Length > 0) od.FileName = p.ExeNames[0];
+            if (od.ShowDialog(this) != DialogResult.OK) return;
+
+            txtEmu.Text = od.FileName;
+            bool windowed = (cboWinMode.SelectedIndex == 0);
+            txtArgs.Text = windowed ? p.ArgsWin : p.ArgsFull;
+        }
+
+        // Layers a tiny config over the main one via --appendconfig. Each mode gets
+        // its own filename so it can be recognised later:
+        //   0 Window     - normal decorated window (fullscreen off)
+        //   1 Maximized  - decorated window; the launcher maximizes it after it opens
+        //                  (RetroArch has no reliable start-maximized setting)
+        //   2 Fullscreen - fills the screen, no title bar (borderless fullscreen)
+        static string WriteWinModeCfg(string retroArchExe, int mode)
+        {
+            string dir = Path.GetDirectoryName(retroArchExe);
+            string name;
+            bool full;
+            if (mode == 2) { name = "romlauncher_fullscreen.cfg"; full = true; }
+            else if (mode == 1) { name = "romlauncher_maximized.cfg"; full = false; }
+            else { name = "romlauncher_windowed.cfg"; full = false; }
+            string file = Path.Combine(dir, name);
+            try
+            {
+                string v = full ? "true" : "false";
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("video_fullscreen = \"" + v + "\"");
+                sb.AppendLine("video_windowed_fullscreen = \"" + v + "\"");
+                File.WriteAllText(file, sb.ToString(), Encoding.ASCII);
+            }
+            catch (Exception ex) { Debug.WriteLine(ex.Message); }
+            return file;
+        }
+
+        // Infer which window-mode entry matches an existing argument string,
+        // so the dropdown reflects what's actually saved.
+        // 0 = Window, 1 = Maximized, 2 = Fullscreen. Legacy borderless/"-f" -> Fullscreen.
+        static int DetectWinMode(string args)
+        {
+            if (string.IsNullOrEmpty(args)) return 1;
+            if (args.IndexOf("romlauncher_windowed.cfg", StringComparison.OrdinalIgnoreCase) >= 0) return 0;
+            if (args.IndexOf("romlauncher_maximized.cfg", StringComparison.OrdinalIgnoreCase) >= 0) return 1;
+            if (args.IndexOf("romlauncher_fullscreen.cfg", StringComparison.OrdinalIgnoreCase) >= 0) return 2;
+            if (args.IndexOf("romlauncher_borderless.cfg", StringComparison.OrdinalIgnoreCase) >= 0) return 2;  // legacy fill-screen
+            if (Regex.IsMatch(args, @"(^|\s)-f(\s|$)")) return 2;   // legacy exclusive fullscreen
+            return 1;   // default: maximized
+        }
+
+        // Rewrite the RetroArch window-mode part of an argument string in place.
+        // Only touches RetroArch invocations (ones that load a core via -L);
+        // leaves other emulators' args alone. Returns the (maybe unchanged) args.
+        string SetWinModeInArgs(string args, int mode)
+        {
+            if (string.IsNullOrEmpty(args)) return args;
+            if (args.IndexOf("-L ", StringComparison.Ordinal) < 0) return args;  // not RetroArch
+
+            // Locate the RetroArch folder for the --appendconfig path.
+            string retroDir = null;
+            string re = txtRetro.Text.Trim();
+            if (re.Length > 0 && File.Exists(re)) retroDir = Path.GetDirectoryName(re);
+            if (retroDir == null)
+            {
+                Match m = Regex.Match(args, "-L\\s+\"([^\"]+)\"");
+                if (m.Success)
+                {
+                    try { retroDir = Path.GetDirectoryName(Path.GetDirectoryName(m.Groups[1].Value)); }
+                    catch (Exception ex) { Debug.WriteLine(ex.Message); }
+                }
+            }
+
+            // Strip any existing window-mode tokens.
+            args = Regex.Replace(args, "--appendconfig\\s+\"[^\"]*romlauncher_(?:borderless|windowed|maximized|fullscreen)\\.cfg\"\\s*", " ");
+            args = Regex.Replace(args, "(^|\\s)-f(?=\\s|$)", " ");
+            args = Regex.Replace(args, "\\s{2,}", " ").Trim();
+
+            // Build the replacement token for the chosen mode.
+            // 0 = Window, 1 = Maximized (maximized at launch), 2 = Fullscreen.
+            string token = null;
+            if (retroDir != null)
+            {
+                string cfg = WriteWinModeCfg(Path.Combine(retroDir, "retroarch.exe"), mode);
+                token = "--appendconfig \"" + cfg + "\"";
+            }
+            if (token == null) return args;                    // couldn't resolve RetroArch dir
+
+            // Insert before the {rom} placeholder, otherwise append.
+            int idx = args.IndexOf("\"{rom}\"", StringComparison.Ordinal);
+            if (idx < 0) idx = args.IndexOf("{rom}", StringComparison.Ordinal);
+            if (idx >= 0) args = args.Substring(0, idx) + token + " " + args.Substring(idx);
+            else args = args + " " + token;
+
+            return Regex.Replace(args, "\\s{2,}", " ").Trim();
+        }
+
+        // Point every RetroArch system at a new RetroArch folder: rewrites the
+        // emulator exe, the -L core path (keeping the core filename), and the
+        // --appendconfig path (keeping the mode filename). Standalone emulators
+        // (no -L, non-retroarch.exe) are left alone. Mirrors ROM-root re-anchoring.
+        void ReanchorRetroArch(string newRetroExe)
+        {
+            if (string.IsNullOrEmpty(newRetroExe)) return;
+            string newDir = Path.GetDirectoryName(newRetroExe);
+            if (string.IsNullOrEmpty(newDir)) return;
+            string coresDir = Path.Combine(newDir, "cores");
+
+            foreach (SystemConfig s in cfg.Systems)
+            {
+                bool isRetro =
+                    (!string.IsNullOrEmpty(s.Emulator) &&
+                     s.Emulator.EndsWith("retroarch.exe", StringComparison.OrdinalIgnoreCase))
+                    || (!string.IsNullOrEmpty(s.Args) &&
+                        s.Args.IndexOf("-L ", StringComparison.Ordinal) >= 0);
+                if (!isRetro) continue;
+
+                if (!string.IsNullOrEmpty(s.Emulator) &&
+                    s.Emulator.EndsWith("retroarch.exe", StringComparison.OrdinalIgnoreCase))
+                    s.Emulator = newRetroExe;
+
+                if (string.IsNullOrEmpty(s.Args)) continue;
+
+                // -L "...\cores\<core>.dll"  ->  keep <core>.dll, swap the folder
+                s.Args = Regex.Replace(s.Args,
+                    "(-L\\s+\")[^\"]*[\\\\/]cores[\\\\/]([^\"\\\\/]+)\"",
+                    delegate(Match m) { return m.Groups[1].Value + Path.Combine(coresDir, m.Groups[2].Value) + "\""; });
+
+                // --appendconfig "...\romlauncher_*.cfg"  ->  keep filename, swap folder
+                s.Args = Regex.Replace(s.Args,
+                    "(--appendconfig\\s+\")[^\"]*[\\\\/](romlauncher_[^\"\\\\/]+\\.cfg)\"",
+                    delegate(Match m) { return m.Groups[1].Value + Path.Combine(newDir, m.Groups[2].Value) + "\""; });
+            }
         }
 
         void CopyToAll()
@@ -1502,7 +2042,198 @@ namespace RomLauncher
             txtEmu.Text = cur.Emulator;
             txtArgs.Text = cur.Args;
             txtExt.Text = cur.Extensions;
+            cboWinMode.SelectedIndex = DetectWinMode(cur.Args);
             loading = false;
+        }
+    }
+
+    // ---------------------------------------------- alternate emulators dialog
+
+    // Manage a system's alternate emulators (its "Launch with" choices). Edits the
+    // system's Alts list in place; the parent Systems dialog saves on OK.
+    class AltEmusForm : Form
+    {
+        SystemConfig sys;
+        ListBox lstAlts;
+        TextBox txtName, txtEmu, txtArgs;
+        ComboBox cboPreset;
+        bool loading;
+
+        public AltEmusForm(SystemConfig system)
+        {
+            sys = system;
+            Text = "Alternate emulators - " + sys.Name;
+            StartPosition = FormStartPosition.CenterParent;
+            ClientSize = new Size(720, 340);
+            MinimizeBox = false;
+            MaximizeBox = false;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            Font = new Font("Segoe UI", 9f);
+
+            Label intro = new Label();
+            intro.Text = "Add other emulators for \"" + sys.Name + "\". At launch, right-click a game and choose Launch with.";
+            intro.AutoSize = true;
+            intro.Location = new Point(12, 10);
+            Controls.Add(intro);
+
+            lstAlts = new ListBox();
+            lstAlts.Location = new Point(12, 34);
+            lstAlts.Size = new Size(200, 230);
+            lstAlts.SelectedIndexChanged += delegate { LoadFields(); };
+            Controls.Add(lstAlts);
+
+            Button bNew = new Button();
+            bNew.Text = "New";
+            bNew.Location = new Point(12, 270);
+            bNew.Size = new Size(95, 26);
+            bNew.Click += delegate
+            {
+                EmuChoice a = new EmuChoice();
+                a.Name = "New emulator";
+                a.Args = "\"{rom}\"";
+                sys.Alts.Add(a);
+                Repopulate(sys.Alts.Count - 1);
+                txtName.Focus();
+                txtName.SelectAll();
+            };
+            Controls.Add(bNew);
+
+            Button bRemove = new Button();
+            bRemove.Text = "Remove";
+            bRemove.Location = new Point(117, 270);
+            bRemove.Size = new Size(95, 26);
+            bRemove.Click += delegate
+            {
+                int i = lstAlts.SelectedIndex;
+                if (i < 0) return;
+                sys.Alts.RemoveAt(i);
+                Repopulate(i - 1 >= 0 ? i - 1 : 0);
+            };
+            Controls.Add(bRemove);
+
+            int rx = 228;
+            Controls.Add(MakeLabel("Name:", rx, 38));
+            txtName = new TextBox();
+            txtName.Location = new Point(rx + 80, 34);
+            txtName.Width = 380;
+            txtName.TextChanged += delegate { if (!loading) { EmuChoice a = Sel(); if (a != null) a.Name = txtName.Text; } };
+            txtName.Leave += delegate { Repopulate(lstAlts.SelectedIndex); };
+            Controls.Add(txtName);
+
+            Controls.Add(MakeLabel("Emulator:", rx, 70));
+            txtEmu = new TextBox();
+            txtEmu.Location = new Point(rx + 80, 66);
+            txtEmu.Width = 300;
+            txtEmu.TextChanged += delegate { if (!loading) { EmuChoice a = Sel(); if (a != null) a.Emulator = txtEmu.Text; } };
+            Controls.Add(txtEmu);
+
+            Button bBrowse = new Button();
+            bBrowse.Text = "Browse";
+            bBrowse.Location = new Point(rx + 383, 65);
+            bBrowse.Size = new Size(77, 24);
+            bBrowse.Click += delegate
+            {
+                OpenFileDialog od = new OpenFileDialog();
+                od.Filter = "Executable (*.exe)|*.exe|All files (*.*)|*.*";
+                if (od.ShowDialog(this) == DialogResult.OK) txtEmu.Text = od.FileName;
+            };
+            Controls.Add(bBrowse);
+
+            Controls.Add(MakeLabel("Arguments:", rx, 102));
+            txtArgs = new TextBox();
+            txtArgs.Location = new Point(rx + 80, 98);
+            txtArgs.Width = 380;
+            txtArgs.TextChanged += delegate { if (!loading) { EmuChoice a = Sel(); if (a != null) a.Args = txtArgs.Text; } };
+            Controls.Add(txtArgs);
+
+            Label hint = new Label();
+            hint.Text = "Placeholders: {rom}  {romdir}  {romname}  {system}";
+            hint.AutoSize = true;
+            hint.ForeColor = Color.Gray;
+            hint.Location = new Point(rx + 80, 126);
+            Controls.Add(hint);
+
+            Controls.Add(MakeLabel("Preset:", rx, 162));
+            cboPreset = new ComboBox();
+            cboPreset.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboPreset.Location = new Point(rx + 80, 158);
+            cboPreset.Width = 250;
+            cboPreset.Items.AddRange(SystemsForm.Presets);
+            Controls.Add(cboPreset);
+
+            Button bFill = new Button();
+            bFill.Text = "Fill";
+            bFill.Location = new Point(rx + 335, 157);
+            bFill.Size = new Size(77, 24);
+            bFill.Click += delegate { FillFromPreset(); };
+            Controls.Add(bFill);
+
+            Label hint2 = new Label();
+            hint2.Text = "Fill uses the preset's fullscreen args. Edit afterward if you want windowed.";
+            hint2.AutoSize = true;
+            hint2.ForeColor = Color.Gray;
+            hint2.Location = new Point(rx + 80, 188);
+            Controls.Add(hint2);
+
+            Button bClose = new Button();
+            bClose.Text = "Close";
+            bClose.DialogResult = DialogResult.OK;
+            bClose.Size = new Size(90, 28);
+            bClose.Location = new Point(ClientSize.Width - 102, ClientSize.Height - 40);
+            Controls.Add(bClose);
+            AcceptButton = bClose;
+
+            Repopulate(0);
+        }
+
+        static Label MakeLabel(string text, int x, int y)
+        {
+            Label l = new Label();
+            l.Text = text;
+            l.AutoSize = true;
+            l.Location = new Point(x, y);
+            return l;
+        }
+
+        EmuChoice Sel() { return lstAlts.SelectedItem as EmuChoice; }
+
+        void LoadFields()
+        {
+            loading = true;
+            EmuChoice a = Sel();
+            if (a != null) { txtName.Text = a.Name; txtEmu.Text = a.Emulator; txtArgs.Text = a.Args; }
+            else { txtName.Text = ""; txtEmu.Text = ""; txtArgs.Text = ""; }
+            loading = false;
+        }
+
+        void Repopulate(int sel)
+        {
+            lstAlts.BeginUpdate();
+            lstAlts.Items.Clear();
+            foreach (EmuChoice a in sys.Alts) lstAlts.Items.Add(a);
+            lstAlts.EndUpdate();
+            if (lstAlts.Items.Count > 0)
+                lstAlts.SelectedIndex = Math.Max(0, Math.Min(sel, lstAlts.Items.Count - 1));
+            else LoadFields();
+        }
+
+        void FillFromPreset()
+        {
+            EmuChoice a = Sel();
+            if (a == null) { MessageBox.Show(this, "Add or select an alternate first."); return; }
+            EmuPreset p = cboPreset.SelectedItem as EmuPreset;
+            if (p == null) { MessageBox.Show(this, "Pick a preset first."); return; }
+
+            OpenFileDialog od = new OpenFileDialog();
+            od.Title = "Locate the " + p.Name + " executable";
+            od.Filter = "Executable (*.exe)|*.exe|All files (*.*)|*.*";
+            if (p.ExeNames.Length > 0) od.FileName = p.ExeNames[0];
+            if (od.ShowDialog(this) != DialogResult.OK) return;
+
+            if (string.IsNullOrEmpty(txtName.Text) || txtName.Text == "New emulator") txtName.Text = p.Name;
+            txtEmu.Text = od.FileName;
+            txtArgs.Text = p.ArgsFull;
+            Repopulate(lstAlts.SelectedIndex);
         }
     }
 
