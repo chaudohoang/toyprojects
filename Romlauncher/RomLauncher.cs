@@ -53,6 +53,15 @@ namespace RomLauncher
         public string Extensions = "";   // csv whitelist, empty = auto
         public bool Enabled = true;
         public List<EmuChoice> Alts = new List<EmuChoice>();   // pick at launch
+        public List<string> ExtraFolders = new List<string>(); // same system in other roots
+
+        // Primary folder plus any same-named folders found under additional roots.
+        public IEnumerable<string> AllFolders()
+        {
+            if (!string.IsNullOrEmpty(Folder)) yield return Folder;
+            foreach (string f in ExtraFolders)
+                if (!string.IsNullOrEmpty(f)) yield return f;
+        }
 
         public override string ToString() { return Name; }
     }
@@ -60,12 +69,32 @@ namespace RomLauncher
     class AppConfig
     {
         public string RootPath = @"F:\Games\Roms";
+        public List<string> ExtraRoots = new List<string>();
         public string RetroArchPath = "";
         public bool MinimizeOnLaunch = true;
         public bool HideDiscDupes = true;
         public int SortMode = 0;
         public string LastSystem = "";
         public List<SystemConfig> Systems = new List<SystemConfig>();
+
+        // Primary root plus any additional roots (existing/non-empty, de-duplicated).
+        public List<string> AllRoots()
+        {
+            List<string> roots = new List<string>();
+            if (!string.IsNullOrEmpty(RootPath)) roots.Add(RootPath);
+            foreach (string r in ExtraRoots)
+            {
+                if (string.IsNullOrEmpty(r)) continue;
+                bool dup = false;
+                foreach (string x in roots)
+                    if (string.Equals(x, r, StringComparison.OrdinalIgnoreCase)) { dup = true; break; }
+                if (!dup) roots.Add(r);
+            }
+            return roots;
+        }
+
+        // Stable key over all roots, so the cache is invalidated when roots change.
+        public string RootsKey() { return string.Join("|", AllRoots().ToArray()); }
 
         public SystemConfig Find(string name)
         {
@@ -126,6 +155,8 @@ namespace RomLauncher
                 if (cur != null)
                 {
                     if (Eq(key, "Folder")) cur.Folder = val;
+                    else if (Regex.IsMatch(key, @"^Folder\d+$", RegexOptions.IgnoreCase))
+                    { if (!string.IsNullOrEmpty(val)) cur.ExtraFolders.Add(val); }
                     else if (Eq(key, "Emulator")) cur.Emulator = val;
                     else if (Eq(key, "Args")) cur.Args = val;
                     else if (Eq(key, "Extensions")) cur.Extensions = val;
@@ -136,6 +167,8 @@ namespace RomLauncher
                 else if (Eq(section, "General"))
                 {
                     if (Eq(key, "RootPath")) cfg.RootPath = val;
+                    else if (Regex.IsMatch(key, @"^ExtraRoot\d+$", RegexOptions.IgnoreCase))
+                    { if (!string.IsNullOrEmpty(val)) cfg.ExtraRoots.Add(val); }
                     else if (Eq(key, "RetroArchPath")) cfg.RetroArchPath = val;
                     else if (Eq(key, "MinimizeOnLaunch")) cfg.MinimizeOnLaunch = val != "0";
                     else if (Eq(key, "HideDiscDupes")) cfg.HideDiscDupes = val != "0";
@@ -152,6 +185,8 @@ namespace RomLauncher
             sb.AppendLine("; RomLauncher settings - portable, lives next to the exe");
             sb.AppendLine("[General]");
             sb.AppendLine("RootPath=" + cfg.RootPath);
+            for (int i = 0; i < cfg.ExtraRoots.Count; i++)
+                sb.AppendLine("ExtraRoot" + (i + 1) + "=" + cfg.ExtraRoots[i]);
             sb.AppendLine("RetroArchPath=" + cfg.RetroArchPath);
             sb.AppendLine("MinimizeOnLaunch=" + (cfg.MinimizeOnLaunch ? "1" : "0"));
             sb.AppendLine("HideDiscDupes=" + (cfg.HideDiscDupes ? "1" : "0"));
@@ -163,6 +198,8 @@ namespace RomLauncher
                 sb.AppendLine();
                 sb.AppendLine("[System:" + s.Name + "]");
                 sb.AppendLine("Folder=" + s.Folder);
+                for (int fi = 0; fi < s.ExtraFolders.Count; fi++)
+                    sb.AppendLine("Folder" + (fi + 2) + "=" + s.ExtraFolders[fi]);
                 sb.AppendLine("Emulator=" + s.Emulator);
                 sb.AppendLine("Args=" + s.Args);
                 sb.AppendLine("Extensions=" + s.Extensions);
@@ -241,10 +278,11 @@ namespace RomLauncher
             foreach (SystemConfig sys in cfg.Systems)
             {
                 if (!sys.Enabled) { log.AppendLine("[skip:disabled] " + sys.Name); continue; }
-                if (string.IsNullOrEmpty(sys.Folder))
+
+                List<string> folders = new List<string>();
+                foreach (string f in sys.AllFolders()) folders.Add(f);
+                if (folders.Count == 0)
                 { log.AppendLine("[skip:no-folder] " + sys.Name); continue; }
-                if (!Directory.Exists(sys.Folder))
-                { log.AppendLine("[skip:missing]  " + sys.Name + "  ->  " + sys.Folder); continue; }
                 if (cancelled()) break;
 
                 progress("Scanning " + sys.Name + " ...");
@@ -260,47 +298,54 @@ namespace RomLauncher
                 int before = all.Count;
                 int rawFiles = 0;
 
-                Stack<string> dirs = new Stack<string>();
-                dirs.Push(sys.Folder);
-
-                while (dirs.Count > 0)
+                foreach (string folder in folders)
                 {
+                    if (!Directory.Exists(folder))
+                    { log.AppendLine("[skip:missing]  " + sys.Name + "  ->  " + folder); continue; }
                     if (cancelled()) break;
-                    string dir = dirs.Pop();
 
-                    string[] subs;
-                    try { subs = Directory.GetDirectories(dir); }
-                    catch (Exception) { subs = new string[0]; }
-                    foreach (string sub in subs)
+                    Stack<string> dirs = new Stack<string>();
+                    dirs.Push(folder);
+
+                    while (dirs.Count > 0)
                     {
-                        string n = Path.GetFileName(sub);
-                        if (n.Length == 0 || n.StartsWith(".")) continue;
-                        if (IgnoreDir.Contains(n)) continue;
-                        dirs.Push(sub);
+                        if (cancelled()) break;
+                        string dir = dirs.Pop();
+
+                        string[] subs;
+                        try { subs = Directory.GetDirectories(dir); }
+                        catch (Exception) { subs = new string[0]; }
+                        foreach (string sub in subs)
+                        {
+                            string n = Path.GetFileName(sub);
+                            if (n.Length == 0 || n.StartsWith(".")) continue;
+                            if (IgnoreDir.Contains(n)) continue;
+                            dirs.Push(sub);
+                        }
+
+                        string[] files;
+                        try { files = Directory.GetFiles(dir); }
+                        catch (Exception ex) { log.AppendLine("   [getfiles-error] " + dir + " : " + ex.Message); continue; }
+                        rawFiles += files.Length;
+
+                        List<string> keep = new List<string>();
+                        foreach (string f in files)
+                        {
+                            string ext = Path.GetExtension(f);
+                            if (ext.Length == 0) continue;
+                            if (white != null) { if (!white.Contains(ext)) continue; }
+                            else if (IgnoreExt.Contains(ext)) continue;
+                            keep.Add(f);
+                        }
+
+                        if (cfg.HideDiscDupes) keep = Collapse(keep);
+
+                        foreach (string f in keep)
+                            all.Add(MakeEntry(f, sys.Name));
                     }
-
-                    string[] files;
-                    try { files = Directory.GetFiles(dir); }
-                    catch (Exception ex) { log.AppendLine("   [getfiles-error] " + dir + " : " + ex.Message); continue; }
-                    rawFiles += files.Length;
-
-                    List<string> keep = new List<string>();
-                    foreach (string f in files)
-                    {
-                        string ext = Path.GetExtension(f);
-                        if (ext.Length == 0) continue;
-                        if (white != null) { if (!white.Contains(ext)) continue; }
-                        else if (IgnoreExt.Contains(ext)) continue;
-                        keep.Add(f);
-                    }
-
-                    if (cfg.HideDiscDupes) keep = Collapse(keep);
-
-                    foreach (string f in keep)
-                        all.Add(MakeEntry(f, sys.Name));
                 }
 
-                log.AppendLine("[ok] " + sys.Name + "  folder=" + sys.Folder
+                log.AppendLine("[ok] " + sys.Name + "  folders=" + folders.Count
                     + "  rawFiles=" + rawFiles + "  kept=" + (all.Count - before));
             }
 
@@ -625,10 +670,22 @@ namespace RomLauncher
 
     class FastListView : ListView
     {
-        public FastListView()
+        // NOTE: do NOT use the managed DoubleBuffered / OptimizedDoubleBuffer style
+        // on a virtual-mode ListView -- it causes intermittent blank rows after the
+        // data changes (the items don't paint until a scroll/resize). Native
+        // double-buffering via LVS_EX_DOUBLEBUFFER is flicker-free AND correct.
+        const int LVM_FIRST = 0x1000;
+        const int LVM_SETEXTENDEDLISTVIEWSTYLE = LVM_FIRST + 54;
+        const int LVS_EX_DOUBLEBUFFER = 0x00010000;
+
+        [DllImport("user32.dll")]
+        static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+
+        protected override void OnHandleCreated(EventArgs e)
         {
-            DoubleBuffered = true;
-            SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
+            base.OnHandleCreated(e);
+            SendMessage(Handle, LVM_SETEXTENDEDLISTVIEWSTYLE,
+                (IntPtr)LVS_EX_DOUBLEBUFFER, (IntPtr)LVS_EX_DOUBLEBUFFER);
         }
     }
 
@@ -644,6 +701,9 @@ namespace RomLauncher
 
         TextBox txtSearch;
         ComboBox cboSystem, cboSort;
+        bool sysProg = false;         // guard: programmatic combo edits
+        string sysType = "";          // type-ahead buffer for the system combo
+        int sysTypeTick = 0;          // last keystroke time (ms), for buffer reset
         CheckBox chkFav;
         Button btnRescan, btnSystems, btnLaunch, btnClear;
         FastListView list;
@@ -746,19 +806,35 @@ namespace RomLauncher
             cboSystem = new ComboBox();
             cboSystem.DropDownStyle = ComboBoxStyle.DropDownList;
             cboSystem.Location = new Point(64, 47);
-            cboSystem.Width = 220;
-            cboSystem.SelectedIndexChanged += delegate { Refilter(); };
+            cboSystem.Width = 200;
+            cboSystem.SelectedIndexChanged += delegate { if (!sysProg) Refilter(); };
+            cboSystem.KeyPress += SysTypeSearch;   // "sn" -> snes (accumulating type-ahead)
             top.Controls.Add(cboSystem);
+
+            Button btnAllSys = new Button();
+            btnAllSys.Text = "All";
+            btnAllSys.Location = new Point(268, 46);
+            btnAllSys.Size = new Size(46, 25);
+            btnAllSys.Click += delegate
+            {
+                sysType = "";
+                sysProg = true;
+                if (cboSystem.Items.Count > 0) cboSystem.SelectedIndex = 0;   // "All systems"
+                sysProg = false;
+                Refilter();          // always refilter, even if it was already on "All"
+                txtSearch.Focus();
+            };
+            top.Controls.Add(btnAllSys);
 
             Label l2 = new Label();
             l2.Text = "Sort:";
             l2.AutoSize = true;
-            l2.Location = new Point(298, 51);
+            l2.Location = new Point(328, 51);
             top.Controls.Add(l2);
 
             cboSort = new ComboBox();
             cboSort.DropDownStyle = ComboBoxStyle.DropDownList;
-            cboSort.Location = new Point(336, 47);
+            cboSort.Location = new Point(366, 47);
             cboSort.Width = 150;
             cboSort.Items.AddRange(new object[] { "Relevance", "Name", "System", "Recently played", "Most played" });
             cboSort.SelectedIndex = Math.Max(0, Math.Min(4, cfg.SortMode));
@@ -768,7 +844,7 @@ namespace RomLauncher
             chkFav = new CheckBox();
             chkFav.Text = "Favorites only";
             chkFav.AutoSize = true;
-            chkFav.Location = new Point(500, 50);
+            chkFav.Location = new Point(530, 50);
             chkFav.CheckedChanged += delegate { Refilter(); };
             top.Controls.Add(chkFav);
 
@@ -878,7 +954,7 @@ namespace RomLauncher
             if (cfg.Systems.Count == 0) DiscoverSystems();
 
             DateTime stamp;
-            List<RomEntry> cached = Store.LoadCache(cfg.RootPath, out stamp);
+            List<RomEntry> cached = Store.LoadCache(cfg.RootsKey(), out stamp);
             if (cached.Count > 0)
             {
                 all = cached;
@@ -905,36 +981,36 @@ namespace RomLauncher
                 cfg.RootPath = fb.SelectedPath;
             }
 
-            // Re-anchor existing systems to the current root. This is what makes
-            // the INI portable: copy it to another PC, change RootPath, and every
-            // system folder is recomputed as <root>\<name> instead of pointing at
-            // the old machine's drive letter.
+            // Rebuild every system's folder set from the current roots. A "system" is
+            // a first-level subfolder name; the same name found under more than one
+            // root is merged into one system so its ROMs show combined. This is also
+            // what makes the INI portable -- folders are recomputed from the roots
+            // rather than pointing at an old machine's drive letters.
             foreach (SystemConfig s in cfg.Systems)
             {
-                string underRoot = Path.Combine(cfg.RootPath, s.Name);
-                if (string.IsNullOrEmpty(s.Folder) || !Directory.Exists(s.Folder))
-                {
-                    if (Directory.Exists(underRoot)) s.Folder = underRoot;
-                }
-                else if (!IsUnder(s.Folder, cfg.RootPath) && Directory.Exists(underRoot))
-                {
-                    // Folder is valid but on a foreign root (stale from another PC).
-                    s.Folder = underRoot;
-                }
+                s.Folder = "";
+                s.ExtraFolders.Clear();
             }
 
             try
             {
-                foreach (string dir in Directory.GetDirectories(cfg.RootPath))
+                foreach (string root in cfg.AllRoots())
                 {
-                    string name = Path.GetFileName(dir);
-                    if (name.StartsWith(".") || name.StartsWith("!")) continue;
-                    SystemConfig existing = cfg.Find(name);
-                    if (existing != null) { existing.Folder = dir; continue; }
-                    SystemConfig s = new SystemConfig();
-                    s.Name = name;
-                    s.Folder = dir;
-                    cfg.Systems.Add(s);
+                    if (!Directory.Exists(root)) continue;
+                    foreach (string dir in Directory.GetDirectories(root))
+                    {
+                        string name = Path.GetFileName(dir);
+                        if (name.StartsWith(".") || name.StartsWith("!")) continue;
+                        SystemConfig s = cfg.Find(name);
+                        if (s == null)
+                        {
+                            s = new SystemConfig();
+                            s.Name = name;
+                            cfg.Systems.Add(s);
+                        }
+                        if (string.IsNullOrEmpty(s.Folder)) s.Folder = dir;
+                        else if (!s.ExtraFolders.Contains(dir)) s.ExtraFolders.Add(dir);
+                    }
                 }
             }
             catch (Exception ex) { Debug.WriteLine(ex.Message); }
@@ -992,23 +1068,78 @@ namespace RomLauncher
                 counts[all[i].SystemName] = c + 1;
             }
 
-            cboSystem.BeginUpdate();
-            cboSystem.Items.Clear();
-            cboSystem.Items.Add(new SysItem { Name = "", Count = all.Count });
-
-            int selIdx = 0, row = 0;
-            foreach (SystemConfig s in cfg.Systems)
+            sysProg = true;
+            try
             {
-                if (!s.Enabled) continue;
-                int c;
-                counts.TryGetValue(s.Name, out c);
-                cboSystem.Items.Add(new SysItem { Name = s.Name, Count = c });
-                row++;
-                if (!string.IsNullOrEmpty(prev) && string.Equals(s.Name, prev, StringComparison.OrdinalIgnoreCase))
-                    selIdx = row;
+                cboSystem.BeginUpdate();
+                cboSystem.Items.Clear();
+                cboSystem.Items.Add(new SysItem { Name = "", Count = all.Count });
+
+                int selIdx = 0, row = 0;
+                foreach (SystemConfig s in cfg.Systems)
+                {
+                    if (!s.Enabled) continue;
+                    int c;
+                    counts.TryGetValue(s.Name, out c);
+                    cboSystem.Items.Add(new SysItem { Name = s.Name, Count = c });
+                    row++;
+                    if (!string.IsNullOrEmpty(prev) && string.Equals(s.Name, prev, StringComparison.OrdinalIgnoreCase))
+                        selIdx = row;
+                }
+                cboSystem.EndUpdate();
+                if (cboSystem.Items.Count > 0)
+                    cboSystem.SelectedIndex = Math.Min(selIdx, cboSystem.Items.Count - 1);
             }
-            cboSystem.EndUpdate();
-            cboSystem.SelectedIndex = selIdx;
+            finally { sysProg = false; }
+        }
+
+        // Type-ahead for the (non-editable) system combo: accumulate keystrokes into
+        // a buffer (reset after a short pause) and jump to the first system whose name
+        // matches -- prefix first, then substring. So "sn" -> snes, "geo" -> neogeo,
+        // instead of the default per-key jumping. No editable text box, so nothing to
+        // mangle or crash.
+        void SysTypeSearch(object sender, KeyPressEventArgs e)
+        {
+            char ch = e.KeyChar;
+            if (ch == '\r' || ch == '\n') return;            // Enter: let default handle
+            if (ch == (char)27) { sysType = ""; return; }    // Esc: clear buffer
+
+            if (ch == '\b')
+            {
+                if (sysType.Length > 0) sysType = sysType.Substring(0, sysType.Length - 1);
+            }
+            else if (!char.IsControl(ch))
+            {
+                int now = Environment.TickCount;
+                if (now - sysTypeTick > 1000) sysType = "";   // pause -> start fresh
+                sysType += ch;
+                sysTypeTick = now;
+            }
+            else return;
+
+            e.Handled = true;   // suppress the built-in single-char search
+
+            int idx = FindSysIndex(sysType);
+            if (idx >= 0) cboSystem.SelectedIndex = idx;
+        }
+
+        int FindSysIndex(string q)
+        {
+            q = q.Trim();
+            if (q.Length == 0) return -1;
+            for (int i = 0; i < cboSystem.Items.Count; i++)
+            {
+                SysItem it = cboSystem.Items[i] as SysItem;
+                if (it != null && it.Name.Length > 0 && it.Name.StartsWith(q, StringComparison.OrdinalIgnoreCase))
+                    return i;
+            }
+            for (int i = 0; i < cboSystem.Items.Count; i++)
+            {
+                SysItem it = cboSystem.Items[i] as SysItem;
+                if (it != null && it.Name.Length > 0 && it.Name.IndexOf(q, StringComparison.OrdinalIgnoreCase) >= 0)
+                    return i;
+            }
+            return -1;
         }
 
         void StartScan()
@@ -1032,7 +1163,7 @@ namespace RomLauncher
                     delegate { return cancelScan; });
 
                 Store.ApplyStats(found);
-                Store.SaveCache(cfg.RootPath, found);
+                Store.SaveCache(cfg.RootsKey(), found);
 
                 try
                 {
@@ -1115,14 +1246,16 @@ namespace RomLauncher
             });
 
             view = res;
-            list.VirtualListSize = 0;
+            if (list.VirtualListSize != 0) list.VirtualListSize = 0;
             list.VirtualListSize = view.Count;
-            list.Invalidate();
             if (view.Count > 0 && list.IsHandleCreated)
             {
                 list.SelectedIndices.Clear();
                 list.SelectedIndices.Add(0);
+                list.EnsureVisible(0);
             }
+            list.Invalidate();
+            list.Update();   // force immediate repaint so rows never linger blank
 
             lblCount.Text = view.Count.ToString("N0", CultureInfo.CurrentCulture) + " / "
                           + all.Count.ToString("N0", CultureInfo.CurrentCulture) + " ROMs";
@@ -1232,16 +1365,16 @@ namespace RomLauncher
 
         void OpenSystems(string selectSystem)
         {
-            string oldRoot = cfg.RootPath;
+            string oldRoots = cfg.RootsKey();
             using (SystemsForm f = new SystemsForm(cfg, selectSystem))
             {
                 if (f.ShowDialog(this) != DialogResult.OK) return;
                 Ini.Save(cfg);
                 FillSystems();
 
-                // Changing the root invalidates the cached index (it was built for
-                // the old root), so rescan rather than showing an empty list.
-                if (!string.Equals(oldRoot, cfg.RootPath, StringComparison.OrdinalIgnoreCase))
+                // Changing any root (primary or additional) invalidates the cached
+                // index, so rescan rather than showing a stale/empty list.
+                if (!string.Equals(oldRoots, cfg.RootsKey(), StringComparison.OrdinalIgnoreCase))
                     StartScan();
                 else
                     Refilter();
@@ -1443,6 +1576,7 @@ namespace RomLauncher
         AppConfig cfg;
         ListBox lst;
         TextBox txtSysFilter;
+        Button btnSysClear;
         TextBox txtRoot, txtEmu, txtArgs, txtExt, txtRetro;
         ComboBox cboCore;
         ComboBox cboWinMode;
@@ -1477,14 +1611,14 @@ namespace RomLauncher
 
             txtRoot = new TextBox();
             txtRoot.Location = new Point(90, y);
-            txtRoot.Width = 600;
+            txtRoot.Width = 512;
             txtRoot.Text = cfg.RootPath;
             Controls.Add(txtRoot);
 
             Button bRoot = new Button();
             bRoot.Text = "Browse";
-            bRoot.Location = new Point(698, y - 1);
-            bRoot.Size = new Size(75, 24);
+            bRoot.Location = new Point(610, y - 1);
+            bRoot.Size = new Size(70, 24);
             bRoot.Click += delegate
             {
                 FolderBrowserDialog fb = new FolderBrowserDialog();
@@ -1492,6 +1626,17 @@ namespace RomLauncher
                 if (fb.ShowDialog(this) == DialogResult.OK) txtRoot.Text = fb.SelectedPath;
             };
             Controls.Add(bRoot);
+
+            Button bMore = new Button();
+            bMore.Text = "More folders\u2026";
+            bMore.Location = new Point(686, y - 1);
+            bMore.Size = new Size(87, 24);
+            bMore.Click += delegate
+            {
+                using (RootsForm rf = new RootsForm(cfg.ExtraRoots))
+                    rf.ShowDialog(this);
+            };
+            Controls.Add(bMore);
 
             y += 32;
 
@@ -1528,6 +1673,17 @@ namespace RomLauncher
             txtSysFilter.TextChanged += delegate { RebuildList(); };
             txtSysFilter.KeyDown += FilterKeyDown;
             Controls.Add(txtSysFilter);
+
+            btnSysClear = new Button();
+            btnSysClear.Text = "\u00D7";
+            btnSysClear.Size = new Size(20, 20);
+            btnSysClear.FlatStyle = FlatStyle.Flat;
+            btnSysClear.FlatAppearance.BorderSize = 0;
+            btnSysClear.TabStop = false;
+            btnSysClear.Location = new Point(txtSysFilter.Right - 22, txtSysFilter.Top + 2);
+            btnSysClear.Click += delegate { txtSysFilter.Clear(); txtSysFilter.Focus(); };
+            Controls.Add(btnSysClear);
+            btnSysClear.BringToFront();
 
             lst = new ListBox();
             lst.Location = new Point(12, y + 28);
@@ -1673,7 +1829,7 @@ namespace RomLauncher
             bAlts.Click += delegate
             {
                 if (cur == null) { MessageBox.Show(this, "Select a system on the left first."); return; }
-                using (AltEmusForm f = new AltEmusForm(cur))
+                using (AltEmusForm f = new AltEmusForm(cur, txtRetro.Text.Trim()))
                     f.ShowDialog(this);
             };
             Controls.Add(bAlts);
@@ -1745,6 +1901,9 @@ namespace RomLauncher
             Shown += delegate
             {
                 Native.SetPlaceholder(txtSysFilter, "Filter systems...");
+                Native.SetRightMargin(txtSysFilter, 24);   // room for the clear button
+                if (btnSysClear != null)
+                    btnSysClear.Location = new Point(txtSysFilter.Right - 22, txtSysFilter.Top + 2);
                 // Focus the emulator field when configuring a known system,
                 // otherwise the filter box for browsing.
                 if (!string.IsNullOrEmpty(initialSelect) && cur != null) txtEmu.Focus();
@@ -1842,7 +2001,7 @@ namespace RomLauncher
         //   1 Maximized  - decorated window; the launcher maximizes it after it opens
         //                  (RetroArch has no reliable start-maximized setting)
         //   2 Fullscreen - fills the screen, no title bar (borderless fullscreen)
-        static string WriteWinModeCfg(string retroArchExe, int mode)
+        internal static string WriteWinModeCfg(string retroArchExe, int mode)
         {
             string dir = Path.GetDirectoryName(retroArchExe);
             string name;
@@ -2054,17 +2213,19 @@ namespace RomLauncher
     class AltEmusForm : Form
     {
         SystemConfig sys;
+        string retroExe;
         ListBox lstAlts;
         TextBox txtName, txtEmu, txtArgs;
-        ComboBox cboPreset;
+        ComboBox cboPreset, cboRACore, cboRAWin;
         bool loading;
 
-        public AltEmusForm(SystemConfig system)
+        public AltEmusForm(SystemConfig system, string retroArchExe)
         {
             sys = system;
+            retroExe = retroArchExe;
             Text = "Alternate emulators - " + sys.Name;
             StartPosition = FormStartPosition.CenterParent;
-            ClientSize = new Size(720, 340);
+            ClientSize = new Size(720, 388);
             MinimizeBox = false;
             MaximizeBox = false;
             FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -2175,6 +2336,37 @@ namespace RomLauncher
             hint2.Location = new Point(rx + 80, 188);
             Controls.Add(hint2);
 
+            Controls.Add(MakeLabel("RetroArch:", rx, 224));
+            cboRACore = new ComboBox();
+            cboRACore.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboRACore.Location = new Point(rx + 80, 220);
+            cboRACore.Width = 200;
+            Controls.Add(cboRACore);
+
+            cboRAWin = new ComboBox();
+            cboRAWin.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboRAWin.Location = new Point(rx + 286, 220);
+            cboRAWin.Width = 95;
+            cboRAWin.Items.AddRange(new object[] { "Window", "Maximized", "Fullscreen" });
+            cboRAWin.SelectedIndex = 1;
+            Controls.Add(cboRAWin);
+
+            Button bUseCore = new Button();
+            bUseCore.Text = "Use core";
+            bUseCore.Location = new Point(rx + 386, 219);
+            bUseCore.Size = new Size(77, 24);
+            bUseCore.Click += delegate { UseRetroCore(); };
+            Controls.Add(bUseCore);
+
+            Label hint3 = new Label();
+            hint3.Text = "Or make the alternate RetroArch itself: pick a core + window mode, then Use core.";
+            hint3.AutoSize = true;
+            hint3.ForeColor = Color.Gray;
+            hint3.Location = new Point(rx + 80, 250);
+            Controls.Add(hint3);
+
+            FillCores();
+
             Button bClose = new Button();
             bClose.Text = "Close";
             bClose.DialogResult = DialogResult.OK;
@@ -2235,6 +2427,124 @@ namespace RomLauncher
             txtArgs.Text = p.ArgsFull;
             Repopulate(lstAlts.SelectedIndex);
         }
+
+        void FillCores()
+        {
+            cboRACore.Items.Clear();
+            if (string.IsNullOrEmpty(retroExe) || !File.Exists(retroExe)) return;
+            string dir = Path.Combine(Path.GetDirectoryName(retroExe), "cores");
+            if (!Directory.Exists(dir)) return;
+            try
+            {
+                foreach (string dll in Directory.GetFiles(dir, "*_libretro.dll"))
+                    cboRACore.Items.Add(Path.GetFileName(dll));
+            }
+            catch (Exception ex) { Debug.WriteLine(ex.Message); }
+        }
+
+        // Make the selected alternate a RetroArch invocation (core + window mode),
+        // just like the main RetroArch helper but stored as an alternate.
+        void UseRetroCore()
+        {
+            EmuChoice a = Sel();
+            if (a == null) { MessageBox.Show(this, "Add or select an alternate first."); return; }
+            if (string.IsNullOrEmpty(retroExe) || !File.Exists(retroExe))
+            { MessageBox.Show(this, "Set the RetroArch path in the Systems dialog first."); return; }
+            string core = cboRACore.SelectedItem as string;
+            if (core == null) { MessageBox.Show(this, "Pick a core first."); return; }
+
+            string dir = Path.GetDirectoryName(retroExe);
+            string corePath = Path.Combine(Path.Combine(dir, "cores"), core);
+            string cfg = SystemsForm.WriteWinModeCfg(retroExe, cboRAWin.SelectedIndex);
+            string args = "-L \"" + corePath + "\" --appendconfig \"" + cfg + "\" \"{rom}\"";
+
+            if (string.IsNullOrEmpty(txtName.Text) || txtName.Text == "New emulator")
+                txtName.Text = "RetroArch - " + core.Replace("_libretro.dll", "");
+            txtEmu.Text = retroExe;
+            txtArgs.Text = args;
+            Repopulate(lstAlts.SelectedIndex);
+        }
+    }
+
+    // ------------------------------------------------ additional ROM folders
+
+    // Manage extra ROM roots. A system that appears under more than one root has
+    // its games merged, so searching shows them combined. Edits the list in place;
+    // the Systems dialog rescans on OK if the set of roots changed.
+    class RootsForm : Form
+    {
+        List<string> roots;
+        ListBox lst;
+
+        public RootsForm(List<string> extraRoots)
+        {
+            roots = extraRoots;
+            Text = "Additional ROM folders";
+            StartPosition = FormStartPosition.CenterParent;
+            ClientSize = new Size(560, 280);
+            MinimizeBox = false;
+            MaximizeBox = false;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            Font = new Font("Segoe UI", 9f);
+
+            Label intro = new Label();
+            intro.Text = "Extra folders scanned alongside the main ROMs root. Same-named systems are merged.";
+            intro.AutoSize = true;
+            intro.Location = new Point(12, 10);
+            Controls.Add(intro);
+
+            lst = new ListBox();
+            lst.Location = new Point(12, 34);
+            lst.Size = new Size(536, 190);
+            lst.HorizontalScrollbar = true;
+            Controls.Add(lst);
+
+            Button bAdd = new Button();
+            bAdd.Text = "Add\u2026";
+            bAdd.Location = new Point(12, 234);
+            bAdd.Size = new Size(90, 28);
+            bAdd.Click += delegate
+            {
+                FolderBrowserDialog fb = new FolderBrowserDialog();
+                fb.Description = "Pick an additional ROMs folder";
+                if (fb.ShowDialog(this) != DialogResult.OK) return;
+                string p = fb.SelectedPath;
+                bool dup = false;
+                foreach (string r in roots)
+                    if (string.Equals(r, p, StringComparison.OrdinalIgnoreCase)) { dup = true; break; }
+                if (!dup) { roots.Add(p); Repopulate(); }
+            };
+            Controls.Add(bAdd);
+
+            Button bRemove = new Button();
+            bRemove.Text = "Remove";
+            bRemove.Location = new Point(108, 234);
+            bRemove.Size = new Size(90, 28);
+            bRemove.Click += delegate
+            {
+                int i = lst.SelectedIndex;
+                if (i >= 0 && i < roots.Count) { roots.RemoveAt(i); Repopulate(); }
+            };
+            Controls.Add(bRemove);
+
+            Button bClose = new Button();
+            bClose.Text = "Close";
+            bClose.DialogResult = DialogResult.OK;
+            bClose.Location = new Point(ClientSize.Width - 102, 234);
+            bClose.Size = new Size(90, 28);
+            Controls.Add(bClose);
+            AcceptButton = bClose;
+
+            Repopulate();
+        }
+
+        void Repopulate()
+        {
+            lst.BeginUpdate();
+            lst.Items.Clear();
+            foreach (string r in roots) lst.Items.Add(r);
+            lst.EndUpdate();
+        }
     }
 
     // -------------------------------------------------------------- entry point
@@ -2246,6 +2556,10 @@ namespace RomLauncher
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            // Log stray UI-thread exceptions instead of popping a crash dialog.
+            Application.ThreadException += delegate(object s, System.Threading.ThreadExceptionEventArgs e)
+            { Debug.WriteLine(e.Exception.ToString()); };
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
             Application.Run(new MainForm());
         }
     }

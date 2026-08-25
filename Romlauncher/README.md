@@ -35,7 +35,12 @@ Nothing launches until a system has an emulator, except `.exe` / `.bat` / `.lnk`
 - Fuzzy subsequence fallback: `sm64` finds `Super Mario 64 (USA)`.
 - Region/version tags are stripped for matching, so `chrono trigger` beats `Chrono Trigger (USA) [!]` into the top slot.
 - Ranking: exact > prefix > word-start substring > substring > subsequence, with small bonuses for favorites and play count, and a penalty for longer titles.
-- The **System** dropdown shows a ROM count next to each entry, e.g. `nes  (1,240)`, and `All systems  (37,312)` at the top. Counts refresh automatically after every scan.
+- The **System** dropdown shows a ROM count next to each entry, e.g. `nes  (1,240)`, and `All systems  (37,312)` at the top. Counts refresh automatically after every scan. **Type-ahead** works: start typing and it jumps to the matching system — `sn` → snes, `geo` → neogeo (it accumulates your keystrokes and matches prefix first, then substring, resetting after a short pause) instead of jumping letter-by-letter.
+- The **All** button next to the dropdown jumps straight back to *All systems* and returns focus to the search box.
+
+## Multiple ROM folders
+
+The main **ROMs root** is your primary library. To scan more than one location (e.g. a second drive), open **Systems…**, click **More folders…**, and **Add** each extra folder. All roots are scanned together, and a system that appears under more than one root (say `ps2` on both drives) is **merged into one entry** — searching *All systems* shows every matching game combined, regardless of which folder it lives in. Changing the set of folders triggers a rescan on **OK**. Extra roots are saved in `RomLauncher.ini` as `ExtraRoot1`, `ExtraRoot2`, …, and each system records its merged folders as `Folder`, `Folder2`, `Folder3`, ….
 
 ## Keyboard
 
@@ -111,6 +116,8 @@ Each mode layers only its two lines over your main `retroarch.cfg` with `--appen
 Each system has one **default** emulator (the Emulator + Arguments fields), plus any number of **alternates**. Click **Alternate emulators…** in the Systems dialog to manage them: **New** adds one, then set its Name, Emulator (Browse), and Arguments — or pick a **Preset** and hit **Fill** to drop in a standalone emulator with its fullscreen args. Alternates are saved per system in `RomLauncher.ini` as `Alt1Name` / `Alt1Emulator` / `Alt1Args`, `Alt2…`, and so on.
 
 At launch time, right-click a game and open **Launch with ▸** to choose: **Default (…)** or any alternate. Double-click / Enter still uses the default. This lets one system (say, PS1) run through RetroArch by default but boot a specific game in DuckStation on demand, without reconfiguring anything.
+
+An alternate can also be **RetroArch itself**: in the Alternate emulators dialog, pick a **core** and **window mode** and press **Use core** — handy for keeping a standalone emulator as the default while offering "open this one in RetroArch" (or vice-versa). The filter box in the Systems dialog has a **×** clear button, like the main search box.
 
 ## Scan rules
 
