@@ -10,7 +10,7 @@ build.bat
 ```
 
 Uses `csc.exe` from .NET Framework 4.x (`%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\`).
-No Visual Studio, no NuGet, no project file. Drop a `RomLauncher.ico` next to the source and it gets embedded automatically.
+No Visual Studio, no NuGet, no project file. Drop a `RomLauncher.ico` next to the source and it gets embedded automatically. The bundled icon is a gamepad on an indigo→violet tile; at runtime the app also loads it from the exe so it shows in the title bar and taskbar (not just Explorer).
 
 Output: `RomLauncher.exe` — fully portable, keeps all its state next to itself:
 
@@ -35,6 +35,7 @@ Nothing launches until a system has an emulator, except `.exe` / `.bat` / `.lnk`
 - Fuzzy subsequence fallback: `sm64` finds `Super Mario 64 (USA)`.
 - Region/version tags are stripped for matching, so `chrono trigger` beats `Chrono Trigger (USA) [!]` into the top slot.
 - Ranking: exact > prefix > word-start substring > substring > subsequence, with small bonuses for favorites and play count, and a penalty for longer titles.
+- The **System** dropdown shows a ROM count next to each entry, e.g. `nes  (1,240)`, and `All systems  (37,312)` at the top. Counts refresh automatically after every scan.
 
 ## Keyboard
 
@@ -70,12 +71,46 @@ Examples:
 snes9x.exe        "{rom}"
 pcsx2.exe         "{rom}" -fullscreen -nogui
 duckstation.exe   -fullscreen "{rom}"
-retroarch.exe     -L "C:\RetroArch\cores\snes9x_libretro.dll" -f "{rom}"
+retroarch.exe     -L "C:\RetroArch\cores\snes9x_libretro.dll" --appendconfig "C:\RetroArch\romlauncher_maximized.cfg" "{rom}"
 ```
+
+### Emulator presets
+
+For common standalone emulators there's an **Emulator preset** dropdown: pick one, press **Apply…**, browse to its exe, and the emulator path + argument line are filled in for you. The **Window mode** dropdown decides the args — **Window** uses the windowed template, **Maximized** or **Fullscreen** use the fullscreen template (Maximized isn't meaningful for standalone emulators, so it maps to fullscreen). Bundled presets, with args verified against each emulator's current CLI:
+
+| Preset | Fullscreen args |
+|---|---|
+| DuckStation (PS1) | `-batch -fullscreen "{rom}"` |
+| PCSX2 (PS2) | `-batch -fullscreen -- "{rom}"` |
+| PPSSPP (PSP) | `--escape-exit --fullscreen "{rom}"` |
+| Dolphin (GC / Wii) | `-b --config=Dolphin.Display.Fullscreen=True -e "{rom}"` |
+| Flycast (Dreamcast / NAOMI) | `-config window:fullscreen=yes "{rom}"` |
+| Yaba Sanshiro (Saturn) | `-i "{rom}" -a -fullscreen` |
+
+`-batch` (DuckStation/PCSX2), `-b` (Dolphin) and `--escape-exit` (PPSSPP) make the emulator close cleanly when you exit the game. You can edit the filled-in args afterward like any other system.
 
 ### RetroArch helper
 
-Set the **RetroArch** path once at the top of the dialog. The core dropdown then lists everything in `...\cores\*_libretro.dll`; pick one, press **Use core**, and the emulator + argument line are filled in for that system. **Copy emulator + args to all systems** applies the current pair everywhere (useful for an all-RetroArch setup, then override the odd system afterwards).
+Set the **RetroArch** path once at the top of the dialog. The core dropdown then lists everything in `...\cores\*_libretro.dll`; pick one, choose a **Window mode**, and press **Use core** to fill in the emulator + argument line for that system.
+
+Changing the **RetroArch** path (to a real `retroarch.exe`) re-anchors every RetroArch system to the new folder when you press **OK** — the emulator exe, each `-L "...\cores\<core>.dll"` path, and each `--appendconfig "...\romlauncher_*.cfg"` path are repointed, keeping the core and mode filenames. Standalone emulators (DuckStation, etc.) are left untouched. This mirrors how changing the **ROMs root** re-anchors every system's ROM folder, so moving RetroArch or copying the INI to another PC just needs the two top paths updated.
+
+Once a system already uses a RetroArch core, changing the **Window mode** dropdown rewrites just the window-mode part of its Arguments in place — no need to press **Use core** again — and the dropdown restores to whatever the saved args say the next time you select that system. All of this is written to `RomLauncher.ini` when you press **OK**.
+
+Window modes:
+- **Window** — a normal resizable window, via `romlauncher_windowed.cfg`.
+- **Maximized** — a real window (title bar + menu) maximized to fill the screen, via `romlauncher_maximized.cfg`. RetroArch can't reliably start maximized, so the launcher opens it as a normal window and maximizes it once the window appears. Slower cores (e.g. PS2) bring their video context up a beat later and can ignore that first maximize — leaving the mouse locked to a stale viewport — so the launcher then does a real restore→maximize "nudge" after the core settles (the same thing as manually un-maximizing and re-maximizing). This is a true maximized window, *not* borderless fullscreen — you keep the title bar and can restore/minimize normally.
+- **Fullscreen** — fills the whole screen with no title bar, via `romlauncher_fullscreen.cfg` (`video_fullscreen=true` + `video_windowed_fullscreen=true`, i.e. borderless fullscreen, alt-tab friendly).
+
+Each mode layers only its two lines over your main `retroarch.cfg` with `--appendconfig`; the main config is left untouched.
+
+**Copy emulator + args to all systems** applies the current pair everywhere.
+
+### Alternate emulators (pick at launch)
+
+Each system has one **default** emulator (the Emulator + Arguments fields), plus any number of **alternates**. Click **Alternate emulators…** in the Systems dialog to manage them: **New** adds one, then set its Name, Emulator (Browse), and Arguments — or pick a **Preset** and hit **Fill** to drop in a standalone emulator with its fullscreen args. Alternates are saved per system in `RomLauncher.ini` as `Alt1Name` / `Alt1Emulator` / `Alt1Args`, `Alt2…`, and so on.
+
+At launch time, right-click a game and open **Launch with ▸** to choose: **Default (…)** or any alternate. Double-click / Enter still uses the default. This lets one system (say, PS1) run through RetroArch by default but boot a specific game in DuckStation on demand, without reconfiguring anything.
 
 ## Scan rules
 
