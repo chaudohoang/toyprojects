@@ -19,6 +19,11 @@
 
   <ItemGroup>
     <PackageReference Include="FluentFTP" Version="54.2.0" />
+    <!-- WinSCP engine. The NuGet package supplies the .NET-compatible (netstandard2.0) WinSCPnet.dll
+         AND WinSCP.exe (copied next to the app). The loose net40 WinSCPnet.dll is NOT usable from
+         .NET 8 — its named-event/security APIs are binary-incompatible (MissingMethodException on
+         Session.Open) — so the package build is required. -->
+    <PackageReference Include="WinSCP" Version="5.21.2" />
   </ItemGroup>
 
 </Project>

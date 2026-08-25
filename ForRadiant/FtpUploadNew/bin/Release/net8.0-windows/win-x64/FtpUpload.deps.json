@@ -10,6 +10,7 @@
       "FtpUpload/1.0.0": {
         "dependencies": {
           "FluentFTP": "54.2.0",
+          "WinSCP": "5.21.2",
           "runtimepack.Microsoft.NETCore.App.Runtime.win-x64": "8.0.30",
           "runtimepack.Microsoft.WindowsDesktop.App.Runtime.win-x64": "8.0.30"
         },
@@ -969,6 +970,14 @@
             "fileVersion": "54.2.0.0"
           }
         }
+      },
+      "WinSCP/5.21.2": {
+        "runtime": {
+          "lib/netstandard2.0/WinSCPnet.dll": {
+            "assemblyVersion": "1.12.0.12723",
+            "fileVersion": "1.12.0.12723"
+          }
+        }
       }
     }
   },
@@ -994,6 +1003,13 @@
       "sha512": "sha512-n+OyaqU80gnOltXo2xBPZklAqbtxJAfl2GfblOIe5OCAk4jr/3zYW9Jf1fG6eR/USZq4AKWQcUMmKE9neSk8og==",
       "path": "fluentftp/54.2.0",
       "hashPath": "fluentftp.54.2.0.nupkg.sha512"
+    },
+    "WinSCP/5.21.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-UmR23Db7IihEOeA2RAjHF+urpITo1RZn27v+pT55vMpiayAiGk1fJtJKDdU9saH/J9PANa1RHSiz7gzPeMiIHg==",
+      "path": "winscp/5.21.2",
+      "hashPath": "winscp.5.21.2.nupkg.sha512"
     }
   },
   "runtimes": {

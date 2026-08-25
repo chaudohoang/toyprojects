@@ -27,6 +27,7 @@ public static class HtmlLog
         public int Attempts;
         public int MaxRetries;
         public bool Recovered;
+        public bool PendingManifest;   // an index/host row injected for a panel still in NG (not yet sent)
         public string LastTime = "";
     }
 
@@ -306,16 +307,28 @@ public static class HtmlLog
     // =====================================================================================
     //  NG-retry report (ngretrylog + rawlog for the original reason)  ->  {day}_nghtmllog.html
     // =====================================================================================
+    /// <summary>Row order within a panel: data files (0), then index manifest (1), then host (2).</summary>
+    private static int NgManifestRank(string file, string pid)
+    {
+        if (file.EndsWith(".idx", StringComparison.OrdinalIgnoreCase)) return 1;
+        if (file.StartsWith(pid + "_", StringComparison.OrdinalIgnoreCase) &&
+            file.EndsWith(".txt", StringComparison.OrdinalIgnoreCase)) return 2;
+        return 0;
+    }
+
     private static string NgRow(FileEntry e, string reason, string primary, string secondary)
     {
-        var rBadge = reason switch
-        {
-            "TIMEDOUT" => "<span class='b to'>Timed Out</span>",
-            "FAILED" => "<span class='b bad'>Failed</span>",
-            _ => "<span class='b pend'>&mdash;</span>"
-        };
-        var state = e.Recovered ? "<span class='b ok'>Recovered</span>" : "<span class='b bad'>Still failing</span>";
-        var stateAttr = e.Recovered ? "RECOVERED" : "FAILING";
+        var rBadge = e.PendingManifest
+            ? "<span class='b pend'>Pending</span>"
+            : reason switch
+            {
+                "TIMEDOUT" => "<span class='b to'>Timed Out</span>",
+                "FAILED" => "<span class='b bad'>Failed</span>",
+                _ => "<span class='b pend'>&mdash;</span>"
+            };
+        var state = e.PendingManifest ? "<span class='b pend'>Pending</span>"
+            : e.Recovered ? "<span class='b ok'>Recovered</span>" : "<span class='b bad'>Still failing</span>";
+        var stateAttr = e.PendingManifest ? "PENDING" : e.Recovered ? "RECOVERED" : "FAILING";
 
         var chips = new StringBuilder();
         var i = 0;
@@ -380,6 +393,31 @@ public static class HtmlLog
         }
 
         int tot = order.Count, recovered = 0, pending = 0, totRetries = 0;
+
+        // Inject Pending rows for the index/host of any panel present in this report whose manifests
+        // haven't been sent yet (they're not in the ng-retry log). Filenames come from the jobs file's
+        // manifest lines. This mirrors the NG list, which shows the manifests as Pending too.
+        var manifestNames = new Dictionary<string, List<string>>();
+        foreach (var line in SafeReadLines(cfg.JobsPathForDay(day)))
+        {
+            var jl = JobsLine.Parse(line);
+            if (jl is null || !jl.IsManifest) continue;
+            if (!manifestNames.TryGetValue(jl.Pid, out var l)) { l = new(); manifestNames[jl.Pid] = l; }
+            l.Add(jl.FileName);
+        }
+        var pidsInReport = order.Select(k => byKey[k].Pid).ToHashSet();
+        foreach (var pid in pidsInReport)
+        {
+            if (!manifestNames.TryGetValue(pid, out var names)) continue;
+            foreach (var name in names)
+            {
+                var key = pid + "|" + name;
+                if (byKey.ContainsKey(key)) continue;   // already sent/recorded — leave as-is
+                byKey[key] = new FileEntry { Pid = pid, File = name, PendingManifest = true };
+                order.Add(key);
+            }
+        }
+
         foreach (var k in order)
         {
             var e = byKey[k];
@@ -400,7 +438,13 @@ public static class HtmlLog
         var cards = new StringBuilder();
         foreach (var pid in panelOrder)
         {
-            var keys = panels[pid];
+            // Order rows like the main rawlog / jobs file: data files first, then index, then host.
+            var keys = panels[pid]
+                .Select((k, i) => (k, i))
+                .OrderBy(x => NgManifestRank(byKey[x.k].File, pid))
+                .ThenBy(x => x.i)
+                .Select(x => x.k)
+                .ToList();
             int pRec = keys.Count(k => byKey[k].Recovered);
             int pFail = keys.Count - pRec;
             var ovText = pFail == 0 ? "Recovered" : "Still failing";

@@ -51,7 +51,8 @@ public sealed class JobIntake(Config cfg, UploadEngine engine)
                 panelPids.Add(jl.Pid);
             }
 
-            parsed.Add(new JobFile { Pid = jl.Pid, FileName = jl.FileName, LocalPath = jl.LocalPath, RemotePath = remote });
+            parsed.Add(new JobFile { Pid = jl.Pid, FileName = jl.FileName, LocalPath = jl.LocalPath,
+                                     RemotePath = remote, IsManifest = jl.IsManifest });
         }
 
         if (parsed.Count > 0)

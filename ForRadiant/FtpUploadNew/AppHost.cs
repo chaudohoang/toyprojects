@@ -69,6 +69,8 @@ public sealed class AppHost : IDisposable
 
         Append($"[{DateTime.Now:HH:mm:ss}] FTP Upload started — primary {Cfg.PrimaryHost}:{Cfg.Port}, " +
                $"secondary {Cfg.SecondaryHost}, timeout {Cfg.TimeoutSeconds}s, {Cfg.MaxAttempts} attempts");
+        Append($"[{DateTime.Now:HH:mm:ss}] transfer engine: {FtpEngineFactory.ActiveEngine}" +
+               (FtpEngineFactory.ActiveEngine == "WinSCP" ? $" ({Cfg.FtpMode} mode)" : ""));
     }
 
     public void Start()

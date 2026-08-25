@@ -464,6 +464,10 @@ public partial class MainWindow : Window
         var existing = new Dictionary<string, NgGroupVm>();
         foreach (var g in _ng) existing[g.Pid] = g;
 
+        // Within a panel, show rows in the same order as the main rawlog / jobs file: data files
+        // first (original order), then the index manifest, then the host manifest (host last).
+        static int NgRank(NgItem it) => !it.IsManifest ? 0 : (it.RemotePath == it.UploadIndexPath ? 1 : 2);
+
         foreach (var pid in order)
         {
             if (!existing.TryGetValue(pid, out var group))
@@ -472,7 +476,13 @@ public partial class MainWindow : Window
                 _ng.Add(group);
                 existing[pid] = group;
             }
-            group.Refresh(byPid[pid]);
+            var rows = byPid[pid]
+                .Select((it, i) => (it, i))
+                .OrderBy(x => NgRank(x.it))
+                .ThenBy(x => x.i)
+                .Select(x => x.it)
+                .ToList();
+            group.Refresh(rows);
         }
 
         var wantedPids = new HashSet<string>(order);
@@ -632,6 +642,12 @@ public partial class MainWindow : Window
         SetUser.Text = c.User;
         SetPassword.Text = c.Password;
         SelectCombo(SetFtpSecure, c.FtpSecure);
+        SelectCombo(SetEngine, string.Equals(c.Engine, "WinSCP", StringComparison.OrdinalIgnoreCase) ? "WinSCP" : "FluentFTP");
+        SelectCombo(SetFtpMode, string.Equals(c.FtpMode, "Active", StringComparison.OrdinalIgnoreCase) ? "Active" : "Passive");
+        SelectCombo(SetInitialHost, string.Equals(c.InitialHost, "Secondary", StringComparison.OrdinalIgnoreCase) ? "Secondary" : "Primary");
+        SetWinScpLog.IsChecked = c.WinScpLog;
+        SetPreserveTimestamp.IsChecked = c.PreserveTimestamp;
+        SetUseTempFile.IsChecked = c.UseTempFile;
 
         SetQueueFolder.Text = c.QueueFolder;
         SetRecipePath.Text = c.RecipePath;
@@ -677,6 +693,12 @@ public partial class MainWindow : Window
             c.User = SetUser.Text.Trim();
             c.Password = SetPassword.Text;
             c.FtpSecure = (SetFtpSecure.SelectedItem as System.Windows.Controls.ComboBoxItem)?.Content?.ToString() ?? c.FtpSecure;
+            c.Engine = (SetEngine.SelectedItem as System.Windows.Controls.ComboBoxItem)?.Content?.ToString() ?? c.Engine;
+            c.FtpMode = (SetFtpMode.SelectedItem as System.Windows.Controls.ComboBoxItem)?.Content?.ToString() ?? c.FtpMode;
+            c.InitialHost = (SetInitialHost.SelectedItem as System.Windows.Controls.ComboBoxItem)?.Content?.ToString() ?? c.InitialHost;
+            c.WinScpLog = SetWinScpLog.IsChecked == true;
+            c.PreserveTimestamp = SetPreserveTimestamp.IsChecked == true;
+            c.UseTempFile = SetUseTempFile.IsChecked == true;
 
             c.QueueFolder = SetQueueFolder.Text.Trim();
             c.RecipePath = SetRecipePath.Text.Trim();
@@ -747,22 +769,30 @@ public partial class MainWindow : Window
 
     // ---------------- view HTML log ----------------
 
+    // Single-instance non-modal calendar popups (day + NG). Re-shown/refreshed instead of duplicated.
+    private LogCalendarWindow? _dayLogCal;
+    private LogCalendarWindow? _ngLogCal;
+
     private void ViewLiveLog_Click(object sender, RoutedEventArgs e)
     {
-        var days = AvailableLogDays(liveMode: true);
-        if (days.Count == 0) { System.Windows.MessageBox.Show("No upload logs yet."); return; }
-        var dlg = new DayPickerWindow(days, "Choose a day — upload log") { Owner = this };
-        if (dlg.ShowDialog() == true && dlg.SelectedDay is string day)
-            BuildAndOpenLog(() => HtmlLog.BuildDayLog(_host.Cfg, day), day);
+        if (_dayLogCal != null) { _dayLogCal.RefreshDays(); _dayLogCal.Activate(); return; }
+        _dayLogCal = new LogCalendarWindow(
+            "Upload Day Report",
+            () => new HashSet<string>(AvailableLogDays(liveMode: true)),
+            day => BuildAndOpenLog(() => HtmlLog.BuildDayLog(_host.Cfg, day), day)) { Owner = this };
+        _dayLogCal.Closed += (_, _) => _dayLogCal = null;
+        _dayLogCal.Show();   // non-modal — does not block the main UI
     }
 
     private void ViewNgLog_Click(object sender, RoutedEventArgs e)
     {
-        var days = AvailableLogDays(liveMode: false);
-        if (days.Count == 0) { System.Windows.MessageBox.Show("No NG-retry logs yet."); return; }
-        var dlg = new DayPickerWindow(days, "Choose a day — NG-retry log") { Owner = this };
-        if (dlg.ShowDialog() == true && dlg.SelectedDay is string day)
-            BuildAndOpenLog(() => HtmlLog.BuildNgLog(_host.Cfg, day), day);
+        if (_ngLogCal != null) { _ngLogCal.RefreshDays(); _ngLogCal.Activate(); return; }
+        _ngLogCal = new LogCalendarWindow(
+            "NG Retry Report",
+            () => new HashSet<string>(AvailableLogDays(liveMode: false)),
+            day => BuildAndOpenLog(() => HtmlLog.BuildNgLog(_host.Cfg, day), day)) { Owner = this };
+        _ngLogCal.Closed += (_, _) => _ngLogCal = null;
+        _ngLogCal.Show();   // non-modal
     }
 
     /// <summary>Days (yyyyMMdd) that have a log to show. Live = a raw log or a jobs file exists;

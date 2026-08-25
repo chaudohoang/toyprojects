@@ -301,6 +301,8 @@ Module Program
         Public HostAfter As Integer = 0
         Public Result As String = ""
         Public Stamp As DateTime = DateTime.Now
+        ' The panel's own creation time, so a finished row can still show it.
+        Public MadeAt As String = ""
     End Class
 
     ' Keyed by panel key (the host file path). Survives ResetRun so results
@@ -1211,8 +1213,41 @@ Module Program
             Log("      reconnecting between every panel.")
         End If
 
+        ' Oldest panel first, so a backlog drains from the front instead of new
+        ' panels queue-jumping the old ones - the mistake that let the backlog
+        ' build up in the first place. The panel's own timestamp comes from its
+        ' source folder name (<localPID>_<yyyyMMddHHmmss>), so this costs nothing
+        ' in disk I/O; a panel with no usable stamp sorts last rather than first.
         Return list.OrderBy(Function(p) hostOf(p), StringComparer.OrdinalIgnoreCase).
+                    ThenBy(Function(p) PanelStamp(p)).
                     ThenBy(Function(p) p.PID).ToList()
+    End Function
+
+    ' The 14-digit stamp in the panel's source folder name, as a sortable string.
+    ' "zzzz..." for anything unparseable so it sorts after real timestamps.
+    Public Function PanelStamp(p As Panel) As String
+        Dim src As String = ""
+        If p.Entries.Count > 0 Then
+            src = p.Entries(0).SourceFile
+        ElseIf p.Leftovers.Count > 0 Then
+            src = p.Leftovers(0).SourceFile
+        End If
+        If src = "" Then Return "zzzzzzzzzzzzzz"
+        Try
+            Dim dir = Path.GetFileName(Path.GetDirectoryName(src))
+            Dim m = Regex.Match(If(dir, ""), "_(\d{14})$")
+            If m.Success Then Return m.Groups(1).Value
+        Catch
+        End Try
+        Return "zzzzzzzzzzzzzz"
+    End Function
+
+    ' Same stamp, formatted for reading: "08-19 14:20". Blank when unknown.
+    Public Function PanelStampDisplay(p As Panel) As String
+        Dim s = PanelStamp(p)
+        If s.Length <> 14 OrElse Not s.All(AddressOf Char.IsDigit) Then Return ""
+        Return s.Substring(4, 2) & "-" & s.Substring(6, 2) & " " &
+               s.Substring(8, 2) & ":" & s.Substring(10, 2)
     End Function
 
     ' Vocabulary + donor maps shared by every panel. Split out so it can be built
@@ -2379,7 +2414,7 @@ Module Program
         Outcomes(p.Key) = New PanelOutcome() With {
             .PID = p.PID, .Total = p.Total, .Uploaded = up, .Failed = fl,
             .Missing = ms, .Rebuilt = If(Reconstruct, p.RebuiltCount, 0), .HostAfter = hostAfter,
-            .Result = note, .Stamp = DateTime.Now}
+            .Result = note, .Stamp = DateTime.Now, .MadeAt = PanelStampDisplay(p)}
 
         If ReportWriter Is Nothing Then Exit Sub
         Try

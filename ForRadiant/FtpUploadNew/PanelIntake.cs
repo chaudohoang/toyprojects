@@ -122,6 +122,21 @@ public sealed class PanelIntake(Config cfg, UploadEngine engine)
         engine.AddFiles(dataFiles);
         engine.SeedPanelManifest(panel.Pid);   // create-or-resume {PID}.idx / {PID}_{DateTime}.txt
 
+        // The index + host completion manifests are tracked as two REAL files on the panel: counted
+        // (so the panel is only SUCCESS once they're sent too) but never queued for the normal pump —
+        // the finalize step sends them once all data files resolve. Local = the source manifests we
+        // build; remote = the .panel's UploadIndexPath / UploadHostPath.
+        var indexSrc = PathDerivation.IndexSrc(panel);
+        var hostSrc = PathDerivation.HostSrc(panel);
+        var manifestFiles = new[]
+        {
+            new JobFile { Pid = panel.Pid, FileName = Path.GetFileName(panel.UploadIndexPath),
+                          LocalPath = indexSrc, RemotePath = panel.UploadIndexPath, IsManifest = true },
+            new JobFile { Pid = panel.Pid, FileName = Path.GetFileName(panel.UploadHostPath),
+                          LocalPath = hostSrc, RemotePath = panel.UploadHostPath, IsManifest = true },
+        };
+        engine.AddFiles(manifestFiles);
+
         // Persist to the day's jobs file so a restart re-loads the panel (with its manifest
         // metadata) and the NG-retry console can reconstruct these files if any end up FAILED.
         var jobsPath = cfg.JobsPath(Clock.Now);
@@ -131,7 +146,19 @@ public sealed class PanelIntake(Config cfg, UploadEngine engine)
             {
                 IsPanel = true,
                 Pid = f.Pid, FileName = f.FileName, LocalPath = f.LocalPath, RemotePath = f.RemotePath,
-                IndexSrc = PathDerivation.IndexSrc(panel), HostSrc = PathDerivation.HostSrc(panel),
+                IndexSrc = indexSrc, HostSrc = hostSrc,
+                UploadIndexPath = panel.UploadIndexPath, UploadHostPath = panel.UploadHostPath,
+                ChannelIndex = panel.ChannelIndex
+            };
+            SafeFile.Append(jobsPath, jl.ToLine());
+        }
+        foreach (var mf in manifestFiles)
+        {
+            var jl = new JobsLine
+            {
+                IsPanel = true, IsManifest = true,
+                Pid = mf.Pid, FileName = mf.FileName, LocalPath = mf.LocalPath, RemotePath = mf.RemotePath,
+                IndexSrc = indexSrc, HostSrc = hostSrc,
                 UploadIndexPath = panel.UploadIndexPath, UploadHostPath = panel.UploadHostPath,
                 ChannelIndex = panel.ChannelIndex
             };

@@ -134,6 +134,25 @@ public sealed class NgRetryLog(Config cfg)
     }
 
     /// <summary>
+    /// Record that a panel's index + host manifests were sent by NG's post-recovery finalize, so the
+    /// NG report shows them (index first, then host — host last). This goes ONLY to the ng-retry log,
+    /// never the main rawlog, so the main rawlog stays a record of the live pump.
+    /// </summary>
+    public void WriteManifestSent(string pid, string day, string uploadIndexPath, string uploadHostPath,
+                                  int retries, string host)
+    {
+        var now = DateTime.Now.ToString("HH:mm:ss");
+        foreach (var remote in new[] { uploadIndexPath, uploadHostPath })   // index first, host last
+        {
+            if (string.IsNullOrWhiteSpace(remote)) continue;
+            var line = string.Join("|",
+                pid, Path.GetFileName(remote), "SUCCEEDED", now,
+                retries.ToString(), now, retries.ToString(), "0", host, "NGRETRY");
+            SafeFile.Append(cfg.NgRetryLogPath(day), line);
+        }
+    }
+
+    /// <summary>
     /// Reduces a day's ng-retry log to per-file state: how many retries recorded, and whether it
     /// eventually SUCCEEDED via NG retry (so the console can drop it from the list).
     /// </summary>

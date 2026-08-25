@@ -108,7 +108,7 @@
                     Background="{Binding RowBg}">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="280"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="105"/>
                         <ColumnDefinition Width="90"/>
@@ -118,7 +118,8 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0" Text="{Binding FileName}" FontSize="12"
-                               FontWeight="SemiBold" Foreground="#3A4256" VerticalAlignment="Center"/>
+                               FontWeight="SemiBold" Foreground="#3A4256" VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis" ToolTip="{Binding FileName}"/>
 
                     <TextBlock Grid.Column="1" Text="{Binding RemotePathFull}" FontSize="10.5"
                                FontFamily="Consolas" Foreground="#6B7386" TextWrapping="Wrap"
@@ -207,7 +208,7 @@
                     <Border Background="#F8F9FC" Padding="16,6">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="280"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="105"/>
                                 <ColumnDefinition Width="90"/>
@@ -317,7 +318,7 @@
             <Border Background="{Binding RowBg}" Padding="16,7">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="280"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="90"/>
                         <ColumnDefinition Width="95"/>
@@ -327,7 +328,8 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0" Text="{Binding FileName}" FontSize="12"
-                               FontWeight="SemiBold" Foreground="#3A4256" VerticalAlignment="Center"/>
+                               FontWeight="SemiBold" Foreground="#3A4256" VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis" ToolTip="{Binding FileName}"/>
                     <TextBlock Grid.Column="1" Text="{Binding RemotePathFull}" FontSize="10.5"
                                FontFamily="Consolas" Foreground="#6B7386" TextWrapping="Wrap"
                                VerticalAlignment="Center" Margin="0,0,10,0" ToolTip="{Binding RemotePathFull}"/>
@@ -398,7 +400,7 @@
                         <Border Background="#F8F9FC" Padding="16,6">
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="150"/>
+                                    <ColumnDefinition Width="280"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="90"/>
                                     <ColumnDefinition Width="95"/>
@@ -800,6 +802,9 @@
                                             <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
                                             <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
                                             <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Text="Primary host" Style="{StaticResource SettingLabel}"/>
                                         <TextBox   Grid.Row="0" Grid.Column="1" x:Name="SetPrimaryHost" Style="{StaticResource SettingBox}"/>
@@ -817,6 +822,30 @@
                                             <ComboBoxItem Content="Explicit"/>
                                             <ComboBoxItem Content="Implicit"/>
                                         </ComboBox>
+                                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Transfer engine" Style="{StaticResource SettingLabel}"/>
+                                        <ComboBox  Grid.Row="6" Grid.Column="1" x:Name="SetEngine" Margin="0,0,0,8" Height="30">
+                                            <ComboBoxItem Content="WinSCP"/>
+                                            <ComboBoxItem Content="FluentFTP"/>
+                                        </ComboBox>
+                                        <TextBlock Grid.Row="7" Grid.Column="0" Text="FTP mode (WinSCP)" Style="{StaticResource SettingLabel}"/>
+                                        <ComboBox  Grid.Row="7" Grid.Column="1" x:Name="SetFtpMode" Margin="0,0,0,8" Height="30">
+                                            <ComboBoxItem Content="Passive"/>
+                                            <ComboBoxItem Content="Active"/>
+                                        </ComboBox>
+                                        <TextBlock Grid.Row="8" Grid.Column="0" Text="Engine session log" Style="{StaticResource SettingLabel}"/>
+                                        <CheckBox  Grid.Row="8" Grid.Column="1" x:Name="SetWinScpLog" Margin="0,2,0,8"
+                                                   VerticalAlignment="Center" Content="Write the engine's FTP conversation log (WinSCP or FluentFTP) to the log folder"/>
+                                        <TextBlock Grid.Row="9" Grid.Column="0" Text="Upload mode" Style="{StaticResource SettingLabel}"/>
+                                        <CheckBox  Grid.Row="9" Grid.Column="1" x:Name="SetUseTempFile" Margin="0,2,0,8"
+                                                   VerticalAlignment="Center" Content="Use temporary .part file then rename (uncheck to upload directly to the final name)"/>
+                                        <TextBlock Grid.Row="10" Grid.Column="0" Text="Initial upload to" Style="{StaticResource SettingLabel}"/>
+                                        <ComboBox  Grid.Row="10" Grid.Column="1" x:Name="SetInitialHost" Margin="0,0,0,8" Height="30">
+                                            <ComboBoxItem Content="Primary"/>
+                                            <ComboBoxItem Content="Secondary"/>
+                                        </ComboBox>
+                                        <TextBlock Grid.Row="11" Grid.Column="0" Text="File timestamp" Style="{StaticResource SettingLabel}"/>
+                                        <CheckBox  Grid.Row="11" Grid.Column="1" x:Name="SetPreserveTimestamp" Margin="0,2,0,8"
+                                                   VerticalAlignment="Center" Content="Preserve the local file's modified time (WinSCP; uncheck to let the server stamp the upload time)"/>
                                     </Grid>
                                 </StackPanel>
                             </Border>

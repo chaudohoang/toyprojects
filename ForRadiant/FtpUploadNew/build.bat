@@ -110,7 +110,7 @@ if not exist "%OUT%\allowed_filenames.txt" (
 
 REM Keep the runnable helper scripts next to the exe/config so the copy you run is
 REM always current (they read config.json from their own folder).
-for %%S in (config.default.json gen_panels.ps1 gen_panels.bat gen_500.bat gen_5000.bat stress_500.bat stress_5000.bat clean_panels.ps1 clean_panels.bat clean_panels_full.bat _htmllog.ps1 _htmllog.bat _nghtmllog.ps1 _nghtmllog.bat _progress.ps1 run_watchdog.bat run_hidden.vbs install_task.bat uninstall_task.bat stop_worker.bat stop_worker.ps1) do (
+for %%S in (config.default.json gen_panels.ps1 gen_panels.bat gen_500.bat gen_5000.bat stress_500.bat stress_5000.bat clean_panels.ps1 clean_panels.bat clean_panels_full.bat _htmllog.ps1 _htmllog.bat _nghtmllog.ps1 _nghtmllog.bat _logpick.ps1 _progress.ps1 run_watchdog.bat run_hidden.vbs install_task.bat uninstall_task.bat stop_worker.bat stop_worker.ps1 _killworker.ps1) do (
     if exist "%%S" copy /y "%%S" "%OUT%\" >nul
 )
 

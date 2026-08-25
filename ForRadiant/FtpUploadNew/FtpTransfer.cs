@@ -7,13 +7,13 @@ public enum TransferOutcome { Success, Timeout, Preempted, Error, LocalMissing }
 public sealed record TransferResult(TransferOutcome Outcome, string? Message = null);
 
 /// <summary>
-/// Wraps FluentFTP with the two behaviours the spec needs:
+/// FluentFTP-backed transfer engine. Provides the two behaviours the spec needs:
 ///  • a HARD per-file timeout (spec §2) — the transfer is cancelled mid-stream at T,
 ///    not merely "reported slow";
 ///  • temp-name-then-rename, so an aborted or timed-out transfer never leaves a
 ///    partially-written file visible under its real name on CNS.
 /// </summary>
-public sealed class FtpTransfer(Config cfg, bool reuseConnections = false)
+public sealed class FluentFtpTransfer(Config cfg, bool reuseConnections = false) : IFtpTransfer
 {
     // A persistent connection reused across files when reuseConnections is true. Used serially by
     // a single pump, so no locking is needed. A "session" is one open connection: it is renewed on
@@ -33,7 +33,7 @@ public sealed class FtpTransfer(Config cfg, bool reuseConnections = false)
     /// 2 retries on the primary, then 2 retries on the secondary.
     /// </summary>
     public string HostForAttempt(int attempt) =>
-        attempt <= cfg.PrimaryAttempts ? cfg.PrimaryHost : cfg.SecondaryHost;
+        attempt <= cfg.PrimaryAttempts ? cfg.FirstHost : cfg.FailoverHost;
 
     public Task<TransferResult> UploadAsync(JobFile file, int attempt, CancellationToken preemptToken)
         => UploadCore(file, HostForAttempt(attempt), preemptToken);
@@ -74,6 +74,20 @@ public sealed class FtpTransfer(Config cfg, bool reuseConnections = false)
         c.Config.ValidateAnyCertificate = true;   // CNS uses a self-signed cert in most installs
         c.Config.RetryAttempts = 0;               // retries are managed by UploadEngine, not the library
 
+        // Optional: write FluentFTP's own control-channel log (the full FTP conversation) to the log
+        // folder, mirroring the WinSCP session log — one file per connection. Gated by WinScpLog,
+        // which acts as the general "engine session log" switch.
+        if (cfg.WinScpLog)
+        {
+            try
+            {
+                Directory.CreateDirectory(cfg.LogFullPath);
+                var p = Path.Combine(cfg.LogFullPath, $"{DateTime.Now:yyyyMMdd}_fluentftp_{DateTime.Now:HHmmssfff}.log");
+                c.Logger = new FileFtpLogger(p);
+            }
+            catch { /* logging is optional */ }
+        }
+
         await c.Connect(ct);
         _client = c; _clientHost = host; _filesThisSession = 0; SessionNumber++;
         return c;
@@ -112,8 +126,12 @@ public sealed class FtpTransfer(Config cfg, bool reuseConnections = false)
 
             var client = await EnsureClient(host, linked.Token);
 
+            // Direct upload to the final name (no .part, no rename) when temp files are disabled —
+            // avoids stranded .part files if the transfer is interrupted, and skips the rename step.
+            var uploadTarget = cfg.UseTempFile ? tempRemote : file.RemotePath;
+
             var status = await client.UploadFile(
-                file.LocalPath, tempRemote,
+                file.LocalPath, uploadTarget,
                 FtpRemoteExists.Overwrite,
                 createRemoteDir: true,
                 token: linked.Token);
@@ -124,10 +142,13 @@ public sealed class FtpTransfer(Config cfg, bool reuseConnections = false)
                 return new TransferResult(TransferOutcome.Error, "upload returned " + status);
             }
 
-            // Only now does the file appear under its real name.
-            if (await client.FileExists(file.RemotePath, linked.Token))
-                await client.DeleteFile(file.RemotePath, linked.Token);
-            await client.Rename(tempRemote, file.RemotePath, linked.Token);
+            if (cfg.UseTempFile)
+            {
+                // Only now does the file appear under its real name.
+                if (await client.FileExists(file.RemotePath, linked.Token))
+                    await client.DeleteFile(file.RemotePath, linked.Token);
+                await client.Rename(tempRemote, file.RemotePath, linked.Token);
+            }
 
             _filesThisSession++;                       // this file rode the current session
             if (!reuseConnections) await EndSession(); // non-reuse = one connection per file (old behaviour)
@@ -161,6 +182,29 @@ public sealed class FtpTransfer(Config cfg, bool reuseConnections = false)
                 await client.DeleteFile(tempRemote, quick.Token);
         }
         catch { /* best effort — a stale .part is harmless, it is never renamed */ }
+    }
+}
+
+/// <summary>
+/// Writes FluentFTP's log entries (the FTP control-channel conversation) to a file, so FluentFTP can
+/// produce a session log comparable to WinSCP's. One instance per connection.
+/// </summary>
+internal sealed class FileFtpLogger : IFtpLogger
+{
+    private readonly string _path;
+    private readonly object _gate = new();
+
+    public FileFtpLogger(string path) { _path = path; }
+
+    public void Log(FtpLogEntry entry)
+    {
+        try
+        {
+            var line = $"{DateTime.Now:HH:mm:ss.fff} [{entry.Severity}] {entry.Message}" +
+                       (entry.Exception is not null ? " | " + entry.Exception.Message : "");
+            lock (_gate) File.AppendAllText(_path, line + Environment.NewLine);
+        }
+        catch { /* logging must never break a transfer */ }
     }
 }
 
