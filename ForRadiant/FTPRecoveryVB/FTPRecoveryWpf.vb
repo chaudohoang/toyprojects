@@ -84,6 +84,7 @@ End Module
 Public Class PanelRow
     Public Property Idx As Integer
     Public Property PID As String = ""
+    Public Property MadeAt As String = ""
     Public Property Total As Integer
     Public Property HostNow As Integer
     Public Property DoneCount As Integer
@@ -108,10 +109,19 @@ Public Class RecoveryWindow
     Private btnUploadOne As Button
     Private btnUploadAll As Button
     Private btnStop As Button
+    Private btnAutoRun As Button
     Private chkForce As CheckBox
     Private chkSkipMissing As CheckBox
     Private chkRetryAll As CheckBox
     Private chkVerbose As CheckBox
+    Private chkAutoRepeat As CheckBox
+    Private cboRepeatEvery As ComboBox
+    ' Set while a repeat is scheduled, so Stop and a manual Scan can break the loop.
+    Private autoRepeatTimer As System.Windows.Threading.DispatcherTimer = Nothing
+    Private autoRepeatRound As Integer = 0
+    ' True when the scan now running was started by the repeat loop, so the upload
+    ' should follow automatically once it finishes.
+    Private autoRepeatUploadAfterScan As Boolean = False
     Private chkReconstruct As CheckBox
     Private cboHost As ComboBox
     Private cboPerSession As ComboBox
@@ -273,10 +283,21 @@ Public Class RecoveryWindow
         outer.ColumnDefinitions.Add(New ColumnDefinition() With {.Width = New GridLength(1, GridUnitType.Star)})
 
         Dim buttons As New WrapPanel()
+        ' The one-click unattended cycle goes first and is styled to stand out - it
+        ' is what most runs will use.
+        btnAutoRun = MakeButton("AUTO: scan + upload, repeat", AddressOf OnAutoRun, True)
+        btnAutoRun.FontWeight = FontWeights.Bold
+        btnAutoRun.Background = New SolidColorBrush(Color.FromRgb(214, 234, 255))
+        btnAutoRun.BorderBrush = New SolidColorBrush(Color.FromRgb(90, 140, 200))
+        btnAutoRun.BorderThickness = New Thickness(1.5)
+        btnAutoRun.Padding = New Thickness(14, 4, 14, 4)
+        btnAutoRun.Margin = New Thickness(0, 0, 14, 0)
+
         btnScan = MakeButton("Start Scan", AddressOf OnScan, True)
         btnUploadOne = MakeButton("Upload this PID", AddressOf OnUploadOne, False)
         btnUploadAll = MakeButton("Upload ALL panels", AddressOf OnUploadAll, False)
         btnStop = MakeButton("Stop", AddressOf OnStop, False)
+        buttons.Children.Add(btnAutoRun)
         buttons.Children.Add(btnScan)
         buttons.Children.Add(btnUploadOne)
         buttons.Children.Add(btnUploadAll)
@@ -336,6 +357,17 @@ Public Class RecoveryWindow
         Next
         cboPerSession.SelectedIndex = 1          ' 100, as LGD asked
 
+        ' Scan and upload again after each run finishes. Useful for a large backlog
+        ' and for SERVER-OFFLINE panels, which need nothing but another attempt.
+        chkAutoRepeat = MakeCheck("Repeat automatically")
+        cboRepeatEvery = New ComboBox() With {
+            .Width = 95, .VerticalContentAlignment = VerticalAlignment.Center,
+            .Margin = New Thickness(6, 0, 0, 0)}
+        For Each v In New String() {"at once", "1 min", "5 min", "15 min", "30 min"}
+            cboRepeatEvery.Items.Add(v)
+        Next
+        cboRepeatEvery.SelectedIndex = 1          ' 1 min
+
         Dim lblStall As New TextBlock() With {
             .Text = "Stall:", .VerticalAlignment = VerticalAlignment.Center,
             .Margin = New Thickness(12, 0, 6, 0)}
@@ -357,25 +389,36 @@ Public Class RecoveryWindow
         Next
         numRetry.SelectedIndex = 2   ' 3 attempts
 
+        ' Each label and its dropdown go in together. Added separately, the
+        ' WrapPanel could break the line between them and clip the label.
         opts.Children.Add(chkReconstruct)
         opts.Children.Add(chkForce)
         opts.Children.Add(chkSkipMissing)
         opts.Children.Add(chkRetryAll)
         opts.Children.Add(chkVerbose)
-        opts.Children.Add(lblHost)
-        opts.Children.Add(cboHost)
-        opts.Children.Add(lblPer)
-        opts.Children.Add(cboPerSession)
-        opts.Children.Add(lblStall)
-        opts.Children.Add(cboStall)
-        opts.Children.Add(lblRetry)
-        opts.Children.Add(numRetry)
+        opts.Children.Add(Pair(chkAutoRepeat, cboRepeatEvery))
+        opts.Children.Add(Pair(lblHost, cboHost))
+        opts.Children.Add(Pair(lblPer, cboPerSession))
+        opts.Children.Add(Pair(lblStall, cboStall))
+        opts.Children.Add(Pair(lblRetry, numRetry))
         Grid.SetColumn(opts, 1)
 
         outer.Children.Add(buttons)
         outer.Children.Add(opts)
         Grid.SetRow(outer, 1)
         Return outer
+    End Function
+
+    ' Keeps a caption and its control on the same line, with breathing room from
+    ' whatever comes before it.
+    Private Function Pair(caption As UIElement, ctrl As UIElement) As UIElement
+        Dim sp As New StackPanel() With {
+            .Orientation = Orientation.Horizontal,
+            .Margin = New Thickness(14, 0, 0, 0),
+            .VerticalAlignment = VerticalAlignment.Center}
+        sp.Children.Add(caption)
+        sp.Children.Add(ctrl)
+        Return sp
     End Function
 
     Private Function MakeButton(text As String, handler As RoutedEventHandler, enabled As Boolean) As Button
@@ -421,6 +464,9 @@ Public Class RecoveryWindow
         dg.RowStyle = rowStyle
 
         AddCol("PID", "PID", 2, True)
+        ' When the panel was made. The list runs oldest first, so this is how the
+        ' operator can see that the top row really is the front of the queue.
+        AddCol("MadeAt", "Panel date", 0, False)
         AddCol("Total", "Total", 0, False)
         AddCol("HostNow", "Host now", 0, False)
         AddCol("DoneCount", "Done", 0, False)
@@ -795,7 +841,11 @@ Public Class RecoveryWindow
         btnUploadAll.IsEnabled = (Not state) AndAlso panels.Count > 0
         btnUploadOne.IsEnabled = (Not state) AndAlso HasUploadableSelection()
         dg.IsEnabled = Not state
-        btnStop.IsEnabled = state
+        ' Stop stays available while a repeat is pending, not just while a run is in
+        ' progress - otherwise the log says "Press Stop to end" next to a greyed
+        ' out button and the only way out is unticking the box.
+        btnStop.IsEnabled = state OrElse (autoRepeatTimer IsNot Nothing)
+        btnAutoRun.IsEnabled = Not state
         ' Options are read once at the start of a run; letting them change mid-run
         ' would mean half the panels used different rules.
         chkReconstruct.IsEnabled = Not state
@@ -804,6 +854,9 @@ Public Class RecoveryWindow
         chkRetryAll.IsEnabled = Not state
         ' Verbose is safe to change mid-run - it only affects what is printed.
         chkVerbose.IsEnabled = True
+        ' Safe to change mid-run: it is only read when a pass finishes.
+        chkAutoRepeat.IsEnabled = True
+        cboRepeatEvery.IsEnabled = True
         cboHost.IsEnabled = Not state
         cboPerSession.IsEnabled = Not state
         cboStall.IsEnabled = Not state
@@ -871,6 +924,9 @@ Public Class RecoveryWindow
     End Sub
 
     Private Sub OnScan(sender As Object, e As RoutedEventArgs)
+        ' A scan the user started means they have taken over - drop any pending
+        ' repeat. A scan the repeat loop started must not cancel its own loop.
+        If Not autoRepeatUploadAfterScan Then CancelRepeat("")
         If Not Directory.Exists(txtRoot.Text) Then
             MessageBox.Show(Me, "Queue folder not found:" & vbCrLf & txtRoot.Text,
                             "Scan", MessageBoxButton.OK, MessageBoxImage.Warning)
@@ -915,9 +971,59 @@ Public Class RecoveryWindow
                         Finally
                             SetBusy(False)
                             SetStatus(panels.Count.ToString() & " panel(s)")
+                            AfterScanForRepeat()
                         End Try
                     End Sub))
             End Sub)
+    End Sub
+
+    ' Start the unattended cycle from one button: scan, upload all, scan again,
+    ' repeat until Stop. Ticks the repeat option so the state of the window matches
+    ' what is actually happening.
+    Private Sub OnAutoRun(sender As Object, e As RoutedEventArgs)
+        If busy Then Return
+        If Not Directory.Exists(txtRoot.Text) Then
+            MessageBox.Show(Me, "Queue folder not found:" & vbCrLf & txtRoot.Text,
+                            "Auto run", MessageBoxButton.OK, MessageBoxImage.Warning)
+            Return
+        End If
+        chkAutoRepeat.IsChecked = True
+        autoRepeatRound = 0
+        AppendLog("")
+        AppendLog(">>> AUTO RUN started - scan, upload, repeat. Press Stop to end.")
+        If chkForce.IsChecked.GetValueOrDefault() Then
+            AppendLog("    CAUTION: 'Force incomplete' is on. A panel that TrueTest is still")
+            AppendLog("    writing looks incomplete, and Force will finalise it short rather")
+            AppendLog("    than waiting for the rest of its images. On a live machine, untick")
+            AppendLog("    Force and let repeated passes pick panels up as they finish.")
+        End If
+        ' Tell the scan-completion hook to carry straight on into the upload.
+        autoRepeatUploadAfterScan = True
+        OnScan(Nothing, Nothing)
+    End Sub
+
+    ' A scan started by the repeat loop has finished. Upload if there is anything
+    ' to upload, otherwise go straight back to waiting for the next round.
+    Private Sub AfterScanForRepeat()
+        If Not autoRepeatUploadAfterScan Then Return
+        autoRepeatUploadAfterScan = False
+        If Not chkAutoRepeat.IsChecked.GetValueOrDefault() Then Return
+        If Program.CancelRequested Then
+            CancelRepeat("stopped by the user")
+            Return
+        End If
+
+        Dim canDo = panels.Where(Function(p)
+                                     Dim st = Program.Classify(p)
+                                     Return st.CanComplete OrElse st.WillForce
+                                 End Function).Count()
+        If canDo > 0 Then
+            AppendLog(">>> auto repeat: uploading " & canDo.ToString() & " panel(s) ...")
+            OnUploadAll(Nothing, Nothing)
+        Else
+            ' Nothing uploadable - schedule the next scan rather than stopping.
+            MaybeScheduleRepeat()
+        End If
     End Sub
 
     Private Sub FillGrid()
@@ -944,6 +1050,7 @@ Public Class RecoveryWindow
             Dim r As New PanelRow() With {
                 .Idx = i,
                 .PID = p.PID,
+                .MadeAt = Program.PanelStampDisplay(p),
                 .Total = p.Total,
                 .HostNow = st.HostNow,
                 .DoneCount = st.DoneCount,
@@ -978,6 +1085,7 @@ Public Class RecoveryWindow
             done.Add(New PanelRow() With {
                 .Idx = -1,
                 .PID = o.PID,
+                .MadeAt = o.MadeAt,
                 .Total = o.Total,
                 .HostNow = o.HostAfter,
                 .DoneCount = o.Uploaded,
@@ -991,7 +1099,10 @@ Public Class RecoveryWindow
                 .RowBrush = If(o.Result.StartsWith("INDEX+HOST SENT"), green, amber)})
         Next
 
-        For Each r In live.OrderBy(Function(x) x.PID)
+        ' Pending rows keep the order the engine will upload them in - oldest panel
+        ' first - so the table reads top-to-bottom as the run will proceed.
+        ' Re-sorting by PID here would show a different order from what happens.
+        For Each r In live
             rows.Add(r)
         Next
         For Each r In done.OrderBy(Function(x) x.PID)
@@ -1094,6 +1205,12 @@ Public Class RecoveryWindow
 
     Private Sub OnStop(sender As Object, e As RoutedEventArgs)
         Program.CancelRequested = True
+        ' Stop must break the repeat loop too, or the next pass would start moments
+        ' after the user asked it to halt. Untick the box as well, so the window
+        ' does not claim it is still repeating.
+        CancelRepeat("stopped by the user")
+        autoRepeatUploadAfterScan = False
+        If chkAutoRepeat IsNot Nothing Then chkAutoRepeat.IsChecked = False
         SetStatus("stopping...")
         AppendLog("")
         AppendLog(">>> STOP requested - finishing the current file then halting.")
@@ -1160,8 +1277,93 @@ Public Class RecoveryWindow
                                                       SetBusy(False)
                                                       SetProgress(0, 1)
                                                       SetStatus(panels.Count.ToString() & " panel(s) remaining")
+                                                      MaybeScheduleRepeat()
                                                   End Sub))
             End Sub)
     End Sub
+
+    ' ---------------------------------------------------------------------
+    ' Auto repeat
+    '
+    ' Scan + Upload ALL, over and over, until the user presses Stop. A round with
+    ' nothing to upload is not a reason to give up - new panels arrive and an
+    ' unreachable server comes back - so it waits and scans again instead.
+    ' ---------------------------------------------------------------------
+    Private Sub CancelRepeat(reason As String)
+        If autoRepeatTimer IsNot Nothing Then
+            autoRepeatTimer.Stop()
+            autoRepeatTimer = Nothing
+            If reason <> "" Then AppendLog(">>> auto repeat stopped - " & reason)
+        End If
+        autoRepeatRound = 0
+        ' No pending repeat any more, so Stop only applies to a live run.
+        If btnStop IsNot Nothing AndAlso Not busy Then btnStop.IsEnabled = False
+    End Sub
+
+    Private Sub MaybeScheduleRepeat()
+        If chkAutoRepeat Is Nothing OrElse Not chkAutoRepeat.IsChecked.GetValueOrDefault() Then
+            CancelRepeat("")
+            Return
+        End If
+        If Program.CancelRequested Then
+            CancelRepeat("stopped by the user")
+            Return
+        End If
+
+        ' Keep going until the user presses Stop. Nothing to upload right now is not
+        ' a reason to give up - new panels arrive, and a server that was unreachable
+        ' comes back. It just means waiting for the next scan.
+        Dim canDo = panels.Where(Function(p)
+                                     Dim st = Program.Classify(p)
+                                     Return st.CanComplete OrElse st.WillForce
+                                 End Function).Count()
+
+        Dim mins As Integer = 0
+        Dim sel = Convert.ToString(cboRepeatEvery.SelectedItem)
+        Integer.TryParse(sel.Replace(" min", ""), mins)      ' "at once" -> 0
+
+        ' "at once" is for working through a backlog. With nothing to do it would
+        ' re-scan every couple of seconds, and a scan reads every queue file in the
+        ' folder - so idle rounds always wait at least a minute.
+        Dim wait As TimeSpan
+        If canDo > 0 Then
+            wait = If(mins > 0, TimeSpan.FromMinutes(mins), TimeSpan.FromSeconds(2))
+        Else
+            wait = TimeSpan.FromMinutes(Math.Max(1, mins))
+        End If
+
+        autoRepeatRound += 1
+        AppendLog("")
+        If canDo > 0 Then
+            AppendLog(">>> auto repeat: " & canDo.ToString() & " panel(s) uploadable - next pass in " &
+                      FriendlyWait(wait) & "   (round " & autoRepeatRound.ToString() & ")")
+        Else
+            AppendLog(">>> auto repeat: nothing to upload right now - scanning again in " &
+                      FriendlyWait(wait) & ".  Press Stop to end.")
+        End If
+
+        If autoRepeatTimer IsNot Nothing Then autoRepeatTimer.Stop()
+        autoRepeatTimer = New System.Windows.Threading.DispatcherTimer()
+        autoRepeatTimer.Interval = wait
+        AddHandler autoRepeatTimer.Tick,
+            Sub()
+                autoRepeatTimer.Stop()
+                autoRepeatTimer = Nothing
+                If busy Then Return                       ' something else started
+                If Not chkAutoRepeat.IsChecked.GetValueOrDefault() Then Return
+                ' Always scan first - the folder may have gained panels since the
+                ' last pass, or lost the reason a panel was blocked.
+                autoRepeatUploadAfterScan = True
+                OnScan(Nothing, Nothing)
+            End Sub
+        autoRepeatTimer.Start()
+        ' SetBusy already ran before this timer existed, so enable Stop here.
+        btnStop.IsEnabled = True
+    End Sub
+
+    Private Function FriendlyWait(t As TimeSpan) As String
+        If t.TotalSeconds < 60 Then Return CInt(t.TotalSeconds).ToString() & "s"
+        Return CInt(t.TotalMinutes).ToString() & " min"
+    End Function
 
 End Class
