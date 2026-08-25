@@ -804,7 +804,7 @@
                                             <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
                                             <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
                                             <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Text="Primary host" Style="{StaticResource SettingLabel}"/>
                                         <TextBox   Grid.Row="0" Grid.Column="1" x:Name="SetPrimaryHost" Style="{StaticResource SettingBox}"/>
@@ -843,6 +843,9 @@
                                             <ComboBoxItem Content="Primary"/>
                                             <ComboBoxItem Content="Secondary"/>
                                         </ComboBox>
+                                        <TextBlock Grid.Row="11" Grid.Column="0" Text="File timestamp" Style="{StaticResource SettingLabel}"/>
+                                        <CheckBox  Grid.Row="11" Grid.Column="1" x:Name="SetPreserveTimestamp" Margin="0,2,0,8"
+                                                   VerticalAlignment="Center" Content="Preserve the local file's modified time (WinSCP; uncheck to let the server stamp the upload time)"/>
                                     </Grid>
                                 </StackPanel>
                             </Border>

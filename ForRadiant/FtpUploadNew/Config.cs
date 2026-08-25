@@ -38,6 +38,11 @@ public sealed class Config
     /// the panel's index/host manifest is sent last and gates downstream, so a partial data file is
     /// overwritten on retry before the panel is considered complete.</summary>
     public bool UseTempFile { get; set; } = true;
+    /// <summary>WinSCP only. When true, an uploaded file keeps the LOCAL file's modified time — but
+    /// the server shows it in the SERVER's timezone, so a file made late on one day can display as the
+    /// next day on a server in a timezone ahead (the "date 26 vs 25" problem). Default false = let the
+    /// server stamp each file with the actual upload time (its own clock), which is predictable.</summary>
+    public bool PreserveTimestamp { get; set; } = false;
     /// <summary>When true, the active engine writes its own session log — the full FTP conversation
     /// (commands + server responses) — to the log folder, one file per connection:
     /// WinSCP -> {yyyyMMdd}_winscp_{HHmmss}.log, FluentFTP -> {yyyyMMdd}_fluentftp_{HHmmss}.log.

@@ -154,7 +154,7 @@ public sealed class WinScpTransfer : IFtpTransfer
                     catch { /* created concurrently by another panel, or exists — ignore */ }
                 }
 
-                var to = new TransferOptions { OverwriteMode = OverwriteMode.Overwrite };
+                var to = new TransferOptions { OverwriteMode = OverwriteMode.Overwrite, PreserveTimestamp = _cfg.PreserveTimestamp };
                 if (_cfg.UseTempFile)
                 {
                     // Upload to a temp name so a failed/aborted transfer never appears under the real

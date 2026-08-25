@@ -10,6 +10,7 @@
   "Engine": "WinSCP",
   "FtpMode": "Passive",
   "UseTempFile": true,
+  "PreserveTimestamp": false,
   "WinScpLog": true,
   "TimeoutSecondsOverride": 5,
   "PrimaryRetries": 2,

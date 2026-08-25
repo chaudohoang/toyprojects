@@ -646,6 +646,7 @@ public partial class MainWindow : Window
         SelectCombo(SetFtpMode, string.Equals(c.FtpMode, "Active", StringComparison.OrdinalIgnoreCase) ? "Active" : "Passive");
         SelectCombo(SetInitialHost, string.Equals(c.InitialHost, "Secondary", StringComparison.OrdinalIgnoreCase) ? "Secondary" : "Primary");
         SetWinScpLog.IsChecked = c.WinScpLog;
+        SetPreserveTimestamp.IsChecked = c.PreserveTimestamp;
         SetUseTempFile.IsChecked = c.UseTempFile;
 
         SetQueueFolder.Text = c.QueueFolder;
@@ -696,6 +697,7 @@ public partial class MainWindow : Window
             c.FtpMode = (SetFtpMode.SelectedItem as System.Windows.Controls.ComboBoxItem)?.Content?.ToString() ?? c.FtpMode;
             c.InitialHost = (SetInitialHost.SelectedItem as System.Windows.Controls.ComboBoxItem)?.Content?.ToString() ?? c.InitialHost;
             c.WinScpLog = SetWinScpLog.IsChecked == true;
+            c.PreserveTimestamp = SetPreserveTimestamp.IsChecked == true;
             c.UseTempFile = SetUseTempFile.IsChecked == true;
 
             c.QueueFolder = SetQueueFolder.Text.Trim();
