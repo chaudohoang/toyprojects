@@ -49,7 +49,7 @@ public static class LogRetention
                     if (!datePart.All(char.IsDigit)) continue;
 
                     var ext = Path.GetExtension(name).ToLowerInvariant();
-                    if (ext != ".txt" && ext != ".html") continue;
+                    if (ext != ".txt" && ext != ".html" && ext != ".log") continue;
 
                     if (!DateTime.TryParseExact(datePart, "yyyyMMdd", null,
                             System.Globalization.DateTimeStyles.None, out var d)) continue;

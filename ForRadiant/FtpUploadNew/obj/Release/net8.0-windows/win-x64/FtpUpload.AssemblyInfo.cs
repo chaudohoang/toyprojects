@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FtpUpload")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9d4c06142c2bf825065f3c022f22cc6f9637efa4")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0dc4d57ea80c953198ea8254ff0d9c3351f30231")]
 [assembly: System.Reflection.AssemblyProductAttribute("FtpUpload")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FtpUpload")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

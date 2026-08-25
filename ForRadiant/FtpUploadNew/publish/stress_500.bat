@@ -17,6 +17,10 @@ REM  (Do NOT pass -Panels / -Pct* here - they are set below and would conflict.)
 REM ==========================================================================
 echo.
 echo === STRESS 500 ===========================================================
+echo Step 0/2: stopping any running FtpUpload (so the clean can actually wipe)...
+taskkill /f /im FtpUpload.exe >nul 2>&1
+REM give the OS a moment to release file handles on jobs/logs/state
+ping -n 2 127.0.0.1 >nul
 echo Step 1/2: FULL clean (no prompt)...
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0clean_panels.ps1" -Full
 echo.

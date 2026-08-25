@@ -18,6 +18,11 @@ public sealed class JobFile
     public string LocalPath { get; init; } = "";
     public string RemotePath { get; init; } = "";
 
+    /// <summary>True for a panel's index/host completion manifest. Counted like any file (so the
+    /// panel is only SUCCESS once these are sent too), but NOT queued for the normal pump — the
+    /// finalize step sends it once all data files resolve, then marks it Succeeded/Failed.</summary>
+    public bool IsManifest { get; init; }
+
     public FileStatus Status { get; set; } = FileStatus.Pending;
     public string SucceedTime { get; set; } = "";
     public int FailCount { get; set; }
@@ -41,9 +46,10 @@ public sealed class JobsLine
     public string Pid = "", FileName = "", LocalPath = "", RemotePath = "";
     public string IndexSrc = "", HostSrc = "", UploadIndexPath = "", UploadHostPath = "", ChannelIndex = "";
     public bool IsPanel;
+    public bool IsManifest;
 
     public string ToLine() => IsPanel
-        ? string.Join('|', Pid, FileName, LocalPath, RemotePath, IndexSrc, HostSrc, UploadIndexPath, UploadHostPath, ChannelIndex)
+        ? string.Join('|', Pid, FileName, LocalPath, RemotePath, IndexSrc, HostSrc, UploadIndexPath, UploadHostPath, ChannelIndex, IsManifest ? "1" : "0")
         : string.Join('|', Pid, FileName, LocalPath, RemotePath);
 
     public static JobsLine? Parse(string line)
@@ -62,6 +68,7 @@ public sealed class JobsLine
             j.IndexSrc = p[4].Trim(); j.HostSrc = p[5].Trim();
             j.UploadIndexPath = p[6].Trim(); j.UploadHostPath = p[7].Trim();
             j.ChannelIndex = p[8].Trim();
+            if (p.Length >= 10) j.IsManifest = p[9].Trim() == "1";   // 10th field, backward compatible
         }
         return j;
     }
@@ -90,6 +97,9 @@ public sealed class Job
     public int TotalFileCount { get; set; }
     /// <summary>True once this panel's index+host manifests have been sent (finalized).</summary>
     public bool Finalized { get; set; }
+    /// <summary>How many times the finalize (manifest send) has failed while the panel was resolved.
+    /// After cfg.MaxAttempts, the manifests are marked Failed and handed to the NG pump.</summary>
+    public int FinalizeAttempts { get; set; }
 
     /// <summary>True if this panel carries .panel metadata (vs. a legacy jobs.txt panel).</summary>
     public bool IsPanelJob => SourceFolder.Length > 0;
@@ -232,6 +242,14 @@ public sealed class NgItem
     public string LocalPath { get; init; } = "";
     public string RemotePath { get; init; } = "";
     public string OrigStatus { get; init; } = "";    // "FAILED" or "TIMEDOUT"
+    /// <summary>True when this NG item IS a panel's index/host manifest (from the panel jobs line).
+    /// The NG pump uploads it directly and does NOT run the manifest-update / finalize post-step.</summary>
+    public bool IsManifest { get; init; }
+
+    /// <summary>True for an index/host row shown for context on a panel whose DATA files are in NG.
+    /// It is never retried by the pump (its content isn't ready until the data files recover) — it's
+    /// purely informational; the post-step sends the real manifest when the data files come back.</summary>
+    public bool DisplayOnly { get; init; }
 
     // Panel manifest paths (from the panel jobs line); empty for legacy files. Let the NG pump
     // update the index/host manifest when it recovers a panel file, and finalize past-day panels

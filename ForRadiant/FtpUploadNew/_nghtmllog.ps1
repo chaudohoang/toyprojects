@@ -24,12 +24,13 @@ function Enc([string]$s) {
 $root = $PSScriptRoot
 if (-not $root) { $root = Split-Path -Parent $MyInvocation.MyCommand.Path }
 
-$primary = ''; $secondary = ''
+$primary = ''; $secondary = ''; $JobsFolder = ''
 $cfgPath = Join-Path $root 'config.json'
 if (Test-Path $cfgPath) {
     try {
         $cfg = Get-Content $cfgPath -Raw | ConvertFrom-Json
         if ([string]::IsNullOrEmpty($LogFolder)) { $LogFolder = [string]$cfg.LogFolder }
+        $JobsFolder = [string]$cfg.JobsFolder
         $primary   = [string]$cfg.PrimaryHost
         $secondary = [string]$cfg.SecondaryHost
     } catch { }
@@ -38,6 +39,8 @@ if ([string]::IsNullOrEmpty($LogFolder)) { $LogFolder = Join-Path $root 'logs' }
 # Resolve a relative LogFolder against the script/exe folder, exactly like the app does, so a seed
 # config using "logs" works regardless of the current working directory.
 if (-not [System.IO.Path]::IsPathRooted($LogFolder)) { $LogFolder = Join-Path $root $LogFolder }
+if ([string]::IsNullOrEmpty($JobsFolder)) { $JobsFolder = Join-Path $root 'jobs' }
+if (-not [System.IO.Path]::IsPathRooted($JobsFolder)) { $JobsFolder = Join-Path $root $JobsFolder }
 
 # No day given (e.g. double-clicked): list days that actually have an ng-retry log and let the user pick.
 if (-not $PSBoundParameters.ContainsKey('Day')) {
@@ -95,7 +98,7 @@ foreach ($line in Get-Content $ngPath) {
     if (-not $byKey.ContainsKey($key)) {
         $byKey[$key] = [pscustomobject]@{
             Pid = $p[0]; File = $p[1]; Events = (New-Object System.Collections.ArrayList)
-            Recovered = $false; Retries = 0; LastTime = ''
+            Recovered = $false; Retries = 0; LastTime = ''; PendingManifest = $false
         }
         [void]$order.Add($key)
     }
@@ -106,6 +109,35 @@ foreach ($line in Get-Content $ngPath) {
     [void]$e.Events.Add([pscustomobject]@{ Ok = $ok; Ip = $ip; Time = $tm })
     if ($ok) { $e.Recovered = $true }
     if ($p.Count -ge 6) { $e.LastTime = $p[5] }
+}
+
+# Inject Pending rows for the index/host of any panel in this report whose manifests haven't been
+# sent yet (not in the ng-retry log). Filenames come from the jobs file's manifest lines (10th
+# field = 1). Mirrors the NG list, which shows the manifests as Pending too.
+$manifestNames = @{}
+$jobsPath = Join-Path $JobsFolder ("{0}_jobs.txt" -f $Day)
+if (Test-Path $jobsPath) {
+    foreach ($jl in Get-Content $jobsPath) {
+        $jp = $jl.Split('|')
+        if ($jp.Count -lt 10 -or $jp[9].Trim() -ne '1') { continue }
+        $mp = $jp[0]
+        if (-not $manifestNames.ContainsKey($mp)) { $manifestNames[$mp] = New-Object System.Collections.ArrayList }
+        [void]$manifestNames[$mp].Add($jp[1])
+    }
+}
+$pidsInReport = @{}
+foreach ($k in $order) { $pidsInReport[$byKey[$k].Pid] = $true }
+foreach ($mp in $pidsInReport.Keys) {
+    if (-not $manifestNames.ContainsKey($mp)) { continue }
+    foreach ($name in $manifestNames[$mp]) {
+        $key = $mp + '|' + $name
+        if ($byKey.ContainsKey($key)) { continue }
+        $byKey[$key] = [pscustomobject]@{
+            Pid = $mp; File = $name; Events = (New-Object System.Collections.ArrayList)
+            Recovered = $false; Retries = 0; LastTime = ''; PendingManifest = $true
+        }
+        [void]$order.Add($key)
+    }
 }
 
 # summary
@@ -119,13 +151,18 @@ foreach ($k in $order) {
 
 # build one NG item row (no PID column; that's in the panel header)
 function NgRow($e, $reason) {
-    $rBadge = switch ($reason) {
-        'TIMEDOUT' { "<span class='b to'>Timed Out</span>" }
-        'FAILED'   { "<span class='b bad'>Failed</span>" }
-        default    { "<span class='b pend'>&mdash;</span>" }
+    if ($e.PendingManifest) {
+        $rBadge = "<span class='b pend'>Pending</span>"
+    } else {
+        $rBadge = switch ($reason) {
+            'TIMEDOUT' { "<span class='b to'>Timed Out</span>" }
+            'FAILED'   { "<span class='b bad'>Failed</span>" }
+            default    { "<span class='b pend'>&mdash;</span>" }
+        }
     }
-    $state = if ($e.Recovered) { "<span class='b ok'>Recovered</span>" } else { "<span class='b bad'>Still failing</span>" }
-    $stateAttr = if ($e.Recovered) { 'RECOVERED' } else { 'FAILING' }
+    $state = if ($e.PendingManifest) { "<span class='b pend'>Pending</span>" }
+             elseif ($e.Recovered) { "<span class='b ok'>Recovered</span>" } else { "<span class='b bad'>Still failing</span>" }
+    $stateAttr = if ($e.PendingManifest) { 'PENDING' } elseif ($e.Recovered) { 'RECOVERED' } else { 'FAILING' }
 
     $chips = ''
     $i = 0
@@ -165,7 +202,13 @@ foreach ($k in $order) {
 
 $cards = New-Object System.Text.StringBuilder
 foreach ($pidv in $panelOrder) {
-    $keys  = $panels[$pidv]
+    # Order rows like the main rawlog / jobs file: data files first, then index, then host.
+    $keys = @($panels[$pidv] | Sort-Object @{Expression={
+        $f = $byKey[$_].File
+        if ($f.ToLower().EndsWith('.idx')) { 1 }
+        elseif ($f.StartsWith($pidv + '_') -and $f.ToLower().EndsWith('.txt')) { 2 }
+        else { 0 }
+    }}, @{Expression={ [array]::IndexOf($panels[$pidv], $_) }})
     $pRec  = @($keys | Where-Object { $byKey[$_].Recovered }).Count
     $pFail = $keys.Count - $pRec
     $ovText = if ($pFail -eq 0) { 'Recovered' } else { 'Still failing' }

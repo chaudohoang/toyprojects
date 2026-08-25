@@ -23,16 +23,18 @@ public sealed class ManifestWriter(Config cfg)
     private static bool IsFor(string line, string destPath) =>
         line.StartsWith(destPath + "@", StringComparison.OrdinalIgnoreCase);
 
-    /// <summary>Create or resume both manifests for a panel from its current data files.</summary>
+    /// <summary>Create or resume both manifests for a panel from its current DATA files.</summary>
     public void Seed(Job job)
     {
-        if (!job.IsPanelJob || job.Files.Count == 0) return;
+        if (!job.IsPanelJob) return;
+        var dataFiles = job.Files.Where(f => !f.IsManifest).ToList();   // manifests never list themselves
+        if (dataFiles.Count == 0) return;
         SafeFile.WithLock(() =>
         {
             // Resume: keep whatever state (clean or -pending) an existing host manifest already has.
             var existing = ReadMap(job.HostSrc);
-            var lines = new List<string>(job.Files.Count);
-            foreach (var f in job.Files)
+            var lines = new List<string>(dataFiles.Count);
+            foreach (var f in dataFiles)
             {
                 var dest = f.RemotePath;
                 lines.Add(existing.TryGetValue(dest, out var prev)
@@ -80,6 +82,13 @@ public sealed class ManifestWriter(Config cfg)
         });
     }
 
+    /// <summary>True once the panel's manifests have been sent (the ".sent" sentinel exists).</summary>
+    public bool IsSent(Job job)
+    {
+        if (!job.IsPanelJob || string.IsNullOrEmpty(job.IndexSrc)) return false;
+        try { return File.Exists(job.IndexSrc + ".sent"); } catch { return false; }
+    }
+
     /// <summary>True once the host manifest exists and no line still carries " -pending".</summary>
     public bool AllResolved(Job job)
     {
@@ -97,7 +106,7 @@ public sealed class ManifestWriter(Config cfg)
     /// <summary>
     /// Job overload: finalize a live panel. Sets job.Finalized on success (fast in-memory skip).
     /// </summary>
-    public async Task<bool> TryFinalizeAsync(Job job, FtpTransfer ftp)
+    public async Task<bool> TryFinalizeAsync(Job job, IFtpTransfer ftp)
     {
         if (job.Finalized || !job.IsPanelJob) return false;
         var sent = await TryFinalizeAsync(job.IndexSrc, job.HostSrc, job.UploadIndexPath, job.UploadHostPath, ftp);
@@ -115,7 +124,7 @@ public sealed class ManifestWriter(Config cfg)
     /// released so a later tick retries. The sentinel also survives restart, so a completed panel is
     /// never re-sent.
     /// </summary>
-    public async Task<bool> TryFinalizeAsync(string indexSrc, string hostSrc, string uploadIndexPath, string uploadHostPath, FtpTransfer ftp)
+    public async Task<bool> TryFinalizeAsync(string indexSrc, string hostSrc, string uploadIndexPath, string uploadHostPath, IFtpTransfer ftp)
     {
         if (string.IsNullOrEmpty(indexSrc) || string.IsNullOrEmpty(hostSrc)) return false;
         var sentinel = indexSrc + ".sent";
@@ -140,7 +149,7 @@ public sealed class ManifestWriter(Config cfg)
         return false;
     }
 
-    private async Task<bool> SendAsync(FtpTransfer ftp, string localPath, string remotePath)
+    private async Task<bool> SendAsync(IFtpTransfer ftp, string localPath, string remotePath)
     {
         var jf = new JobFile
         {

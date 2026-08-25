@@ -12,12 +12,38 @@ public sealed class Config
     // ---- CNS connection (dual IP, spec §2) ----
     public string PrimaryHost { get; set; } = "192.168.0.10";
     public string SecondaryHost { get; set; } = "192.168.0.11";
+    /// <summary>Which host the INITIAL upload attempt targets: "Primary" (default) or "Secondary".
+    /// Failover then goes to the other host. Set to "Secondary" on some machines to split load across
+    /// the two servers. The retry budgets (PrimaryRetries = tries on the initial host,
+    /// SecondaryRetries = tries on the failover host) stay the same; only which IP is "first" changes.</summary>
+    public string InitialHost { get; set; } = "Primary";
     public int Port { get; set; } = 21;
     public string User { get; set; } = "user";
     public string Password { get; set; } = "";
     /// <summary>None | Explicit | Implicit — FTPS mode.</summary>
     public string FtpSecure { get; set; } = "None";
     public string RemoteBaseFolder { get; set; } = "/upload/LGD";
+
+    /// <summary>Which transfer engine to use: "FluentFTP" or "WinSCP". Unknown/empty = FluentFTP.
+    /// WinSCP requires winscp.exe + WinSCPnet.dll next to the exe; if they're missing at runtime the
+    /// app falls back to FluentFTP and logs it.</summary>
+    public string Engine { get; set; } = "WinSCP";
+    /// <summary>FTP transfer mode for the WinSCP engine: "Passive" (default) or "Active".</summary>
+    public string FtpMode { get; set; } = "Passive";
+    /// <summary>When true (default), each file is uploaded under a temporary "{name}.part" name and
+    /// renamed to the final name only after the bytes fully land — so a half-uploaded file never
+    /// appears under its real name. When false, the file is uploaded DIRECTLY to its final name (no
+    /// .part, no rename, no existence-check round-trips). Set false when the server/downstream must
+    /// never see ".part" files, or when an interrupted transfer stranding a ".part" is a problem —
+    /// the panel's index/host manifest is sent last and gates downstream, so a partial data file is
+    /// overwritten on retry before the panel is considered complete.</summary>
+    public bool UseTempFile { get; set; } = true;
+    /// <summary>When true, the active engine writes its own session log — the full FTP conversation
+    /// (commands + server responses) — to the log folder, one file per connection:
+    /// WinSCP -> {yyyyMMdd}_winscp_{HHmmss}.log, FluentFTP -> {yyyyMMdd}_fluentftp_{HHmmss}.log.
+    /// Useful for diagnosing "uploaded but not right" issues; set false to turn it off.
+    /// (Name kept as WinScpLog for config compatibility; it governs both engines.)</summary>
+    public bool WinScpLog { get; set; } = true;
 
     // ---- Timing (spec §2) ----
     /// <summary>Per-file FTP operation timeout in seconds (connect + transfer). Set directly; a
@@ -56,6 +82,13 @@ public sealed class Config
     /// Attempts beyond this use the secondary. Derived from PrimaryRetries.
     /// </summary>
     [JsonIgnore] public int PrimaryAttempts => 1 + Math.Max(0, PrimaryRetries);
+
+    /// <summary>The host the INITIAL attempt uses (primary unless InitialHost="Secondary").</summary>
+    [JsonIgnore] public string FirstHost =>
+        InitialHost.Equals("Secondary", StringComparison.OrdinalIgnoreCase) ? SecondaryHost : PrimaryHost;
+    /// <summary>The host failover switches to after the initial host's attempts are exhausted.</summary>
+    [JsonIgnore] public string FailoverHost =>
+        InitialHost.Equals("Secondary", StringComparison.OrdinalIgnoreCase) ? PrimaryHost : SecondaryHost;
 
     /// <summary>Per-file operation timeout, with a 5 s floor.</summary>
     [JsonIgnore]
@@ -200,6 +233,8 @@ public sealed class Config
     public string RawLogPath(DateTime day) => Path.Combine(LogFullPath, $"{day:yyyyMMdd}_rawlog.txt");
     public string SnapshotPath(DateTime day) => Path.Combine(LogFullPath, $"{day:yyyyMMdd}_snapshot.txt");
     public string JobsPath(DateTime day) => Path.Combine(JobsFullPath, $"{day:yyyyMMdd}_jobs.txt");
+    /// <summary>Durable, auditable operation log (manifest sends etc.). Pruned by log retention.</summary>
+    public string OpLogPath(DateTime day) => Path.Combine(LogFullPath, $"{day:yyyyMMdd}_oplog.txt");
 
     // Day-string variants (yyyyMMdd) for the NG-retry console, which browses arbitrary days.
     public string RawLogPathForDay(string day) => Path.Combine(LogFullPath, $"{day}_rawlog.txt");

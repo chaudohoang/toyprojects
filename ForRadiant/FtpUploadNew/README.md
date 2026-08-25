@@ -29,9 +29,33 @@ shows that one list through two tabs:
   uploads on its own pump — today's live uploading is untouched — and records outcomes to a
   separate per-day **ng-retry log**; once an item succeeds there it drops off the list.
 
-Built with **.NET 8 + WPF**, using **FluentFTP 54.2.0**. WinForms is referenced only for the
-tray icon (WPF has none built in). No DLLs to download by hand — `dotnet build` restores
-everything, and there is no WebView2 or browser runtime involved.
+Built with **.NET 8 + WPF**, using **FluentFTP 54.2.0** and **WinSCP 5.21.2** (the `WinSCP`
+NuGet package). WinForms is referenced only for the tray icon (WPF has none built in). There is
+no WebView2 or browser runtime involved.
+
+### Transfer engine (FluentFTP / WinSCP)
+
+The FTP layer is behind a small `IFtpTransfer` interface with two implementations, chosen by
+`Engine` in `config.json`:
+
+- **`"WinSCP"` (default)** — drives `WinSCP.exe` via `WinSCPnet.dll`. This is the engine the
+  legacy uploader used against the LGD server, and it does its own post-transfer verification.
+  `FtpMode` selects `"Passive"` (default) or `"Active"`. When `WinScpLog` is true (default), WinSCP
+  writes its full FTP conversation to `logs\{yyyyMMdd}_winscp_{HHmmss}.log`.
+- **`"FluentFTP"`** — the pure-managed engine (no external exe).
+
+Both give identical behaviour to the rest of the app: hard per-file timeout, temp-name
+(`.part`) then rename, primary/secondary failover, **one reused session (reconnect only when the
+connection drops / on host change / at the file cap)**, and the same logs/NG flow.
+
+**WinSCP comes from the NuGet package, not a hand-dropped DLL.** This matters: the standalone
+`WinSCPnet.dll` from WinSCP's website is the **.NET Framework (net40)** build, which is
+binary-incompatible with .NET 8 (`Session.Open` throws `MissingMethodException` on its named-event
+security API, so every upload fails instantly). The `WinSCP` NuGet package supplies the correct
+**netstandard2.0** build plus its dependencies, and copies `WinSCP.exe` next to the app. `dotnet
+build`/`build.bat` restore it automatically (needs internet on the build PC once). If `WinSCP.exe`
+is missing at runtime, the app logs a warning and **falls back to FluentFTP**. The active engine is
+printed to the log at startup (`transfer engine: WinSCP (Passive mode)`).
 
 ## Build
 

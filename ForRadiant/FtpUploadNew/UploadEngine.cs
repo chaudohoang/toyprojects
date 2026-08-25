@@ -28,16 +28,19 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
     private readonly ConcurrentDictionary<string, Job> _jobs = new();      // pid -> job
     private readonly List<JobFile> _queue = new();                          // run order
     private readonly object _gate = new();
-    private readonly FtpTransfer _ftp = new(cfg, reuseConnections: true);   // live pump reuses one connection
+    private readonly IFtpTransfer _ftp = FtpEngineFactory.Create(cfg, reuseConnections: true);   // live pump reuses one connection
 
     /// <summary>Current session number and files-on-this-session, surfaced for the live strip.</summary>
     public int SessionNumber => _ftp.SessionNumber;
     public int FilesThisSession => _ftp.FilesThisSession;
 
     // Manifest (index/host) writer + a SEPARATE transfer used only to send finalized manifests,
-    // so completion uploads never collide with the single-in-flight live transfer.
+    // so completion uploads never collide with the single-in-flight live transfer. It REUSES one
+    // session (finalize runs serially on the watch loop), so panel completions share a single
+    // connection instead of opening a fresh one per panel — otherwise every finalize would spawn a
+    // new WinSCP.exe + session (and a new engine log file).
     private readonly ManifestWriter _manifest = new(cfg);
-    private readonly FtpTransfer _manifestFtp = new(cfg);
+    private readonly IFtpTransfer _manifestFtp = FtpEngineFactory.Create(cfg, reuseConnections: true);
 
     // Rolling upload-speed average over the last few files (MB/s), shown in the live strip.
     private readonly object _speedGate = new();
@@ -129,7 +132,9 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
                 }
 
                 job.Files.Add(f);
-                _queue.Add(f);
+                // Manifest files are counted but never enter the normal pump — the finalize step
+                // sends them once all data files resolve, then marks them Succeeded/Failed.
+                if (!f.IsManifest) _queue.Add(f);
             }
         }
 
@@ -180,11 +185,71 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
         foreach (var job in _jobs.Values)
         {
             if (job.Finalized || !job.IsPanelJob) continue;
+            var manifests = job.Files.Where(f => f.IsManifest).ToList();
+            if (manifests.Count == 0) continue;   // legacy panel with no manifest files
+
             try
             {
+                // Already resolved to a terminal state (e.g. carried forward from the rawlog after a
+                // restart, or already handed to NG): the live engine is done with it.
+                if (manifests.All(m => m.Status == FileStatus.Succeeded)) { job.Finalized = true; continue; }
+                if (manifests.Any(m => m.Status is FileStatus.Failed or FileStatus.TimedOut))
+                    { job.Finalized = true; continue; }
+
+                var dataFiles = job.Files.Where(f => !f.IsManifest).ToList();
+                if (dataFiles.Count == 0) continue;
+
+                // Wait until every data file has finished on the live pump — nothing still Pending
+                // (queued or in-flight). The manifests stay Pending in the meantime; they are only
+                // ever resolved once the panel's data files are all done, one way or the other. (This
+                // is what stops a manifest flipping to Failed while other files are still uploading.)
+                if (dataFiles.Any(f => f.Status == FileStatus.Pending)) continue;
+
+                // All data files are resolved now. If any FAILED/TIMED-OUT with its source still
+                // present, it went to the NG pump — the panel is being recovered there (NG log only),
+                // so write NOTHING to the main rawlog; just mark the manifests terminal in-memory so
+                // the panel isn't stuck In Progress. (A file whose SOURCE is gone was legitimately
+                // dropped from the panel and does NOT block a live completion.)
+                if (dataFiles.Any(f => (f.Status is FileStatus.Failed or FileStatus.TimedOut)
+                                       && File.Exists(f.LocalPath)))
+                {
+                    foreach (var mf in manifests.Where(m => m.Status == FileStatus.Pending))
+                        mf.Status = FileStatus.Failed;   // in-memory only — never written to the rawlog
+                    job.Finalized = true;
+                    NotifyChanged();
+                    continue;
+                }
+
+                // Nothing actually uploaded (all dropped) — nothing to finalize.
+                if (!dataFiles.Any(f => f.Status == FileStatus.Succeeded)) { job.Finalized = true; continue; }
+
+                // Clean live completion (every data file Succeeded live, plus any source-gone drops):
+                // send the manifests and record them in the main rawlog (host last).
                 if (await _manifest.TryFinalizeAsync(job, _manifestFtp))
                 {
-                    Log($"panel {job.Pid}: index + host manifest sent — panel complete");
+                    MarkManifestsSucceeded(job, manifests);
+                }
+                else
+                {
+                    // Data done live, but the manifest SEND itself failed. Count it; after MaxAttempts,
+                    // hand the manifests to NG as real FAILED files (a genuine manifest failure — this
+                    // IS recorded in the main rawlog, because the panel completed live).
+                    job.FinalizeAttempts++;
+                    Log($"panel {job.Pid}: manifest send failed (attempt {job.FinalizeAttempts}/{cfg.MaxAttempts})");
+                    if (job.FinalizeAttempts >= cfg.MaxAttempts)
+                    {
+                        foreach (var mf in manifests)
+                        {
+                            mf.Attempts = job.FinalizeAttempts;
+                            mf.FailCount++;
+                            mf.FailTimes.Add(DateTime.Now.ToString("HH:mm:ss"));
+                            mf.Status = FileStatus.Failed;
+                        }
+                        foreach (var mf in manifests.OrderBy(f => f.RemotePath == job.UploadHostPath ? 1 : 0))
+                            rawLog.Write(mf, cfg.MaxAttempts, cfg.PrimaryHost, job, job.Day);
+                        job.Finalized = true;   // live engine is done; the NG pump owns it now
+                        Log($"panel {job.Pid}: manifest NG after {cfg.MaxAttempts} attempts — moved to NG list");
+                    }
                     NotifyChanged();
                 }
             }
@@ -192,6 +257,30 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
             {
                 Log($"panel {job.Pid}: finalize error: {ex.Message}");
             }
+        }
+    }
+
+    /// <summary>Mark a panel's two manifest files Succeeded and log them like any file, so they count,
+    /// show in the day report, and (only now) make the panel AllSucceeded -> SUCCESS/O.</summary>
+    private void MarkManifestsSucceeded(Job job, List<JobFile> manifests)
+    {
+        var pending = manifests.Where(f => f.Status != FileStatus.Succeeded).ToList();
+        foreach (var mf in pending)
+        {
+            mf.Attempts = Math.Max(1, mf.Attempts);
+            mf.Status = FileStatus.Succeeded;
+            mf.SucceedTime = DateTime.Now.ToString("HH:mm:ss");
+        }
+        // Write the INDEX line first and the HOST line LAST, so a completed panel's final rawlog
+        // line is the host manifest with SUCCESS — that is the line the fixture's previous-panel
+        // O/X check reads (it scans bottom-up for the PID's last line).
+        foreach (var mf in pending.OrderBy(f => f.RemotePath == job.UploadHostPath ? 1 : 0))
+            rawLog.Write(mf, cfg.MaxAttempts, cfg.PrimaryHost, job, job.Day);
+        job.Finalized = true;
+        if (pending.Count > 0)
+        {
+            Log($"panel {job.Pid}: index + host manifest sent — panel complete");
+            NotifyChanged();
         }
     }
 
@@ -600,7 +689,11 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
                     // (it never made an attempt), so it shows a clean 0/N with no phantom chip.
                     x.Status = FileStatus.TimedOut;
                     _queue.RemoveAll(q => ReferenceEquals(q, x));
-                    skipped.Add(x);
+                    // Data files go to the main rawlog + NG (retryable). Manifests do NOT: their
+                    // content still has -pending (the data files never finished), so retrying them in
+                    // NG would push an incomplete manifest. They stay a terminal in-memory TimedOut so
+                    // the panel isn't stuck; NG sends them via its post-step once the data files recover.
+                    if (!x.IsManifest) skipped.Add(x);
                 }
 
                 if (_inFlight is not null && _inFlight.Pid == job.Pid)

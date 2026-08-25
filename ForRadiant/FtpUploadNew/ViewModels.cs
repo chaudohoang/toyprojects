@@ -292,9 +292,24 @@ public sealed class NgItemVm : Notify
         ? new System.Windows.Thickness(2)
         : new System.Windows.Thickness(0);
 
-    public string OrigText => Model.OrigStatus == "TIMEDOUT" ? "Timed Out" : "Failed";
-    public Brush OrigBg => Model.OrigStatus == "TIMEDOUT" ? Palette.TimeoutBg : Palette.BadBg;
-    public Brush OrigFg => Model.OrigStatus == "TIMEDOUT" ? Palette.TimeoutFg : Palette.BadFg;
+    public string OrigText => Model.OrigStatus switch
+    {
+        "TIMEDOUT" => "Timed Out",
+        "PENDING" => "Pending",
+        _ => "Failed"
+    };
+    public Brush OrigBg => Model.OrigStatus switch
+    {
+        "TIMEDOUT" => Palette.TimeoutBg,
+        "PENDING" => Palette.PendBg,
+        _ => Palette.BadBg
+    };
+    public Brush OrigFg => Model.OrigStatus switch
+    {
+        "TIMEDOUT" => Palette.TimeoutFg,
+        "PENDING" => Palette.PendFg,
+        _ => Palette.BadFg
+    };
 
     public string StateText => Model.State switch
     {
@@ -324,7 +339,8 @@ public sealed class NgItemVm : Notify
     public string RetriesText => Model.TotalRetries.ToString();
     public string LastHost => Model.LastHost;
 
-    public bool CanRetry => Model.State != NgItemState.Uploading && Model.State != NgItemState.Succeeded;
+    public bool CanRetry => !Model.DisplayOnly
+        && Model.State != NgItemState.Uploading && Model.State != NgItemState.Succeeded;
 
     public void Refresh()
     {
