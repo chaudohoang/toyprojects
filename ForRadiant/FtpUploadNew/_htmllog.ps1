@@ -25,6 +25,11 @@ function Enc([string]$s) {
     return ($s -replace '&', '&amp;' -replace '<', '&lt;' -replace '>', '&gt;')
 }
 
+function Pct($n, $total) {
+    if ($total -gt 0) { return ("<span class='pct'>{0:0.#}%</span>" -f ($n * 100.0 / $total)) }
+    return ''
+}
+
 $root = $PSScriptRoot
 if (-not $root) { $root = Split-Path -Parent $MyInvocation.MyCommand.Path }
 
@@ -324,6 +329,7 @@ $html = @"
   .fhint b{color:#6B7386;}
   .fhint .fc{color:#4D8CFF;font-weight:600;margin-left:6px;}
   .card .n{font-size:22px;font-weight:700;} .card .l{font-size:11px;color:#8891A3;text-transform:uppercase;letter-spacing:.04em;}
+  .card .n .pct{display:block;font-size:11px;font-weight:600;color:#9AA2B1;letter-spacing:0;margin-top:1px;}
   .n.ok{color:#1F9D55;} .n.bad{color:#E0483F;} .n.pend{color:#4D8CFF;} .n.to{color:#7C3AED;}
   table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #ECEFF5;border-radius:10px;overflow:hidden;}
   th{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#8891A3;text-align:left;padding:9px 12px;background:#F8F9FC;border-bottom:1px solid #ECEFF5;}
@@ -351,10 +357,10 @@ $html = @"
 
 <div class='cards'>
   <div class='card'><div class='n'>$tot</div><div class='l'>Files</div></div>
-  <div class='card clickable' data-filter='SUCCEEDED'><div class='n ok'>$ok</div><div class='l'>Succeeded</div></div>
-  <div class='card clickable' data-filter='FAILED'><div class='n bad'>$fail</div><div class='l'>Failed</div></div>
-  <div class='card clickable' data-filter='TIMEDOUT'><div class='n to'>$timeout</div><div class='l'>Timed out</div></div>
-  <div class='card clickable' data-filter='PENDING'><div class='n pend'>$pend</div><div class='l'>Pending</div></div>
+  <div class='card clickable' data-filter='SUCCEEDED'><div class='n ok'>$ok$(Pct $ok $tot)</div><div class='l'>Succeeded</div></div>
+  <div class='card clickable' data-filter='FAILED'><div class='n bad'>$fail$(Pct $fail $tot)</div><div class='l'>Failed</div></div>
+  <div class='card clickable' data-filter='TIMEDOUT'><div class='n to'>$timeout$(Pct $timeout $tot)</div><div class='l'>Timed out</div></div>
+  <div class='card clickable' data-filter='PENDING'><div class='n pend'>$pend$(Pct $pend $tot)</div><div class='l'>Pending</div></div>
   <div class='card'><div class='n'>$priOk&nbsp;/&nbsp;$priFail</div><div class='l'>Primary ok / fail$pTag</div></div>
   <div class='card'><div class='n'>$secOk&nbsp;/&nbsp;$secFail</div><div class='l'>Secondary ok / fail$sTag</div></div>
 </div>

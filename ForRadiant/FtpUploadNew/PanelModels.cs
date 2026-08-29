@@ -146,18 +146,23 @@ public static class PathDerivation
 ///   • '@PID@'  is replaced with the panel's PID before matching
 ///   • '*' matches any run of characters, '?' matches one (case-insensitive)
 ///   • a bare name with no wildcard matches that exact filename
+///   • a line starting with '!' is an EXCLUDE: a file is uploaded only if it matches at least one
+///     normal (allow) pattern AND matches no '!' pattern. e.g. "!*_ori*" skips any *_ori* file.
 /// </summary>
 public sealed class Recipe
 {
-    private readonly List<string> _patterns;
+    private readonly List<string> _allow;
+    private readonly List<string> _exclude;
 
-    private Recipe(List<string> patterns) => _patterns = patterns;
+    private Recipe(List<string> allow, List<string> exclude) { _allow = allow; _exclude = exclude; }
 
-    public IReadOnlyList<string> Patterns => _patterns;
+    /// <summary>The allow patterns. Empty here = no recipe (treated as misconfigured by the caller).</summary>
+    public IReadOnlyList<string> Patterns => _allow;
 
     public static Recipe Load(string path)
     {
-        var patterns = new List<string>();
+        var allow = new List<string>();
+        var exclude = new List<string>();
         try
         {
             if (File.Exists(path))
@@ -165,20 +170,30 @@ public sealed class Recipe
                 {
                     var line = raw.Trim();
                     if (line.Length == 0 || line.StartsWith('#')) continue;
-                    patterns.Add(line);
+                    if (line.StartsWith('!'))
+                    {
+                        var ex = line[1..].Trim();
+                        if (ex.Length > 0) exclude.Add(ex);
+                    }
+                    else allow.Add(line);
                 }
         }
         catch { /* missing/locked recipe -> empty; caller decides how to treat that */ }
-        return new Recipe(patterns);
+        return new Recipe(allow, exclude);
     }
 
-    /// <summary>True if fileName matches any pattern (with @PID@ resolved to pid).</summary>
+    /// <summary>True if fileName matches an ALLOW pattern and NO EXCLUDE ('!') pattern
+    /// (with @PID@ resolved to pid).</summary>
     public bool Matches(string fileName, string pid)
     {
-        foreach (var pat in _patterns)
-            if (GlobToRegex(pat.Replace("@PID@", pid)).IsMatch(fileName))
-                return true;
-        return false;
+        var allowed = false;
+        foreach (var pat in _allow)
+            if (GlobToRegex(pat.Replace("@PID@", pid)).IsMatch(fileName)) { allowed = true; break; }
+        if (!allowed) return false;
+
+        foreach (var pat in _exclude)
+            if (GlobToRegex(pat.Replace("@PID@", pid)).IsMatch(fileName)) return false;   // excluded
+        return true;
     }
 
     private static Regex GlobToRegex(string glob)

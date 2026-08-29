@@ -39,25 +39,31 @@ public partial class MainWindow : Window
     private bool _ngWasManual;
     private NgItem? _lastScrolledNg;
 
+    // Set while the constructor syncs the NG IP dropdown to the saved config value, so that
+    // programmatic change isn't mistaken for the operator picking a host (and re-saved).
+    private bool _ngIpLoading;
+
     public MainWindow(AppHost host)
     {
         _host = host;
+
+        // Must be set BEFORE InitializeComponent: the XAML marks "Auto" IsSelected, which raises
+        // SelectionChanged during construction. Without this guard that phantom event overwrites a
+        // saved Primary/Secondary with Auto on every single launch, before we ever restore it.
+        _ngIpLoading = true;
         InitializeComponent();
 
-        var build = "";
-        try
-        {
-            // Environment.ProcessPath works even for a single-file publish (Assembly.Location
-            // is blank there). Its last-write time is effectively the build time — a quick way
-            // to confirm the running exe is actually the one you just built.
-            var exe = Environment.ProcessPath;
-            if (exe is not null)
-                build = $"build {System.IO.File.GetLastWriteTime(exe):MMM d HH:mm}";
-        }
-        catch { /* non-critical */ }
+        // Proper app version in the title bar, read from the assembly (set by <Version> in the
+        // .csproj — bump it when shipping a new build).
+        var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+        // Include Revision when it is non-zero. Major.Minor.Build alone renders 1.0.0.1 as "v1.0.0",
+        // which makes a shipped patch build indistinguishable from the one it replaced — exactly the
+        // thing this title is meant to let you check at a glance.
+        var vstr = ver is null ? ""
+                 : ver.Revision > 0 ? $"v{ver.Major}.{ver.Minor}.{ver.Build}.{ver.Revision}"
+                 : $"v{ver.Major}.{ver.Minor}.{ver.Build}";
 
-        // Build stamp lives in the OS title bar now, keeping the in-window subtitle clean.
-        Title = build.Length > 0 ? $"FTP Upload Job Manager — {build}" : "FTP Upload Job Manager";
+        Title = vstr.Length > 0 ? $"FTP Upload Job Manager — {vstr}" : "FTP Upload Job Manager";
 
         SubTitle.Text = $"{host.Cfg.PrimaryHost} / {host.Cfg.SecondaryHost}  ·  " +
                         $"{host.Cfg.TimeoutSeconds}s timeout  ·  {host.Cfg.MaxAttempts} attempts";
@@ -65,6 +71,11 @@ public partial class MainWindow : Window
         // Rows/strips show the full destination as ftp://{host}/{path}. Primary host is the
         // main target (failover to secondary is reflected in the log's "via {host}").
         UiConfig.FtpHost = host.Cfg.PrimaryHost;
+
+        // Show the saved NG IP choice. AppHost has already applied it to the engine; this only
+        // syncs the dropdown, so it must not count as an operator change (_ngIpLoading, set above).
+        NgIp.SelectedIndex = host.Cfg.NgIpMode switch { "Primary" => 1, "Secondary" => 2, _ => 0 };
+        _ngIpLoading = false;
 
         JobList.ItemsSource = _jobs;
         NgList.ItemsSource = _ng;
@@ -156,6 +167,8 @@ public partial class MainWindow : Window
     // frozen once, not reallocated on every tick
     private static readonly SolidColorBrush DotIdle = Freeze(0x5A, 0x64, 0x78);
     private static readonly SolidColorBrush DotBusy = Freeze(0xFF, 0x4D, 0x8C);   // hot pink = actively transferring
+    private static readonly SolidColorBrush DotDayOk = Freeze(0x2E, 0xA0, 0x62);   // green = day settled, pump free
+    private static readonly SolidColorBrush DotDayRolling = Freeze(0xE0, 0x8A, 0x1E);  // amber = rollover settling
     private static SolidColorBrush Freeze(byte r, byte g, byte b)
     {
         var br = new SolidColorBrush(Color.FromRgb(r, g, b));
@@ -219,11 +232,38 @@ public partial class MainWindow : Window
         if (f is null)
             LiveIdle.Text = paused
                 ? "Paused — uploads held (jobs still queued)."
-                : "Idle — no uploads in progress right now.";
+                : _host.Engine.RolloverPending
+                    ? "Day rollover settling — uploads are held until it completes."
+                    : "Idle — no uploads in progress right now.";
 
+        UpdateDayBadge();
         UpdateAutoScroll(f);
         UpdateNgStatus();
         UpdateNgAutoScroll();
+    }
+
+    /// <summary>
+    /// Header "Day" badge: which day the engine is filing work under, and when it last rolled over.
+    /// Amber while a rollover is settling — in that state the live pump is HELD, so jobs can pile up
+    /// in the list without uploading, and this is what tells the operator why.
+    /// </summary>
+    private void UpdateDayBadge()
+    {
+        var pending = _host.Engine.RolloverPending;
+        DayText.Text = Clock.Today.ToString("yyyyMMdd");
+        DayDot.Fill = pending ? DotDayRolling : DotDayOk;
+
+        if (pending)
+        {
+            DayRolled.Text = "· rolling over…";
+            return;
+        }
+
+        var at = _host.Engine.LastRolloverAt;
+        DayRolled.Text = at is null
+            ? ""    // no rollover yet this run — the app started on this day
+            : $"· rolled {at:HH:mm:ss} from {_host.Engine.LastRolloverFromDay} " +
+              $"({_host.Engine.LastRolloverAbandoned} → NG)";
     }
 
     // NG list follows the NG-retry pump's in-flight item (flat list, so a direct ScrollIntoView).
@@ -358,7 +398,14 @@ public partial class MainWindow : Window
         while (d is not null)
         {
             if (d is System.Windows.Controls.Primitives.ScrollBar) return true;
-            d = System.Windows.Media.VisualTreeHelper.GetParent(d);
+
+            // VisualTreeHelper.GetParent THROWS on a ContentElement — and a click that lands on
+            // inline text reports its source as a Run, which is exactly that. Unhandled on the UI
+            // thread, so it killed the whole process: clicking a row's text closed the app and the
+            // pumps with it. Step out to the logical tree for those nodes instead.
+            d = (d is System.Windows.Media.Visual || d is System.Windows.Media.Media3D.Visual3D)
+                ? System.Windows.Media.VisualTreeHelper.GetParent(d)
+                : LogicalTreeHelper.GetParent(d);
         }
         return false;
     }
@@ -420,8 +467,15 @@ public partial class MainWindow : Window
         AllTab.Header = $"Today Jobs ({visible.Count})";
         var ngActive = _host.NgRetry.Items.Count(i =>
             i.State is NgItemState.Waiting or NgItemState.Uploading or NgItemState.Failed);
-        NgTab.Header = $"NG List ({ngActive})";
+        // Show out-of-window work alongside the loaded count. Without it a bare "NG List (0)" reads
+        // as "nothing outstanding" when it only means "nothing outstanding in the days I loaded" —
+        // days that have aged out are neither retried nor counted.
+        var older = _host.NgRetry.BacklogOutstanding;
+        NgTab.Header = older > 0 ? $"NG List ({ngActive})  ·  {older:N0} older" : $"NG List ({ngActive})";
         NgEmpty.Visibility = _ng.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        NgEmpty.Text = older > 0
+            ? $"No NG items in the loaded day(s). {older:N0} file(s) on {_host.NgRetry.BacklogDays} older day(s) are outside the {_host.Cfg.NgRecoveryDays}-day recovery window — pick that day above to retry them."
+            : "No NG items for this day.";
     }
 
     /// <summary>
@@ -439,44 +493,48 @@ public partial class MainWindow : Window
                          it.Pid.Contains(_ngFilter, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
-        // Group by PID, preserving first-seen order so cards don't jump around.
+        // Group by day+PID, preserving first-seen order so cards don't jump around. The list can
+        // span several days (today + the recovery window), and the same panel can legitimately
+        // appear on two of them — grouping on PID alone would merge those into one card.
         var order = new List<string>();
         var byPid = new Dictionary<string, List<NgItem>>();
         foreach (var it in items)
         {
-            if (!byPid.TryGetValue(it.Pid, out var list))
+            var key = it.Day + "|" + it.Pid;
+            if (!byPid.TryGetValue(key, out var list))
             {
                 list = new List<NgItem>();
-                byPid[it.Pid] = list;
-                order.Add(it.Pid);
+                byPid[key] = list;
+                order.Add(key);
             }
             list.Add(it);
         }
 
-        // Hide fully-recovered panels: keep a PID only while at least one item still needs
+        // Hide fully-recovered panels: keep a card only while at least one item still needs
         // attention (Waiting / Uploading / Failed). All Succeeded (or Gone) → drop the card.
         static bool NeedsAttention(NgItem it) =>
             it.State is NgItemState.Waiting or NgItemState.Uploading or NgItemState.Failed;
-        order = order.Where(pid => byPid[pid].Any(NeedsAttention)).ToList();
+        order = order.Where(k => byPid[k].Any(NeedsAttention)).ToList();
 
-        // Reconcile group cards by PID — existing cards are refreshed in place (keeping their
-        // expand/collapse state and row objects), new PIDs are added, vanished PIDs removed.
+        // Reconcile group cards by day+PID — existing cards are refreshed in place (keeping their
+        // expand/collapse state and row objects), new ones added, vanished ones removed.
         var existing = new Dictionary<string, NgGroupVm>();
-        foreach (var g in _ng) existing[g.Pid] = g;
+        foreach (var g in _ng) existing[g.GroupKey] = g;
 
         // Within a panel, show rows in the same order as the main rawlog / jobs file: data files
         // first (original order), then the index manifest, then the host manifest (host last).
         static int NgRank(NgItem it) => !it.IsManifest ? 0 : (it.RemotePath == it.UploadIndexPath ? 1 : 2);
 
-        foreach (var pid in order)
+        foreach (var key in order)
         {
-            if (!existing.TryGetValue(pid, out var group))
+            if (!existing.TryGetValue(key, out var group))
             {
-                group = new NgGroupVm(pid);
+                var first = byPid[key][0];
+                group = new NgGroupVm(first.Day, first.Pid);
                 _ng.Add(group);
-                existing[pid] = group;
+                existing[key] = group;
             }
-            var rows = byPid[pid]
+            var rows = byPid[key]
                 .Select((it, i) => (it, i))
                 .OrderBy(x => NgRank(x.it))
                 .ThenBy(x => x.i)
@@ -487,7 +545,7 @@ public partial class MainWindow : Window
 
         var wantedPids = new HashSet<string>(order);
         for (var i = _ng.Count - 1; i >= 0; i--)
-            if (!wantedPids.Contains(_ng[i].Pid))
+            if (!wantedPids.Contains(_ng[i].GroupKey))
                 _ng.RemoveAt(i);
     }
 
@@ -594,6 +652,7 @@ public partial class MainWindow : Window
         ok &= Mark(SetPanelTimeout, IsNonNegInt(SetPanelTimeout.Text));
         ok &= Mark(SetPollInterval, IsNonNegInt(SetPollInterval.Text) && ParseInt(SetPollInterval.Text, 0) > 0);
         ok &= Mark(SetLogRetention, IsNonNegInt(SetLogRetention.Text));
+        ok &= Mark(SetNgRecoveryDays, IsNonNegInt(SetNgRecoveryDays.Text));
         // Max files/session is a combo (Unlimited/100/300/500) — always valid, nothing to check.
         return ok;
     }
@@ -662,6 +721,7 @@ public partial class MainWindow : Window
         SetPanelTimeout.Text = c.PanelTimeoutSeconds.ToString();
         SetPollInterval.Text = c.PollIntervalMs.ToString();
         SetLogRetention.Text = c.LogRetentionDays.ToString();
+        SetNgRecoveryDays.Text = c.NgRecoveryDays.ToString();
         SelectCombo(SetMaxFilesPerSession, c.MaxFilesPerSession <= 0 ? "Unlimited" : c.MaxFilesPerSession.ToString());
 
         SetAutoUpload.IsChecked = c.AutoStartUploading;
@@ -713,6 +773,8 @@ public partial class MainWindow : Window
             c.PanelTimeoutSeconds = ParseInt(SetPanelTimeout.Text, c.PanelTimeoutSeconds);
             c.PollIntervalMs = ParseInt(SetPollInterval.Text, c.PollIntervalMs);
             c.LogRetentionDays = ParseInt(SetLogRetention.Text, c.LogRetentionDays);
+            var ngDaysChanged = ParseInt(SetNgRecoveryDays.Text, c.NgRecoveryDays) != c.NgRecoveryDays;
+            c.NgRecoveryDays = ParseInt(SetNgRecoveryDays.Text, c.NgRecoveryDays);
             // Combo: "Unlimited" -> 0, otherwise the numeric preset.
             var sessSel = (SetMaxFilesPerSession.SelectedItem as System.Windows.Controls.ComboBoxItem)?.Content?.ToString() ?? "Unlimited";
             c.MaxFilesPerSession = sessSel.Equals("Unlimited", StringComparison.OrdinalIgnoreCase) ? 0 : ParseInt(sessSel, 0);
@@ -725,6 +787,17 @@ public partial class MainWindow : Window
             // Create any missing folders (resolved against the exe for relative paths).
             try { c.EnsureFolders(); }
             catch (Exception ex) { SettingsHint.Text = "Saved; some folders could not be created: " + ex.Message; }
+
+            // NG past-days applies live: rebuild the recovery window now rather than waiting for the
+            // next midnight or a restart. Only when it actually changed and the console is showing
+            // the window — if the operator has picked a single day to review, leave them there.
+            if (ngDaysChanged && _host.NgRetry.WindowMode)
+            {
+                var wasRunning = _host.NgRetry.AutoRunning;
+                _host.NgRetry.LoadWindow();               // LoadWindow stops auto-retry...
+                if (wasRunning) _host.NgRetry.StartAutoRetry();   // ...so put it back if it was on
+                _dirty = true;
+            }
 
             // Recipe file: write to the resolved path (may have just changed via RecipePath).
             try
@@ -929,12 +1002,26 @@ public partial class MainWindow : Window
 
     private void NgIp_Changed(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
     {
-        _host.NgRetry.IpMode = (NgIp?.SelectedIndex) switch
+        // Fires once during InitializeComponent (before _host is assigned) and again when the
+        // constructor syncs the dropdown to the saved value — neither is an operator change.
+        if (_host is null || _ngIpLoading) return;
+
+        var mode = (NgIp?.SelectedIndex) switch
         {
             1 => NgIpMode.Primary,
             2 => NgIpMode.Secondary,
             _ => NgIpMode.Auto
         };
+        _host.NgRetry.IpMode = mode;
+
+        // Persist immediately. The watchdog can restart this app at any moment, so waiting for a
+        // clean shutdown to save would lose the choice exactly when it matters most.
+        try
+        {
+            _host.Cfg.NgIpMode = mode.ToString();
+            _host.Cfg.Save(_host.ConfigPath);
+        }
+        catch { /* a failed save must never break the NG tab */ }
     }
 
     private void NgStart_Click(object sender, RoutedEventArgs e)

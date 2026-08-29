@@ -1,7 +1,0 @@
-D:\Branch\FtpUpload\publish\FtpUpload.pdb
-D:\Branch\FtpUpload\publish\D3DCompiler_47_cor3.dll
-D:\Branch\FtpUpload\publish\PenImc_cor3.dll
-D:\Branch\FtpUpload\publish\PresentationNative_cor3.dll
-D:\Branch\FtpUpload\publish\vcruntime140_cor3.dll
-D:\Branch\FtpUpload\publish\wpfgfx_cor3.dll
-D:\Branch\FtpUpload\publish\FtpUpload.exe

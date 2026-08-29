@@ -10,6 +10,8 @@
     <Nullable>enable</Nullable>
     <RootNamespace>FtpUpload</RootNamespace>
     <AssemblyName>FtpUpload</AssemblyName>
+    <!-- App version shown in the window title. Bump this when you ship a new build. -->
+    <Version>1.0.0.1</Version>
     <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <StartupObject>FtpUpload.Program</StartupObject>

@@ -21,6 +21,11 @@ function Enc([string]$s) {
     return ($s -replace '&', '&amp;' -replace '<', '&lt;' -replace '>', '&gt;')
 }
 
+function Pct($n, $total) {
+    if ($total -gt 0) { return ("<span class='pct'>{0:0.#}%</span>" -f ($n * 100.0 / $total)) }
+    return ''
+}
+
 $root = $PSScriptRoot
 if (-not $root) { $root = Split-Path -Parent $MyInvocation.MyCommand.Path }
 

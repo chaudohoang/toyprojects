@@ -174,6 +174,14 @@ public sealed class Config
     public bool AutoStartRetrying { get; set; } = true;
 
     /// <summary>
+    /// Which IP the NG-retry console sends on: "Auto" (alternate primary/secondary each attempt),
+    /// "Primary", or "Secondary". Persisted whenever the operator changes the NG tab's IP dropdown,
+    /// so the choice survives a restart — the watchdog restarts this app routinely, and an operator
+    /// who has deliberately pinned recovery to one host should not silently get Auto back.
+    /// </summary>
+    public string NgIpMode { get; set; } = "Auto";
+
+    /// <summary>
     /// Testing only: artificial per-attempt delay in milliseconds, to mimic real transfer time so
     /// the demo isn't instant (elapsed counters tick, panel timeouts trigger under load, the NG
     /// highlight moves at a readable pace). 0 = no delay (production). Has no effect once the
@@ -205,10 +213,32 @@ public sealed class Config
     /// <summary>
     /// How many days of date-stamped log/report files to keep in the Log and Jobs folders.
     /// Older {yyyyMMdd}_*.txt / _*.html files are auto-deleted on startup and at each day
-    /// rollover. 0 (default) keeps everything forever. Only date-stamped files are ever removed,
-    /// never today's, never anything else. Example: 90.
+    /// rollover. 30 by default; 0 keeps everything forever. Only date-stamped files are ever
+    /// removed, never today's, never anything else.
+    ///
+    /// NOTE the interaction with <see cref="NgRecoveryDays"/>: purging a day deletes its rawlog,
+    /// and with it any record of files that were still unrecovered on that day. Keep retention
+    /// comfortably larger than the recovery window, or work can be discarded before it has had a
+    /// realistic chance of being retried.
     /// </summary>
-    public int LogRetentionDays { get; set; } = 0;
+    public int LogRetentionDays { get; set; } = 30;
+
+    /// <summary>
+    /// How many PAST days the NG console loads and auto-retries alongside today. Files still
+    /// unfinished at a day rollover are filed under the OLD day, so with 0 (the previous behaviour)
+    /// nothing abandoned at midnight is ever retried automatically — an engineer had to open
+    /// yesterday by hand. 1 (default) covers exactly that case: today plus yesterday.
+    /// Recovery always logs to the day the file belongs to, whatever day it is recovered on.
+    /// </summary>
+    public int NgRecoveryDays { get; set; } = 1;
+
+    /// <summary>
+    /// Cap on how many days outside the recovery window are scanned for the "n older" backlog
+    /// figure. 0 (default) = all retained days; the scan is cached per day and runs off the pumps,
+    /// so this is a safety valve for a site that has accumulated something pathological, not a
+    /// knob anyone should normally need.
+    /// </summary>
+    public int NgBacklogScanDays { get; set; } = 0;
 
     /// <summary>
     /// Build the manager window in the background shortly after startup so that opening

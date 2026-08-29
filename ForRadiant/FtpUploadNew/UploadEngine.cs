@@ -82,6 +82,18 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
         Logged?.Invoke(line);
     }
 
+    /// <summary>
+    /// Durable counterpart to <see cref="Log"/> for events that must survive a restart. The UI log
+    /// is in-memory and capped, so on a headless machine (watchdog-restarted, window never opened)
+    /// it is gone by the time anyone asks what happened. Day-rollover events go here so "did the
+    /// day turn over cleanly?" is answerable from disk, days later.
+    /// </summary>
+    private void OpLog(string msg)
+    {
+        try { SafeFile.Append(cfg.OpLogPath(Clock.Now), $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {msg}"); }
+        catch { /* housekeeping must never break the pump */ }
+    }
+
     // ---------------- intake ----------------
 
     /// <summary>
@@ -176,14 +188,26 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
     }
 
     /// <summary>
-    /// Off the hot path (called from the watch loop): for every panel that is fully resolved —
-    /// every data file uploaded (clean) or dropped (source gone), so no " -pending" remains —
-    /// upload its index + host manifests. Idempotent; a failed send is retried next tick.
+    /// For every panel that is fully resolved — every data file uploaded (clean) or dropped (source
+    /// gone), so no " -pending" remains — upload its index + host manifests. Idempotent; a failed
+    /// send is retried on the next sweep.
+    ///
+    /// Runs on its OWN task (see AppHost), never on the watch loop. Every call here can make real FTP
+    /// requests, and against a slow or unreachable host a single manifest send takes tens of seconds —
+    /// on the watch loop that starved the day rollover, intake and command polling badly enough to
+    /// stall uploading completely under load. It gets its own thread of control instead.
     /// </summary>
     public async Task FinalizeReadyPanels()
     {
+        // A pending rollover means the live pump is GATED — settling it is the priority, and the
+        // rollover is about to clear the job list anyway. Re-checked inside the loop below so a
+        // rollover raised mid-sweep stops us promptly rather than after every remaining panel.
+        if (_rolloverPending) return;
+
         foreach (var job in _jobs.Values)
         {
+            if (_rolloverPending) return;
+
             if (job.Finalized || !job.IsPanelJob) continue;
             var manifests = job.Files.Where(f => f.IsManifest).ToList();
             if (manifests.Count == 0) continue;   // legacy panel with no manifest files
@@ -419,17 +443,60 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
     public void Pause() { Paused = true; Log("live pump paused — jobs still queued, uploads held"); NotifyChanged(); }
     public void Resume() { Paused = false; Log("live pump resumed"); NotifyChanged(); }
 
-    private DateTime? _rolloverOldDay;
+    private readonly Queue<DateTime> _rolloverDays = new();
+    private DateTime _rolloverRequestedAt;
+
+    /// <summary>Lock-free view of "a rollover is outstanding", for the pump and finalize hot paths.</summary>
+    private volatile bool _rolloverPending;
+
+    /// <summary>
+    /// How long the rollover waits for the in-flight file to finish before it gives up and cancels
+    /// that transfer. The live pump is GATED while a rollover is pending, so an in-flight file that
+    /// never completes would otherwise stop uploading permanently from midnight onward.
+    /// </summary>
+    private const int RolloverGraceSeconds = 60;
+
+    /// <summary>
+    /// True while a day rollover is still settling. The live pump is GATED in this state — jobs
+    /// keep arriving and show in the list, but nothing is pulled for upload. Surfaced to the UI so
+    /// this can never again look identical to a plain idle ("jobs OK but not running").
+    /// </summary>
+    public bool RolloverPending => _rolloverPending;
+
+    /// <summary>Wall-clock time the last day rollover COMPLETED this run, or null if none has yet.
+    /// Shown in the header so an operator can see at a glance that the day turned over cleanly.</summary>
+    public DateTime? LastRolloverAt { get; private set; }
+
+    /// <summary>The day the last completed rollover closed out (yyyyMMdd), or "" if none yet.</summary>
+    public string LastRolloverFromDay { get; private set; } = "";
+
+    /// <summary>Files carried into NG by the last completed rollover.</summary>
+    public int LastRolloverAbandoned { get; private set; }
 
     /// <summary>
     /// Ask the engine to roll over to a new day. The reset is DEFERRED: the pump stops pulling new
     /// files, the in-flight file is allowed to finish, and then ProcessRolloverIfReady() abandons
     /// the old day's unfinished files to NG and clears the live list for the new day.
+    ///
+    /// Days QUEUE rather than overwrite. If the watch loop is slow enough that a second midnight
+    /// arrives before the first rollover settles, overwriting would silently discard the first —
+    /// its unfinished files would never reach that day's NG list and would be cleared under the
+    /// wrong date. Each requested day gets its own settle-and-log.
     /// </summary>
     public void RequestRollover(DateTime oldDay)
     {
-        lock (_gate) _rolloverOldDay = oldDay;
-        Log($"day rollover requested ({oldDay:yyyyMMdd}) — finishing current upload, then resetting");
+        int depth;
+        lock (_gate)
+        {
+            if (_rolloverDays.Contains(oldDay)) return;    // already queued — don't double-count
+            if (_rolloverDays.Count == 0) _rolloverRequestedAt = DateTime.Now;
+            _rolloverDays.Enqueue(oldDay);
+            _rolloverPending = true;
+            depth = _rolloverDays.Count;
+        }
+        var queued = depth > 1 ? $" (queued behind {depth - 1} unsettled)" : "";
+        Log($"day rollover requested ({oldDay:yyyyMMdd}){queued} — finishing current upload, then resetting");
+        OpLog($"ROLLOVER REQUESTED from {oldDay:yyyyMMdd}{queued} — pump held until it settles");
         NotifyChanged();
     }
 
@@ -441,14 +508,43 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
     /// </summary>
     public void ProcessRolloverIfReady()
     {
+        // Gate check. Let the current upload finish first — but NOT forever: the live pump is
+        // gated while a rollover is pending, so an in-flight file that never returns would stop
+        // all uploading from midnight onward. Past the grace period, cancel it and settle next tick.
+        JobFile? wedged = null;
+        bool notReady;
+        lock (_gate)
+        {
+            notReady = _rolloverDays.Count == 0;
+            if (!notReady && _inFlight is not null)
+            {
+                notReady = true;
+                if ((DateTime.Now - _rolloverRequestedAt).TotalSeconds > RolloverGraceSeconds)
+                {
+                    wedged = _inFlight;
+                    try { _currentTransfer?.Cancel(); } catch { }
+                    _rolloverRequestedAt = DateTime.Now;   // re-arm, so we don't cancel every tick
+                }
+            }
+        }
+        if (wedged is not null)
+        {
+            Log($"day rollover blocked {RolloverGraceSeconds}s by {wedged.Pid}/{wedged.FileName} — " +
+                $"cancelling that transfer so the new day can start");
+            OpLog($"ROLLOVER BLOCKED {RolloverGraceSeconds}s by {wedged.Pid}/{wedged.FileName} — transfer cancelled");
+        }
+        if (notReady) return;
+
         DateTime oldDay;
+        int remaining;
         var abandoned = new List<JobFile>();
         lock (_gate)
         {
-            if (_rolloverOldDay is null) return;
-            if (_inFlight is not null) return;      // let the current upload finish first
-            oldDay = _rolloverOldDay.Value;
-            _rolloverOldDay = null;
+            if (_rolloverDays.Count == 0) return;
+            oldDay = _rolloverDays.Dequeue();
+            remaining = _rolloverDays.Count;
+            _rolloverPending = remaining > 0;
+            if (remaining > 0) _rolloverRequestedAt = DateTime.Now;   // grace restarts for the next one
 
             foreach (var job in _jobs.Values)
                 foreach (var f in job.Files)
@@ -467,7 +563,13 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
         foreach (var f in abandoned)
             rawLog.Write(f, cfg.MaxAttempts, "", null, oldDay);   // into the OLD day's log → its NG
 
-        Log($"day rollover complete — {abandoned.Count} unfinished file(s) from {oldDay:yyyyMMdd} moved to NG (TIMEDOUT); new day started");
+        LastRolloverAt = DateTime.Now;
+        LastRolloverFromDay = oldDay.ToString("yyyyMMdd");
+        LastRolloverAbandoned = abandoned.Count;
+
+        var more = remaining > 0 ? $"; {remaining} more rollover(s) still queued" : "";
+        Log($"day rollover complete — {abandoned.Count} unfinished file(s) from {oldDay:yyyyMMdd} moved to NG (TIMEDOUT); new day started{more}");
+        OpLog($"ROLLOVER COMPLETE {oldDay:yyyyMMdd} -> {Clock.Today:yyyyMMdd} — {abandoned.Count} unfinished file(s) to NG; pump released{more}");
         NotifyChanged();
     }
 
@@ -476,7 +578,7 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
         while (!stopping.IsCancellationRequested)
         {
             // Paused, or waiting for a day-rollover to settle: don't pull new files.
-            if (Paused || _rolloverOldDay is not null)
+            if (Paused || _rolloverPending)
             {
                 await _ftp.EndSession();   // don't hold an idle FTP session open while paused
                 await Task.Delay(cfg.PollIntervalMs, stopping);
@@ -492,7 +594,27 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
                 continue;
             }
 
-            await UploadOne(next, stopping);
+            try
+            {
+                await UploadOne(next, stopping);
+            }
+            catch (OperationCanceledException) when (stopping.IsCancellationRequested) { throw; }
+            catch (Exception ex)
+            {
+                // One bad file must never kill the pump. Before this guard, an unexpected throw ended
+                // RunAsync for the life of the process — the app looked alive but uploaded nothing.
+                // Count it as a spent attempt so a poison file can't be retried in a tight loop
+                // forever — it runs out of attempts and lands in NG like any other failure.
+                next.Attempts++;
+                next.FailCount++;
+                next.FailTimes.Add(DateTime.Now.ToString("HH:mm:ss"));
+                next.Status = next.Attempts >= cfg.MaxAttempts ? FileStatus.Failed : FileStatus.Pending;
+                _jobs.TryGetValue(next.Pid, out var errJob);
+                rawLog.Write(next, cfg.MaxAttempts, "", errJob, errJob?.Day);
+                Log($"   upload error on {next.Pid}/{next.FileName}: {ex.Message} — pump continuing");
+                OpLog($"PUMP ERROR on {next.Pid}/{next.FileName}: {ex.Message} — recovered, pump continuing");
+                await Task.Delay(cfg.PollIntervalMs, stopping);
+            }
         }
     }
 
@@ -566,14 +688,23 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
         var startedAt = DateTime.Now;
         var sessionBefore = _ftp.SessionNumber;
 
-        var result = await _ftp.UploadAsync(f, attempt, cts.Token);
+        TransferResult result;
+        try
+        {
+            result = await _ftp.UploadAsync(f, attempt, cts.Token);
+        }
+        finally
+        {
+            // ALWAYS release the in-flight slot. If UploadAsync throws, leaving _inFlight set would
+            // block ProcessRolloverIfReady() forever — and the live pump is gated on the rollover,
+            // so uploading would stop dead at the next midnight and never resume.
+            lock (_gate) { _inFlight = null; _currentTransfer = null; }
+        }
 
         // A fresh connection was opened for this file (first file, cap reached, host change, or a
         // dropped connection was renewed) — surface it as a new session in the log.
         if (_ftp.SessionNumber > sessionBefore)
             Log($"   session #{_ftp.SessionNumber} opened on {host}");
-
-        lock (_gate) { _inFlight = null; _currentTransfer = null; }
 
         var timedOut = job is { TimedOut: true };
 

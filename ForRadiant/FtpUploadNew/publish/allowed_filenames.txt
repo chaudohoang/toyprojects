@@ -1,5 +1,7 @@
-# uploadable file patterns - folder n recipe = files to upload + total count
+﻿# uploadable file patterns - folder n recipe = files to upload + total count
+# a line starting with '!' EXCLUDES: file uploads only if it matches an allow line and no '!' line
 *otp*.txt
 *gamma*.hex
 *nypucdata*
 step*.tif
+!*_ori*

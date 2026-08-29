@@ -361,9 +361,14 @@ public sealed class NgItemVm : Notify
 public sealed class NgGroupVm : Notify
 {
     public string Pid { get; }
+    /// <summary>The day this panel's NG items belong to (yyyyMMdd). The list can span more than one
+    /// day (today + the recovery window), so cards are keyed by day+PID — the same panel re-tested
+    /// on two days must not collapse into one card.</summary>
+    public string Day { get; }
+    public string GroupKey => Day + "|" + Pid;
     public ObservableCollection<NgItemVm> Items { get; } = new();
 
-    public NgGroupVm(string pid) { Pid = pid; }
+    public NgGroupVm(string day, string pid) { Day = day; Pid = pid; }
 
     private bool _isExpanded = true;
     public bool IsExpanded
@@ -379,6 +384,10 @@ public sealed class NgGroupVm : Notify
     private int Failed => Items.Count - Recovered;
 
     public string Tally => $"{Failed} failed  ·  {Recovered} recovered";
+
+    /// <summary>Day prefix in the card header. Blank for today (the common case, no noise); the
+    /// date for anything older, so a panel being recovered from a past day is obvious at a glance.</summary>
+    public string DayLabel => Day == Clock.Today.ToString("yyyyMMdd") ? "" : Day + "  ·  ";
 
     /// <summary>A status badge mirroring the live job card, so a fully-recovered panel stands out:
     /// "Recovered" (green) when every item succeeded, "Retrying" (amber) while any is in flight,

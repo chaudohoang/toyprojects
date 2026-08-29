@@ -53,6 +53,110 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
     /// </summary>
     private int _loadGen;   // bumped on every LoadDay; a running sweep aborts if this changes
 
+    /// <summary>
+    /// The days currently loaded, newest first. Normally today plus <see cref="Config.NgRecoveryDays"/>
+    /// past days; a single entry when the operator has picked one day from the calendar.
+    /// </summary>
+    private List<string> _days = new();
+
+    /// <summary>True while showing the automatic window (today + past days) rather than one picked day.</summary>
+    public bool WindowMode { get; private set; } = true;
+
+    /// <summary>The days this console is working, for the UI strip.</summary>
+    public IReadOnlyList<string> LoadedDays { get { lock (_gate) return _days.ToList(); } }
+
+    private readonly NgBacklog _backlog = new(cfg);
+
+    /// <summary>Files still unrecovered on days OUTSIDE the window — the "· n older" figure.
+    /// Without it "NG List (0)" reads as "nothing outstanding" when it only means "nothing
+    /// outstanding in the loaded window".</summary>
+    public int BacklogOutstanding => _backlog.Outstanding;
+    public int BacklogDays => _backlog.Days;
+
+    /// <summary>
+    /// Recount the out-of-window backlog. Call from a background task only: on a cold cache this
+    /// reads every retained day's logs, which must never happen on the UI thread or a pump.
+    /// </summary>
+    public void RefreshBacklog()
+    {
+        try
+        {
+            _backlog.Refresh(LoadedDays);
+            NotifyChanged();
+        }
+        catch { /* an advisory counter must never take anything down */ }
+    }
+
+    /// <summary>
+    /// Load the automatic recovery window: today plus the configured number of past days. This is
+    /// what makes midnight-orphaned files recover on their own — they are filed under the OLD day,
+    /// so a today-only list never touches them. Days with no rawlog are skipped.
+    /// </summary>
+    public void LoadWindow()
+    {
+        var days = new List<string>();
+        var today = Clock.Today;
+        for (var back = 0; back <= Math.Max(0, cfg.NgRecoveryDays); back++)
+        {
+            var d = today.AddDays(-back).ToString("yyyyMMdd");
+            if (back == 0 || File.Exists(cfg.RawLogPathForDay(d))) days.Add(d);
+        }
+
+        var items = new List<NgItem>();
+        foreach (var d in days) items.AddRange(BuildItems(d));
+
+        lock (_gate)
+        {
+            AutoRunning = false;
+            _queue.Clear();
+            if (_current is not null) { _current.IsCurrent = false; _current = null; }
+            _items = Order(items);
+            _days = days;
+            WindowMode = true;
+            LoadedDay = days[0];
+            _loadGen++;
+        }
+        var past = days.Count - 1;
+        Log($"NG list loaded for {days[0]}" + (past > 0 ? $" + {past} past day(s) [{string.Join(", ", days.Skip(1))}]" : "") +
+            $": {items.Count} item(s)");
+        NotifyChanged();
+    }
+
+    /// <summary>
+    /// Round-robin across days at PANEL granularity: one whole panel from each day in turn, newest
+    /// day leading each round.
+    ///
+    /// Two failure modes this balances between. All-of-today-then-yesterday starves the oldest days:
+    /// with ~5000 items queued a sweep never reaches its tail before the window slides on, and four
+    /// separate days recovered zero files. But interleaving file-by-file starves throughput instead —
+    /// Attempt() finalizes a panel's manifests as soon as its data files land, so consecutive items
+    /// from different panels trigger a fresh manifest attempt almost every time; measured at 287
+    /// retries versus 533 for the same run. Rotating whole panels keeps every day progressing while
+    /// preserving the per-panel locality that makes finalize cheap.
+    ///
+    /// With a single day loaded this degrades to plain Pid-then-FileName order, as before.
+    /// </summary>
+    private static List<NgItem> Order(IEnumerable<NgItem> items)
+    {
+        var byDay = items
+            .GroupBy(i => i.Day)
+            .OrderByDescending(g => g.Key)
+            .Select(g => g.GroupBy(i => i.Pid)
+                          .OrderBy(p => p.Key)
+                          .Select(p => p.OrderBy(i => i.FileName).ToList())
+                          .ToList())
+            .ToList();
+
+        if (byDay.Count == 0) return new List<NgItem>();
+
+        var ordered = new List<NgItem>();
+        var deepest = byDay.Max(d => d.Count);
+        for (var i = 0; i < deepest; i++)
+            foreach (var day in byDay)
+                if (i < day.Count) ordered.AddRange(day[i]);
+        return ordered;
+    }
+
     public void LoadDay(string day)
     {
         var items = BuildItems(day);
@@ -62,6 +166,8 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
             _queue.Clear();
             if (_current is not null) { _current.IsCurrent = false; _current = null; }
             _items = items.OrderBy(i => i.Pid).ThenBy(i => i.FileName).ToList();
+            _days = new List<string> { day };
+            WindowMode = false;                 // operator picked one day — don't yank them back
             LoadedDay = day;
             _loadGen++;
         }
@@ -70,21 +176,46 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
     }
 
     private DateTime _lastMerge = DateTime.MinValue;
+    private DateTime _lastPastMerge = DateTime.MinValue;
 
     /// <summary>
-    /// While the console is showing TODAY, merge in any files that have since failed or timed out
-    /// in the live run — without disturbing items already loaded/in-flight or stopping an
-    /// auto-retry. Called on a throttle by the watch loop. Past days are static (no merge).
+    /// Make the next RefreshLoadedDayLive rebuild the past days immediately instead of waiting out
+    /// the 30s throttle. Called right after a rollover settles: that is the moment the OLD day's
+    /// rawlog gains all the abandoned files, and they should enter the NG list at once rather than
+    /// sitting idle for half a minute.
+    /// </summary>
+    public void ForcePastMerge() => _lastPastMerge = DateTime.MinValue;
+
+    /// <summary>
+    /// Merge in files that have since failed or timed out, without disturbing items already
+    /// loaded/in-flight or stopping an auto-retry.
+    ///
+    /// TODAY is merged on a 2s throttle (it changes constantly as the live pump works). PAST days
+    /// are merged on a 30s throttle: they only change when this pump itself recovers something, and
+    /// BuildItems reads three files per day — doing that every 2s per day is exactly the kind of
+    /// per-tick file work that starved the watch loop before.
     /// </summary>
     public void RefreshLoadedDayLive()
     {
         var today = Clock.Now.ToString("yyyyMMdd");
-        if (LoadedDay != today) return;
-        if ((DateTime.Now - _lastMerge).TotalSeconds < 2) return;
-        _lastMerge = DateTime.Now;
+        List<string> days;
+        lock (_gate) days = _days.ToList();
+        if (days.Count == 0) return;
 
-        var fresh = BuildItems(today);
+        var doToday = days.Contains(today) && (DateTime.Now - _lastMerge).TotalSeconds >= 2;
+        var doPast  = days.Count > 1 && (DateTime.Now - _lastPastMerge).TotalSeconds >= 30;
+        if (!doToday && !doPast) return;
+        if (doToday) _lastMerge = DateTime.Now;
+        if (doPast) _lastPastMerge = DateTime.Now;
+
+        var rebuild = new List<string>();
+        if (doToday) rebuild.Add(today);
+        if (doPast) rebuild.AddRange(days.Where(d => d != today));
+
+        var fresh = new List<NgItem>();
+        foreach (var d in rebuild) fresh.AddRange(BuildItems(d));
         var freshKeys = new HashSet<string>(fresh.Select(i => i.Key));
+        var scope = new HashSet<string>(rebuild);
         var added = new List<NgItem>();
         int removed;
         lock (_gate)
@@ -96,14 +227,14 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
             // Display-only manifest rows are purely derived from BuildItems (which drops them once the
             // manifest is sent/recovered or the panel leaves NG). Remove any that are no longer in the
             // fresh build so they don't linger showing Pending after the manifests are delivered.
-            removed = _items.RemoveAll(i => i.DisplayOnly && !freshKeys.Contains(i.Key));
+            // Scoped to the days we actually rebuilt — never judge a day we didn't look at.
+            removed = _items.RemoveAll(i => i.DisplayOnly && scope.Contains(i.Day) && !freshKeys.Contains(i.Key));
 
-            if (added.Count > 0 || removed > 0)
-                _items = _items.OrderBy(i => i.Pid).ThenBy(i => i.FileName).ToList();
+            if (added.Count > 0 || removed > 0) _items = Order(_items);
         }
         if (added.Count > 0 || removed > 0)
         {
-            if (added.Count > 0) Log($"NG list: +{added.Count} new item(s) for today");
+            if (added.Count > 0) Log($"NG list: +{added.Count} new item(s)");
             NotifyChanged();
         }
     }

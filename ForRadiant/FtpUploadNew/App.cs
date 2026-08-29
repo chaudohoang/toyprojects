@@ -29,7 +29,7 @@ public sealed class App : Application
         var menu = new Forms.ContextMenuStrip();
         menu.Items.Add("Open manager", null, (_, _) => ShowWindow());
         menu.Items.Add(new Forms.ToolStripSeparator());
-        menu.Items.Add("Exit (stops uploading)", null, (_, _) => ExitProgram());
+        menu.Items.Add("Exit (stops uploading)", null, (_, _) => ExitProgram("tray menu Exit"));
 
         _tray = new Forms.NotifyIcon
         {
@@ -88,9 +88,15 @@ public sealed class App : Application
             Forms.ToolTipIcon.Info);
     }
 
-    private void ExitProgram()
+    /// <summary>
+    /// The single exit path. <paramref name="reason"/> is recorded to the oplog BEFORE anything is
+    /// torn down: a clean exit is otherwise indistinguishable from a kill or a crash after the fact,
+    /// which makes "it stopped uploading overnight" unanswerable on a machine nobody was watching.
+    /// </summary>
+    private void ExitProgram(string reason)
     {
         ShuttingDown = true;
+        _host.LogEvent($"SHUTDOWN — {reason}; pumps stopping");
         if (_tray is not null) { _tray.Visible = false; _tray.Dispose(); _tray = null; }
         _host.Stop();
         Shutdown();
@@ -99,6 +105,25 @@ public sealed class App : Application
     /// <summary>Called when the engine processes a STOP command from TrueTest.</summary>
     public void ShutdownFromCommand()
     {
-        Dispatcher.Invoke(ExitProgram);
+        Dispatcher.Invoke(() => ExitProgram("STOP command from TrueTest"));
+    }
+
+    /// <summary>
+    /// Windows is ending the session (logoff, restart, shutdown). Recorded separately because it is
+    /// nobody's mistake — but it still stops uploading, and without a line here it looks the same as
+    /// an unexplained disappearance.
+    /// </summary>
+    protected override void OnSessionEnding(SessionEndingCancelEventArgs e)
+    {
+        _host.LogEvent($"SHUTDOWN — Windows session ending ({e.ReasonSessionEnding}); pumps stopping");
+        base.OnSessionEnding(e);
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        // Catches any exit path that didn't go through ExitProgram (e.g. Shutdown() called
+        // elsewhere), so the log never simply stops mid-sentence.
+        if (!ShuttingDown) _host.LogEvent("SHUTDOWN — process exiting (reason not recorded)");
+        base.OnExit(e);
     }
 }

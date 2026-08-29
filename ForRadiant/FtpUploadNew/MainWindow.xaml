@@ -384,8 +384,11 @@
                                            Foreground="#8891A3" VerticalAlignment="Center" Margin="0,0,10,0"/>
                                 <TextBlock Grid.Column="1" Text="{Binding Pid}" FontSize="15"
                                            FontWeight="Bold" Foreground="#14203C" VerticalAlignment="Center"/>
-                                <TextBlock Grid.Column="2" Text="{Binding Tally}" FontSize="12"
-                                           Foreground="#6B7386" VerticalAlignment="Center" Margin="14,0,0,0"/>
+                                <TextBlock Grid.Column="2" FontSize="12" Foreground="#6B7386"
+                                           VerticalAlignment="Center" Margin="14,0,0,0">
+                                    <Run Text="{Binding DayLabel, Mode=OneWay}" FontWeight="SemiBold"/>
+                                    <Run Text="{Binding Tally, Mode=OneWay}"/>
+                                </TextBlock>
                                 <Border Grid.Column="3" Style="{StaticResource Badge}"
                                         Background="{Binding HeaderBg}" VerticalAlignment="Center">
                                     <TextBlock Text="{Binding HeaderText}" Style="{StaticResource BadgeText}"
@@ -496,6 +499,21 @@
                 <TextBlock x:Name="SubTitle" FontSize="12.5" Foreground="#6B7386" Margin="0,2,0,0"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <!-- working day + rollover state. The day the engine is filing work under, and when
+                     it last turned over. Amber while a rollover is settling (uploads are held). -->
+                <Border x:Name="DayBadge" Background="White" CornerRadius="9" BorderBrush="#ECEFF5"
+                        BorderThickness="1" Padding="10,6" Margin="0,0,8,0"
+                        ToolTip="The day work is being filed under (yyyyMMdd), and when it last rolled over.&#10;Amber = a rollover is settling; the live pump is held until it finishes.">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse x:Name="DayDot" Width="9" Height="9" Fill="#C7CDD9"
+                                 VerticalAlignment="Center" Margin="0,0,7,0"/>
+                        <TextBlock Text="Day" FontSize="11.5" Foreground="#6B7386" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="DayText" Text="—" FontSize="11.5" FontWeight="SemiBold"
+                                   Foreground="#3A4256" VerticalAlignment="Center" Margin="7,0,0,0"/>
+                        <TextBlock x:Name="DayRolled" Text="" FontSize="11.5" Foreground="#6B7386"
+                                   VerticalAlignment="Center" Margin="7,0,0,0"/>
+                    </StackPanel>
+                </Border>
                 <!-- host reachability, pinged every 30s -->
                 <Border Background="White" CornerRadius="9" BorderBrush="#ECEFF5" BorderThickness="1"
                         Padding="10,6" Margin="0,0,8,0">
@@ -900,6 +918,7 @@
                                             <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
                                             <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
                                             <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Text="Connect timeout (s)" Style="{StaticResource SettingLabel}"/>
                                         <TextBox   Grid.Row="0" Grid.Column="1" x:Name="SetTimeout" Style="{StaticResource SettingBox}"/>
@@ -915,6 +934,9 @@
                                         <TextBlock Grid.Row="5" Grid.Column="0" Text="Log retention (days)" Style="{StaticResource SettingLabel}"/>
                                         <TextBox   Grid.Row="5" Grid.Column="1" x:Name="SetLogRetention" Style="{StaticResource SettingBox}"
                                                    ToolTip="Auto-delete date-stamped logs/reports older than this many days. 0 = keep forever."/>
+                                        <TextBlock Grid.Row="6" Grid.Column="0" Text="NG past days" Style="{StaticResource SettingLabel}"/>
+                                        <TextBox   Grid.Row="6" Grid.Column="1" x:Name="SetNgRecoveryDays" Style="{StaticResource SettingBox}"
+                                                   ToolTip="How many PAST days the NG list loads and auto-retries alongside today. Files still unfinished at midnight are filed under the OLD day, so 0 means nothing abandoned at a rollover is ever retried automatically — an engineer has to open yesterday by hand. 1 covers exactly that case. Recovery always logs to the day the file belongs to."/>
                                     </Grid>
                                 </StackPanel>
                             </Border>

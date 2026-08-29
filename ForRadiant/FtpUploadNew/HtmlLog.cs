@@ -12,6 +12,10 @@ public static class HtmlLog
     private static string Enc(string? s) =>
         (s ?? "").Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;");
 
+    /// <summary>A small "(NN.N%)" of n out of total, or "" when total is 0.</summary>
+    private static string Pct(int n, int total) =>
+        total > 0 ? $"<span class='pct'>{(n * 100.0 / total):0.#}%</span>" : "";
+
     private static string Role(string ip, string primary, string secondary)
     {
         if (!string.IsNullOrEmpty(ip) && ip == primary) return "Primary";
@@ -183,10 +187,10 @@ public static class HtmlLog
 <div class='sub'>from {Enc(raw)} &nbsp;&middot;&nbsp; generated {generated}</div>
 <div class='cards'>
   <div class='card'><div class='n'>{tot}</div><div class='l'>Files</div></div>
-  <div class='card clickable' data-filter='SUCCEEDED'><div class='n ok'>{ok}</div><div class='l'>Succeeded</div></div>
-  <div class='card clickable' data-filter='FAILED'><div class='n bad'>{fail}</div><div class='l'>Failed</div></div>
-  <div class='card clickable' data-filter='TIMEDOUT'><div class='n to'>{timeout}</div><div class='l'>Timed out</div></div>
-  <div class='card clickable' data-filter='PENDING'><div class='n pend'>{pend}</div><div class='l'>Pending</div></div>
+  <div class='card clickable' data-filter='SUCCEEDED'><div class='n ok'>{ok}{Pct(ok, tot)}</div><div class='l'>Succeeded</div></div>
+  <div class='card clickable' data-filter='FAILED'><div class='n bad'>{fail}{Pct(fail, tot)}</div><div class='l'>Failed</div></div>
+  <div class='card clickable' data-filter='TIMEDOUT'><div class='n to'>{timeout}{Pct(timeout, tot)}</div><div class='l'>Timed out</div></div>
+  <div class='card clickable' data-filter='PENDING'><div class='n pend'>{pend}{Pct(pend, tot)}</div><div class='l'>Pending</div></div>
   <div class='card'><div class='n'>{priOk}&nbsp;/&nbsp;{priFail}</div><div class='l'>Primary ok / fail{pTag}</div></div>
   <div class='card'><div class='n'>{secOk}&nbsp;/&nbsp;{secFail}</div><div class='l'>Secondary ok / fail{sTag}</div></div>
 </div>
@@ -481,8 +485,8 @@ public static class HtmlLog
 <div class='sub'>from {Enc(ngPath)} &nbsp;&middot;&nbsp; generated {generated}</div>
 <div class='cards'>
   <div class='card'><div class='n'>{tot}</div><div class='l'>NG items</div></div>
-  <div class='card clickable' data-filter='RECOVERED'><div class='n ok'>{recovered}</div><div class='l'>Recovered</div></div>
-  <div class='card clickable' data-filter='FAILING'><div class='n bad'>{pending}</div><div class='l'>Still failing</div></div>
+  <div class='card clickable' data-filter='RECOVERED'><div class='n ok'>{recovered}{Pct(recovered, tot)}</div><div class='l'>Recovered</div></div>
+  <div class='card clickable' data-filter='FAILING'><div class='n bad'>{pending}{Pct(pending, tot)}</div><div class='l'>Still failing</div></div>
   <div class='card'><div class='n pend'>{totRetries}</div><div class='l'>Total retries</div></div>
 </div>
 <div class='fhint'>Click <b>Recovered / Still failing</b> to show only the matching files (panels with none are hidden; click both to show all again, or click one to clear). <span id='fcount'></span></div>
@@ -553,6 +557,7 @@ public static class HtmlLog
   .fhint b{color:#6B7386;}
   .fhint #fcount{color:#4D8CFF;font-weight:600;margin-left:6px;}
   .card .n{font-size:22px;font-weight:700;} .card .l{font-size:11px;color:#8891A3;text-transform:uppercase;letter-spacing:.04em;}
+  .card .n .pct{display:block;font-size:11px;font-weight:600;color:#9AA2B1;letter-spacing:0;margin-top:1px;}
   .n.ok{color:#1F9D55;} .n.bad{color:#E0483F;} .n.pend{color:#4D8CFF;} .n.to{color:#7C3AED;}
   table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #ECEFF5;border-radius:10px;overflow:hidden;}
   th{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#8891A3;text-align:left;padding:9px 12px;background:#F8F9FC;border-bottom:1px solid #ECEFF5;}
@@ -588,6 +593,7 @@ public static class HtmlLog
   .fhint b{color:#6B7386;}
   .fhint #fcount{color:#4D8CFF;font-weight:600;margin-left:6px;}
   .card .n{font-size:22px;font-weight:700;} .card .l{font-size:11px;color:#8891A3;text-transform:uppercase;letter-spacing:.04em;}
+  .card .n .pct{display:block;font-size:11px;font-weight:600;color:#9AA2B1;letter-spacing:0;margin-top:1px;}
   .n.ok{color:#1F9D55;} .n.bad{color:#E0483F;} .n.pend{color:#4D8CFF;} .n.to{color:#7C3AED;}
   table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #ECEFF5;border-radius:10px;overflow:hidden;}
   th{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#8891A3;text-align:left;padding:9px 12px;background:#F8F9FC;border-bottom:1px solid #ECEFF5;}

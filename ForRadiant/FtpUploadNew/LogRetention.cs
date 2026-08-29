@@ -8,7 +8,8 @@ namespace FtpUpload;
 ///   • files named "{yyyyMMdd}_....(txt|html)" in the Log and Jobs folders, and
 ///   • per-day subfolders named exactly "{yyyyMMdd}" inside the Backup Jobs folder,
 /// and only when that date is older than the retention cutoff. Never today's, never non-date-named
-/// items, never a folder that holds the exe.
+/// items, never a folder that holds the exe, and never a {yyyyMMdd}_oplog.txt — the oplog is the
+/// diagnostic record and is exempt from retention at any setting.
 /// </summary>
 public static class LogRetention
 {
@@ -44,6 +45,14 @@ public static class LogRetention
                 try
                 {
                     var name = Path.GetFileName(f);
+
+                    // NEVER purge the oplog. It is the diagnostic record — startups, shutdowns and
+                    // why, crashes, day rollovers, NG backlog — and it is minuscule next to the
+                    // rawlogs and WinSCP session logs (a few hundred bytes a day, ~100 KB a year).
+                    // Deleting it reclaims nothing and destroys the only evidence available when a
+                    // site reports "it stopped uploading last month".
+                    if (name.EndsWith("_oplog.txt", StringComparison.OrdinalIgnoreCase)) continue;
+
                     if (name.Length < 10 || name[8] != '_') continue;
                     var datePart = name.Substring(0, 8);
                     if (!datePart.All(char.IsDigit)) continue;
