@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace FtpUpload;
@@ -37,35 +37,34 @@ public sealed class Config
     /// never see ".part" files, or when an interrupted transfer stranding a ".part" is a problem —
     /// the panel's index/host manifest is sent last and gates downstream, so a partial data file is
     /// overwritten on retry before the panel is considered complete.</summary>
-    public bool UseTempFile { get; set; } = true;
+    /// FIXED, not configurable: uploads go straight to the final name. [JsonIgnore] keeps it out
+    /// of config.json entirely, so no file can suggest a setting that has no effect.
+    [JsonIgnore] public bool UseTempFile => false;
     /// <summary>WinSCP only. When true, an uploaded file keeps the LOCAL file's modified time — but
     /// the server shows it in the SERVER's timezone, so a file made late on one day can display as the
     /// next day on a server in a timezone ahead (the "date 26 vs 25" problem). Default false = let the
     /// server stamp each file with the actual upload time (its own clock), which is predictable.</summary>
-    public bool PreserveTimestamp { get; set; } = false;
+    /// FIXED, not configurable: the server stamps each file with the actual upload time.
+    [JsonIgnore] public bool PreserveTimestamp => false;
     /// <summary>When true, the active engine writes its own session log — the full FTP conversation
     /// (commands + server responses) — to the log folder, one file per connection:
     /// WinSCP -> {yyyyMMdd}_winscp_{HHmmss}.log, FluentFTP -> {yyyyMMdd}_fluentftp_{HHmmss}.log.
     /// Useful for diagnosing "uploaded but not right" issues; set false to turn it off.
     /// (Name kept as WinScpLog for config compatibility; it governs both engines.)</summary>
-    public bool WinScpLog { get; set; } = true;
+    /// FIXED, not configurable: the session log is ALWAYS written. It is the only record of the
+    /// actual FTP dialogue, and the one artefact that settled "was this really uploaded?" when the
+    /// rawlog and the server disagreed. Turning it off costs nothing at upload time and blinds
+    /// every later investigation.
+    [JsonIgnore] public bool WinScpLog => true;
 
     // ---- Timing (spec §2) ----
     /// <summary>Per-file FTP operation timeout in seconds (connect + transfer). Set directly; a
     /// floor of 5 s is enforced. (Formerly derived from a "total tact" budget — now explicit.)</summary>
     public int TimeoutSecondsOverride { get; set; } = 20;
 
-    /// <summary>
-    /// Retry policy per IP (spec §2, dual-IP failover). Change these to re-shape failover
-    /// however you like — they are the knobs you tune.
-    ///   • the first attempt always uses the PRIMARY IP
-    ///   • PrimaryRetries   more attempts stay on the primary
-    ///   • then it fails over to the SECONDARY IP for SecondaryRetries attempts
-    /// Default 2 + 2 = initial + 2 primary retries, then 2 secondary retries (5 attempts total).
-    /// Set SecondaryRetries = 0 to disable failover; set a retry count to 0 to skip that stage.
-    /// </summary>
-    public int PrimaryRetries { get; set; } = 2;
-    public int SecondaryRetries { get; set; } = 2;
+    // PrimaryRetries / SecondaryRetries were removed with failover. Configs written before that
+    // still contain them, so Load() reads them straight from the JSON to derive RetryCount — see
+    // MigrateRetries. They are no longer properties, so they stop being written to new configs.
 
     /// <summary>
     /// How many files a single reused FTP connection ("session") handles before it is closed and
@@ -76,24 +75,51 @@ public sealed class Config
     public int MaxFilesPerSession { get; set; } = 0;
 
     /// <summary>
-    /// Total attempts per file, counting the initial one = 1 + PrimaryRetries + SecondaryRetries.
-    /// Derived — set PrimaryRetries / SecondaryRetries instead. (Retries shown in the UI are
-    /// MaxAttempts - 1.)
+    /// Retries after the initial attempt, all on the ONE selected host. -1 means "not set in this
+    /// config file"; <see cref="Load"/> then derives it from the old PrimaryRetries/SecondaryRetries
+    /// pair so existing deployments keep their effective attempt count.
     /// </summary>
-    [JsonIgnore] public int MaxAttempts => 1 + Math.Max(0, PrimaryRetries) + Math.Max(0, SecondaryRetries);
+    public int RetryCount { get; set; } = -1;
 
     /// <summary>
-    /// How many attempts use the PRIMARY IP before failover = 1 (initial) + PrimaryRetries.
-    /// Attempts beyond this use the secondary. Derived from PrimaryRetries.
+    /// Total attempts per file, counting the initial one = 1 + RetryCount. Uploading targets a
+    /// single host (<see cref="InitialHost"/>) with no failover, so there is one retry budget.
     /// </summary>
-    [JsonIgnore] public int PrimaryAttempts => 1 + Math.Max(0, PrimaryRetries);
+    [JsonIgnore] public int MaxAttempts => 1 + Math.Max(0, RetryCount);
 
-    /// <summary>The host the INITIAL attempt uses (primary unless InitialHost="Secondary").</summary>
+    /// <summary>
+    /// The ONE host every upload targets, chosen by <see cref="InitialHost"/> ("Primary" or
+    /// "Secondary"). There is no failover: a file that exhausts its retries goes to NG rather than
+    /// to the other server.
+    /// </summary>
     [JsonIgnore] public string FirstHost =>
         InitialHost.Equals("Secondary", StringComparison.OrdinalIgnoreCase) ? SecondaryHost : PrimaryHost;
-    /// <summary>The host failover switches to after the initial host's attempts are exhausted.</summary>
-    [JsonIgnore] public string FailoverHost =>
-        InitialHost.Equals("Secondary", StringComparison.OrdinalIgnoreCase) ? PrimaryHost : SecondaryHost;
+
+    /// <summary>
+    /// THE routing rule, in one place so the data pump, the manifest sender, the NG pump and the
+    /// Settings preview all agree: every attempt goes to <see cref="FirstHost"/>.
+    ///
+    /// Failover was removed deliberately. Sending a file to whichever server answered made "which
+    /// machine holds this panel" unanswerable, and a site configured for one IP still saw uploads
+    /// arriving on the other.
+    /// </summary>
+    public string HostForAttempt(int attempt) => FirstHost;
+
+    /// <summary>
+    /// One-line, plain-language description of where files go — shown live in Settings.
+    /// </summary>
+    [JsonIgnore] public string RoutePlan
+    {
+        get
+        {
+            var label = InitialHost.Equals("Secondary", StringComparison.OrdinalIgnoreCase) ? "secondary" : "primary";
+            var other = InitialHost.Equals("Secondary", StringComparison.OrdinalIgnoreCase) ? PrimaryHost : SecondaryHost;
+            var n = MaxAttempts;
+            var a = n == 1 ? "1 attempt" : $"{n} attempts";
+            return $"all uploads -> {FirstHost} ({label}), {a} per file; " +
+                   $"no failover - {other} is never used, failures go to NG";
+        }
+    }
 
     /// <summary>Per-file operation timeout, with a 5 s floor.</summary>
     [JsonIgnore]
@@ -174,12 +200,26 @@ public sealed class Config
     public bool AutoStartRetrying { get; set; } = true;
 
     /// <summary>
-    /// Which IP the NG-retry console sends on: "Auto" (alternate primary/secondary each attempt),
-    /// "Primary", or "Secondary". Persisted whenever the operator changes the NG tab's IP dropdown,
-    /// so the choice survives a restart — the watchdog restarts this app routinely, and an operator
-    /// who has deliberately pinned recovery to one host should not silently get Auto back.
+    /// Send the HOST manifest early when a file in the panel runs out of attempts, listing only the
+    /// files that DID land (every " -pending" line stripped, exactly as the final manifest is built).
+    ///
+    /// Off by default, and deliberately so: the host manifest is normally the panel-complete signal,
+    /// so an early copy tells the host system about a panel that is still being retried. It writes
+    /// no .idxsent/.hostsent marker and no rawlog row, so the real manifest is still sent when the
+    /// panel finishes — but whether the host side tolerates a partial list is a question about THEIR
+    /// parser, not this app.
+    ///
+    /// Re-sent only when more files have landed since the last early send, so a panel with several
+    /// failures does not upload the same list repeatedly.
     /// </summary>
-    public string NgIpMode { get; set; } = "Auto";
+    public bool MidFailHostUpload { get; set; } = false;
+
+    /// <summary>
+    /// How often the day + NG HTML reports are rewritten automatically, in seconds. 0 = off (only
+    /// built on demand from the UI or the .bat scripts). The reports are only rebuilt when the
+    /// rawlog has actually grown, so an idle machine does no work.
+    /// </summary>
+    public int HtmlLogRefreshSeconds { get; set; } = 60;
 
     /// <summary>
     /// Testing only: artificial per-attempt delay in milliseconds, to mimic real transfer time so
@@ -284,10 +324,43 @@ public sealed class Config
         if (!File.Exists(path))
         {
             var fresh = new Config();
+            if (fresh.RetryCount < 0) fresh.RetryCount = 3;
             fresh.Save(path);
             return fresh;
         }
-        return JsonSerializer.Deserialize<Config>(File.ReadAllText(path)) ?? new Config();
+        var json = File.ReadAllText(path);
+        var cfg = JsonSerializer.Deserialize<Config>(json) ?? new Config();
+        cfg.MigrateRetries(json);
+        return cfg;
+    }
+
+
+    /// <summary>
+    /// Upgrade a config written before failover was removed. RetryCount takes the retries of the
+    /// host that config actually selected, so the attempt count on that host is unchanged: a site
+    /// running Secondary / PrimaryRetries=0 / SecondaryRetries=3 keeps 4 attempts on the secondary.
+    ///
+    /// The legacy keys are read straight from the JSON because they are no longer properties. If
+    /// neither RetryCount nor the old pair is present, fall back to 3 (4 attempts) rather than the
+    /// -1 sentinel — leaving it would silently reduce a production machine to a single attempt.
+    /// </summary>
+    public void MigrateRetries(string? json = null)
+    {
+        if (RetryCount >= 0) return;
+
+        int? legacy = null;
+        if (!string.IsNullOrEmpty(json))
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(json);
+                var wantSecondary = InitialHost.Equals("Secondary", StringComparison.OrdinalIgnoreCase);
+                var key = wantSecondary ? "SecondaryRetries" : "PrimaryRetries";
+                if (doc.RootElement.TryGetProperty(key, out var el) && el.TryGetInt32(out var v)) legacy = v;
+            }
+            catch { /* malformed config — fall through to the default */ }
+        }
+        RetryCount = Math.Max(0, legacy ?? 3);
     }
 
     public void Save(string path)

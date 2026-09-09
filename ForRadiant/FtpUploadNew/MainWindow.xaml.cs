@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Threading;
 // pin the ambiguous names to their WPF versions (WinForms is in scope for the tray icon)
@@ -39,10 +39,6 @@ public partial class MainWindow : Window
     private bool _ngWasManual;
     private NgItem? _lastScrolledNg;
 
-    // Set while the constructor syncs the NG IP dropdown to the saved config value, so that
-    // programmatic change isn't mistaken for the operator picking a host (and re-saved).
-    private bool _ngIpLoading;
-
     public MainWindow(AppHost host)
     {
         _host = host;
@@ -50,32 +46,33 @@ public partial class MainWindow : Window
         // Must be set BEFORE InitializeComponent: the XAML marks "Auto" IsSelected, which raises
         // SelectionChanged during construction. Without this guard that phantom event overwrites a
         // saved Primary/Secondary with Auto on every single launch, before we ever restore it.
-        _ngIpLoading = true;
         InitializeComponent();
 
         // Proper app version in the title bar, read from the assembly (set by <Version> in the
-        // .csproj — bump it when shipping a new build).
+        // .csproj - bump it when shipping a new build).
         var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
         // Include Revision when it is non-zero. Major.Minor.Build alone renders 1.0.0.1 as "v1.0.0",
-        // which makes a shipped patch build indistinguishable from the one it replaced — exactly the
+        // which makes a shipped patch build indistinguishable from the one it replaced - exactly the
         // thing this title is meant to let you check at a glance.
         var vstr = ver is null ? ""
                  : ver.Revision > 0 ? $"v{ver.Major}.{ver.Minor}.{ver.Build}.{ver.Revision}"
                  : $"v{ver.Major}.{ver.Minor}.{ver.Build}";
 
-        Title = vstr.Length > 0 ? $"FTP Upload Job Manager — {vstr}" : "FTP Upload Job Manager";
+        Title = vstr.Length > 0 ? $"FTP Upload Job Manager - {vstr}" : "FTP Upload Job Manager";
 
-        SubTitle.Text = $"{host.Cfg.PrimaryHost} / {host.Cfg.SecondaryHost}  ·  " +
-                        $"{host.Cfg.TimeoutSeconds}s timeout  ·  {host.Cfg.MaxAttempts} attempts";
+        // Client IP first: a site runs many of these across 10.119.x / 10.121.x, and "which PC is
+        // this?" should be answerable from the window without opening a console.
+        SubTitle.Text = $"{NetInfo.LocalIp(host.Cfg.FirstHost)} -> {host.Cfg.FirstHost}  -  " +
+                        $"{host.Cfg.TimeoutSeconds}s timeout  -  {host.Cfg.MaxAttempts} attempts";
 
-        // Rows/strips show the full destination as ftp://{host}/{path}. Primary host is the
-        // main target (failover to secondary is reflected in the log's "via {host}").
-        UiConfig.FtpHost = host.Cfg.PrimaryHost;
+        // Rows/strips show the destination as ftp://{host}/{path}. Use the host the first attempt
+        // actually targets - cfg.PrimaryHost names the wrong server whenever InitialHost=Secondary,
+        // so every row displayed a destination the file was never sent to.
+        UiConfig.FtpHost = host.Cfg.FirstHost;
 
-        // Show the saved NG IP choice. AppHost has already applied it to the engine; this only
-        // syncs the dropdown, so it must not count as an operator change (_ngIpLoading, set above).
-        NgIp.SelectedIndex = host.Cfg.NgIpMode switch { "Primary" => 1, "Secondary" => 2, _ => 0 };
-        _ngIpLoading = false;
+        // Show which single IP everything uses. Sourced from Settings, not a separate NG control.
+        NgIpLabel.Text = host.Cfg.InitialHost.Equals("Secondary", StringComparison.OrdinalIgnoreCase)
+            ? $"Secondary ({host.Cfg.SecondaryHost})" : $"Primary ({host.Cfg.PrimaryHost})";
 
         JobList.ItemsSource = _jobs;
         NgList.ItemsSource = _ng;
@@ -130,7 +127,7 @@ public partial class MainWindow : Window
         {
             Interval = TimeSpan.FromMilliseconds(500)
         };
-        // Hidden is the normal state in production — the operator closes the window and it
+        // Hidden is the normal state in production - the operator closes the window and it
         // lives in the tray. Doing any UI work then is pure waste, so every timer bails out.
         _liveTimer.Tick += (_, _) => { if (IsVisible) RefreshLive(); };
 
@@ -216,11 +213,11 @@ public partial class MainWindow : Window
             LiveElapsed.Text = $"{(DateTime.Now - _host.Engine.InFlightStarted).TotalSeconds:0.0}s";
 
         // Session reuse status: which connection we're on and how many files it has carried
-        // (out of the per-session cap, or ∞ when unlimited).
+        // (out of the per-session cap, or - when unlimited).
         var cap = _host.Cfg.MaxFilesPerSession;
-        var capText = cap > 0 ? cap.ToString() : "\u221E";   // ∞
+        var capText = cap > 0 ? cap.ToString() : "\u221E";   // -
         StatSession.Text = f is not null
-            ? $"·  Session #{_host.Engine.SessionNumber} · {_host.Engine.FilesThisSession}/{capText}"
+            ? $"-  Session #{_host.Engine.SessionNumber} - {_host.Engine.FilesThisSession}/{capText}"
             : "";
 
         var paused = _host.Engine.Paused;
@@ -231,10 +228,10 @@ public partial class MainWindow : Window
         LiveRunningBadge.Visibility = paused ? Visibility.Collapsed : Visibility.Visible;
         if (f is null)
             LiveIdle.Text = paused
-                ? "Paused — uploads held (jobs still queued)."
+                ? "Paused - uploads held (jobs still queued)."
                 : _host.Engine.RolloverPending
-                    ? "Day rollover settling — uploads are held until it completes."
-                    : "Idle — no uploads in progress right now.";
+                    ? "Day rollover settling - uploads are held until it completes."
+                    : "Idle - no uploads in progress right now.";
 
         UpdateDayBadge();
         UpdateAutoScroll(f);
@@ -244,7 +241,7 @@ public partial class MainWindow : Window
 
     /// <summary>
     /// Header "Day" badge: which day the engine is filing work under, and when it last rolled over.
-    /// Amber while a rollover is settling — in that state the live pump is HELD, so jobs can pile up
+    /// Amber while a rollover is settling - in that state the live pump is HELD, so jobs can pile up
     /// in the list without uploading, and this is what tells the operator why.
     /// </summary>
     private void UpdateDayBadge()
@@ -255,15 +252,15 @@ public partial class MainWindow : Window
 
         if (pending)
         {
-            DayRolled.Text = "· rolling over…";
+            DayRolled.Text = "- rolling over...";
             return;
         }
 
         var at = _host.Engine.LastRolloverAt;
         DayRolled.Text = at is null
-            ? ""    // no rollover yet this run — the app started on this day
-            : $"· rolled {at:HH:mm:ss} from {_host.Engine.LastRolloverFromDay} " +
-              $"({_host.Engine.LastRolloverAbandoned} → NG)";
+            ? ""    // no rollover yet this run - the app started on this day
+            : $"- rolled {at:HH:mm:ss} from {_host.Engine.LastRolloverFromDay} " +
+              $"({_host.Engine.LastRolloverAbandoned} - NG)";
     }
 
     // NG list follows the NG-retry pump's in-flight item (flat list, so a direct ScrollIntoView).
@@ -306,7 +303,34 @@ public partial class MainWindow : Window
         NgDot.Fill = ng.InFlight is not null ? DotBusy : DotIdle;   // blue only while transferring
         NgStartBtn.IsEnabled = !running;
         NgStopBtn.IsEnabled = running;
-        NgCount.Text = running ? $"{ng.QueueLength} queued" : "";
+        // Mini version of the NG report: same states, same denominator, same colours as the live
+        // strip. ng.Items holds only what is still OUTSTANDING — BuildItems drops anything already
+        // recovered — so counting it alone gave "14 items, 100% recovered" against the report's
+        // "36 items, 83.3%". The total has to include the recoveries, which RecoveredKeys carries.
+        var ngItems = ng.Items;
+        var ngRec = ng.RecoveredKeys.Count;
+        var ngFail = ngItems.Count(i => !i.DisplayOnly && i.State != NgItemState.Succeeded);
+        var ngPend = ngItems.Count(i => i.DisplayOnly && i.State != NgItemState.Succeeded);
+        var ngTotal = ngRec + ngFail + ngPend;
+
+        // Panels touched by NG = distinct PIDs across the recovered keys and what is outstanding.
+        // A panel counts as recovered when nothing of its is still failing or pending.
+        var ngPids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var k in ng.RecoveredKeys) { var i = k.IndexOf('|'); if (i > 0) ngPids.Add(k[..i]); }
+        foreach (var it in ngItems) ngPids.Add(it.Pid);
+        var ngOpenPids = new HashSet<string>(
+            ngItems.Where(i => i.State != NgItemState.Succeeded).Select(i => i.Pid),
+            StringComparer.OrdinalIgnoreCase);
+        var ngPanelsOk = ngPids.Count(p => !ngOpenPids.Contains(p));
+
+        NgStatPanels.Text = ngPids.Count > 0
+            ? $"{ngPids.Count} ({ngPanelsOk * 100.0 / ngPids.Count:0.#}%)"
+            : "0";
+        NgStatFiles.Text = ngTotal.ToString();
+        NgStatOk.Text = ngTotal > 0 ? $"{ngRec} ({ngRec * 100.0 / ngTotal:0.#}%)" : "0";
+        NgStatPending.Text = ngTotal > 0 ? $"{ngPend} ({ngPend * 100.0 / ngTotal:0.#}%)" : "0";
+        NgStatFailed.Text = ngTotal > 0 ? $"{ngFail} ({ngFail * 100.0 / ngTotal:0.#}%)" : "0";
+        NgCount.Text = running && ng.QueueLength > 0 ? $"-  {ng.QueueLength} queued" : "";
 
         var cur = ng.Current;
         if (cur is not null)
@@ -319,7 +343,7 @@ public partial class MainWindow : Window
             NgCurIp.Text = cur.LastHost;
             NgCurElapsed.Text = ng.InFlight is not null
                 ? $"{(DateTime.Now - ng.InFlightStarted).TotalSeconds:0.0}s"
-                : "cooldown…";
+                : "cooldown...";
         }
         else
         {
@@ -328,9 +352,9 @@ public partial class MainWindow : Window
             var remaining = ng.QueueLength;
             NgIdle.Text = running
                 ? (remaining > 0
-                    ? $"Recovering — {remaining} item(s) still failing, retrying between sweeps…"
-                    : "Monitoring — all recovered; watching for new failures.")
-                : $"Stopped — day {ng.LoadedDay}, {_ng.Sum(g => g.Items.Count)} item(s). Press Auto Retry to recover them.";
+                    ? $"Recovering - {remaining} item(s) still failing, retrying between sweeps..."
+                    : "Monitoring - all recovered; watching for new failures.")
+                : $"Stopped - day {ng.LoadedDay}, {_ng.Sum(g => g.Items.Count)} item(s). Press Auto Retry to recover them.";
         }
     }
 
@@ -399,7 +423,7 @@ public partial class MainWindow : Window
         {
             if (d is System.Windows.Controls.Primitives.ScrollBar) return true;
 
-            // VisualTreeHelper.GetParent THROWS on a ContentElement — and a click that lands on
+            // VisualTreeHelper.GetParent THROWS on a ContentElement - and a click that lands on
             // inline text reports its source as a Run, which is exactly that. Unhandled on the UI
             // thread, so it killed the whole process: clicking a row's text closed the app and the
             // pumps with it. Step out to the logical tree for those nodes instead.
@@ -412,7 +436,7 @@ public partial class MainWindow : Window
 
     /// <summary>A file is "terminal" when nothing more will be done with it: it succeeded, it
     /// failed / timed out, or it's out of attempts. (An in-flight file is Pending with attempts
-    /// left, so it is NOT terminal — its panel stays visible.)</summary>
+    /// left, so it is NOT terminal - its panel stays visible.)</summary>
     private bool FileTerminal(JobFile f) =>
         f.Status == FileStatus.Succeeded || f.Status == FileStatus.Failed || f.Status == FileStatus.TimedOut
         || (f.Status == FileStatus.Pending && f.Attempts >= _host.Cfg.MaxAttempts);
@@ -425,7 +449,7 @@ public partial class MainWindow : Window
     {
         var inFlight = _host.Engine.InFlight;
 
-        // Everything matching the PID filter — used for the day-total stats strip.
+        // Everything matching the PID filter - used for the day-total stats strip.
         var matched = _host.Engine.Jobs
             .Where(j => _filter.Length == 0 ||
                         j.Pid.Contains(_filter, StringComparison.OrdinalIgnoreCase))
@@ -446,18 +470,32 @@ public partial class MainWindow : Window
         foreach (var vm in _jobs) vm.Refresh(inFlight);
 
         var files = matched.Sum(j => j.Files.Count);
-        var ok = matched.Sum(j => j.Files.Count(f => f.Status == FileStatus.Succeeded));
-        var bad = matched.Sum(j => j.Files.Count(f =>
-            f.Status == FileStatus.Failed || f.Status == FileStatus.TimedOut));
 
-        StatJobs.Text = matched.Count.ToString();
+        // Reconcile with NG before counting, so the strip is a mini version of the day report.
+        // The live engine never learns about NG recoveries, so a file NG rescued stayed "Failed"
+        // here forever — 297 Failed in the strip against 0 in the report for the same run.
+        var recovered = _host.NgRetry.RecoveredKeys;
+        var ok = matched.Sum(j => j.Files.Count(f =>
+            f.Status == FileStatus.Succeeded || recovered.Contains(f.Key)));
+        var bad = matched.Sum(j => j.Files.Count(f =>
+            (f.Status == FileStatus.Failed || f.Status == FileStatus.TimedOut)
+            && !recovered.Contains(f.Key)));
+        var pending = files - ok - bad;
+
+        // Panels fully landed — the strip's equivalent of the report's "Panels succeeded" card.
+        var panelsOk = matched.Count(j => j.Files.Count > 0 && j.Files.All(f =>
+            f.Status == FileStatus.Succeeded || recovered.Contains(f.Key)));
+
+        StatJobs.Text = matched.Count > 0
+            ? $"{matched.Count} ({panelsOk * 100.0 / matched.Count:0.#}%)"
+            : "0";
         StatFiles.Text = files.ToString();
-        StatOk.Text = ok.ToString();
-        StatPending.Text = (files - ok - bad).ToString();
-        StatFailed.Text = bad.ToString();
+        StatOk.Text = files > 0 ? $"{ok} ({ok * 100.0 / files:0.#}%)" : "0";
+        StatPending.Text = files > 0 ? $"{pending} ({pending * 100.0 / files:0.#}%)" : "0";
+        StatFailed.Text = files > 0 ? $"{bad} ({bad * 100.0 / files:0.#}%)" : "0";
 
         var mbps = _host.Engine.RollingMBps;
-        StatSpeed.Text = mbps > 0 ? $"·  {mbps:0.0} MB/s avg" : "";
+        StatSpeed.Text = mbps > 0 ? $"-  {mbps:0.0} MB/s avg" : "";
 
         SyncNg();
 
@@ -468,25 +506,25 @@ public partial class MainWindow : Window
         var ngActive = _host.NgRetry.Items.Count(i =>
             i.State is NgItemState.Waiting or NgItemState.Uploading or NgItemState.Failed);
         // Show out-of-window work alongside the loaded count. Without it a bare "NG List (0)" reads
-        // as "nothing outstanding" when it only means "nothing outstanding in the days I loaded" —
+        // as "nothing outstanding" when it only means "nothing outstanding in the days I loaded" -
         // days that have aged out are neither retried nor counted.
         var older = _host.NgRetry.BacklogOutstanding;
-        NgTab.Header = older > 0 ? $"NG List ({ngActive})  ·  {older:N0} older" : $"NG List ({ngActive})";
+        NgTab.Header = older > 0 ? $"NG List ({ngActive})  -  {older:N0} older" : $"NG List ({ngActive})";
         NgEmpty.Visibility = _ng.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         NgEmpty.Text = older > 0
-            ? $"No NG items in the loaded day(s). {older:N0} file(s) on {_host.NgRetry.BacklogDays} older day(s) are outside the {_host.Cfg.NgRecoveryDays}-day recovery window — pick that day above to retry them."
+            ? $"No NG items in the loaded day(s). {older:N0} file(s) on {_host.NgRetry.BacklogDays} older day(s) are outside the {_host.Cfg.NgRecoveryDays}-day recovery window - pick that day above to retry them."
             : "No NG items for this day.";
     }
 
     /// <summary>
     /// Reconciles the NG tab with the NG-retry engine's item list. Rows are keyed on the item's
     /// stable identity string (Day|PID|File), so a Retry just refreshes the row in place and a
-    /// day reload REBINDS existing rows rather than clearing and rebuilding — the list never
+    /// day reload REBINDS existing rows rather than clearing and rebuilding - the list never
     /// blanks out. Items that succeed stay visible (green) until the day is reloaded.
     /// </summary>
     private void SyncNg()
     {
-        // The NG filter is view-only — the pump still works the full loaded list; this just
+        // The NG filter is view-only - the pump still works the full loaded list; this just
         // controls which rows are shown, using the NG tab's own PID box (separate from Today Jobs).
         var items = _host.NgRetry.Items
             .Where(it => _ngFilter.Length == 0 ||
@@ -495,7 +533,7 @@ public partial class MainWindow : Window
 
         // Group by day+PID, preserving first-seen order so cards don't jump around. The list can
         // span several days (today + the recovery window), and the same panel can legitimately
-        // appear on two of them — grouping on PID alone would merge those into one card.
+        // appear on two of them - grouping on PID alone would merge those into one card.
         var order = new List<string>();
         var byPid = new Dictionary<string, List<NgItem>>();
         foreach (var it in items)
@@ -511,12 +549,12 @@ public partial class MainWindow : Window
         }
 
         // Hide fully-recovered panels: keep a card only while at least one item still needs
-        // attention (Waiting / Uploading / Failed). All Succeeded (or Gone) → drop the card.
+        // attention (Waiting / Uploading / Failed). All Succeeded (or Gone) - drop the card.
         static bool NeedsAttention(NgItem it) =>
             it.State is NgItemState.Waiting or NgItemState.Uploading or NgItemState.Failed;
         order = order.Where(k => byPid[k].Any(NeedsAttention)).ToList();
 
-        // Reconcile group cards by day+PID — existing cards are refreshed in place (keeping their
+        // Reconcile group cards by day+PID - existing cards are refreshed in place (keeping their
         // expand/collapse state and row objects), new ones added, vanished ones removed.
         var existing = new Dictionary<string, NgGroupVm>();
         foreach (var g in _ng) existing[g.GroupKey] = g;
@@ -553,7 +591,7 @@ public partial class MainWindow : Window
 
     private void RefreshLog()
     {
-        // newest first, capped — the full history lives in the raw log on disk.
+        // newest first, capped - the full history lives in the raw log on disk.
         // Re-laying out a wrapped TextBlock is not free, so skip it if nothing changed.
         var text = string.Join(Environment.NewLine, _host.LogLines.Reverse().Take(40));
         if (text == _lastLogText) return;
@@ -647,13 +685,13 @@ public partial class MainWindow : Window
         ok &= Mark(SetStateFolder, SetStateFolder.Text.Trim().Length > 0);
 
         ok &= Mark(SetTimeout, IsNonNegInt(SetTimeout.Text));
-        ok &= Mark(SetPrimaryRetries, IsNonNegInt(SetPrimaryRetries.Text));
-        ok &= Mark(SetSecondaryRetries, IsNonNegInt(SetSecondaryRetries.Text));
+        ok &= Mark(SetRetryCount, IsNonNegInt(SetRetryCount.Text));
         ok &= Mark(SetPanelTimeout, IsNonNegInt(SetPanelTimeout.Text));
         ok &= Mark(SetPollInterval, IsNonNegInt(SetPollInterval.Text) && ParseInt(SetPollInterval.Text, 0) > 0);
         ok &= Mark(SetLogRetention, IsNonNegInt(SetLogRetention.Text));
         ok &= Mark(SetNgRecoveryDays, IsNonNegInt(SetNgRecoveryDays.Text));
-        // Max files/session is a combo (Unlimited/100/300/500) — always valid, nothing to check.
+        ok &= Mark(SetHtmlRefresh, IsNonNegInt(SetHtmlRefresh.Text));
+        // Max files/session is a combo (Unlimited/100/300/500) - always valid, nothing to check.
         return ok;
     }
 
@@ -674,8 +712,8 @@ public partial class MainWindow : Window
             ["Password"] = c.Password,
             ["FTP security"] = c.FtpSecure,
             ["Connect timeout"] = c.TimeoutSecondsOverride.ToString(),
-            ["Primary retries"] = c.PrimaryRetries.ToString(),
-            ["Secondary retries"] = c.SecondaryRetries.ToString(),
+            ["Retry count"] = c.RetryCount.ToString(),
+            ["Upload to IP"] = c.InitialHost,
             ["Jobs folder"] = c.JobsFolder,
             ["Log folder"] = c.LogFolder,
             ["State folder"] = c.StateFolder,
@@ -691,7 +729,13 @@ public partial class MainWindow : Window
         cb.SelectedIndex = 0;
     }
 
-    /// <summary>Fill the Settings form from the live config + the recipe file on disk.</summary>
+    // The Settings route preview was removed: with a single destination host and one retry count,
+    // the two fields say everything the panel used to explain. These handlers stay as no-ops so the
+    // XAML bindings on those fields remain valid.
+    private void RoutePreview_Changed(object sender, TextChangedEventArgs e) { }
+
+    private void RoutePreview_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) { }
+
     private void LoadSettings()
     {
         var c = _host.Cfg;
@@ -704,9 +748,7 @@ public partial class MainWindow : Window
         SelectCombo(SetEngine, string.Equals(c.Engine, "WinSCP", StringComparison.OrdinalIgnoreCase) ? "WinSCP" : "FluentFTP");
         SelectCombo(SetFtpMode, string.Equals(c.FtpMode, "Active", StringComparison.OrdinalIgnoreCase) ? "Active" : "Passive");
         SelectCombo(SetInitialHost, string.Equals(c.InitialHost, "Secondary", StringComparison.OrdinalIgnoreCase) ? "Secondary" : "Primary");
-        SetWinScpLog.IsChecked = c.WinScpLog;
-        SetPreserveTimestamp.IsChecked = c.PreserveTimestamp;
-        SetUseTempFile.IsChecked = c.UseTempFile;
+        // Engine log always on; .part rename and preserve-timestamp always off. No longer in the UI.
 
         SetQueueFolder.Text = c.QueueFolder;
         SetRecipePath.Text = c.RecipePath;
@@ -716,12 +758,13 @@ public partial class MainWindow : Window
         SetStateFolder.Text = c.StateFolder;
 
         SetTimeout.Text = c.TimeoutSecondsOverride.ToString();
-        SetPrimaryRetries.Text = c.PrimaryRetries.ToString();
-        SetSecondaryRetries.Text = c.SecondaryRetries.ToString();
+        SetRetryCount.Text = c.RetryCount.ToString();
         SetPanelTimeout.Text = c.PanelTimeoutSeconds.ToString();
         SetPollInterval.Text = c.PollIntervalMs.ToString();
         SetLogRetention.Text = c.LogRetentionDays.ToString();
         SetNgRecoveryDays.Text = c.NgRecoveryDays.ToString();
+        SetHtmlRefresh.Text = c.HtmlLogRefreshSeconds.ToString();
+        SetMidFailHost.IsChecked = c.MidFailHostUpload;
         SelectCombo(SetMaxFilesPerSession, c.MaxFilesPerSession <= 0 ? "Unlimited" : c.MaxFilesPerSession.ToString());
 
         SetAutoUpload.IsChecked = c.AutoStartUploading;
@@ -736,6 +779,54 @@ public partial class MainWindow : Window
 
     /// <summary>Read the form into the live config, persist config.json, and write the recipe file.
     /// Returns true on success.</summary>
+
+    /// <summary>
+    /// The settings that affect behaviour, as name -> value. Taken BEFORE the form is read into the
+    /// live config and again after, so the oplog can name what actually changed.
+    ///
+    /// A snapshot is necessary rather than comparing two Config objects: ApplySettings mutates the
+    /// live config in place, so "old" and "new" would be the same instance.
+    /// </summary>
+    private static Dictionary<string, string> SettingsSnapshot(Config c)
+    {
+        var d = new Dictionary<string, string>(StringComparer.Ordinal);
+        void S(string name, string? v) => d[name] = string.IsNullOrEmpty(v) ? "(empty)" : v!;
+
+        S("PrimaryHost", c.PrimaryHost);
+        S("SecondaryHost", c.SecondaryHost);
+        S("InitialHost", c.InitialHost.ToString());
+        S("User", c.User);
+        // Never the password itself — only whether it is set, so a change is visible without leaking it.
+        S("Password", string.IsNullOrEmpty(c.Password) ? "(unset)" : "(set:" + c.Password.Length + ")");
+        S("RetryCount", c.RetryCount.ToString());
+        S("TimeoutSecondsOverride", c.TimeoutSecondsOverride.ToString());
+        S("PanelTimeoutSeconds", c.PanelTimeoutSeconds.ToString());
+        S("PollIntervalMs", c.PollIntervalMs.ToString());
+        S("LogRetentionDays", c.LogRetentionDays.ToString());
+        S("NgRecoveryDays", c.NgRecoveryDays.ToString());
+        S("HtmlLogRefreshSeconds", c.HtmlLogRefreshSeconds.ToString());
+        S("MidFailHostUpload", c.MidFailHostUpload.ToString());
+        S("MaxFilesPerSession", c.MaxFilesPerSession.ToString());
+        S("AutoStartUploading", c.AutoStartUploading.ToString());
+        S("AutoStartRetrying", c.AutoStartRetrying.ToString());
+        S("QueueFolder", c.QueueFolder);
+        S("JobsFolder", c.JobsFolder);
+        S("LogFolder", c.LogFolder);
+        S("StateFolder", c.StateFolder);
+        S("RecipePath", c.RecipePath);
+        return d;
+    }
+
+    /// <summary>"key: old -> new" for each setting that differs. Unchanged values are omitted.</summary>
+    private static List<string> DiffSettings(Dictionary<string, string> before, Dictionary<string, string> after)
+    {
+        var list = new List<string>();
+        foreach (var kv in after)
+            if (!before.TryGetValue(kv.Key, out var old) || !string.Equals(old, kv.Value, StringComparison.Ordinal))
+                list.Add($"{kv.Key}: {(old ?? "(new)")} -> {kv.Value}");
+        return list;
+    }
+
     private bool ApplySettings()
     {
         if (!ValidateSettings())
@@ -747,6 +838,7 @@ public partial class MainWindow : Window
         try
         {
             var c = _host.Cfg;
+            var beforeSave = SettingsSnapshot(c);   // before the form overwrites it
             c.PrimaryHost = SetPrimaryHost.Text.Trim();
             c.SecondaryHost = SetSecondaryHost.Text.Trim();
             c.Port = ParseInt(SetPort.Text, c.Port);
@@ -756,9 +848,6 @@ public partial class MainWindow : Window
             c.Engine = (SetEngine.SelectedItem as System.Windows.Controls.ComboBoxItem)?.Content?.ToString() ?? c.Engine;
             c.FtpMode = (SetFtpMode.SelectedItem as System.Windows.Controls.ComboBoxItem)?.Content?.ToString() ?? c.FtpMode;
             c.InitialHost = (SetInitialHost.SelectedItem as System.Windows.Controls.ComboBoxItem)?.Content?.ToString() ?? c.InitialHost;
-            c.WinScpLog = SetWinScpLog.IsChecked == true;
-            c.PreserveTimestamp = SetPreserveTimestamp.IsChecked == true;
-            c.UseTempFile = SetUseTempFile.IsChecked == true;
 
             c.QueueFolder = SetQueueFolder.Text.Trim();
             c.RecipePath = SetRecipePath.Text.Trim();
@@ -768,13 +857,14 @@ public partial class MainWindow : Window
             c.StateFolder = SetStateFolder.Text.Trim();
 
             c.TimeoutSecondsOverride = ParseInt(SetTimeout.Text, c.TimeoutSecondsOverride);
-            c.PrimaryRetries = ParseInt(SetPrimaryRetries.Text, c.PrimaryRetries);
-            c.SecondaryRetries = ParseInt(SetSecondaryRetries.Text, c.SecondaryRetries);
+            c.RetryCount = ParseInt(SetRetryCount.Text, c.RetryCount);
             c.PanelTimeoutSeconds = ParseInt(SetPanelTimeout.Text, c.PanelTimeoutSeconds);
             c.PollIntervalMs = ParseInt(SetPollInterval.Text, c.PollIntervalMs);
             c.LogRetentionDays = ParseInt(SetLogRetention.Text, c.LogRetentionDays);
             var ngDaysChanged = ParseInt(SetNgRecoveryDays.Text, c.NgRecoveryDays) != c.NgRecoveryDays;
             c.NgRecoveryDays = ParseInt(SetNgRecoveryDays.Text, c.NgRecoveryDays);
+            c.HtmlLogRefreshSeconds = ParseInt(SetHtmlRefresh.Text, c.HtmlLogRefreshSeconds);
+            c.MidFailHostUpload = SetMidFailHost.IsChecked == true;
             // Combo: "Unlimited" -> 0, otherwise the numeric preset.
             var sessSel = (SetMaxFilesPerSession.SelectedItem as System.Windows.Controls.ComboBoxItem)?.Content?.ToString() ?? "Unlimited";
             c.MaxFilesPerSession = sessSel.Equals("Unlimited", StringComparison.OrdinalIgnoreCase) ? 0 : ParseInt(sessSel, 0);
@@ -782,7 +872,20 @@ public partial class MainWindow : Window
             c.AutoStartUploading = SetAutoUpload.IsChecked == true;
             c.AutoStartRetrying = SetAutoRetry.IsChecked == true;
 
+            // What actually changed, captured BEFORE the save so the oplog can name it.
+            //
+            // "Who changed the destination IP, and when?" is the question that started this whole
+            // investigation, and until now the oplog could not answer it: it recorded startups,
+            // shutdowns, rollovers and crashes, but not a settings change. A restart line saying
+            // "settings saved" is no use either — the values are the point.
+            var changes = DiffSettings(beforeSave, SettingsSnapshot(c));
+
             c.Save(_host.ConfigPath);
+
+            if (changes.Count > 0)
+                _host.LogEvent("SETTINGS SAVED - " + string.Join("; ", changes));
+            else
+                _host.LogEvent("SETTINGS SAVED - no values changed");
 
             // Create any missing folders (resolved against the exe for relative paths).
             try { c.EnsureFolders(); }
@@ -790,7 +893,7 @@ public partial class MainWindow : Window
 
             // NG past-days applies live: rebuild the recovery window now rather than waiting for the
             // next midnight or a restart. Only when it actually changed and the console is showing
-            // the window — if the operator has picked a single day to review, leave them there.
+            // the window - if the operator has picked a single day to review, leave them there.
             if (ngDaysChanged && _host.NgRetry.WindowMode)
             {
                 var wasRunning = _host.NgRetry.AutoRunning;
@@ -845,6 +948,174 @@ public partial class MainWindow : Window
     // Single-instance non-modal calendar popups (day + NG). Re-shown/refreshed instead of duplicated.
     private LogCalendarWindow? _dayLogCal;
     private LogCalendarWindow? _ngLogCal;
+    private LogCalendarWindow? _summaryCal;
+    private LogCalendarWindow? _opLogCal;
+
+    /// <summary>
+    /// Pick a day and open its operation log — startups, shutdowns with reason, rollovers, settings
+    /// saves, crashes and mid-fail host sends. Plain text, opened in whatever handles .txt.
+    ///
+    /// Days come from the oplog files actually present, not from the upload logs: a machine can have
+    /// an oplog for a day it uploaded nothing (started and stopped), and that is exactly the day
+    /// someone needs to look at.
+    /// </summary>
+    /// <summary>
+    /// "Session Log" — find the WinSCP records for the PID typed in the strip's filter box.
+    ///
+    /// It reads the PID from the filter box rather than adding a per-row button: you are usually
+    /// already filtered to the panel you care about, and the box is in both views.
+    /// </summary>
+    private void LiveSessionLog_Click(object sender, RoutedEventArgs e) => ShowSessionLog(FilterBox.Text);
+
+    private void NgSessionLog_Click(object sender, RoutedEventArgs e) => ShowSessionLog(NgFilterBox.Text);
+
+    private void ShowSessionLog(string? pid)
+    {
+        pid = (pid ?? "").Trim();
+        if (pid.Length == 0)
+        {
+            MessageBox.Show(this, "Type a panel ID in the PID box first, then press Session Log.",
+                            "Session Log", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+        try
+        {
+            var path = SessionLogFinder.Build(_host.Cfg, pid);
+            if (path is null)
+            {
+                MessageBox.Show(this,
+                    $"No WinSCP session log mentions \"{pid}\".\n\n" +
+                    "Either it was uploaded on a day whose session logs have been purged by log " +
+                    "retention, or the PID is not an exact match.",
+                    "Session Log", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(path) { UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, "Could not build the session-log report: " + ex.Message,
+                            "Session Log", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
+    private TracePanelWindow? _traceWin;
+
+    /// <summary>
+    /// Open the Trace Panel window, pre-filled from whichever PID filter box has text so you do not
+    /// retype a panel you are already looking at.
+    /// </summary>
+    private void TracePanel_Click(object sender, RoutedEventArgs e)
+    {
+        if (_traceWin != null) { _traceWin.Activate(); return; }
+        var seed = FilterBox.Text.Trim();
+        if (seed.Length == 0) seed = NgFilterBox.Text.Trim();
+        _traceWin = new TracePanelWindow(_host.Cfg, seed) { Owner = this };
+        _traceWin.Closed += (_, _) => _traceWin = null;
+        _traceWin.Show();
+    }
+    private void ViewOpLog_Click(object sender, RoutedEventArgs e)
+    {
+        if (_opLogCal != null) { _opLogCal.RefreshDays(); _opLogCal.Activate(); return; }
+        _opLogCal = new LogCalendarWindow(
+            "Operation Log",
+            () => new HashSet<string>(AvailableOpLogDays()),
+            day =>
+            {
+                try
+                {
+                    var path = _host.Cfg.OpLogPath(ParseDayOrToday(day));
+                    if (!System.IO.File.Exists(path))
+                    {
+                        MessageBox.Show(this, $"No operation log for {day}.",
+                                        "Operation Log", MessageBoxButton.OK, MessageBoxImage.Information);
+                        return;
+                    }
+                    System.Diagnostics.Process.Start(
+                        new System.Diagnostics.ProcessStartInfo(path) { UseShellExecute = true });
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, "Could not open the operation log: " + ex.Message,
+                                    "Operation Log", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }) { Owner = this };
+        _opLogCal.Closed += (_, _) => _opLogCal = null;
+        _opLogCal.Show();
+    }
+
+    private static DateTime ParseDayOrToday(string day)
+        => DateTime.TryParseExact(day, "yyyyMMdd", null,
+               System.Globalization.DateTimeStyles.None, out var d) ? d : DateTime.Today;
+
+    /// <summary>Days that actually have an operation log on disk.</summary>
+    private IEnumerable<string> AvailableOpLogDays()
+    {
+        var days = new List<string>();
+        try
+        {
+            var dir = _host.Cfg.LogFullPath;
+            if (!System.IO.Directory.Exists(dir)) return days;
+            foreach (var f in System.IO.Directory.GetFiles(dir, "*_oplog.txt"))
+            {
+                var name = System.IO.Path.GetFileName(f);
+                if (name.Length >= 8) days.Add(name[..8]);
+            }
+        }
+        catch { }
+        return days;
+    }
+
+    private void ViewSummary_Click(object sender, RoutedEventArgs e)
+    {
+        if (_summaryCal != null) { _summaryCal.RefreshDays(); _summaryCal.Activate(); return; }
+        _summaryCal = new LogCalendarWindow(
+            "Summary CSV",
+            () => new HashSet<string>(AvailableLogDays(liveMode: true)),
+            day =>
+            {
+                try
+                {
+                    var path = SummaryLog.Build(_host.Cfg, day);
+                    if (path is null || !System.IO.File.Exists(path))
+                    {
+                        MessageBox.Show(this, $"No summary for {day} - nothing was uploaded that day.",
+                                        "Summary", MessageBoxButton.OK, MessageBoxImage.Information);
+                        return;
+                    }
+
+                    // Open a COPY, never the live file. Excel holds a .csv with FileShare.Read,
+                    // which denies writers — so viewing the real file would silently block the
+                    // background refresh from rewriting it for as long as it stayed open. The copy
+                    // is a point-in-time snapshot; reopen for newer data.
+                    var tmpDir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "FtpUploadSummary");
+                    System.IO.Directory.CreateDirectory(tmpDir);
+
+                    // Prune snapshots older than a day so this folder can't grow without bound.
+                    try
+                    {
+                        foreach (var old in System.IO.Directory.GetFiles(tmpDir, "*.csv"))
+                            if ((DateTime.Now - System.IO.File.GetLastWriteTime(old)).TotalDays > 1)
+                                try { System.IO.File.Delete(old); } catch { }
+                    }
+                    catch { }
+
+                    // Timestamped name: a previous copy may still be open in Excel and locked.
+                    var copy = System.IO.Path.Combine(tmpDir, $"{day}_summary_{DateTime.Now:HHmmss}.csv");
+                    System.IO.File.Copy(path, copy, overwrite: true);
+
+                    System.Diagnostics.Process.Start(
+                        new System.Diagnostics.ProcessStartInfo(copy) { UseShellExecute = true });
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, "Could not open the summary: " + ex.Message,
+                                    "Summary", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }) { Owner = this };
+        _summaryCal.Closed += (_, _) => _summaryCal = null;
+        _summaryCal.Show();
+    }
 
     private void ViewLiveLog_Click(object sender, RoutedEventArgs e)
     {
@@ -854,7 +1125,7 @@ public partial class MainWindow : Window
             () => new HashSet<string>(AvailableLogDays(liveMode: true)),
             day => BuildAndOpenLog(() => HtmlLog.BuildDayLog(_host.Cfg, day), day)) { Owner = this };
         _dayLogCal.Closed += (_, _) => _dayLogCal = null;
-        _dayLogCal.Show();   // non-modal — does not block the main UI
+        _dayLogCal.Show();   // non-modal - does not block the main UI
     }
 
     private void ViewNgLog_Click(object sender, RoutedEventArgs e)
@@ -945,7 +1216,7 @@ public partial class MainWindow : Window
 
     private static async Task PingOneAsync(string host, System.Windows.Shapes.Ellipse dot, System.Windows.Controls.TextBlock text)
     {
-        if (string.IsNullOrWhiteSpace(host)) { dot.Fill = PingIdle; text.Text = "—"; return; }
+        if (string.IsNullOrWhiteSpace(host)) { dot.Fill = PingIdle; text.Text = "-"; return; }
         try
         {
             using var ping = new System.Net.NetworkInformation.Ping();
@@ -994,7 +1265,7 @@ public partial class MainWindow : Window
     private void NgDate_Changed(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
     {
         var day = (NgDate.SelectedDate ?? DateTime.Today).ToString("yyyyMMdd");
-        if (day == _host.NgRetry.LoadedDay) return;   // already showing this day — don't reload
+        if (day == _host.NgRetry.LoadedDay) return;   // already showing this day - don't reload
                                                        // (that would reset the running auto-retry)
         _host.NgRetry.LoadDay(day);
         _dirty = true;
@@ -1002,26 +1273,8 @@ public partial class MainWindow : Window
 
     private void NgIp_Changed(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
     {
-        // Fires once during InitializeComponent (before _host is assigned) and again when the
-        // constructor syncs the dropdown to the saved value — neither is an operator change.
-        if (_host is null || _ngIpLoading) return;
-
-        var mode = (NgIp?.SelectedIndex) switch
-        {
-            1 => NgIpMode.Primary,
-            2 => NgIpMode.Secondary,
-            _ => NgIpMode.Auto
-        };
-        _host.NgRetry.IpMode = mode;
-
-        // Persist immediately. The watchdog can restart this app at any moment, so waiting for a
-        // clean shutdown to save would lose the choice exactly when it matters most.
-        try
-        {
-            _host.Cfg.NgIpMode = mode.ToString();
-            _host.Cfg.Save(_host.ConfigPath);
-        }
-        catch { /* a failed save must never break the NG tab */ }
+        // NG no longer has its own IP selector; the host comes from Settings. Kept as a no-op so
+        // any stale XAML binding cannot crash the tab.
     }
 
     private void NgStart_Click(object sender, RoutedEventArgs e)
@@ -1061,14 +1314,31 @@ public partial class MainWindow : Window
 
     private void FilterBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-        _filter = FilterBox.Text.Trim();   // masthead box → Today Jobs list only
+        _filter = FilterBox.Text.Trim();   // masthead box - Today Jobs list only
+        // Hidden, not Collapsed: Hidden keeps the button's layout slot so the box never changes width.
+        if (FilterClear is not null)
+            FilterClear.Visibility = FilterBox.Text.Length > 0 ? Visibility.Visible : Visibility.Hidden;
         _dirty = true;
+    }
+
+    private void FilterClear_Click(object sender, RoutedEventArgs e)
+    {
+        FilterBox.Text = "";       // TextChanged does the rest (filter + hide the button)
+        FilterBox.Focus();
     }
 
     private void NgFilterBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-        _ngFilter = NgFilterBox.Text.Trim();   // NG tab's own box → NG list only
+        _ngFilter = NgFilterBox.Text.Trim();   // NG tab's own box - NG list only
+        if (NgFilterClear is not null)
+            NgFilterClear.Visibility = NgFilterBox.Text.Length > 0 ? Visibility.Visible : Visibility.Hidden;
         _dirty = true;
+    }
+
+    private void NgFilterClear_Click(object sender, RoutedEventArgs e)
+    {
+        NgFilterBox.Text = "";
+        NgFilterBox.Focus();
     }
 
     // ---------------- hiding to tray ----------------
@@ -1088,12 +1358,12 @@ public partial class MainWindow : Window
         // restore first, so reopening comes back maximized instead of minimized
         WindowState = WindowState.Maximized;
         Hide();
-        // Tell the operator once that closing did not stop the uploads — otherwise the
+        // Tell the operator once that closing did not stop the uploads - otherwise the
         // window just vanishes and it looks like the program quit.
         (System.Windows.Application.Current as App)?.NotifyHiddenOnce();
     }
 
-    /// <summary>Closing only hides the window — the upload engine keeps running.</summary>
+    /// <summary>Closing only hides the window - the upload engine keeps running.</summary>
     protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
     {
         if (!App.ShuttingDown)

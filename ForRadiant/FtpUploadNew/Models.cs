@@ -222,8 +222,8 @@ public static class SafeFile
     }
 }
 
-/// <summary>Which IP the NG-retry pump uses for an attempt.</summary>
-public enum NgIpMode { Auto, Primary, Secondary }
+// NgIpMode removed: uploads and NG recovery both use the single host from Settings
+// (Config.FirstHost), so there is no per-console IP choice any more.
 
 /// <summary>State of one NG item within the NG-retry console.</summary>
 public enum NgItemState { Waiting, Uploading, Succeeded, Failed, Gone }

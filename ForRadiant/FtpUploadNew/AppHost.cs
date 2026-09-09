@@ -1,4 +1,4 @@
-namespace FtpUpload;
+﻿namespace FtpUpload;
 
 /// <summary>
 /// The running program: engine + intake + command channel, started once at launch and
@@ -14,6 +14,7 @@ public sealed class AppHost : IDisposable
     private Task? _pump;
     private Task? _ngPump;
     private Task? _finalizePump;
+    private Task? _reportPump;
     private Task? _watch;
 
     public Config Cfg { get; }
@@ -62,15 +63,8 @@ public sealed class AppHost : IDisposable
         // (filed under the OLD day) is recovered automatically instead of waiting for an engineer
         // to open yesterday by hand. Whether it auto-retries on launch is configurable.
         //
-        // Restore the operator's saved IP choice BEFORE auto-retry starts, so the first attempt
-        // after a restart already uses the host they picked rather than silently reverting to Auto.
-        // The watchdog restarts this app routinely, so a deliberate pin must survive that.
-        NgRetry.IpMode = Cfg.NgIpMode switch
-        {
-            "Primary" => NgIpMode.Primary,
-            "Secondary" => NgIpMode.Secondary,
-            _ => NgIpMode.Auto
-        };
+        // NG uses the single host from Settings (Cfg.FirstHost); it has no IP selector of its own,
+        // so there is nothing to restore here any more.
         NgRetry.LoadWindow();
         if (Cfg.AutoStartRetrying) NgRetry.StartAutoRetry();
 
@@ -96,15 +90,16 @@ public sealed class AppHost : IDisposable
         // Housekeeping: prune old date-stamped logs/reports on startup (no-op if retention = 0).
         LogRetention.Purge(Cfg, Append);
 
-        Append($"[{DateTime.Now:HH:mm:ss}] FTP Upload started — primary {Cfg.PrimaryHost}:{Cfg.Port}, " +
-               $"secondary {Cfg.SecondaryHost}, timeout {Cfg.TimeoutSeconds}s, {Cfg.MaxAttempts} attempts");
+        Append($"[{DateTime.Now:HH:mm:ss}] FTP Upload started — client {NetInfo.Describe(Cfg.FirstHost)} " +
+               $"-> {Cfg.FirstHost}:{Cfg.Port}, timeout {Cfg.TimeoutSeconds}s, {Cfg.MaxAttempts} attempts");
 
         // Durable startup marker, so the oplog reads as a clean START/SHUTDOWN pair per run and a
         // restart is obvious even when nobody was watching the window.
         var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
         try { SafeFile.Append(Cfg.OpLogPath(Clock.Now),
               $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] STARTUP v{ver} pid {Environment.ProcessId} — " +
-              $"primary {Cfg.PrimaryHost}, secondary {Cfg.SecondaryHost}"); } catch { }
+              $"client {NetInfo.Describe(Cfg.FirstHost)} — uploading to {Cfg.FirstHost}, " +
+              $"{Cfg.MaxAttempts} attempt(s)/file, timeout {Cfg.TimeoutSeconds}s"); } catch { }
         Append($"[{DateTime.Now:HH:mm:ss}] transfer engine: {FtpEngineFactory.ActiveEngine}" +
                (FtpEngineFactory.ActiveEngine == "WinSCP" ? $" ({Cfg.FtpMode} mode)" : ""));
     }
@@ -139,6 +134,39 @@ public sealed class AppHost : IDisposable
                 catch (Exception ex) { Append($"[{DateTime.Now:HH:mm:ss}] finalize error: {ex.Message}"); }
                 try { await Task.Delay(Cfg.PollIntervalMs, _stopping.Token); }
                 catch (OperationCanceledException) { }
+            }
+        });
+
+        // HTML reports rewritten on a timer, so they are current without anyone opening the UI or
+        // running a .bat. Its own task: building a day's report reads the whole rawlog and produces
+        // a multi-MB string, which must never sit on the watch loop or a transfer pump.
+        _reportPump = Task.Run(async () =>
+        {
+            long lastLen = -1;
+            while (!_stopping.IsCancellationRequested)
+            {
+                try
+                {
+                    var every = Cfg.HtmlLogRefreshSeconds;
+                    if (every > 0)
+                    {
+                        var day = Clock.Now.ToString("yyyyMMdd");
+                        var raw = Cfg.RawLogPathForDay(day);
+                        // Only rebuild when the log has actually grown — an idle machine does no work.
+                        var len = File.Exists(raw) ? new FileInfo(raw).Length : 0;
+                        if (len != lastLen)
+                        {
+                            lastLen = len;
+                            HtmlLog.BuildDayLog(Cfg, day);
+                            HtmlLog.BuildNgLog(Cfg, day);
+                            SummaryLog.Build(Cfg, day);
+                        }
+                    }
+                }
+                catch (Exception ex) { Append($"[{DateTime.Now:HH:mm:ss}] report refresh error: {ex.Message}"); }
+
+                var wait = Math.Max(5, Cfg.HtmlLogRefreshSeconds) * 1000;
+                try { await Task.Delay(wait, _stopping.Token); } catch (OperationCanceledException) { }
             }
         });
 
@@ -308,7 +336,7 @@ public sealed class AppHost : IDisposable
     public void Dispose()
     {
         _stopping.Cancel();
-        try { Task.WaitAll(new[] { _pump, _ngPump, _finalizePump, _watch }.Where(t => t is not null).ToArray()!, 3000); } catch { }
+        try { Task.WaitAll(new[] { _pump, _ngPump, _finalizePump, _reportPump, _watch }.Where(t => t is not null).ToArray()!, 3000); } catch { }
         _stopping.Dispose();
     }
 }

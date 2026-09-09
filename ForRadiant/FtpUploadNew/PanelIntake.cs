@@ -79,7 +79,18 @@ public sealed class PanelIntake(Config cfg, UploadEngine engine)
         var hostName = Path.GetFileName(PathDerivation.HostSrc(panel));
 
         var dataFiles = new List<JobFile>();
-        foreach (var full in Directory.GetFiles(panel.SourceFolder))
+        // Recurse: the newer model writes nothing at the panel root — everything sits in nested
+        // folders (PucOutput\FlashData, PucOutput\OTP_Gamma, CropOutput\RawImages, OmitOutput, ...).
+        // A top-level-only scan finds zero files there and the panel gets rejected.
+        //
+        // The remote path is still derived from the FILE NAME alone, so the source folder layout is
+        // flattened on the server — the destination tree is organised by file type (HEX/IMAGE/...),
+        // not by which output folder produced it.
+        //
+        // Note this makes recipe precision matter much more: a loose pattern like "step*.tif" now
+        // also matches CropOutput\RawImages\*_Raw.tif and OmitOutput\*_omit.tif — about 3 GB per
+        // panel that is not meant to be uploaded.
+        foreach (var full in Directory.EnumerateFiles(panel.SourceFolder, "*", SearchOption.AllDirectories))
         {
             var name = Path.GetFileName(full);
             if (name.Equals(indexName, StringComparison.OrdinalIgnoreCase) ||

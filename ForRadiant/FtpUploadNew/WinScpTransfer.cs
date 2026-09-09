@@ -46,8 +46,8 @@ public sealed class WinScpTransfer : IFtpTransfer
         try { return File.Exists(ExecutablePath()); } catch { return false; }
     }
 
-    public string HostForAttempt(int attempt) =>
-        attempt <= _cfg.PrimaryAttempts ? _cfg.FirstHost : _cfg.FailoverHost;
+    /// <summary>Delegates to <see cref="Config.HostForAttempt"/> — one shared routing rule.</summary>
+    public string HostForAttempt(int attempt) => _cfg.HostForAttempt(attempt);
 
     public Task<TransferResult> UploadAsync(JobFile file, int attempt, CancellationToken preemptToken)
         => UploadCore(file, HostForAttempt(attempt), preemptToken);

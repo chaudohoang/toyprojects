@@ -1,4 +1,4 @@
-# =============================================================================
+﻿# =============================================================================
 #  _nghtmllog.ps1 - HTML report of a day's NG-RETRY log (the manual recovery pump).
 #
 #  Reads YYYYMMDD_ngretrylog.txt and turns it into a colour-coded report: one row
@@ -117,8 +117,16 @@ foreach ($line in Get-Content $ngPath) {
 }
 
 # Inject Pending rows for the index/host of any panel in this report whose manifests haven't been
-# sent yet (not in the ng-retry log). Filenames come from the jobs file's manifest lines (10th
-# field = 1). Mirrors the NG list, which shows the manifests as Pending too.
+# sent yet. "Sent" must come from BOTH logs: a manifest uploaded by the LIVE pump appears only in
+# the rawlog, so checking the ng-retry log alone reported it Pending forever.
+$sentInRawLog = @{}
+$rawPathForPending = Join-Path $LogFolder ("{0}_rawlog.txt" -f $Day)
+if (Test-Path $rawPathForPending) {
+    foreach ($rl in Get-Content $rawPathForPending) {
+        $rp = $rl.Split('|')
+        if ($rp.Count -ge 3 -and $rp[2] -eq 'SUCCEEDED') { $sentInRawLog[$rp[0] + '|' + $rp[1]] = $true }
+    }
+}
 $manifestNames = @{}
 $jobsPath = Join-Path $JobsFolder ("{0}_jobs.txt" -f $Day)
 if (Test-Path $jobsPath) {
@@ -136,7 +144,8 @@ foreach ($mp in $pidsInReport.Keys) {
     if (-not $manifestNames.ContainsKey($mp)) { continue }
     foreach ($name in $manifestNames[$mp]) {
         $key = $mp + '|' + $name
-        if ($byKey.ContainsKey($key)) { continue }
+        if ($byKey.ContainsKey($key)) { continue }        # already in the ng-retry log
+        if ($sentInRawLog.ContainsKey($key)) { continue } # sent by the live pump - not pending
         $byKey[$key] = [pscustomobject]@{
             Pid = $mp; File = $name; Events = (New-Object System.Collections.ArrayList)
             Recovered = $false; Retries = 0; LastTime = ''; PendingManifest = $true
@@ -146,13 +155,18 @@ foreach ($mp in $pidsInReport.Keys) {
 }
 
 # summary
-$tot = $order.Count
-$recovered = 0; $pending = 0; $totRetries = 0
+$recovered = 0; $failing = 0; $pendingMan = 0; $totRetries = 0
 foreach ($k in $order) {
     $e = $byKey[$k]
-    if ($e.Recovered) { $recovered++ } else { $pending++ }
+    # Three distinct states. Lumping pending manifests in with failures made the header read
+    # "192 recovered (100%)" and "124 still failing" at the same time, and clicking Still failing
+    # showed nothing - because those rows are tagged PENDING, not FAILING.
+    if     ($e.Recovered)       { $recovered++ }
+    elseif ($e.PendingManifest) { $pendingMan++ }
+    else                        { $failing++ }
     $totRetries += $e.Events.Count
 }
+$tot = $recovered + $failing + $pendingMan
 
 # build one NG item row (no PID column; that's in the panel header)
 function NgRow($e, $reason) {
@@ -205,6 +219,7 @@ foreach ($k in $order) {
     [void]$panels[$pidv].Add($k)
 }
 
+$panelsComplete = 0
 $cards = New-Object System.Text.StringBuilder
 foreach ($pidv in $panelOrder) {
     # Order rows like the main rawlog / jobs file: data files first, then index, then host.
@@ -215,13 +230,24 @@ foreach ($pidv in $panelOrder) {
         else { 0 }
     }}, @{Expression={ [array]::IndexOf($panels[$pidv], $_) }})
     $pRec  = @($keys | Where-Object { $byKey[$_].Recovered }).Count
-    $pFail = $keys.Count - $pRec
-    $ovText = if ($pFail -eq 0) { 'Recovered' } else { 'Still failing' }
-    $ovCls  = if ($pFail -eq 0) { 'ok' } else { 'bad' }
+    # Manifests that have not been sent yet are PENDING, not failures. They are injected with
+    # Recovered=$false, so a plain "count - recovered" counted them as failing and every panel that
+    # went through NG showed "Still failing" even when every data file had recovered - contradicting
+    # the per-row label, which already says Pending. Keep the three states distinct.
+    $pPend = @($keys | Where-Object { $byKey[$_].PendingManifest -and -not $byKey[$_].Recovered }).Count
+    $pFail = $keys.Count - $pRec - $pPend
+    $ovText = if ($pFail -gt 0) { 'Still failing' } elseif ($pPend -gt 0) { 'Manifests pending' } else { 'Recovered' }
+    $ovCls  = if ($pFail -gt 0) { 'bad' } elseif ($pPend -gt 0) { 'pend' } else { 'ok' }
     $stTokens = New-Object System.Collections.ArrayList
     if ($pRec  -gt 0) { [void]$stTokens.Add('RECOVERED') }
     if ($pFail -gt 0) { [void]$stTokens.Add('FAILING') }
+    if ($pPend -gt 0) { [void]$stTokens.Add('PENDING') }
+    if ($keys.Count -gt 0 -and $pRec -eq $keys.Count) { $panelsComplete++ }
     $stAttr = $stTokens -join ' '
+
+    $tally = "$pRec recovered"
+    if ($pPend -gt 0) { $tally += " &middot; $pPend manifest(s) pending" }
+    if ($pFail -gt 0) { $tally += " &middot; $pFail still failing" }
 
     $frows = ''
     foreach ($k in $keys) {
@@ -233,7 +259,7 @@ foreach ($pidv in $panelOrder) {
 <div class='panel' data-states='$stAttr'>
   <div class='phead'>
     <span class='ppid'>$(Enc $pidv)</span>
-    <span class='ptally'>$pRec recovered &middot; $pFail still failing</span>
+    <span class='ptally'>$tally</span>
     <span class='b $ovCls pov'>$ovText</span>
   </div>
   <table class='ptable'>
@@ -246,6 +272,22 @@ $frows
 "@)
 }
 
+# Which machine PRODUCED this day's log, from its oplog STARTUP line - not whoever runs this script.
+# A log copied off a line PC and analysed elsewhere must still name the line PC.
+$clientTag = ''
+$opPath = Join-Path $LogFolder ("{0}_oplog.txt" -f $Day)
+if (Test-Path $opPath) {
+    foreach ($ol in Get-Content $opPath) {
+        if ($ol -notmatch 'STARTUP') { continue }
+        $ix = $ol.IndexOf('client ')
+        if ($ix -lt 0) { continue }
+        $rest = $ol.Substring($ix + 7)
+        # just the machine name and the IP - the rest of the STARTUP line is other detail
+        $tok = $rest.Trim() -split '\s+'
+        $clientTag = if ($tok.Count -ge 2) { $tok[0] + ' ' + $tok[1] } else { $tok[0] }
+    }
+}
+if ($clientTag) { $clientTag = " &nbsp;&middot;&nbsp; client " + (Enc $clientTag) }
 $generated = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
 $pTag = if ($primary)   { " ($(Enc $primary))" } else { '' }
 $sTag = if ($secondary) { " ($(Enc $secondary))" } else { '' }
@@ -255,6 +297,9 @@ $html = @"
 <html><head><meta charset='utf-8'>
 <title>NG-retry log $Day</title>
 <style>
+  html{overflow-y:scroll;}
+  .hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;}
+  .hdrleft{min-width:0;}
   body{font-family:Segoe UI,Arial,sans-serif;margin:24px;color:#14203C;background:#F4F6FA;}
   h1{font-size:22px;margin:0 0 2px;} h2{font-size:15px;margin:26px 0 10px;color:#3A4256;}
   .sub{color:#6B7386;font-size:12.5px;margin-bottom:18px;}
@@ -264,6 +309,13 @@ $html = @"
   .card.clickable:hover{box-shadow:0 3px 10px rgba(20,32,60,.13);transform:translateY(-1px);}
   .card.clickable.active{border-color:#4D8CFF;box-shadow:0 0 0 2px rgba(77,140,255,.35);}
   .fhint{font-size:11.5px;color:#8891A3;margin:2px 0 4px;}
+  .pidbar{display:flex;align-items:center;gap:8px;flex:0 0 auto;}
+  .pidlbl{font-size:11px;font-weight:600;color:#6B7386;}
+  .pidwrap{position:relative;display:inline-block;}
+  .pidwrap input{padding:5px 26px 5px 10px;font-size:12px;border:1px solid #C9DAF8;border-radius:8px;width:210px;outline:none;}
+  .pidwrap input:focus{border-color:#4D8CFF;}
+  #pidClear{position:absolute;right:7px;top:50%;transform:translateY(-50%);cursor:pointer;color:#8A97BD;font-size:15px;line-height:1;display:none;user-select:none;}
+  #pidClear:hover{color:#E0483F;}
   .fhint b{color:#6B7386;}
   .fhint .fc{color:#4D8CFF;font-weight:600;margin-left:6px;}
   .card .n{font-size:22px;font-weight:700;} .card .l{font-size:11px;color:#8891A3;text-transform:uppercase;letter-spacing:.04em;}
@@ -286,28 +338,48 @@ $html = @"
   .chip.ok{background:#E4F7EA;color:#1F9D55;} .chip.bad{background:#FDECEB;color:#E0483F;}
   .chip.pri{border-color:#4D8CFF;} .chip.sec{border-color:#B8860B;}
 </style></head><body>
-<h1>NG-retry &mdash; $Day</h1>
-<div class='sub'>from $(Enc $ngPath) &nbsp;&middot;&nbsp; generated $generated</div>
+<div class='hdr'>
+  <div class='hdrleft'>
+  <h1>NG-retry &mdash; $Day</h1>
+  <div class='sub'>from $(Enc $ngPath) &nbsp;&middot;&nbsp; generated $generated$clientTag</div>
+  </div>
+  <div class='pidbar'>
+    <span class='pidlbl'>PID</span>
+    <span class='pidwrap'>
+      <input id='pidFilter' type='text' placeholder='filter by PID' autocomplete='off'/>
+      <span id='pidClear' title='Clear'>&#215;</span>
+    </span>
+  </div>
+</div>
 
 <div class='cards'>
-  <div class='card'><div class='n'>$tot</div><div class='l'>NG items</div></div>
-  <div class='card clickable' data-filter='RECOVERED'><div class='n ok'>$recovered</div><div class='l'>Recovered</div></div>
-  <div class='card clickable' data-filter='FAILING'><div class='n bad'>$pending</div><div class='l'>Still failing</div></div>
+  <div class='card'><div class='n'>$($panelOrder.Count)$(Pct $panelsComplete $panelOrder.Count)</div><div class='l'>Panels recovered</div></div>
+  <div class='card'><div class='n'>$tot</div><div class='l'>Files</div></div>
+  <div class='card clickable' data-filter='RECOVERED'><div class='n ok'>$recovered$(Pct $recovered $tot)</div><div class='l'>Recovered</div></div>
+  <div class='card clickable' data-filter='FAILING'><div class='n bad'>$failing$(Pct $failing $tot)</div><div class='l'>Still failing</div></div>
+  <div class='card clickable' data-filter='PENDING'><div class='n pend'>$pendingMan$(Pct $pendingMan $tot)</div><div class='l'>Manifests pending</div></div>
   <div class='card'><div class='n pend'>$totRetries</div><div class='l'>Total retries</div></div>
 </div>
-<div class='fhint'>Click <b>Recovered / Still failing</b> to show only the matching files (panels with none are hidden; click both to show all again, or click one to clear). <span class='fc'></span></div>
+<div class='fhint'>Click <b>Recovered / Still failing / Manifests pending</b> to show only the matching files (panels with none are hidden; click both to show all again, or click one to clear). <span class='fc'></span></div>
 
 <h2>NG-retry items</h2>
+<div id='noMatch' style='display:none;padding:14px;background:#fff;border:1px solid #ECEFF5;border-radius:10px;color:#8891A3;font-size:12.5px;'>No panels match the current filter.</div>
 $($cards.ToString())
 <script>
 (function(){
   var active = new Set();
+  var pidBox = document.getElementById('pidFilter');
+  var pidClear = document.getElementById('pidClear');
+  function pidOk(p){ if (!pidBox) return true; var q = pidBox.value.trim().toUpperCase(); if (!q) return true;
+    var el = p.querySelector('.ppid'); return el && el.textContent.toUpperCase().indexOf(q) !== -1; }
+  function pidSync(){ if (pidClear && pidBox) pidClear.style.display = pidBox.value ? 'block' : 'none'; }
   var cards  = document.querySelectorAll('.card.clickable');
   var panels = document.querySelectorAll('.panel');
   var fc     = document.querySelector('.fc');
   function apply(){
     var shown = 0;
     panels.forEach(function(p){
+      if (!pidOk(p)) { p.style.display = 'none'; return; }
       var rows = p.querySelectorAll('tbody tr');
       if (active.size === 0) {
         p.style.display = '';
@@ -324,7 +396,11 @@ $($cards.ToString())
       p.style.display = any ? '' : 'none';
       if (any) shown++;
     });
-    if (fc) fc.textContent = active.size === 0 ? '' : ('Showing ' + shown + ' of ' + panels.length + ' panels (matching rows only)');
+    // Count reflects BOTH filters, and an empty result says so instead of a blank page.
+    var filtering = active.size > 0 || (pidBox && pidBox.value.trim() !== '');
+    if (fc) fc.textContent = filtering ? ('Showing ' + shown + ' of ' + panels.length + ' panels') : '';
+    var nm = document.getElementById('noMatch');
+    if (nm) nm.style.display = (filtering && shown === 0) ? 'block' : 'none';
   }
   cards.forEach(function(c){
     c.addEventListener('click', function(){
@@ -334,6 +410,10 @@ $($cards.ToString())
       apply();
     });
   });
+  if (pidBox) pidBox.addEventListener('input', function(){ pidSync(); apply(); });
+  if (pidClear) pidClear.addEventListener('click', function(){ pidBox.value = ''; pidSync(); apply(); pidBox.focus(); });
+  pidSync();
+  apply();
 })();
 </script>
 </body></html>
@@ -341,5 +421,5 @@ $($cards.ToString())
 
 $outPath = Join-Path $LogFolder ("{0}_nghtmllog.html" -f $Day)
 $html | Set-Content -Path $outPath -Encoding UTF8
-Write-Host "wrote $outPath  ($tot NG items: $recovered recovered, $pending still failing)"
+Write-Host "wrote $outPath  ($tot NG items: $recovered recovered, $failing still failing, $pendingMan manifest(s) pending)"
 if (-not $NoOpen) { Invoke-Item $outPath }

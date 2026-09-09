@@ -1,7 +1,10 @@
-﻿# uploadable file patterns - folder n recipe = files to upload + total count
-# a line starting with '!' EXCLUDES: file uploads only if it matches an allow line and no '!' line
+# uploadable file patterns - matched against the FILE NAME at ANY depth (intake is recursive)
+# a line starting with '!' EXCLUDES: a file uploads only if it matches an allow line and no '!' line
 *otp*.txt
 *gamma*.hex
 *nypucdata*
 step*.tif
+# deny: the newer nested layout also holds raw/omit variants of every image - never upload those
 !*_ori*
+#!*_Raw*
+#!*_omit*

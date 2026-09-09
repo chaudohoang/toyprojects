@@ -19,7 +19,8 @@ namespace FtpUpload;
 /// </summary>
 public sealed class RawLog(Config cfg)
 {
-    public void Write(JobFile f, int maxAttempts, string host, Job? job = null, DateTime? day = null)
+    public void Write(JobFile f, int maxAttempts, string host, Job? job = null, DateTime? day = null,
+                      string reason = "")
     {
         var line = string.Join("|",
             f.Pid,
@@ -37,7 +38,12 @@ public sealed class RawLog(Config cfg)
             f.Attempts.ToString(),
             maxAttempts.ToString(),
             host,
-            job?.PanelStatus ?? "");     // 10th field: the panel's status at this instant
+            job?.PanelStatus ?? "",      // 10th field: the panel's status at this instant
+            // 11th: why, when FAILED needs distinguishing. "SOURCE_GONE" means the local file was
+            // deleted, so no retry can ever help — a transfer failure looks identical in the status
+            // column without it, and an operator cannot tell "the server refused" from "the file
+            // is not there any more".
+            reason);
 
         SafeFile.Append(cfg.RawLogPath(day ?? Clock.Now), line);
     }

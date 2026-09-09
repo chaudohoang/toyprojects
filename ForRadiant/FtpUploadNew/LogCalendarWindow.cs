@@ -16,7 +16,7 @@ namespace FtpUpload;
 
 /// <summary>
 /// Non-modal calendar popup for viewing a day's log. Days that HAVE a log are shown BOLD + RED and
-/// are clickable â€” clicking one opens that day's report â€” while days without a log are greyed and
+/// are clickable - clicking one opens that day's report - while days without a log are greyed and
 /// inert. The window stays open (click several days), does not block the main UI, and is meant to be
 /// a single instance (the caller reuses/refreshes it instead of opening a second).
 /// </summary>

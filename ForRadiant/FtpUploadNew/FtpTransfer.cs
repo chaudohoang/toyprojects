@@ -27,13 +27,9 @@ public sealed class FluentFtpTransfer(Config cfg, bool reuseConnections = false)
     /// <summary>Files successfully sent on the CURRENT open connection.</summary>
     public int FilesThisSession => _filesThisSession;
 
-    /// <summary>
-    /// The first <see cref="Config.PrimaryAttempts"/> attempts go to the primary IP, the rest
-    /// fail over to the secondary (spec §2). With the defaults that is: initial attempt plus
-    /// 2 retries on the primary, then 2 retries on the secondary.
-    /// </summary>
-    public string HostForAttempt(int attempt) =>
-        attempt <= cfg.PrimaryAttempts ? cfg.FirstHost : cfg.FailoverHost;
+    /// <summary>Delegates to <see cref="Config.HostForAttempt"/> — the single routing rule shared by
+    /// the data pump, the manifest sender and the Settings preview.</summary>
+    public string HostForAttempt(int attempt) => cfg.HostForAttempt(attempt);
 
     public Task<TransferResult> UploadAsync(JobFile file, int attempt, CancellationToken preemptToken)
         => UploadCore(file, HostForAttempt(attempt), preemptToken);

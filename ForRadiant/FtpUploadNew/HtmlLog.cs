@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 
 namespace FtpUpload;
 
@@ -33,6 +33,9 @@ public static class HtmlLog
         public bool Recovered;
         public bool PendingManifest;   // an index/host row injected for a panel still in NG (not yet sent)
         public string LastTime = "";
+        /// <summary>11th rawlog field. "SOURCE_GONE" = the local file was deleted, so no retry can
+        /// ever help — worth showing differently from a transfer that failed.</summary>
+        public string Reason = "";
     }
 
     // =====================================================================================
@@ -46,7 +49,9 @@ public static class HtmlLog
         if (!File.Exists(raw) && !File.Exists(jobs)) return null;
 
         string primary = cfg.PrimaryHost, secondary = cfg.SecondaryHost;
-        var maxRetriesCfg = Math.Max(0, cfg.PrimaryRetries) + Math.Max(0, cfg.SecondaryRetries);
+        // Retries now come from the single RetryCount (uploads target one host, no failover), so the
+        // old PrimaryRetries + SecondaryRetries sum would report a ceiling the engine no longer uses.
+        var maxRetriesCfg = Math.Max(0, cfg.MaxAttempts - 1);
 
         var order = new List<string>();
         var byKey = new Dictionary<string, FileEntry>();
@@ -88,20 +93,32 @@ public static class HtmlLog
                 e.FailTimes = p[5];
                 e.Attempts = int.TryParse(p[6], out var at) ? at : 0;
                 e.MaxRetries = Math.Max(0, (int.TryParse(p[7], out var ma) ? ma : 1) - 1);
+            if (p.Length >= 11) e.Reason = p[10];
             }
 
         // Summary
         int tot = order.Count, ok = 0, fail = 0, pend = 0, timeout = 0;
-        int priOk = 0, priFail = 0, secOk = 0, secFail = 0;
+        // Per-host tallies taken from the LOG, not from the current config: keying them to the
+        // configured Primary/Secondary made a report read 0/0 as soon as the hosts were changed,
+        // because the logged IP matched neither name any more.
+        var hostStats = new Dictionary<string, (int Ok, int Fail)>();
         foreach (var k in order)
         {
             var e = byKey[k];
             switch (e.Status) { case "SUCCEEDED": ok++; break; case "FAILED": fail++; break; case "TIMEDOUT": timeout++; break; default: pend++; break; }
-            foreach (var ev in e.Events)
+
+            // Count each FILE once, under the host of its LAST attempt, by its FINAL status — not
+            // once per attempt. Per-attempt counting made these cards exceed the file total (a file
+            // needing 3 tries added 3) and counted a file as failed while it was still retrying.
+            // A file is a failure only once every attempt is spent and it still has not landed.
+            if (e.Events.Count > 0)
             {
-                var r = Role(ev.Ip, primary, secondary);
-                if (r == "Primary") { if (ev.Ok) priOk++; else priFail++; }
-                else if (r == "Secondary") { if (ev.Ok) secOk++; else secFail++; }
+                var ip = e.Events[^1].Ip;
+                if (!string.IsNullOrEmpty(ip))
+                {
+                    hostStats.TryGetValue(ip, out var cur);
+                    hostStats[ip] = e.Status == "SUCCEEDED" ? (cur.Ok + 1, cur.Fail) : (cur.Ok, cur.Fail + 1);
+                }
             }
         }
 
@@ -116,6 +133,7 @@ public static class HtmlLog
         }
 
         var cards = new StringBuilder();
+        var panelsComplete = 0;
         foreach (var pid in panelOrder)
         {
             var files = panels[pid].Select(k => byKey[k]).ToList();
@@ -141,6 +159,10 @@ public static class HtmlLog
             if (nTO > 0) stTokens.Add("TIMEDOUT");
             if (nPend > 0) stTokens.Add("PENDING");
             var stAttr = string.Join(" ", stTokens);
+
+            // A panel counts as complete only when every one of its files landed — the figure
+            // behind the percentage on the Panels card.
+            if (total > 0 && nSucc == total) panelsComplete++;
 
             cards.Append($@"
 <div class='panel' data-statuses='{stAttr}'>
@@ -176,23 +198,50 @@ public static class HtmlLog
 </table>";
 
         var generated = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        // Which machine produced this day's log (from its oplog), not who is viewing the report.
+        var client = ClientFor(cfg, day);
+        var clientTag = client.Length > 0 ? $" &nbsp;&middot;&nbsp; client {Enc(client)}" : "";
         var pTag = string.IsNullOrEmpty(primary) ? "" : $" ({Enc(primary)})";
         var sTag = string.IsNullOrEmpty(secondary) ? "" : $" ({Enc(secondary)})";
+
+        // One card per host that actually appears in the log, named by its role where the current
+        // config still recognises the IP, otherwise by the IP itself.
+        var hostSb = new StringBuilder();
+        foreach (var h in hostStats.Keys.OrderBy(x => x))
+        {
+            var role = Role(h, primary, secondary);
+            var label = role is "Primary" or "Secondary" ? $"{role} ok / fail ({Enc(h)})" : $"{Enc(h)} ok / fail";
+            hostSb.AppendLine($"  <div class='card'><div class='n'>{hostStats[h].Ok}&nbsp;/&nbsp;{hostStats[h].Fail}</div><div class='l'>{label}</div></div>");
+        }
+        if (hostSb.Length == 0)
+            hostSb.AppendLine("  <div class='card'><div class='n'>0&nbsp;/&nbsp;0</div><div class='l'>no host recorded</div></div>");
+        var hostCards = hostSb.ToString().TrimEnd();
 
         var html = $@"<!doctype html>
 <html><head><meta charset='utf-8'>
 <title>FTP Upload log {day}</title>
 <style>{DayCss}</style></head><body>
-<h1>FTP Upload &mdash; {day}</h1>
-<div class='sub'>from {Enc(raw)} &nbsp;&middot;&nbsp; generated {generated}</div>
+<div class='hdr'>
+  <div class='hdrleft'>
+  <h1>FTP Upload &mdash; {day}</h1>
+  <div class='sub'>from {Enc(raw)} &nbsp;&middot;&nbsp; generated {generated}{clientTag}</div>
+  </div>
+  <div class='pidbar'>
+    <span class='pidlbl'>PID</span>
+    <span class='pidwrap'>
+      <input id='pidFilter' type='text' placeholder='filter by PID' autocomplete='off'/>
+      <span id='pidClear' title='Clear'>&#215;</span>
+    </span>
+  </div>
+</div>
 <div class='cards'>
+  <div class='card'><div class='n'>{panelOrder.Count}{Pct(panelsComplete, panelOrder.Count)}</div><div class='l'>Panels succeeded</div></div>
   <div class='card'><div class='n'>{tot}</div><div class='l'>Files</div></div>
   <div class='card clickable' data-filter='SUCCEEDED'><div class='n ok'>{ok}{Pct(ok, tot)}</div><div class='l'>Succeeded</div></div>
   <div class='card clickable' data-filter='FAILED'><div class='n bad'>{fail}{Pct(fail, tot)}</div><div class='l'>Failed</div></div>
   <div class='card clickable' data-filter='TIMEDOUT'><div class='n to'>{timeout}{Pct(timeout, tot)}</div><div class='l'>Timed out</div></div>
   <div class='card clickable' data-filter='PENDING'><div class='n pend'>{pend}{Pct(pend, tot)}</div><div class='l'>Pending</div></div>
-  <div class='card'><div class='n'>{priOk}&nbsp;/&nbsp;{priFail}</div><div class='l'>Primary ok / fail{pTag}</div></div>
-  <div class='card'><div class='n'>{secOk}&nbsp;/&nbsp;{secFail}</div><div class='l'>Secondary ok / fail{sTag}</div></div>
+{hostCards}
 </div>
 <div class='fhint'>Click <b>Succeeded / Failed / Timed out / Pending</b> to show only the matching files (panels with none are hidden; click several to combine; click again to clear). <span id='fcount'></span></div>
 <div class='legend'>Attempts:
@@ -203,6 +252,7 @@ public static class HtmlLog
   &nbsp;(blue border = primary IP, amber = secondary; green = uploaded, red = failed)
 </div>
 <h2>Files</h2>
+<div id='noMatch' style='display:none;padding:14px;background:#fff;border:1px solid #ECEFF5;border-radius:10px;color:#8891A3;font-size:12.5px;'>No panels match the current filter.</div>
 {cards}
 {snapSection}
 <script>
@@ -211,9 +261,19 @@ public static class HtmlLog
   var cards  = document.querySelectorAll('.card.clickable');
   var panels = document.querySelectorAll('.panel');
   var fcount = document.getElementById('fcount');
+  var pidBox = document.getElementById('pidFilter');
+  // PID filter composes with the status cards: a panel must match BOTH to stay visible.
+  function pidOk(p){{
+    if (!pidBox) return true;
+    var q = pidBox.value.trim().toUpperCase();
+    if (!q) return true;
+    var el = p.querySelector('.ppid');
+    return el && el.textContent.toUpperCase().indexOf(q) !== -1;
+  }}
   function apply(){{
     var shown = 0;
     panels.forEach(function(p){{
+      if (!pidOk(p)) {{ p.style.display = 'none'; return; }}
       var rows = p.querySelectorAll('tbody tr');
       if (active.size === 0) {{
         // no filter: show every panel and every row
@@ -232,8 +292,12 @@ public static class HtmlLog
       p.style.display = any ? '' : 'none';
       if (any) shown++;
     }});
-    if (fcount) fcount.textContent = active.size === 0
-      ? '' : ('Showing ' + shown + ' of ' + panels.length + ' panels (matching rows only)');
+      // Count reflects BOTH filters, and an empty result says so instead of leaving a blank page.
+      var filtering = active.size > 0 || (pidBox && pidBox.value.trim() !== '');
+      if (fcount) fcount.textContent = filtering
+        ? ('Showing ' + shown + ' of ' + panels.length + ' panels') : '';
+      var nm = document.getElementById('noMatch');
+      if (nm) nm.style.display = (filtering && shown === 0) ? 'block' : 'none';
   }}
   cards.forEach(function(c){{
     c.addEventListener('click', function(){{
@@ -242,7 +306,14 @@ public static class HtmlLog
       else {{ active.add(f); c.classList.add('active'); }}
       apply();
     }});
-  }});
+    }});
+    var pidClear = document.getElementById('pidClear');
+  function pidSync(){{ if (pidClear && pidBox) pidClear.style.display = pidBox.value ? 'block' : 'none'; }}
+  if (pidBox) pidBox.addEventListener('input', function(){{ pidSync(); apply(); }});
+  if (pidClear) pidClear.addEventListener('click', function(){{ pidBox.value = ''; pidSync(); apply(); pidBox.focus(); }});
+  pidSync();
+    var pidClear = document.getElementById('pidClear');
+    if (pidClear) pidClear.addEventListener('click', function(){{ if (pidBox) {{ pidBox.value = ''; apply(); }} }});
 }})();
 </script>
 </body></html>";
@@ -258,11 +329,22 @@ public static class HtmlLog
         var badge = e.Status switch
         {
             "SUCCEEDED" => "<span class='b ok'>Succeeded</span>",
-            "FAILED" => "<span class='b bad'>Failed</span>",
+            "FAILED" => e.Reason == "SOURCE_GONE"
+                    ? "<span class='b gone'>Source gone</span>"
+                    : "<span class='b bad'>Failed</span>",
             "TIMEDOUT" => "<span class='b to'>Timed Out</span>",
             _ => "<span class='b pend'>Pending</span>"
         };
-        var used = Math.Max(0, e.Attempts - 1);
+            // Retries used, split between the live pump and NG.
+            //
+            // Live attempts can NEVER exceed MaxAttempts - that is what sends a file to NG - so any
+            // excess must have come from NG, whose retries are deliberately uncapped. Showing the
+            // total against the live ceiling produced "6 / 3", a ratio that cannot be true.
+            // Attribute the excess instead: "3 / 3 +3 NG".
+            var used = Math.Max(0, e.Attempts - 1);
+            var retryCell = used > e.MaxRetries
+                ? $"{e.MaxRetries} / {e.MaxRetries} <span class='ngx'>+{used - e.MaxRetries} NG</span>"
+                : $"{used} / {e.MaxRetries}";
 
         var ftList = string.IsNullOrEmpty(e.FailTimes)
             ? new List<string>()
@@ -303,7 +385,7 @@ public static class HtmlLog
   <td>{badge}</td>
   <td class='t'>{succ}</td>
   <td class='t'>{ft}</td>
-  <td class='r'>{used} / {e.MaxRetries}</td>
+  <td class='r'>{retryCell}</td>
   <td class='chips'>{chips}</td>
 </tr>";
     }
@@ -327,7 +409,9 @@ public static class HtmlLog
             : reason switch
             {
                 "TIMEDOUT" => "<span class='b to'>Timed Out</span>",
-                "FAILED" => "<span class='b bad'>Failed</span>",
+                "FAILED" => e.Reason == "SOURCE_GONE"
+                    ? "<span class='b gone'>Source gone</span>"
+                    : "<span class='b bad'>Failed</span>",
                 _ => "<span class='b pend'>&mdash;</span>"
             };
         var state = e.PendingManifest ? "<span class='b pend'>Pending</span>"
@@ -396,11 +480,19 @@ public static class HtmlLog
             if (p.Length >= 6) e.LastTime = p[5];
         }
 
-        int tot = order.Count, recovered = 0, pending = 0, totRetries = 0;
+        int recovered = 0, failing = 0, pendingMan = 0, totRetries = 0;
 
-        // Inject Pending rows for the index/host of any panel present in this report whose manifests
-        // haven't been sent yet (they're not in the ng-retry log). Filenames come from the jobs file's
-        // manifest lines. This mirrors the NG list, which shows the manifests as Pending too.
+        // Inject Pending rows for the index/host of any panel in this report whose manifests have
+        // not been sent yet. "Sent" must be judged from BOTH logs: a manifest uploaded by the LIVE
+        // pump appears only in the rawlog, so checking the ng-retry log alone reported it Pending
+        // forever (seen on WB007.idx — SUCCEEDED in the rawlog at 10:13:46, no ng-retry row at all).
+        var sentInRawLog = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var line in SafeReadLines(cfg.RawLogPathForDay(day)))
+        {
+            var p = line.Split('|');
+            if (p.Length >= 3 && p[2] == "SUCCEEDED") sentInRawLog.Add(p[0] + "|" + p[1]);
+        }
+
         var manifestNames = new Dictionary<string, List<string>>();
         foreach (var line in SafeReadLines(cfg.JobsPathForDay(day)))
         {
@@ -416,7 +508,8 @@ public static class HtmlLog
             foreach (var name in names)
             {
                 var key = pid + "|" + name;
-                if (byKey.ContainsKey(key)) continue;   // already sent/recorded — leave as-is
+                if (byKey.ContainsKey(key)) continue;     // already in the ng-retry log
+                if (sentInRawLog.Contains(key)) continue; // sent by the live pump — not pending
                 byKey[key] = new FileEntry { Pid = pid, File = name, PendingManifest = true };
                 order.Add(key);
             }
@@ -425,9 +518,19 @@ public static class HtmlLog
         foreach (var k in order)
         {
             var e = byKey[k];
-            if (e.Recovered) recovered++; else pending++;
+            // Three distinct states. Lumping pending manifests in with failures made the header read
+            // "100% recovered" and "N still failing" at once, and clicking Still failing showed
+            // nothing, because those rows are tagged PENDING rather than FAILING.
+            if (e.Recovered) recovered++;
+            else if (e.PendingManifest) pendingMan++;
+            else failing++;
             totRetries += e.Events.Count;
         }
+
+        // Total AFTER injection, so the cards sum to it. Computing it beforehand excluded the
+        // pending manifests, which made "155 recovered (100%)" sit next to "16 manifests pending"
+        // under a total of 155 — the parts didn't add up to the whole.
+        int tot = recovered + failing + pendingMan;
 
         // Group NG items into panel cards by PID (preserve first-seen order), like the day log.
         var panelOrder = new List<string>();
@@ -440,6 +543,7 @@ public static class HtmlLog
         }
 
         var cards = new StringBuilder();
+        var panelsComplete = 0;
         foreach (var pid in panelOrder)
         {
             // Order rows like the main rawlog / jobs file: data files first, then index, then host.
@@ -450,13 +554,22 @@ public static class HtmlLog
                 .Select(x => x.k)
                 .ToList();
             int pRec = keys.Count(k => byKey[k].Recovered);
-            int pFail = keys.Count - pRec;
-            var ovText = pFail == 0 ? "Recovered" : "Still failing";
-            var ovCls = pFail == 0 ? "ok" : "bad";
+            int pPend = keys.Count(k => byKey[k].PendingManifest && !byKey[k].Recovered);
+            int pFail = keys.Count - pRec - pPend;
+            var ovText = pFail > 0 ? "Still failing" : pPend > 0 ? "Manifests pending" : "Recovered";
+            var ovCls = pFail > 0 ? "bad" : pPend > 0 ? "pend" : "ok";
             var stTokens = new List<string>();
             if (pRec > 0) stTokens.Add("RECOVERED");
             if (pFail > 0) stTokens.Add("FAILING");
+            if (pPend > 0) stTokens.Add("PENDING");
             var stAttr = string.Join(" ", stTokens);
+
+            // A panel counts as fully recovered only when nothing is failing or still pending.
+            if (keys.Count > 0 && pRec == keys.Count) panelsComplete++;
+
+            var tally = $"{pRec} recovered";
+            if (pPend > 0) tally += $" &middot; {pPend} manifest(s) pending";
+            if (pFail > 0) tally += $" &middot; {pFail} still failing";
 
             var frows = new StringBuilder();
             foreach (var k in keys)
@@ -466,7 +579,7 @@ public static class HtmlLog
 <div class='panel' data-states='{stAttr}'>
   <div class='phead'>
     <span class='ppid'>{Enc(pid)}</span>
-    <span class='ptally'>{pRec} recovered &middot; {pFail} still failing</span>
+    <span class='ptally'>{tally}</span>
     <span class='b {ovCls} pov'>{ovText}</span>
   </div>
   <table class='ptable'>
@@ -477,20 +590,36 @@ public static class HtmlLog
         }
 
         var generated = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        var client = ClientFor(cfg, day);
+        var clientTag = client.Length > 0 ? $" &nbsp;&middot;&nbsp; client {Enc(client)}" : "";
         var html = $@"<!doctype html>
 <html><head><meta charset='utf-8'>
 <title>NG-retry log {day}</title>
 <style>{NgCss}</style></head><body>
-<h1>NG-retry &mdash; {day}</h1>
-<div class='sub'>from {Enc(ngPath)} &nbsp;&middot;&nbsp; generated {generated}</div>
+<div class='hdr'>
+  <div class='hdrleft'>
+  <h1>NG-retry &mdash; {day}</h1>
+  <div class='sub'>from {Enc(ngPath)} &nbsp;&middot;&nbsp; generated {generated}{clientTag}</div>
+  </div>
+  <div class='pidbar'>
+    <span class='pidlbl'>PID</span>
+    <span class='pidwrap'>
+      <input id='pidFilter' type='text' placeholder='filter by PID' autocomplete='off'/>
+      <span id='pidClear' title='Clear'>&#215;</span>
+    </span>
+  </div>
+</div>
 <div class='cards'>
-  <div class='card'><div class='n'>{tot}</div><div class='l'>NG items</div></div>
+  <div class='card'><div class='n'>{panelOrder.Count}{Pct(panelsComplete, panelOrder.Count)}</div><div class='l'>Panels recovered</div></div>
+  <div class='card'><div class='n'>{tot}</div><div class='l'>Files</div></div>
   <div class='card clickable' data-filter='RECOVERED'><div class='n ok'>{recovered}{Pct(recovered, tot)}</div><div class='l'>Recovered</div></div>
-  <div class='card clickable' data-filter='FAILING'><div class='n bad'>{pending}{Pct(pending, tot)}</div><div class='l'>Still failing</div></div>
+  <div class='card clickable' data-filter='FAILING'><div class='n bad'>{failing}{Pct(failing, tot)}</div><div class='l'>Still failing</div></div>
+  <div class='card clickable' data-filter='PENDING'><div class='n pend'>{pendingMan}{Pct(pendingMan, tot)}</div><div class='l'>Manifests pending</div></div>
   <div class='card'><div class='n pend'>{totRetries}</div><div class='l'>Total retries</div></div>
 </div>
 <div class='fhint'>Click <b>Recovered / Still failing</b> to show only the matching files (panels with none are hidden; click both to show all again, or click one to clear). <span id='fcount'></span></div>
 <h2>NG-retry items</h2>
+<div id='noMatch' style='display:none;padding:14px;background:#fff;border:1px solid #ECEFF5;border-radius:10px;color:#8891A3;font-size:12.5px;'>No panels match the current filter.</div>
 {cards}
 <script>
 (function(){{
@@ -498,9 +627,19 @@ public static class HtmlLog
   var cards  = document.querySelectorAll('.card.clickable');
   var panels = document.querySelectorAll('.panel');
   var fcount = document.getElementById('fcount');
+  var pidBox = document.getElementById('pidFilter');
+  // PID filter composes with the status cards: a panel must match BOTH to stay visible.
+  function pidOk(p){{
+    if (!pidBox) return true;
+    var q = pidBox.value.trim().toUpperCase();
+    if (!q) return true;
+    var el = p.querySelector('.ppid');
+    return el && el.textContent.toUpperCase().indexOf(q) !== -1;
+  }}
   function apply(){{
     var shown = 0;
     panels.forEach(function(p){{
+      if (!pidOk(p)) {{ p.style.display = 'none'; return; }}
       var rows = p.querySelectorAll('tbody tr');
       if (active.size === 0) {{
         p.style.display = '';
@@ -517,8 +656,12 @@ public static class HtmlLog
       p.style.display = any ? '' : 'none';
       if (any) shown++;
     }});
-    if (fcount) fcount.textContent = active.size === 0
-      ? '' : ('Showing ' + shown + ' of ' + panels.length + ' panels (matching rows only)');
+      // Count reflects BOTH filters, and an empty result says so instead of leaving a blank page.
+      var filtering = active.size > 0 || (pidBox && pidBox.value.trim() !== '');
+      if (fcount) fcount.textContent = filtering
+        ? ('Showing ' + shown + ' of ' + panels.length + ' panels') : '';
+      var nm = document.getElementById('noMatch');
+      if (nm) nm.style.display = (filtering && shown === 0) ? 'block' : 'none';
   }}
   cards.forEach(function(c){{
     c.addEventListener('click', function(){{
@@ -527,7 +670,14 @@ public static class HtmlLog
       else {{ active.add(f); c.classList.add('active'); }}
       apply();
     }});
-  }});
+    }});
+    var pidClear = document.getElementById('pidClear');
+  function pidSync(){{ if (pidClear && pidBox) pidClear.style.display = pidBox.value ? 'block' : 'none'; }}
+  if (pidBox) pidBox.addEventListener('input', function(){{ pidSync(); apply(); }});
+  if (pidClear) pidClear.addEventListener('click', function(){{ pidBox.value = ''; pidSync(); apply(); pidBox.focus(); }});
+  pidSync();
+    var pidClear = document.getElementById('pidClear');
+    if (pidClear) pidClear.addEventListener('click', function(){{ if (pidBox) {{ pidBox.value = ''; apply(); }} }});
 }})();
 </script>
 </body></html>";
@@ -544,7 +694,41 @@ public static class HtmlLog
         catch { return Array.Empty<string>(); }
     }
 
+    /// <summary>
+    /// "client MACHINE 10.119.211.42" for the machine that PRODUCED this day's log, taken from the
+    /// last STARTUP line in that day's oplog — not from whoever happens to be viewing the report.
+    /// Those differ whenever a log is copied off a line PC and opened elsewhere, and the producer is
+    /// the one worth knowing. Falls back to this machine when the oplog has no STARTUP line.
+    /// </summary>
+    private static string ClientFor(Config cfg, string day)
+    {
+        try
+        {
+            string? found = null;
+            foreach (var line in SafeReadLines(cfg.OpLogPath(ParseDay(day))))
+            {
+                var i = line.IndexOf("client ", StringComparison.OrdinalIgnoreCase);
+                if (i < 0 || !line.Contains("STARTUP", StringComparison.OrdinalIgnoreCase)) continue;
+                var rest = line[(i + 7)..].Trim();
+                // Just the machine name and the IP; the rest of the STARTUP line is other detail.
+                var tok = rest.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (tok.Length >= 2) found = tok[0] + " " + tok[1];
+                else if (tok.Length == 1) found = tok[0];
+            }
+            if (!string.IsNullOrWhiteSpace(found)) return found!;
+        }
+        catch { }
+        try { return NetInfo.Describe(cfg.FirstHost); } catch { return ""; }
+    }
+
+    private static DateTime ParseDay(string day)
+        => DateTime.TryParseExact(day, "yyyyMMdd", null, System.Globalization.DateTimeStyles.None, out var d)
+           ? d : DateTime.Today;
+
     private const string DayCss = @"
+  html{overflow-y:scroll;}   /* reserve the scrollbar so filtering can't change the page width */
+  .hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;}
+  .hdrleft{min-width:0;}
   body{font-family:Segoe UI,Arial,sans-serif;margin:24px;color:#14203C;background:#F4F6FA;}
   h1{font-size:22px;margin:0 0 2px;} h2{font-size:15px;margin:26px 0 10px;color:#3A4256;}
   .sub{color:#6B7386;font-size:12.5px;margin-bottom:18px;}
@@ -554,6 +738,15 @@ public static class HtmlLog
   .card.clickable:hover{box-shadow:0 3px 10px rgba(20,32,60,.13);transform:translateY(-1px);}
   .card.clickable.active{border-color:#4D8CFF;box-shadow:0 0 0 2px rgba(77,140,255,.35);}
   .fhint{font-size:11.5px;color:#8891A3;margin:2px 0 4px;}
+  .pidbar{display:flex;align-items:center;gap:8px;flex:0 0 auto;}
+  .ngx{color:#8A6BFF;font-weight:600;}
+  .b.gone{background:#FFF4E5;color:#8A5A00;border:1px solid #F0D9A8;}
+  .pidlbl{font-size:11px;font-weight:600;color:#6B7386;}
+  .pidwrap{position:relative;display:inline-block;}
+  .pidwrap input{padding:5px 26px 5px 10px;font-size:12px;border:1px solid #C9DAF8;border-radius:8px;width:210px;outline:none;}
+  .pidwrap input:focus{border-color:#4D8CFF;}
+  #pidClear{position:absolute;right:7px;top:50%;transform:translateY(-50%);cursor:pointer;color:#8A97BD;font-size:15px;line-height:1;display:none;user-select:none;}
+  #pidClear:hover{color:#E0483F;}
   .fhint b{color:#6B7386;}
   .fhint #fcount{color:#4D8CFF;font-weight:600;margin-left:6px;}
   .card .n{font-size:22px;font-weight:700;} .card .l{font-size:11px;color:#8891A3;text-transform:uppercase;letter-spacing:.04em;}
@@ -581,6 +774,9 @@ public static class HtmlLog
   .legend .chip{cursor:default;}";
 
     private const string NgCss = @"
+  html{overflow-y:scroll;}   /* reserve the scrollbar so filtering can't change the page width */
+  .hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;}
+  .hdrleft{min-width:0;}
   body{font-family:Segoe UI,Arial,sans-serif;margin:24px;color:#14203C;background:#F4F6FA;}
   h1{font-size:22px;margin:0 0 2px;} h2{font-size:15px;margin:26px 0 10px;color:#3A4256;}
   .sub{color:#6B7386;font-size:12.5px;margin-bottom:18px;}
@@ -590,6 +786,15 @@ public static class HtmlLog
   .card.clickable:hover{box-shadow:0 3px 10px rgba(20,32,60,.13);transform:translateY(-1px);}
   .card.clickable.active{border-color:#4D8CFF;box-shadow:0 0 0 2px rgba(77,140,255,.35);}
   .fhint{font-size:11.5px;color:#8891A3;margin:2px 0 4px;}
+  .pidbar{display:flex;align-items:center;gap:8px;flex:0 0 auto;}
+  .ngx{color:#8A6BFF;font-weight:600;}
+  .b.gone{background:#FFF4E5;color:#8A5A00;border:1px solid #F0D9A8;}
+  .pidlbl{font-size:11px;font-weight:600;color:#6B7386;}
+  .pidwrap{position:relative;display:inline-block;}
+  .pidwrap input{padding:5px 26px 5px 10px;font-size:12px;border:1px solid #C9DAF8;border-radius:8px;width:210px;outline:none;}
+  .pidwrap input:focus{border-color:#4D8CFF;}
+  #pidClear{position:absolute;right:7px;top:50%;transform:translateY(-50%);cursor:pointer;color:#8A97BD;font-size:15px;line-height:1;display:none;user-select:none;}
+  #pidClear:hover{color:#E0483F;}
   .fhint b{color:#6B7386;}
   .fhint #fcount{color:#4D8CFF;font-weight:600;margin-left:6px;}
   .card .n{font-size:22px;font-weight:700;} .card .l{font-size:11px;color:#8891A3;text-transform:uppercase;letter-spacing:.04em;}

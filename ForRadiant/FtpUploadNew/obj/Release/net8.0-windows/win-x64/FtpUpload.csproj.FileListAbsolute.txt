@@ -482,3 +482,5 @@ E:\Github\toyprojects\ForRadiant\FtpUploadNew\obj\Release\net8.0-windows\win-x64
 E:\Github\toyprojects\ForRadiant\FtpUploadNew\obj\Release\net8.0-windows\win-x64\FtpUpload.pdb
 E:\Github\toyprojects\ForRadiant\FtpUploadNew\obj\Release\net8.0-windows\win-x64\FtpUpload.genruntimeconfig.cache
 E:\Github\toyprojects\ForRadiant\FtpUploadNew\obj\Release\net8.0-windows\win-x64\ref\FtpUpload.dll
+E:\Github\toyprojects\ForRadiant\FtpUploadNew\obj\Release\net8.0-windows\win-x64\TracePanelWindow.baml
+E:\Github\toyprojects\ForRadiant\FtpUploadNew\obj\Release\net8.0-windows\win-x64\TracePanelWindow.g.cs

@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 
 namespace FtpUpload;
 
@@ -88,6 +88,18 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
     /// it is gone by the time anyone asks what happened. Day-rollover events go here so "did the
     /// day turn over cleanly?" is answerable from disk, days later.
     /// </summary>
+    private bool _warnHooked;
+
+    /// <summary>
+    /// Route the manifest writer's silent-failure warnings into the oplog. Subscribed once, lazily,
+    /// because the writer is a field initializer and this class has no explicit constructor.
+    /// </summary>
+    private void HookManifestWarnings()
+    {
+        if (_warnHooked) return;
+        _warnHooked = true;
+        _manifest.Warned += m => OpLog(m);
+    }
     private void OpLog(string msg)
     {
         try { SafeFile.Append(cfg.OpLogPath(Clock.Now), $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {msg}"); }
@@ -249,9 +261,10 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
 
                 // Clean live completion (every data file Succeeded live, plus any source-gone drops):
                 // send the manifests and record them in the main rawlog (host last).
-                if (await _manifest.TryFinalizeAsync(job, _manifestFtp))
+                var fin = await _manifest.TryFinalizeAsync(job, _manifestFtp);
+                if (fin.Ok)
                 {
-                    MarkManifestsSucceeded(job, manifests);
+                    MarkManifestsSucceeded(job, manifests, fin.Host);
                 }
                 else
                 {
@@ -262,17 +275,28 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
                     Log($"panel {job.Pid}: manifest send failed (attempt {job.FinalizeAttempts}/{cfg.MaxAttempts})");
                     if (job.FinalizeAttempts >= cfg.MaxAttempts)
                     {
+                        // PER-MANIFEST status. The index and host are separate uploads: one can land
+                        // while the other fails, and stamping both with a shared outcome wrote FAILED
+                        // over a manifest that was already on the server. Mark each by its own result.
                         foreach (var mf in manifests)
                         {
+                            var isHost = mf.RemotePath == job.UploadHostPath;
+                            var landed = isHost ? fin.HostOk : fin.IdxOk;
                             mf.Attempts = job.FinalizeAttempts;
-                            mf.FailCount++;
-                            mf.FailTimes.Add(DateTime.Now.ToString("HH:mm:ss"));
-                            mf.Status = FileStatus.Failed;
+                            if (landed) { mf.Status = FileStatus.Succeeded; }
+                            else
+                            {
+                                mf.FailCount++;
+                                mf.FailTimes.Add(DateTime.Now.ToString("HH:mm:ss"));
+                                mf.Status = FileStatus.Failed;
+                            }
                         }
+                        // Record the host the send was actually attempted on, not cfg.PrimaryHost.
                         foreach (var mf in manifests.OrderBy(f => f.RemotePath == job.UploadHostPath ? 1 : 0))
-                            rawLog.Write(mf, cfg.MaxAttempts, cfg.PrimaryHost, job, job.Day);
+                            rawLog.Write(mf, cfg.MaxAttempts, fin.Host, job, job.Day);
                         job.Finalized = true;   // live engine is done; the NG pump owns it now
-                        Log($"panel {job.Pid}: manifest NG after {cfg.MaxAttempts} attempts — moved to NG list");
+                        Log($"panel {job.Pid}: manifest NG after {cfg.MaxAttempts} attempts " +
+                            $"(index {(fin.IdxOk ? "sent" : "failed")}, host {(fin.HostOk ? "sent" : "failed")}) — moved to NG list");
                     }
                     NotifyChanged();
                 }
@@ -286,7 +310,34 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
 
     /// <summary>Mark a panel's two manifest files Succeeded and log them like any file, so they count,
     /// show in the day report, and (only now) make the panel AllSucceeded -> SUCCESS/O.</summary>
-    private void MarkManifestsSucceeded(Job job, List<JobFile> manifests)
+    /// <summary>
+    /// Optional early host-manifest send after a file exhausts its attempts (MidFailHostUpload).
+    ///
+    /// Logged to the OPLOG only. A rawlog row would make _history dedup skip the real manifest
+    /// later, and would make the fixture's bottom-up scan read the panel as complete while it is
+    /// still being retried — so status logging is deliberately left alone.
+    /// </summary>
+    private async Task MidFailHostAsync(Job? job)
+    {
+        if (!cfg.MidFailHostUpload) return;
+        if (job is null || !job.IsPanelJob) return;
+        try
+        {
+            var r = await _manifest.SendMidFailAsync(job.IndexSrc, job.HostSrc,
+                                                     job.UploadIndexPath, job.UploadHostPath, _manifestFtp);
+            if (r.Sent)
+            {
+                // One summary line here. The exact file list goes into the panel's own ".midfail"
+                // record next to its manifests — that is where you look when reconciling a partial
+                // manifest against what the host acted on, and it keeps the oplog readable.
+                OpLog($"MIDFAIL {job.Pid}: early index+host manifests sent -> {r.Host}, " +
+                      $"{r.Files.Count} file(s) (list in {System.IO.Path.GetFileName(System.IO.Path.ChangeExtension(job.IndexSrc, ".midfail"))})");
+            }
+        }
+        catch (Exception ex) { OpLog($"MIDFAIL {job.Pid}: send error: {ex.Message}"); }
+    }
+
+    private void MarkManifestsSucceeded(Job job, List<JobFile> manifests, string host)
     {
         var pending = manifests.Where(f => f.Status != FileStatus.Succeeded).ToList();
         foreach (var mf in pending)
@@ -298,8 +349,10 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
         // Write the INDEX line first and the HOST line LAST, so a completed panel's final rawlog
         // line is the host manifest with SUCCESS — that is the line the fixture's previous-panel
         // O/X check reads (it scans bottom-up for the PID's last line).
+        // Log the host the manifests were ACTUALLY sent to. This used to hardcode cfg.PrimaryHost,
+        // so on a secondary-only machine every completed panel's rawlog claimed the primary was used.
         foreach (var mf in pending.OrderBy(f => f.RemotePath == job.UploadHostPath ? 1 : 0))
-            rawLog.Write(mf, cfg.MaxAttempts, cfg.PrimaryHost, job, job.Day);
+            rawLog.Write(mf, cfg.MaxAttempts, host, job, job.Day);
         job.Finalized = true;
         if (pending.Count > 0)
         {
@@ -575,6 +628,7 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
 
     public async Task RunAsync(CancellationToken stopping)
     {
+        HookManifestWarnings();
         while (!stopping.IsCancellationRequested)
         {
             // Paused, or waiting for a day-rollover to settle: don't pull new files.
@@ -748,8 +802,10 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
                 f.FailCount++;
                 f.FailTimes.Add(DateTime.Now.ToString("HH:mm:ss"));
                 f.Status = FileStatus.Failed;
-                rawLog.Write(f, cfg.MaxAttempts, "", job, job?.Day);
+                rawLog.Write(f, cfg.MaxAttempts, "", job, job?.Day, "SOURCE_GONE");
                 Log($"   local file missing — {f.Pid}/{f.FileName} (FAILED, no retry)");
+                OpLog($"SOURCE GONE {f.Pid}/{f.FileName} - local file no longer exists; " +
+                      "dropped from the manifests, no retry can recover it");
 
                 // Manifest: drop this file's line so the panel can still finalize (short by it).
                 if (job is not null && job.IsPanelJob) _manifest.DropLine(job, f.RemotePath);
@@ -767,6 +823,7 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
                     f.Status = FileStatus.Failed;
                     rawLog.Write(f, cfg.MaxAttempts, host, job, job?.Day);
                     Log($"   NG after {cfg.MaxAttempts} attempts — {f.Pid}/{f.FileName}");
+                    await MidFailHostAsync(job);
                 }
                 else if (timedOut)
                 {

@@ -1,4 +1,4 @@
-namespace FtpUpload;
+﻿namespace FtpUpload;
 
 /// <summary>
 /// The NG-retry console — a manual recovery tool that runs completely SEPARATELY from the live
@@ -14,13 +14,37 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
 {
     private readonly IFtpTransfer _ftp = FtpEngineFactory.Create(cfg, reuseConnections: true);   // NG pump reuses one connection too
     private readonly ManifestWriter _manifest = new(cfg);   // update a panel's index/host on NG recovery
+    // Own RawLog instance so recoveries can be written back into the day's main log. Appends go
+    // through the shared file lock, so writing alongside the live engine's instance is safe.
+    private readonly RawLog rawLog = new(cfg);
+
+    /// <summary>
+    /// Keys this engine has confirmed on the server, always in "PID|FileName" form — the same shape
+    /// JobFile.Key uses, so the UI can match them against live job files.
+    ///
+    /// NgItem.Key is "Day|PID|FileName", so adding that directly put two formats in this set: the
+    /// same file counted twice, and splitting a day-prefixed key on '|' produced the day string as a
+    /// bogus panel. That read as "26 files / 7 panels" in the strip against the log's "19 / 6".
+    ///
+    /// The live engine keeps its own in-memory job state and never learns about NG recoveries, so
+    /// without this the header strip counted a file NG had rescued as still Failed.
+    /// </summary>
+    private readonly HashSet<string> _recovered = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Normalise any key to "PID|FileName" — NgItem keys carry a leading day.</summary>
+    private static string FileKey(string pid, string fileName) => pid + "|" + fileName;
+
+    /// <summary>Snapshot of the recovered keys, for the UI. Cheap: in-memory, no file reads.</summary>
+    public HashSet<string> RecoveredKeys
+    {
+        get { lock (_gate) return new HashSet<string>(_recovered, StringComparer.OrdinalIgnoreCase); }
+    }
     private readonly object _gate = new();
     private List<NgItem> _items = new();     // the loaded day's NG items
     private readonly List<NgItem> _queue = new();
     private NgItem? _inFlight;
     private NgItem? _current;                 // actively worked item (persists across cooldown)
 
-    public NgIpMode IpMode { get; set; } = NgIpMode.Auto;
     public bool AutoRunning { get; private set; }
     public string LoadedDay { get; private set; } = "";
 
@@ -255,19 +279,40 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
         }
 
         var status = new Dictionary<string, string>();     // last line per file wins
+        // Files whose LOCAL source was deleted. These must NOT become NG items: NG retries without
+        // limit, and no number of retries can upload a file that no longer exists. Left in, one
+        // showed as "1 file, 100% failing" in the strip while the NG list showed nothing to work on
+        // — a permanent phantom failure that an operator can neither fix nor clear.
+        var gone = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var line in SafeFile.ReadLines(cfg.RawLogPathForDay(day)))
         {
             var p = line.Split('|');
             if (p.Length < 3) continue;
-            status[p[0] + "|" + p[1]] = p[2];
+            var key = p[0] + "|" + p[1];
+            status[key] = p[2];
+            if (p.Length >= 11 && p[10].Trim() == "SOURCE_GONE") gone.Add(key);
+            else gone.Remove(key);       // a later row supersedes: the file came back
         }
 
         var prior = ngLog.ReadState(day);
+
+        // Seed the recovered set for the UI: anything the ng-retry state already marks as fixed.
+        // State keys are "PID|FileName" like the rawlog, so they need no normalising — but strip a
+        // leading day if one ever appears, so this set only ever holds one key shape.
+        lock (_gate)
+            foreach (var kv2 in prior)
+                if (kv2.Value.Item2)
+                {
+                    var k = kv2.Key;
+                    var parts = k.Split('|');
+                    _recovered.Add(parts.Length >= 3 ? FileKey(parts[1], parts[^1]) : k);
+                }
 
         var items = new List<NgItem>();
         foreach (var kv in status)
         {
             if (kv.Value != "FAILED" && kv.Value != "TIMEDOUT") continue;
+            if (gone.Contains(kv.Key)) continue;           // source deleted — no retry can help
             var (retries, recovered) = prior.TryGetValue(kv.Key, out var e) ? e : (0, false);
             if (recovered) continue;                       // already fixed via NG retry
 
@@ -350,7 +395,7 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
                 if (Actionable(it)) it.State = NgItemState.Waiting;
             n = _items.Count(Actionable);
         }
-        Log($"NG auto-retry started: {n} item(s), IP={IpMode}");
+        Log($"NG auto-retry started: {n} item(s), IP={cfg.FirstHost}");
         NotifyChanged();
     }
 
@@ -379,13 +424,99 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
         NotifyChanged();
     }
 
-    private string HostFor(NgItem item) => IpMode switch
+    /// <summary>
+    /// Write an NG recovery back into that day's MAIN rawlog as SUCCEEDED.
+    ///
+    /// Recoveries used to be recorded only in the ng-retry log, so the rawlog's last word on a
+    /// recovered file stayed FAILED forever. Anything reading the rawlog alone — the main HTML
+    /// report, LGD's own checks — therefore saw failures for files that were on the server: on
+    /// 2026-09-02, 97 of 124 host manifests WinSCP proves were uploaded still read FAILED. The
+    /// rawlog is what people treat as the record of the day, so it has to be self-contained.
+    ///
+    /// The row goes to the file's OWN day (item.Day), not today, so a past-day recovery lands in
+    /// the right day's log. Append-only: the original FAILED rows stay as history, and a
+    /// last-row-wins read now gives the correct final status.
+    /// </summary>
+    private void WriteRecoveryToRawLog(NgItem item, string host)
     {
-        NgIpMode.Primary => cfg.PrimaryHost,
-        NgIpMode.Secondary => cfg.SecondaryHost,
-        // Auto: alternate primary/secondary each attempt so a dead IP doesn't trap it.
-        _ => (item.SessionRetries % 2 == 0 ? cfg.PrimaryHost : cfg.SecondaryHost)
-    };
+        try
+        {
+            if (!DateTime.TryParseExact(item.Day, "yyyyMMdd", null,
+                    System.Globalization.DateTimeStyles.None, out var day)) return;
+
+            var jf = item.ToJobFile();
+            jf.Status = FileStatus.Succeeded;
+            jf.Attempts = item.TotalRetries + 1;
+            // Carry the succeed time and fail history across, or the write-back row records a
+            // success with no timestamp and reports lose "when did this land".
+            jf.SucceedTime = DateTime.Now.ToString("HH:mm:ss");
+            jf.FailCount = item.TotalRetries;
+            rawLog.Write(jf, cfg.MaxAttempts, host, null, day);
+        }
+        catch { /* the ng-retry log already has the authoritative record; never break recovery */ }
+    }
+
+    /// <summary>
+    /// Write the per-file marker for a manifest that NG uploaded as its own NG item.
+    ///
+    /// TryFinalizeAsync owns these markers normally, but a manifest abandoned at a rollover becomes
+    /// an ordinary NG item and is uploaded directly, bypassing it. Leaving the marker unwritten made
+    /// a later finalize re-send a file already on the server and log it as FAILED.
+    /// </summary>
+    private void MarkManifestSentOnDisk(NgItem item)
+    {
+        try
+        {
+            if (!item.IsManifest || item.IndexSrc.Length == 0) return;
+            var isIndex = !string.IsNullOrEmpty(item.UploadIndexPath)
+                          && item.RemotePath.Equals(item.UploadIndexPath, StringComparison.OrdinalIgnoreCase);
+            var marker = item.IndexSrc + (isIndex ? ".idxsent" : ".hostsent");
+            SafeFile.WithLock(() => { try { File.WriteAllText(marker, DateTime.Now.ToString("o")); } catch (Exception mex) { Log($"MARKER WRITE FAILED {Path.GetFileName(marker)}: {mex.GetType().Name}: {mex.Message}"); } });
+        }
+        catch { }
+    }
+
+    /// <summary>
+    /// Write the two manifests of an NG-finalized panel into that day's MAIN rawlog as SUCCEEDED,
+    /// so the rawlog is self-contained: without it a completed panel's manifests appear only in the
+    /// ng-retry log and read as "data uploaded, no host manifest" to anything reading the rawlog.
+    /// </summary>
+    private void WriteManifestToRawLog(NgItem item, string host)
+        => WriteManifestToRawLog(item.Pid, item.Day, item.UploadIndexPath, item.UploadHostPath,
+                                 item.TotalRetries + 1, host);
+
+    private void WriteManifestToRawLog(string pid, string dayStr, string upIdx, string upHost, int attempts, string host)
+    {
+        try
+        {
+            if (!DateTime.TryParseExact(dayStr, "yyyyMMdd", null,
+                    System.Globalization.DateTimeStyles.None, out var day)) return;
+
+            // Index first, host last: the fixture scans bottom-up for a PID's last line, so the host
+            // manifest must be the final entry for a completed panel.
+            foreach (var remote in new[] { upIdx, upHost })
+            {
+                if (string.IsNullOrWhiteSpace(remote)) continue;
+                var name = System.IO.Path.GetFileName(remote);
+                var jf = new JobFile
+                {
+                    Pid = pid, FileName = name, RemotePath = remote,
+                    Status = FileStatus.Succeeded,
+                    Attempts = attempts,
+                    SucceedTime = DateTime.Now.ToString("HH:mm:ss")
+                };
+                rawLog.Write(jf, cfg.MaxAttempts, host, null, day);
+                lock (_gate) _recovered.Add(FileKey(pid, name));   // so the UI strip agrees with the log
+            }
+        }
+        catch { /* the ng-retry log already holds the authoritative record */ }
+    }
+
+    /// <summary>
+    /// Which IP this retry uses: the ONE host chosen in Settings. NG no longer has its own IP
+    /// selector — uploads and recovery must agree on the destination.
+    /// </summary>
+    private string HostFor(NgItem item) => cfg.FirstHost;
 
     private void SetCurrent(NgItem item)
     {
@@ -445,6 +576,14 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
                         if (Actionable(item)) anyFailed = true;
                     }
 
+                    // Finish any panels whose data completed during this cycle, BEFORE the cooldown.
+                    // Running it here rather than only in the idle branch below is what makes it
+                    // prompt: while NG had work the loop always `continue`d, so under sustained
+                    // failure the finalize sweep never ran and manifests sat unsent for minutes.
+                    // It is called on this same thread, between item attempts, so it never shares
+                    // the reused FTP session with a transfer in flight.
+                    await SweepUnfinalizedPanels(stopping);
+
                     if (AutoRunning && anyFailed && gen == _loadGen)
                     {
                         ClearCurrent();   // no highlight during the between-sweep pause
@@ -455,10 +594,100 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
                 }
             }
 
-            // 3) Nothing to do — idle.
+            // 3) Nothing to retry — look for panels whose DATA is complete but whose manifests were
+            // never sent, and finish them. See SweepUnfinalizedPanels for why these exist.
             ClearCurrent();
+            if (AutoRunning) await SweepUnfinalizedPanels(stopping);
             await _ftp.EndSession();   // close the reused connection while idle
             await Task.Delay(300, stopping);
+        }
+    }
+
+    private DateTime _lastFinalizeSweep = DateTime.MinValue;
+
+    /// <summary>How often the unfinalized-panel sweep may run. Short, because it is now the primary
+    /// path for finishing panels whose data recovered late — at 60s manifests sat unsent for minutes.
+    /// Each run re-reads the loaded days' logs, so it is still throttled rather than run every tick.</summary>
+    private const int FinalizeSweepSeconds = 10;
+
+    /// <summary>
+    /// Finish panels whose data files are all uploaded but whose index/host manifests were never
+    /// sent — the one hole left in the recovery chain.
+    ///
+    /// How a panel gets stuck: a data file exhausts its live attempts and goes FAILED, so the live
+    /// engine can never mark the panel ready and stops finalizing it. NG then recovers that file and
+    /// calls finalize once — but if THAT send fails, the NG item is already marked Succeeded, so it
+    /// is never revisited. The manifests were never attempted, so they have no rawlog row and never
+    /// enter the NG list either. Nothing owns them. Measured at 8 panels in 100 under load, and it
+    /// matches the field report of panels arriving with images+hex but no host manifest.
+    ///
+    /// This is a safety net, so it is deliberately conservative: it only sends when the index
+    /// manifest on disk has no unresolved " -pending" line, i.e. every data file really did land.
+    /// </summary>
+    private async Task SweepUnfinalizedPanels(CancellationToken ct)
+    {
+        if ((DateTime.Now - _lastFinalizeSweep).TotalSeconds < FinalizeSweepSeconds) return;
+        _lastFinalizeSweep = DateTime.Now;
+
+        foreach (var day in LoadedDays)
+        {
+            if (ct.IsCancellationRequested) return;
+
+            // Which manifest files are already recorded as sent, from either log.
+            var sent = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var path in new[] { cfg.RawLogPathForDay(day), cfg.NgRetryLogPath(day) })
+                foreach (var line in SafeFile.ReadLines(path))
+                {
+                    var p = line.Split('|');
+                    if (p.Length >= 3 && p[2] == "SUCCEEDED") sent.Add(p[0] + "|" + p[1]);
+                }
+
+            // Panel manifest paths come from that day's jobs file.
+            var panels = new Dictionary<string, JobsLine>(StringComparer.OrdinalIgnoreCase);
+            foreach (var line in SafeFile.ReadLines(cfg.JobsPathForDay(day)))
+            {
+                var jl = JobsLine.Parse(line);
+                if (jl is null || jl.IndexSrc.Length == 0) continue;
+                panels.TryAdd(jl.Pid, jl);
+            }
+
+            foreach (var kv in panels)
+            {
+                if (ct.IsCancellationRequested) return;
+                var jl = kv.Value;
+                var idxName = Path.GetFileName(jl.UploadIndexPath);
+                var hostName = Path.GetFileName(jl.UploadHostPath);
+                if (idxName.Length == 0 || hostName.Length == 0) continue;
+                if (sent.Contains(jl.Pid + "|" + idxName) && sent.Contains(jl.Pid + "|" + hostName)) continue;
+
+                // Only finalize a panel whose data is genuinely complete.
+                if (!File.Exists(jl.IndexSrc)) continue;
+
+                // Skip panels already finished: both per-file markers present means the index and the
+                // host manifest are on the server. TryFinalizeAsync checks this too, but testing it
+                // here avoids claiming a lock and re-reading the manifest for nothing.
+                if (File.Exists(jl.IndexSrc + ".idxsent") && File.Exists(jl.IndexSrc + ".hostsent")) continue;
+
+                var stillPending = false;
+                foreach (var l in SafeFile.ReadLines(jl.IndexSrc))
+                    if (l.EndsWith(" -pending", StringComparison.OrdinalIgnoreCase)) { stillPending = true; break; }
+                if (stillPending) continue;
+
+                try
+                {
+                    var host = cfg.FirstHost;
+                    var fin = await _manifest.TryFinalizeAsync(jl.IndexSrc, jl.HostSrc,
+                                    jl.UploadIndexPath, jl.UploadHostPath, _ftp, host);
+                    if (fin.Ok && fin.Uploaded)
+                    {
+                        ngLog.WriteManifestSent(jl.Pid, day, jl.UploadIndexPath, jl.UploadHostPath, 0, fin.Host);
+                        WriteManifestToRawLog(jl.Pid, day, jl.UploadIndexPath, jl.UploadHostPath, 1, fin.Host);
+                        Log($"   panel {jl.Pid} ({day}): manifests finished by sweep - panel complete");
+                        NotifyChanged();
+                    }
+                }
+                catch (Exception ex) { Log($"   panel {jl.Pid}: finalize sweep error: {ex.Message}"); }
+            }
         }
     }
 
@@ -482,6 +711,12 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
             item.State = NgItemState.Succeeded;
             item.LastResult = "OK";
             ngLog.Write(item, true, host);
+            WriteRecoveryToRawLog(item, host);
+            lock (_gate) _recovered.Add(FileKey(item.Pid, item.FileName));
+            // A manifest recovered as its OWN NG item never went through TryFinalizeAsync, so it had
+            // no per-file marker written. Without one, the next finalize believes it is still missing
+            // and re-sends it — which then records a FAILED row for a file already on the server.
+            MarkManifestSentOnDisk(item);
             Log($"   OK  {item.Pid}/{item.FileName} -> ftp://{host}/{item.RemotePath.TrimStart('/')} after {item.TotalRetries} retry/ies");
 
             // A manifest item IS the index/host file — it was just uploaded directly, so there is no
@@ -498,13 +733,20 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
                 {
                     try
                     {
-                        if (await _manifest.TryFinalizeAsync(item.IndexSrc, item.HostSrc,
-                                item.UploadIndexPath, item.UploadHostPath, _ftp))
+                        // forceHost: the NG list is independent of the routing settings, so the
+                        // manifests go to the IP this recovery used, not via HostForAttempt.
+                        var fin = await _manifest.TryFinalizeAsync(item.IndexSrc, item.HostSrc,
+                                item.UploadIndexPath, item.UploadHostPath, _ftp, host);
+                        if (fin.Ok && fin.Uploaded)
                         {
                             // Record the index + host send in the NG log (index first, host last) so
-                            // the NG report shows the manifests too. Not written to the main rawlog.
+                            // the NG report shows the manifests too.
                             ngLog.WriteManifestSent(item.Pid, item.Day, item.UploadIndexPath,
-                                                    item.UploadHostPath, item.TotalRetries, host);
+                                                    item.UploadHostPath, item.TotalRetries, fin.Host);
+                            // ...and in the day's MAIN rawlog, so it is self-contained. Without this
+                            // the rawlog shows a completed panel's manifests as never sent, which is
+                            // exactly the false "no host manifest" signature we chased in the field.
+                            WriteManifestToRawLog(item, fin.Host);
                             Log($"   panel {item.Pid}: index + host manifest sent — panel complete");
                         }
                     }
@@ -530,11 +772,13 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
                 {
                     try
                     {
-                        if (await _manifest.TryFinalizeAsync(item.IndexSrc, item.HostSrc,
-                                item.UploadIndexPath, item.UploadHostPath, _ftp))
+                        var fin2 = await _manifest.TryFinalizeAsync(item.IndexSrc, item.HostSrc,
+                                item.UploadIndexPath, item.UploadHostPath, _ftp, host);
+                        if (fin2.Ok && fin2.Uploaded)
                         {
                             ngLog.WriteManifestSent(item.Pid, item.Day, item.UploadIndexPath,
-                                                    item.UploadHostPath, item.TotalRetries, host);
+                                                    item.UploadHostPath, item.TotalRetries, fin2.Host);
+                            WriteManifestToRawLog(item, fin2.Host);
                             Log($"   panel {item.Pid}: index + host manifest sent — panel complete");
                         }
                     }
