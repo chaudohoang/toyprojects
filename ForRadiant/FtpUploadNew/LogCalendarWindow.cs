@@ -105,6 +105,25 @@ public sealed class LogCalendarWindow : Window
         RefreshDays();
     }
 
+    /// <summary>
+    /// The same calendar, as a panel to embed rather than a window to show.
+    ///
+    /// The View Log window wants this calendar inside each of its tabs. Building it here keeps ONE
+    /// implementation of the red-day highlighting, month navigation and click handling — a second
+    /// copy would drift from this one the first time either changed.
+    ///
+    /// Returns the panel plus the refresh action, since the host needs to re-read the days when the
+    /// user switches tabs or a new day's log appears.
+    /// </summary>
+    public static (FrameworkElement Panel, Action Refresh) CreateEmbedded(
+        string title, Func<HashSet<string>> getDays, Action<string> onPick)
+    {
+        var w = new LogCalendarWindow(title, getDays, onPick);
+        var root = (FrameworkElement)w.Content;
+        w.Content = null;            // detach before reparenting; the window is never shown
+        return (root, w.RefreshDays);
+    }
+
     /// <summary>Re-read which days have a log (call when re-showing so new days appear).</summary>
     public void RefreshDays()
     {

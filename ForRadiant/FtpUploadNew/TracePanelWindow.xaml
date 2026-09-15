@@ -1,7 +1,7 @@
 ﻿<Window x:Class="FtpUpload.TracePanelWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Trace Panel" Height="620" Width="940"
+        Title="Trace Panel" Height="860" Width="1400"
         WindowStartupLocation="CenterOwner" Background="#F5F7FB"
         WindowStyle="ToolWindow" ShowInTaskbar="False">
     <Grid Margin="14">
@@ -61,7 +61,7 @@
         <TabControl Grid.Row="2" Background="White" BorderBrush="#ECEFF5" BorderThickness="1">
             <TabItem Header="Report">
                 <TextBox x:Name="ReportBox" IsReadOnly="True" BorderThickness="0"
-                         FontFamily="Consolas" FontSize="12" Padding="10"
+                         FontFamily="Consolas" FontSize="12.5" Padding="10"
                          VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
                          TextWrapping="NoWrap" Background="Transparent"
                          Text="Type a panel ID and press Search (or Enter)."/>
@@ -70,7 +70,7 @@
                  reality disagree this is the tab that settles it. -->
             <TabItem Header="Raw log lines">
                 <TextBox x:Name="RawBox" IsReadOnly="True" BorderThickness="0"
-                         FontFamily="Consolas" FontSize="11.5" Padding="10"
+                         FontFamily="Consolas" FontSize="12.5" Padding="10"
                          VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
                          TextWrapping="NoWrap" Background="Transparent"
                          Text="The verbatim lines from every log: jobs file, rawlog, ng-retry, oplog, the manifests, the .midfail record, and the WinSCP session dialogue."/>

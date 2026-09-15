@@ -1,4 +1,54 @@
-namespace FtpUpload;
+﻿namespace FtpUpload;
+
+/// <summary>
+/// One place that knows the row layout of the rawlog and the ng-retry log.
+///
+/// Field 0 is the WRITE TIME ("yyyy-MM-dd HH:mm:ss"), then PID, FileName, Status, ... Putting it
+/// first makes these files readable the way the operation log is: when each line was appended is
+/// visible without counting columns, and that matters because a row can be written long after the
+/// event it describes (an NG write-back, or the sweep recording a manifest).
+///
+/// Rows written before the move have no timestamp and start with the PID. BOTH shapes are accepted,
+/// so logs already collected — including a set downloaded from a site for analysis — keep working.
+/// Every reader goes through Fields() instead of splitting for itself: sixteen places each deciding
+/// what a column meant is how a field gets misread.
+/// </summary>
+public static class LogRow
+{
+    /// <summary>Row fields WITHOUT the leading write time, so index 0 is always the PID.</summary>
+    public static string[] Fields(string line)
+    {
+        var p = line.Split('|');
+        return HasStamp(p) ? p[1..] : p;
+    }
+
+    /// <summary>The row's write time, or "" for a row written before the timestamp existed.</summary>
+    public static string WrittenAt(string line)
+    {
+        var p = line.Split('|');
+        return HasStamp(p) ? p[0] : "";
+    }
+
+    /// <summary>True when this row belongs to the given panel, whichever shape it is.</summary>
+    public static bool IsPanel(string line, string pid)
+    {
+        var p = line.Split('|');
+        var i = HasStamp(p) ? 1 : 0;
+        return p.Length > i && p[i].Equals(pid, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>The row's PID, or "" when the line is too short to have one.</summary>
+    public static string Pid(string line)
+    {
+        var f = Fields(line);
+        return f.Length > 0 ? f[0] : "";
+    }
+
+    // "yyyy-MM-dd HH:mm:ss" is 19 chars with dashes at 4 and 7 — cheap to recognise, and no PID
+    // looks like that.
+    private static bool HasStamp(string[] p)
+        => p.Length > 1 && p[0].Length == 19 && p[0][4] == '-' && p[0][7] == '-';
+}
 
 /// <summary>
 /// Log 1 (spec §4) — YYYYMMDD_rawlog.txt, strictly append-only.
@@ -23,6 +73,9 @@ public sealed class RawLog(Config cfg)
                       string reason = "")
     {
         var line = string.Join("|",
+            // Field 0: when this row was appended. First, so these files read like the operation
+            // log. See LogRow, which every reader uses.
+            Clock.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             f.Pid,
             f.FileName,
             f.Status switch
@@ -63,7 +116,7 @@ public sealed class RawLog(Config cfg)
 
         foreach (var line in SafeFile.ReadLines(cfg.RawLogPath(day)))
         {
-            var p = line.Split('|');
+            var p = LogRow.Fields(line);
             if (p.Length < 8) continue;
 
             var rec = new JobFile { Pid = p[0], FileName = p[1] };
@@ -104,7 +157,7 @@ public sealed class SnapshotLog(Config cfg)
             $"{f.FileName}:{(f.Status == FileStatus.Succeeded ? "O" : "X")}");
 
         var line = string.Join("|",
-            new[] { DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), job.Pid, overall }
+            new[] { Clock.Now.ToString("yyyy-MM-dd HH:mm:ss"), job.Pid, overall }
                 .Concat(perFile));
 
         SafeFile.Append(cfg.SnapshotPath(Clock.Now), line);
@@ -123,8 +176,9 @@ public sealed class NgRetryLog(Config cfg)
 {
     public void Write(NgItem item, bool succeeded, string host)
     {
-        var now = DateTime.Now.ToString("HH:mm:ss");
+        var now = Clock.Now.ToString("HH:mm:ss");
         var line = string.Join("|",
+            Clock.Now.ToString("yyyy-MM-dd HH:mm:ss"),   // field 0 — see LogRow
             item.Pid,
             item.FileName,
             succeeded ? "SUCCEEDED" : "FAILED",
@@ -134,7 +188,8 @@ public sealed class NgRetryLog(Config cfg)
             item.TotalRetries.ToString(),
             "0",                       // 0 = unlimited retries
             host,
-            "NGRETRY");
+            "NGRETRY",
+            "");                       // reason - kept so the columns line up with the rawlog
 
         SafeFile.Append(cfg.NgRetryLogPath(item.Day), line);
     }
@@ -147,13 +202,17 @@ public sealed class NgRetryLog(Config cfg)
     public void WriteManifestSent(string pid, string day, string uploadIndexPath, string uploadHostPath,
                                   int retries, string host)
     {
-        var now = DateTime.Now.ToString("HH:mm:ss");
+        var now = Clock.Now.ToString("HH:mm:ss");
         foreach (var remote in new[] { uploadIndexPath, uploadHostPath })   // index first, host last
         {
             if (string.IsNullOrWhiteSpace(remote)) continue;
             var line = string.Join("|",
+                Clock.Now.ToString("yyyy-MM-dd HH:mm:ss"),   // field 0 - see LogRow  // Clock.Now, not DateTime.Now: under SimulateFastDaySeconds the simulated
+                                                        // day advances, and two loggers on different clocks put
+                                                        // the same moment on different dates - the timeline then
+                                                        // sorted rollover rows after the retries that followed them.
                 pid, Path.GetFileName(remote), "SUCCEEDED", now,
-                retries.ToString(), now, retries.ToString(), "0", host, "NGRETRY");
+                retries.ToString(), now, retries.ToString(), "0", host, "NGRETRY", "");
             SafeFile.Append(cfg.NgRetryLogPath(day), line);
         }
     }
@@ -167,7 +226,7 @@ public sealed class NgRetryLog(Config cfg)
         var result = new Dictionary<string, (int, bool)>();
         foreach (var line in SafeFile.ReadLines(cfg.NgRetryLogPath(day)))
         {
-            var p = line.Split('|');
+            var p = LogRow.Fields(line);
             if (p.Length < 3) continue;
             var key = p[0] + "|" + p[1];
             var retries = p.Length > 6 && int.TryParse(p[6], out var r) ? r : 0;

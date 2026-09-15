@@ -91,8 +91,13 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
     private bool _warnHooked;
 
     /// <summary>
-    /// Route the manifest writer's silent-failure warnings into the oplog. Subscribed once, lazily,
-    /// because the writer is a field initializer and this class has no explicit constructor.
+    /// Route the manifest writer's silent-failure warnings into the OPERATION log. Subscribed once,
+    /// lazily, because the writer is a field initializer and this class has no explicit constructor.
+    ///
+    /// The operation log, not the app log: every warning it raises names a panel ("SEED SKIPPED
+    /// &lt;PID&gt;", "MARKER WRITE FAILED"). Sent to the app log they swamped it — a 500-panel run
+    /// whose sources had been cleaned up put several hundred SEED SKIPPED lines in front of the two
+    /// startups someone opened that file to find.
     /// </summary>
     private void HookManifestWarnings()
     {
@@ -100,10 +105,42 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
         _warnHooked = true;
         _manifest.Warned += m => OpLog(m);
     }
+    /// <summary>
+    /// Make a transport message safe to store as a rawlog field.
+    ///
+    /// The rawlog is pipe-delimited, so a message containing '|' would silently split into extra
+    /// fields and shift everything after it. Also capped: a stack-trace-length message would
+    /// dwarf the row it belongs to.
+    /// </summary>
+    private static string Reasonable(string? msg)
+    {
+        if (string.IsNullOrWhiteSpace(msg)) return "";
+        var s = msg.Replace('|', '/').Replace('\r', ' ').Replace('\n', ' ').Trim();
+        while (s.Contains("  ")) s = s.Replace("  ", " ");
+        // 260, not 120: a Windows sharing-violation message runs to about 190 characters
+        // ("...System Error. Code: 32. The process cannot access the file because it is being
+        // used by another process.") and the old cap cut it off mid-sentence, losing the part
+        // that actually says what went wrong.
+        return s.Length > 260 ? s[..260] : s;
+    }
+
+    private void AppLog(string msg)
+    {
+        try { SafeFile.Append(cfg.AppLogPath(Clock.Now), $"[{Clock.Now:yyyy-MM-dd HH:mm:ss}] {msg}"); }
+        catch { /* housekeeping must never break the pump */ }
+    }
+
+    /// <summary>
+    /// PANEL-level event, to its own day file rather than the oplog.
+    ///
+    /// The oplog answers "what happened to this machine". Per-panel events — early manifest sends,
+    /// vanished source files — swamped it: one busy day put thousands of panel lines in front of the
+    /// handful of startups and rollovers someone opened it to find.
+    /// </summary>
     private void OpLog(string msg)
     {
-        try { SafeFile.Append(cfg.OpLogPath(Clock.Now), $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {msg}"); }
-        catch { /* housekeeping must never break the pump */ }
+        try { SafeFile.Append(cfg.PanelEventsPath(Clock.Now), $"[{Clock.Now:yyyy-MM-dd HH:mm:ss}] {msg}"); }
+        catch { }
     }
 
     // ---------------- intake ----------------
@@ -265,9 +302,27 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
                 if (fin.Ok)
                 {
                     MarkManifestsSucceeded(job, manifests, fin.Host);
+                    // Name the host file that actually landed. With stamping on it is not the panel's
+                    // own name, and without this nothing in our logs says which file on the server this
+                    // send produced - the Trace Panel verdict then reports it as unexplained.
+                    if (fin.Uploaded)
+                        OpLog($"FINALIZE {job.Pid}: {fin.SentDescription} -> {fin.Host}" +
+                              (fin.HostName.Length > 0 ? $" as {fin.HostName}" : ""));
                 }
                 else
                 {
+                    // PARTIAL send: one manifest landed, the other did not. Log it here too.
+                    //
+                    // The success branch above owns the logging, so a call that put the HOST on the
+                    // server and then failed the index recorded nothing at all — and with stamping on
+                    // that host file carries a name only this line would have named. Measured: 6 of 79
+                    // host files on the server had no log line, every one of them this case, and the
+                    // next call then reported "index manifest sent (host was already there)" with no
+                    // name, which reads like the name is missing rather than logged a minute earlier.
+                    if (fin.Uploaded)
+                        OpLog($"FINALIZE {job.Pid}: {fin.SentDescription} -> {fin.Host}" +
+                              (fin.HostName.Length > 0 ? $" as {fin.HostName}" : ""));
+
                     // Data done live, but the manifest SEND itself failed. Count it; after MaxAttempts,
                     // hand the manifests to NG as real FAILED files (a genuine manifest failure — this
                     // IS recorded in the main rawlog, because the panel completed live).
@@ -317,6 +372,7 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
     /// later, and would make the fixture's bottom-up scan read the panel as complete while it is
     /// still being retried — so status logging is deliberately left alone.
     /// </summary>
+
     private async Task MidFailHostAsync(Job? job)
     {
         if (!cfg.MidFailHostUpload) return;
@@ -325,13 +381,26 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
         {
             var r = await _manifest.SendMidFailAsync(job.IndexSrc, job.HostSrc,
                                                      job.UploadIndexPath, job.UploadHostPath, _manifestFtp);
+            if (!r.Sent && r.Why.Length > 0)
+            // Every attempt is logged, repeats included: a repeated skip shows the engine was
+            // still trying at that moment. The Operation REPORT collapses the runs so it stays
+            // readable; the raw log keeps them all.
+            if (!r.Sent && r.Why.Length > 0)
+                OpLog($"MIDFAIL {job.Pid}: NOT sent - {r.Why}");
             if (r.Sent)
             {
                 // One summary line here. The exact file list goes into the panel's own ".midfail"
                 // record next to its manifests — that is where you look when reconciling a partial
-                // manifest against what the host acted on, and it keeps the oplog readable.
-                OpLog($"MIDFAIL {job.Pid}: early index+host manifests sent -> {r.Host}, " +
-                      $"{r.Files.Count} file(s) (list in {System.IO.Path.GetFileName(System.IO.Path.ChangeExtension(job.IndexSrc, ".midfail"))})");
+                // manifest against what the host acted on, and it keeps this log readable.
+                OpLog($"MIDFAIL {job.Pid}: " +
+                      // Say which manifest actually landed. An empty RemoteName means the HOST
+                      // upload failed and only the index went - "index+host sent" then overstated
+                      // it, and the missing name read like a logging gap rather than the truth.
+                      (r.RemoteName.Length > 0 ? "early index+host manifests sent" : "early index manifest sent (host did NOT land)") +
+                      $" -> {r.Host}, " +
+                      $"{r.Files.Count} file(s)" +
+                      (r.RemoteName.Length > 0 ? $" as {r.RemoteName}" : "") +
+                      $" (list in {System.IO.Path.GetFileName(System.IO.Path.ChangeExtension(job.IndexSrc, ".midfail"))})");
             }
         }
         catch (Exception ex) { OpLog($"MIDFAIL {job.Pid}: send error: {ex.Message}"); }
@@ -549,7 +618,7 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
         }
         var queued = depth > 1 ? $" (queued behind {depth - 1} unsettled)" : "";
         Log($"day rollover requested ({oldDay:yyyyMMdd}){queued} — finishing current upload, then resetting");
-        OpLog($"ROLLOVER REQUESTED from {oldDay:yyyyMMdd}{queued} — pump held until it settles");
+        AppLog($"ROLLOVER REQUESTED from {oldDay:yyyyMMdd}{queued} — pump held until it settles");
         NotifyChanged();
     }
 
@@ -584,7 +653,7 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
         {
             Log($"day rollover blocked {RolloverGraceSeconds}s by {wedged.Pid}/{wedged.FileName} — " +
                 $"cancelling that transfer so the new day can start");
-            OpLog($"ROLLOVER BLOCKED {RolloverGraceSeconds}s by {wedged.Pid}/{wedged.FileName} — transfer cancelled");
+            AppLog($"ROLLOVER BLOCKED {RolloverGraceSeconds}s by {wedged.Pid}/{wedged.FileName} — transfer cancelled");
         }
         if (notReady) return;
 
@@ -622,7 +691,7 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
 
         var more = remaining > 0 ? $"; {remaining} more rollover(s) still queued" : "";
         Log($"day rollover complete — {abandoned.Count} unfinished file(s) from {oldDay:yyyyMMdd} moved to NG (TIMEDOUT); new day started{more}");
-        OpLog($"ROLLOVER COMPLETE {oldDay:yyyyMMdd} -> {Clock.Today:yyyyMMdd} — {abandoned.Count} unfinished file(s) to NG; pump released{more}");
+        AppLog($"ROLLOVER COMPLETE {oldDay:yyyyMMdd} -> {Clock.Today:yyyyMMdd} — {abandoned.Count} unfinished file(s) to NG; pump released{more}");
         NotifyChanged();
     }
 
@@ -666,7 +735,19 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
                 _jobs.TryGetValue(next.Pid, out var errJob);
                 rawLog.Write(next, cfg.MaxAttempts, "", errJob, errJob?.Day);
                 Log($"   upload error on {next.Pid}/{next.FileName}: {ex.Message} — pump continuing");
+                // Per-FILE, so it belongs with the panel events, not the app log: on 2026-09-10
+                // these were 484 of the 489 lines in the oplog, burying the handful of startups and
+                // rollovers someone opens that file to find. It also carries the only copy of the
+                // server's own words ("Session was aborted"), which the Operation report reads back
+                // as the failure reason.
                 OpLog($"PUMP ERROR on {next.Pid}/{next.FileName}: {ex.Message} — recovered, pump continuing");
+                // A file that runs out of attempts HERE is just as failed as one that exhausts them
+                // on the normal path, so the early manifest send applies equally. This was the most
+                // common failure on site — 28 of 50 failing panels reached FAILED through a session
+                // abort — and mid-fail never saw any of them because it was only wired to the other
+                // branch.
+                if (next.Status == FileStatus.Failed) await MidFailHostAsync(errJob);
+
                 await Task.Delay(cfg.PollIntervalMs, stopping);
             }
         }
@@ -788,6 +869,8 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
                     f.Status = FileStatus.TimedOut;
                     rawLog.Write(f, cfg.MaxAttempts, "", job, job?.Day);
                     Log($"   panel timeout — {f.Pid}/{f.FileName} cut off (TIMEDOUT)");
+                    // Cut off mid-attempt is still a failure the host should be told about.
+                    await MidFailHostAsync(job);
                 }
                 else
                 {
@@ -809,6 +892,10 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
 
                 // Manifest: drop this file's line so the panel can still finalize (short by it).
                 if (job is not null && job.IsPanelJob) _manifest.DropLine(job, f.RemotePath);
+
+                // Then tell the host. Order matters: DropLine must run FIRST so the manifest sent
+                // here no longer lists a file that will never arrive.
+                await MidFailHostAsync(job);
                 break;
 
             default:    // Timeout or Error — a completed, failed attempt
@@ -820,8 +907,13 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
                 if (f.Attempts >= cfg.MaxAttempts)
                 {
                     // Used up every attempt on its own merits — a genuine NG (Failed).
+                    //
+                    // Carry the transport's own message into the reason field. It is the only place
+                    // the cause survives: the Operation report otherwise has to mine the WinSCP
+                    // session logs, which hold nothing at all for a failure that never reached the
+                    // wire — an injected test failure, or a session that died mid-transfer.
                     f.Status = FileStatus.Failed;
-                    rawLog.Write(f, cfg.MaxAttempts, host, job, job?.Day);
+                    rawLog.Write(f, cfg.MaxAttempts, host, job, job?.Day, Reasonable(result.Message));
                     Log($"   NG after {cfg.MaxAttempts} attempts — {f.Pid}/{f.FileName}");
                     await MidFailHostAsync(job);
                 }
@@ -831,6 +923,8 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
                     f.Status = FileStatus.TimedOut;
                     rawLog.Write(f, cfg.MaxAttempts, host, job, job?.Day);
                     Log($"   panel timeout — {f.Pid}/{f.FileName} (TIMEDOUT)");
+                    // A timeout is a failure like any other as far as the host is concerned.
+                    await MidFailHostAsync(job);
                 }
                 else
                 {
@@ -842,6 +936,28 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
         }
 
         NotifyChanged();
+    }
+
+    /// <summary>
+    /// Panels the timeout sweep marked TimedOut, waiting for an early manifest send.
+    ///
+    /// CheckPanelTimeouts runs on the WATCH LOOP, and an FTP send there starved the rollover, intake
+    /// and command polling badly enough to stop uploading entirely — so the sweep only queues the
+    /// panel and the finalize pump (which already owns manifest sends, off the watch loop) does the
+    /// actual upload.
+    /// </summary>
+    private readonly System.Collections.Concurrent.ConcurrentQueue<Job> _midFailQueue = new();
+
+    /// <summary>Drain the queue from a pump that is allowed to do FTP work. Returns what it sent.</summary>
+    public async Task<int> DrainMidFailQueue()
+    {
+        var n = 0;
+        while (_midFailQueue.TryDequeue(out var job))
+        {
+            await MidFailHostAsync(job);
+            n++;
+        }
+        return n;
     }
 
     /// <summary>
@@ -869,6 +985,9 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
 
                 job.TimedOut = true;
                 pannedOut.Add(job.Pid);
+                // Tell the host what this panel DID manage to upload. Queued rather than sent here:
+                // this runs on the watch loop, and an FTP send here starves intake and the rollover.
+                _midFailQueue.Enqueue(job);
 
                 foreach (var x in job.Files.Where(x => x.Status == FileStatus.Pending).ToList())
                 {

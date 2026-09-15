@@ -1,4 +1,4 @@
-# =============================================================================
+﻿# =============================================================================
 #  test_rollover.ps1 - drives the DAY ROLLOVER path end to end.
 #
 #  Why this exists and stress_500.bat does not cover it: stress_500 stages all
@@ -186,10 +186,10 @@ for ($d = 1; $d -le $Days; $d++) {
 # minute, then everything outstanding is genuinely outstanding.
 function Get-Completed {
     $n = 0
-    foreach ($f in (Get-ChildItem $logDir -Filter '*_rawlog.txt' -ErrorAction SilentlyContinue)) {
+    foreach ($f in (Get-ChildItem $logDir -Filter '*_totallog.txt' -ErrorAction SilentlyContinue)) {
         $n += @(Get-Content $f.FullName | Where-Object { $_ -match '\|SUCCEEDED\|' }).Count
     }
-    foreach ($f in (Get-ChildItem $logDir -Filter '*_ngretrylog.txt' -ErrorAction SilentlyContinue)) {
+    foreach ($f in (Get-ChildItem $logDir -Filter '*_ngretrytotallog.txt' -ErrorAction SilentlyContinue)) {
         $n += @(Get-Content $f.FullName | Where-Object { $_ -match '\|SUCCEEDED\|' }).Count
     }
     return $n
@@ -235,7 +235,7 @@ Write-Host '=== RESULT =========================================================
 # runs. Give a late rollover a moment to land first, so we don't read mid-flight.
 Start-Sleep -Seconds 5
 
-$opFiles = Get-ChildItem $logDir -Filter '*_oplog.txt' -ErrorAction SilentlyContinue
+$opFiles = Get-ChildItem $logDir -Filter '*_panelevents.txt' -ErrorAction SilentlyContinue
 $op = @()
 foreach ($f in $opFiles) { $op += Get-Content $f.FullName }
 
@@ -287,7 +287,7 @@ $quietDays = @()
 $totalJobs = 0; $totalUploaded = 0
 foreach ($jf in $dayFiles) {
     $day  = $jf.Name.Substring(0,8)
-    $raw  = Join-Path $logDir "${day}_rawlog.txt"
+    $raw  = Join-Path $logDir "${day}_totallog.txt"
     $njob = @(Get-Content $jf.FullName -ErrorAction SilentlyContinue).Count
     $nok  = 0
     if (Test-Path $raw) { $nok = @(Get-Content $raw | Where-Object { $_ -match '\|SUCCEEDED\|' }).Count }
@@ -310,8 +310,8 @@ $ngTotal = 0; $ngOk = 0; $ngTried = 0; $ngLeft = 0
 $ngQuiet = @()
 foreach ($jf in $dayFiles) {
     $day = $jf.Name.Substring(0,8)
-    $raw = Join-Path $logDir "${day}_rawlog.txt"
-    $ng  = Join-Path $logDir "${day}_ngretrylog.txt"
+    $raw = Join-Path $logDir "${day}_totallog.txt"
+    $ng  = Join-Path $logDir "${day}_ngretrytotallog.txt"
 
     # last rawlog line per PID|File wins - that is how the app itself derives the NG list
     $final = @{}

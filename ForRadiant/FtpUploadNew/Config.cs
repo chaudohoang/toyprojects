@@ -215,6 +215,41 @@ public sealed class Config
     public bool MidFailHostUpload { get; set; } = false;
 
     /// <summary>
+    /// Name the host manifest for the moment it is UPLOADED rather than when the panel was measured.
+    ///
+    /// The host manifest is "&lt;PID&gt;_&lt;yyyyMMddHHmmss&gt;.txt", and that stamp normally comes from the
+    /// panel's DateTime, so every send of a panel writes to the same name and overwrites the last.
+    /// With this on, the stamp is taken when each upload starts, so an early (mid-fail) send and the
+    /// final one land under different names and BOTH are kept.
+    ///
+    /// LGD asked for this so they get the progression rather than one file replaced in place. The
+    /// cost is volume: any panel that ever fails leaves two or three host files instead of one. Off
+    /// by default — it changes what appears on their server, so it is theirs to turn on.
+    ///
+    /// The index has no stamp and is untouched; the local file keeps its name, so markers, the
+    /// ".midfail" record and every log row are unaffected.
+    /// </summary>
+    public bool StampManifestNameAtUpload { get; set; } = false;
+
+    /// <summary>
+    /// Send only what is NEW since the panel's last manifest upload, instead of the full list.
+    ///
+    /// Each send — early or final — then carries just the files that landed since the one before, so
+    /// LGD can read the increments rather than re-reading a growing list. The LOCAL manifests are
+    /// untouched and stay complete: only a temp copy is uploaded, so markers, resume, DropLine and
+    /// the no-pending gate all behave exactly as they do now.
+    ///
+    /// REQUIRES <see cref="StampManifestNameAtUpload"/>. Without per-upload names every send writes
+    /// to the same remote file, so the last delta would overwrite all the earlier ones and the
+    /// server would be left holding one increment instead of the panel. The UI refuses the
+    /// combination and the engine ignores this flag when stamping is off.
+    ///
+    /// Note for the host system: with this on, NO single file lists the whole panel — the files must
+    /// be accumulated. That is a real change to what the panel-complete manifest means.
+    /// </summary>
+    public bool DeltaManifests { get; set; } = false;
+
+    /// <summary>
     /// How often the day + NG HTML reports are rewritten automatically, in seconds. 0 = off (only
     /// built on demand from the UI or the .bat scripts). The reports are only rebuilt when the
     /// rawlog has actually grown, so an idle machine does no work.
@@ -305,17 +340,78 @@ public sealed class Config
     // LogFolder, and the command channel stays in StateFolder since it is transient
     // plumbing rather than a record of work.
     [JsonIgnore] public string CommandPath => Path.Combine(StateFullPath, "commands.txt");
-    public string RawLogPath(DateTime day) => Path.Combine(LogFullPath, $"{day:yyyyMMdd}_rawlog.txt");
+    // These two keep their old NAMES so the ~30 call sites do not all have to change, but they now
+    // resolve through the totallog helpers above — new name for writing, old name honoured when a
+    // day was recorded before the rename.
+    public string RawLogPath(DateTime day) => TotalLogPath(day);
     public string SnapshotPath(DateTime day) => Path.Combine(LogFullPath, $"{day:yyyyMMdd}_snapshot.txt");
     public string JobsPath(DateTime day) => Path.Combine(JobsFullPath, $"{day:yyyyMMdd}_jobs.txt");
-    /// <summary>Durable, auditable operation log (manifest sends etc.). Pruned by log retention.</summary>
-    public string OpLogPath(DateTime day) => Path.Combine(LogFullPath, $"{day:yyyyMMdd}_oplog.txt");
+    /// <summary>
+    /// The full per-file transfer log — every attempt, every status change. Named "totallog"
+    /// because that is what the UI has always called it.
+    ///
+    /// READING a day must also accept the old "_rawlog.txt" name: every log set recorded before
+    /// the rename still uses it, including the ones copied off site for analysis. Use
+    /// <see cref="TotalLogPathForDay"/> to resolve, never build the name inline.
+    /// </summary>
+    public string TotalLogPath(DateTime day) => TotalLogPathForDay(day.ToString("yyyyMMdd"));
+
+    public string TotalLogPathForDay(string day)
+    {
+        var now = Path.Combine(LogFullPath, $"{day}_totallog.txt");
+        if (File.Exists(now)) return now;
+        var legacy = Path.Combine(LogFullPath, $"{day}_rawlog.txt");
+        return File.Exists(legacy) ? legacy : now;   // new name when neither exists (we are writing)
+    }
+
+    /// <summary>The NG-retry equivalent, with the same legacy fallback ("_ngretrylog.txt").</summary>
+    public string NgRetryTotalLogPath(string day)
+    {
+        var now = Path.Combine(LogFullPath, $"{day}_ngretrytotallog.txt");
+        if (File.Exists(now)) return now;
+        var legacy = Path.Combine(LogFullPath, $"{day}_ngretrylog.txt");
+        return File.Exists(legacy) ? legacy : now;
+    }
+
+    /// <summary>
+    /// The APP's own log: startups and shutdowns with reasons, day rollovers, settings changes,
+    /// crashes, and a pump dying. Nothing about panels.
+    ///
+    /// Kept separate and never purged. It is tiny (a few hundred bytes a day) and it is the only
+    /// evidence available when a site reports "it stopped uploading last month".
+    /// </summary>
+    public string AppLogPath(DateTime day) => Path.Combine(LogFullPath, $"{day:yyyyMMdd}_aplog.txt");
+    public string AppLogPathForDay(string day) => Path.Combine(LogFullPath, $"{day}_aplog.txt");
+
+    /// <summary>
+    /// PANEL EVENTS, raw: early (mid-fail) manifest sends and why one was skipped, source files
+    /// that vanished, the transport's own error text when a transfer threw, and panels whose source
+    /// folder was empty or gone.
+    ///
+    /// Written by the engines; the Operation report is built FROM this. Named "panelevents" and not
+    /// "oplog" because the readable report is "{day}_operation.txt", and two files one letter apart
+    /// meaning different things fooled nobody and confused everybody.
+    ///
+    /// READING accepts the old "_oplog.txt" name so days recorded before the rename still work.
+    /// </summary>
+    public string PanelEventsPath(DateTime day) => PanelEventsPathForDay(day.ToString("yyyyMMdd"));
+
+    public string PanelEventsPathForDay(string day)
+    {
+        var now = Path.Combine(LogFullPath, $"{day}_panelevents.txt");
+        if (File.Exists(now)) return now;
+        var legacy = Path.Combine(LogFullPath, $"{day}_oplog.txt");
+        return File.Exists(legacy) ? legacy : now;   // new name when neither exists (we are writing)
+    }
+
+    /// <summary>The readable per-file report, kept on disk so it travels with a copied log folder.</summary>
+    public string OperationReportPath(string day) => Path.Combine(LogFullPath, $"{day}_operation.csv");
 
     // Day-string variants (yyyyMMdd) for the NG-retry console, which browses arbitrary days.
-    public string RawLogPathForDay(string day) => Path.Combine(LogFullPath, $"{day}_rawlog.txt");
+    // Both resolve through the totallog helpers, so a legacy day still reads.
+    public string RawLogPathForDay(string day) => TotalLogPathForDay(day);
     public string JobsPathForDay(string day) => Path.Combine(JobsFullPath, $"{day}_jobs.txt");
-    // The NG-retry log lives beside the day's other logs, one per original day.
-    public string NgRetryLogPath(string day) => Path.Combine(LogFullPath, $"{day}_ngretrylog.txt");
+    public string NgRetryLogPath(string day) => NgRetryTotalLogPath(day);
 
     private static readonly JsonSerializerOptions Opts = new() { WriteIndented = true };
 

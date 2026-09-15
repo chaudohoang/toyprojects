@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace FtpUpload;
 
@@ -57,7 +57,9 @@ internal sealed class NgBacklog
         if (!Directory.Exists(logDir)) { Outstanding = 0; Days = 0; return; }
 
         // Newest first, so a cap (NgBacklogScanDays) drops the oldest rather than the most relevant.
-        var files = Directory.GetFiles(logDir, "*_rawlog.txt")
+        // Both names: "_totallog.txt" now, "_rawlog.txt" before the rename.
+            var files = Directory.GetFiles(logDir, "*_totallog.txt")
+                                 .Concat(Directory.GetFiles(logDir, "*_rawlog.txt"))
                              .OrderByDescending(f => f)
                              .ToList();
         var cap = cfg.NgBacklogScanDays;
@@ -125,7 +127,7 @@ internal sealed class NgBacklog
         {
             foreach (var line in File.ReadLines(rawPath))
             {
-                var p = line.Split('|');
+                var p = LogRow.Fields(line);   // field 0 = PID, whichever row shape
                 if (p.Length < 3) continue;
                 final[p[0] + "|" + p[1]] = p[2];
             }
@@ -139,7 +141,7 @@ internal sealed class NgBacklog
             {
                 foreach (var line in File.ReadLines(ngPath))
                 {
-                    var p = line.Split('|');
+                    var p = LogRow.Fields(line);   // field 0 = PID, whichever row shape
                     if (p.Length >= 3 && p[2] == "SUCCEEDED") recovered.Add(p[0] + "|" + p[1]);
                 }
             }

@@ -61,7 +61,7 @@ public static class HtmlLog
             foreach (var line in SafeReadLines(jobs))
             {
                 if (string.IsNullOrWhiteSpace(line)) continue;
-                var p = line.Split('|');
+                var p = LogRow.Fields(line);   // field 0 = PID, whichever row shape
                 if (p.Length < 2) continue;
                 var key = p[0] + "|" + p[1];
                 if (!byKey.ContainsKey(key))
@@ -76,7 +76,7 @@ public static class HtmlLog
             foreach (var line in SafeReadLines(raw))
             {
                 if (string.IsNullOrWhiteSpace(line)) continue;
-                var p = line.Split('|');
+                var p = LogRow.Fields(line);   // field 0 = PID, whichever row shape
                 if (p.Length < 8) continue;
                 var key = p[0] + "|" + p[1];
                 if (!byKey.TryGetValue(key, out var e))
@@ -185,7 +185,7 @@ public static class HtmlLog
             foreach (var line in SafeReadLines(snapPath))
             {
                 if (string.IsNullOrWhiteSpace(line)) continue;
-                var p = line.Split('|');
+                var p = LogRow.Fields(line);   // field 0 = PID, whichever row shape
                 if (p.Length < 3) continue;
                 var ov = p[2] == "O" ? "<span class='b ok'>O</span>" : "<span class='b bad'>X</span>";
                 snapRows.Append($"<tr><td class='t'>{Enc(p[0])}</td><td class='pid'>{Enc(p[1])}</td><td>{ov}</td></tr>");
@@ -454,7 +454,7 @@ public static class HtmlLog
         if (File.Exists(rawPath))
             foreach (var line in SafeReadLines(rawPath))
             {
-                var p = line.Split('|');
+                var p = LogRow.Fields(line);   // field 0 = PID, whichever row shape
                 if (p.Length < 3) continue;
                 orig[p[0] + "|" + p[1]] = p[2];
             }
@@ -464,7 +464,7 @@ public static class HtmlLog
         foreach (var line in SafeReadLines(ngPath))
         {
             if (string.IsNullOrWhiteSpace(line)) continue;
-            var p = line.Split('|');
+            var p = LogRow.Fields(line);   // field 0 = PID, whichever row shape
             if (p.Length < 3) continue;
             var key = p[0] + "|" + p[1];
             if (!byKey.TryGetValue(key, out var e))
@@ -489,7 +489,7 @@ public static class HtmlLog
         var sentInRawLog = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var line in SafeReadLines(cfg.RawLogPathForDay(day)))
         {
-            var p = line.Split('|');
+            var p = LogRow.Fields(line);   // field 0 = PID, whichever row shape
             if (p.Length >= 3 && p[2] == "SUCCEEDED") sentInRawLog.Add(p[0] + "|" + p[1]);
         }
 
@@ -705,7 +705,7 @@ public static class HtmlLog
         try
         {
             string? found = null;
-            foreach (var line in SafeReadLines(cfg.OpLogPath(ParseDay(day))))
+            foreach (var line in SafeReadLines(cfg.PanelEventsPath(ParseDay(day))))
             {
                 var i = line.IndexOf("client ", StringComparison.OrdinalIgnoreCase);
                 if (i < 0 || !line.Contains("STARTUP", StringComparison.OrdinalIgnoreCase)) continue;

@@ -494,23 +494,32 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0">
-                <TextBlock Text="FTP Upload Job Manager" FontSize="20" FontWeight="Bold"
-                           Foreground="#14203C"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="FTP Upload Job Manager" FontSize="20" FontWeight="Bold"
+                               Foreground="#14203C"/>
+                    <!-- Version AND build date: two builds a day apart both read "v1.0.0.4", which
+                         is not enough to tell a deployed copy from a newer one. Deliberately
+                         prominent - it is the first thing to check when a fix "isn't working". -->
+                    <Border Background="#EEF3FF" BorderBrush="#C9DAF8" BorderThickness="1"
+                            CornerRadius="5" Padding="8,2" Margin="12,0,0,2"
+                            VerticalAlignment="Bottom">
+                        <TextBlock x:Name="BuildStamp" FontSize="14" FontWeight="Bold"
+                                   Foreground="#2A55B8"/>
+                    </Border>
+                </StackPanel>
                 <TextBlock x:Name="SubTitle" FontSize="12.5" Foreground="#6B7386" Margin="0,2,0,0"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                 <!-- Summary sits in the header rather than a tab strip, so it is reachable
                      from both the Today Jobs and NG List views. -->
-                <Button x:Name="SummaryBtn" Content="Summary Log" Margin="0,0,8,0" Padding="12,6"
-                        VerticalAlignment="Center" Cursor="Hand" Click="ViewSummary_Click"
+                <!-- ONE log button. Five separate ones (two of them both called "Total Log",
+                     on different strips, opening different reports) meant pressing a button was
+                     the only way to find out what it did. The tabs are named and described. -->
+                <Button x:Name="ViewLogBtn" Content="View Log" Margin="0,0,10,0" Padding="12,6"
+                        VerticalAlignment="Center" Cursor="Hand" Click="ViewLog_Click"
                         Background="White" Foreground="#3A4256" BorderBrush="#C9DAF8" BorderThickness="1"
                         FontSize="11.5" FontWeight="SemiBold"
-                        ToolTip="Open a day's summary CSV: one row per panel, one column per recipe file, O/X per cell"/>
-                  <Button x:Name="OpLogBtn" Content="Operation Log" Margin="0,0,10,0" Padding="12,6"
-                          VerticalAlignment="Center" Cursor="Hand" Click="ViewOpLog_Click"
-                          Background="White" Foreground="#3A4256" BorderBrush="#C9DAF8" BorderThickness="1"
-                          FontSize="11.5" FontWeight="SemiBold"
-                          ToolTip="Open a day's operation log: startups and shutdowns (with reason), day rollovers, settings saves, crashes, and mid-fail host sends. This is the file that answers 'what happened to this machine', and log retention never deletes it."/>
+                        ToolTip="Every log in one place, a tab each: Day Log, NG Retry, Summary, Operation, Activity. Pick a day and open it."/>
                   <Button x:Name="TracePanelBtn" Content="Trace Panel" Margin="0,0,10,0" Padding="12,6"
                           VerticalAlignment="Center" Cursor="Hand" Click="TracePanel_Click"
                           Background="White" Foreground="#3A4256" BorderBrush="#C9DAF8" BorderThickness="1"
@@ -596,18 +605,28 @@
                                 <TextBlock x:Name="LiveCount" FontSize="11.5" Foreground="#A9B3CC"
                                            VerticalAlignment="Center" Margin="10,0,0,0"/>
 
-                                <!-- compact counts, on the header line -->
+                                <!-- Compact counts on the header line.
+                                     The NUMBER is the thing being read, so it gets the size and
+                                     weight; the word after it is only a label and stays small and
+                                     dim. At a uniform 11.5 the percentages were the hardest part
+                                     of the window to focus on, which is backwards. -->
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="18,0,0,0">
-                                    <TextBlock x:Name="StatJobs" Text="0" Foreground="#B79CFF" FontSize="11.5" FontWeight="SemiBold"/>
-                                    <TextBlock Text="Panels" Foreground="#8A97BD" FontSize="11.5" Margin="4,0,14,0"/>
-                                    <TextBlock x:Name="StatFiles" Text="0" Foreground="White" FontSize="11.5" FontWeight="SemiBold"/>
-                                    <TextBlock Text="Files" Foreground="#8A97BD" FontSize="11.5" Margin="4,0,14,0"/>
-                                    <TextBlock x:Name="StatOk" Text="0" Foreground="#3FCF7F" FontSize="11.5" FontWeight="SemiBold"/>
-                                    <TextBlock Text="Succeeded" Foreground="#8A97BD" FontSize="11.5" Margin="4,0,14,0"/>
-                                    <TextBlock x:Name="StatPending" Text="0" Foreground="#4D8CFF" FontSize="11.5" FontWeight="SemiBold"/>
-                                    <TextBlock Text="Pending" Foreground="#8A97BD" FontSize="11.5" Margin="4,0,14,0"/>
-                                    <TextBlock x:Name="StatFailed" Text="0" Foreground="#FF6B61" FontSize="11.5" FontWeight="SemiBold"/>
-                                    <TextBlock Text="Failed" Foreground="#8A97BD" FontSize="11.5" Margin="4,0,14,0"/>
+                                    <TextBlock x:Name="StatJobs" Text="0" Foreground="#B79CFF" FontSize="15" FontWeight="Bold"/>
+                                    <TextBlock Text="Panels" Foreground="#8A97BD" FontSize="11.5" Margin="5,2,16,0" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="StatFiles" Text="0" Foreground="White" FontSize="15" FontWeight="Bold"/>
+                                    <TextBlock Text="Files" Foreground="#8A97BD" FontSize="11.5" Margin="5,2,16,0" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="StatOk" Text="0" Foreground="#3FCF7F" FontSize="15" FontWeight="Bold"/>
+                                    <TextBlock Text="Succeeded" Foreground="#8A97BD" FontSize="11.5" Margin="5,2,16,0" VerticalAlignment="Center"/>
+                                    <!-- Order matches the HTML report's cards exactly: Succeeded,
+                                         Failed, Timed out, Pending. Reading the strip and the
+                                         report side by side is the common case, and two different
+                                         orders for the same six numbers makes that needlessly hard. -->
+                                    <TextBlock x:Name="StatFailed" Text="0" Foreground="#FF6B61" FontSize="15" FontWeight="Bold"/>
+                                    <TextBlock Text="Failed" Foreground="#8A97BD" FontSize="11.5" Margin="5,2,16,0" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="StatTimedOut" Text="0" Foreground="#E8A33D" FontSize="15" FontWeight="Bold"/>
+                                    <TextBlock Text="Timed out" Foreground="#8A97BD" FontSize="11.5" Margin="5,2,16,0" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="StatPending" Text="0" Foreground="#4D8CFF" FontSize="15" FontWeight="Bold"/>
+                                    <TextBlock Text="Pending" Foreground="#8A97BD" FontSize="11.5" Margin="5,2,16,0" VerticalAlignment="Center"/>
                                     <TextBlock x:Name="StatSpeed" Text="" Foreground="#7FE0A8" FontSize="11.5" FontWeight="SemiBold"/>
                                     <TextBlock x:Name="StatSession" Text="" Foreground="#8FB4FF" FontSize="11.5" FontWeight="SemiBold" Margin="14,0,0,0"/>
                                 </StackPanel>
@@ -618,9 +637,6 @@
                                             Content="Auto Upload" VerticalAlignment="Center" Click="LiveStart_Click"/>
                                     <Button x:Name="LiveStopBtn" Style="{StaticResource DeleteRowButton}"
                                             Content="Stop" Margin="6,0,18,0" VerticalAlignment="Center" Click="LiveStop_Click"/>
-                                    <Button x:Name="LiveViewLogBtn" Style="{StaticResource ForceButton}"
-                                            Content="Total Log" Margin="0,0,8,0" VerticalAlignment="Center"
-                                            ToolTip="Build an HTML report of today's upload log and open it" Click="ViewLiveLog_Click"/>
                                     <Button x:Name="LiveExpandAllBtn" Style="{StaticResource ForceButton}"
                                             Content="&#xE949;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                                             Margin="0,0,4,0" VerticalAlignment="Center"
@@ -721,16 +737,23 @@
                                 <!-- Mini version of the NG report, same layout and colours as the
                                      live strip so the two views read identically. -->
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="18,0,0,0">
-                                    <TextBlock x:Name="NgStatPanels" Text="0" Foreground="#B79CFF" FontSize="11.5" FontWeight="SemiBold"/>
-                                    <TextBlock Text="Panels" Foreground="#8A97BD" FontSize="11.5" Margin="4,0,14,0"/>
-                                    <TextBlock x:Name="NgStatFiles" Text="0" Foreground="White" FontSize="11.5" FontWeight="SemiBold"/>
-                                    <TextBlock Text="Files" Foreground="#8A97BD" FontSize="11.5" Margin="4,0,14,0"/>
-                                    <TextBlock x:Name="NgStatOk" Text="0" Foreground="#3FCF7F" FontSize="11.5" FontWeight="SemiBold"/>
-                                    <TextBlock Text="Recovered" Foreground="#8A97BD" FontSize="11.5" Margin="4,0,14,0"/>
-                                    <TextBlock x:Name="NgStatPending" Text="0" Foreground="#4D8CFF" FontSize="11.5" FontWeight="SemiBold"/>
-                                    <TextBlock Text="Pending" Foreground="#8A97BD" FontSize="11.5" Margin="4,0,14,0"/>
-                                    <TextBlock x:Name="NgStatFailed" Text="0" Foreground="#FF6B61" FontSize="11.5" FontWeight="SemiBold"/>
-                                    <TextBlock Text="Failing" Foreground="#8A97BD" FontSize="11.5" Margin="4,0,14,0"/>
+                                    <TextBlock x:Name="NgStatPanels" Text="0" Foreground="#B79CFF" FontSize="15" FontWeight="Bold"/>
+                                    <TextBlock Text="Panels" Foreground="#8A97BD" FontSize="11.5" Margin="5,2,16,0" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="NgStatFiles" Text="0" Foreground="White" FontSize="15" FontWeight="Bold"/>
+                                    <TextBlock Text="Files" Foreground="#8A97BD" FontSize="11.5" Margin="5,2,16,0" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="NgStatOk" Text="0" Foreground="#3FCF7F" FontSize="15" FontWeight="Bold"/>
+                                    <TextBlock Text="Recovered" Foreground="#8A97BD" FontSize="11.5" Margin="5,2,16,0" VerticalAlignment="Center"/>
+                                    <!-- Same order as the NG report's cards: Recovered, Failing,
+                                         Pending. -->
+                                    <TextBlock x:Name="NgStatFailed" Text="0" Foreground="#FF6B61" FontSize="15" FontWeight="Bold"/>
+                                    <TextBlock Text="Failing" Foreground="#8A97BD" FontSize="11.5" Margin="5,2,16,0" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="NgStatPending" Text="0" Foreground="#4D8CFF" FontSize="15" FontWeight="Bold"/>
+                                    <!-- "Manifests pending", not just "Pending": in the LIVE strip
+                                         Pending means a file not yet attempted, whereas here it is
+                                         a manifest that cannot be retried until its panel's data
+                                         files recover. Same thing the NG report calls MANIFESTS
+                                         PENDING, so use its words. -->
+                                    <TextBlock Text="Manifests pending" Foreground="#8A97BD" FontSize="11.5" Margin="5,2,16,0" VerticalAlignment="Center"/>
                                     <TextBlock x:Name="NgCount" FontSize="11.5" Foreground="#8FB4FF"
                                                FontWeight="SemiBold" VerticalAlignment="Center"/>
                                 </StackPanel>
@@ -750,9 +773,6 @@
                                             Content="Auto Retry" Margin="12,0,0,0" VerticalAlignment="Center" Click="NgStart_Click"/>
                                     <Button x:Name="NgStopBtn" Style="{StaticResource DeleteRowButton}"
                                             Content="Stop" Margin="6,0,18,0" VerticalAlignment="Center" Click="NgStop_Click"/>
-                                    <Button x:Name="NgViewLogBtn" Style="{StaticResource ForceButton}"
-                                            Content="Total Log" Margin="0,0,8,0" VerticalAlignment="Center"
-                                            ToolTip="Build an HTML report of this day's NG-retry log and open it" Click="ViewNgLog_Click"/>
                                     <Button x:Name="NgExpandAllBtn" Style="{StaticResource ForceButton}"
                                             Content="&#xE949;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                                             Margin="0,0,4,0" VerticalAlignment="Center"
@@ -957,6 +977,8 @@
                                             <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
                                             <RowDefinition Height="Auto"/>
                                             <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Text="Connect timeout (s)" Style="{StaticResource SettingLabel}"/>
                                         <TextBox   Grid.Row="0" Grid.Column="1" x:Name="SetTimeout" Style="{StaticResource SettingBox}"/>
@@ -983,6 +1005,16 @@
                                                    VerticalAlignment="Center"
                                                    Content="Send the host manifest early when a file runs out of attempts"
                                                    ToolTip="OFF by default. When a file exhausts its attempts, upload the HOST manifest early, listing only the files that actually landed (every -pending line stripped, exactly as the final manifest is built). It writes no marker and no rawlog row, so the real manifest is still sent when the panel finishes, and it re-sends only when more files have landed since last time. Note the host manifest is normally the panel-complete signal, so only enable this if the host system tolerates a partial list."/>
+                                        <TextBlock Grid.Row="8" Grid.Column="0" Text="Stamp manifest at upload" Style="{StaticResource SettingLabel}"/>
+                                        <CheckBox  Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2" x:Name="SetStampManifestName" Margin="0,2,0,8"
+                                                   VerticalAlignment="Center"
+                                                   Content="Name the host manifest for the moment it is uploaded"
+                                                   ToolTip="OFF by default. The host manifest is named &lt;PID&gt;_&lt;yyyyMMddHHmmss&gt;.txt from the panel's measurement time, so when a panel sends more than once - an early (mid-fail) send, then the complete manifest - the second overwrites the first. With this ON only the REPEAT sends are renamed, to the moment each upload starts, so every version survives. A panel that never fails is untouched and keeps its original name. Expect one extra host file per failing panel. The index has no stamp and is unaffected, and the local file always keeps its name, so markers and logs are unchanged."/>
+                             <TextBlock Grid.Row="9" Grid.Column="0" Text="Send only new files" Style="{StaticResource SettingLabel}"/>
+                             <CheckBox  Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" x:Name="SetDeltaManifests" Margin="0,2,0,8"
+                                                   VerticalAlignment="Center"
+                                                   Content="Each manifest lists only what landed since the last one"
+                                                   ToolTip="OFF by default, and only takes effect with the setting above ticked. Normally every manifest send carries the panel's whole list so far; with this ON each send - early or final - carries ONLY the files that landed since the previous send. The manifests on THIS machine stay complete - only the uploaded copy is trimmed. Important: with this on NO single file lists the whole panel, so the host system must add them up. It needs per-upload names, which is why it requires the setting above."/>
                                     </Grid>
                                 </StackPanel>
                             </Border>

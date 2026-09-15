@@ -58,7 +58,26 @@ public partial class MainWindow : Window
                  : ver.Revision > 0 ? $"v{ver.Major}.{ver.Minor}.{ver.Build}.{ver.Revision}"
                  : $"v{ver.Major}.{ver.Minor}.{ver.Build}";
 
-        Title = vstr.Length > 0 ? $"FTP Upload Job Manager - {vstr}" : "FTP Upload Job Manager";
+        // Build date alongside the version.
+        //
+        // Two builds a day apart both call themselves v1.0.0.4, and that cost real confusion: a
+        // summary CSV was read through a day-old deployed copy while the fix sat in a newer build,
+        // with nothing on screen to tell them apart. The date makes the running binary identifiable.
+        var built = "";
+        try
+        {
+            var exe = Environment.ProcessPath;
+            if (!string.IsNullOrEmpty(exe) && System.IO.File.Exists(exe))
+                built = System.IO.File.GetLastWriteTime(exe).ToString("yyyy.MMdd.HHmmss");
+        }
+        catch { }
+
+        var stamp = vstr.Length > 0
+            ? (built.Length > 0 ? $"{vstr} \u2014 {built}" : vstr)
+            : built;
+
+        Title = stamp.Length > 0 ? $"FTP Upload Job Manager - {stamp}" : "FTP Upload Job Manager";
+        BuildStamp.Text = stamp;
 
         // Client IP first: a site runs many of these across 10.119.x / 10.121.x, and "which PC is
         // this?" should be answerable from the window without opening a console.
@@ -477,10 +496,15 @@ public partial class MainWindow : Window
         var recovered = _host.NgRetry.RecoveredKeys;
         var ok = matched.Sum(j => j.Files.Count(f =>
             f.Status == FileStatus.Succeeded || recovered.Contains(f.Key)));
+        // Failed and TimedOut counted SEPARATELY, matching the HTML report's cards. They were
+        // summed into one "Failed" number here, so a run whose files were cut off by the panel
+        // timeout showed them as outright failures and the strip had no equivalent of the
+        // report's "TIMED OUT" card at all.
         var bad = matched.Sum(j => j.Files.Count(f =>
-            (f.Status == FileStatus.Failed || f.Status == FileStatus.TimedOut)
-            && !recovered.Contains(f.Key)));
-        var pending = files - ok - bad;
+            f.Status == FileStatus.Failed && !recovered.Contains(f.Key)));
+        var timedOut = matched.Sum(j => j.Files.Count(f =>
+            f.Status == FileStatus.TimedOut && !recovered.Contains(f.Key)));
+        var pending = files - ok - bad - timedOut;
 
         // Panels fully landed — the strip's equivalent of the report's "Panels succeeded" card.
         var panelsOk = matched.Count(j => j.Files.Count > 0 && j.Files.All(f =>
@@ -493,6 +517,7 @@ public partial class MainWindow : Window
         StatOk.Text = files > 0 ? $"{ok} ({ok * 100.0 / files:0.#}%)" : "0";
         StatPending.Text = files > 0 ? $"{pending} ({pending * 100.0 / files:0.#}%)" : "0";
         StatFailed.Text = files > 0 ? $"{bad} ({bad * 100.0 / files:0.#}%)" : "0";
+        StatTimedOut.Text = files > 0 ? $"{timedOut} ({timedOut * 100.0 / files:0.#}%)" : "0";
 
         var mbps = _host.Engine.RollingMBps;
         StatSpeed.Text = mbps > 0 ? $"-  {mbps:0.0} MB/s avg" : "";
@@ -765,6 +790,8 @@ public partial class MainWindow : Window
         SetNgRecoveryDays.Text = c.NgRecoveryDays.ToString();
         SetHtmlRefresh.Text = c.HtmlLogRefreshSeconds.ToString();
         SetMidFailHost.IsChecked = c.MidFailHostUpload;
+        SetStampManifestName.IsChecked = c.StampManifestNameAtUpload;
+        SetDeltaManifests.IsChecked = c.DeltaManifests;
         SelectCombo(SetMaxFilesPerSession, c.MaxFilesPerSession <= 0 ? "Unlimited" : c.MaxFilesPerSession.ToString());
 
         SetAutoUpload.IsChecked = c.AutoStartUploading;
@@ -806,6 +833,7 @@ public partial class MainWindow : Window
         S("NgRecoveryDays", c.NgRecoveryDays.ToString());
         S("HtmlLogRefreshSeconds", c.HtmlLogRefreshSeconds.ToString());
         S("MidFailHostUpload", c.MidFailHostUpload.ToString());
+        S("StampManifestNameAtUpload", c.StampManifestNameAtUpload.ToString());
         S("MaxFilesPerSession", c.MaxFilesPerSession.ToString());
         S("AutoStartUploading", c.AutoStartUploading.ToString());
         S("AutoStartRetrying", c.AutoStartRetrying.ToString());
@@ -865,6 +893,8 @@ public partial class MainWindow : Window
             c.NgRecoveryDays = ParseInt(SetNgRecoveryDays.Text, c.NgRecoveryDays);
             c.HtmlLogRefreshSeconds = ParseInt(SetHtmlRefresh.Text, c.HtmlLogRefreshSeconds);
             c.MidFailHostUpload = SetMidFailHost.IsChecked == true;
+        c.StampManifestNameAtUpload = SetStampManifestName.IsChecked == true;
+        c.DeltaManifests = SetDeltaManifests.IsChecked == true;
             // Combo: "Unlimited" -> 0, otherwise the numeric preset.
             var sessSel = (SetMaxFilesPerSession.SelectedItem as System.Windows.Controls.ComboBoxItem)?.Content?.ToString() ?? "Unlimited";
             c.MaxFilesPerSession = sessSel.Equals("Unlimited", StringComparison.OrdinalIgnoreCase) ? 0 : ParseInt(sessSel, 0);
@@ -949,55 +979,10 @@ public partial class MainWindow : Window
     private LogCalendarWindow? _dayLogCal;
     private LogCalendarWindow? _ngLogCal;
     private LogCalendarWindow? _summaryCal;
-    private LogCalendarWindow? _opLogCal;
+    private LogCalendarWindow? _appLogCal;
 
-    /// <summary>
-    /// Pick a day and open its operation log — startups, shutdowns with reason, rollovers, settings
-    /// saves, crashes and mid-fail host sends. Plain text, opened in whatever handles .txt.
-    ///
-    /// Days come from the oplog files actually present, not from the upload logs: a machine can have
-    /// an oplog for a day it uploaded nothing (started and stopped), and that is exactly the day
-    /// someone needs to look at.
-    /// </summary>
-    /// <summary>
-    /// "Session Log" — find the WinSCP records for the PID typed in the strip's filter box.
-    ///
-    /// It reads the PID from the filter box rather than adding a per-row button: you are usually
-    /// already filtered to the panel you care about, and the box is in both views.
-    /// </summary>
-    private void LiveSessionLog_Click(object sender, RoutedEventArgs e) => ShowSessionLog(FilterBox.Text);
 
-    private void NgSessionLog_Click(object sender, RoutedEventArgs e) => ShowSessionLog(NgFilterBox.Text);
 
-    private void ShowSessionLog(string? pid)
-    {
-        pid = (pid ?? "").Trim();
-        if (pid.Length == 0)
-        {
-            MessageBox.Show(this, "Type a panel ID in the PID box first, then press Session Log.",
-                            "Session Log", MessageBoxButton.OK, MessageBoxImage.Information);
-            return;
-        }
-        try
-        {
-            var path = SessionLogFinder.Build(_host.Cfg, pid);
-            if (path is null)
-            {
-                MessageBox.Show(this,
-                    $"No WinSCP session log mentions \"{pid}\".\n\n" +
-                    "Either it was uploaded on a day whose session logs have been purged by log " +
-                    "retention, or the PID is not an exact match.",
-                    "Session Log", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(path) { UseShellExecute = true });
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show(this, "Could not build the session-log report: " + ex.Message,
-                            "Session Log", MessageBoxButton.OK, MessageBoxImage.Warning);
-        }
-    }
 
     private TracePanelWindow? _traceWin;
 
@@ -1014,130 +999,34 @@ public partial class MainWindow : Window
         _traceWin.Closed += (_, _) => _traceWin = null;
         _traceWin.Show();
     }
-    private void ViewOpLog_Click(object sender, RoutedEventArgs e)
+
+    private LogCalendarWindow? _activityCal;
+
+
+
+    private LogViewerWindow? _logViewer;
+
+    /// <summary>
+    /// Open the one log window: a tab per log, a day list in each.
+    ///
+    /// Replaces five buttons. Single instance, so pressing it again brings the existing window
+    /// forward instead of stacking copies.
+    /// </summary>
+    private void ViewLog_Click(object sender, RoutedEventArgs e)
     {
-        if (_opLogCal != null) { _opLogCal.RefreshDays(); _opLogCal.Activate(); return; }
-        _opLogCal = new LogCalendarWindow(
-            "Operation Log",
-            () => new HashSet<string>(AvailableOpLogDays()),
-            day =>
-            {
-                try
-                {
-                    var path = _host.Cfg.OpLogPath(ParseDayOrToday(day));
-                    if (!System.IO.File.Exists(path))
-                    {
-                        MessageBox.Show(this, $"No operation log for {day}.",
-                                        "Operation Log", MessageBoxButton.OK, MessageBoxImage.Information);
-                        return;
-                    }
-                    System.Diagnostics.Process.Start(
-                        new System.Diagnostics.ProcessStartInfo(path) { UseShellExecute = true });
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(this, "Could not open the operation log: " + ex.Message,
-                                    "Operation Log", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-            }) { Owner = this };
-        _opLogCal.Closed += (_, _) => _opLogCal = null;
-        _opLogCal.Show();
+        if (_logViewer != null) { _logViewer.Activate(); return; }
+        _logViewer = new LogViewerWindow(_host.Cfg) { Owner = this };
+        _logViewer.Closed += (_, _) => _logViewer = null;
+        _logViewer.Show();
     }
 
     private static DateTime ParseDayOrToday(string day)
         => DateTime.TryParseExact(day, "yyyyMMdd", null,
                System.Globalization.DateTimeStyles.None, out var d) ? d : DateTime.Today;
 
-    /// <summary>Days that actually have an operation log on disk.</summary>
-    private IEnumerable<string> AvailableOpLogDays()
-    {
-        var days = new List<string>();
-        try
-        {
-            var dir = _host.Cfg.LogFullPath;
-            if (!System.IO.Directory.Exists(dir)) return days;
-            foreach (var f in System.IO.Directory.GetFiles(dir, "*_oplog.txt"))
-            {
-                var name = System.IO.Path.GetFileName(f);
-                if (name.Length >= 8) days.Add(name[..8]);
-            }
-        }
-        catch { }
-        return days;
-    }
 
-    private void ViewSummary_Click(object sender, RoutedEventArgs e)
-    {
-        if (_summaryCal != null) { _summaryCal.RefreshDays(); _summaryCal.Activate(); return; }
-        _summaryCal = new LogCalendarWindow(
-            "Summary CSV",
-            () => new HashSet<string>(AvailableLogDays(liveMode: true)),
-            day =>
-            {
-                try
-                {
-                    var path = SummaryLog.Build(_host.Cfg, day);
-                    if (path is null || !System.IO.File.Exists(path))
-                    {
-                        MessageBox.Show(this, $"No summary for {day} - nothing was uploaded that day.",
-                                        "Summary", MessageBoxButton.OK, MessageBoxImage.Information);
-                        return;
-                    }
 
-                    // Open a COPY, never the live file. Excel holds a .csv with FileShare.Read,
-                    // which denies writers — so viewing the real file would silently block the
-                    // background refresh from rewriting it for as long as it stayed open. The copy
-                    // is a point-in-time snapshot; reopen for newer data.
-                    var tmpDir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "FtpUploadSummary");
-                    System.IO.Directory.CreateDirectory(tmpDir);
 
-                    // Prune snapshots older than a day so this folder can't grow without bound.
-                    try
-                    {
-                        foreach (var old in System.IO.Directory.GetFiles(tmpDir, "*.csv"))
-                            if ((DateTime.Now - System.IO.File.GetLastWriteTime(old)).TotalDays > 1)
-                                try { System.IO.File.Delete(old); } catch { }
-                    }
-                    catch { }
-
-                    // Timestamped name: a previous copy may still be open in Excel and locked.
-                    var copy = System.IO.Path.Combine(tmpDir, $"{day}_summary_{DateTime.Now:HHmmss}.csv");
-                    System.IO.File.Copy(path, copy, overwrite: true);
-
-                    System.Diagnostics.Process.Start(
-                        new System.Diagnostics.ProcessStartInfo(copy) { UseShellExecute = true });
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(this, "Could not open the summary: " + ex.Message,
-                                    "Summary", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-            }) { Owner = this };
-        _summaryCal.Closed += (_, _) => _summaryCal = null;
-        _summaryCal.Show();
-    }
-
-    private void ViewLiveLog_Click(object sender, RoutedEventArgs e)
-    {
-        if (_dayLogCal != null) { _dayLogCal.RefreshDays(); _dayLogCal.Activate(); return; }
-        _dayLogCal = new LogCalendarWindow(
-            "Upload Day Report",
-            () => new HashSet<string>(AvailableLogDays(liveMode: true)),
-            day => BuildAndOpenLog(() => HtmlLog.BuildDayLog(_host.Cfg, day), day)) { Owner = this };
-        _dayLogCal.Closed += (_, _) => _dayLogCal = null;
-        _dayLogCal.Show();   // non-modal - does not block the main UI
-    }
-
-    private void ViewNgLog_Click(object sender, RoutedEventArgs e)
-    {
-        if (_ngLogCal != null) { _ngLogCal.RefreshDays(); _ngLogCal.Activate(); return; }
-        _ngLogCal = new LogCalendarWindow(
-            "NG Retry Report",
-            () => new HashSet<string>(AvailableLogDays(liveMode: false)),
-            day => BuildAndOpenLog(() => HtmlLog.BuildNgLog(_host.Cfg, day), day)) { Owner = this };
-        _ngLogCal.Closed += (_, _) => _ngLogCal = null;
-        _ngLogCal.Show();   // non-modal
-    }
 
     /// <summary>Days (yyyyMMdd) that have a log to show. Live = a raw log or a jobs file exists;
     /// NG = an ngretrylog exists.</summary>
@@ -1160,12 +1049,14 @@ public partial class MainWindow : Window
         }
         if (liveMode)
         {
-            Scan(_host.Cfg.LogFullPath, "_rawlog.txt");
+            Scan(_host.Cfg.LogFullPath, "_totallog.txt");
+            Scan(_host.Cfg.LogFullPath, "_rawlog.txt");        // days from before the rename
             Scan(_host.Cfg.JobsFullPath, "_jobs.txt");
         }
         else
         {
-            Scan(_host.Cfg.LogFullPath, "_ngretrylog.txt");
+            Scan(_host.Cfg.LogFullPath, "_ngretrytotallog.txt");
+            Scan(_host.Cfg.LogFullPath, "_ngretrylog.txt");     // ditto
         }
         return set.ToList();
     }
@@ -1182,7 +1073,7 @@ public partial class MainWindow : Window
                 System.Windows.MessageBox.Show($"No log to show for {day} yet.");
                 return;
             }
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(path) { UseShellExecute = true });
+            LogSnapshot.OpenCopy(path);   // a copy: an open viewer would deny the writer
         }
         catch (Exception ex)
         {

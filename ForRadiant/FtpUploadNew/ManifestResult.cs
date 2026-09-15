@@ -14,8 +14,22 @@ namespace FtpUpload;
 /// and one panel's 3 real transfers produced 13 rawlog rows and 12 ng-retry rows.
 /// </para>
 /// </summary>
-public readonly record struct FinalizeResult(bool IdxOk, bool HostOk, string Host, bool Uploaded = false)
+public readonly record struct FinalizeResult(bool IdxOk, bool HostOk, string Host, bool Uploaded = false,
+                                            string HostName = "", bool IdxSentNow = false, bool HostSentNow = false)
 {
     /// <summary>The panel is finalized only when BOTH manifests are on the server.</summary>
     public bool Ok => IdxOk && HostOk;
+
+    /// <summary>
+    /// What THIS call actually put on the server, for the log line.
+    ///
+    /// "index + host manifests sent" was printed regardless, so a call that only had the index left
+    /// to send still claimed both — and the host name was blank, because no host went out. Saying
+    /// what was really sent makes the blank name self-explaining instead of looking like a defect.
+    /// </summary>
+    public string SentDescription =>
+        IdxSentNow && HostSentNow ? "index + host manifests sent"
+        : HostSentNow ? "host manifest sent (index was already there)"
+        : IdxSentNow ? "index manifest sent (host was already there)"
+        : "nothing sent";
 }

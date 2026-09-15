@@ -25,11 +25,14 @@ if ([string]::IsNullOrEmpty($LogFolder)) { $LogFolder = Join-Path $root 'logs' }
 if (-not [System.IO.Path]::IsPathRooted($LogFolder)) { $LogFolder = Join-Path $root $LogFolder }
 
 if ($Kind -eq 'ng') {
-    $pattern = '^(\d{8})_ngretrylog\.txt$'
+    # BOTH names: "_ngretrytotallog.txt" now, "_ngretrylog.txt" for days recorded before the
+    # rename (and for any log set copied off site). Matching one only made this picker report
+    # "no log days found" on a folder full of logs.
+    $pattern = '^(\d{8})_(ngretrytotallog|ngretrylog)\.txt$'
     $script:gen = Join-Path $root '_nghtmllog.ps1'
     $title = 'NG Retry Report - pick a day'
 } else {
-    $pattern = '^(\d{8})_rawlog\.txt$'
+    $pattern = '^(\d{8})_(totallog|rawlog)\.txt$'
     $script:gen = Join-Path $root '_htmllog.ps1'
     $title = 'Upload Day Report - pick a day'
 }

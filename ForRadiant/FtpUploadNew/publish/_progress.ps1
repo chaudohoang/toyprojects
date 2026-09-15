@@ -1,6 +1,8 @@
-$demo = 'D:\FtpUploadDemo'
+﻿$demo = 'D:\FtpUploadDemo'
 $day  = Get-Date -Format 'yyyyMMdd'
-$raw  = "$demo\logs\${day}_rawlog.txt"
+$raw  = "$demo\logs\${day}_totallog.txt"
+# fall back to the pre-rename name so an older log set still reads
+if (-not (Test-Path $raw)) { $raw = "$demo\logs\${day}_rawlog.txt" }
 
 Start-Sleep -Seconds 25
 

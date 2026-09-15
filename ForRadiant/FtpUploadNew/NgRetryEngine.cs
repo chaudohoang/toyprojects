@@ -286,7 +286,7 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
         var gone = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var line in SafeFile.ReadLines(cfg.RawLogPathForDay(day)))
         {
-            var p = line.Split('|');
+            var p = LogRow.Fields(line);   // field 0 = PID, whichever row shape
             if (p.Length < 3) continue;
             var key = p[0] + "|" + p[1];
             status[key] = p[2];
@@ -318,6 +318,19 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
 
             var parts = kv.Key.Split('|');
             paths.TryGetValue(kv.Key, out var pp);
+
+            // A MANIFEST that failed is never retried as a file.
+            //
+            // Its content depends on the panel's data files, so re-uploading the copy on disk is
+            // both premature and redundant — the finalize step sends the real thing once the data
+            // recovers. The day rollover marks every unfinished file TimedOut, manifests included,
+            // which landed them here as ordinary retryable items: NG then uploaded the index as a
+            // plain file AND finalize sent it as a manifest, so 70 panels in one run had their
+            // manifests sent twice. Skipping here lets the display-only pass below pick them up,
+            // which is the same treatment they get when they have not failed at all — so nothing
+            // is lost, the panel still shows them as pending, and they are sent exactly once.
+            if (pp.isManifest) continue;
+
             items.Add(new NgItem
             {
                 Day = day,
@@ -344,7 +357,12 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
         foreach (var kv in paths)
         {
             if (!kv.Value.isManifest) continue;                 // only manifest jobs lines
-            if (status.ContainsKey(kv.Key)) continue;           // already a real (retryable) NG item
+            // Skip only when it has actually LANDED. This used to skip anything with a rawlog
+            // status at all, on the assumption that such a manifest was already a retryable item
+            // above — but manifests are no longer added there, so a failed or timed-out manifest
+            // would be dropped from both passes and never shown or sent. The only manifest that
+            // belongs nowhere is one that already succeeded.
+            if (status.TryGetValue(kv.Key, out var st) && st == "SUCCEEDED") continue;
             var parts = kv.Key.Split('|');
             var pid = parts[0];
             if (!pidsWithItems.Contains(pid)) continue;         // panel not in NG — skip
@@ -545,13 +563,66 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
     {
         while (!stopping.IsCancellationRequested)
         {
+            // Every iteration is wrapped. Without this, ONE unhandled exception anywhere below ended
+            // RunAsync, the task completed, and NG never ran again for the life of the process —
+            // silently, because the message went to the in-memory console and not the oplog.
+            //
+            // Measured on LGD's 2026-09-10 logs: NG recovered 35 files up to 00:19 and then did
+            // nothing for fourteen hours while 208 files failed. Nothing on disk explained it.
+            // The live pump already survives per-file faults, which is why its 484 session aborts
+            // read "recovered, pump continuing"; NG had no equivalent.
+            try
+            {
+                await PumpOnce(stopping);
+            }
+            catch (OperationCanceledException) { break; }
+            catch (Exception ex)
+            {
+                // Oplog, not just the console: a dead recovery engine has to leave evidence.
+                AppLog($"NG PUMP ERROR: {ex.GetType().Name}: {ex.Message} - recovered, NG continuing");
+                ClearCurrent();
+                try { await Task.Delay(TimeSpan.FromSeconds(Math.Max(1, cfg.NgRetryCooldownSeconds)), stopping); }
+                catch (OperationCanceledException) { break; }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Write to the day's OPERATION log, not just the in-memory console.
+    ///
+    /// The NG console scrolls and is never persisted, so when this pump died the only record of it
+    /// vanished with the window. Anything that stops recovery has to survive on disk.
+    /// </summary>
+    private void AppLog(string msg)
+    {
+        try { SafeFile.Append(cfg.AppLogPath(Clock.Now), $"[{Clock.Now:yyyy-MM-dd HH:mm:ss}] {msg}"); }
+        catch { }
+        try { Log(msg); } catch { }
+    }
+    /// <summary>
+    /// PANEL-level event, to the day's events file rather than the app oplog.
+    ///
+    /// The oplog is the machine's own history and should stay readable; per-panel events belong
+    /// with the other panel records, which is where the Operation report reads them from.
+    /// </summary>
+    private void OpLog(string msg)
+    {
+        try { SafeFile.Append(cfg.PanelEventsPath(Clock.Now), $"[{Clock.Now:yyyy-MM-dd HH:mm:ss}] {msg}"); }
+        catch { }
+        try { Log(msg); } catch { }
+    }
+
+    /// <summary>One pass of the NG pump. Extracted so RunAsync can guard each iteration.</summary>
+    private async Task PumpOnce(CancellationToken stopping)
+    {
+        {
             // 1) Manual one-shot retries (RetryOne) are drained first, even when auto-retry is off.
             NgItem? manual = null;
             lock (_gate) if (_queue.Count > 0) { manual = _queue[0]; _queue.RemoveAt(0); }
             if (manual is not null)
             {
                 if (manual.State != NgItemState.Succeeded) await Attempt(manual, stopping);
-                continue;
+                return;
             }
 
             // 2) Auto-retry SWEEP: attempt every not-yet-recovered item once, back to back (no
@@ -588,9 +659,9 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
                     {
                         ClearCurrent();   // no highlight during the between-sweep pause
                         try { await Task.Delay(TimeSpan.FromSeconds(Math.Max(1, cfg.NgRetryCooldownSeconds)), stopping); }
-                        catch (OperationCanceledException) { break; }
+                        catch (OperationCanceledException) { return; }
                     }
-                    continue;
+                    return;
                 }
             }
 
@@ -638,7 +709,7 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
             foreach (var path in new[] { cfg.RawLogPathForDay(day), cfg.NgRetryLogPath(day) })
                 foreach (var line in SafeFile.ReadLines(path))
                 {
-                    var p = line.Split('|');
+                    var p = LogRow.Fields(line);   // field 0 = PID, whichever row shape
                     if (p.Length >= 3 && p[2] == "SUCCEEDED") sent.Add(p[0] + "|" + p[1]);
                 }
 
@@ -683,8 +754,15 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
                         ngLog.WriteManifestSent(jl.Pid, day, jl.UploadIndexPath, jl.UploadHostPath, 0, fin.Host);
                         WriteManifestToRawLog(jl.Pid, day, jl.UploadIndexPath, jl.UploadHostPath, 1, fin.Host);
                         Log($"   panel {jl.Pid} ({day}): manifests finished by sweep - panel complete");
+                        OpLog($"FINALIZE {jl.Pid}: {fin.SentDescription} -> {fin.Host}" +
+                              (fin.HostName.Length > 0 ? $" as {fin.HostName}" : ""));
                         NotifyChanged();
                     }
+                    // A PARTIAL send still put a file on the server. Log it, or the host manifest it
+                    // uploaded carries a stamped name that appears in no log line at all.
+                    else if (fin.Uploaded)
+                        OpLog($"FINALIZE {jl.Pid}: {fin.SentDescription} -> {fin.Host}" +
+                              (fin.HostName.Length > 0 ? $" as {fin.HostName}" : ""));
                 }
                 catch (Exception ex) { Log($"   panel {jl.Pid}: finalize sweep error: {ex.Message}"); }
             }
@@ -748,7 +826,18 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
                             // exactly the false "no host manifest" signature we chased in the field.
                             WriteManifestToRawLog(item, fin.Host);
                             Log($"   panel {item.Pid}: index + host manifest sent — panel complete");
+                            // Name the host file that landed, so every file on the server traces
+                            // back to a log line. This is the third of three finalize sites; the
+                            // other two had it and this one did not, which left 6 of 60 panels
+                            // with an unexplained file in the verdict.
+                            OpLog($"FINALIZE {item.Pid}: {fin.SentDescription} -> {fin.Host}" +
+                                  (fin.HostName.Length > 0 ? $" as {fin.HostName}" : ""));
                         }
+                        // A PARTIAL send still put a file on the server - log it, or the host manifest it
+                        // uploaded carries a stamped name that appears in no log line at all.
+                        else if (fin.Uploaded)
+                            OpLog($"FINALIZE {item.Pid}: {fin.SentDescription} -> {fin.Host}" +
+                                  (fin.HostName.Length > 0 ? $" as {fin.HostName}" : ""));
                     }
                     catch (Exception ex) { Log($"   panel {item.Pid}: finalize error: {ex.Message}"); }
                 }
@@ -779,11 +868,26 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
                             ngLog.WriteManifestSent(item.Pid, item.Day, item.UploadIndexPath,
                                                     item.UploadHostPath, item.TotalRetries, fin2.Host);
                             WriteManifestToRawLog(item, fin2.Host);
+                            // The FOURTH finalize site, and the only one that logged nothing to the
+                            // panel-events file. With stamped names that made its file untraceable:
+                            // 87 of 1128 host files on the server had no log line naming them, and
+                            // the Trace Panel flagged each as unexplained. Same line as the others.
+                            OpLog($"FINALIZE {item.Pid}: {fin2.SentDescription} -> {fin2.Host}" +
+                                  (fin2.HostName.Length > 0 ? $" as {fin2.HostName}" : ""));
                             Log($"   panel {item.Pid}: index + host manifest sent — panel complete");
                         }
+                        // A PARTIAL send still put a file on the server - log it, or the host manifest it
+                        // uploaded carries a stamped name that appears in no log line at all.
+                        else if (fin2.Uploaded)
+                            OpLog($"FINALIZE {item.Pid}: {fin2.SentDescription} -> {fin2.Host}" +
+                                  (fin2.HostName.Length > 0 ? $" as {fin2.HostName}" : ""));
                     }
                     catch (Exception ex) { Log($"   panel {item.Pid}: finalize error: {ex.Message}"); }
                 }
+
+                // Source gone is a failure too. Placed after DropLine so the manifest sent here no
+                // longer lists a file that can never arrive.
+                await MidFailAsync(item, host);
             }
         }
         else
@@ -792,7 +896,51 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
             item.LastResult = result.Message ?? result.Outcome.ToString();
             ngLog.Write(item, false, host);
             Log($"   {result.Outcome}: {item.LastResult}");
+
+            // An NG failure counts as a failure too.
+            //
+            // This is what covers "fail, then some files recover, then fail again": once a panel is
+            // in NG, every later failure IS an NG failure, so without this the host would only ever
+            // hear about the panel once. The count guard inside SendMidFailAsync does the deciding —
+            // it only sends when MORE files have landed than last time — so repeated NG failures on
+            // a panel that has gained nothing cost one manifest read and no upload.
+            await MidFailAsync(item, host);
         }
         NotifyChanged();
+    }
+
+    /// <summary>
+    /// Early index+host send after an NG failure, mirroring the live pump's mid-fail.
+    ///
+    /// Logged to the OPLOG only and writes no marker or rawlog row, exactly as the live-pump version
+    /// does, so the real manifests are still sent when the panel finally completes.
+    /// </summary>
+
+    private async Task MidFailAsync(NgItem item, string host)
+    {
+        if (!cfg.MidFailHostUpload) return;
+        if (item.IsManifest) return;                    // a manifest failing tells the host nothing new
+        if (item.IndexSrc.Length == 0) return;
+        try
+        {
+            var r = await _manifest.SendMidFailAsync(item.IndexSrc, item.HostSrc,
+                        item.UploadIndexPath, item.UploadHostPath, _ftp, host);
+            // Every attempt is logged, repeats included. A repeated skip is itself evidence that
+            // NG was still trying at that moment, which is exactly what gets asked when a panel
+            // sits unfinished for an hour. The Operation REPORT collapses the runs so it stays
+            // readable; the raw log keeps them all.
+            if (!r.Sent && r.Why.Length > 0)
+                OpLog($"MIDFAIL {item.Pid}: NOT sent (NG) - {r.Why}");
+            if (r.Sent)
+            {
+                OpLog($"MIDFAIL {item.Pid}: " +
+                      (r.RemoteName.Length > 0 ? "early index+host manifests sent (NG)" : "early index manifest sent (NG, host did NOT land)") +
+                      $" -> {r.Host}, " +
+                      $"{r.Files.Count} file(s)" +
+                      (r.RemoteName.Length > 0 ? $" as {r.RemoteName}" : "") +
+                      $" (list in {Path.GetFileName(Path.ChangeExtension(item.IndexSrc, ".midfail"))})");
+            }
+        }
+        catch (Exception ex) { OpLog($"MIDFAIL {item.Pid}: send error (NG): {ex.Message}"); }
     }
 }

@@ -60,9 +60,9 @@ public static class PanelTrace
                 { jobFiles.Add(jl); foundDay = d; }
             }
             foreach (var line in SafeFile.ReadLines(cfg.RawLogPathForDay(d)))
-                if (line.StartsWith(pid + "|", StringComparison.OrdinalIgnoreCase)) { rawRows.Add(line); foundDay = d; }
+                if (LogRow.IsPanel(line, pid)) { rawRows.Add(line); foundDay = d; }
             foreach (var line in SafeFile.ReadLines(cfg.NgRetryLogPath(d)))
-                if (line.StartsWith(pid + "|", StringComparison.OrdinalIgnoreCase)) { ngRows.Add(line); foundDay = d; }
+                if (LogRow.IsPanel(line, pid)) { ngRows.Add(line); foundDay = d; }
         }
 
         if (jobFiles.Count == 0 && rawRows.Count == 0 && ngRows.Count == 0)
@@ -76,7 +76,7 @@ public static class PanelTrace
             return sb.ToString();
         }
         if (foundDay.Length > 0) sb.AppendLine($"day: {foundDay}");
-        return Sections(cfg, pid, jobFiles, rawRows, ngRows, sb);
+        return Sections(cfg, pid, foundDay, jobFiles, rawRows, ngRows, sb);
     }
 
     /// <summary>
@@ -121,10 +121,11 @@ public static class PanelTrace
         {
             foreach (var (label, path) in new[]
                      {
-                         ($"jobs file : {d}_jobs.txt",      cfg.JobsPathForDay(d)),
-                         ($"rawlog    : {d}_rawlog.txt",    cfg.RawLogPathForDay(d)),
-                         ($"ng-retry  : {d}_ngretrylog.txt", cfg.NgRetryLogPath(d)),
-                         ($"oplog     : {d}_oplog.txt",     cfg.OpLogPath(ParseDay(d)))
+                         ("jobs file", cfg.JobsPathForDay(d)),
+                         ("totallog",  cfg.RawLogPathForDay(d)),
+                         ("ng-retry",  cfg.NgRetryLogPath(d)),
+                         ("events",    cfg.PanelEventsPath(ParseDay(d))),
+                         ("aplog",     cfg.AppLogPath(ParseDay(d)))
                      })
             {
                 var hits = SafeFile.ReadLines(path)
@@ -133,9 +134,41 @@ public static class PanelTrace
                 if (hits.Count == 0) continue;
                 any = true;
                 sb.AppendLine();
-                sb.AppendLine($"--- {label}   ({hits.Count} line(s)) " + new string('-', 20));
+                // Name the file that was actually READ, not the one we expected. The transfer log
+                // is "_totallog.txt" now and "_rawlog.txt" on any day recorded before the rename,
+                // and a header naming the wrong one sends the next reader to a file these lines
+                // did not come from.
+                sb.AppendLine($"--- {label,-10}: {Path.GetFileName(path),-30} ({hits.Count} line(s)) "
+                              + new string('-', 12));
                 foreach (var l in hits) sb.AppendLine("   " + l);
             }
+
+            // The OPERATION REPORT's rows for this panel.
+            //
+            // Derived rather than raw, but it belongs here: it is the one view that puts the
+            // panel's files, its early manifest sends and its failure reasons in one chronological
+            // list. Reading the raw files alone means holding four of them in your head at once —
+            // and the oplog on its own can look like it only contains mid-fail lines, because for a
+            // panel whose failures were all ordinary transfer failures, that is all it holds.
+            try
+            {
+                var rep = OperationLog.Build(cfg, d);
+                if (rep is not null && File.Exists(rep))
+                {
+                    var rows = File.ReadAllLines(rep)
+                                   .Where(l => l.Contains(pid, StringComparison.OrdinalIgnoreCase))
+                                   .ToList();
+                    if (rows.Count > 0)
+                    {
+                        any = true;
+                        sb.AppendLine();
+                        sb.AppendLine($"--- {"operation",-10}: {d + "_operation (derived)",-30} ({rows.Count} line(s)) "
+                                      + new string('-', 12));
+                        foreach (var l in rows) sb.AppendLine("   " + l);
+                    }
+                }
+            }
+            catch { /* the report is a convenience here; never break the raw view over it */ }
         }
 
         // the manifests themselves, and the .midfail record
@@ -221,9 +254,9 @@ public static class PanelTrace
             foreach (var path in new[] { cfg.RawLogPathForDay(d), cfg.NgRetryLogPath(d) })
                 foreach (var line in SafeFile.ReadLines(path))
                 {
-                    var i = line.IndexOf('|');
-                    if (i <= 0) continue;
-                    var p = line[..i];
+                    // Log rows may carry a leading write time; the jobs file above never does.
+                    var p = LogRow.Pid(line);
+                    if (p.Length == 0) continue;
                     if (p.Contains(query, StringComparison.OrdinalIgnoreCase)) found.Add(p);
                 }
         }
@@ -231,6 +264,9 @@ public static class PanelTrace
         if (found.Contains(query)) return new List<string> { query };
         return found.ToList();
     }
+
+    /// <summary>Trim to width, keeping the END of a long name - the distinguishing part.</summary>
+    private static string Fit(string s, int w) => s.Length <= w ? s : "\u2026" + s[^(w - 1)..];
 
     private static DateTime ParseDay(string day)
         => DateTime.TryParseExact(day, "yyyyMMdd", null,
@@ -241,7 +277,21 @@ public static class PanelTrace
         var set = new SortedSet<string>(StringComparer.Ordinal);
         try
         {
-            foreach (var f in Directory.GetFiles(cfg.LogFullPath, "*_rawlog.txt"))
+            // EVERY kind of day file, not just the transfer log.
+            //
+            // After a rollover a day can have NG retries and panel events but no totallog at all,
+            // because no new panels arrived that day — everything being worked on belongs to an
+            // earlier day. Deriving the day list from "*_totallog.txt" alone made those days
+            // invisible, so a panel's second early-manifest send was missing from the trace.
+            //
+            // Both naming generations, since a folder can hold a mix.
+            foreach (var pattern in new[]
+                     {
+                         "*_totallog.txt", "*_rawlog.txt",
+                         "*_ngretrytotallog.txt", "*_ngretrylog.txt",
+                         "*_panelevents.txt", "*_oplog.txt"
+                     })
+            foreach (var f in Directory.GetFiles(cfg.LogFullPath, pattern))
             {
                 var n = Path.GetFileName(f);
                 if (n.Length >= 8) set.Add(n[..8]);
@@ -274,7 +324,7 @@ public static class PanelTrace
         catch { return Array.Empty<string>(); }
     }
 
-    private static string Sections(Config cfg, string pid, List<JobsLine> jobFiles,
+    private static string Sections(Config cfg, string pid, string day, List<JobsLine> jobFiles,
                                    List<string> rawRows, List<string> ngRows, StringBuilder sb)
     {
         // ---- 1. the panel's files, and where they came from on disk --------------------
@@ -288,28 +338,29 @@ public static class PanelTrace
         }
         if (jobFiles.Count == 0) sb.AppendLine("   (no jobs-file lines — panel may predate the current jobs file)");
 
-        // ---- 2. what the live pump did -------------------------------------------------
+        // ---- 2. the TIMELINE: every event for this panel, in order ---------------------
+        //
+        // One chronological list, not three lists to cross-reference. It used to print the rawlog
+        // rows and the NG rows as separate sections, which meant working out the order yourself
+        // and missed the panel-level events (early manifest sends, source-gone, pump errors)
+        // entirely. Built from the same parser as the Operation CSV, so the two cannot disagree.
         sb.AppendLine();
-        sb.AppendLine("--- UPLOAD HISTORY (rawlog: live pump + NG write-backs) ----------------------");
-        if (rawRows.Count == 0) sb.AppendLine("   (nothing — no upload was ever attempted for this panel)");
-        foreach (var r in rawRows)
+        sb.AppendLine("--- TIMELINE (everything that happened to this panel, in order) --------------");
+        var evs = OperationLog.Collect(cfg, day, pid);
+        if (evs.Count == 0) sb.AppendLine("   (nothing — no upload was ever attempted for this panel)");
+        else
         {
-            var p = r.Split('|');
-            if (p.Length < 9) continue;
-            // 11th field carries the reason a FAILED row failed, when there is one.
-            var why = p.Length >= 11 && p[10].Trim().Length > 0 ? "  " + p[10].Trim() : "";
-            sb.AppendLine($"   {p[1],-44} {p[2],-10} at {(p[3].Length > 0 ? p[3] : "-"),-9} att {p[6]}/{p[7]}  {p[8]}{why}");
-        }
-
-        // ---- 3. what recovery did ------------------------------------------------------
-        sb.AppendLine();
-        sb.AppendLine("--- NG RECOVERY (ng-retry log) ----------------------------------------------");
-        if (ngRows.Count == 0) sb.AppendLine("   (none — this panel never needed recovery)");
-        foreach (var r in ngRows)
-        {
-            var p = r.Split('|');
-            if (p.Length < 9) continue;
-            sb.AppendLine($"   {p[1],-44} {p[2],-10} retries {p[4],-4} {p[8]}");
+            sb.AppendLine($"   {"TIME",-9} {"FILE",-26} {"EVENT",-38} {"RESULT",-10} {"TRY",-4} {"SOURCE",-12} REASON");
+            sb.AppendLine("   " + new string('-', 150));
+            foreach (var e in evs)
+            {
+                var time = e.When.Length >= 19 ? e.When[11..] : e.When;
+                // Reason on the SAME line. On a panel NG retried 120 times, a continuation line
+                // doubled the report's length and put a near-identical sentence between every pair
+                // of events, which made the sequence impossible to scan.
+                sb.AppendLine($"   {time,-9} {Fit(e.File, 26),-26} {Fit(e.Event, 38),-38} " +
+                              $"{e.Result,-10} {e.Try,-4} {e.Source,-12} {e.Reason}");
+            }
         }
 
         // ---- 4. finalize markers on disk ----------------------------------------------
@@ -323,12 +374,17 @@ public static class PanelTrace
                      {
                          (".idxsent",  "index manifest is on the server"),
                          (".hostsent", "host manifest is on the server"),
-                         (".sent",     "finalize lock (transient — should NOT persist)"),
-                         (".midfail",  "early host manifest sent; value = files landed at the time")
+                         (".idxpartial",  "an EARLY, incomplete index manifest was sent"),
+                         (".hostpartial", "an EARLY, incomplete host manifest was sent"),
+                         (".sending",  "finalize lock (transient — should NOT persist)"),
+                         (".midfail",  "early manifests sent; value = files landed at the time")
                      })
             {
-                // ".midfail" replaces the ".idx" extension; the sent-markers append to the full name.
-                var f = suffix == ".midfail" ? Path.ChangeExtension(indexSrc, ".midfail") : indexSrc + suffix;
+                // Two naming shapes: ".idxsent"/".hostsent"/".sending" APPEND to the full name
+                // ("PID.idx.idxsent"), while ".midfail"/".idxpartial"/".hostpartial" REPLACE the
+                // extension ("PID.midfail"). Keep them straight or the trace reports them missing.
+                var replaces = suffix is ".midfail" or ".idxpartial" or ".hostpartial";
+                var f = replaces ? Path.ChangeExtension(indexSrc, suffix) : indexSrc + suffix;
                 var present = File.Exists(f);
                 var extra = "";
                 if (present && suffix == ".midfail")
@@ -336,7 +392,10 @@ public static class PanelTrace
                     // now a log: one block per early send. Report how many sends and the latest.
                     try
                     {
-                        var ls = File.ReadAllLines(f).Where(x => x.Contains("sig=", StringComparison.Ordinal)).ToList();
+                        // One block per early send; the header line carries the count of files.
+                        // (It used to carry "sig=" too — the re-send guard is now the file COUNT,
+                        // so match on the count instead or this always reports zero sends.)
+                        var ls = File.ReadAllLines(f).Where(x => x.Contains("file(s)", StringComparison.Ordinal)).ToList();
                         extra = ls.Count == 0 ? "" : $" = {ls.Count} send(s), last {ls[^1].Split("  ")[0]}";
                     }
                     catch { }
@@ -344,7 +403,7 @@ public static class PanelTrace
                 sb.AppendLine($"   {suffix,-11} {(present ? "present" : "-"),-8}{extra,-6} {meaning}");
             }
         }
-        return WinScpAndVerdict(cfg, pid, jobFiles, rawRows, ngRows, sb);
+        return WinScpAndVerdict(cfg, pid, day, jobFiles, rawRows, ngRows, sb);
     }
 
     /// <summary>
@@ -354,7 +413,7 @@ public static class PanelTrace
     /// record what the server actually received. Every confusing case this week came from those two
     /// disagreeing.
     /// </summary>
-    private static string WinScpAndVerdict(Config cfg, string pid, List<JobsLine> jobFiles,
+    private static string WinScpAndVerdict(Config cfg, string pid, string day, List<JobsLine> jobFiles,
                                            List<string> rawRows, List<string> ngRows, StringBuilder sb)
     {
         var onServer = new Dictionary<string, long>(StringComparer.OrdinalIgnoreCase);
@@ -396,10 +455,39 @@ public static class PanelTrace
         var sourceGone = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var r in rawRows.Concat(ngRows))
         {
-            var p = r.Split('|');
+            var p = LogRow.Fields(r);
             if (p.Length >= 3 && p[2] == "SUCCEEDED") okLogs.Add(p[1]);
             if (p.Length >= 11 && p[10].Trim() == "SOURCE_GONE") sourceGone.Add(p[1]);
         }
+
+        // Host manifests sent under a STAMPED name.
+        //
+        // With "name the manifest at upload" on, a repeat send lands under its own timestamp, and
+        // the rawlog records the LOCAL name — so the server file matched nothing and the verdict
+        // read "ON THE SERVER but the logs do not say so" for a file we sent on purpose. The panel
+        // events name each one ("... as PID_20260914131052.txt"), so read them back.
+        var stampedSends = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        // EVERY day's panel events, not just this panel's first day. A panel worked on across a
+        // rollover has its later sends written to the later days' files, and reading one day left
+        // four of SH0103's five host files flagged as unexplained when the logs named them all.
+        try
+        {
+            var days = new SortedSet<string>(StringComparer.Ordinal) { day };
+            foreach (var f in Directory.GetFiles(cfg.LogFullPath))
+            {
+                var n = Path.GetFileName(f);
+                if (n.Length >= 8 && n[..8].All(char.IsDigit) &&
+                    string.CompareOrdinal(n[..8], day) >= 0) days.Add(n[..8]);
+            }
+            foreach (var d in days)
+            foreach (var line in SafeFile.ReadLines(cfg.PanelEventsPathForDay(d)))
+            {
+                if (!line.Contains(pid, StringComparison.OrdinalIgnoreCase)) continue;
+                var m = System.Text.RegularExpressions.Regex.Match(line, @"\bas (\S+\.txt)\b");
+                if (m.Success) { stampedSends.Add(m.Groups[1].Value); okLogs.Add(m.Groups[1].Value); }
+            }
+        }
+        catch { }
 
         sb.AppendLine();
         sb.AppendLine("--- VERDICT ------------------------------------------------------------------");
@@ -413,9 +501,15 @@ public static class PanelTrace
             var inLogs = okLogs.Contains(n);
             var inSrv = onServer.ContainsKey(n);
             if (inLogs || inSrv) landedCount++;
+            // "extra copy" means a name the panel invented at upload time — NOT one of its own
+            // files. A clean panel's finalize names the original manifest, and that name is in the
+            // jobs file, so tagging it as a repeat send called every normal panel's only host file
+            // an extra copy.
+            var isExtra = stampedSends.Contains(n) &&
+                          !jobFiles.Any(j => j.FileName.Equals(n, StringComparison.OrdinalIgnoreCase));
             var note = (inLogs, inSrv) switch
             {
-                (true, true) => "",
+                (true, true) => isExtra ? "   <- extra copy: a repeat manifest send, named at upload" : "",
                 (true, false) => "   <- logs say OK; no session log to confirm (purged?)",
                 (false, true) => "   <- ON THE SERVER but the logs do not say so",
                 _ => sourceGone.Contains(n)
@@ -425,10 +519,17 @@ public static class PanelTrace
             sb.AppendLine($"   {n,-44}  {(inLogs ? "OK" : "--"),-8}  {(inSrv ? "OK" : "--"),-6}{note}");
         }
 
+        // Count against the panel's OWN files. The extra stamped copies are repeat sends of a
+        // manifest already counted, so including them read "14 of 12 accounted for" - a number that
+        // looks like a fault when nothing is wrong.
         var expected = jobFiles.Count;
+        var extras = stampedSends.Count(s => onServer.ContainsKey(s) &&
+                                             !jobFiles.Any(j => j.FileName.Equals(s, StringComparison.OrdinalIgnoreCase)));
+        var counted = landedCount - extras;
         sb.AppendLine();
-        sb.AppendLine($"   {landedCount} of {expected} file(s) accounted for" +
-                      (expected > 0 && landedCount >= expected ? "  — panel complete" : ""));
+        sb.AppendLine($"   {counted} of {expected} file(s) accounted for" +
+                      (expected > 0 && counted >= expected ? "  — panel complete" : "") +
+                      (extras > 0 ? $"   (+{extras} repeat manifest send(s))" : ""));
         sb.AppendLine();
         sb.AppendLine(new string('=', 84));
         sb.AppendLine("Reading this: \"Script: Failed\" and a non-zero WinSCP exit code are normally just");

@@ -11,6 +11,7 @@
 #
 #     .\_htmllog.ps1                 # today
 #     .\_htmllog.ps1 20260816        # a specific day (yyyyMMdd)
+
 #     .\_htmllog.ps1 -LogFolder D:\FtpUploadDemo\logs -NoOpen
 # =============================================================================
 param(
@@ -19,6 +20,37 @@ param(
     [string]$JobsFolder = '',
     [switch]$NoOpen
 )
+
+# --- log-name resolution -----------------------------------------------------
+#  The per-attempt log is "{day}_totallog.txt" and the NG one "{day}_ngretrytotallog.txt".
+#  Days recorded before the rename use "_rawlog.txt" / "_ngretrylog.txt", and copied log
+#  sets from site still do, so every read resolves the new name first and falls back.
+function Resolve-DayLog {
+    param([string]$Folder, [string]$Day, [string]$NewSuffix, [string]$LegacySuffix)
+    $n = Join-Path $Folder ("{0}{1}" -f $Day, $NewSuffix)
+    if (Test-Path $n) { return $n }
+    $l = Join-Path $Folder ("{0}{1}" -f $Day, $LegacySuffix)
+    if (Test-Path $l) { return $l }
+    return $n
+}
+function Get-LogDays {
+    param([string]$Folder, [string[]]$Filters)
+    $set = @{}
+    foreach ($f in $Filters) {
+        Get-ChildItem -Path $Folder -Filter $f -ErrorAction SilentlyContinue | ForEach-Object {
+            if ($_.Name.Length -ge 8) { $set[$_.Name.Substring(0,8)] = $true } } }
+    return @($set.Keys | Sort-Object)
+}
+
+# Rows may start with a write time ("yyyy-MM-dd HH:mm:ss") as field 0. Strip it so index 0
+# is always the PID - matches LogRow.Fields on the C# side. Logs collected before the
+# timestamp existed have no stamp and pass through unchanged.
+function Split-LogRow([string]$line) {
+    $p = $line.Split("|")
+    if ($p.Count -gt 1 -and $p[0].Length -eq 19 -and $p[0][4] -eq "-" -and $p[0][7] -eq "-") { return $p[1..($p.Count-1)] }
+    return $p
+}
+
 
 function Enc([string]$s) {
     if ($null -eq $s) { return '' }
@@ -73,9 +105,7 @@ if ($cfg) {
 
 # No day given (e.g. double-clicked): list days that actually have a raw log and let the user pick.
 if (-not $PSBoundParameters.ContainsKey('Day')) {
-    $days = @(Get-ChildItem -Path $LogFolder -Filter '*_rawlog.txt' -ErrorAction SilentlyContinue |
-              ForEach-Object { $_.Name -replace '_rawlog\.txt$', '' } |
-              Sort-Object -Unique)
+    $days = @(Get-LogDays $LogFolder @('*_totallog.txt','*_rawlog.txt'))
     if ($days.Count -eq 0) {
         Write-Host "No log days found in $LogFolder"
         exit 1
@@ -91,7 +121,7 @@ if (-not $PSBoundParameters.ContainsKey('Day')) {
     else { Write-Host "Not understood; using newest ($($days[-1]))."; $Day = $days[-1] }
 }
 
-$raw      = Join-Path $LogFolder  ("{0}_rawlog.txt" -f $Day)
+$raw      = Resolve-DayLog $LogFolder $Day '_totallog.txt' '_rawlog.txt'
 $jobsPath = Join-Path $JobsFolder ("{0}_jobs.txt"   -f $Day)
 if (-not (Test-Path $raw) -and -not (Test-Path $jobsPath)) {
     Write-Host "Nothing found for $Day."
@@ -117,7 +147,7 @@ $byKey = @{}
 if (Test-Path $jobsPath) {
     foreach ($line in Get-Content $jobsPath) {
         if ([string]::IsNullOrWhiteSpace($line)) { continue }
-        $p = $line.Split('|')
+        $p = Split-LogRow $line
         if ($p.Count -lt 2) { continue }
         $key = $p[0] + '|' + $p[1]
         if (-not $byKey.ContainsKey($key)) {
@@ -133,7 +163,7 @@ if (Test-Path $jobsPath) {
 $rawLines = if (Test-Path $raw) { Get-Content $raw } else { @() }
 foreach ($line in $rawLines) {
     if ([string]::IsNullOrWhiteSpace($line)) { continue }
-    $p = $line.Split('|')
+    $p = Split-LogRow $line
     if ($p.Count -lt 8) { continue }
     $key = $p[0] + '|' + $p[1]
     if (-not $byKey.ContainsKey($key)) {
@@ -313,7 +343,7 @@ if (Test-Path $snapPath) {
     $sb = New-Object System.Text.StringBuilder
     foreach ($line in Get-Content $snapPath) {
         if ([string]::IsNullOrWhiteSpace($line)) { continue }
-        $p = $line.Split('|')
+        $p = Split-LogRow $line
         if ($p.Count -lt 3) { continue }
         $ovOk = ($p[2] -eq 'O')
         $ov = if ($ovOk) { "<span class='b ok'>O</span>" } else { "<span class='b bad'>X</span>" }
@@ -326,7 +356,7 @@ if (Test-Path $snapPath) {
 # Which machine PRODUCED this day's log, from its oplog STARTUP line - not whoever runs this script.
 # A log copied off a line PC and analysed elsewhere must still name the line PC.
 $clientTag = ''
-$opPath = Join-Path $LogFolder ("{0}_oplog.txt" -f $Day)
+$opPath = Resolve-DayLog $LogFolder $Day '_panelevents.txt' '_oplog.txt'
 if (Test-Path $opPath) {
     foreach ($ol in Get-Content $opPath) {
         if ($ol -notmatch 'STARTUP') { continue }
@@ -393,7 +423,7 @@ $html = @"
   .fhint .fc{color:#4D8CFF;font-weight:600;margin-left:6px;}
   .card .n{font-size:22px;font-weight:700;} .card .l{font-size:11px;color:#8891A3;text-transform:uppercase;letter-spacing:.04em;}
   .card .n .pct{display:block;font-size:11px;font-weight:600;color:#9AA2B1;letter-spacing:0;margin-top:1px;}
-  .n.ok{color:#1F9D55;} .n.bad{color:#E0483F;} .n.pend{color:#4D8CFF;} .n.to{color:#7C3AED;}
+  .n.ok{color:#1F9D55;} .n.bad{color:#E0483F;} .n.pend{color:#4D8CFF;} .n.to{color:#B57314;}
   table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #ECEFF5;border-radius:10px;overflow:hidden;}
   th{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#8891A3;text-align:left;padding:9px 12px;background:#F8F9FC;border-bottom:1px solid #ECEFF5;}
   td{padding:9px 12px;border-bottom:1px solid #F2F4F8;font-size:12.5px;vertical-align:top;}
@@ -407,7 +437,7 @@ $html = @"
   .panel .ptable th{background:#F8F9FC;}
   .b{display:inline-block;padding:2px 9px;border-radius:8px;font-size:11px;font-weight:600;}
   .b.ok{background:#E4F7EA;color:#1F9D55;} .b.bad{background:#FDECEB;color:#E0483F;} .b.pend{background:#EEF0F4;color:#8891A3;}
-  .b.to{background:#F3E8FF;color:#7C3AED;}
+  .b.to{background:#FFF6E5;color:#B57314;}
   .chips{line-height:2;}
   .chip{display:inline-block;padding:2px 8px;margin:0 2px 2px 0;border-radius:7px;font-size:11px;border:1px solid transparent;white-space:nowrap;}
   .chip.ok{background:#E4F7EA;color:#1F9D55;} .chip.bad{background:#FDECEB;color:#E0483F;}

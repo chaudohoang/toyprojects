@@ -8,6 +8,7 @@
 #
 #     .\_nghtmllog.ps1                 # today
 #     .\_nghtmllog.ps1 20260816        # a specific day (yyyyMMdd)
+
 #     .\_nghtmllog.ps1 -LogFolder D:\FtpUploadDemo\logs -NoOpen
 # =============================================================================
 param(
@@ -15,6 +16,37 @@ param(
     [string]$LogFolder = '',
     [switch]$NoOpen
 )
+
+# --- log-name resolution -----------------------------------------------------
+#  The per-attempt log is "{day}_totallog.txt" and the NG one "{day}_ngretrytotallog.txt".
+#  Days recorded before the rename use "_rawlog.txt" / "_ngretrylog.txt", and copied log
+#  sets from site still do, so every read resolves the new name first and falls back.
+function Resolve-DayLog {
+    param([string]$Folder, [string]$Day, [string]$NewSuffix, [string]$LegacySuffix)
+    $n = Join-Path $Folder ("{0}{1}" -f $Day, $NewSuffix)
+    if (Test-Path $n) { return $n }
+    $l = Join-Path $Folder ("{0}{1}" -f $Day, $LegacySuffix)
+    if (Test-Path $l) { return $l }
+    return $n
+}
+function Get-LogDays {
+    param([string]$Folder, [string[]]$Filters)
+    $set = @{}
+    foreach ($f in $Filters) {
+        Get-ChildItem -Path $Folder -Filter $f -ErrorAction SilentlyContinue | ForEach-Object {
+            if ($_.Name.Length -ge 8) { $set[$_.Name.Substring(0,8)] = $true } } }
+    return @($set.Keys | Sort-Object)
+}
+
+# Rows may start with a write time ("yyyy-MM-dd HH:mm:ss") as field 0. Strip it so index 0
+# is always the PID - matches LogRow.Fields on the C# side. Logs collected before the
+# timestamp existed have no stamp and pass through unchanged.
+function Split-LogRow([string]$line) {
+    $p = $line.Split("|")
+    if ($p.Count -gt 1 -and $p[0].Length -eq 19 -and $p[0][4] -eq "-" -and $p[0][7] -eq "-") { return $p[1..($p.Count-1)] }
+    return $p
+}
+
 
 function Enc([string]$s) {
     if ($null -eq $s) { return '' }
@@ -49,9 +81,7 @@ if (-not [System.IO.Path]::IsPathRooted($JobsFolder)) { $JobsFolder = Join-Path 
 
 # No day given (e.g. double-clicked): list days that actually have an ng-retry log and let the user pick.
 if (-not $PSBoundParameters.ContainsKey('Day')) {
-    $days = @(Get-ChildItem -Path $LogFolder -Filter '*_ngretrylog.txt' -ErrorAction SilentlyContinue |
-              ForEach-Object { $_.Name -replace '_ngretrylog\.txt$', '' } |
-              Sort-Object -Unique)
+    $days = @(Get-LogDays $LogFolder @('*_ngretrytotallog.txt','*_ngretrylog.txt'))
     if ($days.Count -eq 0) {
         Write-Host "No NG-retry log days found in $LogFolder"
         exit 1
@@ -67,8 +97,8 @@ if (-not $PSBoundParameters.ContainsKey('Day')) {
     else { Write-Host "Not understood; using newest ($($days[-1]))."; $Day = $days[-1] }
 }
 
-$ngPath  = Join-Path $LogFolder ("{0}_ngretrylog.txt" -f $Day)
-$rawPath = Join-Path $LogFolder ("{0}_rawlog.txt" -f $Day)
+$ngPath  = Resolve-DayLog $LogFolder $Day '_ngretrytotallog.txt' '_ngretrylog.txt'
+$rawPath = Resolve-DayLog $LogFolder $Day '_totallog.txt' '_rawlog.txt'
 if (-not (Test-Path $ngPath)) {
     Write-Host "No NG-retry log for $Day at:`n  $ngPath"
     Write-Host "Pass a day (e.g. _nghtmllog.bat 20260816) or -LogFolder <path>."
@@ -86,7 +116,7 @@ function Role($ip) {
 $orig = @{}
 if (Test-Path $rawPath) {
     foreach ($line in Get-Content $rawPath) {
-        $p = $line.Split('|')
+        $p = Split-LogRow $line
         if ($p.Count -lt 3) { continue }
         $orig[$p[0] + '|' + $p[1]] = $p[2]
     }
@@ -97,7 +127,7 @@ $order = New-Object System.Collections.ArrayList
 $byKey = @{}
 foreach ($line in Get-Content $ngPath) {
     if ([string]::IsNullOrWhiteSpace($line)) { continue }
-    $p = $line.Split('|')
+    $p = Split-LogRow $line
     if ($p.Count -lt 3) { continue }
     $key = $p[0] + '|' + $p[1]
     if (-not $byKey.ContainsKey($key)) {
@@ -120,10 +150,10 @@ foreach ($line in Get-Content $ngPath) {
 # sent yet. "Sent" must come from BOTH logs: a manifest uploaded by the LIVE pump appears only in
 # the rawlog, so checking the ng-retry log alone reported it Pending forever.
 $sentInRawLog = @{}
-$rawPathForPending = Join-Path $LogFolder ("{0}_rawlog.txt" -f $Day)
+$rawPathForPending = Resolve-DayLog $LogFolder $Day '_totallog.txt' '_rawlog.txt'
 if (Test-Path $rawPathForPending) {
     foreach ($rl in Get-Content $rawPathForPending) {
-        $rp = $rl.Split('|')
+        $rp = Split-LogRow $rl
         if ($rp.Count -ge 3 -and $rp[2] -eq 'SUCCEEDED') { $sentInRawLog[$rp[0] + '|' + $rp[1]] = $true }
     }
 }
@@ -275,7 +305,7 @@ $frows
 # Which machine PRODUCED this day's log, from its oplog STARTUP line - not whoever runs this script.
 # A log copied off a line PC and analysed elsewhere must still name the line PC.
 $clientTag = ''
-$opPath = Join-Path $LogFolder ("{0}_oplog.txt" -f $Day)
+$opPath = Resolve-DayLog $LogFolder $Day '_panelevents.txt' '_oplog.txt'
 if (Test-Path $opPath) {
     foreach ($ol in Get-Content $opPath) {
         if ($ol -notmatch 'STARTUP') { continue }

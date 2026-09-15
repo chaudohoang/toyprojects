@@ -80,7 +80,7 @@ public sealed class AppHost : IDisposable
                 var line = $"NG BACKLOG {NgRetry.BacklogOutstanding} unrecovered file(s) on {NgRetry.BacklogDays} day(s) " +
                            $"outside the {Cfg.NgRecoveryDays}-day recovery window — not being retried automatically";
                 AppendNg($"[{DateTime.Now:HH:mm:ss}] {line}");
-                try { SafeFile.Append(Cfg.OpLogPath(Clock.Now), $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {line}"); } catch { }
+                try { SafeFile.Append(Cfg.AppLogPath(Clock.Now), $"[{Clock.Now:yyyy-MM-dd HH:mm:ss}] {line}"); } catch { }
             }
         });
 
@@ -96,8 +96,8 @@ public sealed class AppHost : IDisposable
         // Durable startup marker, so the oplog reads as a clean START/SHUTDOWN pair per run and a
         // restart is obvious even when nobody was watching the window.
         var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-        try { SafeFile.Append(Cfg.OpLogPath(Clock.Now),
-              $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] STARTUP v{ver} pid {Environment.ProcessId} — " +
+        try { SafeFile.Append(Cfg.AppLogPath(Clock.Now),
+              $"[{Clock.Now:yyyy-MM-dd HH:mm:ss}] STARTUP v{ver} pid {Environment.ProcessId} — " +
               $"client {NetInfo.Describe(Cfg.FirstHost)} — uploading to {Cfg.FirstHost}, " +
               $"{Cfg.MaxAttempts} attempt(s)/file, timeout {Cfg.TimeoutSeconds}s"); } catch { }
         Append($"[{DateTime.Now:HH:mm:ss}] transfer engine: {FtpEngineFactory.ActiveEngine}" +
@@ -132,6 +132,12 @@ public sealed class AppHost : IDisposable
                 try { await Engine.FinalizeReadyPanels(); }
                 catch (OperationCanceledException) { }
                 catch (Exception ex) { Append($"[{DateTime.Now:HH:mm:ss}] finalize error: {ex.Message}"); }
+
+                // Early manifest sends queued by the panel-timeout sweep. Done here because this
+                // pump is already allowed to do FTP work; the sweep itself runs on the watch loop.
+                try { await Engine.DrainMidFailQueue(); }
+                catch (OperationCanceledException) { }
+                catch (Exception ex) { Append($"[{DateTime.Now:HH:mm:ss}] mid-fail queue error: {ex.Message}"); }
                 try { await Task.Delay(Cfg.PollIntervalMs, _stopping.Token); }
                 catch (OperationCanceledException) { }
             }
@@ -160,6 +166,10 @@ public sealed class AppHost : IDisposable
                             HtmlLog.BuildDayLog(Cfg, day);
                             HtmlLog.BuildNgLog(Cfg, day);
                             SummaryLog.Build(Cfg, day);
+                            // The readable per-file report, kept current beside the rest.
+                            OperationLog.Build(Cfg, day);
+                            // Plain-language, one line per file — kept current alongside the rest so
+                            // it is there when someone needs it, not only when they press the button.
                         }
                     }
                 }
@@ -312,7 +322,7 @@ public sealed class AppHost : IDisposable
     /// </summary>
     public void LogEvent(string msg)
     {
-        try { SafeFile.Append(Cfg.OpLogPath(Clock.Now), $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {msg}"); }
+        try { SafeFile.Append(Cfg.AppLogPath(Clock.Now), $"[{Clock.Now:yyyy-MM-dd HH:mm:ss}] {msg}"); }
         catch { }
         try { Append($"[{DateTime.Now:HH:mm:ss}] {msg}"); }
         catch { }
@@ -327,7 +337,7 @@ public sealed class AppHost : IDisposable
     public void LogCrash(string where, Exception? ex)
     {
         var detail = ex?.ToString() ?? "(no exception object supplied)";
-        try { SafeFile.Append(Cfg.OpLogPath(Clock.Now), $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] UNHANDLED {where} EXCEPTION — {detail}"); }
+        try { SafeFile.Append(Cfg.AppLogPath(Clock.Now), $"[{Clock.Now:yyyy-MM-dd HH:mm:ss}] UNHANDLED {where} EXCEPTION — {detail}"); }
         catch { /* logging a crash must not cause one */ }
         try { Append($"[{DateTime.Now:HH:mm:ss}] unhandled {where} exception: {ex?.Message} — see oplog"); }
         catch { }

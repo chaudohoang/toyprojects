@@ -1,4 +1,4 @@
-namespace FtpUpload;
+﻿namespace FtpUpload;
 
 /// <summary>
 /// Single-exe entry point: the upload engine AND its manager UI in one process.
@@ -20,6 +20,29 @@ internal static class Program
     [STAThread]
     private static int Main(string[] args)
     {
+        // "--reports <yyyyMMdd>": rebuild a day's reports and exit, without starting the engine.
+        //
+        // For a day that is already over, or a log set copied from another machine: the report pump
+        // only ever rebuilds TODAY, so there was no way to regenerate an older day except by hand.
+        // Runs before the single-instance guard, since it uploads nothing and touches only reports.
+        var ri = Array.FindIndex(args, a => a.Equals("--reports", StringComparison.OrdinalIgnoreCase));
+        if (ri >= 0 && ri + 1 < args.Length)
+        {
+            var day = args[ri + 1];
+            var cfg = Config.Load(Path.Combine(AppContext.BaseDirectory, "config.json"));
+            var made = new List<string>();
+            try { if (OperationLog.Build(cfg, day) is { } a) made.Add(a); }
+            catch (Exception ex) { Console.WriteLine("operation report failed: " + ex); }
+            try { if (SummaryLog.Build(cfg, day) is { } s) made.Add(s); }
+            catch (Exception ex) { Console.WriteLine("summary failed: " + ex); }
+            try { HtmlLog.BuildDayLog(cfg, day); HtmlLog.BuildNgLog(cfg, day); }
+            catch (Exception ex) { Console.WriteLine("html reports failed: " + ex); }
+            Console.WriteLine(made.Count == 0
+                ? $"nothing to build for {day} (no rawlog or jobs file)"
+                : "built:\r\n  " + string.Join("\r\n  ", made));
+            return 0;
+        }
+
         // Single-instance guard: the keep-alive task may fire while a healthy copy is
         // already running, and two uploaders would double-transfer.
         using var single = new Mutex(true, @"Global\FtpUpload_Worker_Instance", out var isOnlyInstance);
