@@ -677,9 +677,56 @@ namespace RomLauncher
         const int LVM_FIRST = 0x1000;
         const int LVM_SETEXTENDEDLISTVIEWSTYLE = LVM_FIRST + 54;
         const int LVS_EX_DOUBLEBUFFER = 0x00010000;
+        const int LVM_SCROLL = LVM_FIRST + 20;
+        const int LVM_GETTOPINDEX = LVM_FIRST + 39;
+        const int LVM_GETCOUNTPERPAGE = LVM_FIRST + 40;
+        const int LVM_GETORIGIN = LVM_FIRST + 41;
 
         [DllImport("user32.dll")]
         static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("user32.dll", EntryPoint = "SendMessage")]
+        static extern IntPtr SendMessagePoint(IntPtr hWnd, int msg, IntPtr wParam, ref POINT lParam);
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct POINT { public int X; public int Y; }
+
+        // EnsureVisible(0) is a no-op whenever the control *believes* row 0 is
+        // already on screen, so it cannot repair a stale scroll origin. LVM_SCROLL
+        // clamps to the control's valid range, so an absurd negative dy always
+        // lands on the first row.
+        public void ScrollToTop()
+        {
+            if (IsHandleCreated) SendMessage(Handle, LVM_SCROLL, IntPtr.Zero, (IntPtr)(-0x400000));
+        }
+
+        public int TopIndex
+        {
+            get { return IsHandleCreated ? SendMessage(Handle, LVM_GETTOPINDEX, IntPtr.Zero, IntPtr.Zero).ToInt32() : -1; }
+        }
+
+        public int CountPerPage
+        {
+            get { return IsHandleCreated ? SendMessage(Handle, LVM_GETCOUNTPERPAGE, IntPtr.Zero, IntPtr.Zero).ToInt32() : -1; }
+        }
+
+        // last resort when the native control gets into a state it won't paint
+        // its way out of: throw the HWND away and build a fresh one
+        public void ForceRecreateHandle()
+        {
+            RecreateHandle();
+        }
+
+        // scroll origin in pixels -- non-zero here with a short list is the smoking gun
+        public Point ViewOrigin
+        {
+            get
+            {
+                POINT p = new POINT();
+                if (IsHandleCreated) SendMessagePoint(Handle, LVM_GETORIGIN, IntPtr.Zero, ref p);
+                return new Point(p.X, p.Y);
+            }
+        }
 
         protected override void OnHandleCreated(EventArgs e)
         {
@@ -713,6 +760,7 @@ namespace RomLauncher
         Thread scanThread;
         volatile bool cancelScan;
         bool resizing;
+        int retrieveCalls;            // diagnostics: RetrieveVirtualItem hits since last Refilter
 
         public MainForm()
         {
@@ -1246,23 +1294,88 @@ namespace RomLauncher
             });
 
             view = res;
-            if (list.VirtualListSize != 0) list.VirtualListSize = 0;
-            list.VirtualListSize = view.Count;
+
+            // Virtual-mode refresh. The failure being chased here: after the row
+            // count shrinks a lot (42k -> a system -> "Favorites only") the list
+            // sometimes paints nothing at all, or paints the rows shoved to the
+            // bottom under a blank gap, even though VirtualListSize is correct.
+            // Current mitigations, none of them proven to be THE cause yet:
+            //  - clear the selection before resizing, so no stale index past the
+            //    new size survives the resize
+            //  - set the size once (the old "= 0 then = N" dance did not help)
+            //  - ScrollToTop(), because EnsureVisible(0) is a no-op when the
+            //    control already believes row 0 is on screen
+            //  - RedrawItems, which re-raises RetrieveVirtualItem for every row
+            // Ctrl+Shift+D dumps the control's real state when it misbehaves.
+            list.BeginUpdate();
+            try
+            {
+                if (list.SelectedIndices.Count > 0) list.SelectedIndices.Clear();
+                list.VirtualListSize = view.Count;
+            }
+            finally { list.EndUpdate(); }
+
             if (view.Count > 0 && list.IsHandleCreated)
             {
-                list.SelectedIndices.Clear();
-                list.SelectedIndices.Add(0);
+                list.EnsureVisible(view.Count - 1);
                 list.EnsureVisible(0);
+                list.ScrollToTop();                        // repairs a stale scroll origin
+                list.RedrawItems(0, view.Count - 1, true); // re-raises RetrieveVirtualItem for every row
+                list.SelectedIndices.Add(0);
             }
+            retrieveCalls = 0;
             list.Invalidate();
             list.Update();   // force immediate repaint so rows never linger blank
 
             lblCount.Text = view.Count.ToString("N0", CultureInfo.CurrentCulture) + " / "
                           + all.Count.ToString("N0", CultureInfo.CurrentCulture) + " ROMs";
+
+            HealBlankList();
+        }
+
+        // We just scrolled to the top, so row 0 MUST be inside the client area.
+        // If it isn't, the control kept a scroll origin from the old (much
+        // longer) list and every row is painting off-screen -- that is the
+        // "empty list with a non-zero count" bug. Scroll again; if even that
+        // doesn't take, rebuild the native control. Costs a flicker nobody
+        // notices, and only ever runs when the list is already wrong.
+        void HealBlankList()
+        {
+            if (view.Count == 0 || !list.IsHandleCreated) return;
+            if (RowZeroVisible()) return;
+
+            list.ScrollToTop();
+            if (RowZeroVisible()) return;
+
+            Debug.WriteLine("HealBlankList: recreating the list handle (count=" + view.Count
+                            + ", origin=" + list.ViewOrigin + ")");
+            list.ForceRecreateHandle();
+            if (list.VirtualListSize != view.Count) list.VirtualListSize = view.Count;
+            LayoutColumns();
+            list.SelectedIndices.Clear();
+            list.SelectedIndices.Add(0);
+            list.EnsureVisible(0);
+            list.Invalidate();
+            list.Update();
+        }
+
+        bool RowZeroVisible()
+        {
+            try
+            {
+                Rectangle r = list.GetItemRect(0);
+                return r.Bottom > 0 && r.Top < list.ClientRectangle.Height;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                return true;          // bogus reading -- don't "heal" a healthy list
+            }
         }
 
         void RetrieveItem(object sender, RetrieveVirtualItemEventArgs e)
         {
+            retrieveCalls++;
             if (e.ItemIndex < 0 || e.ItemIndex >= view.Count)
             {
                 e.Item = new ListViewItem("");
@@ -1323,7 +1436,32 @@ namespace RomLauncher
             if (keyData == Keys.F5) { StartScan(); return true; }
             if (keyData == Keys.F2) { ToggleFav(); return true; }
             if (keyData == (Keys.Control | Keys.F)) { txtSearch.Focus(); txtSearch.SelectAll(); return true; }
+            if (keyData == (Keys.Control | Keys.Shift | Keys.D)) { ShowListDiag(); return true; }
             return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        // Ctrl+Shift+D -- dump what the ListView actually thinks its state is.
+        // Press it while the list is wrongly blank and compare with a good run.
+        void ShowListDiag()
+        {
+            string s;
+            try
+            {
+                Rectangle r0 = view.Count > 0 ? list.GetItemRect(0) : Rectangle.Empty;
+                s = "view.Count      = " + view.Count
+                  + "\nVirtualListSize = " + list.VirtualListSize
+                  + "\nItems.Count     = " + list.Items.Count
+                  + "\nTopIndex        = " + list.TopIndex
+                  + "\nCountPerPage    = " + list.CountPerPage
+                  + "\nViewOrigin      = " + list.ViewOrigin
+                  + "\nGetItemRect(0)  = " + r0
+                  + "\nClientRectangle = " + list.ClientRectangle
+                  + "\nlist.Bounds     = " + list.Bounds
+                  + "\nSelected count  = " + list.SelectedIndices.Count
+                  + "\nRetrieveItem hits since last Refilter = " + retrieveCalls;
+            }
+            catch (Exception ex) { s = ex.ToString(); }
+            MessageBox.Show(this, s, "ListView diagnostics");
         }
 
         // -------------------------------------------------------------- actions
@@ -1342,6 +1480,23 @@ namespace RomLauncher
             if (r == null) return;
             r.Fav = !r.Fav;
             Store.SaveStats(all);
+
+            if (chkFav.Checked && !r.Fav)
+            {
+                // it no longer belongs in a favorites-only list, so drop it --
+                // but keep the cursor where it was instead of jumping to row 0
+                int keep = list.SelectedIndices.Count > 0 ? list.SelectedIndices[0] : 0;
+                Refilter();
+                if (view.Count > 0 && list.IsHandleCreated)
+                {
+                    if (keep >= view.Count) keep = view.Count - 1;
+                    list.SelectedIndices.Clear();
+                    list.SelectedIndices.Add(keep);
+                    list.EnsureVisible(keep);
+                }
+                return;
+            }
+
             list.Invalidate();
         }
 
