@@ -174,7 +174,8 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Chau\\.nuget\\packages\\": {}
+    "C:\\Users\\Chau\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0.8",
@@ -185,13 +186,19 @@
       "packagesPath": "C:\\Users\\Chau\\.nuget\\packages\\",
       "outputPath": "E:\\Github\\toyprojects\\ForRadiant\\FtpUploadNew\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\Chau\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Chau\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net8.0-windows"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
