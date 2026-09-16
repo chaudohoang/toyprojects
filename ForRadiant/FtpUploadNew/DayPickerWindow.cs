@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 // This project references both WPF and WinForms, so these names are ambiguous without aliases.

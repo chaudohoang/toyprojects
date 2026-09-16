@@ -231,23 +231,6 @@ public sealed class Config
     /// </summary>
     public bool StampManifestNameAtUpload { get; set; } = false;
 
-    /// <summary>
-    /// Send only what is NEW since the panel's last manifest upload, instead of the full list.
-    ///
-    /// Each send — early or final — then carries just the files that landed since the one before, so
-    /// LGD can read the increments rather than re-reading a growing list. The LOCAL manifests are
-    /// untouched and stay complete: only a temp copy is uploaded, so markers, resume, DropLine and
-    /// the no-pending gate all behave exactly as they do now.
-    ///
-    /// REQUIRES <see cref="StampManifestNameAtUpload"/>. Without per-upload names every send writes
-    /// to the same remote file, so the last delta would overwrite all the earlier ones and the
-    /// server would be left holding one increment instead of the panel. The UI refuses the
-    /// combination and the engine ignores this flag when stamping is off.
-    ///
-    /// Note for the host system: with this on, NO single file lists the whole panel — the files must
-    /// be accumulated. That is a real change to what the panel-complete manifest means.
-    /// </summary>
-    public bool DeltaManifests { get; set; } = false;
 
     /// <summary>
     /// How often the day + NG HTML reports are rewritten automatically, in seconds. 0 = off (only

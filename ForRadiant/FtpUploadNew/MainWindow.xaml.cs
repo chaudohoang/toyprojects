@@ -791,7 +791,6 @@ public partial class MainWindow : Window
         SetHtmlRefresh.Text = c.HtmlLogRefreshSeconds.ToString();
         SetMidFailHost.IsChecked = c.MidFailHostUpload;
         SetStampManifestName.IsChecked = c.StampManifestNameAtUpload;
-        SetDeltaManifests.IsChecked = c.DeltaManifests;
         SelectCombo(SetMaxFilesPerSession, c.MaxFilesPerSession <= 0 ? "Unlimited" : c.MaxFilesPerSession.ToString());
 
         SetAutoUpload.IsChecked = c.AutoStartUploading;
@@ -894,7 +893,6 @@ public partial class MainWindow : Window
             c.HtmlLogRefreshSeconds = ParseInt(SetHtmlRefresh.Text, c.HtmlLogRefreshSeconds);
             c.MidFailHostUpload = SetMidFailHost.IsChecked == true;
         c.StampManifestNameAtUpload = SetStampManifestName.IsChecked == true;
-        c.DeltaManifests = SetDeltaManifests.IsChecked == true;
             // Combo: "Unlimited" -> 0, otherwise the numeric preset.
             var sessSel = (SetMaxFilesPerSession.SelectedItem as System.Windows.Controls.ComboBoxItem)?.Content?.ToString() ?? "Unlimited";
             c.MaxFilesPerSession = sessSel.Equals("Unlimited", StringComparison.OrdinalIgnoreCase) ? 0 : ParseInt(sessSel, 0);
@@ -1023,6 +1021,7 @@ public partial class MainWindow : Window
     private static DateTime ParseDayOrToday(string day)
         => DateTime.TryParseExact(day, "yyyyMMdd", null,
                System.Globalization.DateTimeStyles.None, out var d) ? d : DateTime.Today;
+
 
 
 

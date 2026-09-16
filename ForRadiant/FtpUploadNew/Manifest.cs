@@ -114,35 +114,55 @@ public sealed class ManifestWriter(Config cfg)
     /// files have landed since, there is nothing new to tell the host and the send is skipped.
     /// </summary>
     /// <returns>(sent, host, cleanLineCount). sent=false means skipped, not failed.</returns>
-    public async Task<(bool Sent, string Host, List<string> Files, string Why, string RemoteName)> SendMidFailAsync(
+    /// <summary>Serialised per panel - see PanelGate.</summary>
+    public async Task<(bool Sent, string Host, List<string> Files, string Why, string RemoteName, List<ManifestSend> Sends)> SendMidFailAsync(
+        string indexSrc, string hostSrc, string uploadIndexPath, string uploadHostPath,
+        IFtpTransfer ftp, string? forceHost = null)
+    {
+        var gate = PanelGate(indexSrc);
+        await gate.WaitAsync();
+        try { return await SendMidFailCoreAsync(indexSrc, hostSrc, uploadIndexPath, uploadHostPath, ftp, forceHost); }
+        finally { gate.Release(); }
+    }
+
+    private async Task<(bool Sent, string Host, List<string> Files, string Why, string RemoteName, List<ManifestSend> Sends)> SendMidFailCoreAsync(
         string indexSrc, string hostSrc, string uploadIndexPath, string uploadHostPath,
         IFtpTransfer ftp, string? forceHost = null)
     {
         var target = forceHost ?? cfg.FirstHost;
-        if (string.IsNullOrEmpty(indexSrc) || string.IsNullOrEmpty(hostSrc)) return (false, target, new(), "no manifest paths on the job", "");
-        if (!File.Exists(hostSrc)) return (false, target, new(), "host manifest file does not exist", "");
+        if (string.IsNullOrEmpty(indexSrc) || string.IsNullOrEmpty(hostSrc)) return (false, target, new(), "no manifest paths on the job", "", new());
+        if (!File.Exists(hostSrc)) return (false, target, new(), "host manifest file does not exist", "", new());
         if (string.IsNullOrWhiteSpace(uploadHostPath) && string.IsNullOrWhiteSpace(uploadIndexPath))
-            return (false, target, new(), "no remote manifest paths", "");
+            return (false, target, new(), "no remote manifest paths", "", new());
 
-        var cleanFull = ReadRaw(hostSrc)
+        var clean = ReadRaw(hostSrc)
                     .Where(l => !l.TrimEnd().EndsWith(Pending, StringComparison.Ordinal))
                     .Where(l => l.Trim().Length > 0)
                     .ToList();
-        if (cleanFull.Count == 0) return (false, target, new(), "nothing has landed yet", "");
+        if (clean.Count == 0) return (false, target, new(), "nothing has landed yet", "", new());
 
-        // DELTA mode: the HOST copy carries only what the host has not been told about yet.
+        // With stamping on, the HOST copy carries only what it has not already been given.
         //
-        // Gated on stamping, because without per-upload names each host send overwrites the last.
-        // The INDEX always carries cleanFull — see the comment at the upload below.
-        var deltaMode = cfg.DeltaManifests && cfg.StampManifestNameAtUpload;
-        var sentBefore = deltaMode ? HostNamesAlreadySent(indexSrc) : new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var clean = deltaMode
-            ? cleanFull.Where(l => !sentBefore.Contains(Path.GetFileName((l.Split('@')[0]).Trim()))).ToList()
-            : cleanFull;
-        if (deltaMode && clean.Count == 0)
-            return (false, target, new(), "nothing new for the host since the last send (delta mode)", "");
+        // One setting does both: per-upload names and host increments. They belong together — names
+        // without increments just repeats the list, and increments without names would overwrite the
+        // previous one. The INDEX is always the full checklist: its remote name is fixed, so every
+        // send lands on the same file and an increment there would leave the server holding a
+        // fragment.
+        var hostDelta = cfg.StampManifestNameAtUpload;
+        // ONE read of the record gives both facts: what the host has, and what the index last sent.
+        var already = Delivered(indexSrc);
+        var delivered = hostDelta ? already.HostNames : new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var hostLines = hostDelta
+            ? clean.Where(l => !delivered.Contains(Path.GetFileName((l.Split('@')[0]).Trim()))).ToList()
+            : clean;
+        var hostNames = hostLines.Select(l => Path.GetFileName((l.Split('@')[0]).Trim())).ToList();
 
         var names = clean.Select(l => Path.GetFileName((l.Split('@')[0]).Trim())).ToList();
+
+        // Nothing new for the host: skip. With increments there is nothing to send, and an empty
+        // host file would replace a real manifest with nothing.
+        if (hostDelta && hostNames.Count == 0)
+            return (false, target, new(), "no new uploaded files", "", new());
 
         var stampFile = Path.ChangeExtension(indexSrc, ".midfail");     // "PID.midfail"
 
@@ -159,16 +179,21 @@ public sealed class ManifestWriter(Config cfg)
             if (File.Exists(stampFile))
                 foreach (var l in File.ReadAllLines(stampFile))
                 {
-                    var m = System.Text.RegularExpressions.Regex.Match(l, @"^\S+ \S+\s+(\d+) file\(s\)");
+                    // Read the HOST line of each block: "    host  <name>  N file(s)  sent".
+                    //
+                    // This used to match the block HEADER, which carried the count in the old
+                    // one-line-per-send format. Reformatting the record per manifest moved the
+                    // count onto the manifest lines, so the regex stopped matching, lastCount
+                    // stayed -1, and this guard could never fire — the no-stamp path re-sent the
+                    // same list on every trigger with nothing to stop it.
+                    var m = System.Text.RegularExpressions.Regex.Match(
+                                l, @"^\s*host\s+\S+\s+(\d+) files?\b.*\bsent\b");
                     if (m.Success && int.TryParse(m.Groups[1].Value, out var n)) lastCount = n;   // keep the LAST
                 }
         }
         catch { }
-        // In DELTA mode this guard does not apply: clean.Count is the size of the increment, not a
-        // running total, so comparing it with the last send's count is meaningless. The "nothing new
-        // since the last send" check above is the delta equivalent and has already run.
-        if (!deltaMode && clean.Count <= lastCount)
-            return (false, target, new(), $"no new files since the last send (now {clean.Count}, last {lastCount})", "");
+        if (!hostDelta && clean.Count <= lastCount)
+            return (false, target, new(), "no new uploaded files", "", new());
 
         // Never REGRESS a manifest that is already on the server in full.
         //
@@ -181,9 +206,10 @@ public sealed class ManifestWriter(Config cfg)
         var idxDone = File.Exists(indexSrc + ".idxsent");
         var hostDone = File.Exists(indexSrc + ".hostsent");
         var targets = new List<string>();
-        if (!idxDone && !string.IsNullOrWhiteSpace(uploadIndexPath)) targets.Add(uploadIndexPath);
+        // HOST FIRST, then the index.
         if (!hostDone && !string.IsNullOrWhiteSpace(uploadHostPath)) targets.Add(uploadHostPath);
-        if (targets.Count == 0) return (false, target, new(), "both manifests already sent in full", "");
+        if (!idxDone && !string.IsNullOrWhiteSpace(uploadIndexPath)) targets.Add(uploadIndexPath);
+        if (targets.Count == 0) return (false, target, new(), "both manifests already sent in full", "", new());
 
         // Claim the SAME lock the real finalize uses, so the two can never write these remote paths
         // at once. Held by a finalize -> skip: it is about to send the complete manifests.
@@ -198,7 +224,7 @@ public sealed class ManifestWriter(Config cfg)
             }
             try { File.WriteAllText(lockFile, DateTime.Now.ToString("o")); claimed = true; } catch { }
         });
-        if (!claimed) return (false, target, new(), "a finalize holds the lock", "");
+        if (!claimed) return (false, target, new(), "a finalize holds the lock", "", new());
 
         // Upload a filtered COPY: the real manifests keep their " -pending" lines for the final send.
         // The copy is LOCAL only - the remote name is always the real manifest path.
@@ -208,12 +234,12 @@ public sealed class ManifestWriter(Config cfg)
         // survives — a delta index would leave the server holding one increment, and an empty final
         // delta wiped four of them outright in testing. So the index always carries the full list
         // and only the HOST goes delta.
-        var tmp = Path.ChangeExtension(indexSrc, ".midfail.tmp");
-        var tmpDelta = Path.ChangeExtension(indexSrc, ".midfail.delta.tmp");
+        var tmp = Path.ChangeExtension(indexSrc, ".midfail.tmp");        // full list, for the index
+        var tmpHost = Path.ChangeExtension(indexSrc, ".midfail.host.tmp"); // what the host still needs
         try
         {
-            SafeFile.WithLock(() => WriteRaw(tmp, cleanFull));
-            if (deltaMode) SafeFile.WithLock(() => WriteRaw(tmpDelta, clean));
+            SafeFile.WithLock(() => WriteRaw(tmp, clean));
+            if (hostDelta) SafeFile.WithLock(() => WriteRaw(tmpHost, hostLines));
 
             var sentAny = false;
             // The name the HOST manifest actually went out as - it differs from the panel's own
@@ -221,9 +247,18 @@ public sealed class ManifestWriter(Config cfg)
             // file on the server a given early send produced.
             var hostRemoteName = "";
             var hostLanded = false;
-            foreach (var remote in targets)   // index first, host last (the order targets was built)
+            // One entry per MANIFEST, so the caller can log the index send and the host send as
+            // separate lines naming their own remote file. A single combined line could only name
+            // one of them, and said "index+host sent" even when just one had landed.
+            var sends = new List<ManifestSend>();
+            // The index only needs re-sending when the checklist has actually grown; otherwise it
+            // would upload a byte-identical file over itself.
+            var idxAlready = already.IndexCount;
+            var indexNeeded = clean.Count > idxAlready;
+            foreach (var remote in targets)   // host first, then index (the order targets was built)
             {
                 var isHost = string.Equals(remote, uploadHostPath, StringComparison.OrdinalIgnoreCase);
+                if (!isHost && !indexNeeded) continue;   // the index is already up to date
                 // Stamped here too. This path uploads DIRECTLY rather than through SendAsync, so it
                 // was silently exempt: every early send kept the panel's own DateTime while finalize
                 // used the upload time, which is the opposite of what was asked for and left the two
@@ -232,20 +267,34 @@ public sealed class ManifestWriter(Config cfg)
                 var jf = new JobFile
                 {
                     Pid = "", FileName = Path.GetFileName(remoteName),
-                    LocalPath = (deltaMode && isHost) ? tmpDelta : tmp,
+                    LocalPath = (hostDelta && isHost) ? tmpHost : tmp,
                     RemotePath = remoteName
                 };
                 var r = await ftp.UploadToHostAsync(jf, target, CancellationToken.None);
+                var lineCount = (hostDelta && isHost) ? hostNames.Count : names.Count;
+                sends.Add(new ManifestSend(isHost ? "host" : "index", Path.GetFileName(remoteName),
+                                           r.Outcome == TransferOutcome.Success, lineCount, target,
+                                           (r.Message ?? "").Trim()));
                 if (r.Outcome == TransferOutcome.Success)
                 {
                     sentAny = true;
-                    if (isHost) { hostRemoteName = Path.GetFileName(remoteName); hostLanded = true; }
+                    if (isHost)
+                    {
+                        hostRemoteName = Path.GetFileName(remoteName); hostLanded = true;
+                    }
                 }
                 // Nothing landed: give the name back so the next send can use it rather than
                 // burning the panel's original and forcing a rename it never needed.
                 else if (cfg.StampManifestNameAtUpload) ReleaseStamp(remoteName);
             }
-            if (!sentAny) return (false, target, new(), "the upload itself failed", "");
+            // Say WHICH manifest failed and why, in the transport's own words. "the upload itself
+            // failed" told you neither, so a skip reason could not be acted on.
+            if (!sentAny)
+            {
+                var why = string.Join("; ", sends.Select(s =>
+                          $"{s.Kind} upload failed" + (s.Error.Length > 0 ? $": {s.Error}" : "")));
+                return (false, target, new(), why.Length > 0 ? why : "the upload itself failed", "", sends);
+            }
 
             // Mark that a PARTIAL manifest is on the server. Deliberately a different name from
             // .idxsent/.hostsent: those mean "the complete manifest is up there", and the finalize
@@ -267,31 +316,37 @@ public sealed class ManifestWriter(Config cfg)
             }
 
             var block = new System.Text.StringBuilder();
-            // Clock.Now, matching the logs. This record is read side by side with the panel-events
-            // line announcing the same send, and a record stamped from a different clock than the
-            // log it pairs with is worse than no stamp at all.
-            block.AppendLine($"{Clock.Now:yyyy-MM-dd HH:mm:ss}  {names.Count} file(s)  -> {target}" +
-                             (hostRemoteName.Length > 0 ? $"  as {hostRemoteName}" : ""));
-            foreach (var n in names) block.AppendLine("    " + n);
+            // ONE ENTRY PER MANIFEST, with the count that manifest actually carried.
+            //
+            // It used to write the panel's whole list under a single header, so a record saying
+            // "9 file(s)" sat beside a host file containing 7 — the increment. Now each manifest
+            // reports its own name, its own count and its own outcome, and the names listed are
+            // the ones that manifest delivered.
+            //
+            // Clock.Now, matching the logs: this record is read side by side with the panel-events
+            // line announcing the same send.
+            block.AppendLine($"{Clock.Now:yyyy-MM-dd HH:mm:ss}  -> {target}");
+            foreach (var s in sends)
+            {
+                block.AppendLine($"    {s.Kind,-5} {s.RemoteName}  {s.Files} file{(s.Files == 1 ? "" : "s")}  " +
+                                 (s.Ok ? "sent" : "FAILED"));
+                if (!s.Ok) continue;
+                foreach (var n in (s.Kind == "host" ? hostNames : names)) block.AppendLine("        " + n);
+            }
             block.AppendLine();
-            // In DELTA mode this record is what the next host delta subtracts, so write it ONLY when
-            // the host upload actually landed. An index-only success must leave it untouched, or
-            // those files are marked delivered to a host that never saw them and no later send will
-            // offer them again. Outside delta mode the record is just history and always written.
-            if (!deltaMode || hostLanded)
-                SafeFile.WithLock(() =>
-                {
-                    try { File.AppendAllText(stampFile, block.ToString()); }
-                    catch (Exception mex) { MarkerWriteFailed(stampFile, mex); }
-                });
-            return (true, target, names, "", hostRemoteName);
+            SafeFile.WithLock(() =>
+            {
+                try { File.AppendAllText(stampFile, block.ToString()); }
+                catch (Exception mex) { MarkerWriteFailed(stampFile, mex); }
+            });
+            return (true, target, names, "", hostRemoteName, sends);
         }
         finally
         {
             SafeFile.WithLock(() =>
             {
                 try { File.Delete(tmp); } catch { }
-                try { File.Delete(tmpDelta); } catch { }
+                try { File.Delete(tmpHost); } catch { }
                 try { File.Delete(lockFile); } catch { }   // always release
             });
         }
@@ -398,7 +453,16 @@ public sealed class ManifestWriter(Config cfg)
     /// panel could never be finalized again.</summary>
     private const int LockStaleMinutes = 10;
 
+    /// <summary>Serialised per panel - see PanelGate.</summary>
     public async Task<FinalizeResult> TryFinalizeAsync(string indexSrc, string hostSrc, string uploadIndexPath, string uploadHostPath, IFtpTransfer ftp, string? forceHost = null)
+    {
+        var gate = PanelGate(indexSrc);
+        await gate.WaitAsync();
+        try { return await TryFinalizeCoreAsync(indexSrc, hostSrc, uploadIndexPath, uploadHostPath, ftp, forceHost); }
+        finally { gate.Release(); }
+    }
+
+    private async Task<FinalizeResult> TryFinalizeCoreAsync(string indexSrc, string hostSrc, string uploadIndexPath, string uploadHostPath, IFtpTransfer ftp, string? forceHost = null)
     {
         var target = forceHost ?? cfg.FirstHost;
         if (string.IsNullOrEmpty(indexSrc) || string.IsNullOrEmpty(hostSrc))
@@ -467,77 +531,78 @@ public sealed class ManifestWriter(Config cfg)
             // only when it did — otherwise every no-op call adds another pair of log rows.
             var uploaded = false;
 
-            // DELTA mode: upload a TEMP copy holding only what the host has not been told about,
-            // and leave the real manifests on disk complete.
-            //
-            // Your suggestion, and it is what makes this safe: markers, resume, DropLine and the
-            // no-pending gate all read the local files, so none of them can be affected by what we
-            // choose to send. Gated on stamping — without per-upload names the last delta would
-            // overwrite every earlier one and the server would hold one increment, not the panel.
-            var deltaMode = cfg.DeltaManifests && cfg.StampManifestNameAtUpload;
-            var sentBefore = deltaMode ? HostNamesAlreadySent(indexSrc) : new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            var deltaNames = new List<string>();
-            // The INDEX is never a delta. Its remote name is fixed ("PID.idx", no stamp), so every
-            // send overwrites the same file — a delta index leaves the server holding one increment,
-            // and an EMPTY final delta destroys it outright. Four .idx files were wiped to 0 bytes in
-            // testing before this. Only the host goes delta.
+            // With stamping on the host gets only what it has not been given yet; the index always
+            // gets the full checklist, because its remote name is fixed and cannot hold versions.
+            var hostDelta = cfg.StampManifestNameAtUpload;
+            var delivered = hostDelta ? Delivered(indexSrc).HostNames : new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            // How many files each manifest describes, for the log line.
+            var idxFiles = ReadRaw(hostSrc)
+                           .Count(l => l.Trim().Length > 0 &&
+                                       !l.TrimEnd().EndsWith(Pending, StringComparison.Ordinal));
             var hostToSend = hostSrc;
             var tmpHost = "";
-            var hostDeltaEmpty = false;
-            if (deltaMode)
+            var hostNames = new List<string>();
+            var hostNothingNew = false;
+            if (hostDelta)
             {
-                var newLines = ReadRaw(hostSrc)
-                               .Where(l => l.Trim().Length > 0)
-                               .Where(l => !l.TrimEnd().EndsWith(Pending, StringComparison.Ordinal))
-                               .Where(l => !sentBefore.Contains(Path.GetFileName((l.Split('@')[0]).Trim())))
-                               .ToList();
-                deltaNames = newLines.Select(l => Path.GetFileName((l.Split('@')[0]).Trim())).ToList();
-                if (newLines.Count == 0) hostDeltaEmpty = true;
+                var hostLines = ReadRaw(hostSrc)
+                                .Where(l => l.Trim().Length > 0)
+                                .Where(l => !l.TrimEnd().EndsWith(Pending, StringComparison.Ordinal))
+                                .Where(l => !delivered.Contains(Path.GetFileName((l.Split('@')[0]).Trim())))
+                                .ToList();
+                hostNames = hostLines.Select(l => Path.GetFileName((l.Split('@')[0]).Trim())).ToList();
+                if (hostLines.Count == 0) hostNothingNew = true;
                 else
                 {
                     try
                     {
-                        tmpHost = hostSrc + ".delta.tmp";
-                        File.WriteAllLines(tmpHost, newLines);
+                        tmpHost = hostSrc + ".host.tmp";
+                        File.WriteAllLines(tmpHost, hostLines);
                         hostToSend = tmpHost;
                     }
-                    catch { hostToSend = hostSrc; }   // fall back to the full list rather than risk an empty one
+                    catch { hostToSend = hostSrc; hostNames = new List<string>(); }  // full list rather than risk an empty one
                 }
             }
 
-            if (!idxOk)
-            {
-                var r = await SendAsync(ftp, indexSrc, uploadIndexPath, forceHost);
-                idxOk = r.Ok; landedOn = r.Host; if (r.Ok) { uploaded = true; idxSentNow = true; }
-                if (idxOk) SafeFile.WithLock(() => { try { File.WriteAllText(idxSent, DateTime.Now.ToString("o")); } catch (Exception mex) { MarkerWriteFailed(idxSent, mex); } });
-            }
-
+            // HOST FIRST, then the index.
             var hostOk = File.Exists(hostSent);
-            if (!hostOk && hostDeltaEmpty)
+            if (!hostOk && hostNothingNew)
             {
-                // The host already has every file this panel produced, delivered by earlier deltas.
-                // Sending an empty file would replace a real manifest with nothing — 5 zero-byte
-                // host manifests came out of the first attempt this way. Mark it done instead: the
-                // content is on the server, just spread across the earlier sends.
+                // Every file has already been delivered to the host by the earlier sends. Sending an
+                // empty file would replace a real manifest with nothing, so mark it done instead.
                 hostOk = true;
                 SafeFile.WithLock(() => { try { File.WriteAllText(hostSent, DateTime.Now.ToString("o")); } catch (Exception mex) { MarkerWriteFailed(hostSent, mex); } });
             }
             else if (!hostOk)
             {
                 var r = await SendAsync(ftp, hostToSend, uploadHostPath, forceHost);
-                hostOk = r.Ok; landedOn = r.Host; if (r.Ok) { uploaded = true; hostSentNow = true; hostName = r.RemoteName; }
+                hostOk = r.Ok; landedOn = r.Host;
+                if (r.Ok)
+                {
+                    uploaded = true; hostSentNow = true; hostName = r.RemoteName;
+                    // NOT recording the delivered names here, for the same reason as the index
+                    // count below: finalize is the LAST send for this panel, so nothing reads them
+                    // afterwards. Recording would leave a file in every panel's folder rather than
+                    // only the ones whose early sends actually needed the bookkeeping.
+                }
                 if (hostOk) SafeFile.WithLock(() => { try { File.WriteAllText(hostSent, DateTime.Now.ToString("o")); } catch (Exception mex) { MarkerWriteFailed(hostSent, mex); } });
             }
+            try { if (tmpHost.Length > 0) File.Delete(tmpHost); } catch { }
 
-            // Record what the HOST carried, so the next delta subtracts it — and only when the host
-            // upload actually landed. An index-only success must not mark these files delivered.
-            if (deltaMode)
+            if (!idxOk)
             {
-                if (hostSentNow) RecordSend(indexSrc, deltaNames, landedOn, hostName);
-                try { if (tmpHost.Length > 0) File.Delete(tmpHost); } catch { }
+                var r = await SendAsync(ftp, indexSrc, uploadIndexPath, forceHost);
+                idxOk = r.Ok; landedOn = r.Host;
+                // NOT recording the index count here. Once finalize succeeds both markers exist, so
+                // no further send happens for this panel and the count is never read again —
+                // writing it would leave a file in EVERY panel's folder, including the ones that
+                // never failed, for a guard only the early sends use.
+                if (r.Ok) { uploaded = true; idxSentNow = true; }
+                if (idxOk) SafeFile.WithLock(() => { try { File.WriteAllText(idxSent, DateTime.Now.ToString("o")); } catch (Exception mex) { MarkerWriteFailed(idxSent, mex); } });
             }
 
-            return new FinalizeResult(idxOk, hostOk, landedOn, uploaded, hostName, idxSentNow, hostSentNow);
+            return new FinalizeResult(idxOk, hostOk, landedOn, uploaded, hostName, idxSentNow, hostSentNow,
+                                      idxFiles, hostDelta ? hostNames.Count : idxFiles);
         }
         finally
         {
@@ -675,56 +740,71 @@ public sealed class ManifestWriter(Config cfg)
         }
     }
 
+
+
     /// <summary>
-    /// Every file name the HOST manifest has already carried, from the ".midfail" record.
+    /// One gate per panel, held for the WHOLE send — checks, uploads, markers and the record.
     ///
-    /// The record lists the exact names sent on each send, indented under a header line, so it is
-    /// already the log of what the host has been told — and it survives a restart, which an
-    /// in-memory set would not. Delta mode subtracts this from the host copy.
+    /// The ".sending" file is claimed under a cross-process mutex, but the uploads then run outside
+    /// it, so two callers in this process could both get past it: the live engine and NG finalized
+    /// MS0120 within 400 ms of each other, each uploading both manifests, and each reading the
+    /// stamp register before the other had written to it — so both used the panel's ORIGINAL host
+    /// name and the second overwrote the first. With different stamps it would instead have left a
+    /// spurious extra file on the server.
     ///
-    /// HOST only, and only names from sends whose host upload SUCCEEDED. Recording per send rather
-    /// than per manifest is what broke the first attempt: a send that landed the index but not the
-    /// host marked its files delivered anyway, the next delta subtracted them, and 7 of DL0006's 10
-    /// files never reached the host at all. A name belongs here only once the host has it.
+    /// Keyed by the panel, so panels still run concurrently — only one send per panel at a time.
     /// </summary>
-    private static HashSet<string> HostNamesAlreadySent(string indexSrc)
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, SemaphoreSlim> _panelGates
+        = new(StringComparer.OrdinalIgnoreCase);
+
+    private static SemaphoreSlim PanelGate(string indexSrc)
+        => _panelGates.GetOrAdd(indexSrc ?? "", _ => new SemaphoreSlim(1, 1));
+
+    /// <summary>
+    /// What the panel's manifests have already DELIVERED, read from the ".midfail" record.
+    ///
+    /// The record is the single source of truth. Each block lists one line per manifest, marked
+    /// "sent" or "FAILED", with the names beneath - so the host's delivered set is the names under
+    /// its successful lines, and the index's last count is the number on its last successful line.
+    ///
+    /// Two separate files used to hold this (".hostnames" and ".idxcount"). They were added when
+    /// the record was one line per send and could not answer either question - which is what lost
+    /// 7 of DL0006's 10 files, because delivery was read from a log of SENDS. The record now
+    /// reports per manifest, so the extra files were three sources of truth that had to agree, and
+    /// a file in every panel's folder. One reader, one record.
+    /// </summary>
+    private static (HashSet<string> HostNames, int IndexCount) Delivered(string indexSrc)
     {
-        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var hostNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var idxCount = 0;
         try
         {
             var rec = Path.ChangeExtension(indexSrc, ".midfail");
-            if (!File.Exists(rec)) return seen;
+            if (!File.Exists(rec)) return (hostNames, 0);
+            var collecting = false;   // inside a successful HOST block, gathering its names
             foreach (var raw in File.ReadAllLines(rec))
             {
                 var l = raw.Trim();
-                // Header lines start with a date; the names are the indented lines under them.
-                if (l.Length == 0) continue;
-                if (System.Text.RegularExpressions.Regex.IsMatch(l, @"^\d{4}-\d{2}-\d{2} ")) continue;
-                seen.Add(l);
+                if (l.Length == 0) { collecting = false; continue; }
+                var m = System.Text.RegularExpressions.Regex.Match(
+                            l, @"^(host|index)\s+\S+\s+(\d+) files?\b.*\b(sent|FAILED)\b");
+                if (m.Success)
+                {
+                    var ok = m.Groups[3].Value == "sent";
+                    if (m.Groups[1].Value == "index")
+                    {
+                        if (ok && int.TryParse(m.Groups[2].Value, out var n)) idxCount = n;
+                        collecting = false;
+                    }
+                    else collecting = ok;   // only a SUCCESSFUL host send delivered anything
+                    continue;
+                }
+                // An indented name under the block above.
+                if (collecting) hostNames.Add(l);
             }
         }
         catch { }
-        return seen;
-    }
-
-    /// <summary>
-    /// Append a send to the ".midfail" record: a header line, then the names that went with it.
-    /// Shared by the early sends and by finalize, so both feed what delta mode subtracts.
-    /// </summary>
-    private static void RecordSend(string indexSrc, IEnumerable<string> names, string target, string remoteName)
-    {
-        try
-        {
-            var rec = Path.ChangeExtension(indexSrc, ".midfail");
-            var list = names.ToList();
-            var block = new System.Text.StringBuilder();
-            block.AppendLine($"{Clock.Now:yyyy-MM-dd HH:mm:ss}  {list.Count} file(s)  -> {target}" +
-                             (remoteName.Length > 0 ? $"  as {remoteName}" : ""));
-            foreach (var n in list) block.AppendLine("    " + n);
-            block.AppendLine();
-            File.AppendAllText(rec, block.ToString());
-        }
-        catch { }
+        return (hostNames, idxCount);
     }
 
     private async Task<(bool Ok, string Host, string RemoteName)> SendAsync(IFtpTransfer ftp, string localPath, string remotePath, string? forceHost)

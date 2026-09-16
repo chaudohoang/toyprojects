@@ -48,7 +48,9 @@ public static class SummaryLog
                     // staying sortable and greppable.
                     var stamp = LogRow.WrittenAt(line);
                     var v = stamp.Length >= 19
-                        ? stamp[..10].Replace("-", "") + "-" + stamp[11..].Replace(":", "")
+                        // Seconds only: the stamp may now carry ".fff", and this column has an agreed
+                // shape ("20260910-000555") that Excel must not read as a number.
+                ? stamp[..10].Replace("-", "") + "-" + stamp.Substring(11, 8).Replace(":", "")
                         : day + "-" + ((p.Length > 3 && p[3].Length == 8) ? p[3].Replace(":", "") : "000000");
                     if (!lastSeen.TryGetValue(p[0], out var prev) || string.CompareOrdinal(v, prev) > 0)
                         lastSeen[p[0]] = v;

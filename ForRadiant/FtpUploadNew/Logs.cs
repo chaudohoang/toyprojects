@@ -44,10 +44,16 @@ public static class LogRow
         return f.Length > 0 ? f[0] : "";
     }
 
-    // "yyyy-MM-dd HH:mm:ss" is 19 chars with dashes at 4 and 7 — cheap to recognise, and no PID
-    // looks like that.
+    // "yyyy-MM-dd HH:mm:ss" (19 chars) or "yyyy-MM-dd HH:mm:ss.fff" (23) — dashes at 4 and 7 make
+    // it cheap to recognise, and no PID looks like that.
+    //
+    // BOTH lengths, because milliseconds were added later: every day recorded before that, and
+    // every log set copied off site, still has the 19-character form. Accepting only one length
+    // would make those rows look like they had no timestamp at all, and the whole Operation report
+    // is ordered by it.
     private static bool HasStamp(string[] p)
-        => p.Length > 1 && p[0].Length == 19 && p[0][4] == '-' && p[0][7] == '-';
+        => p.Length > 1 && (p[0].Length == 19 || p[0].Length == 23)
+           && p[0][4] == '-' && p[0][7] == '-';
 }
 
 /// <summary>
@@ -75,7 +81,7 @@ public sealed class RawLog(Config cfg)
         var line = string.Join("|",
             // Field 0: when this row was appended. First, so these files read like the operation
             // log. See LogRow, which every reader uses.
-            Clock.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            Clock.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"),
             f.Pid,
             f.FileName,
             f.Status switch
@@ -157,7 +163,7 @@ public sealed class SnapshotLog(Config cfg)
             $"{f.FileName}:{(f.Status == FileStatus.Succeeded ? "O" : "X")}");
 
         var line = string.Join("|",
-            new[] { Clock.Now.ToString("yyyy-MM-dd HH:mm:ss"), job.Pid, overall }
+            new[] { Clock.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), job.Pid, overall }
                 .Concat(perFile));
 
         SafeFile.Append(cfg.SnapshotPath(Clock.Now), line);
@@ -178,7 +184,7 @@ public sealed class NgRetryLog(Config cfg)
     {
         var now = Clock.Now.ToString("HH:mm:ss");
         var line = string.Join("|",
-            Clock.Now.ToString("yyyy-MM-dd HH:mm:ss"),   // field 0 — see LogRow
+            Clock.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"),   // field 0 — see LogRow
             item.Pid,
             item.FileName,
             succeeded ? "SUCCEEDED" : "FAILED",
@@ -207,7 +213,7 @@ public sealed class NgRetryLog(Config cfg)
         {
             if (string.IsNullOrWhiteSpace(remote)) continue;
             var line = string.Join("|",
-                Clock.Now.ToString("yyyy-MM-dd HH:mm:ss"),   // field 0 - see LogRow  // Clock.Now, not DateTime.Now: under SimulateFastDaySeconds the simulated
+                Clock.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"),   // field 0 - see LogRow  // Clock.Now, not DateTime.Now: under SimulateFastDaySeconds the simulated
                                                         // day advances, and two loggers on different clocks put
                                                         // the same moment on different dates - the timeline then
                                                         // sorted rollover rows after the retries that followed them.

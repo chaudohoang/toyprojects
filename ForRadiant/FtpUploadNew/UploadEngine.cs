@@ -139,7 +139,7 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
     /// </summary>
     private void OpLog(string msg)
     {
-        try { SafeFile.Append(cfg.PanelEventsPath(Clock.Now), $"[{Clock.Now:yyyy-MM-dd HH:mm:ss}] {msg}"); }
+        try { SafeFile.Append(cfg.PanelEventsPath(Clock.Now), $"[{Clock.Now:yyyy-MM-dd HH:mm:ss.fff}] {msg}"); }
         catch { }
     }
 
@@ -306,8 +306,8 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
                     // own name, and without this nothing in our logs says which file on the server this
                     // send produced - the Trace Panel verdict then reports it as unexplained.
                     if (fin.Uploaded)
-                        OpLog($"FINALIZE {job.Pid}: {fin.SentDescription} -> {fin.Host}" +
-                              (fin.HostName.Length > 0 ? $" as {fin.HostName}" : ""));
+                        foreach (var line in fin.SentLines(System.IO.Path.GetFileName(job.UploadIndexPath)))
+                            OpLog($"FINALIZE {job.Pid}: {line}");
                 }
                 else
                 {
@@ -317,11 +317,11 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
                     // server and then failed the index recorded nothing at all — and with stamping on
                     // that host file carries a name only this line would have named. Measured: 6 of 79
                     // host files on the server had no log line, every one of them this case, and the
-                    // next call then reported "index manifest sent (host was already there)" with no
+                    // next call then reported "index sent (host was already there)" with no
                     // name, which reads like the name is missing rather than logged a minute earlier.
                     if (fin.Uploaded)
-                        OpLog($"FINALIZE {job.Pid}: {fin.SentDescription} -> {fin.Host}" +
-                              (fin.HostName.Length > 0 ? $" as {fin.HostName}" : ""));
+                        foreach (var line in fin.SentLines(System.IO.Path.GetFileName(job.UploadIndexPath)))
+                            OpLog($"FINALIZE {job.Pid}: {line}");
 
                     // Data done live, but the manifest SEND itself failed. Count it; after MaxAttempts,
                     // hand the manifests to NG as real FAILED files (a genuine manifest failure — this
@@ -381,26 +381,27 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
         {
             var r = await _manifest.SendMidFailAsync(job.IndexSrc, job.HostSrc,
                                                      job.UploadIndexPath, job.UploadHostPath, _manifestFtp);
-            if (!r.Sent && r.Why.Length > 0)
             // Every attempt is logged, repeats included: a repeated skip shows the engine was
             // still trying at that moment. The Operation REPORT collapses the runs so it stays
             // readable; the raw log keeps them all.
-            if (!r.Sent && r.Why.Length > 0)
+            // Only a GUARD skip gets the one-line "NOT sent" form. When an upload was actually
+            // attempted, the per-manifest lines below report it - with its file count, which the
+            // combined message dropped, so a failed send said nothing about how much it carried.
+            if (!r.Sent && r.Sends.Count == 0 && r.Why.Length > 0)
                 OpLog($"MIDFAIL {job.Pid}: NOT sent - {r.Why}");
-            if (r.Sent)
+            if (r.Sends.Count > 0)
             {
-                // One summary line here. The exact file list goes into the panel's own ".midfail"
-                // record next to its manifests — that is where you look when reconciling a partial
-                // manifest against what the host acted on, and it keeps this log readable.
-                OpLog($"MIDFAIL {job.Pid}: " +
-                      // Say which manifest actually landed. An empty RemoteName means the HOST
-                      // upload failed and only the index went - "index+host sent" then overstated
-                      // it, and the missing name read like a logging gap rather than the truth.
-                      (r.RemoteName.Length > 0 ? "early index+host manifests sent" : "early index manifest sent (host did NOT land)") +
-                      $" -> {r.Host}, " +
-                      $"{r.Files.Count} file(s)" +
-                      (r.RemoteName.Length > 0 ? $" as {r.RemoteName}" : "") +
-                      $" (list in {System.IO.Path.GetFileName(System.IO.Path.ChangeExtension(job.IndexSrc, ".midfail"))})");
+                // ONE LINE PER MANIFEST, each naming the remote file it produced.
+                //
+                // The combined line could only name one of the two, and said "index+host sent" even
+                // when just one landed. Split, each line states its own manifest, its own remote
+                // name and its own outcome — so a file on the server always maps to a log line.
+                var rec = System.IO.Path.GetFileName(System.IO.Path.ChangeExtension(job.IndexSrc, ".midfail"));
+                foreach (var s in r.Sends)
+                    OpLog($"MIDFAIL {job.Pid}: early {s.Kind} " +
+                          (s.Ok ? "sent" : "FAILED to send") +
+                          $" -> {s.Host} as {s.RemoteName}, {s.Files} file{(s.Files == 1 ? "" : "s")}" +
+                          (s.Ok ? $" (list in {rec})" : s.Error.Length > 0 ? $" - {s.Error}" : ""));
             }
         }
         catch (Exception ex) { OpLog($"MIDFAIL {job.Pid}: send error: {ex.Message}"); }
@@ -788,6 +789,16 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
             foreach (var job in _jobs.Values)
                 foreach (var f in job.Files)
                 {
+                    // NEVER a manifest.
+                    //
+                    // The seed excludes manifests from the queue (they are sent by finalize, not
+                    // uploaded as files), but this sweep reads job.Files directly and so had no
+                    // such filter. A panel whose manifests were still Pending — the last panel of
+                    // a run, where no newer panel had displaced it — got its index and host
+                    // uploaded here as ordinary files: no stamping, no markers, and no entry in
+                    // the delivery record, so finalize then sent the host AGAIN under the same
+                    // name. That was GT0120 and MS0120, 1 panel in 120 each time, both the last.
+                    if (f.IsManifest) continue;
                     if (f.Status != FileStatus.Pending) continue;   // succeeded or final-failed
                     if (f.Attempts >= cfg.MaxAttempts) continue;     // out of road
                     if (ReferenceEquals(f, _inFlight)) continue;

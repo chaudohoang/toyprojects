@@ -12,11 +12,11 @@ using System.Reflection;
 
 [assembly: System.Reflection.AssemblyCompanyAttribute("FtpUpload")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
-[assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.7")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0.7+1d3666c02bac5ca9900f88030cd1acdf5629f36d")]
+[assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0.8+e489c43aba37acbdc3d1ad4ae42d9965727db32b")]
 [assembly: System.Reflection.AssemblyProductAttribute("FtpUpload")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FtpUpload")]
-[assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.7")]
+[assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.8")]
 [assembly: System.Runtime.Versioning.TargetPlatformAttribute("Windows7.0")]
 [assembly: System.Runtime.Versioning.SupportedOSPlatformAttribute("Windows7.0")]
 

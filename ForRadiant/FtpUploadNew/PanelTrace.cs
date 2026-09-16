@@ -218,7 +218,7 @@ public static class PanelTrace
         // WinSCP dialogue
         try
         {
-            foreach (var f in Directory.GetFiles(cfg.LogFullPath, "*_winscp_*.log").OrderBy(x => x))
+            foreach (var f in SessionLogs(cfg))
             {
                 var lines = ReadEvenIfOpen(f);
                 var hits = lines.Where(l => l.Contains(pid, StringComparison.OrdinalIgnoreCase)).ToList();
@@ -263,6 +263,25 @@ public static class PanelTrace
         // An exact hit wins outright: never make someone disambiguate an id they typed in full.
         if (found.Contains(query)) return new List<string> { query };
         return found.ToList();
+    }
+
+    /// <summary>
+    /// Every WinSCP session log: the "winscp" subfolder AND the log folder itself.
+    ///
+    /// They moved into a subfolder because a day makes hundreds of them, but every log set
+    /// recorded before that - and every one copied off site - still has them loose in the log
+    /// folder. Reading only the new location would silently lose the server-side evidence,
+    /// which is the whole point of the section that uses it.
+    /// </summary>
+    private static IEnumerable<string> SessionLogs(Config cfg)
+    {
+        var all = new List<string>();
+        foreach (var dir in new[] { Path.Combine(cfg.LogFullPath, "winscp"), cfg.LogFullPath })
+        {
+            try { if (Directory.Exists(dir)) all.AddRange(Directory.GetFiles(dir, "*_winscp_*.log")); }
+            catch { }
+        }
+        return all.OrderBy(x => Path.GetFileName(x), StringComparer.Ordinal);
     }
 
     /// <summary>Trim to width, keeping the END of a long name - the distinguishing part.</summary>
@@ -336,7 +355,7 @@ public static class PanelTrace
             sb.AppendLine($"   {jl.FileName,-44} {(jl.IsManifest ? "manifest" : "data")}");
             if (jl.IndexSrc.Length > 0) indexSrc = jl.IndexSrc;
         }
-        if (jobFiles.Count == 0) sb.AppendLine("   (no jobs-file lines — panel may predate the current jobs file)");
+        if (jobFiles.Count == 0) sb.AppendLine("   (no jobs-file lines - panel may predate the current jobs file)");
 
         // ---- 2. the TIMELINE: every event for this panel, in order ---------------------
         //
@@ -350,7 +369,7 @@ public static class PanelTrace
         if (evs.Count == 0) sb.AppendLine("   (nothing — no upload was ever attempted for this panel)");
         else
         {
-            sb.AppendLine($"   {"TIME",-9} {"FILE",-26} {"EVENT",-38} {"RESULT",-10} {"TRY",-4} {"SOURCE",-12} REASON");
+            sb.AppendLine($"   {"TIME",-13} {"FILE",-26} {"EVENT",-38} {"RESULT",-10} {"TRY",-4} {"SOURCE",-12} REASON");
             sb.AppendLine("   " + new string('-', 150));
             foreach (var e in evs)
             {
@@ -358,7 +377,7 @@ public static class PanelTrace
                 // Reason on the SAME line. On a panel NG retried 120 times, a continuation line
                 // doubled the report's length and put a near-identical sentence between every pair
                 // of events, which made the sequence impossible to scan.
-                sb.AppendLine($"   {time,-9} {Fit(e.File, 26),-26} {Fit(e.Event, 38),-38} " +
+                sb.AppendLine($"   {time,-13} {Fit(e.File, 26),-26} {Fit(e.Event, 38),-38} " +
                               $"{e.Result,-10} {e.Try,-4} {e.Source,-12} {e.Reason}");
             }
         }
@@ -381,22 +400,24 @@ public static class PanelTrace
                      })
             {
                 // Two naming shapes: ".idxsent"/".hostsent"/".sending" APPEND to the full name
-                // ("PID.idx.idxsent"), while ".midfail"/".idxpartial"/".hostpartial" REPLACE the
-                // extension ("PID.midfail"). Keep them straight or the trace reports them missing.
+                // ("PID.idx.idxsent"), while the rest REPLACE the extension ("PID.midfail").
+                // Keep them straight or the trace reports them missing.
                 var replaces = suffix is ".midfail" or ".idxpartial" or ".hostpartial";
                 var f = replaces ? Path.ChangeExtension(indexSrc, suffix) : indexSrc + suffix;
                 var present = File.Exists(f);
                 var extra = "";
                 if (present && suffix == ".midfail")
                 {
-                    // now a log: one block per early send. Report how many sends and the latest.
+                    // One block per early send, headed by a date; the manifests it carried are
+                    // listed beneath. Count the HEADERS — counting "file(s)" lines now double-counts,
+                    // because the index and the host each report their own.
                     try
                     {
-                        // One block per early send; the header line carries the count of files.
-                        // (It used to carry "sig=" too — the re-send guard is now the file COUNT,
-                        // so match on the count instead or this always reports zero sends.)
-                        var ls = File.ReadAllLines(f).Where(x => x.Contains("file(s)", StringComparison.Ordinal)).ToList();
-                        extra = ls.Count == 0 ? "" : $" = {ls.Count} send(s), last {ls[^1].Split("  ")[0]}";
+                        var heads = File.ReadAllLines(f)
+                                        .Where(x => System.Text.RegularExpressions.Regex.IsMatch(
+                                                        x, @"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"))
+                                        .ToList();
+                        extra = heads.Count == 0 ? "" : $" = {heads.Count} send(s), last {heads[^1].Split("  ")[0]}";
                     }
                     catch { }
                 }
@@ -420,7 +441,7 @@ public static class PanelTrace
         var sessionFiles = 0;
         try
         {
-            foreach (var f in Directory.GetFiles(cfg.LogFullPath, "*_winscp_*.log"))
+            foreach (var f in SessionLogs(cfg))
             {
                 var lines = ReadEvenIfOpen(f);
                 if (lines.Length == 0) continue;

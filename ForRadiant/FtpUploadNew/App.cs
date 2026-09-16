@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using Forms = System.Windows.Forms;
 using Application = System.Windows.Application;
 
@@ -21,6 +21,7 @@ public sealed class App : Application
         _host = host;
         ShutdownMode = ShutdownMode.OnExplicitShutdown;   // closing the window must not end the process
     }
+
 
     protected override void OnStartup(StartupEventArgs e)
     {

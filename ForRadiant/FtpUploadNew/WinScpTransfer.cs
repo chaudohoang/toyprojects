@@ -102,8 +102,12 @@ public sealed class WinScpTransfer : IFtpTransfer
         {
             try
             {
-                Directory.CreateDirectory(_cfg.LogFullPath);
-                s.SessionLogPath = Path.Combine(_cfg.LogFullPath,
+                // Session logs go in their OWN folder. A busy day produces hundreds of them — 292
+                // on one LGD machine — which buries the handful of files a person actually reads
+                // (the day log, the summary, the reports) in the same directory listing.
+                var sessionDir = Path.Combine(_cfg.LogFullPath, "winscp");
+                Directory.CreateDirectory(sessionDir);
+                s.SessionLogPath = Path.Combine(sessionDir,
                     $"{DateTime.Now:yyyyMMdd}_winscp_{DateTime.Now:HHmmssfff}.log");
             }
             catch { /* logging is optional — proceed without it */ }

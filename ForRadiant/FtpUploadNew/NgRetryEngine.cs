@@ -607,7 +607,7 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
     /// </summary>
     private void OpLog(string msg)
     {
-        try { SafeFile.Append(cfg.PanelEventsPath(Clock.Now), $"[{Clock.Now:yyyy-MM-dd HH:mm:ss}] {msg}"); }
+        try { SafeFile.Append(cfg.PanelEventsPath(Clock.Now), $"[{Clock.Now:yyyy-MM-dd HH:mm:ss.fff}] {msg}"); }
         catch { }
         try { Log(msg); } catch { }
     }
@@ -754,15 +754,15 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
                         ngLog.WriteManifestSent(jl.Pid, day, jl.UploadIndexPath, jl.UploadHostPath, 0, fin.Host);
                         WriteManifestToRawLog(jl.Pid, day, jl.UploadIndexPath, jl.UploadHostPath, 1, fin.Host);
                         Log($"   panel {jl.Pid} ({day}): manifests finished by sweep - panel complete");
-                        OpLog($"FINALIZE {jl.Pid}: {fin.SentDescription} -> {fin.Host}" +
-                              (fin.HostName.Length > 0 ? $" as {fin.HostName}" : ""));
+                        foreach (var line in fin.SentLines(System.IO.Path.GetFileName(jl.UploadIndexPath)))
+                            OpLog($"FINALIZE {jl.Pid}: {line}");
                         NotifyChanged();
                     }
                     // A PARTIAL send still put a file on the server. Log it, or the host manifest it
                     // uploaded carries a stamped name that appears in no log line at all.
                     else if (fin.Uploaded)
-                        OpLog($"FINALIZE {jl.Pid}: {fin.SentDescription} -> {fin.Host}" +
-                              (fin.HostName.Length > 0 ? $" as {fin.HostName}" : ""));
+                        foreach (var line in fin.SentLines(System.IO.Path.GetFileName(jl.UploadIndexPath)))
+                            OpLog($"FINALIZE {jl.Pid}: {line}");
                 }
                 catch (Exception ex) { Log($"   panel {jl.Pid}: finalize sweep error: {ex.Message}"); }
             }
@@ -830,14 +830,14 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
                             // back to a log line. This is the third of three finalize sites; the
                             // other two had it and this one did not, which left 6 of 60 panels
                             // with an unexplained file in the verdict.
-                            OpLog($"FINALIZE {item.Pid}: {fin.SentDescription} -> {fin.Host}" +
-                                  (fin.HostName.Length > 0 ? $" as {fin.HostName}" : ""));
+                            foreach (var line in fin.SentLines(System.IO.Path.GetFileName(item.UploadIndexPath)))
+                                OpLog($"FINALIZE {item.Pid}: {line}");
                         }
                         // A PARTIAL send still put a file on the server - log it, or the host manifest it
                         // uploaded carries a stamped name that appears in no log line at all.
                         else if (fin.Uploaded)
-                            OpLog($"FINALIZE {item.Pid}: {fin.SentDescription} -> {fin.Host}" +
-                                  (fin.HostName.Length > 0 ? $" as {fin.HostName}" : ""));
+                            foreach (var line in fin.SentLines(System.IO.Path.GetFileName(item.UploadIndexPath)))
+                                OpLog($"FINALIZE {item.Pid}: {line}");
                     }
                     catch (Exception ex) { Log($"   panel {item.Pid}: finalize error: {ex.Message}"); }
                 }
@@ -929,16 +929,18 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
             // NG was still trying at that moment, which is exactly what gets asked when a panel
             // sits unfinished for an hour. The Operation REPORT collapses the runs so it stays
             // readable; the raw log keeps them all.
-            if (!r.Sent && r.Why.Length > 0)
+            // Only a GUARD skip gets the one-line "NOT sent" form - see UploadEngine.
+            if (!r.Sent && r.Sends.Count == 0 && r.Why.Length > 0)
                 OpLog($"MIDFAIL {item.Pid}: NOT sent (NG) - {r.Why}");
-            if (r.Sent)
+            if (r.Sends.Count > 0)
             {
-                OpLog($"MIDFAIL {item.Pid}: " +
-                      (r.RemoteName.Length > 0 ? "early index+host manifests sent (NG)" : "early index manifest sent (NG, host did NOT land)") +
-                      $" -> {r.Host}, " +
-                      $"{r.Files.Count} file(s)" +
-                      (r.RemoteName.Length > 0 ? $" as {r.RemoteName}" : "") +
-                      $" (list in {Path.GetFileName(Path.ChangeExtension(item.IndexSrc, ".midfail"))})");
+                // ONE LINE PER MANIFEST, naming the remote file each produced - see UploadEngine.
+                var rec = Path.GetFileName(Path.ChangeExtension(item.IndexSrc, ".midfail"));
+                foreach (var s in r.Sends)
+                    OpLog($"MIDFAIL {item.Pid}: early {s.Kind} " +
+                          (s.Ok ? "sent (NG)" : "FAILED to send (NG)") +
+                          $" -> {s.Host} as {s.RemoteName}, {s.Files} file{(s.Files == 1 ? "" : "s")}" +
+                          (s.Ok ? $" (list in {rec})" : s.Error.Length > 0 ? $" - {s.Error}" : ""));
             }
         }
         catch (Exception ex) { OpLog($"MIDFAIL {item.Pid}: send error (NG): {ex.Message}"); }
