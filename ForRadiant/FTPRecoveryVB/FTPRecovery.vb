@@ -1360,8 +1360,23 @@ Module Program
         Dim done As Integer = 0
         Dim swR = Diagnostics.Stopwatch.StartNew()
         Dim nextR As Integer = 500
+        Dim badFolders As Integer = 0
         For Each p In list
-            AddReconstructed(p)
+            ' One bad folder must not kill the scan. A corrupted directory entry
+            ' (Windows: "the file or directory is corrupted and unreadable") used
+            ' to abort the whole run, so 129,000 queue files produced 0 panels and
+            ' nothing could be uploaded at all. Skip that panel and carry on.
+            Try
+                AddReconstructed(p)
+            Catch ex As Exception
+                badFolders += 1
+                If badFolders <= 10 Then
+                    Log("  ! cannot read the source folder for PID " & p.PID &
+                        " - skipping reconstruction for it: " & OneLine(ex.Message))
+                ElseIf badFolders = 11 Then
+                    Log("  ! ... further unreadable folders will not be listed individually.")
+                End If
+            End Try
             rebuilt += p.RebuiltCount
             junk += p.SkippedJunk.Count
             If p.InferredExts.Count > 0 Then inferredPanels += 1
@@ -1376,6 +1391,11 @@ Module Program
         Next
         Log("Reconstruction: rebuilt " & rebuilt.ToString() & " entr(ies) from disk, " &
             junk.ToString() & " candidate(s) skipped as unrecognised.")
+        If badFolders > 0 Then
+            Log("Reconstruction: " & badFolders.ToString() &
+                " panel(s) had an unreadable source folder and were skipped." &
+                "  Run chkdsk on that drive - this is filesystem damage, not a queue problem.")
+        End If
         If inferredPanels > 0 Then
             Log("Reconstruction: dest folder inferred from a donor panel for " &
                 inferredPanels.ToString() & " panel(s) - see per-panel detail on upload.")

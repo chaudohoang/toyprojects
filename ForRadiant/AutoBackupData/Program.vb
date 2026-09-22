@@ -2,8 +2,8 @@
 Imports System.Threading
 Imports System.Windows.Forms
 
-Namespace AutoDeleteData
-	Friend Module Program
+' Namespace: RootNamespace is AutoBackupData; no Namespace block is declared here.
+Friend Module Program
 		Private mutex As Mutex = New Mutex(True, "AutoBackupDataDove2p0")
 		''' <summary>
 		''' The main entry point for the application.
@@ -21,5 +21,4 @@ Namespace AutoDeleteData
 				NativeMethods.PostMessage(CType(NativeMethods.HWND_BROADCAST, IntPtr), NativeMethods.WM_SHOWME, IntPtr.Zero, IntPtr.Zero)
 			End If
 		End Sub
-	End Module
-End Namespace
+End Module

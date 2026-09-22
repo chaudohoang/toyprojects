@@ -578,8 +578,14 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
             catch (OperationCanceledException) { break; }
             catch (Exception ex)
             {
+                // Drop the connection before claiming recovery. Catching and carrying on is not
+                // recovery if the thing that broke is the session itself: at LGD this handler ran
+                // every 30s for four days, logging "recovered" while retrying nothing at all,
+                // because the aborted session was never disposed and threw again on the next pass.
+                try { await _ftp.EndSession(); } catch { }
+
                 // Oplog, not just the console: a dead recovery engine has to leave evidence.
-                AppLog($"NG PUMP ERROR: {ex.GetType().Name}: {ex.Message} - recovered, NG continuing");
+                AppLog($"NG PUMP ERROR: {ex.GetType().Name}: {ex.Message} - session dropped, NG continuing");
                 ClearCurrent();
                 try { await Task.Delay(TimeSpan.FromSeconds(Math.Max(1, cfg.NgRetryCooldownSeconds)), stopping); }
                 catch (OperationCanceledException) { break; }
@@ -668,8 +674,17 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
             // 3) Nothing to retry — look for panels whose DATA is complete but whose manifests were
             // never sent, and finish them. See SweepUnfinalizedPanels for why these exist.
             ClearCurrent();
-            if (AutoRunning) await SweepUnfinalizedPanels(stopping);
-            await _ftp.EndSession();   // close the reused connection while idle
+            try
+            {
+                if (AutoRunning) await SweepUnfinalizedPanels(stopping);
+            }
+            finally
+            {
+                // MUST be in a finally. When the sweep threw, this line was skipped, so an aborted
+                // session was never disposed and the pump spun on the corpse forever — 1,243-2,880
+                // "Session was aborted" lines a day at LGD, with zero files actually retried.
+                await _ftp.EndSession();   // close the reused connection while idle
+            }
             await Task.Delay(300, stopping);
         }
     }

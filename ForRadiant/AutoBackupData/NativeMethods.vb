@@ -1,8 +1,8 @@
 ﻿Imports System
 Imports System.Runtime.InteropServices
 
-Namespace AutoDeleteData
-	Friend Class NativeMethods
+' Namespace: RootNamespace is AutoBackupData; no Namespace block is declared here.
+Friend Class NativeMethods
 		Public Const HWND_BROADCAST As Integer = &HFFFF
 		Public Shared ReadOnly WM_SHOWME As Integer = NativeMethods.RegisterWindowMessage("WM_SHOWME")
 		<DllImport("user32")>
@@ -11,5 +11,4 @@ Namespace AutoDeleteData
 		<DllImport("user32")>
 		Public Shared Function RegisterWindowMessage(ByVal message As String) As Integer
 		End Function
-	End Class
-End Namespace
+End Class

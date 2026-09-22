@@ -1,8 +1,8 @@
 ﻿
 Imports System
 
-Namespace AutoDeleteData
-	Partial Class MainForm
+' Namespace: RootNamespace is AutoBackupData; no Namespace block is declared here.
+Partial Class MainForm
 		''' <summary>
 		''' Required designer variable.
 		''' </summary>
@@ -359,5 +359,4 @@ Namespace AutoDeleteData
         Friend WithEvents ExcludePaths As Windows.Forms.DataGridViewTextBoxColumn
         Friend WithEvents ExcludeFolders As Windows.Forms.DataGridViewTextBoxColumn
         Friend WithEvents ExcludeFiles As Windows.Forms.DataGridViewTextBoxColumn
-    End Class
-End Namespace
+End Class

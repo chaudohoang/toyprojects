@@ -58,8 +58,14 @@ public sealed class Config
     [JsonIgnore] public bool WinScpLog => true;
 
     // ---- Timing (spec §2) ----
-    /// <summary>Per-file FTP operation timeout in seconds (connect + transfer). Set directly; a
-    /// floor of 5 s is enforced. (Formerly derived from a "total tact" budget — now explicit.)</summary>
+    /// <summary>Total budget for ONE file: connect + transfer, enforced by a hard cancel that
+    /// aborts the session. A floor of 5 s is enforced. Also feeds SessionOptions.Timeout (WinSCP's
+    /// per-command / control-connection timeout), so raising it also slows dead-connection
+    /// detection — keep that in mind if you tune it upward.
+    ///
+    /// Deliberately left as a tuning knob rather than a correctness control: since the session is
+    /// now dropped and rebuilt after every abort, a file that times out is simply retried, and the
+    /// NG pump recovers it. A timeout costs throughput, not data.</summary>
     public int TimeoutSecondsOverride { get; set; } = 20;
 
     // PrimaryRetries / SecondaryRetries were removed with failover. Configs written before that

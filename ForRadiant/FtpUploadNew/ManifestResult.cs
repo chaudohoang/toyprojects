@@ -26,7 +26,7 @@ public readonly record struct ManifestSend(string Kind, string RemoteName, bool 
 /// </summary>
 public readonly record struct FinalizeResult(bool IdxOk, bool HostOk, string Host, bool Uploaded = false,
                                             string HostName = "", bool IdxSentNow = false, bool HostSentNow = false,
-                                            int IdxFiles = 0, int HostFiles = 0)
+                                            int IdxFiles = 0, int HostFiles = 0, string FailWhy = "")
 {
     /// <summary>The panel is finalized only when BOTH manifests are on the server.</summary>
     public bool Ok => IdxOk && HostOk;

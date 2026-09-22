@@ -285,7 +285,14 @@ public sealed class ManifestWriter(Config cfg)
                 }
                 // Nothing landed: give the name back so the next send can use it rather than
                 // burning the panel's original and forcing a rename it never needed.
-                else if (cfg.StampManifestNameAtUpload) ReleaseStamp(remoteName);
+                else
+                {
+                    if (cfg.StampManifestNameAtUpload) ReleaseStamp(remoteName);
+                    // This path uploads DIRECTLY instead of through SendAsync, so it needs its own
+                    // session drop — otherwise the early sends are the one manifest route that can
+                    // still inherit a dead connection and keep failing on it forever.
+                    await DropManifestSession(ftp);
+                }
             }
             // Say WHICH manifest failed and why, in the transport's own words. "the upload itself
             // failed" told you neither, so a skip reason could not be acted on.
@@ -526,6 +533,11 @@ public sealed class ManifestWriter(Config cfg)
             // to a log line, and the Trace Panel verdict flagged it as unexplained.
             var hostName = "";
             var idxSentNow = false;
+            // Why the last failed send failed. Carried out on FinalizeResult so the operation log's
+            // reason column is populated: "index gave up" / "host gave up" / "early send FAILED"
+            // used to be logged with a BLANK reason, which is why the LGD outage took four
+            // machines' session logs to trace instead of one line in the day log.
+            var failWhy = "";
             var hostSentNow = false;
             // Did THIS call actually put something on the server? The caller logs a manifest send
             // only when it did — otherwise every no-op call adds another pair of log rows.
@@ -577,6 +589,7 @@ public sealed class ManifestWriter(Config cfg)
             {
                 var r = await SendAsync(ftp, hostToSend, uploadHostPath, forceHost);
                 hostOk = r.Ok; landedOn = r.Host;
+                if (!r.Ok) failWhy = r.Error;
                 if (r.Ok)
                 {
                     uploaded = true; hostSentNow = true; hostName = r.RemoteName;
@@ -593,6 +606,7 @@ public sealed class ManifestWriter(Config cfg)
             {
                 var r = await SendAsync(ftp, indexSrc, uploadIndexPath, forceHost);
                 idxOk = r.Ok; landedOn = r.Host;
+                if (!r.Ok) failWhy = r.Error;
                 // NOT recording the index count here. Once finalize succeeds both markers exist, so
                 // no further send happens for this panel and the count is never read again —
                 // writing it would leave a file in EVERY panel's folder, including the ones that
@@ -602,7 +616,7 @@ public sealed class ManifestWriter(Config cfg)
             }
 
             return new FinalizeResult(idxOk, hostOk, landedOn, uploaded, hostName, idxSentNow, hostSentNow,
-                                      idxFiles, hostDelta ? hostNames.Count : idxFiles);
+                                      idxFiles, hostDelta ? hostNames.Count : idxFiles, failWhy);
         }
         finally
         {
@@ -807,7 +821,7 @@ public sealed class ManifestWriter(Config cfg)
         return (hostNames, idxCount);
     }
 
-    private async Task<(bool Ok, string Host, string RemoteName)> SendAsync(IFtpTransfer ftp, string localPath, string remotePath, string? forceHost)
+    private async Task<(bool Ok, string Host, string RemoteName, string Error)> SendAsync(IFtpTransfer ftp, string localPath, string remotePath, string? forceHost)
     {
         // Stamped HERE, the point finalize and the finalize sweep both funnel through. The name is
         // RELEASED again if nothing lands, so a send that fails every attempt does not burn the
@@ -825,19 +839,42 @@ public sealed class ManifestWriter(Config cfg)
             var one = await ftp.UploadToHostAsync(jf, forceHost!, CancellationToken.None);
             var okOne = one.Outcome == TransferOutcome.Success;
             if (!okOne && cfg.StampManifestNameAtUpload) ReleaseStamp(remotePath);
-            return (okOne, forceHost!, Path.GetFileName(remotePath));
+            if (!okOne) await DropManifestSession(ftp);
+            return (okOne, forceHost!, Path.GetFileName(remotePath), okOne ? "" : Describe(one));
         }
 
         var last = cfg.HostForAttempt(1);
+        var lastErr = "";
         for (var attempt = 1; attempt <= Math.Max(1, cfg.MaxAttempts); attempt++)
         {
             last = cfg.HostForAttempt(attempt);
             var r = await ftp.UploadToHostAsync(jf, last, CancellationToken.None);
-            if (r.Outcome == TransferOutcome.Success) return (true, last, Path.GetFileName(remotePath));
+            if (r.Outcome == TransferOutcome.Success) return (true, last, Path.GetFileName(remotePath), "");
+            lastErr = Describe(r);
         }
         // Nothing landed on any host: hand the name back for the next attempt to reuse.
         if (cfg.StampManifestNameAtUpload) ReleaseStamp(remotePath);
-        return (false, last, Path.GetFileName(remotePath));
+        await DropManifestSession(ftp);
+        return (false, last, Path.GetFileName(remotePath), lastErr);
+    }
+
+    /// <summary>Why a manifest send failed, for the operation log's reason column.</summary>
+    private static string Describe(TransferResult r)
+        => string.IsNullOrWhiteSpace(r.Message) ? r.Outcome.ToString() : $"{r.Outcome}: {r.Message}";
+
+    /// <summary>
+    /// Close the manifest connection after a failed send, so the NEXT send reconnects.
+    ///
+    /// The index/host transfer is long-lived and, unlike the data pump, has no natural idle point
+    /// that recycles it. That asymmetry is the whole 2026-09-18 LGD incident: one abort left this
+    /// connection dead and images kept uploading — through their own session, which the pump closes
+    /// between panels — while .idx/.txt silently stopped for four days across four machines. The
+    /// engine now drops an aborted session by itself; this is the belt-and-braces layer, so a
+    /// manifest failure of ANY kind starts the next attempt on a fresh connection.
+    /// </summary>
+    private static async Task DropManifestSession(IFtpTransfer ftp)
+    {
+        try { await ftp.EndSession(); } catch { /* best effort — never let this mask the real error */ }
     }
 
     // ---- raw manifest file helpers (callers already hold the SafeFile lock) ----

@@ -19,9 +19,10 @@ Imports System.Windows.Forms.VisualStyles.VisualStyleElement
 Imports System.Runtime.InteropServices.ComTypes
 Imports System.Collections.Concurrent
 
-Namespace AutoDeleteData
-    Partial Public Class MainForm
-        Inherits Form
+' Namespace: the project's RootNamespace is already AutoBackupData and VB prefixes it to
+' every declaration, so no Namespace block is declared here. Types are AutoBackupData.*.
+Partial Public Class MainForm
+    Inherits Form
         Public apppath As String
         Public appdir As String
         Public settingPath As String
@@ -109,6 +110,13 @@ Namespace AutoDeleteData
 
         Private Sub SaveBackupSettings()
             Try
+                ' The settings folder under Radiant Vision Systems Data may not exist yet on
+                ' a fresh machine; StreamWriter does not create it and the save just failed.
+                Dim settingsDir As String = Path.GetDirectoryName(backupSettingsFile)
+                If Not String.IsNullOrEmpty(settingsDir) AndAlso Not Directory.Exists(settingsDir) Then
+                    Directory.CreateDirectory(settingsDir)
+                End If
+
                 Using writer As New StreamWriter(backupSettingsFile, False)
                     For Each row As DataGridViewRow In dataGridView1.Rows
                         If Not row.IsNewRow Then
@@ -157,11 +165,13 @@ Namespace AutoDeleteData
 
         Private Sub exitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles exitToolStripMenuItem.Click
             SaveSettings()
+            StopBackupEngine()   ' stops the worker threads and flushes the pending log lines
             Application.Exit()
         End Sub
 
         Private Sub exit2ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles exit2ToolStripMenuItem.Click
             SaveSettings()
+            StopBackupEngine()
             Application.Exit()
         End Sub
 
@@ -212,7 +222,9 @@ Namespace AutoDeleteData
                 Try
                     Dim settings() As String = File.ReadAllLines(settingPath)
                     For Each line As String In settings
-                        Dim parts As String() = line.Split("="c)
+                        ' Split on the FIRST "=" only. A plain Split("="c) broke any value
+                        ' containing an equals sign - the line was silently discarded.
+                        Dim parts As String() = line.Split(New Char() {"="c}, 2)
                         If parts.Length = 2 Then
                             Dim setting As String = parts(0).Trim()
                             Dim value As String = parts(1).Trim()
@@ -274,14 +286,12 @@ Namespace AutoDeleteData
         End Sub
 
         Private Sub startMonitor()
-            If Not Directory.Exists(txtLogpath.Text) Then
-                Try
-                    Directory.CreateDirectory(txtLogpath.Text)
-                Catch ex As Exception
-                    MessageBox.Show(Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Cannot create log folder, use application folder instead !" + Environment.NewLine)
-                End Try
-            End If
+            If monitoring Then Exit Sub ' Prevent multiple starts
 
+            ' The log folder is resolved by the engine (ResolveBackupLogDir), which falls
+            ' back to the application folder on its own. The MessageBox that used to be here
+            ' was a hang risk: this app can start minimized at PC login, and a modal dialog
+            ' nobody can see would block it forever.
 
             lblMonitoringStatus.Invoke(Sub()
                                            lblMonitoringStatus.Text = "Status : Monitoring ..."
@@ -304,9 +314,19 @@ Namespace AutoDeleteData
 
             dataGridView1.ReadOnly = True
 
-            If monitoring Then Exit Sub ' Prevent multiple starts
             monitoring = True
-            AppendLog("Monitoring started.")
+
+            ' Rule snapshotting, watchers, the copy queue, the reconciliation sweep and the
+            ' watchdog all live in BackupEngine.vb now. See StartBackupEngine.
+            StartBackupEngine()
+        End Sub
+
+        ''' <summary>
+        ''' Dead code, kept only so the old behaviour can be diffed against the new engine.
+        ''' Nothing calls this. Delete it once you are happy, along with the watchers /
+        ''' excluded* / processed* fields at the top of the class.
+        ''' </summary>
+        Private Sub startMonitor_Old()
             Try
                 ' Dispose of existing watchers
                 For Each watcher In watchers.Values
@@ -404,29 +424,18 @@ Namespace AutoDeleteData
             logPath = Path.Combine(logFolder, "autobackuplog_" & currentDate & ".txt")
         End Sub
 
+        ''' <summary>
+        ''' Now just hands the line to the engine's log queue, which one dedicated thread
+        ''' flushes in batches.
+        '''
+        ''' The old version called SetLogFilePath() on EVERY line, which read
+        ''' txtLogpath.Text from whatever thread was logging - a blocking cross-thread
+        ''' SendMessage to the UI thread - plus a Directory.Exists and possibly a
+        ''' CreateDirectory. Per log line. It also caught only IOException, so an
+        ''' UnauthorizedAccessException escaped into the caller.
+        ''' </summary>
         Private Sub AppendLog(message As String)
-            ' Ensure the log path is updated before writing
-            SetLogFilePath()
-
-            Dim attempts As Integer = 0
-            Dim success As Boolean = False
-
-            Do While attempts < 5 AndAlso Not success
-                Try
-                    ' Try to write the log entry
-                    File.AppendAllText(logPath, $"{DateTime.Now:HH:mm:ss} - {message}{Environment.NewLine}")
-                    success = True ' If successful, exit loop
-                Catch ex As IOException
-                    attempts += 1
-                    If attempts >= 5 Then
-                        ' If max attempts reached, log to Debug or Console
-                        Debug.WriteLine($"Failed to write log: {ex.Message}")
-                    Else
-                        ' Wait 200ms before retrying
-                        Threading.Thread.Sleep(200)
-                    End If
-                End Try
-            Loop
+            BkLog(message)
         End Sub
 
 
@@ -490,29 +499,10 @@ Namespace AutoDeleteData
 
             If Not monitoring Then Exit Sub ' Prevent stopping when already stopped
 
-            AppendLog("Stopping monitoring...")
-            For Each key In watchers.Keys.ToList() ' Ensure keys don't change during iteration
-                Dim watcher = watchers(key)
-                If watcher IsNot Nothing Then
-                    AppendLog($"Disposing watcher for: {key}")
-                    ' Remove handlers explicitly
-                    RemoveHandler watcher.Created, AddressOf OnFileCreated
-                    RemoveHandler watcher.Changed, AddressOf OnFileChanged
-                    RemoveHandler watcher.Renamed, AddressOf OnFileRenamed
-
-                    ' Dispose the watcher to ensure it stops listening to events
-                    Try
-                        watcher.Dispose()
-                    Catch ex As Exception
-                        AppendLog($"Error disposing watcher for {key}: {ex.Message}")
-                    End Try
-                End If
-            Next
-
-            watchers.Clear() ' Ensure no remaining watchers
+            ' Cancels every engine thread, disposes the watchers and flushes the log queue.
+            StopBackupEngine()
             monitoring = False
-            AppendLog("Monitoring stopped.")
-
+            lblMonitoringStatus.Text = "Status : Stopped ..."
         End Sub
 
         Private Async Sub OnFileCreated(sender As Object, e As FileSystemEventArgs)
@@ -752,18 +742,27 @@ Namespace AutoDeleteData
 
 
         Private Sub WriteLog(file As String, content As String)
-            If Not Directory.Exists(Path.GetDirectoryName(file)) Then
-                Directory.CreateDirectory(Path.GetDirectoryName(file))
-            End If
-            Dim fileloaded As Boolean
-            While Not fileloaded
-                Try
-                    IO.File.AppendAllText(file, content)
-                    fileloaded = True
-                Catch ex As Exception
-                    fileloaded = False
-                End Try
-            End While
+            ' This used to be an unbounded retry loop with no sleep. If the append failed for
+            ' a non-transient reason (disk full, file locked, permissions, drive offline) it
+            ' spun at 100% CPU forever and never returned. Bounded retries with a sleep, and
+            ' it gives up quietly.
+            Try
+                Dim dir As String = Path.GetDirectoryName(file)
+                If Not String.IsNullOrEmpty(dir) AndAlso Not Directory.Exists(dir) Then
+                    Directory.CreateDirectory(dir)
+                End If
+
+                For attempt As Integer = 1 To 10
+                    Try
+                        IO.File.AppendAllText(file, content)
+                        Exit Sub
+                    Catch ex As Exception
+                        System.Threading.Thread.Sleep(200)
+                    End Try
+                Next
+            Catch ex As Exception
+                ' Logging must never take down a caller.
+            End Try
         End Sub
 
         Private Sub btnClearLogs_Click(sender As Object, e As EventArgs) Handles btnClearLogs.Click
@@ -782,11 +781,13 @@ Namespace AutoDeleteData
         Private Sub btnViewLog_Click(sender As Object, e As EventArgs) Handles btnViewLog.Click
 
             Try
-                    Process.Start(logpath)
-                Catch ex As Exception
-                    ' Optional: Handle/log the exception
-                End Try
+                ' Recompute first: AppendLog no longer refreshes logPath on every line, so
+                ' after midnight the cached value would point at yesterday's file.
+                SetLogFilePath()
+                Process.Start(logPath)
+            Catch ex As Exception
+                ' Optional: Handle/log the exception
+            End Try
 
         End Sub
-    End Class
-End Namespace
+End Class

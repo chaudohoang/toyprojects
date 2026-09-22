@@ -347,8 +347,13 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
                             }
                         }
                         // Record the host the send was actually attempted on, not cfg.PrimaryHost.
+                        // fin.FailWhy fills the reason column: these rows become "index gave up" /
+                        // "host gave up", and they used to carry an EMPTY reason — hundreds a day
+                        // at LGD saying that it failed but never why, which is what made the
+                        // 2026-09-18 outage take four machines' session logs to diagnose.
                         foreach (var mf in manifests.OrderBy(f => f.RemotePath == job.UploadHostPath ? 1 : 0))
-                            rawLog.Write(mf, cfg.MaxAttempts, fin.Host, job, job.Day);
+                            rawLog.Write(mf, cfg.MaxAttempts, fin.Host, job, job.Day,
+                                         mf.Status == FileStatus.Failed ? fin.FailWhy : "");
                         job.Finalized = true;   // live engine is done; the NG pump owns it now
                         Log($"panel {job.Pid}: manifest NG after {cfg.MaxAttempts} attempts " +
                             $"(index {(fin.IdxOk ? "sent" : "failed")}, host {(fin.HostOk ? "sent" : "failed")}) — moved to NG list");
@@ -705,6 +710,7 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
             if (Paused || _rolloverPending)
             {
                 await _ftp.EndSession();   // don't hold an idle FTP session open while paused
+                await _manifestFtp.EndSession();
                 await Task.Delay(cfg.PollIntervalMs, stopping);
                 continue;
             }
@@ -714,6 +720,11 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
             if (next is null)
             {
                 await _ftp.EndSession();   // nothing to send — close the reused connection until work arrives
+                // The manifest session must be recycled here too. It used to be created once and
+                // never closed, so a single abort left index/host permanently broken while the data
+                // pump — which DOES close on idle — kept working and hid the fault. That is exactly
+                // what LGD saw: images arriving, .idx/.txt silently stopped for four days.
+                await _manifestFtp.EndSession();
                 await Task.Delay(cfg.PollIntervalMs, stopping);
                 continue;
             }
@@ -940,7 +951,12 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
                 else
                 {
                     f.Status = FileStatus.Pending;
-                    rawLog.Write(f, cfg.MaxAttempts, host, job, job?.Day);
+                    // Carry the reason on the RETRY row too, not only on the final give-up. Without
+                    // it a per-file timeout was indistinguishable from any other failed attempt:
+                    // the day log showed "attempt failed, queued to try again" with a blank reason,
+                    // while the panel timeout had a row of its own. The 20 s file limit was doing
+                    // the damage at LGD and was the one thing the log never named.
+                    rawLog.Write(f, cfg.MaxAttempts, host, job, job?.Day, Reasonable(result.Message));
                     lock (_gate) _queue.Insert(0, f);   // retry, switching IP at attempt 3
                 }
                 break;

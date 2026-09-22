@@ -25,10 +25,8 @@ Namespace AutoDeleteData
         Public appdir As String
         Public settingPath As String
         Private allowVisible As Boolean = True
-        Public DeleteTask As Tasks.Task
-        Public CheckDiskTask As Tasks.Task
-        Public DeleteTaskTasksCancellationTokenSource As New CancellationTokenSource
-        Public CheckDiskTaskTasksCancellationTokenSource As New CancellationTokenSource
+        ' DeleteTask / CheckDiskTask / the two CancellationTokenSource fields were removed.
+        ' Worker lifetime and cancellation are owned by MonitorEngine (monitorSlots / monitorCts).
 
         <DllImport("User32.dll")>
         Private Shared Function GetLastInputInfo(ByRef plii As MainForm.LASTINPUTINFO) As Boolean
@@ -97,6 +95,7 @@ Namespace AutoDeleteData
             LoadExcludedFolderNames()
             LoadExcludedFolderPaths()
             LoadCreationSetting()
+            RefreshMonitorConfig()
             If MonitorAutomaticallyToolStripMenuItem.Checked = True Then
                 startMonitor()
             End If
@@ -599,11 +598,15 @@ Namespace AutoDeleteData
             Dim folderInfo As New IO.DirectoryInfo(folderPath)
             Dim fileSize As Long = 0
 
-            For Each file In folderInfo.GetFiles()
+            ' Enumerate lazily. This recurses over whole data trees, and GetFiles/GetDirectories
+            ' allocate one full array per level — on a folder with tens of thousands of files that
+            ' array lands on the large object heap for no reason. Nothing here mutates the tree,
+            ' so a streaming walk is safe.
+            For Each file In folderInfo.EnumerateFiles()
                 fileSize += file.Length
             Next
 
-            For Each subfolder In folderInfo.GetDirectories()
+            For Each subfolder In folderInfo.EnumerateDirectories()
                 fileSize += GetDirectorySize(subfolder.FullName)
             Next
 
@@ -631,11 +634,11 @@ Namespace AutoDeleteData
         End Sub
 
         Function ShouldExcludeFile(file As FileInfo, exludeFileNameList As List(Of String), logpath As String) As Boolean
-            ' Check if the checkbox is checked
-            If chkSkipFileLastCreationTime.Checked Then
+            ' Reads the snapshot taken on the UI thread, not the controls - see RefreshMonitorConfig.
+            If cfgSkipFileLastCreationTime Then
                 ' Parse the value from txtFileLastCreationTimeToSkip
                 Dim minutesToSkip As Integer
-                If Integer.TryParse(txtFileLastCreationTimeToSkip.Text.Trim(), minutesToSkip) Then
+                If Integer.TryParse(cfgFileMinutesToSkipText.Trim(), minutesToSkip) Then
                     ' Check if the file's creation time is within the specified minutes range
                     If (DateTime.Now - file.CreationTime).TotalMinutes <= minutesToSkip Then
                         ' Log a message indicating that the file is excluded based on creation time
@@ -649,14 +652,14 @@ Namespace AutoDeleteData
             End If
 
             ' Continue with the existing logic for excluding files based on the pattern list
-            Return exludeFileNameList.Any(Function(pattern) New Regex("^" & Regex.Escape(pattern).Replace("\*", ".*").Replace("\?", ".") & "$", RegexOptions.IgnoreCase).IsMatch(file.Name))
+            Return exludeFileNameList.Any(Function(pattern) WildcardRegex(pattern).IsMatch(file.Name))
         End Function
 
         Function ShouldExcludeFolderName(ByVal folder As DirectoryInfo, exludeFolderNameList As List(Of String), logpath As String) As Boolean
-            ' Check if the checkbox is checked
-            If chkSkipFolderLastCreationTime.Checked Then
+            ' Reads the snapshot taken on the UI thread, not the controls - see RefreshMonitorConfig.
+            If cfgSkipFolderLastCreationTime Then
                 ' Parse the value from txtFolderLastCreationTimeToSkip
-                Dim timeToSkipStr As String = txtFolderLastCreationTimeToSkip.Text.Trim()
+                Dim timeToSkipStr As String = cfgFolderMinutesToSkipText.Trim()
                 ' Try to parse the minutes value from the text box
                 Dim minutesToSkip As Integer
                 If Integer.TryParse(timeToSkipStr, minutesToSkip) Then
@@ -673,14 +676,14 @@ Namespace AutoDeleteData
             End If
 
             ' Continue with the existing logic for excluding folders based on the pattern list
-            Return exludeFolderNameList.Any(Function(pattern) New Regex("^" & Regex.Escape(pattern).Replace("\*", ".*").Replace("\?", ".") & "$", RegexOptions.IgnoreCase).IsMatch(folder.Name))
+            Return exludeFolderNameList.Any(Function(pattern) WildcardRegex(pattern).IsMatch(folder.Name))
         End Function
 
         Function ShouldExcludeFolderPath(ByVal folder As DirectoryInfo, exludeFolderPathList As List(Of String), logpath As String) As Boolean
-            ' Check if the checkbox is checked
-            If chkSkipFolderLastCreationTime.Checked Then
+            ' Reads the snapshot taken on the UI thread, not the controls - see RefreshMonitorConfig.
+            If cfgSkipFolderLastCreationTime Then
                 ' Parse the value from txtFolderLastCreationTimeToSkip
-                Dim timeToSkipStr As String = txtFolderLastCreationTimeToSkip.Text.Trim()
+                Dim timeToSkipStr As String = cfgFolderMinutesToSkipText.Trim()
                 ' Try to parse the minutes value from the text box
                 Dim minutesToSkip As Integer
                 If Integer.TryParse(timeToSkipStr, minutesToSkip) Then
@@ -697,29 +700,44 @@ Namespace AutoDeleteData
             End If
 
             ' Continue with the existing logic for excluding folders based on the pattern list
-            Return exludeFolderPathList.Any(Function(pattern) New Regex("^" & Regex.Escape(pattern).Replace("\*", ".*").Replace("\?", ".") & "$", RegexOptions.IgnoreCase).IsMatch(folder.FullName))
+            Return exludeFolderPathList.Any(Function(pattern) WildcardRegex(pattern).IsMatch(folder.FullName))
         End Function
 
         Sub DeleteFilesAndFolders(ByVal parentDirectory As DirectoryInfo, ByVal period As Integer, ByVal subfolderlevel As Integer, ByVal logpath As String, ByVal topLevelDirectoryPath As String)
 
-            Dim excludedFolderNames As New List(Of String)(txtExcludeFolderNames.Text.Split({Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries))
+            ' These used to be rebuilt from the TextBoxes on every directory visited - a blocking
+            ' SendMessage to the UI thread per folder, plus a fresh List allocation. They are now
+            ' the snapshot taken once on the UI thread.
+            Dim excludedFolderNames As List(Of String) = cfgExcludeFolderNames
 
             If ShouldExcludeFolderName(parentDirectory, excludedFolderNames, logpath) Then
                 Return ' Skip deletion and recursion if parent folder matches the name
             End If
 
-            Dim excludedFolderPaths As New List(Of String)(txtExcludeFolderPaths.Text.Split({Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries))
+            Dim excludedFolderPaths As List(Of String) = cfgExcludeFolderPaths
 
             If ShouldExcludeFolderPath(parentDirectory, excludedFolderPaths, logpath) Then
                 Return ' Skip deletion and recursion if parent folder matches the name
             End If
 
-            Dim excludedFileNames As New List(Of String)(txtExcludeFileNames.Text.Split({Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries))
+            Dim excludedFileNames As List(Of String) = cfgExcludeFileNames
 
             ' If subfolderlevel is 0, process the current directory
             If subfolderlevel = 0 Then
+                ' Enumerate defensively. GetFiles/GetDirectories throw UnauthorizedAccessException,
+                ' PathTooLongException, and DirectoryNotFoundException (folder deleted underneath us
+                ' by TrueTest or by the disk-space pass). Previously any of those unwound the whole
+                ' recursion and killed the monitoring loop for this row.
+                Dim filesHere As FileInfo()
+                Try
+                    filesHere = parentDirectory.GetFiles()
+                Catch ex As Exception
+                    WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Cannot list files in " + parentDirectory.FullName + ", skipped : " + ex.Message + Environment.NewLine)
+                    Exit Sub
+                End Try
+
                 ' Delete files in the current directory
-                For Each file As FileInfo In parentDirectory.GetFiles()
+                For Each file As FileInfo In filesHere
                     If ShouldExcludeFile(file, excludedFileNames, logpath) Then
                         Continue For ' Skip deletion of excluded files
                     End If
@@ -735,17 +753,33 @@ Namespace AutoDeleteData
                 Next
 
                 ' Recursively delete files in subdirectories
-                For Each directory As DirectoryInfo In parentDirectory.GetDirectories()
+                Dim subDirsHere As DirectoryInfo()
+                Try
+                    subDirsHere = parentDirectory.GetDirectories()
+                Catch ex As Exception
+                    WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Cannot list subfolders in " + parentDirectory.FullName + ", skipped : " + ex.Message + Environment.NewLine)
+                    Exit Sub
+                End Try
+
+                For Each directory As DirectoryInfo In subDirsHere
                     DeleteFilesAndFolders(directory, period, 0, logpath, topLevelDirectoryPath)
                 Next
 
                 ' Delete the parent directory if it's empty and not the top-level directory
-                If parentDirectory.FullName <> topLevelDirectoryPath AndAlso parentDirectory.GetFiles().Length = 0 AndAlso parentDirectory.GetDirectories().Length = 0 Then
+                Dim isEmptyNow As Boolean = False
+                Try
+                    ' Stops at the first entry instead of materialising two arrays to read .Length.
+                    isEmptyNow = Not parentDirectory.EnumerateFileSystemInfos().Any()
+                Catch ex As Exception
+                    Exit Sub
+                End Try
+
+                If parentDirectory.FullName <> topLevelDirectoryPath AndAlso isEmptyNow Then
                     ' Check if the checkbox for skipping folder last creation time is checked
-                    If chkSkipFolderLastCreationTime.Checked Then
+                    If cfgSkipFolderLastCreationTime Then
                         ' Parse the value from txtFolderLastCreationTimeToSkip
                         Dim minutesToSkip As Integer
-                        If Integer.TryParse(txtFolderLastCreationTimeToSkip.Text.Trim(), minutesToSkip) Then
+                        If Integer.TryParse(cfgFolderMinutesToSkipText.Trim(), minutesToSkip) Then
                             ' Check if the parent directory's creation time is within the specified minutes range
                             Dim directoryCreationTime As DateTime = Directory.GetCreationTime(parentDirectory.FullName)
                             If (DateTime.Now - directoryCreationTime).TotalMinutes <= minutesToSkip Then
@@ -771,7 +805,15 @@ Namespace AutoDeleteData
                 End If
             Else
                 ' If subfolderlevel > 0, process each subdirectory as a new parentDirectory
-                For Each directory As DirectoryInfo In parentDirectory.GetDirectories()
+                Dim childDirs As DirectoryInfo()
+                Try
+                    childDirs = parentDirectory.GetDirectories()
+                Catch ex As Exception
+                    WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Cannot list subfolders in " + parentDirectory.FullName + ", skipped : " + ex.Message + Environment.NewLine)
+                    Exit Sub
+                End Try
+
+                For Each directory As DirectoryInfo In childDirs
                     DeleteFilesAndFolders(directory, period, subfolderlevel - 1, logpath, topLevelDirectoryPath)
                 Next
             End If
@@ -780,9 +822,9 @@ Namespace AutoDeleteData
 
 
         Sub DeleteOldestFilesAndSubfolders(ByVal foldersToDelete As List(Of String), ByVal targetSizeGB As Double, ByVal subfolderlevelsToDelete As List(Of Integer), ByVal logpath As String)
-            Dim excludedFolderNames As New List(Of String)(txtExcludeFolderNames.Text.Split({Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries))
-            Dim excludedFolderPaths As New List(Of String)(txtExcludeFolderPaths.Text.Split({Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries))
-            Dim excludedFilesNames As New List(Of String)(txtExcludeFileNames.Text.Split({Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries))
+            Dim excludedFolderNames As List(Of String) = cfgExcludeFolderNames
+            Dim excludedFolderPaths As List(Of String) = cfgExcludeFolderPaths
+            Dim excludedFilesNames As List(Of String) = cfgExcludeFileNames
 
             Dim allFiles As New List(Of FileSystemInfo)
             Dim emptiedFolders As New List(Of DirectoryInfo)
@@ -836,10 +878,10 @@ Namespace AutoDeleteData
                         Dim directory As DirectoryInfo = DirectCast(item, DirectoryInfo)
                         If DirectoryIsEmpty(directory) AndAlso Not IsFolderNameExcluded(directory, excludedFolderNames) AndAlso Not IsFolderPathExcluded(directory, excludedFolderPaths) AndAlso Not foldersToDelete.Contains(directory.FullName) Then
                             ' Check if the checkbox is checked
-                            If chkSkipFolderLastCreationTime.Checked Then
+                            If cfgSkipFolderLastCreationTime Then
                                 ' Parse the value from txtFolderLastCreationTimeToSkip as an integer
                                 Dim minutesToSkip As Integer
-                                If Integer.TryParse(txtFolderLastCreationTimeToSkip.Text, minutesToSkip) Then
+                                If Integer.TryParse(cfgFolderMinutesToSkipText, minutesToSkip) Then
                                     ' Check if the folder was created within the specified time frame
                                     If (DateTime.Now - directory.CreationTime).TotalMinutes > minutesToSkip Then
                                         directory.Delete()
@@ -881,10 +923,10 @@ Namespace AutoDeleteData
             If folder Is Nothing Then Return
 
             ' Check if the checkbox is checked
-            If chkSkipFolderLastCreationTime.Checked Then
+            If cfgSkipFolderLastCreationTime Then
                 ' Parse the value from txtFolderLastCreationTimeToSkip as an integer
                 Dim minutesToSkip As Integer
-                If Integer.TryParse(txtFolderLastCreationTimeToSkip.Text, minutesToSkip) Then
+                If Integer.TryParse(cfgFolderMinutesToSkipText, minutesToSkip) Then
                     ' Skip deleting if the folder was created within the specified time frame
                     If (DateTime.Now - folder.CreationTime).TotalMinutes <= minutesToSkip Then
                         WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Skipped deleting empty folder created in the last {minutesToSkip} minutes: {folder.FullName}" + Environment.NewLine)
@@ -915,18 +957,24 @@ Namespace AutoDeleteData
             ' Check if current directory should be skipped (level > 0)
             If level > 0 Then
                 ' Recursively add files and folders from subdirectories
-                For Each subDir As DirectoryInfo In directory.GetDirectories()
+                For Each subDir As DirectoryInfo In directory.EnumerateDirectories()
                     filesAndFolders.AddRange(GetAllFilesAndFolders(subDir, level - 1))
                 Next
             Else
                 ' Add files and folders from the current directory
                 filesAndFolders.Add(directory)
-                filesAndFolders.AddRange(directory.GetFiles())
-                filesAndFolders.AddRange(directory.GetDirectories())
 
-                ' Recursively add files and folders from subdirectories (level = 0)
-                For Each subDir As DirectoryInfo In directory.GetDirectories()
-                    filesAndFolders.AddRange(GetAllFilesAndFolders(subDir, level))
+                ' One lazy pass per folder. This used to be GetFiles() + GetDirectories() for the
+                ' list plus a SECOND GetDirectories() to drive the recursion: three arrays and two
+                ' directory scans at every level of the tree. The caller still needs the whole list
+                ' (it sorts every entry by creation time), so only the per-level garbage goes away —
+                ' the order changes to depth-first, which is irrelevant to a caller that sorts.
+                For Each entry As FileSystemInfo In directory.EnumerateFileSystemInfos()
+                    filesAndFolders.Add(entry)
+                    Dim subDir As DirectoryInfo = TryCast(entry, DirectoryInfo)
+                    If subDir IsNot Nothing Then
+                        filesAndFolders.AddRange(GetAllFilesAndFolders(subDir, level))
+                    End If
                 Next
             End If
 
@@ -936,7 +984,9 @@ Namespace AutoDeleteData
 
 
         Function DirectoryIsEmpty(ByVal directory As DirectoryInfo) As Boolean
-            Return (directory.GetFiles().Length = 0 AndAlso directory.GetDirectories().Length = 0)
+            ' Called once per folder entry in the disk-space pass, so the two throwaway arrays the
+            ' old .Length test allocated added up. This stops at the first entry found.
+            Return Not directory.EnumerateFileSystemInfos().Any()
         End Function
 
         Function GetCreationTime(ByVal item As FileSystemInfo) As DateTime
@@ -950,15 +1000,15 @@ Namespace AutoDeleteData
 
         Function ShouldStopDeleting(ByVal file As FileInfo, ByVal excludeFolderNames As List(Of String), ByVal excludeFolderPaths As List(Of String), ByVal excludeFileNames As List(Of String), ByVal logpath As String) As Boolean
 
-            If excludeFileNames.Any(Function(pattern) New Regex("^" & Regex.Escape(pattern).Replace("\*", ".*").Replace("\?", ".") & "$", RegexOptions.IgnoreCase).IsMatch(file.Name)) Then Return True
+            If excludeFileNames.Any(Function(pattern) WildcardRegex(pattern).IsMatch(file.Name)) Then Return True
             If IsFolderNameExcluded(file.Directory, excludeFolderNames) Then Return True
             If IsFolderPathExcluded(file.Directory, excludeFolderPaths) Then Return True
 
             ' Check if the checkbox is checked
-            If chkSkipFileLastCreationTime.Checked Then
+            If cfgSkipFileLastCreationTime Then
                 ' Parse the value from txtFileLastCreationTimeToSkip as an integer
                 Dim minutesToSkip As Integer
-                If Integer.TryParse(txtFileLastCreationTimeToSkip.Text.Trim, minutesToSkip) Then
+                If Integer.TryParse(cfgFileMinutesToSkipText.Trim, minutesToSkip) Then
                     ' Skip files created within the specified time frame
                     If (DateTime.Now - file.CreationTime).TotalMinutes <= minutesToSkip Then Return True
                 Else
@@ -972,13 +1022,13 @@ Namespace AutoDeleteData
 
         Function IsFolderNameExcluded(ByVal directory As DirectoryInfo, ByVal excludeFolderNames As List(Of String)) As Boolean
             If directory Is Nothing Then Return False
-            If excludeFolderNames.Any(Function(pattern) New Regex("^" & Regex.Escape(pattern).Replace("\*", ".*").Replace("\?", ".") & "$", RegexOptions.IgnoreCase).IsMatch(directory.Name)) Then Return True
+            If excludeFolderNames.Any(Function(pattern) WildcardRegex(pattern).IsMatch(directory.Name)) Then Return True
             Return IsFolderNameExcluded(directory.Parent, excludeFolderNames)
         End Function
 
         Function IsFolderPathExcluded(ByVal directory As DirectoryInfo, ByVal excludeFolderPaths As List(Of String)) As Boolean
             If directory Is Nothing Then Return False
-            If excludeFolderPaths.Any(Function(pattern) New Regex("^" & Regex.Escape(pattern).Replace("\*", ".*").Replace("\?", ".") & "$", RegexOptions.IgnoreCase).IsMatch(directory.FullName)) Then Return True
+            If excludeFolderPaths.Any(Function(pattern) WildcardRegex(pattern).IsMatch(directory.FullName)) Then Return True
             Return IsFolderPathExcluded(directory.Parent, excludeFolderPaths)
         End Function
 
@@ -1025,12 +1075,14 @@ Namespace AutoDeleteData
 
                             Next
 
-                            WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Nothing to delete in Drive {driveLetter} " + Environment.NewLine)
-
-                            Dim deletelogpath As String = logpath
-                            Dim DeleteTask = New Tasks.Task(New Action(Sub() DeleteCurrentWithSize(foldersToDelete, minimumGB, subfolderlevelsToDelete, deletelogpath)))
-                            DeleteTask.Start()
-
+                            ' Run the delete inline instead of spawning a fire-and-forget Task.
+                            ' The old version started a new delete pass on every check cycle, so a
+                            ' pass that took longer than the check interval piled up: several
+                            ' threads walking and deleting the same tree at once, which is what
+                            ' produced the DirectoryNotFoundException races.
+                            If foundFolderToDelete Then
+                                DeleteCurrentWithSize(foldersToDelete, minimumGB, subfolderlevelsToDelete, logpath)
+                            End If
 
                             If Not foundFolderToDelete Then
                                 WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Nothing to delete in Drive {driveLetter} " + Environment.NewLine)
@@ -1053,152 +1105,14 @@ Namespace AutoDeleteData
 
         End Sub
 
-        Private Sub DeleteCurrentAtPeriodWithWait(currentRowIndex As Integer, path As String, period As Integer, subfolderlevel As Integer, wait As Integer, logpath As String)
-
-            While True
-                If DeleteTaskTasksCancellationTokenSource.IsCancellationRequested Then
-                    Exit Sub
-                End If
-                Dim sw = New Stopwatch
-                sw.Start()
-                While sw.ElapsedMilliseconds < 1000 * wait
-                    If DeleteTaskTasksCancellationTokenSource.IsCancellationRequested Then
-
-                        Exit Sub
-                    End If
-                    System.Threading.Thread.Sleep(100)
-                    dataGridView1.Invoke(Sub()
-                                             dataGridView1.Rows(currentRowIndex).Cells(4).Value = Math.Floor(((wait + 1) - sw.ElapsedMilliseconds / 1000)).ToString
-                                         End Sub)
-                End While
-
-                Dim Deleting As Boolean = False
-                If Not Deleting Then
-
-                    Deleting = True
-                    WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Start Deleting " + path + Environment.NewLine)
-
-                    If Directory.Exists(path) Then
-                        Dim directory As New IO.DirectoryInfo(path)
-
-                        ' Recursively delete files in all subdirectories and delete empty directories
-                        DeleteFilesAndFolders(directory, period, subfolderlevel, logpath, path)
-
-                    Else
-                        WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Not existed " + path + Environment.NewLine)
-                    End If
-
-                    Deleting = False
-                    WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Finish Deleting " + path + Environment.NewLine)
-
-                Else
-                    WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Still Deleting " + path + " ,start again after " + wait.ToString + " seconds" + Environment.NewLine)
-
-                End If
-
-            End While
-
-
+        Private Sub DeleteCurrentAtPeriodWithWaitRemoved()
+            ' Replaced by MonitorEngine.RunSlotLoop. Kept as a marker so the old name is
+            ' searchable in git history; the body is gone.
         End Sub
 
-        Private Sub CheckDiskSpaceWithWait(currentRowIndex As Integer, driveLetter As String, minimumGB As Double, wait As Integer, logpath As String)
-
-            While True
-                If CheckDiskTaskTasksCancellationTokenSource.IsCancellationRequested Then
-                    Exit Sub
-                End If
-                Dim sw = New Stopwatch
-                sw.Start()
-                While sw.ElapsedMilliseconds < 1000 * wait
-                    If CheckDiskTaskTasksCancellationTokenSource.IsCancellationRequested Then
-
-                        Exit Sub
-                    End If
-                    System.Threading.Thread.Sleep(100)
-                    dataGridView2.Invoke(Sub()
-                                             dataGridView2.Rows(currentRowIndex).Cells(3).Value = Math.Floor(((wait + 1) - sw.ElapsedMilliseconds / 1000)).ToString
-                                         End Sub)
-                End While
-
-                Dim Checking As Boolean = False
-
-                If Not Checking Then
-
-                    Checking = True
-
-                    WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Start Checking " + driveLetter + Environment.NewLine)
-
-                    Try
-                        Dim driveInfo As New DriveInfo(driveLetter)
-
-                        If driveInfo.IsReady Then
-                            Dim availableSpaceInBytes As Long = driveInfo.AvailableFreeSpace
-                            Dim availableSpaceInMB As Double = CDbl(availableSpaceInBytes) / (1024 * 1024)
-                            Dim availableSpaceInGB As Double = availableSpaceInMB / 1024
-                            WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Drive {driveLetter} has : {availableSpaceInGB:F2} GB Available Space" + Environment.NewLine)
-                            If availableSpaceInGB < minimumGB Then
-                                WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Drive {driveLetter} has less than : {minimumGB:F2} GB Available Space" + Environment.NewLine)
-                                WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Start Deleting old files in Drive {driveLetter} " + Environment.NewLine)
-                                If dataGridView3 IsNot Nothing Then
-                                    Dim foldersToDelete As New List(Of String)
-                                    Dim subfolderlevelsToDelete As New List(Of Integer)
-                                    Dim foundFolderToDelete As Boolean
-                                    For i = 0 To dataGridView3.RowCount - 1
-                                        Dim rowIndex As Integer = dataGridView3.Rows(i).Cells(0).RowIndex
-                                        If String.IsNullOrEmpty(dataGridView3.Rows(rowIndex).Cells(0).Value) Then Continue For
-                                        Dim path As String = dataGridView3.Rows(rowIndex).Cells(0).Value.ToString()
-                                        Dim subfolderlevel As Integer = dataGridView3.Rows(rowIndex).Cells(1).Value.ToString()
-                                        Dim deleteDriveLetter As String = ""
-                                        Try
-                                            deleteDriveLetter = IO.Path.GetPathRoot(path).Replace(":\", "")
-                                        Catch ex As Exception
-                                        End Try
-                                        If deleteDriveLetter <> driveLetter Then
-                                            Continue For
-                                        Else
-                                            foundFolderToDelete = True
-                                        End If
-
-                                        ' Collect folders to be processed
-                                        foldersToDelete.Add(path)
-                                        subfolderlevelsToDelete.Add(subfolderlevel)
-                                        WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Added  {path} to delete list " + Environment.NewLine)
-                                    Next
-
-                                    Dim deletelogpath As String = logpath
-                                    Dim DeleteTask = New Tasks.Task(New Action(Sub() DeleteCurrentWithSize(foldersToDelete, minimumGB, subfolderlevelsToDelete, deletelogpath)))
-                                    DeleteTask.Start()
-
-
-                                    If Not foundFolderToDelete Then
-                                        WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Nothing to delete in Drive {driveLetter} " + Environment.NewLine)
-                                    End If
-                                End If
-
-                                WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Finish Deleting old files in Drive {driveLetter} " + Environment.NewLine)
-                            End If
-                        Else
-                            WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"Drive {driveLetter} is not ready." + Environment.NewLine)
-                        End If
-
-
-                    Catch ex As Exception
-                        WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + $"An error occurred: {ex.Message}" + Environment.NewLine)
-                    End Try
-
-                    Checking = False
-
-                    WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Finish Checking " + driveLetter + Environment.NewLine)
-
-                Else
-
-                    WriteLog(logpath, Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Still Checking " + driveLetter + " ,start again after " + wait.ToString + " seconds" + Environment.NewLine)
-
-                End If
-
-            End While
-
-
+        Private Sub CheckDiskSpaceWithWaitRemoved()
+            ' Replaced by MonitorEngine.RunSlotLoop. Kept as a marker so the old name is
+            ' searchable in git history; the body is gone.
         End Sub
 
         Private Sub cmdStartMonitor_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles cmdStartMonitor.LinkClicked
@@ -1217,55 +1131,9 @@ Namespace AutoDeleteData
                     MessageBox.Show(Now.ToString("yyyyMMdd HH:mm:ss") + " : " + "Cannot create log folder, use application folder instead !" + Environment.NewLine)
                 End Try
             End If
-            If dataGridView1 IsNot Nothing AndAlso chkMonitorFolders.Checked = True Then
-                DeleteTaskTasksCancellationTokenSource = New CancellationTokenSource
-                For i = 0 To dataGridView1.RowCount - 1
-
-                    Dim rowIndex As Integer = dataGridView1.Rows(i).Cells(0).RowIndex
-                    If String.IsNullOrEmpty(dataGridView1.Rows(rowIndex).Cells(0).Value) Then Continue For
-                    Dim path As String = dataGridView1.Rows(rowIndex).Cells(0).Value.ToString()
-                    Dim waitTime As New Integer
-                    If Not Int32.TryParse(dataGridView1.Rows(rowIndex).Cells(1).Value, waitTime) Then
-                        waitTime = 60
-                    End If
-                    Dim period As Integer = dataGridView1.Rows(rowIndex).Cells(2).Value
-                    Dim subfolderlevel As Integer = dataGridView1.Rows(rowIndex).Cells(3).Value
-                    Dim logpath As String = ""
-                    If Directory.Exists(txtLogpath.Text) Then
-                        logpath = txtLogpath.Text + "\autodeletedatalog_" + path.Replace("\", "-").Replace(":", "") + "_" + Now.ToString("yyyyMMdd") + ".txt"
-                    Else
-                        logpath = appdir + "\Log\autodeletedatalog_" + path.Replace("\", "-").Replace(":", "") + "_" + Now.ToString("yyyyMMdd") + ".txt"
-
-                    End If
-
-                    DeleteTask = New Tasks.Task(New Action(Sub() DeleteCurrentAtPeriodWithWait(rowIndex, path, period, subfolderlevel, waitTime, logpath)), DeleteTaskTasksCancellationTokenSource.Token)
-                    DeleteTask.Start()
-                Next
-
-            End If
-            If dataGridView2 IsNot Nothing AndAlso chkMonitorDisk.Checked = True Then
-                CheckDiskTaskTasksCancellationTokenSource = New CancellationTokenSource
-                For i = 0 To dataGridView2.RowCount - 1
-
-                    Dim rowIndex As Integer = dataGridView2.Rows(i).Cells(0).RowIndex
-                    If String.IsNullOrEmpty(dataGridView2.Rows(rowIndex).Cells(0).Value) Then Continue For
-                    Dim driveLetter As String = dataGridView2.Rows(rowIndex).Cells(0).Value.ToString()
-                    Dim waitTime As New Integer
-                    If Not Int32.TryParse(dataGridView2.Rows(rowIndex).Cells(1).Value, waitTime) Then
-                        waitTime = 60
-                    End If
-                    Dim minimumGB As Integer = dataGridView2.Rows(rowIndex).Cells(2).Value
-                    Dim logpath As String = ""
-                    If Directory.Exists(txtLogpath.Text) Then
-                        logpath = txtLogpath.Text + "\autocheckdisklog_" + driveLetter + "_" + Now.ToString("yyyyMMdd") + ".txt"
-                    Else
-                        logpath = appdir + "\Log\autocheckdisklog_" + driveLetter + "_" + Now.ToString("yyyyMMdd") + ".txt"
-                    End If
-                    CheckDiskTask = New Tasks.Task(New Action(Sub() CheckDiskSpaceWithWait(rowIndex, driveLetter, minimumGB, waitTime, logpath)), CheckDiskTaskTasksCancellationTokenSource.Token)
-                    CheckDiskTask.Start()
-                Next
-
-            End If
+            ' All scheduling, countdown rendering and worker supervision now lives in
+            ' MonitorEngine.vb. See StartMonitorEngine / RunSlotLoop / WatchdogSlot.
+            StartMonitorEngine()
 
             lblMonitoringStatus.Invoke(Sub()
                                            lblMonitoringStatus.Text = "Status : Monitoring ..."
@@ -1369,69 +1237,8 @@ Namespace AutoDeleteData
         End Sub
 
         Private Sub stopMonitor()
-            If DeleteTaskTasksCancellationTokenSource IsNot Nothing Then
-                DeleteTaskTasksCancellationTokenSource.Cancel()
-            End If
-            If DeleteTask IsNot Nothing Then
-                If DeleteTask.Status <> TaskStatus.RanToCompletion Then
-                    'Wait a little longer
-                    Dim sw As New Stopwatch
-                    sw.Start()
-                    Do Until DeleteTask.Status = TaskStatus.RanToCompletion
-                        If DeleteTask.Status = TaskStatus.Canceled Then Exit Do
-                        If DeleteTask.Status = TaskStatus.Faulted Then Exit Do
-                        If sw.ElapsedMilliseconds > 1000 Then Exit Do
-                    Loop
-                    sw.Stop()
-                End If
-                If DeleteTask.IsCompleted OrElse DeleteTask.IsCanceled OrElse DeleteTask.IsFaulted Then
-                    DeleteTask.Dispose()
-                End If
-                DeleteTask = Nothing
-            End If
-
-            If CheckDiskTaskTasksCancellationTokenSource IsNot Nothing Then
-                CheckDiskTaskTasksCancellationTokenSource.Cancel()
-            End If
-            If CheckDiskTask IsNot Nothing Then
-                If CheckDiskTask.Status <> TaskStatus.RanToCompletion Then
-                    'Wait a little longer
-                    Dim sw As New Stopwatch
-                    sw.Start()
-                    Do Until CheckDiskTask.Status = TaskStatus.RanToCompletion
-                        If CheckDiskTask.Status = TaskStatus.Canceled Then Exit Do
-                        If CheckDiskTask.Status = TaskStatus.Faulted Then Exit Do
-                        If sw.ElapsedMilliseconds > 1000 Then Exit Do
-                    Loop
-                    sw.Stop()
-                End If
-                If CheckDiskTask.IsCompleted OrElse CheckDiskTask.IsCanceled OrElse CheckDiskTask.IsFaulted Then
-                    CheckDiskTask.Dispose()
-                End If
-                CheckDiskTask = Nothing
-            End If
-
-            If dataGridView1 IsNot Nothing Then
-                For i = 0 To dataGridView1.RowCount - 1
-
-                    Dim rowIndex As Integer = dataGridView1.Rows(i).Cells(0).RowIndex
-                    dataGridView1.Invoke(Sub()
-                                             dataGridView1.Rows(rowIndex).Cells(4).Value = ""
-                                         End Sub)
-                Next
-
-            End If
-            If dataGridView2 IsNot Nothing Then
-
-                For i = 0 To dataGridView2.RowCount - 1
-
-                    Dim rowIndex As Integer = dataGridView2.Rows(i).Cells(0).RowIndex
-                    dataGridView2.Invoke(Sub()
-                                             dataGridView2.Rows(rowIndex).Cells(3).Value = ""
-                                         End Sub)
-                Next
-
-            End If
+            ' Cancels every worker, waits briefly, and clears the countdown cells.
+            StopMonitorEngine()
 
             lblMonitoringStatus.Invoke(Sub()
                                            lblMonitoringStatus.Text = "Status : Stopped ..."
@@ -1574,18 +1381,27 @@ Namespace AutoDeleteData
         End Sub
 
         Private Sub WriteLog(file As String, content As String)
-            If Not Directory.Exists(Path.GetDirectoryName(file)) Then
-                Directory.CreateDirectory(Path.GetDirectoryName(file))
-            End If
-            Dim fileloaded As Boolean
-            While Not fileloaded
-                Try
-                    IO.File.AppendAllText(file, content)
-                    fileloaded = True
-                Catch ex As Exception
-                    fileloaded = False
-                End Try
-            End While
+            ' This used to be an unbounded retry loop with no sleep. If the append failed for a
+            ' non-transient reason (disk full, file locked, permissions, drive offline) it spun
+            ' at 100% CPU forever and the calling worker never came back - which froze that
+            ' row's countdown permanently. Bounded retries with a sleep, and it gives up quietly.
+            Try
+                Dim dir As String = Path.GetDirectoryName(file)
+                If Not String.IsNullOrEmpty(dir) AndAlso Not Directory.Exists(dir) Then
+                    Directory.CreateDirectory(dir)
+                End If
+
+                For attempt As Integer = 1 To 10
+                    Try
+                        IO.File.AppendAllText(file, content)
+                        Exit Sub
+                    Catch ex As Exception
+                        System.Threading.Thread.Sleep(200)
+                    End Try
+                Next
+            Catch ex As Exception
+                ' Logging must never take down a worker.
+            End Try
         End Sub
 
         Private Sub btnSaveList1_Click(sender As Object, e As EventArgs) Handles btnSaveList1.Click
@@ -1597,6 +1413,8 @@ Namespace AutoDeleteData
         End Sub
 
         Private Sub btnDelSelectedFolder_Click(sender As Object, e As EventArgs) Handles btnDelSelectedFolder.Click
+            ' Snapshot the exclude lists on the UI thread before the background task reads them.
+            RefreshMonitorConfig()
             If dataGridView1 IsNot Nothing Then
                 Dim rowIndex As Integer = dataGridView1.CurrentCell.RowIndex
                 Dim path As String = dataGridView1.Rows(rowIndex).Cells(0).Value.ToString()
@@ -1614,6 +1432,8 @@ Namespace AutoDeleteData
         End Sub
 
         Private Sub btnDelAllFolders_Click(sender As Object, e As EventArgs) Handles btnDelAllFolders.Click
+            ' Snapshot the exclude lists on the UI thread before the background tasks read them.
+            RefreshMonitorConfig()
             If dataGridView1 IsNot Nothing Then
 
                 For i = 0 To dataGridView1.RowCount - 1
@@ -1637,6 +1457,8 @@ Namespace AutoDeleteData
         End Sub
 
         Private Sub btnCheckSelectedDiskFreeSpace_Click(sender As Object, e As EventArgs) Handles btnCheckSelectedDiskFreeSpace.Click
+            ' Snapshot the exclude lists on the UI thread before the background task reads them.
+            RefreshMonitorConfig()
             If dataGridView2 IsNot Nothing Then
                 Dim rowIndex As Integer = dataGridView2.CurrentCell.RowIndex
                 Dim driveLetter As String = dataGridView2.Rows(rowIndex).Cells(0).Value.ToString()
@@ -1653,6 +1475,8 @@ Namespace AutoDeleteData
         End Sub
 
         Private Sub btnCheckAllDiskFreeSpace_Click(sender As Object, e As EventArgs) Handles btnCheckAllDiskFreeSpace.Click
+            ' Snapshot the exclude lists on the UI thread before the background tasks read them.
+            RefreshMonitorConfig()
             If dataGridView2 IsNot Nothing Then
 
                 For i = 0 To dataGridView2.RowCount - 1
@@ -1667,7 +1491,7 @@ Namespace AutoDeleteData
                     Else
                         logpath = appdir + "\Log\autocheckdisklog_" + driveLetter + "_" + Now.ToString("yyyyMMdd") + ".txt"
                     End If
-                    CheckDiskTask = New Tasks.Task(New Action(Sub() CheckDiskSpace(driveLetter, minimumGB, logpath)))
+                    Dim CheckDiskTask = New Tasks.Task(New Action(Sub() CheckDiskSpace(driveLetter, minimumGB, logpath)))
                     CheckDiskTask.Start()
                 Next
 

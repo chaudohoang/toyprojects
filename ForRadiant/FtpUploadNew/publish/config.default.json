@@ -28,7 +28,7 @@
     "PanelTimeoutSeconds":  0,
     "NgRetryCooldownSeconds":  5,
     "LogRetentionDays":  30,
-    "NgRecoveryDays":  1,
+    "NgRecoveryDays":  7,
     "NgBacklogScanDays":  0,
     "PrewarmUi":  true,
     "PrewarmDelaySeconds":  5,

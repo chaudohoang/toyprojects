@@ -10,11 +10,17 @@ namespace FtpUpload;
 ///  • temp-name-then-rename, so an aborted/timed-out transfer never shows under the real name;
 ///  • per-attempt primary/secondary host failover.
 ///
-/// SESSION POLICY: open ONE session and send every file through it. It is reconnected ONLY when it
-/// is actually disconnected (Session.Opened == false), on a host change (failover), or when the
-/// per-session file cap is hit (0 = unlimited). A timed-out / preempted transfer does NOT drop the
-/// session — Session.Abort() cancels just that transfer, and WinSCP reconnects internally if the
-/// connection itself is lost.
+/// SESSION POLICY: open ONE session and send every file through it. It is reconnected when it is
+/// disconnected (Session.Opened == false), on a host change (failover), when the per-session file
+/// cap is hit (0 = unlimited), and — critically — after ANY abort.
+///
+/// Session.Abort() does NOT cancel a single transfer. It tears down the whole session and kills the
+/// underlying WinSCP.exe. Every later call on that Session throws "InvalidOperationException:
+/// Session was aborted", and the manifest path additionally throws "Element session@0 already read
+/// to the end". Worse, Session.Opened STAYS TRUE after an abort, so an Opened-only check silently
+/// reuses the corpse forever. Measured at LGD (302L 2026-09-18 13:08, 502L 2026-09-18 19:55): one
+/// timed-out transfer poisoned the session and index/host upload never recovered again — four days,
+/// ~1800 panels, zero manifests. Hence _aborted, and CloseSession() on every cancellation path.
 /// </summary>
 public sealed class WinScpTransfer : IFtpTransfer
 {
@@ -26,6 +32,26 @@ public sealed class WinScpTransfer : IFtpTransfer
     private Session? _session;
     private string? _sessionHost;
     private int _filesThisSession;
+
+    // Set by the cancellation callback the moment Session.Abort() is called. Session.Opened is NOT
+    // a reliable liveness test after an abort (it stays true), so this is the flag EnsureSession
+    // actually trusts. Cleared only when a fresh session is opened.
+    private volatile bool _aborted;
+
+    // NOTE on capturing the server's own status code (421 / 530 / 550):
+    // Tried and reverted 2026-09-21. WinSCP's exception text does NOT carry the code — a refused
+    // connection is just "Connection failed." — and neither route to the code works from here:
+    //   * Session.OutputDataReceived carries the scripting console output, not the FTP protocol
+    //     lines, so the "< 421 ..." reply never reaches it (verified: nothing captured).
+    //   * Reading the session log while it is open fails — winscp.exe does not share it for
+    //     reading, so the FileStream throws and yields nothing (verified: nothing captured).
+    // The code IS in the per-session log under logs\winscp\, which is where to look when a reason
+    // says "connection to the server was lost" and you need to know why. Doing it in-process would
+    // need WinSCP's XML log parsed after the session closes — worth having, not worth faking.
+
+    // Remote directories this engine has already confirmed/created. Survives a reconnect on purpose
+    // — the folder is still on the server after our connection drops. Serial use, no locking.
+    private readonly HashSet<string> _ensuredDirs = new(StringComparer.Ordinal);
 
     public int SessionNumber { get; private set; }
     public int FilesThisSession => _filesThisSession;
@@ -60,7 +86,7 @@ public sealed class WinScpTransfer : IFtpTransfer
     private void CloseSession()
     {
         var s = _session;
-        _session = null; _sessionHost = null; _filesThisSession = 0;
+        _session = null; _sessionHost = null; _filesThisSession = 0; _aborted = false;
         if (s is null) return;
         try { s.Dispose(); } catch { /* best effort */ }
     }
@@ -69,10 +95,12 @@ public sealed class WinScpTransfer : IFtpTransfer
     {
         var cap = _cfg.MaxFilesPerSession;                        // 0 = unlimited
         var underCap = cap <= 0 || _filesThisSession < cap;
-        if (_reuse && _session is not null && _session.Opened && _sessionHost == host && underCap)
+        // !_aborted comes FIRST: after Session.Abort() the object still reports Opened == true, so
+        // the Opened check alone would hand back a dead session for the life of the process.
+        if (_reuse && !_aborted && _session is not null && _session.Opened && _sessionHost == host && underCap)
             return _session;                                      // reuse the live session
 
-        CloseSession();                                           // host changed / cap / lost / non-reuse
+        CloseSession();                                           // aborted / host changed / cap / lost / non-reuse
 
         var opts = new SessionOptions
         {
@@ -95,6 +123,7 @@ public sealed class WinScpTransfer : IFtpTransfer
             opts.GiveUpSecurityAndAcceptAnyTlsHostCertificate = true;   // CNS self-signed cert
 
         var s = new Session { ExecutablePath = _exePath };
+
 
         // WinSCP's own session log (the full FTP conversation) — one file per connection, in the log
         // folder, like a normal WinSCP setup. Best-effort: never let logging stop an upload.
@@ -140,8 +169,24 @@ public sealed class WinScpTransfer : IFtpTransfer
 
         Session? live = null;
         // Hard timeout / preemption: abort the WinSCP session mid-transfer when the token trips.
-        // Session.Abort() is explicitly safe to call from another thread.
-        using var reg = linked.Token.Register(() => { try { live?.Abort(); } catch { } });
+        // Session.Abort() is explicitly safe to call from another thread. Flag the session dead in
+        // the SAME callback: whoever aborted it, it must never be handed out by EnsureSession again.
+        //
+        // The registration is ONE-SHOT and can fire before the worker has a session to abort — the
+        // timer starts here, but `live` is only assigned after EnsureSession returns, and opening a
+        // fresh connection to an unresponsive server can itself burn the whole budget. The old code
+        // did `live?.Abort()`, so in that window nothing was aborted, nothing was flagged, and the
+        // callback never ran again: the file then transferred with NO time limit at all. Record the
+        // request instead, and let the worker act on it the moment it has the session.
+        var cancelRequested = false;
+        using var reg = linked.Token.Register(() =>
+        {
+            cancelRequested = true;
+            var s = live;
+            if (s is null) return;          // worker will see cancelRequested and abort itself
+            _aborted = true;
+            try { s.Abort(); } catch { }
+        });
 
         try
         {
@@ -150,12 +195,33 @@ public sealed class WinScpTransfer : IFtpTransfer
                 var s = EnsureSession(host);
                 live = s;
 
-                // WinSCP won't create the upload's target directory — ensure it exists first.
-                var parent = RemoteParent(file.RemotePath);
-                if (parent.Length > 0 && !s.FileExists(parent))
+                // Close the race: the deadline may have passed while EnsureSession was opening the
+                // connection, in which case the callback above found `live` null and did nothing.
+                // Honour it here rather than starting a transfer that can no longer be cancelled.
+                if (cancelRequested || linked.Token.IsCancellationRequested)
                 {
-                    try { s.CreateDirectory(parent); }   // creates superior directories too
-                    catch { /* created concurrently by another panel, or exists — ignore */ }
+                    _aborted = true;
+                    try { s.Abort(); } catch { }
+                    linked.Token.ThrowIfCancellationRequested();
+                }
+
+                // WinSCP won't create the upload's target directory — ensure it exists first.
+                // Once per DIRECTORY, not once per file. All ~13 files of a panel share one remote
+                // folder, so the old per-file probe spent PWD+CWD+SIZE round trips (and produced
+                // two 550s) on every single file: 16,285 of the 16,460 server errors in four days
+                // of LGD session logs were this check re-asking a question it had already answered.
+                var parent = RemoteParent(file.RemotePath);
+                if (parent.Length > 0 && !_ensuredDirs.Contains(parent))
+                {
+                    if (!s.FileExists(parent))
+                    {
+                        try { s.CreateDirectory(parent); }   // creates superior directories too
+                        catch { /* created concurrently by another panel, or exists — ignore */ }
+                    }
+                    // Only cache once it is known to exist; a throw above leaves it uncached so the
+                    // next file re-checks rather than uploading into a directory that isn't there.
+                    if (_ensuredDirs.Count > 4000) _ensuredDirs.Clear();   // long-running process
+                    _ensuredDirs.Add(parent);
                 }
 
                 var to = new TransferOptions { OverwriteMode = OverwriteMode.Overwrite, PreserveTimestamp = _cfg.PreserveTimestamp };
@@ -175,6 +241,15 @@ public sealed class WinScpTransfer : IFtpTransfer
                     s.PutFiles(file.LocalPath, file.RemotePath, false, to).Check();
                 }
 
+                // The file is fully on the server under its real name. Retire the abort callback
+                // NOW so a timer expiring during the return path cannot destroy a session over a
+                // transfer that already succeeded. Dispose() waits out a callback already running
+                // and blocks any future one, so this is the point of no return for this file.
+                // Real case: LGD 302L 2026-09-18, "226 Transfer complete" at 13:08:48.389, timeout
+                // due at 13:08:48.790 — the upload was thrown away with 400 ms to spare, and took
+                // the session with it.
+                reg.Dispose();
+
                 _filesThisSession++;
                 if (!_reuse) CloseSession();   // non-reuse = one connection per file
                 return new TransferResult(TransferOutcome.Success);
@@ -182,10 +257,10 @@ public sealed class WinScpTransfer : IFtpTransfer
         }
         catch (OperationCanceledException)
         {
-            TryCleanupTemp(tempRemote);
-            // Keep the ONE session: WinSCP.Abort() cancels only THIS transfer and leaves the session
-            // usable, so we do NOT reconnect here. A reconnect happens only when the session is
-            // actually disconnected (EnsureSession's Opened check) or on host change / file cap.
+            // Order matters: try the .part cleanup while the session may still be usable, THEN drop
+            // it. An aborted session cannot clean up (every call throws), so don't bother.
+            if (!_aborted) TryCleanupTemp(tempRemote);
+            CloseSession();   // the abort killed WinSCP.exe — this session is finished, not paused
             return preemptToken.IsCancellationRequested
                 ? new TransferResult(TransferOutcome.Preempted)
                 : new TransferResult(TransferOutcome.Timeout, $"exceeded {_cfg.TimeoutSeconds}s on {host}");
@@ -195,22 +270,80 @@ public sealed class WinScpTransfer : IFtpTransfer
             // A Session.Abort() (timeout / preempt) surfaces here too — classify by which token tripped.
             if (linked.IsCancellationRequested)
             {
-                TryCleanupTemp(tempRemote);
+                if (!_aborted) TryCleanupTemp(tempRemote);
+                CloseSession();   // same as above — an aborted session is dead, drop it
                 return preemptToken.IsCancellationRequested
                     ? new TransferResult(TransferOutcome.Preempted)
                     : new TransferResult(TransferOutcome.Timeout, $"exceeded {_cfg.TimeoutSeconds}s on {host}");
             }
-            TryCleanupTemp(tempRemote);
-            // Soft / remote error — keep the session open. WinSCP reconnects itself if the connection
-            // actually dropped; EnsureSession renews the session only when Session.Opened goes false.
-            return new TransferResult(TransferOutcome.Error, $"{host}: {ex.Message}");
+
+            // Not our cancellation. If the session reports itself aborted anyway (an abort raced in
+            // from elsewhere, or a previous one poisoned it), it is unusable — drop it rather than
+            // hand it to the next file. These are the two messages that appeared ~35,000 times at
+            // LGD between 18 and 21 Sep because the session was reused after an abort.
+            var poisoned = _aborted
+                        || ex is InvalidOperationException
+                        || ex.Message.Contains("Session was aborted", StringComparison.OrdinalIgnoreCase)
+                        || ex.Message.Contains("already read to the end", StringComparison.OrdinalIgnoreCase);
+
+            if (poisoned) CloseSession();
+            else TryCleanupTemp(tempRemote);
+
+            // Soft / remote error on a healthy session — keep it open; WinSCP reconnects itself if
+            // the connection actually dropped.
+            return new TransferResult(TransferOutcome.Error, $"{host}: {Explain(ex)}");
         }
+    }
+
+    /// <summary>
+    /// A readable reason for the log's reason column, with WinSCP's own wording kept on the end.
+    ///
+    /// The raw text is written for someone reading WinSCP's source, not someone reading a day log
+    /// at 3am: "Element session@0 already read to the end" means the WinSCP process behind this
+    /// session had already exited. Four days of LGD logs carried that string and nobody could act
+    /// on it. Plain sentence first, original after it in brackets so nothing is lost for a deeper
+    /// investigation.
+    /// </summary>
+    private static string Explain(Exception ex)
+    {
+        var m = ex.Message?.Trim() ?? "";
+        string? plain = null;
+
+        if (m.Contains("Session was aborted", StringComparison.OrdinalIgnoreCase))
+            plain = "connection was cancelled by the upload time limit and is being reopened";
+        else if (m.Contains("already read to the end", StringComparison.OrdinalIgnoreCase))
+            plain = "connection had already closed (WinSCP process ended) and is being reopened";
+        else if (m.Contains("Timeout detected", StringComparison.OrdinalIgnoreCase))
+            plain = "no reply from the server";
+        else if (m.Contains("Service not available", StringComparison.OrdinalIgnoreCase))
+            plain = "server refused the connection (it may be at its connection limit)";
+        else if (m.Contains("Connection failed", StringComparison.OrdinalIgnoreCase)
+              || m.Contains("Lost connection", StringComparison.OrdinalIgnoreCase))
+            plain = "connection to the server was lost";
+        else if (m.Contains("cannot find the path", StringComparison.OrdinalIgnoreCase)
+              || m.Contains("cannot find the file", StringComparison.OrdinalIgnoreCase))
+            plain = "the folder or file does not exist on the server";
+        else if (m.Contains("Access is denied", StringComparison.OrdinalIgnoreCase)
+              || m.Contains("Permission denied", StringComparison.OrdinalIgnoreCase))
+            plain = "the server refused it (permission)";
+
+        // Lead the bracket with the server's own status code when there is one. The code is the
+        // part an FTP admin can act on - 421 (refused / at its connection limit) and 550 (no such
+        // path) mean different things to LGD's side - and it was getting buried mid-sentence in
+        // WinSCP's wording, or lost entirely once a plain sentence was put in front of it.
+        var code = System.Text.RegularExpressions.Regex.Match(m, @"\b([45]\d\d)\b");
+        var detail = code.Success && !m.TrimStart().StartsWith(code.Value, StringComparison.Ordinal)
+                   ? $"{code.Value}: {m}"
+                   : m;
+
+
+        return plain is null ? detail : $"{plain} [{detail}]";
     }
 
     private void TryCleanupTemp(string tempRemote)
     {
         var s = _session;
-        if (s is null || !s.Opened) return;
+        if (s is null || _aborted || !s.Opened) return;   // Opened lies after an abort; _aborted doesn't
         try { if (s.FileExists(tempRemote)) s.RemoveFiles(RemotePath.EscapeFileMask(tempRemote)); }
         catch { /* best effort — a stale .part is harmless, it is never renamed */ }
     }

@@ -91,6 +91,9 @@
     <Compile Include="MainForm.Designer.vb">
       <DependentUpon>MainForm.vb</DependentUpon>
     </Compile>
+    <Compile Include="BackupEngine.vb">
+      <DependentUpon>MainForm.vb</DependentUpon>
+    </Compile>
     <Compile Include="NativeMethods.vb" />
     <Compile Include="Program.vb" />
     <Compile Include="Properties\AssemblyInfo.vb" />
