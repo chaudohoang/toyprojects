@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,6 +22,15 @@ namespace SeqxcToolset.Core
         public XElement TerminalPattern;
         public string AliasTarget;
         public string PatternNumberRaw;
+
+        /// <summary>
+        /// Raw &lt;PatternString&gt; text from the same terminal &lt;Pattern&gt; element that
+        /// owns PatternNumber. Null means the element is absent entirely — PatternString
+        /// is a newer addition to the format, so files written by an older TrueTest
+        /// simply don't have it, and that case must not be confused with a present-but-
+        /// empty &lt;PatternString&gt;&lt;/PatternString&gt; (which reads as "").
+        /// </summary>
+        public string PatternStringRaw;
 
         public bool IsAlias => TerminalPattern == null;
     }
@@ -54,6 +63,18 @@ namespace SeqxcToolset.Core
     }
 
     public class PatternNumberChange
+    {
+        public string TerminalName;
+        public string OldValue;
+        public string NewValue;
+    }
+
+    /// <summary>
+    /// A pending edit to the &lt;PatternString&gt; of one terminal PatternSetup.
+    /// Addressed by terminal name and alias-resolved exactly like
+    /// PatternNumberChange, since both tags live on the same element.
+    /// </summary>
+    public class PatternStringChange
     {
         public string TerminalName;
         public string OldValue;
@@ -161,7 +182,10 @@ namespace SeqxcToolset.Core
                 };
 
                 if (terminal != null)
+                {
                     info.PatternNumberRaw = terminal.Element("PatternNumber")?.Value;
+                    info.PatternStringRaw = terminal.Element("PatternString")?.Value;
+                }
                 else
                     info.AliasTarget = patternWrap?.Element("PatternSetupName")?.Value;
 
@@ -232,6 +256,18 @@ namespace SeqxcToolset.Core
         }
 
         /// <summary>
+        /// Follows the same alias chain as GetResolvedPatternNumber — &lt;PatternString&gt;
+        /// sits immediately after &lt;PatternNumber&gt; inside the very same terminal
+        /// &lt;Pattern xsi:type="Dove3p0_PG.Dove3p0_Pattern"&gt; element, so an alias shares
+        /// its string for exactly the same reason it shares its number. Returns null
+        /// when the terminal is unresolved OR has no PatternString element at all.
+        /// </summary>
+        public string GetResolvedPatternString(string patternSetupName)
+        {
+            return ResolveTerminal(patternSetupName)?.PatternStringRaw;
+        }
+
+        /// <summary>
         /// True when this pattern's terminal IS referenced by at least one
         /// SequenceItem, but every item referencing it has Selected=false —
         /// i.e. it's a disabled/inactive step, not just an unused library
@@ -293,6 +329,64 @@ namespace SeqxcToolset.Core
             pnEl.Value = newValue;
             terminal.PatternNumberRaw = newValue;
             return true;
+        }
+
+        /// <summary>
+        /// Applies a new PatternString value in-memory (does not touch disk).
+        /// Mirrors SetPatternNumber. Returns false when the terminal is unresolved or
+        /// predates the PatternString property, so the caller can warn rather than
+        /// inventing an element this file's schema may not expect.
+        /// </summary>
+        public bool SetPatternString(string patternSetupName, string newValue,
+            out string terminalName, out List<string> affectedSiblings)
+        {
+            terminalName = null;
+            affectedSiblings = new List<string>();
+
+            var terminal = ResolveTerminal(patternSetupName);
+            if (terminal?.TerminalPattern == null) return false;
+
+            var psEl = terminal.TerminalPattern.Element("PatternString");
+            if (psEl == null) return false;
+
+            terminalName = terminal.Name;
+            affectedSiblings = GetSiblingAliases(terminal.Name);
+
+            psEl.Value = newValue ?? "";
+            terminal.PatternStringRaw = newValue ?? "";
+            return true;
+        }
+
+        /// <summary>
+        /// PatternString counterpart to SaveMinimalDiff — same targeted text patch on the
+        /// original file, same skip-with-warning rather than guessing. A change whose
+        /// OldValue is null means the file has no PatternString element for that entry;
+        /// that is reported rather than patched, since inserting a tag into a sequence
+        /// written by an older TrueTest is not this tool's call to make.
+        /// </summary>
+        public List<string> SavePatternStringChanges(string outputPath, IEnumerable<PatternStringChange> changes)
+        {
+            var warnings = new List<string>();
+            Encoding enc = DetectEncoding(FilePath);
+            string text = File.ReadAllText(FilePath, enc);
+
+            foreach (var change in changes)
+            {
+                if (change.OldValue == null)
+                {
+                    warnings.Add($"'{change.TerminalName}' has no <PatternString> element — this file " +
+                                 "predates that property. Re-save the sequence from TrueTest first. Skipped.");
+                    continue;
+                }
+
+                bool ok = TryPatchPatternString(ref text, change.TerminalName, change.OldValue, change.NewValue);
+                if (!ok)
+                    warnings.Add($"Could not safely locate/patch '{change.TerminalName}' " +
+                                 $"('{change.OldValue}' -> '{change.NewValue}'). Skipped to avoid corrupting the file.");
+            }
+
+            File.WriteAllText(outputPath, text, enc);
+            return warnings;
         }
 
         /// <summary>
@@ -455,6 +549,54 @@ namespace SeqxcToolset.Core
             string block = text.Substring(blockStart, blockEnd - blockStart);
             string oldTag = $"<PatternNumber>{oldValue}</PatternNumber>";
             string newTag = $"<PatternNumber>{newValue}</PatternNumber>";
+
+            int tagIdx = block.IndexOf(oldTag, StringComparison.Ordinal);
+            if (tagIdx < 0) return false;
+
+            string patchedBlock = block.Substring(0, tagIdx) + newTag + block.Substring(tagIdx + oldTag.Length);
+            text = text.Substring(0, blockStart) + patchedBlock + text.Substring(blockEnd);
+            return true;
+        }
+
+        /// <summary>
+        /// Escapes text for an XML element's content, matching what XLinq itself would
+        /// write. Needed here and NOT in TryPatchPatternNumber because this patcher
+        /// splices a value straight into the file text: a PatternString may legitimately
+        /// contain &amp;, &lt; or &gt;, whereas a PatternNumber never could. CR is escaped
+        /// too, so a value pasted out of Excel can't silently alter line endings.
+        /// </summary>
+        private static string EscapeXmlText(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return "";
+            return value
+                .Replace("&", "&amp;")
+                .Replace("<", "&lt;")
+                .Replace(">", "&gt;")
+                .Replace("\r", "&#xD;");
+        }
+
+        /// <summary>
+        /// PatternString counterpart to TryPatchPatternNumber. Both the old and the new
+        /// value are escaped before use: the old one because the on-disk text is already
+        /// in escaped form and has to be matched as such, the new one so the patched file
+        /// stays well-formed. An all-empty PatternString (every entry in a freshly
+        /// upgraded file) matches as &lt;PatternString&gt;&lt;/PatternString&gt;, which occurs
+        /// exactly once inside a PatternSetup block.
+        /// </summary>
+        private static bool TryPatchPatternString(ref string text, string terminalName, string oldValue, string newValue)
+        {
+            string nameTag = $"<Name>{terminalName}</Name>";
+            int nameIdx = text.IndexOf(nameTag, StringComparison.Ordinal);
+            if (nameIdx < 0) return false;
+
+            int blockStart = text.LastIndexOf("<PatternSetup>", nameIdx, StringComparison.Ordinal);
+            int blockEndTagIdx = text.IndexOf("</PatternSetup>", nameIdx, StringComparison.Ordinal);
+            if (blockStart < 0 || blockEndTagIdx < 0) return false;
+            int blockEnd = blockEndTagIdx + "</PatternSetup>".Length;
+
+            string block = text.Substring(blockStart, blockEnd - blockStart);
+            string oldTag = $"<PatternString>{EscapeXmlText(oldValue)}</PatternString>";
+            string newTag = $"<PatternString>{EscapeXmlText(newValue)}</PatternString>";
 
             int tagIdx = block.IndexOf(oldTag, StringComparison.Ordinal);
             if (tagIdx < 0) return false;

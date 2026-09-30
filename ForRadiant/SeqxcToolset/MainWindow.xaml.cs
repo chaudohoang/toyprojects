@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,6 +7,7 @@ using Microsoft.Win32;
 using SeqxcToolset.Core;
 using SeqxcToolset.Tasks;
 using SeqxcToolset.Tasks.PatternNumberTask;
+using SeqxcToolset.Tasks.PatternStringTask;
 using SeqxcToolset.Tasks.ExposureTimeTask;
 using SeqxcToolset.Tasks.LuminanceScaleTask;
 
@@ -20,16 +21,57 @@ namespace SeqxcToolset
         public MainWindow()
         {
             InitializeComponent();
+            ApplyBuildStampToTitle();
             RegisterTasks();
             TaskList.ItemsSource = _tasks;
             if (_tasks.Count > 0)
                 TaskList.SelectedIndex = 0;
         }
 
+        /// <summary>
+        /// Stamps the exe's build time into the title bar, e.g.
+        /// "Seqxc Toolset - build 2026-09-30-15-49-00".
+        ///
+        /// The point is to answer "am I actually running the build I just made?" from
+        /// the window itself. Once the exe has been copied onto a line PC there is
+        /// otherwise nothing on screen distinguishing two builds made minutes apart.
+        ///
+        /// The timestamp is the exe's own last-write time, which is when MSBuild
+        /// produced it. A deterministic .NET build can't supply this from the PE
+        /// header (that field holds a content hash, not a time), and this project has
+        /// no generated-constant step, so the file time is what's available. Note it
+        /// travels with the file: a copy that preserves timestamps keeps the real build
+        /// time, but re-writing the exe some other way would show the newer time.
+        ///
+        /// net48 has no Environment.ProcessPath (.NET 6+), hence the entry assembly's
+        /// location. Invariant culture so the digits are the same on every machine
+        /// regardless of the local calendar or date format.
+        /// </summary>
+        private void ApplyBuildStampToTitle()
+        {
+            string built = "";
+            try
+            {
+                string exe = System.Reflection.Assembly.GetEntryAssembly()?.Location;
+                if (!string.IsNullOrEmpty(exe) && System.IO.File.Exists(exe))
+                    built = System.IO.File.GetLastWriteTime(exe)
+                        .ToString("yyyy-MM-dd-HH-mm-ss", System.Globalization.CultureInfo.InvariantCulture);
+            }
+            catch
+            {
+                // A title without the stamp is strictly better than failing to open the
+                // window over it, so any IO/reflection problem just leaves it off.
+            }
+
+            if (built.Length > 0)
+                Title = $"Seqxc Toolset - build {built}";
+        }
+
         private void RegisterTasks()
         {
             // Add new task modules here as they're built.
             _tasks.Add(new PatternNumberTaskModule());
+            _tasks.Add(new PatternStringTaskModule());
             _tasks.Add(new ExposureTimeTaskModule());
             _tasks.Add(new LuminanceScaleTaskModule());
         }

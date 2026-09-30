@@ -17,6 +17,13 @@ build.bat
 Locates MSBuild via `vswhere.exe` (with VS2022/2019 fallbacks), builds Release.
 Output: `bin\Release\net48\Seqxc Toolset.exe`
 
+> **Confirm you're running the fresh build.** The title bar carries the exe's build
+> time — `Seqxc Toolset - build 2026-09-30-15-49-00`. If it doesn't match the build you
+> just made, you're looking at an older copy. The stamp is the exe's own last-write
+> time (`ApplyBuildStampToTitle` in `MainWindow.xaml.cs`): a deterministic .NET build
+> can't supply this from the PE header, whose timestamp field holds a content hash
+> rather than a time.
+
 ## How the file structure maps (learned from X4023-2CB-P1_RSP_POR_DX_MATHON.seqxc)
 
 - `<Items><SequenceItem>` — the ~29 steps in the sequence. Has `<Selected>`,
@@ -24,7 +31,7 @@ Output: `bin\Release\net48\Seqxc Toolset.exe`
   It does **not** hold a PatternNumber directly.
 - `<PatternSetupList><PatternSetup>` — ~198 named pattern definitions
   (`CalG`, `W16r2`, `g192`, `r216`, ...). Each is either:
-  - **terminal**: `<Pattern><Pattern xsi:type="Dove3p0_PG.Dove3p0_Pattern">...<PatternNumber>N</PatternNumber>...`
+  - **terminal**: `<Pattern><Pattern xsi:type="Dove3p0_PG.Dove3p0_Pattern">...<PatternNumber>N</PatternNumber><PatternString>S</PatternString>...`
   - **alias**: `<Pattern><PatternSetupName>OtherName</PatternSetupName></Pattern>` —
     points at another PatternSetup instead of owning its own number
     (e.g. `r216`/`g216`/`b216` all resolve through `W216`).
@@ -89,7 +96,54 @@ that change and reports a warning rather than risking corruption.
   in-memory assumptions (and FilePath correctly points at the saved copy for
   any further edits).
 
-## Task 2: Exposure Time
+## Task 2: Pattern Strings
+
+`<PatternString>` is a **newer addition to the format**, sitting immediately after
+`<PatternNumber>` inside the very same terminal `<Pattern xsi:type="Dove3p0_PG.Dove3p0_Pattern">`
+element. Because the two tags share an element, an alias shares its string for exactly
+the same reason it shares its number — so this task reuses the whole of Task 1's
+behaviour unchanged: the same alias resolution, the same live mirroring across rows
+with an identical `PatternSetupName`, the same "shared by aliasing, continue?"
+confirmation at Save time, the same Selected/"Show all items" filter, and the same
+minimal-diff text patch.
+
+It is a separate task rather than two more columns on Task 1 — the tags are edited
+independently, and keeping Task 1's working paste/fuzzy-match logic untouched was worth
+more than putting both fields in one grid.
+
+Three things genuinely differ from Pattern Numbers, all of them because the value is
+text rather than an integer:
+
+- **Header detection.** Task 1 spots a pasted header row by rejecting any non-integer
+  "to be" value — a shortcut a string field doesn't have. Instead, only the **first**
+  candidate line of a paste is tested, against a list of known header labels (`Name`,
+  `As is`, `To be`, `New`, `Pattern String`, ...). Checking every line would risk
+  silently dropping a legitimate value that happens to read like a label.
+- **XML escaping.** `SaveMinimalDiff` splices the value straight into the file text, so
+  a string containing `&`, `<` or `>` has to be escaped on the way in and matched in
+  escaped form on the way out (`SequenceDocument.EscapeXmlText` /
+  `TryPatchPatternString`). CR is escaped as well, so a value pasted out of Excel can't
+  silently alter the file's line endings. A PatternNumber could never contain any of
+  these, which is why Task 1 needs none of it.
+- **Missing element.** A sequence written by an older TrueTest has no `<PatternString>`
+  at all. That is kept distinct from a present-but-empty `<PatternString></PatternString>`
+  (which is what every entry in a freshly upgraded file looks like): `PatternStringRaw`
+  is `null` in the first case and `""` in the second. Rows with no element show
+  `(absent)`, are disabled in the grid, and are reported rather than patched on Save —
+  inserting a tag into a file whose schema may not expect it is not this tool's call to
+  make.
+
+Blank "New String" means **no change**, the same rule as every other task. Since
+PatternString starts out empty everywhere, the consequence is that a value can be set
+but not cleared back to empty from here; clearing is deliberately out of scope rather
+than giving an empty cell a second meaning.
+
+Verified against `X4023-CB-P1_RSP_POR_DX_MATHON.seqxc` (36 items, 171 PatternSetups —
+170 terminals each carrying an empty `<PatternString>`, 1 alias): setting three values,
+one of them `R&D <test>`, changed exactly 3 lines out of 59,787, left every
+`PatternNumber` untouched, round-tripped each value unescaped, and produced valid XML.
+
+## Task 3: Exposure Time
 
 - `CaptureFilter`/`ExposureTime` live directly on each `<PatternSetup>` element
   itself (7-slot arrays), unlike `PatternNumber` — they are **not** routed
@@ -124,7 +178,7 @@ that change and reports a warning rather than risking corruption.
   settled, so for now it's direct in-grid typing only. Follows the same
   Selected/"Show all items" filter as Task 1.
 
-## Task 3: Luminance Scale
+## Task 4: Luminance Scale
 
 - `LuminanceScaleRed`/`Green`/`Blue` live directly on the **SequenceItem's own
   `Analysis` element** — not in `PatternSetup` at all, unlike Tasks 1 and 2.
@@ -139,7 +193,8 @@ that change and reports a warning rather than risking corruption.
 - Same New-column + **New (all)** broadcast pattern as Exposure Time (blank
   = no change; typing in "New (all)" fans out to Red/Green/Blue, since they
   usually match; editing an individual channel afterward still overrides it).
-- No bulk Excel import yet, same as Exposure Time.
+- No bulk Excel import yet, same as Exposure Time. (Pattern Numbers and Pattern
+  Strings both have it.)
 
 ## Saving across multiple tasks in one session
 
@@ -148,8 +203,8 @@ dialog, its own confirmation). On top of that, the toolbar has two buttons
 for editing several tasks in one sitting:
 
 - **Save All Changes...** — shows one file dialog, then walks every task
-  that has pending edits, in order (Pattern Numbers → Exposure Time →
-  Luminance Scale), calling each one's internal save (same validation/
+  that has pending edits, in order (Pattern Numbers → Pattern Strings →
+  Exposure Time → Luminance Scale), calling each one's internal save (same validation/
   conflict logic as its own Save button, including the alias-sharing
   confirmation — declining that just skips that one task rather than
   aborting the whole batch). After each task writes, `_document` reloads
@@ -167,12 +222,13 @@ deliberately no *automatic* cross-task refresh outside of the explicit
 "Save All" flow above. That's not a gap: each task's Save reads the file
 **fresh from disk** at save time (not from some in-memory snapshot) and
 `_document.FilePath` is updated the moment any task reloads, so saving in
-Task 1 then Task 2 then Task 3 individually, in any order, still always
+each task individually, in any order, still always
 patches correctly on top of whatever the previous one just wrote. Since the
-three tasks edit entirely distinct XML tags (`PatternNumber` vs
+four tasks edit entirely distinct XML tags (`PatternNumber` vs `PatternString` vs
 `CaptureFilter`/`ExposureTime` vs `LuminanceScaleRed/Green/Blue`), there's
 nothing for one task's save to make another task's *displayed* Current
-values wrong either.
+values wrong either — Pattern Numbers and Pattern Strings share an *element*, but
+not a tag, so their patches never collide.
 
 An earlier version of this wired a shared "Reloaded" event so every task's
 grid refreshed the instant *any* task saved individually — reverted, because
