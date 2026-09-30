@@ -23,3 +23,5 @@ E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\ExposureTi
 E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\ExposureTimeTask\ExposureTimeView.g.cs
 E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\LuminanceScaleTask\LuminanceScaleView.baml
 E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\LuminanceScaleTask\LuminanceScaleView.g.cs
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\PatternStringTask\PatternStringView.baml
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\PatternStringTask\PatternStringView.g.cs
