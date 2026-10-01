@@ -1,4 +1,4 @@
-<Application x:Class="SeqxcToolset.App"
+﻿<Application x:Class="SeqxcToolset.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
@@ -45,6 +45,24 @@
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
+            </Style>
+
+            <!-- Cells of sequence items that are NOT selected in the sequence. Those rows
+                 only appear when "Show all items" is ticked, and have to be tellable from
+                 the steps that actually run — otherwise the grid silently mixes the two.
+                 Dimmed AND italic, so the distinction isn't carried by colour alone.
+                 Opacity rather than Foreground, so the Capture checkboxes in Exposure
+                 Time dim too; applied per cell, which leaves the row's own dirty
+                 highlight at full strength. No BasedOn: unset properties fall back to
+                 the theme style, so the default cell template and selection visuals are
+                 kept. -->
+            <Style x:Key="DataCellStyle" TargetType="DataGridCell">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Selected}" Value="False">
+                        <Setter Property="Opacity" Value="0.55"/>
+                        <Setter Property="FontStyle" Value="Italic"/>
+                    </DataTrigger>
+                </Style.Triggers>
             </Style>
 
             <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">

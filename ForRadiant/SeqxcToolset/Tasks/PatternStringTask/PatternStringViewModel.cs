@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -11,15 +11,14 @@ using System.Windows.Input;
 using Microsoft.Win32;
 using SeqxcToolset.Core;
 
-// The picker dialog is field-agnostic (it just ranks candidate step names), so it is
-// reused from the Pattern Numbers task rather than cloned.
-using SeqxcToolset.Tasks.PatternNumberTask;
-
 namespace SeqxcToolset.Tasks.PatternStringTask
 {
     public class PatternStringViewModel : INotifyPropertyChanged
     {
         private SequenceDocument _document;
+
+        /// <summary>Key this task's remembered import columns are stored under.</summary>
+        private const string TaskKey = "Pattern Strings";
 
         public ObservableCollection<PatternStringRowVM> Rows { get; } = new ObservableCollection<PatternStringRowVM>();
 
@@ -30,13 +29,6 @@ namespace SeqxcToolset.Tasks.PatternStringTask
             set { _showAllItems = value; OnPropertyChanged(); RebuildRows(); }
         }
 
-        private string _pasteText = "";
-        public string PasteText
-        {
-            get => _pasteText;
-            set { _pasteText = value; OnPropertyChanged(); }
-        }
-
         private string _importSummary = "";
         public string ImportSummary
         {
@@ -44,15 +36,45 @@ namespace SeqxcToolset.Tasks.PatternStringTask
             set { _importSummary = value; OnPropertyChanged(); }
         }
 
-        public ICommand ParseImportCommand { get; }
+
+        /// <summary>
+        /// Full path of the workbook an import would read, shown in the bottom bar so
+        /// "Choose columns" is never a guess about which file it will use. The whole
+        /// path rather than just the file name: two rule sheets in different folders can
+        /// share a name, and it matches how the sequence path is shown in the top
+        /// toolbar.
+        /// </summary>
+        public string ExcelFileLabel
+        {
+            get
+            {
+                string path = AppSettings.Current.LastXlsxPath;
+                return string.IsNullOrEmpty(path) ? "(none chosen yet)" : path;
+            }
+        }
+
+        /// <summary>Full path, for the label's tooltip.</summary>
+        public string ExcelFilePath => AppSettings.Current.LastXlsxPath;
+
+        public ICommand ImportFromExcelCommand { get; }
+        public ICommand PickColumnsCommand { get; }
         public ICommand SaveCommand { get; }
         public ICommand ClearNewValuesCommand { get; }
 
         public PatternStringViewModel()
         {
-            ParseImportCommand = new RelayCommand(_ => ParseImport());
+            ImportFromExcelCommand = new RelayCommand(_ => ImportFromExcel());
+            PickColumnsCommand = new RelayCommand(_ => PickColumns());
             SaveCommand = new RelayCommand(_ => SaveChanges());
             ClearNewValuesCommand = new RelayCommand(_ => ClearNewValues());
+
+            // The workbook is app-wide: choosing one in another task has to update the
+            // label here too, so follow the change rather than reading it once.
+            AppSettings.LastXlsxPathChanged += (s, e) =>
+            {
+                OnPropertyChanged(nameof(ExcelFileLabel));
+                OnPropertyChanged(nameof(ExcelFilePath));
+            };
         }
 
         public void LoadDocument(SequenceDocument document)
@@ -140,38 +162,68 @@ namespace SeqxcToolset.Tasks.PatternStringTask
         }
 
         /// <summary>
-        /// Parses text pasted from an Excel range (tab-separated, 2 columns
-        /// Name/To-be, or 3 columns Name/As-is/To-be) — same scope and matching
-        /// rules as the Pattern Numbers import:
+        /// Reads pattern strings from an .xlsx: pick the workbook, then the sheet and
+        /// the two (optionally three) columns.
+        ///
+        /// This task imports only the columns it edits. A sheet may well hold values
+        /// for several tasks at once — the file this was built against carries pattern
+        /// string, pattern index, exposure and luminance side by side — but each task
+        /// asks for its own columns, so importing here can never write another task's
+        /// field by accident.
+        /// </summary>
+        private void ImportFromExcel()
+        {
+            if (_document == null)
+            {
+                ImportSummary = "Open a .seqxc file first.";
+                return;
+            }
+
+            var rows = ExcelImportWindow.PickRows(TaskKey, "Pattern String");
+            if (rows == null) return;   // cancelled, or the workbook could not be read
+
+            ApplyImportRows(rows);
+        }
+
+        /// <summary>
+        /// Re-imports pattern strings from the workbook already in use, going straight to the
+        /// sheet and column picker without the file dialog.
+        /// </summary>
+        private void PickColumns()
+        {
+            if (_document == null)
+            {
+                ImportSummary = "Open a .seqxc file first.";
+                return;
+            }
+
+            var rows = ExcelImportWindow.PickColumnsFromLastWorkbook(TaskKey, "Pattern String");
+            if (rows == null) return;
+
+            ApplyImportRows(rows);
+        }
+
+        /// <summary>
+        /// Matching for imported rows — same scope and rules as the Pattern Numbers
+        /// import:
         ///
         /// Strict scope: only PatternSetups tied to a currently-visible row are
         /// eligible, for both auto-apply and the picker. Orphan library patterns
         /// and steps hidden by the Selected filter are never matched.
         ///
-        /// A pasted name resolves to a terminal PatternSetup, and EVERY row sharing
+        /// A row's name resolves to a terminal PatternSetup, and EVERY row sharing
         /// that terminal gets the value in one shot. Unresolvable names, and names
-        /// resolving to a terminal already assigned earlier in the same paste, go to
-        /// the picker rather than being guessed at.
+        /// resolving to a terminal already assigned a DIFFERENT value earlier in the
+        /// same import, go to the picker rather than being guessed at.
         /// </summary>
-        private void ParseImport()
+        private void ApplyImportRows(IEnumerable<(string Name, string AsIs, string ToBe)> rows)
         {
-            if (string.IsNullOrWhiteSpace(PasteText))
-            {
-                ImportSummary = "Paste some rows first.";
-                return;
-            }
-            if (_document == null)
-            {
-                ImportSummary = "Open a file first.";
-                return;
-            }
-
             var assignedTerminals = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            int matched = 0, mismatched = 0, ignored = 0;
+            int matched = 0, mismatched = 0, ignored = 0, duplicates = 0;
             var mismatchNames = new List<string>();
             bool ignoreAllRemaining = false;
 
-            foreach (var (name, asIs, toBe) in EnumeratePasteLines(PasteText))
+            foreach (var (name, asIs, toBe) in rows)
             {
                 if (ignoreAllRemaining) { ignored++; continue; }
 
@@ -180,6 +232,19 @@ namespace SeqxcToolset.Tasks.PatternStringTask
                     terminal = null; // not tied to any currently-visible row — out of scope
 
                 bool alreadyAssigned = terminal != null && assignedTerminals.ContainsKey(terminal.Name);
+
+                // A repeat of a terminal already given the SAME value is not an
+                // ambiguity — it is the ordinary shape of a per-step sheet, where one
+                // pattern used at two steps gets a line each. The real rule lives in
+                // the file: a sequence can list the same pattern twice, and the
+                // sheet mirrors that row for row. Only a repeat carrying a DIFFERENT
+                // value is genuinely ambiguous and still routes to the picker.
+                if (alreadyAssigned && assignedTerminals[terminal.Name] == toBe)
+                {
+                    duplicates++;
+                    continue;
+                }
+
                 bool trustworthyAutoMatch = terminal != null && !alreadyAssigned &&
                     !HasBetterScopedMatch(name, terminal);
 
@@ -215,6 +280,7 @@ namespace SeqxcToolset.Tasks.PatternStringTask
 
             var sb = new StringBuilder();
             sb.Append($"Matched {matched} row(s).");
+            if (duplicates > 0) sb.Append($"  {duplicates} repeat(s) of the same pattern and value already covered.");
             if (mismatched > 0) sb.Append($"  {mismatched} 'as-is' value(s) didn't match the file — applied anyway.");
             if (ignored > 0) sb.Append($"  {ignored} row(s) ignored.");
             ImportSummary = sb.ToString();
@@ -235,7 +301,7 @@ namespace SeqxcToolset.Tasks.PatternStringTask
             return Rows.Any(r =>
                 !string.Equals(r.ResolvedTerminalName, terminal.Name, StringComparison.OrdinalIgnoreCase) &&
                 !string.Equals(r.PatternSetupName, name, StringComparison.OrdinalIgnoreCase) &&
-                ScoreMatch(name, r.PatternSetupName) >= RelevanceThreshold);
+                NameMatch.Score(name, r.PatternSetupName) >= RelevanceThreshold);
         }
 
         private void ApplyValueToTerminal(PatternSetupInfo terminal, string toBe, string asIs,
@@ -273,7 +339,7 @@ namespace SeqxcToolset.Tasks.PatternStringTask
                     Name = row.PatternSetupName,
                     Label = $"Step #{row.Index + 1}: {row.PatternSetupName}  (current: {row.CurrentPatternString}){appliedNote}",
                     IsStep = true,
-                    Score = ScoreMatch(query, row.PatternSetupName)
+                    Score = NameMatch.Score(query, row.PatternSetupName)
                 });
             }
 
@@ -284,97 +350,6 @@ namespace SeqxcToolset.Tasks.PatternStringTask
                 .ToList();
         }
 
-        /// <summary>
-        /// Rough relevance score between a pasted name (e.g. "R31") and a real
-        /// PatternSetupName (e.g. "W31_step23_R"): tokenizes both into letter- and
-        /// digit-runs and rewards shared tokens, with extra weight for a shared
-        /// trailing letter token (the common "_R"/"_G"/"_B" channel suffix
-        /// convention) and shared numbers.
-        /// </summary>
-        private static int ScoreMatch(string query, string candidateName)
-        {
-            if (string.IsNullOrEmpty(query) || string.IsNullOrEmpty(candidateName)) return 0;
-
-            string q = query.Trim();
-            string c = candidateName.Trim();
-            if (c.Equals(q, StringComparison.OrdinalIgnoreCase)) return 1000;
-
-            var qTokens = Regex.Matches(q, @"[A-Za-z]+|\d+").Cast<Match>().Select(m => m.Value).ToList();
-            var cTokens = Regex.Matches(c, @"[A-Za-z]+|\d+").Cast<Match>().Select(m => m.Value).ToList();
-
-            int score = 0;
-            foreach (var qt in qTokens)
-                foreach (var ct in cTokens)
-                    if (string.Equals(qt, ct, StringComparison.OrdinalIgnoreCase))
-                        score += char.IsDigit(qt[0]) ? 30 : 15;
-
-            var qLastLetterToken = qTokens.LastOrDefault(t => char.IsLetter(t[0]));
-            var cLastToken = cTokens.LastOrDefault();
-            if (qLastLetterToken != null && cLastToken != null &&
-                string.Equals(qLastLetterToken, cLastToken, StringComparison.OrdinalIgnoreCase))
-                score += 25;
-
-            if (c.IndexOf(q, StringComparison.OrdinalIgnoreCase) >= 0) score += 10;
-            if (q.IndexOf(c, StringComparison.OrdinalIgnoreCase) >= 0) score += 5;
-
-            return score;
-        }
-
-        // Words that only ever appear in a copied header row, never as a real
-        // PatternString value. Pattern Numbers can detect its header simply by
-        // rejecting any non-integer "to be" value; a string field has no such
-        // shortcut, so the header is identified by label instead.
-        private static readonly HashSet<string> HeaderWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-        {
-            "name", "pattern", "patternname", "pattern name", "setup", "setup name",
-            "pattern setup", "pattern setup name", "patternsetupname", "step",
-            "as is", "asis", "as-is", "current", "current string", "old", "from",
-            "to be", "tobe", "to-be", "new", "new string", "value", "to",
-            "pattern string", "patternstring", "string"
-        };
-
-        /// <summary>
-        /// A header is only ever the first row of a pasted range, so only the first
-        /// candidate line is tested. Checking every line would risk silently dropping
-        /// a legitimate value that happens to read like a label.
-        /// </summary>
-        private static bool LooksLikeHeader(string name, string asIs, string toBe) =>
-            HeaderWords.Contains(name ?? "") ||
-            HeaderWords.Contains(toBe ?? "") ||
-            (asIs != null && HeaderWords.Contains(asIs));
-
-        private static IEnumerable<(string Name, string AsIs, string ToBe)> EnumeratePasteLines(string pasteText)
-        {
-            var lines = pasteText.Replace("\r\n", "\n").Split('\n');
-            bool firstCandidate = true;
-
-            foreach (var rawLine in lines)
-            {
-                string line = rawLine.TrimEnd();
-                if (string.IsNullOrWhiteSpace(line)) continue;
-
-                var cols = line.Split('\t');
-                if (cols.Length < 2) continue;
-
-                string name = cols[0].Trim();
-                string asIs = cols.Length >= 3 ? cols[1].Trim() : null;
-                string toBe = cols.Length >= 3 ? cols[2].Trim() : cols[1].Trim();
-                if (string.IsNullOrEmpty(name)) continue;
-
-                if (firstCandidate)
-                {
-                    firstCandidate = false;
-                    if (LooksLikeHeader(name, asIs, toBe)) continue;
-                }
-
-                // An empty "to be" means "nothing to set" here, not "clear it" — blank
-                // cells are how a partially filled sheet looks, and IsDirty ignores
-                // them anyway, so they are dropped before reaching the matcher.
-                if (string.IsNullOrEmpty(toBe)) continue;
-
-                yield return (name, asIs, toBe);
-            }
-        }
 
         public bool HasPendingChanges => Rows.Any(r => r.IsDirty);
 

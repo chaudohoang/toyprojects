@@ -1,12 +1,21 @@
-# Seqxc Toolset
+﻿# Seqxc Toolset
 
 A task-plugin desktop tool for `.seqxc` sequence files. Opens a file once, then
 each "task" is an independent module that reads/edits a specific slice of it.
 
 WPF, .NET Framework 4.8, SDK-style csproj, zero NuGet dependencies — same
-pattern as SeqxcEditor / MultiRemoteTool.
+pattern as SeqxcEditor / MultiRemoteTool. Reading .xlsx files is done against the
+framework's own `System.IO.Compression` + `System.Xml.Linq` (see **Reading .xlsx**),
+so that stays true: no ClosedXML/EPPlus, and no Excel install or COM interop on the
+machine either.
 
 ## Build
+
+The window opens at 1700x1000 (minimum 900x600), centred on the **primary** monitor.
+Centring is done in code against `SystemParameters.WorkArea` rather than with
+`WindowStartupLocation="CenterScreen"`, which can pick a secondary monitor; the size is
+clamped to that work area first, so on a smaller panel the title bar can't end up off
+screen.
 
 Place `app.ico` in the project root (next to `SeqxcToolset.csproj`) — it's
 used for the exe icon, title bar, and taskbar icon.
@@ -50,11 +59,172 @@ finds the specific `<PatternSetup>` block by `<Name>`, and replaces only the
 elsewhere in the TrueTest tooling. If it can't find an exact match it skips
 that change and reports a warning rather than risking corruption.
 
+## Reading .xlsx
+
+`Core/XlsxReader.cs` is a small OOXML reader — an .xlsx is a zip of XML parts, so
+`ZipFile` plus `XDocument` is the whole mechanism. `System.IO.Compression` and
+`System.IO.Compression.FileSystem` are named explicitly in the csproj because .NET
+Framework doesn't auto-reference them; they are framework assemblies, not packages.
+
+Worth knowing about it:
+
+- Cells are addressed by their **reference** (`H4`), never by position in the row.
+  A workbook stores only non-empty cells, so a row starting at column C would
+  otherwise have C read as A. Rows and columns are both sparse.
+- A sheet's name is resolved to its part through `workbook.xml` + the workbook
+  relationships. The filenames do not reliably follow tab order — `sheet2.xml` can be
+  the first tab — so the relationship lookup isn't optional.
+- Numbers are rendered as **Excel displays** them, not as stored. A cell showing 10.03
+  holds 10.029999999999999 and one showing 0.01415 holds 1.4149999999999999E-2;
+  `G15` (fifteen significant digits, Excel's own display precision) reproduces the
+  on-screen value, and integers print without a decimal point so an index reads 1008.
+- Shared strings concatenate their `<r>` runs, skipping `<rPh>` — those are the
+  phonetic-guide runs Excel adds for East Asian text, and including them would append
+  a ruby copy of the string to itself.
+- Limits: values only, no formatting, so a date comes back as its serial number.
+  Formula cells yield the result Excel cached when it saved. `.xlsm` works (same
+  format); `.xls`, the old binary format, does not and must be re-saved first.
+
+## Importing from Excel
+
+Every task carries its controls in a **bar along the bottom** rather than a side panel,
+so the grid gets the full window width. The bar shows the **full path** of the workbook
+currently in use — `Excel: D:\Log\20260909 X402x model New Pattern index rule.xlsx` —
+matching how the sequence path appears in the top toolbar, trimmed with the full text as
+a tooltip if it runs long. Then two buttons:
+
+- **"Choose file..."** — pick a workbook, then the sheet and columns.
+- **"Choose columns"** — skips the file dialog and goes straight to the sheet and
+  column picker for the workbook already named in the bar. For when the file is settled
+  and it's the columns being changed: pulling a second field out of the same sheet, or
+  correcting a mis-picked column, without walking the file dialog again.
+
+The workbook is app-wide, so choosing one in any task updates the label in all four
+(`AppSettings.LastXlsxPathChanged`). The import summary fills the middle of the bar,
+trimmed with the full text as a tooltip, and this task's **Clear New Values** and
+**Save Changes...** sit at the right — distinct from the global **Save All Changes...**
+in the window's top toolbar.
+
+Either way the dialog asks for the sheet, the **pattern name** column and that task's
+**value** column, with an optional third "as is" column, and previews the matched rows
+before anything is applied.
+
+Each task asks only for the columns **it** edits, and that is the whole design rather
+than a limitation. The rule sheet this was built for
+(`20260909 X402x model New Pattern index rule.xlsx`, Sheet2) carries all four fields
+side by side:
+
+| Column | Header | Task |
+|---|---|---|
+| D | `Pattern` | the name, for every task |
+| H | `Pattern String` | Pattern Strings |
+| I | `Current` | — |
+| J | `L/v Scale` | Luminance Scale |
+| K | `Exp time` | Exposure Time |
+
+A task that guessed its own columns out of that could quietly write a neighbouring
+task's field. Importing per task, with the columns named explicitly, cannot. It also
+means one sheet is simply imported once per task you want to fill, reviewing each
+before Save All.
+
+The header row is **detected**, not assumed to be row 1 — Sheet2 has headers on row 3
+and Sheet1 on row 2, under a title row. The rule is the first row near the top with at
+least three filled cells of which at least two aren't numbers; a box on the dialog
+overrides it when the guess is wrong. Name and value columns are then pre-selected by
+matching header text, so the file above opens with `D — Pattern` and the right value
+column already chosen.
+
+### What the choices are remembered as
+
+The sheet, header row and column choices are remembered **per task** (see
+**Settings**), and restored next time that task's dialog opens — provided the workbook
+still has that sheet.
+
+Columns are stored by **header text**, never by index or letter. If someone inserts a
+column into the rule sheet, a remembered index would silently point at the wrong column
+and write wrong values into the sequence; a remembered name either still finds the same
+column or fails to match and falls back to auto-detection. The dialog's preview also
+shows what a restored choice resolved to before anything is applied.
+
+### Matching differs by task
+
+Rows arrive as Name / As-is / To-be, but what happens next follows each field's own
+rules:
+
+- **Pattern Numbers** and **Pattern Strings** resolve the name through the alias chain
+  to a terminal PatternSetup and apply to every row sharing it (`ApplyImportRows`),
+  with a picker for genuine ambiguities.
+- **Exposure Time** matches the **exact** PatternSetupName, because
+  `CaptureFilter`/`ExposureTime` live on each named PatternSetup's own element and an
+  alias does not share them. The single sheet column is broadcast to Y/X/Z via
+  `NewExpAll`. Unmatched names go to the picker.
+- **Luminance Scale** matches the name and then only steps that actually carry the
+  fields, since `LuminanceScaleRed/Green/Blue` exist only on some Analysis types. The
+  single column is broadcast to Red/Green/Blue via `NewAll`. Unmatched names go to the
+  picker, which offers only steps that have the fields.
+
+Two consequences of how these sheets are written:
+
+- **A repeated pattern is normal, not a conflict.** A sheet lists one row per *step*, so
+  a pattern used at two steps appears twice — `CalG`, `CalR` and `CalB` each appear
+  twice in Sheet2, identical but for the luminance column. A repeat carrying the **same**
+  value is counted and skipped rather than treated as ambiguous. A repeat carrying a
+  **different** value still is ambiguous and is handled per task (picker, or reported).
+- **Luminance lines up by itself.** Of the two `CalG` rows, one has a luminance value and
+  one is blank, mirroring the two steps that use it — only one of which has the fields.
+  The blank row carries no value so it never reaches the matcher, and the valued row
+  lands on the one step that can take it.
+
+### The match picker
+
+**All four tasks** open a match picker when a name can't be placed — either no step
+carries it, or it repeats one already given a *different* value. Candidates are ranked by
+`Tasks/NameMatch.cs` (shared by every task, so the ranking is identical), with the best
+pre-selected so Enter applies it, plus **Ignore** and **Ignore All Remaining**.
+
+This matters because a rule sheet may name its patterns on a different scheme than the
+sequence does. `20260909 X402x model New Pattern index rule.xlsx` names them `W48`,
+`W192`, `WR192`, while `X4023-CB-P1_RSP_POR_DX_MATHON.seqxc` holds `g48`, `r48`, `b48`,
+`g192`… — only `CalG`/`CalR`/`CalB` line up, and the rest is a mapping only the person
+importing can make. (Note `W48` is **not** simply all three channels: the sheet gives it
+one L/v of 10.03 where the sequence holds 4.958 / 2.662 / 4.008 for `g48` / `r48` /
+`b48`.)
+
+Two differences between the tasks, both deliberate:
+
+- **Pattern Numbers and Pattern Strings** also decline to auto-trust an exact match when
+  a different in-scope step scores distinctly better (`HasBetterScopedMatch`), for the
+  `W34` versus `W34_10NIT` case. **Exposure Time and Luminance Scale do not**: `CalG`
+  scores 55 against `Cal2G`, over the threshold, so that rule would raise a dialog on
+  rows that already match cleanly. There, an exact name match is trusted.
+- **Luminance Scale** offers only steps that actually carry luminance fields. Offering
+  one that can't take a value would let you pick a step and then watch nothing happen.
+
+## Settings
+
+`%APPDATA%\SeqxcToolset\settings.xml`, written through `Core/AppSettings.cs` — XML via
+`XDocument`, so still no JSON serializer and no NuGet dependency. It holds the last
+sequence opened, the last workbook opened, and each task's import column choices.
+
+Not stored beside the exe on purpose: `build.bat` deletes `bin\`, so settings there
+would be wiped by every rebuild, and a tool folder on a line PC may not be writable.
+
+- **The last sequence reopens on start.** Silent if nothing is remembered or the file has
+  since moved or been deleted — a stale path is a normal thing to find, not an error
+  worth a dialog. A file that exists but won't parse does report. The path is saved as
+  soon as a file loads, not only on exit, so it survives a crash or a kill from Task
+  Manager; because every save path reloads the document from the file it just wrote, the
+  remembered path follows "Save As" too.
+- **The last workbook seeds the import file dialog**, so a second import opens in the
+  right folder.
+- Every read and write is best-effort. A corrupt, locked or missing file leaves defaults
+  in place rather than stopping the app — nothing here is worth failing a launch over.
+
 ## Task 1: Pattern Numbers
 
 - Lists every `Selected=true` SequenceItem (toggle to show all) with its
   resolved current PatternNumber.
-- Typing directly into a row's New # (not via paste) also live-mirrors into
+- Typing directly into a row's New # (not via import) also live-mirrors into
   every other row sharing the exact same `PatternSetupName` (e.g. two `CalG`
   steps) — that sameness is obvious just from the name, so it's safe to
   mirror instantly. This deliberately does NOT extend to alias siblings like
@@ -63,8 +233,8 @@ that change and reports a warning rather than risking corruption.
   "shared by aliasing, continue?" confirmation — silently cascading it live
   here would bypass that warning.
 
-- Paste a 2-column range (`Name`, `To be`) or 3-column range (`Name`, `As is`,
-  `To be`) copied straight from Excel — no header row needed. "Parse & Match":
+- "Load .xlsx..." imports from the rule sheet (see **Importing from Excel**), and
+  matches like this:
   - **Strict scope**: only PatternSetups tied to a currently-visible row are
     ever eligible — a selected `SequenceItem`, or any item at all if "Show all
     items" is checked. Orphan library patterns with no item reference, and
@@ -73,19 +243,19 @@ that change and reports a warning rather than risking corruption.
   - Resolves each name to its underlying terminal PatternSetup and applies
     the value to **every** row sharing that terminal at once — e.g. two
     SequenceItems both named `CalG` are literally the same pattern, so one
-    pasted `CalG` line updates both, instead of leaving one blank.
+    imported `CalG` line updates both, instead of leaving one blank.
   - If a name can't be resolved within that scope, or it resolves to a
-    terminal that already got a value earlier in the same paste (a genuine
+    terminal that already got a different value earlier in the same import (a genuine
     ambiguity — e.g. several differently-valued lines that can't all be the
     same node), a picker dialog pops up: pick which step this specific line
     should apply to, or Ignore it (or Ignore All Remaining). Candidates are
-    ranked by similarity to the pasted name — tokenized on letter/digit runs,
+    ranked by similarity to the imported name — tokenized on letter/digit runs,
     so `R31` naturally ranks `Step #7: W31_step23_R` at the top (shared "31",
     shared trailing "R" channel suffix) — with the top match pre-selected so
     Enter applies it immediately.
   - Even an exact-name match isn't auto-trusted if a different in-scope step
     fuzzy-matches distinctly better (e.g. a literal `W34` step existing
-    alongside `W34_10NIT` when the rest of the paste is clearly `_10NIT`
+    alongside `W34_10NIT` when the rest of the sheet is clearly `_10NIT`
     values) — that still routes through the picker instead of guessing wrong.
 
 - "Save Changes..." resolves aliases, detects conflicts (two rows pointing at
@@ -108,21 +278,16 @@ confirmation at Save time, the same Selected/"Show all items" filter, and the sa
 minimal-diff text patch.
 
 It is a separate task rather than two more columns on Task 1 — the tags are edited
-independently, and keeping Task 1's working paste/fuzzy-match logic untouched was worth
+independently, and keeping Task 1's working match/fuzzy-match logic untouched was worth
 more than putting both fields in one grid.
 
-Three things genuinely differ from Pattern Numbers, all of them because the value is
-text rather than an integer:
+Two things genuinely differ from Pattern Numbers, both because the value is text
+rather than an integer:
 
-- **Header detection.** Task 1 spots a pasted header row by rejecting any non-integer
-  "to be" value — a shortcut a string field doesn't have. Instead, only the **first**
-  candidate line of a paste is tested, against a list of known header labels (`Name`,
-  `As is`, `To be`, `New`, `Pattern String`, ...). Checking every line would risk
-  silently dropping a legitimate value that happens to read like a label.
 - **XML escaping.** `SaveMinimalDiff` splices the value straight into the file text, so
   a string containing `&`, `<` or `>` has to be escaped on the way in and matched in
   escaped form on the way out (`SequenceDocument.EscapeXmlText` /
-  `TryPatchPatternString`). CR is escaped as well, so a value pasted out of Excel can't
+  `TryPatchPatternString`). CR is escaped as well, so a value coming out of Excel can't
   silently alter the file's line endings. A PatternNumber could never contain any of
   these, which is why Task 1 needs none of it.
 - **Missing element.** A sequence written by an older TrueTest has no `<PatternString>`
@@ -174,9 +339,10 @@ one of them `R&D <test>`, changed exactly 3 lines out of 59,787, left every
   rather than matching on value text (`SequenceDocument.SetChannelValue` /
   `SaveExposureChanges`). Reloads from the saved file afterward, same as
   Task 1.
-- No bulk Excel import yet — the column layout for exposure changes isn't
-  settled, so for now it's direct in-grid typing only. Follows the same
-  Selected/"Show all items" filter as Task 1.
+- Bulk import from Excel is available — see **Importing from Excel**. The single
+  exposure column is broadcast to Y/X/Z. (This used to say the column layout wasn't
+  settled; picking the columns explicitly in the dialog is what settled it.) Follows
+  the same Selected/"Show all items" filter as Task 1.
 
 ## Task 4: Luminance Scale
 
@@ -193,8 +359,9 @@ one of them `R&D <test>`, changed exactly 3 lines out of 59,787, left every
 - Same New-column + **New (all)** broadcast pattern as Exposure Time (blank
   = no change; typing in "New (all)" fans out to Red/Green/Blue, since they
   usually match; editing an individual channel afterward still overrides it).
-- No bulk Excel import yet, same as Exposure Time. (Pattern Numbers and Pattern
-  Strings both have it.)
+- Bulk import from Excel is available — see **Importing from Excel**. The single
+  luminance column is broadcast to Red/Green/Blue, and steps whose Analysis type has
+  no luminance fields are skipped.
 
 ## Saving across multiple tasks in one session
 
@@ -238,10 +405,30 @@ staleness it was solving. The "Save All Changes" button above is the correct
 place for a unified refresh, since by definition nothing is left pending to
 lose at that point.
 
+## Selected vs unselected steps
+
+Every task's grid lists only the sequence items with `<Selected>true` until **"Show all
+items (incl. unselected)"** is ticked. With it on, the unselected steps are shown
+**dimmed (55% opacity) and italic**, so a grid mixing the two never reads as one
+uniform list.
+
+Two cues rather than one on purpose: colour alone would be lost on a dim panel or to a
+colour-blind reader, and italic survives both. Opacity rather than a muted foreground,
+so the Capture checkboxes in Exposure Time dim along with the text; applied per cell
+(`DataCellStyle` in `App.xaml`), which leaves a dirty row's yellow highlight at full
+strength underneath. Luminance Scale's `NewCellStyle` is `BasedOn` it, or its New cells
+would stay bright on an otherwise dimmed row.
+
+Note the dimming marks a step that is **switched off in the sequence**, not one that
+can't be edited — Luminance Scale greys the *cell background* separately for steps whose
+Analysis type has no luminance fields. The two can appear together.
+
 ## Copy/paste in the grid
 
-All three grids support Excel-style cell-range copy/paste for their "New"
-columns (`DataGridPasteHelper.cs`):
+All four grids support Excel-style cell-range copy/paste for their "New"
+columns (`DataGridPasteHelper.cs`). This is the **grid's own** Ctrl+C/Ctrl+V between
+cells, and is unrelated to importing a sheet — the paste-a-range-into-a-text-box import
+that Tasks 1 and 2 used to have is gone, replaced by "Load .xlsx...":
 
 - **Copy** needs no extra code — WPF's `DataGrid` already exports a selected
   cell range as tab/newline-delimited text on Ctrl+C.
@@ -259,7 +446,18 @@ columns (`DataGridPasteHelper.cs`):
   binding path, so the same helper serves Pattern Numbers' `NewPatternNumber`
   (string), Exposure Time's `NewYCapture`/etc. (`bool?`) and
   `NewYExposure`/etc. (string), and Luminance Scale's `NewRed`/`NewGreen`/
-  `NewBlue`/`NewAll` (string) without per-task-specific paste code.
+  `NewBlue`/`NewAll` (string), and Pattern Strings' `NewPatternString` (string),
+  without per-task-specific paste code.
+
+## Shared pieces under `Tasks/`
+
+- `ExcelImportWindow` — the sheet/column picker, used by every task.
+- `ResolveMatchWindow` — the match picker. It started inside `PatternNumberTask` and
+  moved up here once all four tasks used it.
+- `NameMatch` — the candidate ranking. Was a private copy in the two pattern tasks;
+  shared rather than let four copies of a scoring rule drift apart.
+- `DataGridPasteHelper` — the grid's own cell-range Ctrl+C/Ctrl+V.
+- `SaveResult`, `ITaskModule` — the task contract.
 
 ## Adding a new task
 

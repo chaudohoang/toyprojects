@@ -4,11 +4,9 @@ E:\Github\toyprojects\ForRadiant\SeqxcToolset\bin\Release\net48\Seqxc Toolset.pd
 E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\SeqxcToolset.csproj.AssemblyReference.cache
 E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\MainWindow.baml
 E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\PatternNumberTask\PatternNumberView.baml
-E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\PatternNumberTask\ResolveMatchWindow.baml
 E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\App.baml
 E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\MainWindow.g.cs
 E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\PatternNumberTask\PatternNumberView.g.cs
-E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\PatternNumberTask\ResolveMatchWindow.g.cs
 E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\App.g.cs
 E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Seqxc Toolset_MarkupCompile.cache
 E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Seqxc Toolset.g.resources
@@ -25,3 +23,10 @@ E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\LuminanceS
 E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\LuminanceScaleTask\LuminanceScaleView.g.cs
 E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\PatternStringTask\PatternStringView.baml
 E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\PatternStringTask\PatternStringView.g.cs
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\ExcelImportWindow.baml
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\ExcelImportWindow.g.cs
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\bin\_verify\Seqxc Toolset.exe.config
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\bin\_verify\Seqxc Toolset.exe
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\bin\_verify\Seqxc Toolset.pdb
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\ResolveMatchWindow.baml
+E:\Github\toyprojects\ForRadiant\SeqxcToolset\obj\Release\net48\Tasks\ResolveMatchWindow.g.cs

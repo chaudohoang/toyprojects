@@ -22,10 +22,75 @@ namespace SeqxcToolset
         {
             InitializeComponent();
             ApplyBuildStampToTitle();
+            CenterOnPrimaryScreen();
             RegisterTasks();
             TaskList.ItemsSource = _tasks;
             if (_tasks.Count > 0)
                 TaskList.SelectedIndex = 0;
+
+            // Reopening happens on Loaded, not here: the window is then up, so a slow
+            // parse doesn't look like a hang and any message has somewhere to appear.
+            Loaded += (s, e) => ReopenLastSequence();
+            Closing += (s, e) => RememberLastSequence();
+        }
+
+        /// <summary>
+        /// Opens the sequence that was loaded when the app last closed. Silent when
+        /// there is nothing remembered or the file has since been moved or deleted —
+        /// a stale path is a normal thing to find, not an error worth a dialog. A file
+        /// that exists but won't parse does report, since that is worth knowing about.
+        /// </summary>
+        private void ReopenLastSequence()
+        {
+            string path = AppSettings.Current.LastSeqxcPath;
+            if (string.IsNullOrEmpty(path)) return;
+
+            if (!System.IO.File.Exists(path))
+            {
+                StatusText.Text = "Last file is no longer there: " + path;
+                return;
+            }
+
+            LoadSequence(path, announceFailure: true);
+        }
+
+        /// <summary>
+        /// Records whatever is currently loaded, which is also whatever was last saved:
+        /// every save path reloads the document from the file it just wrote, so
+        /// FilePath already points at the newest copy by the time this runs.
+        /// </summary>
+        private void RememberLastSequence()
+        {
+            if (!string.IsNullOrEmpty(_document.FilePath))
+            {
+                AppSettings.Current.LastSeqxcPath = _document.FilePath;
+                AppSettings.Save();
+            }
+        }
+
+        /// <summary>
+        /// Places the window in the middle of the PRIMARY monitor.
+        ///
+        /// Done in code rather than with WindowStartupLocation="CenterScreen", which
+        /// centres on whichever monitor WPF considers current — on a multi-monitor desk
+        /// that can be the secondary one. SystemParameters.WorkArea is always the
+        /// primary monitor and already excludes the taskbar, so the window can't land
+        /// half under it.
+        ///
+        /// The size is clamped to that work area first: the default 1700x1000 does not
+        /// fit a 1366x768 laptop panel, and centring an oversized window would push its
+        /// title bar off the top of the screen where it can't be dragged back.
+        /// </summary>
+        private void CenterOnPrimaryScreen()
+        {
+            var work = SystemParameters.WorkArea;
+            if (work.Width <= 0 || work.Height <= 0) return;   // no desktop metrics; leave it to Windows
+
+            if (Width > work.Width) Width = work.Width;
+            if (Height > work.Height) Height = work.Height;
+
+            Left = work.Left + (work.Width - Width) / 2;
+            Top = work.Top + (work.Height - Height) / 2;
         }
 
         /// <summary>
@@ -85,10 +150,19 @@ namespace SeqxcToolset
             };
             if (dlg.ShowDialog() != true) return;
 
+            LoadSequence(dlg.FileName, announceFailure: true);
+        }
+
+        /// <summary>
+        /// Loads a sequence and hands it to every task. Shared by the Open button and
+        /// by the reopen-on-start path so both behave identically.
+        /// </summary>
+        private void LoadSequence(string path, bool announceFailure)
+        {
             try
             {
-                _document.Load(dlg.FileName);
-                FilePathText.Text = dlg.FileName;
+                _document.Load(path);
+                FilePathText.Text = path;
                 StatusText.Text = $"Loaded {_document.Items.Count} sequence items, " +
                                    $"{_document.PatternSetups.Count} pattern setups.";
 
@@ -97,11 +171,18 @@ namespace SeqxcToolset
 
                 if (TaskList.SelectedItem is ITaskModule current)
                     TaskHost.Content = current.View;
+
+                // Persist immediately rather than only on close, so the choice survives
+                // a crash or a kill from Task Manager.
+                AppSettings.Current.LastSeqxcPath = path;
+                AppSettings.Save();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, $"Failed to load file:\n{ex.Message}", "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                StatusText.Text = "Failed to load " + path;
+                if (announceFailure)
+                    MessageBox.Show(this, $"Failed to load file:\n{ex.Message}", "Error",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

@@ -1,7 +1,9 @@
-<Window x:Class="SeqxcToolset.MainWindow"
+﻿<Window x:Class="SeqxcToolset.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Seqxc Toolset" Height="760" Width="1200"
+        Title="Seqxc Toolset"
+        WindowStartupLocation="Manual"
+        Height="1000" Width="1700" MinHeight="600" MinWidth="900"
         Icon="app.ico"
         Background="{StaticResource BgAppBrush}"
         FontFamily="Segoe UI" FontSize="13">

@@ -1,95 +1,86 @@
-<UserControl x:Class="SeqxcToolset.Tasks.PatternStringTask.PatternStringView"
+﻿<UserControl x:Class="SeqxcToolset.Tasks.PatternStringTask.PatternStringView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="320"/>
-        </Grid.ColumnDefinitions>
+    <!-- Controls live in a bar along the bottom rather than a side panel, so the grid
+         gets the full window width. The bar must be declared before the DataGrid: a
+         DockPanel fills with its LAST child, so the grid has to come last. -->
+    <DockPanel>
 
-        <!-- Left: grid of sequence items -->
-        <DockPanel Grid.Column="0" Margin="0,0,12,0">
-            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
-                <TextBlock Text="Pattern Strings" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                <CheckBox x:Name="ShowAllCheck" Content="Show all items (incl. unselected)"
-                          Margin="20,0,0,0" VerticalAlignment="Center"
-                          Checked="ShowAllCheck_Changed" Unchecked="ShowAllCheck_Changed"/>
-            </StackPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+            <TextBlock Text="Pattern Strings" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center"/>
+            <CheckBox x:Name="ShowAllCheck" Content="Show all items (incl. unselected)"
+                      Margin="20,0,0,0" VerticalAlignment="Center"
+                      Checked="ShowAllCheck_Changed" Unchecked="ShowAllCheck_Changed"/>
+        </StackPanel>
 
-            <DataGrid x:Name="ItemsGrid" AutoGenerateColumns="False" CanUserAddRows="False"
-                      SelectionUnit="Cell" SelectionMode="Extended"
-                      Background="{StaticResource BgPanelBrush}" RowHeaderWidth="0"
-                      GridLinesVisibility="Horizontal" HeadersVisibility="Column">
-                <DataGrid.RowStyle>
-                    <Style TargetType="DataGridRow">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsDirty}" Value="True">
-                                <Setter Property="Background" Value="{StaticResource DirtyBrush}"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding IsAlias}" Value="True">
-                                <Setter Property="ToolTip" Value="Alias — resolved via another pattern"/>
-                            </DataTrigger>
-                            <!-- No <PatternString> element to write to: the file predates
-                                 the property, so the New cell is locked rather than
-                                 accepting a value that Save would only skip. -->
-                            <DataTrigger Binding="{Binding IsEditable}" Value="False">
-                                <Setter Property="IsEnabled" Value="False"/>
-                                <Setter Property="ToolTip"
-                                        Value="This file has no PatternString for this pattern — re-save the sequence from TrueTest first"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </DataGrid.RowStyle>
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="#" Binding="{Binding DisplayIndex}" Width="35" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Pattern Setup Name" Binding="{Binding PatternSetupName}" Width="170" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Analysis" Binding="{Binding AnalysisType}" Width="150" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Resolved Via" Binding="{Binding ResolvedTerminalName}" Width="110" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Current String" Binding="{Binding CurrentPatternString}" Width="140" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="New String" Binding="{Binding NewPatternString, UpdateSourceTrigger=PropertyChanged}" Width="160"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </DockPanel>
-
-        <!-- Right: excel import + actions -->
-        <Border Grid.Column="1" Background="{StaticResource BgPanelBrush}"
+        <Border DockPanel.Dock="Bottom" Background="{StaticResource BgPanelBrush}"
                 BorderBrush="{StaticResource BorderBrush2}" BorderThickness="1"
-                CornerRadius="6" Padding="14">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-
-                <TextBlock Grid.Row="0" Text="Import from Excel" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                <TextBlock Grid.Row="1" TextWrapping="Wrap" Foreground="{StaticResource TextMutedBrush}"
-                           FontSize="11" Margin="0,0,0,8">
-                    Copy a 2-column range from Excel (Name / To be) or 3-column
-                    (Name / As is / To be) — header row optional — and paste it below,
-                    or type rows directly as "Name&lt;TAB&gt;ToBe".
-                </TextBlock>
-                <TextBox Grid.Row="2" x:Name="PasteBox" MinHeight="120" AcceptsReturn="True" AcceptsTab="True"
-                         TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto"
-                         HorizontalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="12"
-                         Text="{Binding PasteText, UpdateSourceTrigger=PropertyChanged}"/>
-                <Button Grid.Row="3" Content="Parse &amp; Match" Margin="0,8,0,0" Command="{Binding ParseImportCommand}"/>
-                <TextBlock Grid.Row="4" Text="{Binding ImportSummary}" TextWrapping="Wrap" Margin="0,8,0,0" FontSize="11"
-                           Foreground="{StaticResource TextMutedBrush}"/>
-
-                <Separator Grid.Row="5" Margin="0,14"/>
-
-                <StackPanel Grid.Row="6">
-                    <Button Content="Save Changes..." Style="{StaticResource PrimaryButton}"
-                            Command="{Binding SaveCommand}"/>
-                    <Button Content="Clear New Values" Margin="0,8,0,0"
-                            Command="{Binding ClearNewValuesCommand}"/>
+                CornerRadius="6" Padding="10,8" Margin="0,10,0,0">
+            <DockPanel LastChildFill="True">
+                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Excel:" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding ExcelFileLabel}" ToolTip="{Binding ExcelFilePath}"
+                               VerticalAlignment="Center" Margin="6,0,0,0"
+                               MaxWidth="620" TextTrimming="CharacterEllipsis"
+                               Foreground="{StaticResource TextMutedBrush}"/>
+                    <Button Content="Choose file..." Margin="14,0,0,0" MinWidth="110"
+                            Command="{Binding ImportFromExcelCommand}"
+                            ToolTip="Pick a workbook, then the sheet, the pattern name column and the Pattern String column"/>
+                    <Button Content="Choose columns" Margin="8,0,0,0" MinWidth="130"
+                            Command="{Binding PickColumnsCommand}"
+                            ToolTip="Pick the sheet and columns again from the workbook named here — no file dialog"/>
                 </StackPanel>
-            </Grid>
+
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="Clear New Values" Margin="0,0,8,0" MinWidth="130"
+                            Command="{Binding ClearNewValuesCommand}"/>
+                    <Button Content="Save Changes..." Style="{StaticResource PrimaryButton}" MinWidth="130"
+                            Command="{Binding SaveCommand}"/>
+                </StackPanel>
+
+                <!-- Fills what's left; an import summary can be long, so it trims and
+                     carries the full text as its tooltip. -->
+                <TextBlock Text="{Binding ImportSummary}" ToolTip="{Binding ImportSummary}"
+                           VerticalAlignment="Center" Margin="16,0,16,0" FontSize="11"
+                           TextTrimming="CharacterEllipsis"
+                           Foreground="{StaticResource TextMutedBrush}"/>
+            </DockPanel>
         </Border>
-    </Grid>
+
+        <DataGrid x:Name="ItemsGrid" AutoGenerateColumns="False" CanUserAddRows="False"
+                  SelectionUnit="Cell" SelectionMode="Extended"
+                  Background="{StaticResource BgPanelBrush}" RowHeaderWidth="0"
+                  GridLinesVisibility="Horizontal" HeadersVisibility="Column"
+                  CellStyle="{StaticResource DataCellStyle}">
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsDirty}" Value="True">
+                            <Setter Property="Background" Value="{StaticResource DirtyBrush}"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsAlias}" Value="True">
+                            <Setter Property="ToolTip" Value="Alias — resolved via another pattern"/>
+                        </DataTrigger>
+                        <!-- No <PatternString> element to write to: the file predates
+                             the property, so the New cell is locked rather than
+                             accepting a value that Save would only skip. -->
+                        <DataTrigger Binding="{Binding IsEditable}" Value="False">
+                            <Setter Property="IsEnabled" Value="False"/>
+                            <Setter Property="ToolTip"
+                                    Value="This file has no PatternString for this pattern — re-save the sequence from TrueTest first"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="#" Binding="{Binding DisplayIndex}" Width="35" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Pattern Setup Name" Binding="{Binding PatternSetupName}" Width="Auto" MinWidth="150" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Analysis" Binding="{Binding AnalysisType}" Width="Auto" MinWidth="140" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Resolved Via" Binding="{Binding ResolvedTerminalName}" Width="Auto" MinWidth="110" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Current String" Binding="{Binding CurrentPatternString}" Width="200" IsReadOnly="True"/>
+                <DataGridTextColumn Header="New String" Binding="{Binding NewPatternString, UpdateSourceTrigger=PropertyChanged}" Width="220"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+    </DockPanel>
 </UserControl>

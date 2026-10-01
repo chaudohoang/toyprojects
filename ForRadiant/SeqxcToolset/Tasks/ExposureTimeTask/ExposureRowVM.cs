@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace SeqxcToolset.Tasks.ExposureTimeTask
@@ -10,6 +10,12 @@ namespace SeqxcToolset.Tasks.ExposureTimeTask
 
         public string PatternSetupName { get; set; }
         public string AnalysisType { get; set; }
+
+        /// <summary>
+        /// Whether the sequence has this step selected. Only ever false when
+        /// "Show all items" is on; the grid dims those rows.
+        /// </summary>
+        public bool Selected { get; set; }
 
         public bool YCapture { get; set; }
         public string YExposure { get; set; }

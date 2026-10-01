@@ -13,4 +13,13 @@
   <ItemGroup>
     <Resource Include="app.ico" />
   </ItemGroup>
+
+  <!-- Framework assemblies, NOT NuGet packages - the project still has no package
+       references. .NET Framework does not auto-reference these two, so Core/XlsxReader.cs
+       needs them named explicitly to read an .xlsx (a zip of XML parts) without
+       ClosedXML/EPPlus or an Excel install. -->
+  <ItemGroup>
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+  </ItemGroup>
 </Project>
