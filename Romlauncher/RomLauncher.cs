@@ -1,4 +1,4 @@
-// RomLauncher.cs - single-file WinForms ROM launcher (LaunchBox-lite)
+﻿// RomLauncher.cs - single-file WinForms ROM launcher (LaunchBox-lite)
 // Build with build.bat (csc.exe from .NET Framework 4.x). No VS, no NuGet.
 // C# 5 compatible on purpose (Framework csc does not support C# 6+ syntax).
 
@@ -751,6 +751,8 @@ namespace RomLauncher
         bool sysProg = false;         // guard: programmatic combo edits
         string sysType = "";          // type-ahead buffer for the system combo
         int sysTypeTick = 0;          // last keystroke time (ms), for buffer reset
+        string listType = "";         // type-ahead buffer for the ROM list
+        int listTypeTick = 0;         // last keystroke time (ms), for buffer reset
         CheckBox chkFav;
         Button btnRescan, btnSystems, btnLaunch, btnClear;
         FastListView list;
@@ -912,6 +914,7 @@ namespace RomLauncher
             list.RetrieveVirtualItem += RetrieveItem;
             list.DoubleClick += delegate { LaunchSelected(); };
             list.KeyDown += ListKeyDown;
+            list.KeyPress += ListTypeSearch;   // "sm" -> Smash... (accumulating type-ahead)
             Controls.Add(list);
             list.BringToFront();
 
@@ -1429,6 +1432,63 @@ namespace RomLauncher
         {
             if (e.KeyCode == Keys.Enter) { LaunchSelected(); e.Handled = true; }
             else if (e.KeyCode == Keys.F2) { ToggleFav(); e.Handled = true; }
+        }
+
+        // Type-ahead for the ROM list, the same accumulating style as the system combo:
+        // keystrokes build a buffer (reset after a short pause) and the selection jumps
+        // to the first row whose name matches -- prefix first, then substring. So
+        // "mario" lands on a Mario game, where the native ListView search would treat
+        // m, a, r, i, o as five separate jumps.
+        //
+        // Unlike the search box this does NOT filter: every row stays in the list and
+        // only the selection moves, which is the point when scrolling a whole library
+        // rather than narrowing it. It searches the rows currently shown, so the search
+        // box and system filter still apply.
+        void ListTypeSearch(object sender, KeyPressEventArgs e)
+        {
+            char ch = e.KeyChar;
+            if (ch == '\r' || ch == '\n') return;            // Enter: ListKeyDown launches
+            if (ch == (char)27) { listType = ""; return; }   // Esc: clear buffer
+
+            if (ch == '\b')
+            {
+                if (listType.Length > 0) listType = listType.Substring(0, listType.Length - 1);
+            }
+            else if (!char.IsControl(ch))
+            {
+                int now = Environment.TickCount;
+                if (now - listTypeTick > 1000) listType = "";   // pause -> start fresh
+                listType += ch;
+                listTypeTick = now;
+            }
+            else return;
+
+            // Suppress the control's built-in single-char search; left alone it would
+            // jump on its own and fight the buffer. Also stops Space from being taken
+            // as a selection toggle, so multi-word typing works.
+            e.Handled = true;
+
+            int idx = FindRowIndex(listType);
+            if (idx >= 0)
+            {
+                list.SelectedIndices.Clear();
+                list.SelectedIndices.Add(idx);
+                list.EnsureVisible(idx);
+            }
+        }
+
+        // First visible row matching q: prefix on the name, then substring -- the same
+        // two passes FindSysIndex does for the system combo. LowerName is already
+        // lower-cased, so this costs no allocation per keystroke on a 40k-row list.
+        int FindRowIndex(string q)
+        {
+            q = q.Trim();
+            if (q.Length == 0) return -1;
+            for (int i = 0; i < view.Count; i++)
+                if (view[i].LowerName.StartsWith(q, StringComparison.OrdinalIgnoreCase)) return i;
+            for (int i = 0; i < view.Count; i++)
+                if (view[i].LowerName.IndexOf(q, StringComparison.OrdinalIgnoreCase) >= 0) return i;
+            return -1;
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)

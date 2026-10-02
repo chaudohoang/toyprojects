@@ -62,7 +62,11 @@
             </DockPanel>
         </Border>
 
+        <!-- CanUserDeleteRows="False": Delete is handled by DataGridEditHelper to
+             clear the selected cells. Left at its default of true, the DataGrid would
+             also try to remove the row itself, which would drop a step out of the view. -->
         <DataGrid x:Name="ItemsGrid" AutoGenerateColumns="False" CanUserAddRows="False"
+                  CanUserDeleteRows="False"
                   SelectionUnit="Cell" SelectionMode="Extended"
                   Background="{StaticResource BgPanelBrush}" RowHeaderWidth="0"
                   GridLinesVisibility="Horizontal" HeadersVisibility="Column"

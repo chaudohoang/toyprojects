@@ -423,12 +423,40 @@ Note the dimming marks a step that is **switched off in the sequence**, not one 
 can't be edited — Luminance Scale greys the *cell background* separately for steps whose
 Analysis type has no luminance fields. The two can appear together.
 
-## Copy/paste in the grid
+## Editing in the grid
 
-All four grids support Excel-style cell-range copy/paste for their "New"
-columns (`DataGridPasteHelper.cs`). This is the **grid's own** Ctrl+C/Ctrl+V between
-cells, and is unrelated to importing a sheet — the paste-a-range-into-a-text-box import
-that Tasks 1 and 2 used to have is gone, replaced by "Load .xlsx...":
+`DataGridEditHelper.cs` gives all four grids the same cell-editing behaviour. Every
+path through it writes only into bound properties whose name starts with `New`, so a
+rectangular selection spanning a read-only "Current" column can never overwrite it.
+
+| Key | On a selected cell | Inside a cell editor |
+|---|---|---|
+| **Backspace** | deletes **one character**, leaving the editor open | normal Backspace |
+| **Delete** | clears every selected New cell **immediately**, no Enter needed | forward delete |
+| **Ctrl+V** | pastes a range (below) | normal paste |
+| **Ctrl+Z** | undoes the last paste or Delete | the editor's own undo |
+
+**Backspace** needs the help because the DataGrid opens an editor with the whole value
+*selected*, so an untouched Backspace wipes the entire cell and leaves the edit pending
+a commit. The helper opens the edit, drops the selection, puts the caret at the end and
+removes exactly one character — deferred to `Input` priority, since the editing TextBox
+does not exist until the DataGrid has prepared the cell.
+
+**Delete** writes straight to the row instead of opening an editor, which is why it
+needs no Enter, and clears the whole selection as one undo step. The grids set
+`CanUserDeleteRows="False"`: at its default of true the DataGrid would also try to
+delete the row, dropping a step out of the view.
+
+**Ctrl+Z** covers the bulk edits — paste and Delete — up to 25 steps, newest first, and
+reverts a batch through the same property setters so the dirty highlight recalculates
+normally. A single typed cell is deliberately *not* on the stack: Esc already abandons
+an edit in progress, and the editor has its own undo while open.
+
+### Copy/paste of a range
+
+This is the **grid's own** Ctrl+C/Ctrl+V between cells, unrelated to importing a sheet —
+the paste-a-range-into-a-text-box import that Tasks 1 and 2 used to have is gone,
+replaced by "Load .xlsx...":
 
 - **Copy** needs no extra code — WPF's `DataGrid` already exports a selected
   cell range as tab/newline-delimited text on Ctrl+C.
@@ -456,7 +484,8 @@ that Tasks 1 and 2 used to have is gone, replaced by "Load .xlsx...":
   moved up here once all four tasks used it.
 - `NameMatch` — the candidate ranking. Was a private copy in the two pattern tasks;
   shared rather than let four copies of a scoring rule drift apart.
-- `DataGridPasteHelper` — the grid's own cell-range Ctrl+C/Ctrl+V.
+- `DataGridEditHelper` — the grids' cell editing: paste, Backspace/Delete, undo.
+  (Lives at the project root, not under `Tasks/`.)
 - `SaveResult`, `ITaskModule` — the task contract.
 
 ## Adding a new task

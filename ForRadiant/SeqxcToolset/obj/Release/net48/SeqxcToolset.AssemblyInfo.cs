@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Seqxc Toolset")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ebae9e065b2329ec25c1a0afd942031610a66305")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+deaf2052a6ab56be9dc9731456e237a93f18c078")]
 [assembly: System.Reflection.AssemblyProductAttribute("Seqxc Toolset")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Seqxc Toolset")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

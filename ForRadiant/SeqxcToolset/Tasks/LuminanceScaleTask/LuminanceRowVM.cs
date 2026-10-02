@@ -69,6 +69,14 @@ namespace SeqxcToolset.Tasks.LuminanceScaleTask
 
         public bool IsDirty => Changed(NewRed, Red) || Changed(NewGreen, Green) || Changed(NewBlue, Blue);
 
+
+        /// <summary>
+        /// Re-raises IsDirty. Needed after an undo writes the backing values directly:
+        /// restoring the "(all)" convenience column alone touches no per-channel setter,
+        /// so nothing else would tell the row style to repaint.
+        /// </summary>
+        public void RefreshDirty() => OnPropertyChanged(nameof(IsDirty));
+
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string name = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

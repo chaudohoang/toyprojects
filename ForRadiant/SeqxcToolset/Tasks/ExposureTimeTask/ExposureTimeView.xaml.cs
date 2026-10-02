@@ -1,4 +1,4 @@
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using SeqxcToolset.Core;
 
 namespace SeqxcToolset.Tasks.ExposureTimeTask
@@ -12,7 +12,7 @@ namespace SeqxcToolset.Tasks.ExposureTimeTask
             InitializeComponent();
             DataContext = _vm;
             ItemsGrid.ItemsSource = _vm.Rows;
-            DataGridPasteHelper.Attach(ItemsGrid);
+            DataGridEditHelper.Attach(ItemsGrid);
         }
 
         public void LoadDocument(SequenceDocument document)
