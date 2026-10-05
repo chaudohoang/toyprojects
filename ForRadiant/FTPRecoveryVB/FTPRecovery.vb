@@ -1,4 +1,4 @@
-Option Strict On
+﻿Option Strict On
 
 ' =============================================================================
 ' FTPRecovery - one-shot recovery tool for stalled FTPUploaderVB queues.
@@ -35,6 +35,7 @@ Imports System.IO
 Imports System.Linq
 Imports System.Text
 Imports System.Text.RegularExpressions
+Imports System.Security.Cryptography
 Imports WinSCP
 
 Module Program
@@ -45,6 +46,9 @@ Module Program
     Public ForceIncomplete As Boolean = False
     Public SkipMissingSource As Boolean = False
     Public Reconstruct As Boolean = False
+    ' Send index/host even when a byte-identical manifest has already been
+    ' delivered. Off by default - see the delivery ledger.
+    Public ReDeliver As Boolean = False
     ' When set, uploads go to this server instead of the one named on line 0 of the
     ' queue file. Everything else - credentials, dest paths, everything - still comes
     ' from the queue file. Empty means "use whatever the queue says".
@@ -143,6 +147,11 @@ Module Program
     Private nRebuilt As Integer = 0
     Private nPanelsShort As Integer = 0
     Private nPanelsForced As Integer = 0
+    Private nPanelsAlreadySent As Integer = 0
+    ' Set by FinalizePanel when it returned True WITHOUT uploading, so the report
+    ' row does not claim a delivery that did not happen on this pass.
+    Private LastDeliverySuppressed As Boolean = False
+    Private nCleanupFailed As Integer = 0
 
     ' =========================================================================
     ' Data model
@@ -342,7 +351,8 @@ Module Program
     Public Function IsRuleFileName(name As String) As Boolean
         Return String.Equals(name, ALLOW_FILE, StringComparison.OrdinalIgnoreCase) OrElse
                String.Equals(name, DENY_FILE, StringComparison.OrdinalIgnoreCase) OrElse
-               String.Equals(name, KNOWN_FILE, StringComparison.OrdinalIgnoreCase)
+               String.Equals(name, KNOWN_FILE, StringComparison.OrdinalIgnoreCase) OrElse
+               String.Equals(name, DELIVERED_FILE, StringComparison.OrdinalIgnoreCase)
     End Function
 
     ' Where to look when no path is given. The exe's own folder wins only if it
@@ -510,6 +520,10 @@ Module Program
             End If
         End If
         Log("Panels still short    : " & nPanelsIncomplete.ToString())
+        If nPanelsAlreadySent > 0 Then
+            Log("Panels already sent   : " & nPanelsAlreadySent.ToString() &
+                "  (identical manifest - suppressed, see " & DELIVERED_FILE & ")")
+        End If
         Log("Files uploaded        : " & nUploaded.ToString())
         If UploadStart <> DateTime.MinValue AndAlso nUploaded > 0 Then
             Dim secs = Math.Max(1, DateTime.Now.Subtract(UploadStart).TotalSeconds)
@@ -530,6 +544,12 @@ Module Program
         Log("Files already recorded: " & nAlready.ToString())
         Log("Failed->clean retries : " & nRetried.ToString())
         Log("Rebuilt from disk     : " & nRebuilt.ToString())
+        If nCleanupFailed > 0 Then
+            Log("")
+            Log("ATTENTION: " & nCleanupFailed.ToString() & " queue file(s) could not be" &
+                " deleted. Those panels come back on every scan.")
+            Log("  Clear them by hand, or every pass keeps re-reading them for nothing.")
+        End If
         If Not DoExecute Then
             Log("")
             Log("DRY RUN - nothing was changed. Re-run with -go to execute.")
@@ -564,6 +584,8 @@ Module Program
                     If StallTimeoutSeconds < 0 Then StallTimeoutSeconds = 0
                 Case "-reconstruct", "/reconstruct"
                     Reconstruct = True
+                Case "-redeliver", "/redeliver"
+                    ReDeliver = True
                 Case "-host", "/host"
                     i += 1
                     If i >= args.Length Then Return False
@@ -620,6 +642,11 @@ Module Program
         Console.WriteLine("  -reconstruct   Rebuild entries for files on disk that have no queue file,")
         Console.WriteLine("                 using a surviving sibling from the same panel. Only files")
         Console.WriteLine("                 matching a sibling's filename pattern are accepted.")
+        Console.WriteLine()
+        Console.WriteLine("  -redeliver     Send index/host even when an identical manifest was already")
+        Console.WriteLine("                 delivered. Normally a panel whose manifest is unchanged is")
+        Console.WriteLine("                 skipped, so an auto-run cannot re-send it every pass.")
+        Console.WriteLine("                 Use this only when the customer actually lost the manifest.")
         Console.WriteLine()
         Console.WriteLine("  STOP FTPUploaderVB BEFORE RUNNING WITH -go.")
     End Sub
@@ -794,6 +821,19 @@ Module Program
     Public Const DENY_FILE As String = "denied_filenames.txt"
     Public Const KNOWN_FILE As String = "known_filenames.txt"
 
+    ' Manifests this tool has already delivered. Deleting the queue file was the
+    ' only thing stopping a finished panel from being sent again, and that is a
+    ' single point of failure: a delete that fails (locked file, read-only share),
+    ' or an index/host queue file recreated by FTPUploaderVB or by
+    ' WriteIndexHostQueue, puts the panel straight back in front of the next scan
+    ' with nothing pending - which satisfies "hostAfter >= Total" and re-sends.
+    ' An unattended auto-run then re-delivers the same manifest once per pass
+    ' indefinitely (LGD: 222 panels x 20 passes in 13.5 hours, 8,880 succeed-log
+    ' lines for 444 real deliveries). This ledger is the guard that does not
+    ' depend on the queue file being gone, and it is on disk so it survives a
+    ' restart of the tool.
+    Public Const DELIVERED_FILE As String = "delivered_panels.txt"
+
     Private Function ExeDir() As String
         Return AppDomain.CurrentDomain.BaseDirectory.TrimEnd("\"c)
     End Function
@@ -885,6 +925,145 @@ Module Program
             Log("  ! could not read denied_filenames.txt: " & ex.Message)
         End Try
         Return n
+    End Function
+
+    Private Function DeliveredPath() As String
+        Return RuleFile(DELIVERED_FILE)
+    End Function
+
+    ' Keyed lookup plus the lines in file order, so pruning keeps the newest.
+    Private DeliveredKeys As HashSet(Of String) = Nothing
+    Private DeliveredLines As New List(Of String)()
+    Private Const DELIVERED_KEEP As Integer = 20000
+
+    Private Sub LoadDelivered()
+        If DeliveredKeys IsNot Nothing Then Exit Sub
+        DeliveredKeys = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+        DeliveredLines.Clear()
+        Dim p = DeliveredPath()
+        If Not File.Exists(p) Then Exit Sub
+        Try
+            For Each l In File.ReadAllLines(p)
+                If l = "" OrElse l.StartsWith("#") Then Continue For
+                Dim k = l.Split(CChar(vbTab))(0).Trim()
+                If k = "" Then Continue For
+                If DeliveredKeys.Add(k) Then DeliveredLines.Add(l)
+            Next
+        Catch ex As Exception
+            ' Unreadable ledger must not suppress a delivery, so treat it as empty
+            ' and say so - the run is then no worse than before this guard existed.
+            Log("  ! could not read " & DELIVERED_FILE & ": " & ex.Message)
+            Log("    index/host duplicate protection is OFF for this run.")
+            DeliveredKeys.Clear() : DeliveredLines.Clear()
+        End Try
+    End Sub
+
+    Private Function AlreadyDelivered(key As String) As Boolean
+        LoadDelivered()
+        Return DeliveredKeys.Contains(key)
+    End Function
+
+    ' When this exact manifest went out, for the operator-facing log line.
+    Private Function DeliveredWhen(key As String) As String
+        LoadDelivered()
+        For Each l In DeliveredLines
+            Dim a = l.Split(CChar(vbTab))
+            If a.Length >= 2 AndAlso String.Equals(a(0).Trim(), key, StringComparison.OrdinalIgnoreCase) Then
+                Return a(1).Trim()
+            End If
+        Next
+        Return "unknown"
+    End Function
+
+    ' Appended, not rewritten, so a crash mid-run cannot lose deliveries that
+    ' already happened - the whole point is that the record outlives the process.
+    Private Sub MarkDelivered(key As String, p As Panel)
+        LoadDelivered()
+        If Not DeliveredKeys.Add(key) Then Exit Sub
+        Dim line = key & vbTab & DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") &
+                   vbTab & p.PID & vbTab & p.HostDst
+        DeliveredLines.Add(line)
+        ' Beside the exe by default, falling back to the queue folder when that is
+        ' not writable (read-only or shared install) - the same two locations
+        ' RuleFile() searches, so the next run finds whichever one was used.
+        If Not AppendDelivered(DeliveredPath(), line) Then
+            If Not AppendDelivered(Path.Combine(QueueRoot, DELIVERED_FILE), line) Then
+                Log("  ! could not record the delivery in " & DELIVERED_FILE & " anywhere.")
+                Log("    this panel may be sent again on the next pass.")
+            End If
+        End If
+        PruneDelivered()
+    End Sub
+
+    Private Function AppendDelivered(path As String, line As String) As Boolean
+        Try
+            If Not File.Exists(path) Then
+                File.WriteAllLines(path, New String() {
+                    "# Manifests (index+host) already delivered by FTPRecovery.",
+                    "# key" & vbTab & "when" & vbTab & "PID" & vbTab & "host dest",
+                    "#",
+                    "# The key is a hash of the exact bytes uploaded plus both",
+                    "# destination paths, so a CHANGED manifest is delivered again",
+                    "# and only a byte-identical re-send is suppressed.",
+                    "# Safe to delete: the next run then re-sends every panel it finds."})
+            End If
+            File.AppendAllText(path, line & Environment.NewLine)
+            Return True
+        Catch ex As Exception
+            Log("  ! could not write " & path & " : " & ex.Message)
+            Return False
+        End Try
+    End Function
+
+    Private Sub PruneDelivered()
+        If DeliveredLines.Count <= DELIVERED_KEEP Then Exit Sub
+        Dim keep = DeliveredLines.Skip(DeliveredLines.Count - DELIVERED_KEEP).ToList()
+        Try
+            Dim head As New List(Of String)()
+            head.Add("# Manifests (index+host) already delivered by FTPRecovery.")
+            head.Add("# key" & vbTab & "when" & vbTab & "PID" & vbTab & "host dest")
+            head.Add("# pruned to the newest " & DELIVERED_KEEP.ToString() & " on " &
+                     DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
+            head.AddRange(keep)
+            File.WriteAllLines(DeliveredPath(), head)
+            DeliveredLines.Clear() : DeliveredLines.AddRange(keep)
+            DeliveredKeys = New HashSet(Of String)(
+                keep.Select(Function(l) l.Split(CChar(vbTab))(0).Trim()),
+                StringComparer.OrdinalIgnoreCase)
+        Catch
+            ' Keep the in-memory set; the file just stays long.
+        End Try
+    End Sub
+
+    ' Fingerprint of one delivery: the bytes that actually go on the wire, plus
+    ' where they go. Content-based on purpose - a manifest that gained lines, or
+    ' had placeholders replaced on a retry, hashes differently and IS re-sent.
+    Private Function DeliveryKey(p As Panel, ref As QueueEntry,
+                                 idxUpload As String, hstUpload As String) As String
+        Return ShortHash(EffectiveHost(ref) & "|" & p.IndexDst & "|" & p.HostDst &
+                         "|" & FileDigest(idxUpload) & "|" & FileDigest(hstUpload))
+    End Function
+
+    Private Function FileDigest(fpath As String) As String
+        Try
+            If Not File.Exists(fpath) Then Return "-"
+            Using fs = File.OpenRead(fpath)
+                Using sha = SHA256.Create()
+                    Return BitConverter.ToString(sha.ComputeHash(fs)).Replace("-", "")
+                End Using
+            End Using
+        Catch
+            ' Cannot read it, so cannot claim it matches an earlier delivery.
+            ' A unique value here fails OPEN - the manifest is sent.
+            Return Guid.NewGuid().ToString("N")
+        End Try
+    End Function
+
+    Private Function ShortHash(s As String) As String
+        Using sha = SHA256.Create()
+            Return BitConverter.ToString(
+                sha.ComputeHash(Encoding.UTF8.GetBytes(s))).Replace("-", "").Substring(0, 32)
+        End Using
     End Function
 
     Private Sub LoadVocab()
@@ -1730,6 +1909,14 @@ Module Program
                     " of " & p.Total.ToString() & " - " & String.Join(", ", causes))
             End If
             If FinalizePanel(p) Then
+                If LastDeliverySuppressed Then
+                    ' Already on the server and unchanged. Reported as its own
+                    ' result: counting it as SENT would overstate what this pass
+                    ' did and hide a panel that should not have been here at all.
+                    note = "ALREADY-DELIVERED (not re-sent)"
+                    ReportRow(p, hostBefore, pending, up, fl, ms, dupCount, hostAfter, note)
+                    Return
+                End If
                 nPanelsFired += 1
                 If forced Then nPanelsForced += 1
                 If shortBy > 0 Then
@@ -1771,8 +1958,29 @@ Module Program
         Dim idxUpload = CleanCopyFor(p.IndexSrc, idxTemp)
         Dim hstUpload = CleanCopyFor(p.HostSrc, hstTemp)
 
+        ' A finished panel satisfies "hostAfter >= Total" on EVERY pass, so this
+        ' is the only thing standing between an unattended auto-run and the same
+        ' manifest going out once per pass forever. Checked against what is about
+        ' to be uploaded, so a manifest that genuinely changed still goes.
+        Dim key = DeliveryKey(p, ref, idxUpload, hstUpload)
+        If AlreadyDelivered(key) AndAlso Not ReDeliver Then
+            Log("  index/host NOT sent - this exact manifest was already delivered " &
+                DeliveredWhen(key) & ".")
+            Log("  Nothing has changed since, so re-sending would only overwrite it" &
+                " with itself. Use -redeliver to send anyway.")
+            nPanelsAlreadySent += 1
+            LastDeliverySuppressed = True
+            DiscardTemp(idxUpload, idxTemp, hstUpload, hstTemp)
+            ' Still clear the queue files. The panel is only in front of us because
+            ' that cleanup did not take effect last time, and leaving them means it
+            ' comes back on the next pass too.
+            CleanupAfterDelivery(p, ref)
+            Return True
+        End If
+
         Dim ok As Boolean = True
         Dim err As String = ""
+        LastDeliverySuppressed = False
 
         If File.Exists(idxUpload) Then
             If TryUpload(ref, idxUpload, p.IndexDst, err) Then
@@ -1805,31 +2013,14 @@ Module Program
         End If
 
         ' Discard the temp copies regardless of outcome.
-        If idxTemp Then
-            Try
-                File.Delete(idxUpload)
-            Catch
-            End Try
-        End If
-        If hstTemp Then
-            Try
-                File.Delete(hstUpload)
-            Catch
-            End Try
-        End If
+        DiscardTemp(idxUpload, idxTemp, hstUpload, hstTemp)
 
-        ' Clear stale index/host queue files so the main app cannot re-send them later.
         If ok Then
-            For Each lo In p.Leftovers
-                Log("  clearing stale index/host queue: " & Path.GetFileName(lo.FilePath))
-                BackupAndDelete(lo.FilePath, "Backedup Recovery Queue\StaleIndexHost")
-            Next
-            For Each pth In New String() {p.Entries.Select(Function(x) x.OutIndexInfo).FirstOrDefault(),
-                                          p.Entries.Select(Function(x) x.OutHostInfo).FirstOrDefault()}
-                If pth IsNot Nothing AndAlso pth <> "" AndAlso File.Exists(pth) Then
-                    BackupAndDelete(pth, "Backedup Recovery Queue\StaleIndexHost")
-                End If
-            Next
+            ' Record it BEFORE the cleanup. If the cleanup is what fails, the panel
+            ' comes back next pass and the ledger is then the only thing that knows
+            ' the manifest is already on the server.
+            MarkDelivered(key, p)
+            CleanupAfterDelivery(p, ref)
         Else
             ' The files are on the server but the manifest is not. Every data queue
             ' file was consumed as its file uploaded, so without this the panel
@@ -1842,6 +2033,65 @@ Module Program
 
         Return ok
     End Function
+
+    Private Sub DiscardTemp(idxUpload As String, idxTemp As Boolean,
+                            hstUpload As String, hstTemp As Boolean)
+        If idxTemp Then
+            Try
+                File.Delete(idxUpload)
+            Catch
+            End Try
+        End If
+        If hstTemp Then
+            Try
+                File.Delete(hstUpload)
+            Catch
+            End Try
+        End If
+    End Sub
+
+    ' Clear the queue files that put this panel in front of us, so the main app
+    ' cannot re-send them and the next scan does not see the panel at all.
+    '
+    ' A failure here is why a delivered panel reappears, so it is reported rather
+    ' than swallowed: the operator needs to know the panel will be back.
+    Private Sub CleanupAfterDelivery(p As Panel, ref As QueueEntry)
+        ' One list of distinct paths, because the two sources overlap: a leftover
+        ' found in the queue root usually IS the file named by OutIndexInfo /
+        ' OutHostInfo. Deleting it twice reported every stuck file twice.
+        Dim targets As New List(Of String)()
+        Dim seen As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+
+        For Each lo In p.Leftovers
+            If lo.FilePath <> "" AndAlso seen.Add(lo.FilePath) Then targets.Add(lo.FilePath)
+        Next
+
+        ' From ref, not p.Entries: a panel found only through its leftover
+        ' index/host queue files has no Entries at all, and FirstOrDefault() on
+        ' that empty list returned Nothing - so these two were never cleaned up
+        ' for exactly the panels most likely to be stuck in a re-send loop.
+        For Each pth In New String() {ref.OutIndexInfo, ref.OutHostInfo}
+            If pth IsNot Nothing AndAlso pth <> "" AndAlso seen.Add(pth) Then targets.Add(pth)
+        Next
+
+        Dim stuck As New List(Of String)()
+        For Each t In targets
+            If Not File.Exists(t) Then Continue For
+            Log("  clearing stale index/host queue: " & Path.GetFileName(t))
+            If Not BackupAndDelete(t, "Backedup Recovery Queue\StaleIndexHost") Then stuck.Add(t)
+        Next
+
+        If stuck.Count > 0 Then
+            nCleanupFailed += stuck.Count
+            Log("  ! WARNING: " & stuck.Count.ToString() & " queue file(s) could not be" &
+                " removed, so this panel WILL be found again on the next scan:")
+            For Each f In stuck
+                Log("      " & f)
+            Next
+            Log("    The manifest will not be re-uploaded (the delivery ledger blocks" &
+                " that), but the file(s) need clearing by hand.")
+        End If
+    End Sub
 
     ' Recreate the index/host queue files the way FTPUploaderVB does: a copy of a
     ' real queue file with lines 7/8 pointing at the index (or host) instead of an
@@ -2281,8 +2531,11 @@ Module Program
         End Try
     End Sub
 
-    Private Sub BackupAndDelete(fpath As String, subFolder As String)
-        If Not File.Exists(fpath) Then Exit Sub
+    ' Returns True when the queue file is gone from the queue folder - the only
+    ' outcome that stops the panel being rediscovered. A failed BACKUP is not
+    ' fatal to that; a failed DELETE is, and callers that care check the result.
+    Private Function BackupAndDelete(fpath As String, subFolder As String) As Boolean
+        If Not File.Exists(fpath) Then Return True
         Try
             Dim dir = Path.Combine(QueueRoot, subFolder)
             If Not Directory.Exists(dir) Then Directory.CreateDirectory(dir)
@@ -2295,10 +2548,12 @@ Module Program
         End Try
         Try
             File.Delete(fpath)
+            Return True
         Catch ex As Exception
             Log("      ! delete failed: " & ex.Message)
+            Return False
         End Try
-    End Sub
+    End Function
 
     Private Sub EnsureDirFor(filePath As String)
         Dim d = Path.GetDirectoryName(filePath)
@@ -2390,6 +2645,7 @@ Module Program
         nPanels = 0 : nPanelsFired = 0 : nPanelsIncomplete = 0
         nUploaded = 0 : nFailed = 0 : nMissing = 0 : nAlready = 0 : nRetried = 0
         nRebuilt = 0 : nPanelsShort = 0 : nPanelsForced = 0
+        nPanelsAlreadySent = 0 : nCleanupFailed = 0
         ConsecutiveFailures = 0 : Aborted = False
         ServerDown = False : LastProbe = DateTime.MinValue : nSkippedOffline = 0
         SessionNumber = 0 : FilesThisSession = 0 : LoggedWinScpPath = False
@@ -2417,12 +2673,14 @@ Module Program
             "  ...of which SHORT   : " & nPanelsShort.ToString(),
             "  ...of which FORCED  : " & nPanelsForced.ToString(),
             "Panels still short    : " & nPanelsIncomplete.ToString(),
+            "Panels already sent   : " & nPanelsAlreadySent.ToString(),
             "Files uploaded        : " & nUploaded.ToString(),
             "Files failed          : " & nFailed.ToString(),
             "Files source missing  : " & nMissing.ToString(),
             "Files already recorded: " & nAlready.ToString(),
             "Failed->clean retries : " & nRetried.ToString(),
-            "Rebuilt from disk     : " & nRebuilt.ToString()})
+            "Rebuilt from disk     : " & nRebuilt.ToString(),
+            "Queue files stuck     : " & nCleanupFailed.ToString()})
     End Function
 
     Private Sub ReportRow(p As Panel, hostBefore As Integer, pending As Integer,

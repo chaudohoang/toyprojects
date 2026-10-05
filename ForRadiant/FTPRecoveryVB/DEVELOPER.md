@@ -1,4 +1,4 @@
-# FTPRecovery — Developer Notes
+﻿# FTPRecovery — Developer Notes
 
 Technical reference. For operating the tool, see `README.md`.
 
@@ -313,6 +313,7 @@ Rule files, also beside the exe:
 | `allowed_filenames.txt` | hand-maintained; supports `*`/`?` and `!strict` |
 | `denied_filenames.txt` | hand-maintained; beats every other source |
 | `known_filenames.txt` | learned cache, rewritten every scan |
+| `delivered_panels.txt` | delivery ledger, appended on every index/host send |
 
 `RuleFile()` looks beside the exe first, then the queue folder (per-folder
 override), then `<queue>\Log\Recovery` (legacy). All three are excluded by name in
@@ -330,6 +331,42 @@ PID,Total,HostBefore,Pending,Uploaded,Failed,MissingSource,AlreadyRecorded,HostA
 
 Successes and failures also append to each panel's own succeed/fail logs (lines 5
 and 6), prefixed `FTPRecovery`, keeping the existing audit trail continuous.
+
+### Why a panel is not sent twice
+
+`hostAfter >= p.Total` is true on **every** pass once a panel is finished, so the
+only thing that used to stop a re-send was the queue file being gone. That is a
+single point of failure. A delete that fails, or an index/host queue file recreated
+by FTPUploaderVB or by `WriteIndexHostQueue`, puts the panel back in front of the
+next scan with nothing pending — which looks exactly like a panel ready to fire.
+
+An unattended auto-run then re-delivers the same manifest once per pass
+indefinitely. LGD, 2026-08-18: 222 panels × 20 passes over 13.5 hours, 8,880
+succeed-log lines for 444 real deliveries.
+
+`delivered_panels.txt` is the guard that does not depend on the queue file being
+gone:
+
+| | |
+|---|---|
+| key | `ShortHash(host \| indexDst \| hostDst \| SHA256(idx bytes) \| SHA256(host bytes))` |
+| hashed | the **clean copies**, i.e. exactly what goes on the wire |
+| checked | in `FinalizePanel`, after `CleanCopyFor`, before the first upload |
+| written | by `MarkDelivered`, *before* the cleanup — if the cleanup is what failed, the ledger is the only thing left that knows |
+| location | beside the exe, falling back to the queue folder; pruned to the newest 20,000 |
+
+Content-keyed on purpose. A manifest that gained records, or had a placeholder
+replaced on a retry, hashes differently and **is** delivered again; only a
+byte-identical re-send is suppressed. `FileDigest` returns a fresh GUID when it
+cannot read a file, so an unreadable manifest fails *open* — it is sent.
+
+A suppressed panel still gets `CleanupAfterDelivery`, because it is only in front
+of us at all if that cleanup previously failed. `BackupAndDelete` returns whether
+the queue file actually went away, and a file that will not delete is reported per
+panel and again in the summary — it is the reason the panel keeps coming back.
+
+`-redeliver` overrides the ledger, for when the customer genuinely lost a manifest.
+Deleting `delivered_panels.txt` has the same effect for every panel.
 
 Retired queue files are archived under `Backedup Recovery Queue\` in `Succeeded` /
 `AlreadyRecorded` / `MissingSource` / `Failed` / `StaleIndexHost`, under their

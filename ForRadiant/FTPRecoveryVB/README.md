@@ -1,4 +1,4 @@
-# FTP Recovery — User Guide
+﻿# FTP Recovery — User Guide
 
 *Tiếng Việt: [README.vi.md](README.vi.md)*
 
@@ -167,6 +167,26 @@ doesn't include everything.
 
 Only use this when you've looked at a panel, understand what's missing, and have
 decided finishing it is better than leaving it stuck.
+
+### A finished panel is never sent twice
+
+Once the tool has sent a panel's index and host files, it remembers that it did.
+If the same panel turns up again on a later scan — usually because a queue file
+could not be deleted, or the main app recreated one — the panel is reported as
+**ALREADY-DELIVERED** and nothing is uploaded or logged.
+
+It compares what it is *about* to send with what it sent before, so this is not a
+"once per panel, forever" rule. If the panel's list genuinely changed — more files
+arrived, or a failed file finally went through — the new list **is** sent.
+
+The record lives in `delivered_panels.txt` beside the exe. Deleting it makes the
+tool forget, and the next run sends every panel it finds. `-redeliver` on the
+command line does the same for one run — use it only when the customer actually
+lost a manifest.
+
+If a queue file will not delete, the log says so per panel and again at the end of
+the run. That panel comes back on every scan until the file is cleared by hand;
+nothing is re-uploaded in the meantime, but it is worth fixing.
 
 ### Skip missing source — usually leave OFF
 
@@ -350,6 +370,7 @@ Next to `FTPRecoveryGUI.exe`:
 | `allowed_filenames.txt` | **you edit** — names that may be sent |
 | `denied_filenames.txt` | **you edit** — names that must never be sent |
 | `known_filenames.txt` | written by the program, editing it does nothing |
+| `delivered_panels.txt` | written by the program — the record of manifests already sent |
 | `Log\Recovery\` | all logs and reports |
 
 Copy those to any machine and it's ready to run. The upload folder is only an
