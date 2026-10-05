@@ -219,6 +219,11 @@ Module Program
         ' True when the panel cannot reach the total but Force is on, so it WILL be
         ' sent - short. The table must predict that rather than showing INCOMPLETE.
         Public WillForce As Boolean = False
+        ' True when this exact manifest is already recorded as delivered, so the
+        ' panel looks ready but nothing will be sent. "hostAfter >= Total" stays
+        ' true forever once true, so without this the table, the verdict and the
+        ' dry run all keep promising a delivery that will not happen.
+        Public AlreadySent As Boolean = False
         Public Verdict As String = ""
     End Class
 
@@ -262,6 +267,20 @@ Module Program
             ' Flag panels that only reach the total because entries were rebuilt -
             ' they are ready, but for a different reason than a clean panel, and
             ' the dest paths of the rebuilt files were derived rather than read.
+            ' Checked only here: a panel that cannot complete is not going to be
+            ' sent anyway, and this reads both manifests to hash them.
+            Dim refq = p.Entries.FirstOrDefault()
+            If refq Is Nothing Then refq = p.Leftovers.FirstOrDefault()
+            If refq IsNot Nothing AndAlso Not ReDeliver _
+               AndAlso s.NewCount = 0 AndAlso s.RetryCount = 0 _
+               AndAlso AlreadyDelivered(DeliveryKey(p, refq)) Then
+                s.AlreadySent = True
+                s.CanComplete = False
+                s.Verdict = "ALREADY SENT - manifest unchanged since " &
+                            DeliveredWhen(DeliveryKey(p, refq)) & ", nothing to do"
+                Return s
+            End If
+
             Dim rebuiltNote = If(s.Rebuilt > 0, " (" & s.Rebuilt.ToString() & " rebuilt)", "")
             If s.MissingSrc > 0 Then
                 ' Completes, but n files can never be sent - manifest will be short.
@@ -1035,28 +1054,25 @@ Module Program
         End Try
     End Sub
 
-    ' Fingerprint of one delivery: the bytes that actually go on the wire, plus
-    ' where they go. Content-based on purpose - a manifest that gained lines, or
-    ' had placeholders replaced on a retry, hashes differently and IS re-sent.
-    Private Function DeliveryKey(p As Panel, ref As QueueEntry,
-                                 idxUpload As String, hstUpload As String) As String
+    ' Fingerprint of one delivery: what will be sent, and where to. Content-based
+    ' on purpose - a manifest that gained lines, or had placeholders replaced on a
+    ' retry, hashes differently and IS re-sent.
+    '
+    ' Keyed on the CLEAN CONTENT rather than on the temp file CleanCopyFor builds,
+    ' so Classify can answer the same question during a scan without writing
+    ' anything. Both go through CleanLines, so what the panel table predicts and
+    ' what the upload path decides cannot drift apart.
+    Private Function DeliveryKey(p As Panel, ref As QueueEntry) As String
         Return ShortHash(EffectiveHost(ref) & "|" & p.IndexDst & "|" & p.HostDst &
-                         "|" & FileDigest(idxUpload) & "|" & FileDigest(hstUpload))
+                         "|" & ManifestDigest(p.IndexSrc) & "|" & ManifestDigest(p.HostSrc))
     End Function
 
-    Private Function FileDigest(fpath As String) As String
-        Try
-            If Not File.Exists(fpath) Then Return "-"
-            Using fs = File.OpenRead(fpath)
-                Using sha = SHA256.Create()
-                    Return BitConverter.ToString(sha.ComputeHash(fs)).Replace("-", "")
-                End Using
-            End Using
-        Catch
-            ' Cannot read it, so cannot claim it matches an earlier delivery.
-            ' A unique value here fails OPEN - the manifest is sent.
-            Return Guid.NewGuid().ToString("N")
-        End Try
+    Private Function ManifestDigest(fpath As String) As String
+        Dim lines = CleanLines(fpath)
+        ' Unreadable, so nothing can be claimed to match an earlier delivery.
+        ' A unique value fails OPEN - the manifest is sent.
+        If lines Is Nothing Then Return Guid.NewGuid().ToString("N")
+        Return ShortHash(String.Join(vbLf, lines))
     End Function
 
     Private Function ShortHash(s As String) As String
@@ -1707,8 +1723,15 @@ Module Program
 
         If Not DoExecute Then
             Log("  VERDICT: " & st.Verdict)
-            nPanelsFired += 1
-            ReportRow(p, hostBefore, pending, realPending, 0, 0, dupCount, projected, "DRYRUN-WOULD-FIRE")
+            If st.AlreadySent Then
+                nPanelsAlreadySent += 1
+                ReportRow(p, hostBefore, pending, 0, 0, 0, dupCount, projected,
+                          "DRYRUN-ALREADY-DELIVERED")
+            Else
+                nPanelsFired += 1
+                ReportRow(p, hostBefore, pending, realPending, 0, 0, dupCount, projected,
+                          "DRYRUN-WOULD-FIRE")
+            End If
             Return
         End If
 
@@ -1962,7 +1985,7 @@ Module Program
         ' is the only thing standing between an unattended auto-run and the same
         ' manifest going out once per pass forever. Checked against what is about
         ' to be uploaded, so a manifest that genuinely changed still goes.
-        Dim key = DeliveryKey(p, ref, idxUpload, hstUpload)
+        Dim key = DeliveryKey(p, ref)
         If AlreadyDelivered(key) AndAlso Not ReDeliver Then
             Log("  index/host NOT sent - this exact manifest was already delivered " &
                 DeliveredWhen(key) & ".")
@@ -2494,13 +2517,26 @@ Module Program
     ' the upload used to mean a crash mid-finalize left the host file permanently
     ' below totalFileCount, stranding the panel with no queue files to recover
     ' from. Uploading a copy keeps the on-disk count consistent whatever happens.
+    ' The lines that will actually be uploaded for a manifest: placeholders gone.
+    ' Nothing - not an empty array - when the file cannot be read, so a caller can
+    ' tell "no placeholders" apart from "no idea".
+    Private Function CleanLines(fpath As String) As String()
+        If Not File.Exists(fpath) Then Return Nothing
+        Try
+            Return File.ReadAllLines(fpath).
+                   Where(Function(l) Not l.Contains(FAILED_SUFFIX)).ToArray()
+        Catch
+            Return Nothing
+        End Try
+    End Function
+
     Private Function CleanCopyFor(fpath As String, ByRef isTemp As Boolean) As String
         isTemp = False
         If Not File.Exists(fpath) Then Return fpath
         Try
             Dim all = File.ReadAllLines(fpath)
-            Dim clean = all.Where(Function(l) Not l.Contains(FAILED_SUFFIX)).ToArray()
-            If clean.Length = all.Length Then Return fpath
+            Dim clean = CleanLines(fpath)
+            If clean Is Nothing OrElse clean.Length = all.Length Then Return fpath
 
             Dim tmp = Path.Combine(Path.GetTempPath(),
                 "ftprec_" & Guid.NewGuid().ToString("N") & "_" & Path.GetFileName(fpath))

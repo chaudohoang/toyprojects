@@ -1,4 +1,4 @@
-Option Strict On
+﻿Option Strict On
 
 ' =============================================================================
 ' FTPRecoveryWpf - WPF front end over the FTPRecovery engine.
@@ -1030,6 +1030,9 @@ Public Class RecoveryWindow
         rows.Clear()
         Dim ready As Integer = 0
         Dim pink = New SolidColorBrush(Color.FromRgb(255, 235, 235))
+        ' Already delivered and unchanged. Not blocked and not ready - there is
+        ' simply nothing to do, so it must not be coloured like a problem.
+        Dim slate = New SolidColorBrush(Color.FromRgb(238, 238, 238))
         Dim blue = New SolidColorBrush(Color.FromRgb(233, 243, 255))
 
         Dim green = New SolidColorBrush(Color.FromRgb(232, 245, 233))
@@ -1060,7 +1063,9 @@ Public Class RecoveryWindow
                 .Projected = st.Projected.ToString() & " / " & p.Total.ToString(),
                 .Verdict = st.Verdict,
                 .CanUpload = True}
-            If Not st.CanComplete Then
+            If st.AlreadySent Then
+                r.RowBrush = slate
+            ElseIf Not st.CanComplete Then
                 ' Force turns "blocked" into "will send, short" - colour it as an
                 ' outcome to check rather than an obstacle.
                 r.RowBrush = If(st.WillForce, orange, pink)

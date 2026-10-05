@@ -365,6 +365,36 @@ of us at all if that cleanup previously failed. `BackupAndDelete` returns whethe
 the queue file actually went away, and a file that will not delete is reported per
 panel and again in the summary — it is the reason the panel keeps coming back.
 
+The root defect was that the completion test is a **property of the panel**, not a
+record of what was done: `hostAfter >= p.Total` becomes true once and stays true
+forever, so every pass that can see the panel fires it again. The ledger is the
+missing record, and it is consulted everywhere that decision is *expressed*, not
+just at the upload call:
+
+| Place | Before | After |
+|---|---|---|
+| `FinalizePanel` | uploaded | skips, cleans up, returns True |
+| `Classify` verdict | `READY - index/host only` | `ALREADY SENT - manifest unchanged since …` |
+| `PanelStatus.CanComplete` | True | False, with `AlreadySent` set |
+| dry run | `DRYRUN-WOULD-FIRE` | `DRYRUN-ALREADY-DELIVERED` |
+| report row | `INDEX+HOST SENT` | `ALREADY-DELIVERED (not re-sent)` |
+| GUI row | pink, i.e. blocked | slate, i.e. nothing to do |
+| GUI auto-repeat | counted in `canDo`, fired a pass | `canDo` = 0, no pass fires at all |
+
+That last row matters most: the auto-repeat loop gates on
+`st.CanComplete OrElse st.WillForce`, so a scan finding nothing but delivered
+panels now schedules the next scan instead of starting an upload. The run that hit
+LGD would have done no FTP work at all.
+
+`Classify` only consults the ledger for a panel that would otherwise fire **and**
+has nothing pending (`NewCount = 0 AndAlso RetryCount = 0`). Pending work would
+change the manifest, which changes the key, which means a genuine delivery - so
+suppressing on the panel alone would have stranded it.
+
+`DeliveryKey` hashes `CleanLines` rather than the temp file `CleanCopyFor` writes,
+so `Classify` can answer the same question during a scan without writing anything,
+and the table cannot predict something different from what the upload path decides.
+
 `-redeliver` overrides the ledger, for when the customer genuinely lost a manifest.
 Deleting `delivered_panels.txt` has the same effect for every panel.
 

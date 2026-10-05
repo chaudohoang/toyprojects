@@ -184,6 +184,11 @@ tool forget, and the next run sends every panel it finds. `-redeliver` on the
 command line does the same for one run — use it only when the customer actually
 lost a manifest.
 
+The panel table shows these as **ALREADY SENT** in grey — not pink, because
+nothing is wrong and nothing needs doing. A dry run says the same, and when auto
+repeat finds nothing but already-sent panels it just waits for the next scan
+instead of starting an upload.
+
 If a queue file will not delete, the log says so per panel and again at the end of
 the run. That panel comes back on every scan until the file is cleared by hand;
 nothing is re-uploaded in the meantime, but it is worth fixing.
