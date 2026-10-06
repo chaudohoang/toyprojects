@@ -1380,12 +1380,42 @@ Namespace AutoDeleteData
             LoadCreationSetting()
         End Sub
 
+        ''' <summary>
+        ''' The log path is built once per pass and then threaded through every delete/check
+        ''' helper, so a pass that started before midnight and finished after it appended
+        ''' everything to the previous day's file. Re-stamp the yyyyMMdd segment of the file
+        ''' name at the moment of the write, so the roll-over also happens mid-pass.
+        ''' </summary>
+        Private Shared Function RollLogDateToNow(file As String) As String
+            Try
+                If String.IsNullOrEmpty(file) Then Return file
+
+                Dim name As String = Path.GetFileName(file)
+                Dim m As Match = Regex.Match(name, "^(?<head>.*_)(?<date>\d{8})(?<ext>\.[^.]*)$")
+                If Not m.Success Then Return file
+
+                Dim today As String = Now.ToString("yyyyMMdd")
+                If m.Groups("date").Value = today Then Return file
+
+                Dim rolled As String = m.Groups("head").Value & today & m.Groups("ext").Value
+                Dim dir As String = Path.GetDirectoryName(file)
+                If String.IsNullOrEmpty(dir) Then Return rolled
+                Return Path.Combine(dir, rolled)
+            Catch ex As Exception
+                ' A path we cannot parse is still better than no log at all.
+                Return file
+            End Try
+        End Function
+
         Private Sub WriteLog(file As String, content As String)
             ' This used to be an unbounded retry loop with no sleep. If the append failed for a
             ' non-transient reason (disk full, file locked, permissions, drive offline) it spun
             ' at 100% CPU forever and the calling worker never came back - which froze that
             ' row's countdown permanently. Bounded retries with a sleep, and it gives up quietly.
             Try
+                ' Resolve the date in the file name now, not when the caller built the path.
+                file = RollLogDateToNow(file)
+
                 Dim dir As String = Path.GetDirectoryName(file)
                 If Not String.IsNullOrEmpty(dir) AndAlso Not Directory.Exists(dir) Then
                     Directory.CreateDirectory(dir)
