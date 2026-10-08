@@ -1,0 +1,12 @@
+# i5-3570 - 2011-2013 era CPU: it cannot capture and encode fast enough for Tight+JPEG,
+# so spend bandwidth (there is plenty at 3 ms) to save work on the remote machine.
+# Delete this file to fall back to viewer-profile.vnc.
+
+# Hextile: far cheaper to encode than Tight. 0=Raw, 2=RRE, 5=Hextile, 7=Tight, 10=ZRLE.
+preferred_encoding=5
+
+# 256 colours - fewer bytes to grab, convert and send
+8bit=1
+
+# only matters if this machine is put back on Tight, but keep it low here
+quality=3
