@@ -720,6 +720,7 @@ Namespace TrueTestWatcher
                 If chkAutolog.Checked AndAlso cbxAutologPath.Text <> "" Then
                     Try
                         Directory.CreateDirectory(cbxAutologPath.Text)
+                        FatalLogDir = cbxAutologPath.Text
                         Dim logFile As String = Path.Combine(cbxAutologPath.Text, Now.ToString("yyyyMMdd") + ".txt")
                         WriteLog(logFile, Me.Text + vbTab + Now.ToString("yyyyMMdd HH:mm:ss") + " : " + text)
                         WriteLog(logFile, vbCrLf)
@@ -783,6 +784,18 @@ Namespace TrueTestWatcher
         End Sub
 
         Public Sub CheckForMatchingSequenceParameters(ByVal file1FullPath As String, ByVal file2FullPath As String)
+            Try
+                SyncLock masterCheckGate
+                    CheckForMatchingSequenceParametersCore(file1FullPath, file2FullPath)
+                End SyncLock
+            Catch ex As Exception
+                parameterNG = True
+                CommLogUpdateText("Parameters Check FAILED : " + ex.GetType().Name + " : " + ex.Message)
+                LogFatal("CheckForMatchingSequenceParameters", ex)
+            End Try
+        End Sub
+
+        Private Sub CheckForMatchingSequenceParametersCore(ByVal file1FullPath As String, ByVal file2FullPath As String)
             parameterNG = False
             If Not chkCompareSequenceParameters.Checked Then
                 CommLogUpdateText("SKIPPED PARAMETERS COMPARISION !!!")
@@ -1043,7 +1056,27 @@ Namespace TrueTestWatcher
 
         End Sub
 
+        ''' <summary>
+        ''' One save of CurrentSequence.txt raises several watcher events - logchange6 is
+        ''' wired to Changed, Created and Deleted, with Attributes notifications on - and each
+        ''' handler runs a whole master check inline on its own ThreadPool thread. The gate
+        ''' stops two of them being inside the comparison at once.
+        ''' </summary>
+        Private Shared ReadOnly masterCheckGate As New Object()
+
         Public Sub CompareCalSettings(ByVal file1FullPath As String, ByVal file2FullPath As String)
+            Try
+                SyncLock masterCheckGate
+                    CompareCalSettingsCore(file1FullPath, file2FullPath)
+                End SyncLock
+            Catch ex As Exception
+                calibrationNG = True
+                CommLogUpdateText("Calibrations Check FAILED : " + ex.GetType().Name + " : " + ex.Message)
+                LogFatal("CompareCalSettings", ex)
+            End Try
+        End Sub
+
+        Private Sub CompareCalSettingsCore(ByVal file1FullPath As String, ByVal file2FullPath As String)
             calibrationNG = False
             If Not chkCompareSequenceCalibrations.Checked Then
                 CommLogUpdateText("SKIPPED CALIBRATIONS COMPARISION !!!")
@@ -1127,21 +1160,21 @@ Namespace TrueTestWatcher
                 If sequence1AnaList.Contains(nodes1(index).SelectSingleNode("Name").InnerText) Then
                     'If demuraStepList1.Contains(nodes1(index).SelectSingleNode("Name").InnerText) Then Continue For
                     node1 = nodes1(index).SelectSingleNode("CameraSettingsList")
-                    For Each childNode As XmlNode In node1.ChildNodes
-                        If childNode.SelectSingleNode("SerialNumber").InnerText <> CameraSN Then
-                            node1.RemoveChild(childNode)
-                        End If
-                    Next
-                    Try
-                        SN1 = node1.SelectSingleNode("CameraSettings/SerialNumber").InnerText
-                    Catch ex As Exception
-                    End Try
+                    ' RemoveChild during a For Each over the live ChildNodes ends the
+                    ' enumeration at the first removal, so this used to strip at most one entry
+                    ' and could leave another camera's settings first. Snapshot, then remove.
+                    RemoveOtherCameras(node1, CameraSN)
+                    ' SN1 must be recomputed every pass. It is declared outside the loop, and
+                    ' when a step had no settings for this camera the old Try swallowed the
+                    ' NullReferenceException and left the PREVIOUS step's value in place - which
+                    ' slipped past the "" guard below and made the three reads throw on Nothing.
+                    SN1 = NodeText(node1, "CameraSettings/SerialNumber")
                     If SN1 = "" Then
                         Exit For
                     End If
-                    Dim CCID = node1.SelectSingleNode("CameraSettings/ColorCalID").InnerText
-                    Dim IMCID = node1.SelectSingleNode("CameraSettings/ImageScalingCalibrationID").InnerText
-                    Dim FFID = node1.SelectSingleNode("CameraSettings/FlatFieldID").InnerText
+                    Dim CCID = NodeText(node1, "CameraSettings/ColorCalID")
+                    Dim IMCID = NodeText(node1, "CameraSettings/ImageScalingCalibrationID")
+                    Dim FFID = NodeText(node1, "CameraSettings/FlatFieldID")
                     ColorCalSetting1.Add(SN1 + "," + nodes1(index).SelectSingleNode("Name").InnerText + "," + CCID)
                     ImgScaleSetting1.Add(SN1 + "," + nodes1(index).SelectSingleNode("Name").InnerText + "," + IMCID)
                     FFCSetting1.Add(SN1 + "," + nodes1(index).SelectSingleNode("Name").InnerText + "," + FFID)
@@ -1172,21 +1205,21 @@ Namespace TrueTestWatcher
                 If sequence2AnaList.Contains(nodes2(index).SelectSingleNode("Name").InnerText) Then
                     'If demuraStepList2.Contains(nodes2(index).SelectSingleNode("Name").InnerText) Then Continue For
                     node2 = nodes2(index).SelectSingleNode("CameraSettingsList")
-                    For Each childNode As XmlNode In node2.ChildNodes
-                        If childNode.SelectSingleNode("SerialNumber").InnerText <> CameraSN Then
-                            node2.RemoveChild(childNode)
-                        End If
-                    Next
-                    Try
-                        SN2 = node2.SelectSingleNode("CameraSettings/SerialNumber").InnerText
-                    Catch ex As Exception
-                    End Try
+                    ' RemoveChild during a For Each over the live ChildNodes ends the
+                    ' enumeration at the first removal, so this used to strip at most one entry
+                    ' and could leave another camera's settings first. Snapshot, then remove.
+                    RemoveOtherCameras(node2, CameraSN)
+                    ' SN2 must be recomputed every pass. It is declared outside the loop, and
+                    ' when a step had no settings for this camera the old Try swallowed the
+                    ' NullReferenceException and left the PREVIOUS step's value in place - which
+                    ' slipped past the "" guard below and made the three reads throw on Nothing.
+                    SN2 = NodeText(node2, "CameraSettings/SerialNumber")
                     If SN2 = "" Then
                         Exit For
                     End If
-                    Dim CCID = node2.SelectSingleNode("CameraSettings/ColorCalID").InnerText
-                    Dim IMCID = node2.SelectSingleNode("CameraSettings/ImageScalingCalibrationID").InnerText
-                    Dim FFID = node2.SelectSingleNode("CameraSettings/FlatFieldID").InnerText
+                    Dim CCID = NodeText(node2, "CameraSettings/ColorCalID")
+                    Dim IMCID = NodeText(node2, "CameraSettings/ImageScalingCalibrationID")
+                    Dim FFID = NodeText(node2, "CameraSettings/FlatFieldID")
                     ColorCalSetting2.Add(SN2 + "," + nodes2(index).SelectSingleNode("Name").InnerText + "," + CCID)
                     ImgScaleSetting2.Add(SN2 + "," + nodes2(index).SelectSingleNode("Name").InnerText + "," + IMCID)
                     FFCSetting2.Add(SN2 + "," + nodes2(index).SelectSingleNode("Name").InnerText + "," + FFID)
@@ -1240,10 +1273,18 @@ Namespace TrueTestWatcher
                     equal = False
                     calibrationNG = True
                     log.Add("Step : " + ColorCalSetting1(index).Split(",")(1) + ", Running Sequence Color Cal is (None)")
+                ElseIf index >= ColorCalSetting2.Count Then
+                    ' The two sequences can hold different numbers of calibrated steps - that is
+                    ' exactly what an "analysis list does not match" NG means. Indexing list 2 by
+                    ' list 1's range threw ArgumentOutOfRangeException on a FileSystemWatcher
+                    ' thread, which had no handler anywhere and killed the process.
+                    equal = False
+                    calibrationNG = True
+                    log.Add("Step : " + ColorCalSetting1(index).Split(",")(1) + ", no matching step in Master Calibration (running has " + ColorCalSetting1.Count.ToString + " calibrated steps, master has " + ColorCalSetting2.Count.ToString + ")")
                 ElseIf ColorCalSetting1(index) <> ColorCalSetting2(index) Then
                     equal = False
                     calibrationNG = True
-                    log.Add("Step : " + ColorCalSetting1(index).Split(",")(1) + ", Running Sequence Color Cal : " + colorCalRef1(ColorCalSetting1(index).Split(",")(2)) + ", Master Calibration Color Cal : " + colorCalRef2(ColorCalSetting2(index).Split(",")(2)))
+                    log.Add("Step : " + ColorCalSetting1(index).Split(",")(1) + ", Running Sequence Color Cal : " + CalDesc(colorCalRef1, ColorCalSetting1(index)) + ", Master Calibration Color Cal : " + CalDesc(colorCalRef2, ColorCalSetting2(index)))
                 End If
             Next
             sw2.Stop()
@@ -1255,10 +1296,18 @@ Namespace TrueTestWatcher
                     equal = False
                     calibrationNG = True
                     log.Add("Step : " + ImgScaleSetting1(index).Split(",")(1) + ", Running Sequence Img Scale Cal is (None)")
+                ElseIf index >= ImgScaleSetting2.Count Then
+                    ' The two sequences can hold different numbers of calibrated steps - that is
+                    ' exactly what an "analysis list does not match" NG means. Indexing list 2 by
+                    ' list 1's range threw ArgumentOutOfRangeException on a FileSystemWatcher
+                    ' thread, which had no handler anywhere and killed the process.
+                    equal = False
+                    calibrationNG = True
+                    log.Add("Step : " + ImgScaleSetting1(index).Split(",")(1) + ", no matching step in Master Calibration (running has " + ImgScaleSetting1.Count.ToString + " calibrated steps, master has " + ImgScaleSetting2.Count.ToString + ")")
                 ElseIf ImgScaleSetting1(index) <> ImgScaleSetting2(index) Then
                     equal = False
                     calibrationNG = True
-                    log.Add("Step : " + ImgScaleSetting1(index).Split(",")(1) + ", Running Sequence Img Scale Cal : " + imgScaleRef1(ImgScaleSetting1(index).Split(",")(2)) + ", Master Calibration Img Scale Cal : " + imgScaleRef2(ImgScaleSetting2(index).Split(",")(2)))
+                    log.Add("Step : " + ImgScaleSetting1(index).Split(",")(1) + ", Running Sequence Img Scale Cal : " + CalDesc(imgScaleRef1, ImgScaleSetting1(index)) + ", Master Calibration Img Scale Cal : " + CalDesc(imgScaleRef2, ImgScaleSetting2(index)))
                 End If
             Next
             sw2.Stop()
@@ -1270,10 +1319,18 @@ Namespace TrueTestWatcher
                     equal = False
                     calibrationNG = True
                     log.Add("Step : " + FFCSetting1(index).Split(",")(1) + ", Running Sequence FFC Cal is (None)")
+                ElseIf index >= FFCSetting2.Count Then
+                    ' The two sequences can hold different numbers of calibrated steps - that is
+                    ' exactly what an "analysis list does not match" NG means. Indexing list 2 by
+                    ' list 1's range threw ArgumentOutOfRangeException on a FileSystemWatcher
+                    ' thread, which had no handler anywhere and killed the process.
+                    equal = False
+                    calibrationNG = True
+                    log.Add("Step : " + FFCSetting1(index).Split(",")(1) + ", no matching step in Master Calibration (running has " + FFCSetting1.Count.ToString + " calibrated steps, master has " + FFCSetting2.Count.ToString + ")")
                 ElseIf FFCSetting1(index) <> FFCSetting2(index) Then
                     equal = False
                     calibrationNG = True
-                    log.Add("Step : " + FFCSetting1(index).Split(",")(1) + ", Running Sequence FFC Cal : " + flatFieldRef1(FFCSetting1(index).Split(",")(2)) + ", Master Calibration FFC Cal : " + flatFieldRef2(FFCSetting2(index).Split(",")(2)))
+                    log.Add("Step : " + FFCSetting1(index).Split(",")(1) + ", Running Sequence FFC Cal : " + CalDesc(flatFieldRef1, FFCSetting1(index)) + ", Master Calibration FFC Cal : " + CalDesc(flatFieldRef2, FFCSetting2(index)))
                 End If
             Next
             sw2.Stop()
@@ -1854,6 +1911,40 @@ Namespace TrueTestWatcher
                 RefDict.Add(Row(0), Row(1))
             Next
         End Sub
+
+        ''' <summary>InnerText of a descendant, or "" when either the parent or the node is absent.</summary>
+        Private Shared Function NodeText(parent As XmlNode, xpath As String) As String
+            If parent Is Nothing Then Return ""
+            Dim n As XmlNode = parent.SelectSingleNode(xpath)
+            If n Is Nothing Then Return ""
+            Return n.InnerText
+        End Function
+
+        ''' <summary>Strip every CameraSettings entry that is not for cameraSN.</summary>
+        Private Shared Sub RemoveOtherCameras(settingsList As XmlNode, cameraSN As String)
+            If settingsList Is Nothing Then Exit Sub
+            Dim doomed As New List(Of XmlNode)
+            For Each child As XmlNode In settingsList.ChildNodes
+                If NodeText(child, "SerialNumber") <> cameraSN Then doomed.Add(child)
+            Next
+            For Each child As XmlNode In doomed
+                settingsList.RemoveChild(child)
+            Next
+        End Sub
+
+        ''' <summary>
+        ''' Description for a "SN,step,id" setting. A raw Dictionary index threw
+        ''' KeyNotFoundException whenever the id was not in the calibration database - which is
+        ''' guaranteed when the ids were read from a different camera's database than the one
+        ''' the sequence was calibrated against.
+        ''' </summary>
+        Private Shared Function CalDesc(ref As Dictionary(Of String, String), setting As String) As String
+            Dim parts As String() = setting.Split(","c)
+            Dim id As String = parts(parts.Length - 1)
+            Dim desc As String = ""
+            If ref IsNot Nothing AndAlso ref.TryGetValue(id, desc) Then Return desc
+            Return "id " + id + " (not in calibration database)"
+        End Function
 
         Public Function GetConnect(ByVal CameraSN)
             Dim conn As SqlCeConnection
@@ -3143,16 +3234,46 @@ Namespace TrueTestWatcher
             End If
         End Sub
 
+        ''' <summary>
+        ''' This used to retry forever with no sleep and no attempt limit. WriteLog runs on the
+        ''' UI thread (CommLogUpdateText marshals to it), so an append that failed for a
+        ''' non-transient reason - disk full, file locked, permissions - pegged a core and froze
+        ''' the whole app permanently. Bounded retries with a sleep, then it gives up quietly.
+        ''' </summary>
         Private Sub WriteLog(file As String, content As String)
+            Dim timeout As Integer = 5000       ' Timeout in milliseconds (5 seconds)
+            Dim retryInterval As Integer = 500  ' Retry interval in milliseconds (0.5 second)
+            Dim endTime As DateTime = DateTime.Now.AddMilliseconds(timeout)
             Dim fileloaded As Boolean
-            While Not fileloaded
+            While Not fileloaded AndAlso DateTime.Now < endTime
                 Try
                     IO.File.AppendAllText(file, content)
                     fileloaded = True
                 Catch ex As Exception
                     fileloaded = False
+                    Thread.Sleep(retryInterval)
                 End Try
             End While
+        End Sub
+
+        ''' <summary>
+        ''' Last-resort logger for exceptions that escaped every Try. Writes next to the normal
+        ''' autolog when that path is known, otherwise beside the exe. Never throws: it is the
+        ''' handler of last resort, so it has nowhere to report its own failure.
+        ''' </summary>
+        Friend Shared FatalLogDir As String = ""
+
+        Friend Shared Sub LogFatal(source As String, ex As Exception)
+            Try
+                Dim dir As String = FatalLogDir
+                If String.IsNullOrEmpty(dir) OrElse Not Directory.Exists(dir) Then
+                    dir = Path.GetDirectoryName(Application.ExecutablePath)
+                End If
+                IO.File.AppendAllText(Path.Combine(dir, Now.ToString("yyyyMMdd") + "_crash.txt"),
+                                      Now.ToString("yyyyMMdd HH:mm:ss") + " : UNHANDLED (" + source + ") : " +
+                                      If(ex Is Nothing, "unknown exception", ex.ToString()) + Environment.NewLine)
+            Catch
+            End Try
         End Sub
 
         Private Function HaveCommonSubstrings(str1 As String, str2 As String) As Boolean
