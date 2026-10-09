@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Prefer32Bit>false</Prefer32Bit>
+    <RootNamespace>RemoteToolsTabbed</RootNamespace>
+    <AssemblyName>RemoteToolsTabbed</AssemblyName>
+    <Nullable>disable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <Version>1.1.0</Version>
+    <ApplicationIcon>remotetools.ico</ApplicationIcon>
+    <!-- keep the deployment layout the line PCs already use -->
+    <OutputPath>..\bin\$(Configuration)\RemoteToolsTabbed\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="remotetools.ico" />
+  </ItemGroup>
+
+  <!-- All.csv is the machine list and tvnviewer.exe does the actual VNC work; both are
+       read from the exe's own folder at run time. -->
+  <ItemGroup>
+    <None Include="All.csv" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="tvnviewer.exe" CopyToOutputDirectory="PreserveNewest" />
+    <!-- viewer options for every session; the gear in the sidebar rewrites it.
+         One profile for every machine - per-machine viewer-profile.<host>.vnc overrides
+         were removed, so do not re-add a wildcard here. -->
+    <None Include="viewer-profile.vnc" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

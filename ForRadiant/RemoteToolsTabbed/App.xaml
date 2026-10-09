@@ -1,0 +1,195 @@
+﻿<Application x:Class="RemoteToolsTabbed.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:RemoteToolsTabbed"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+
+        <Color x:Key="AccentColor">#FF2E7DD1</Color>
+        <SolidColorBrush x:Key="Accent" Color="{StaticResource AccentColor}"/>
+        <SolidColorBrush x:Key="Chrome" Color="#FFEFEFF1"/>
+        <SolidColorBrush x:Key="ChromeBorder" Color="#FFD6D6DA"/>
+        <SolidColorBrush x:Key="Surface" Color="#FFFBFBFC"/>
+        <SolidColorBrush x:Key="Ink" Color="#FF202024"/>
+        <SolidColorBrush x:Key="InkSoft" Color="#FF6A6A73"/>
+        <SolidColorBrush x:Key="SessionBackdrop" Color="#FF1E1E20"/>
+
+        <!-- buttons -->
+        <Style x:Key="ToolButton" TargetType="Button">
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="Foreground" Value="{StaticResource Ink}"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="{StaticResource ChromeBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Shell" CornerRadius="3"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Shell" Property="Background" Value="#FFF0F6FC"/>
+                                <Setter TargetName="Shell" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Shell" Property="Background" Value="#FFDCEBF9"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource ToolButton}">
+            <Setter Property="Background" Value="{StaticResource Accent}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Accent}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <!-- small square chevron / glyph button (sidebar show-hide) -->
+        <Style x:Key="IconButton" TargetType="Button">
+            <Setter Property="Width" Value="22"/>
+            <Setter Property="Height" Value="22"/>
+            <Setter Property="FontSize" Value="9"/>
+            <Setter Property="Foreground" Value="{StaticResource InkSoft}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Shell" Background="Transparent" CornerRadius="3">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Shell" Property="Background" Value="#FFDCE6F0"/>
+                                <Setter Property="Foreground" Value="{StaticResource Ink}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- a machine list's group header in the sidebar grid -->
+        <Style x:Key="GroupBand" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource Chrome}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource ChromeBorder}"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="Padding" Value="4,5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FFE3E3E8"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="GroupChevron" TargetType="TextBlock">
+            <Setter Property="Text" Value="&#x25B8;"/>
+            <Setter Property="Width" Value="13"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="{StaticResource InkSoft}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Name.IsExpanded}" Value="True">
+                    <Setter Property="Text" Value="&#x25BE;"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- the little x on a session tab -->
+        <Style x:Key="TabCloseButton" TargetType="Button">
+            <Setter Property="Width" Value="16"/>
+            <Setter Property="Height" Value="16"/>
+            <Setter Property="Margin" Value="8,0,-4,0"/>
+            <Setter Property="Foreground" Value="{StaticResource InkSoft}"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="ToolTip" Value="Close this session"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Shell" Background="Transparent" CornerRadius="8">
+                            <TextBlock Text="&#x2715;" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Foreground="{TemplateBinding Foreground}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Shell" Property="Background" Value="#FFE4576B"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- tab headers -->
+        <Style TargetType="TabItem">
+            <Setter Property="Foreground" Value="{StaticResource InkSoft}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="Shell" Margin="0,0,2,0" Background="Transparent"
+                                BorderBrush="Transparent" BorderThickness="0,2,0,0">
+                            <ContentPresenter ContentSource="Header" Margin="14,7"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Shell" Property="Background" Value="#FFE3E3E8"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Shell" Property="Background" Value="{StaticResource Surface}"/>
+                                <Setter TargetName="Shell" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                                <Setter Property="Foreground" Value="{StaticResource Ink}"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- the keep-alive tab control: headers on top, one presenter per tab below -->
+        <Style TargetType="{x:Type local:TabControlEx}">
+            <Setter Property="Background" Value="{StaticResource Surface}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type local:TabControlEx}">
+                        <DockPanel>
+                            <Border DockPanel.Dock="Top" Background="{StaticResource Chrome}"
+                                    BorderBrush="{StaticResource ChromeBorder}" BorderThickness="0,0,0,1">
+                                <TabPanel IsItemsHost="True" Margin="6,4,6,0"/>
+                            </Border>
+                            <Grid x:Name="PART_ItemsHolder" Background="{TemplateBinding Background}"/>
+                        </DockPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="DataGrid">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="{StaticResource ChromeBorder}"/>
+            <Setter Property="RowBackground" Value="White"/>
+            <Setter Property="AlternatingRowBackground" Value="#FFF7F8FA"/>
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#FFEDEDF0"/>
+            <Setter Property="RowHeaderWidth" Value="0"/>
+            <Setter Property="SelectionMode" Value="Extended"/>
+            <Setter Property="SelectionUnit" Value="FullRow"/>
+            <Setter Property="AutoGenerateColumns" Value="False"/>
+        </Style>
+
+    </Application.Resources>
+</Application>

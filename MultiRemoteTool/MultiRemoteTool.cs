@@ -986,6 +986,8 @@ namespace MultiRemoteTool
 
         // ── Contact selection state ───────────────────────────
         private Contact    _selectedContact;
+        private bool       _adHoc;             // _selectedContact came from the search box, not a row
+        private bool       _syncingSelection;  // re-entrancy guard: ClearSelection() re-fires SelectionChanged
         private StatusStrip          _status;
         private ToolStripStatusLabel _lblStatus;
 
@@ -1009,7 +1011,7 @@ namespace MultiRemoteTool
                     OnConnect(_selectedContact);
                     return true;
                 }
-                if (keyData == Keys.Delete)
+                if (keyData == Keys.Delete && !_adHoc && !_txtSearch.Focused)
                 {
                     OnDelete(_selectedContact);
                     return true;
@@ -1125,7 +1127,7 @@ namespace MultiRemoteTool
 
             // FIX #4: use explicit _searchIsPlaceholder flag
             _txtSearch = new TextBox { Size = new Size(200, 24), BorderStyle = BorderStyle.FixedSingle,
-                ForeColor = Color.FromArgb(140, 140, 140), Text = "Search contacts..." };
+                ForeColor = Color.FromArgb(140, 140, 140), Text = "Search or type an address..." };
             _txtSearch.GotFocus += delegate
             {
                 if (_searchIsPlaceholder)
@@ -1144,6 +1146,7 @@ namespace MultiRemoteTool
             {
                 if (_searchIsPlaceholder) return;
                 _search = _txtSearch.Text;
+                ApplySearchSelection();
                 DoRefresh();
             };
 
@@ -1302,7 +1305,7 @@ namespace MultiRemoteTool
             _searchIsPlaceholder = true;
             _search              = "";
             _txtSearch.ForeColor = Color.FromArgb(140, 140, 140);
-            _txtSearch.Text      = "Search contacts...";
+            _txtSearch.Text      = "Search or type an address...";
         }
 
         private void LayoutTopBar()
@@ -1356,19 +1359,49 @@ namespace MultiRemoteTool
         private void ClearSelection()
         {
             _selectedContact = null;
+            _adHoc           = false;
             _contactListView.ClearSelection();
             // Keep action bar visible but show empty/hint state — never hide it so rows don't shift
-            _lblActionContact.Text        = "Click a row to select a contact";
+            _lblActionContact.Text        = "Click a row, or type an address in the search box";
             _lblActionContact.ForeColor   = Color.FromArgb(160, 160, 180);
             _btnConnect.Enabled           = false;
             _btnEditContact.Enabled       = false;
             _btnDeleteContact.Enabled     = false;
         }
 
+        // Arms Connect on whatever is typed in the search box, so you can reach a
+        // machine that is not in the address book. Called on every keystroke, which
+        // also drops the previously clicked row -- otherwise a stale selection stays
+        // armed for Connect long after the search text has moved on.
+        private void ApplySearchSelection()
+        {
+            if (_syncingSelection) return;
+            _syncingSelection = true;
+            try
+            {
+                ClearSelection();
+
+                string typed = (_search ?? "").Trim();
+                if (typed.Length == 0) return;
+
+                _adHoc           = true;
+                _selectedContact = new Contact { Name = "", Id = typed, Password = "" };
+
+                _lblActionContact.Text      = "⌨  Connect to:  " + typed;
+                _lblActionContact.ForeColor = Color.FromArgb(150, 70, 0);
+                _btnConnect.Enabled         = true;
+                _btnEditContact.Enabled     = false;   // nothing to edit -- not a saved contact
+                _btnDeleteContact.Enabled   = false;
+                LayoutActionBar();
+            }
+            finally { _syncingSelection = false; }
+        }
+
         private void OnRowClicked(Contact c)
         {
-            if (c == null) { ClearSelection(); return; }
+            if (c == null) { ApplySearchSelection(); return; }
             _selectedContact = c;
+            _adHoc           = false;
             string name = string.IsNullOrWhiteSpace(c.Name) ? "(no name)" : c.Name;
             int rowNum = _contactListView.SelectedIndex + 1;
             _lblActionContact.Text        = rowNum + ".  " + name + "   " + c.Id;
@@ -1685,15 +1718,30 @@ namespace MultiRemoteTool
                 catch { }
             }
 
-            // 2. Common install locations (direct, no subdirectory search)
-            string[] common = new string[]
+            // 2. Common install locations — the root itself, then one level of
+            //    vendor subdirectories (e.g. Program Files\TightVNC\tvnviewer.exe)
+            string[] roots = new string[]
             {
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),         exeName),
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),      exeName),
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), exeName)
+                Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+                Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
             };
-            foreach (var c in common)
-                if (File.Exists(c)) return c;
+            foreach (var root in roots)
+            {
+                if (string.IsNullOrEmpty(root)) continue;
+                try
+                {
+                    string direct = Path.Combine(root, exeName);
+                    if (File.Exists(direct)) return direct;
+
+                    foreach (var sub in Directory.GetDirectories(root))
+                    {
+                        string full = Path.Combine(sub, exeName);
+                        if (File.Exists(full)) return full;
+                    }
+                }
+                catch { }
+            }
 
             // 3. App folder (standalone / portable exe dropped next to us)
             string local = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, exeName);

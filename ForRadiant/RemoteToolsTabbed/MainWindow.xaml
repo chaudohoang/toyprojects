@@ -1,0 +1,134 @@
+﻿<Window x:Class="RemoteToolsTabbed.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:RemoteToolsTabbed"
+        Title="Remote Tools" Height="900" Width="1600" MinHeight="480" MinWidth="820"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource Surface}"
+        Icon="remotetools.ico"
+        Loaded="Window_Loaded" Closing="Window_Closing">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <!-- a session: the hosted viewer window, with a status panel over it until it is up -->
+        <DataTemplate x:Key="SessionContent">
+            <Grid Background="{StaticResource SessionBackdrop}">
+                <ContentPresenter Content="{Binding Host}"/>
+                <Border Background="{StaticResource SessionBackdrop}"
+                        Visibility="{Binding IsOverlayVisible, Converter={StaticResource BoolToVis}}">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding StatusMessage}" Foreground="{Binding StatusBrush}"
+                                   FontSize="14" MaxWidth="560" TextAlignment="Center" TextWrapping="Wrap"/>
+                        <Button Content="{Binding CancelButtonText}" Style="{StaticResource ToolButton}"
+                                HorizontalAlignment="Center" MinWidth="110" Margin="0,18,0,0"
+                                Click="SessionCancel_Click"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Window.CommandBindings>
+        <CommandBinding Command="{x:Static local:AppCommands.CloseTab}" Executed="CloseTabCommand_Executed"/>
+        <CommandBinding Command="{x:Static local:AppCommands.FocusSearch}" Executed="FocusSearchCommand_Executed"/>
+        <CommandBinding Command="{x:Static local:AppCommands.ToggleSidebar}" Executed="ToggleSidebarCommand_Executed"/>
+    </Window.CommandBindings>
+
+    <Window.InputBindings>
+        <KeyBinding Key="W" Modifiers="Control" Command="{x:Static local:AppCommands.CloseTab}"/>
+        <KeyBinding Key="F" Modifiers="Control" Command="{x:Static local:AppCommands.FocusSearch}"/>
+        <KeyBinding Key="B" Modifiers="Control" Command="{x:Static local:AppCommands.ToggleSidebar}"/>
+    </Window.InputBindings>
+
+    <DockPanel>
+
+        <!-- status bar -->
+        <Border DockPanel.Dock="Bottom" Background="{StaticResource Chrome}"
+                BorderBrush="{StaticResource ChromeBorder}" BorderThickness="0,1,0,0" Padding="12,5">
+            <DockPanel>
+                <TextBlock x:Name="SessionCount" DockPanel.Dock="Right" Margin="12,0,0,0"
+                           Foreground="{StaticResource InkSoft}"/>
+                <TextBlock x:Name="StatusText" Foreground="{StaticResource InkSoft}"
+                           TextTrimming="CharacterEllipsis"/>
+            </DockPanel>
+        </Border>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="SidebarColumn" Width="340" MinWidth="260"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*" MinWidth="360"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- the machine list, always on screen -->
+            <Border x:Name="Sidebar" Grid.Column="0" MinWidth="260"
+                    Background="{StaticResource Chrome}"
+                    BorderBrush="{StaticResource ChromeBorder}" BorderThickness="0,0,1,0">
+                <!-- the title, the machine count and the two icon buttons belong to the list
+                     itself, so that they travel with it into the flyout -->
+                <ContentControl x:Name="SidebarHost"/>
+            </Border>
+
+            <!-- What is left of it when hidden. The whole strip is the one click target: the
+                 chevron is a glyph, not a button. As a button it was a second target doing the
+                 same job, and doing it differently - a button acts on the release, and the
+                 flyout's deferred auto-hide gets its turn in the gap between press and
+                 release, so by the time the click arrived the list had already tucked itself
+                 away and the toggle opened it straight back up. -->
+            <Border x:Name="CollapsedSidebar" Grid.Column="0" Width="34" Visibility="Collapsed"
+                    Background="{StaticResource Chrome}" Cursor="Hand"
+                    ToolTip="Slide the machine list out over the session; click again to put it away (Ctrl+B docks it)"
+                    MouseLeftButtonDown="CollapsedSidebar_Click"
+                    BorderBrush="{StaticResource ChromeBorder}" BorderThickness="0,0,1,0">
+                <StackPanel>
+                    <TextBlock Text="&#x25B6;" FontSize="9" Margin="0,14,0,15"
+                               Foreground="{StaticResource InkSoft}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="COMPUTERS" FontSize="11" FontWeight="SemiBold"
+                               Foreground="{StaticResource InkSoft}" HorizontalAlignment="Center">
+                        <TextBlock.LayoutTransform>
+                            <RotateTransform Angle="90"/>
+                        </TextBlock.LayoutTransform>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
+            <GridSplitter x:Name="SidebarSplitter" Grid.Column="1" Width="5" HorizontalAlignment="Stretch"
+                          Background="Transparent" ResizeBehavior="PreviousAndNext"/>
+
+            <!-- sessions live here and nowhere else -->
+            <Grid Grid.Column="2">
+                <local:TabControlEx x:Name="Tabs" ContentTemplate="{StaticResource SessionContent}"
+                                    SelectionChanged="Tabs_SelectionChanged">
+                    <local:TabControlEx.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Background="Transparent"
+                                        MouseDown="TabHeader_MouseDown">
+                                <StackPanel.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Close session" Click="MenuCloseTab_Click"/>
+                                        <MenuItem Header="Close other sessions" Click="MenuCloseOthers_Click"/>
+                                        <MenuItem Header="Pop out to own window" Click="MenuPopOut_Click"/>
+                                    </ContextMenu>
+                                </StackPanel.ContextMenu>
+                                <TextBlock Text="{Binding Header}" VerticalAlignment="Center"/>
+                                <Button Style="{StaticResource TabCloseButton}" Click="CloseTab_Click"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </local:TabControlEx.ItemTemplate>
+                </local:TabControlEx>
+
+                <!-- shown while nothing is connected -->
+                <Border x:Name="EmptyState" Background="{StaticResource Surface}">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Text="No sessions open" FontSize="17" Foreground="{StaticResource InkSoft}"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="Pick a machine on the left and press Remote Control."
+                                   Margin="0,8,0,0" Foreground="{StaticResource InkSoft}"
+                                   HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
+    </DockPanel>
+</Window>
