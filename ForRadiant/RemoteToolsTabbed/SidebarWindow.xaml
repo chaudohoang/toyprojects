@@ -1,0 +1,23 @@
+<Window x:Class="RemoteToolsTabbed.SidebarWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Computers" Width="340" Height="640" MinWidth="250" MinHeight="280"
+        WindowStyle="ToolWindow" ShowInTaskbar="False"
+        Background="{StaticResource Chrome}">
+    <Border x:Name="Shell" BorderBrush="{StaticResource ChromeBorder}" BorderThickness="0">
+        <DockPanel>
+            <Border DockPanel.Dock="Bottom" BorderBrush="{StaticResource ChromeBorder}" BorderThickness="0,1,0,0"
+                    Padding="12,6">
+                <DockPanel>
+                    <Button DockPanel.Dock="Right" Content="Dock" Style="{StaticResource ToolButton}"
+                            Margin="0" Padding="12,0" Height="26" Click="DockBack_Click"
+                            ToolTip="Keep the list open in the main window (Ctrl+B)"/>
+                    <TextBlock x:Name="Hint" Text="Ctrl+Shift+B docks it back"
+                               Foreground="{StaticResource InkSoft}" VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis"/>
+                </DockPanel>
+            </Border>
+            <ContentControl x:Name="Host"/>
+        </DockPanel>
+    </Border>
+</Window>

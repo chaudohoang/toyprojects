@@ -1,0 +1,59 @@
+# Viewer options used for every session this tool opens.
+#
+# The [connection] host is a placeholder: each session gets a copy of this file in %TEMP%
+# with its own host written in, because -optionsfile restores the whole connection and
+# ignores a host given on the command line.
+#
+# To change these, use the gear in the sidebar header: it opens TightVNC Viewer so you can
+# set them in its own dialog, then rewrites this file. Delete this file to go back to the
+# viewer's own per-host settings.
+#
+# Tuned for speed on a busy LAN / Wi-Fi link.
+
+[connection]
+host=
+port=5900
+
+[options]
+
+# Tight + JPEG is the whole point: Raw (0) sends uncompressed pixels, which is what makes a
+# full-screen repaint feel laggy. Raw=0, RRE=2, Hextile=5, Tight=7, ZRLE=10.
+preferred_encoding=7
+use_encoding_1=1
+
+# JPEG quality, 0 (poor, fastest) .. 9 (best, heaviest). 6 is the viewer's default.
+quality=5
+
+# re-use blocks that only moved instead of sending them again - cheap and always worth it
+copyrect=1
+
+# no custom compression level; -1 leaves the viewer on its own default
+compresslevel=-1
+
+# full colour. Set to 1 to drop to 256 colours: a big bandwidth cut when the link, rather
+# than the remote PC, is the bottleneck.
+8bit=0
+
+# No scaling. Scaling costs CPU on every single frame, and with a session docked in a tab
+# the viewer would rescale the whole remote desktop continuously. Collapse the sidebar
+# (Ctrl+B) when a session needs more room instead.
+fitwindow=0
+scale_num=1
+scale_den=1
+
+# keep clients already connected to the same server
+shared=1
+
+viewonly=0
+fullscreen=0
+belldeiconify=0
+disableclipboard=0
+swapmouse=0
+
+# track the remote cursor locally - the pointer stops lagging behind the mouse
+cursorshape=1
+noremotecursor=0
+
+# local cursor shape: 0 = do not show, 1 = normal dot, 2 = arrow, 3 = small dot
+localcursor=0
+local_cursor_shape=0
