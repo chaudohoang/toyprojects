@@ -1,1 +1,1 @@
-﻿LoadedPlatforms=UltraVNC,TightVNC,AnyDesk,UltraViewer,RustDesk
+﻿LoadedPlatforms=UltraVNC,TightVNC,AnyDesk,UltraViewer,RustDesk,RustDesk-IP

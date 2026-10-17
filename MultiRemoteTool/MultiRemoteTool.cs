@@ -1,11 +1,14 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 // ═══════════════════════════════════════════════════════════════
@@ -25,6 +28,7 @@ namespace MultiRemoteTool
         public string ExeName      { get; set; }
         public string CommandLine  { get; set; }
         public string BookFileName { get; set; }  // optional — overrides default contacts_<Name>.csv
+        public int    ProbePort    { get; set; }  // optional — port used to pick between {ip} candidates
 
         public string CsvPath()
         {
@@ -63,17 +67,26 @@ namespace MultiRemoteTool
         // Builds args with {exe} substituted — needed for pipe commands like AnyDesk
         public string BuildArgs(Contact c, string exePath)
         {
+            return BuildArgs(c, exePath, null);
+        }
+
+        // resolvedIp fills {ip} for platforms whose book holds machine names
+        // instead of addresses; null leaves {ip} meaning the same as {id}.
+        public string BuildArgs(Contact c, string exePath, string resolvedIp)
+        {
             string cleanId = c.Id == null ? "" : new string(c.Id.Where(ch => !char.IsWhiteSpace(ch)).ToArray());
             string pwd     = c.Password ?? "";
             return CommandLine
                 .Replace("{exe}",             exePath ?? "")
+                .Replace("{ip}",              string.IsNullOrEmpty(resolvedIp) ? cleanId : resolvedIp)
                 .Replace("{id}",              cleanId)
                 .Replace("{pw}",              pwd)
                 .Replace("<REMOTE-ID>",       cleanId)
                 .Replace("<REMOTE-PASSWORD>", pwd);
         }
 
-        public bool UsesPipe { get { return CommandLine.Contains("|"); } }
+        public bool UsesPipe     { get { return CommandLine.Contains("|"); } }
+        public bool UsesIpLookup { get { return CommandLine.Contains("{ip}"); } }
 
         public void SaveIni()
         {
@@ -86,6 +99,8 @@ namespace MultiRemoteTool
             };
             if (!string.IsNullOrWhiteSpace(BookFileName))
                 lines.Add("BookFileName=" + BookFileName.Trim());
+            if (ProbePort > 0)
+                lines.Add("ProbePort=" + ProbePort);
             File.WriteAllLines(IniPath(), lines.ToArray(), Encoding.UTF8);
         }
 
@@ -104,6 +119,11 @@ namespace MultiRemoteTool
                 else if (key == "ExeName")      p.ExeName      = val;
                 else if (key == "CommandLine")  p.CommandLine  = val;
                 else if (key == "BookFileName") p.BookFileName = val;
+                else if (key == "ProbePort")
+                {
+                    int pp;
+                    if (int.TryParse(val, out pp) && pp > 0 && pp < 65536) p.ProbePort = pp;
+                }
             }
             return p;
         }
@@ -126,6 +146,225 @@ namespace MultiRemoteTool
             }
             list.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
             return list;
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────
+    //  Host resolution  —  machine name → reachable address
+    //  For platforms whose address book stores PC names rather than
+    //  addresses: the address is worked out at connect time, so a
+    //  machine can move between the LAN and the tailnet freely.
+    // ──────────────────────────────────────────────────────────
+    public class ResolveResult
+    {
+        public string Ip     { get; set; }   // null when nothing usable was found
+        public string Via    { get; set; }   // "LAN" / "Tailscale" / "routed"
+        public bool   Probed { get; set; }   // winner actually answered on the probe port
+        public List<string> Tried { get; private set; }
+        public ResolveResult() { Tried = new List<string>(); }
+    }
+
+    public static class HostResolver
+    {
+        private const int ProbeTimeoutMs = 700;   // one window for all candidates, not one each
+        private const int CliTimeoutMs   = 2500;
+
+        public static ResolveResult Resolve(string host, int probePort)
+        {
+            var res = new ResolveResult();
+            if (string.IsNullOrWhiteSpace(host)) return res;
+            host = host.Trim();
+
+            // An entry may already be an address — nothing to look up.
+            IPAddress literal;
+            if (IPAddress.TryParse(host, out literal))
+            {
+                res.Ip = literal.ToString(); res.Via = Kind(literal);
+                res.Tried.Add(res.Ip + " (" + res.Via + ", literal)");
+                return res;
+            }
+
+            // DNS and the two Tailscale queries are independent, so run them
+            // together — serially, a name that resolves nowhere costs the DNS
+            // timeout plus two process spawns one after another.
+            var cands = new List<IPAddress>();
+            string ts = TailscaleExe();
+            var lookups = new List<System.Threading.Tasks.Task>
+            {
+                System.Threading.Tasks.Task.Run(delegate { AddDns(host, cands); })
+            };
+            if (ts != null)
+            {
+                lookups.Add(System.Threading.Tasks.Task.Run(delegate { AddTailscaleIp(ts, host, cands); }));
+                lookups.Add(System.Threading.Tasks.Task.Run(delegate { AddTailscaleLanEndpoint(ts, host, cands); }));
+            }
+            try { System.Threading.Tasks.Task.WaitAll(lookups.ToArray(), CliTimeoutMs + 500); }
+            catch { }
+
+            lock (cands) { if (cands.Count == 0) return res; }
+
+            // LAN beats tailnet: a local link is faster and does not depend
+            // on the Tailscale service being up.
+            cands.Sort(delegate(IPAddress a, IPAddress b) { return Rank(a).CompareTo(Rank(b)); });
+            foreach (var a in cands) res.Tried.Add(a + " (" + Kind(a) + ")");
+
+            if (probePort <= 0)
+            {
+                res.Ip = cands[0].ToString(); res.Via = Kind(cands[0]);
+                return res;
+            }
+
+            // Probe every candidate at once, so an unreachable one costs a single
+            // timeout for the whole set rather than one timeout each.
+            var open  = new bool[cands.Count];
+            var tasks = new List<System.Threading.Tasks.Task>();
+            for (int i = 0; i < cands.Count; i++)
+            {
+                int idx = i;
+                tasks.Add(System.Threading.Tasks.Task.Run(delegate
+                {
+                    open[idx] = Probe(cands[idx], probePort, ProbeTimeoutMs);
+                }));
+            }
+            try { System.Threading.Tasks.Task.WaitAll(tasks.ToArray(), ProbeTimeoutMs + 500); }
+            catch { }
+
+            // cands is already in preference order, so the first hit is the best one.
+            for (int i = 0; i < cands.Count; i++)
+            {
+                if (!open[i]) continue;
+                res.Ip = cands[i].ToString(); res.Via = Kind(cands[i]); res.Probed = true;
+                return res;
+            }
+            return res;   // candidates existed, none answered
+        }
+
+        // ── candidate sources ─────────────────────────────────
+        private static void AddDns(string host, List<IPAddress> into)
+        {
+            try
+            {
+                foreach (var a in Dns.GetHostAddresses(host))
+                    if (a.AddressFamily == AddressFamily.InterNetwork) Add(into, a);
+            }
+            catch { }   // an unknown name is a normal outcome here, not an error
+        }
+
+        private static void AddTailscaleIp(string ts, string host, List<IPAddress> into)
+        {
+            string ips = Run(ts, "ip -4 \"" + host + "\"", CliTimeoutMs);
+            if (ips == null) return;
+            foreach (var line in ips.Split('\n'))
+            {
+                IPAddress a;
+                if (IPAddress.TryParse(line.Trim(), out a)) Add(into, a);
+            }
+        }
+
+        // "status" exposes a peer's LAN endpoint while a direct connection is up.
+        // That is the only way to learn the LAN address of a peer MagicDNS answers
+        // for, since DNS hands back only the 100.x address.
+        private static void AddTailscaleLanEndpoint(string ts, string host, List<IPAddress> into)
+        {
+            string st = Run(ts, "status", CliTimeoutMs);
+            if (st == null) return;
+            foreach (var raw in st.Split('\n'))
+            {
+                var cols = raw.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                if (cols.Length < 2) continue;
+                if (!cols[1].Equals(host, StringComparison.OrdinalIgnoreCase)) continue;
+                var m = Regex.Match(raw, @"direct\s+(\d{1,3}(?:\.\d{1,3}){3}):");
+                if (!m.Success) continue;
+                IPAddress a;
+                if (IPAddress.TryParse(m.Groups[1].Value, out a)) Add(into, a);
+            }
+        }
+
+        private static string TailscaleExe()
+        {
+            string[] roots =
+            {
+                Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+                Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)
+            };
+            foreach (var r in roots)
+            {
+                if (string.IsNullOrEmpty(r)) continue;
+                string full = Path.Combine(r, "Tailscale", "tailscale.exe");
+                if (File.Exists(full)) return full;
+            }
+            return null;
+        }
+
+        // ── helpers ───────────────────────────────────────────
+        private static string Run(string exe, string args, int timeoutMs)
+        {
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName               = exe,
+                    Arguments              = args,
+                    UseShellExecute        = false,
+                    CreateNoWindow         = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError  = true
+                };
+                using (var p = Process.Start(psi))
+                {
+                    // "tailscale ip" writes a diagnostic to stderr for an unknown
+                    // name; drain it asynchronously so it neither reaches a console
+                    // nor fills its pipe while we are reading stdout.
+                    p.ErrorDataReceived += delegate { };
+                    p.BeginErrorReadLine();
+                    string stdout = p.StandardOutput.ReadToEnd();
+                    if (!p.WaitForExit(timeoutMs)) { try { p.Kill(); } catch { } return null; }
+                    return stdout;
+                }
+            }
+            catch { return null; }
+        }
+
+        private static bool Probe(IPAddress ip, int port, int timeoutMs)
+        {
+            try
+            {
+                using (var c = new TcpClient())
+                {
+                    var ar = c.BeginConnect(ip, port, null, null);
+                    if (!ar.AsyncWaitHandle.WaitOne(timeoutMs)) return false;
+                    c.EndConnect(ar);          // throws when the port refused
+                    return c.Connected;
+                }
+            }
+            catch { return false; }
+        }
+
+        private static void Add(List<IPAddress> into, IPAddress a)
+        {
+            byte[] b = a.GetAddressBytes();
+            if (b[0] == 127) return;                    // loopback
+            if (b[0] == 169 && b[1] == 254) return;     // link-local autoconfig
+            lock (into)
+            {
+                foreach (var x in into) if (x.Equals(a)) return;
+                into.Add(a);
+            }
+        }
+
+        private static int Rank(IPAddress a)
+        {
+            byte[] b = a.GetAddressBytes();
+            if (b[0] == 100 && b[1] >= 64 && b[1] <= 127) return 1;   // 100.64/10 CGNAT — Tailscale
+            if (b[0] == 10)                               return 0;
+            if (b[0] == 172 && b[1] >= 16 && b[1] <= 31)  return 0;
+            if (b[0] == 192 && b[1] == 168)               return 0;
+            return 2;
+        }
+
+        private static string Kind(IPAddress a)
+        {
+            switch (Rank(a)) { case 0: return "LAN"; case 1: return "Tailscale"; default: return "routed"; }
         }
     }
 
@@ -222,7 +461,7 @@ namespace MultiRemoteTool
     public class PlatformDialog : Form
     {
         public Platform Result { get; private set; }
-        private TextBox _txtName, _txtExe, _txtCmd, _txtBook;
+        private TextBox _txtName, _txtExe, _txtCmd, _txtBook, _txtProbe;
         private Button  _btnOk, _btnCancel;
 
         public PlatformDialog(Platform existing)
@@ -273,7 +512,7 @@ namespace MultiRemoteTool
             y += rowH;
             var hint = new Label
             {
-                Text      = "Placeholders:  {id}  {pw}  {exe}  (use | for stdin pipe)",
+                Text      = "Placeholders:  {id}  {pw}  {exe}  {ip}  (use | for stdin pipe)",
                 Location  = new Point(tx, y),
                 Size      = new Size(tw, 18),
                 ForeColor = Color.FromArgb(100, 100, 100),
@@ -306,6 +545,19 @@ namespace MultiRemoteTool
             Controls.Add(bookHint);
 
             y += rowH + 18;
+            AddLabel("Probe Port:", lx, y + 2, lw);
+            _txtProbe = AddTB(tx, y, 80);
+            var probeHint = new Label
+            {
+                Text      = "Only for {ip}: port used to tell a live address from a stale one",
+                Location  = new Point(tx + 88, y + 4),
+                Size      = new Size(tw - 88, 16),
+                ForeColor = Color.FromArgb(130, 130, 130),
+                Font      = new Font("Segoe UI", 8f, FontStyle.Italic)
+            };
+            Controls.Add(probeHint);
+
+            y += rowH + 6;
             _btnOk = new Button
             {
                 Text = "Save", DialogResult = DialogResult.OK,
@@ -334,6 +586,7 @@ namespace MultiRemoteTool
                 _txtExe.Text  = existing.ExeName;
                 _txtCmd.Text  = existing.CommandLine;
                 _txtBook.Text = existing.BookFileName ?? "";
+                _txtProbe.Text = existing.ProbePort > 0 ? existing.ProbePort.ToString() : "";
                 // Name IS editable — MainForm handles the INI/CSV rename on save
             }
 
@@ -346,12 +599,19 @@ namespace MultiRemoteTool
                 if (string.IsNullOrWhiteSpace(_txtCmd.Text))
                 { Warn("Command line is required."); return; }
 
+                int probe = 0;
+                string probeRaw = _txtProbe.Text.Trim();
+                if (probeRaw.Length > 0 &&
+                    (!int.TryParse(probeRaw, out probe) || probe < 1 || probe > 65535))
+                { Warn("Probe Port must be a number from 1 to 65535, or blank."); return; }
+
                 Result = new Platform
                 {
                     Name         = _txtName.Text.Trim(),
                     ExeName      = _txtExe.Text.Trim(),
                     CommandLine  = _txtCmd.Text.Trim(),
-                    BookFileName = _txtBook.Text.Trim()
+                    BookFileName = _txtBook.Text.Trim(),
+                    ProbePort    = probe
                 };
             };
         }
@@ -1802,6 +2062,7 @@ namespace MultiRemoteTool
                     _selected.ExeName      = dlg.Result.ExeName;
                     _selected.CommandLine  = dlg.Result.CommandLine;
                     _selected.BookFileName = dlg.Result.BookFileName;
+                    _selected.ProbePort    = dlg.Result.ProbePort;
 
                     // Save new INI first, THEN delete old
                     _selected.SaveIni();
@@ -1827,6 +2088,7 @@ namespace MultiRemoteTool
                     _selected.ExeName      = dlg.Result.ExeName;
                     _selected.CommandLine  = dlg.Result.CommandLine;
                     _selected.BookFileName = dlg.Result.BookFileName;
+                    _selected.ProbePort    = dlg.Result.ProbePort;
                     _selected.SaveIni();
                 }
 
@@ -2021,9 +2283,39 @@ namespace MultiRemoteTool
                 return;
             }
 
+            // Books for {ip} platforms hold machine names, so the address has
+            // to be found now — it changes as the machine moves networks.
+            string resolvedIp = null;
+            if (_selected.UsesIpLookup)
+            {
+                _lblStatus.Text = "Looking up " + c.Id + "...";
+                _status.Refresh();
+                ResolveResult rr;
+                Cursor.Current = Cursors.WaitCursor;
+                try { rr = HostResolver.Resolve(c.Id, _selected.ProbePort); }
+                finally { Cursor.Current = Cursors.Default; }
+
+                if (rr.Ip == null)
+                {
+                    string detail = rr.Tried.Count == 0
+                        ? "The name did not resolve through DNS or Tailscale."
+                        : "Tried:\n  " + string.Join("\n  ", rr.Tried.ToArray()) +
+                          (_selected.ProbePort > 0
+                              ? "\n\nNone answered on port " + _selected.ProbePort + "."
+                              : "");
+                    MessageBox.Show(
+                        "No reachable address found for \"" + c.Id + "\".\n\n" + detail,
+                        _selected.Name + " — host not found",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    _lblStatus.Text = "Lookup failed for " + c.Id;
+                    return;
+                }
+                resolvedIp = rr.Ip;
+            }
+
             try
             {
-                string args = _selected.BuildArgs(c, exePath);
+                string args = _selected.BuildArgs(c, exePath, resolvedIp);
                 ProcessStartInfo psi;
 
                 if (_selected.UsesPipe)
@@ -2049,7 +2341,8 @@ namespace MultiRemoteTool
                 }
 
                 Process.Start(psi);
-                _lblStatus.Text = "Connecting via " + _selected.Name + " to " + c.Id + "...";
+                _lblStatus.Text = "Connecting via " + _selected.Name + " to " + c.Id
+                                + (resolvedIp == null ? "" : " [" + resolvedIp + "]") + "...";
             }
             catch (Exception ex)
             {
@@ -2151,14 +2444,16 @@ namespace MultiRemoteTool
                     // Name in the exported INI follows the chosen filename stem,
                     // so saving as "RustDesk.ini" produces Name=RustDesk
                     string exportedName = Path.GetFileNameWithoutExtension(dlg.FileName);
-                    var lines = new string[]
+                    var lines = new List<string>
                     {
                         "[Platform]",
                         "Name="        + exportedName,
                         "ExeName="     + _selected.ExeName,
                         "CommandLine=" + _selected.CommandLine
                     };
-                    File.WriteAllLines(dlg.FileName, lines, Encoding.UTF8);
+                    if (_selected.ProbePort > 0)
+                        lines.Add("ProbePort=" + _selected.ProbePort);
+                    File.WriteAllLines(dlg.FileName, lines.ToArray(), Encoding.UTF8);
 
                     // Also export contacts CSV alongside the INI (renamed to match)
                     string srcCsv  = _selected.CsvPath();
