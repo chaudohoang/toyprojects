@@ -146,6 +146,19 @@ and let the tool find the machine.
 Any platform whose `CommandLine` contains `{ip}` gets this treatment. There is no flag to turn it
 on — the placeholder *is* the switch.
 
+### Spotting a platform that does this
+
+`{ip}` is the only placeholder with a side effect, so the UI calls it out rather than leaving you
+to infer it from the command line:
+
+- The header under the platform name reads `rustdesk.exe ✓ · name → IP` in amber instead of the
+  usual green. Hover it for the full explanation, including which port will be probed.
+- The status bar adds `Remote ID is a machine name, resolved on Connect`.
+- In **Edit Platform**, `{ip}` has its own amber line under the command box explaining what it
+  does, and the **Probe Port** field is filled in.
+- At connect time the status bar shows the address it settled on, e.g.
+  `Connecting via RustDesk-IP to victus16 [192.168.100.49]...`
+
 ### What happens on Connect
 
 **1. Short-circuit.** If the Remote ID already parses as an IP address, it is used as-is. The

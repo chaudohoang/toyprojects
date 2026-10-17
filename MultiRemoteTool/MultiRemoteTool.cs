@@ -512,7 +512,7 @@ namespace MultiRemoteTool
             y += rowH;
             var hint = new Label
             {
-                Text      = "Placeholders:  {id}  {pw}  {exe}  {ip}  (use | for stdin pipe)",
+                Text      = "Placeholders:  {id}  {pw}  {exe}   (use | for stdin pipe)",
                 Location  = new Point(tx, y),
                 Size      = new Size(tw, 18),
                 ForeColor = Color.FromArgb(100, 100, 100),
@@ -520,7 +520,27 @@ namespace MultiRemoteTool
             };
             Controls.Add(hint);
 
-            y += 22;
+            // {ip} gets its own line: it is the one placeholder that does something
+            // beyond substitution, and that is not guessable from a list.
+            y += 18;
+            var ipHint = new Label
+            {
+                Text      = "{ip}  —  looks the Remote ID up as a machine name and connects to"
+                          + " the address that answers",
+                Location  = new Point(tx, y),
+                Size      = new Size(tw, 30),
+                ForeColor = Color.FromArgb(150, 70, 0),
+                Font      = new Font("Segoe UI", 8.5f, FontStyle.Italic)
+            };
+            Controls.Add(ipHint);
+            var ipTip = new ToolTip();
+            ipTip.SetToolTip(ipHint,
+                "Tries DNS, and \"tailscale ip\" / the LAN endpoint from \"tailscale status\"\n"
+                + "when Tailscale is installed. Every address found is probed at once on\n"
+                + "Probe Port below; the best one that answers wins, LAN before Tailscale.\n\n"
+                + "Leave {ip} out and the book holds ordinary IDs or addresses, used as typed.");
+
+            y += 34;   // the {ip} line wraps to two at this width
             var example = new Label
             {
                 Text      = "e.g.  --connect {id} --password {pw}",
@@ -549,7 +569,7 @@ namespace MultiRemoteTool
             _txtProbe = AddTB(tx, y, 80);
             var probeHint = new Label
             {
-                Text      = "Only for {ip}: port used to tell a live address from a stale one",
+                Text      = "Only for {ip} — the port probed to find a live address",
                 Location  = new Point(tx + 88, y + 4),
                 Size      = new Size(tw - 88, 16),
                 ForeColor = Color.FromArgb(130, 130, 130),
@@ -1950,22 +1970,47 @@ namespace MultiRemoteTool
         private void UpdateStatusExe()
         {
             if (_selected == null) return;
+            // The subtitle is squeezed by the search box, so the marker stays short
+            // and the explanation lives in its tooltip.
+            bool   lookup    = _selected.UsesIpLookup;
+            string marker    = lookup ? "   ·  name → IP" : "";
+            string lookupTip = lookup ? "\n\n" + IpLookupTip() : "";
+
             string exePath = FindExe(_selected.ExeName);
             if (exePath != null)
             {
-                _lblExeInfo.Text      = Path.GetFileName(exePath) + "  ✓";
-                _lblExeInfo.ForeColor = Color.FromArgb(16, 124, 100);
-                _exeTip.SetToolTip(_lblExeInfo, exePath);
-                _lblStatus.Text       = _selected.Name + " — exe found: " + exePath;
+                _lblExeInfo.Text      = Path.GetFileName(exePath) + "  ✓" + marker;
+                _lblExeInfo.ForeColor = lookup ? Color.FromArgb(150, 70, 0) : Color.FromArgb(16, 124, 100);
+                _exeTip.SetToolTip(_lblExeInfo, exePath + lookupTip);
+                _lblStatus.Text       = _selected.Name + " — exe found: " + exePath
+                    + (lookup ? "   |   Remote ID is a machine name, resolved on Connect" : "");
             }
             else
             {
-                _lblExeInfo.Text      = _selected.ExeName + "  ✗ not found";
+                _lblExeInfo.Text      = _selected.ExeName + "  ✗ not found" + marker;
                 _lblExeInfo.ForeColor = Color.FromArgb(196, 43, 28);
-                _exeTip.SetToolTip(_lblExeInfo, "Not found — check exe name or browse to full path");
+                _exeTip.SetToolTip(_lblExeInfo,
+                    "Not found — check exe name or browse to full path" + lookupTip);
                 _lblStatus.Text       = _selected.Name + " — exe NOT found: " + _selected.ExeName
                     + "  (install it or place it next to MultiRemoteTool.exe)";
             }
+        }
+
+        // Spelled out in one place so the tooltip and the platform dialog agree.
+        private string IpLookupTip()
+        {
+            string port = _selected != null && _selected.ProbePort > 0
+                ? _selected.ProbePort.ToString()
+                : "(none set)";
+            return "This platform uses {ip}.\n"
+                 + "The Remote ID column holds MACHINE NAMES, not addresses.\n\n"
+                 + "On Connect the name is looked up through DNS and, if Tailscale is\n"
+                 + "installed, through \"tailscale ip\" and the LAN endpoint in\n"
+                 + "\"tailscale status\". Every address found is probed at once on port "
+                 + port + ",\n"
+                 + "and the best one that answers is used — a LAN address in preference\n"
+                 + "to a Tailscale one. If nothing answers, the launch is cancelled and\n"
+                 + "the addresses tried are listed.";
         }
 
         // FIX #3: correct search order — system PATH first, app folder as fallback
