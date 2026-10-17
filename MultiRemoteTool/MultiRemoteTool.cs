@@ -1118,10 +1118,11 @@ namespace MultiRemoteTool
                 g.DrawString(init, fnt, br, new RectangleF(10, 10, 24, 24), sf);
             g.SmoothingMode = SmoothingMode.Default;
 
-            // Platform name — shrinks to leave room for buttons (and badge when selected)
+            // Platform name — shrinks to leave room for the badge, and for the
+            // action buttons while selected.
             int btnAreaW  = _isSelected ? BtnRight + BtnW * 4 + BtnGap * 3 + 4 : 6;
-            int nameRight = Width - btnAreaW - (_isSelected && ContactCount >= 0 ? 40 : 0);
-            nameRight     = Math.Max(42, nameRight);
+            int badgeArea = ContactCount >= 0 ? BadgeWidth(ContactCount) + 6 : 0;
+            int nameRight = Math.Max(42, Width - btnAreaW - badgeArea);
             using (var fnt = new Font("Segoe UI", 9.5f, _isSelected ? FontStyle.Bold : FontStyle.Regular))
             using (var br  = new SolidBrush(_isSelected ? ColTextSel : ColText))
             using (var sf  = new StringFormat { LineAlignment = StringAlignment.Center,
@@ -1135,8 +1136,7 @@ namespace MultiRemoteTool
                 string badge = ContactCount.ToString();
                 using (var fnt = new Font("Segoe UI", 7.5f, FontStyle.Bold))
                 {
-                    var sz  = TextRenderer.MeasureText(badge, fnt);
-                    int bw  = sz.Width + 8;
+                    int bw  = BadgeWidth(ContactCount);
                     int bh  = 16;
                     // When selected, offset left of the action buttons
                     int rightEdge = _isSelected
@@ -1155,6 +1155,14 @@ namespace MultiRemoteTool
             }
 
             PositionActionButtons();
+        }
+
+        // Single source of truth for the badge box, so the name reservation and
+        // the badge itself can never disagree.
+        private static int BadgeWidth(int count)
+        {
+            using (var fnt = new Font("Segoe UI", 7.5f, FontStyle.Bold))
+                return TextRenderer.MeasureText(count.ToString(), fnt).Width + 8;
         }
 
         private Button MakeActionBtn(string symbol, Color back)
@@ -1295,7 +1303,7 @@ namespace MultiRemoteTool
                 try { this.Icon = new Icon(icoPath); } catch { }
 
             // ── Sidebar ───────────────────────────────────────
-            _sidebar = new Panel { Dock = DockStyle.Left, Width = 240, BackColor = ColSidebar };
+            _sidebar = new Panel { Dock = DockStyle.Left, Width = 264, BackColor = ColSidebar };
 
             var sidebarHeader = new Panel { Dock = DockStyle.Top, Height = 44, BackColor = Color.FromArgb(18, 18, 18) };
             var lblApp = new Label
