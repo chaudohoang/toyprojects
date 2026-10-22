@@ -58,6 +58,29 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 - **Still open:** the app has not been clicked through in the UI (per-run NG cards unseen);
   `ForRadiant/CLAUDE.md` still says FtpUploadNew is "not under active change as of 2026-10-01".
 
+- **1.0.0.11: operation.csv column naming.** `run` held a STAMP there while `Run` in
+  summary.csv held an ORDINAL — same word, two meanings, in two reports read side by side.
+  Renamed to `run start` and added a `run` (`1 of 2`) column, so both files now mean the
+  same thing by the same header. Chau asked for the ordinal after I argued against it:
+  "N of M" is a fact about the panel's whole DAY, not the event, so a row written at 08:00
+  reads `1 of 1` until a 15:00 retest makes it `1 of 2` — consistent within one build (the
+  report is always rebuilt whole) but the same physical event can render differently in a
+  report rebuilt later. Engine-level rows (SOURCE GONE / PUMP ERROR / manifest warnings)
+  carry no run and get a blank label rather than an invented `1 of 1`.
+  Verified by rebuilding all three stress runs' reports: 0 blank labels, 0 blank stamps,
+  0 (pid,stamp) pairs disagreeing on their label.
+- **Deploy recipe learned the hard way:** copy the PREVIOUS `D:\Log\FtpUpload <ver>` folder
+  and swap only `FtpUpload.exe` — 18 entries. Copying the repo's `publish\` folder shipped
+  49: the test harness, `.pdb`, five config variants, stale September data in
+  `jobs\`/`logs\`/`state\`, no `WinSCP.ini`, and — worst — overwrote the production
+  `config.json` (demo host, `SimulateFailurePercent: 40`, autostart off,
+  `StampManifestNameAtUpload: false`) and `allowed_filenames.txt` with the repo's loose dev
+  recipe, whose `step*.tif` also matches `*_Raw.tif`/`*_omit.tif` (~3 GB/panel).
+  Those three files belong to the SITE, not the build.
+- `publish\FtpUpload.exe` is ~147 MB and deliberately untracked (over GitHub's 100 MB
+  limit). Commit with `git add -u`; `git add <project-folder>` sweeps it in and the push is
+  rejected by the pre-receive hook.
+
 ---
 
 ## 2026-10-19

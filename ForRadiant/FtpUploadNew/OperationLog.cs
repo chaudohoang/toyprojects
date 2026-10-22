@@ -308,11 +308,35 @@ public static class OperationLog
 
     private static string? WriteCsv(Config cfg, string day, List<Ev> evs)
     {
-        var sb = new StringBuilder(evs.Count * 110);
-        // "run" sits next to the PID: it is what distinguishes two tests of the same panel, and
-        // one grep of a run stamp pulls that run's whole story out of this file, the raw log and
-        // the summary at once.
-        sb.AppendLine("date,time,PID,run,file,event,result,try,host,source,reason");
+        var sb = new StringBuilder(evs.Count * 120);
+
+        // "run" / "run start" sit next to the PID and mean exactly what they mean in the summary,
+        // so the two reports can be read side by side:
+        //   run        "1 of 2" - which test of this panel, for reading at a glance
+        //   run start  the .panel stamp - the join key to the raw log, the ng-retry log and the
+        //              host manifest filename; one grep of it pulls a run's whole story out of
+        //              every file at once.
+        //
+        // "N of M" is a fact about the panel's whole DAY, not about the event: a row written at
+        // 08:00 reads "1 of 1" until a 15:00 retest makes it "1 of 2". That is consistent within
+        // one build of this report (it is always rebuilt whole), but it does mean the same
+        // physical event can render differently in a report rebuilt later.
+        var runsOfPid = evs.Where(x => x.Run.Length > 0)
+                           .GroupBy(x => x.Pid, StringComparer.OrdinalIgnoreCase)
+                           .ToDictionary(g => g.Key,
+                                         g => g.Select(x => x.Run).Distinct()
+                                               .OrderBy(r => r, StringComparer.Ordinal).ToList(),
+                                         StringComparer.OrdinalIgnoreCase);
+        string RunLabel(Ev e)
+        {
+            // Engine-level rows (SOURCE GONE, PUMP ERROR, manifest warnings) carry no run: their
+            // text does not name one, and inventing "1 of 1" would assert something unverified.
+            if (e.Run.Length == 0 || !runsOfPid.TryGetValue(e.Pid, out var runs)) return "";
+            var i = runs.IndexOf(e.Run);
+            return i < 0 ? "" : $"{i + 1} of {runs.Count}";
+        }
+
+        sb.AppendLine("date,time,PID,run,run start,file,event,result,try,host,source,reason");
         foreach (var e in evs)
             sb.Append(Csv(e.When.Length >= 19 ? e.When[..10] : e.When)).Append(',')
               // "06-58-17.613", not "06:58:17.613". Excel reads a colon-separated time as a NUMBER,
@@ -322,6 +346,7 @@ public static class OperationLog
               // plain text, not a spreadsheet, and keeps the colons.
               .Append(e.When.Length >= 19 ? e.When[11..].Replace(':', '-') : "").Append(',')
               .Append(Csv(e.Pid)).Append(',')
+              .Append(RunLabel(e)).Append(',')
               // Hyphenated like Run start in the summary: Excel reads 14 bare digits as a number
               // and renders "2.02609E+13", losing the value on screen and in anything pasted out.
               .Append(e.Run.Length == 14 ? e.Run[..8] + "-" + e.Run[8..] : Csv(e.Run)).Append(',')
