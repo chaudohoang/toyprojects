@@ -20,11 +20,23 @@ namespace FtpUpload;
 /// </summary>
 public static class OperationLog
 {
+    /// <summary>Split a panel-event subject "{PID}#{RunId}" into its parts. Lines written before
+    /// runs existed carry no '#', and yield an empty run.</summary>
+    private static (string Pid, string Run) SplitSubject(string s)
+    {
+        var i = s.IndexOf('#');
+        return i < 0 ? (s, "") : (s[..i], s[(i + 1)..]);
+    }
+
+    /// <summary>The run on a rawlog / ng-retry row: the appended 12th field, or "" on older rows.</summary>
+    private static string RunOf(string[] p) => p.Length > 11 ? p[11] : "";
+
     /// <summary>One event in the day timeline. Internal so the Trace Panel can render the
     /// same events for one panel - one parser, two presentations.</summary>
     internal sealed record Ev(
         string When,      // yyyy-MM-dd HH:mm:ss — the sort key
         string Pid,
+        string Run,       // which run of the panel — "" on rows from before runs existed
         string File,
         string Event,     // what happened, in words
         string Result,    // OK / FAILED / TIMED OUT / SKIPPED / -
@@ -83,7 +95,7 @@ public static class OperationLog
         foreach (var line in SafeFile.ReadLines(evPath))
         {
             var m = System.Text.RegularExpressions.Regex.Match(line, @"\]\s*(?:MIDFAIL|FINALIZE)\s+(\S+?):");
-            if (m.Success) manifestFromEvents.Add(m.Groups[1].Value);
+            if (m.Success) manifestFromEvents.Add(SplitSubject(m.Groups[1].Value).Pid);
         }
 
         // ---- 1. the live pump: one row per attempt --------------------------------------------
@@ -138,7 +150,7 @@ public static class OperationLog
             };
             if (viaNg) ev += " (via ng retry)";
 
-            evs.Add(new Ev(when, p[0], p[1], ev, res,
+            evs.Add(new Ev(when, p[0], RunOf(p), p[1], ev, res,
                            p.Length > 6 ? p[6] : "",
                            p.Length > 8 ? p[8] : "",
                            reasonTxt, "day job", 2));
@@ -162,7 +174,7 @@ public static class OperationLog
             var stamp = LogRow.WrittenAt(line);
             var when = stamp.Length >= 19 ? stamp : dayPrefix + " " + ClockOf(p, dayPrefix);
             var ok = p[2] == "SUCCEEDED";
-            evs.Add(new Ev(when, p[0], p[1],
+            evs.Add(new Ev(when, p[0], RunOf(p), p[1],
                            ok ? "ng retry succeeded" : "ng retry failed",
                            ok ? "ok" : "failed",
                            p.Length > 6 ? p[6] : "",
@@ -186,7 +198,7 @@ public static class OperationLog
             var mid = System.Text.RegularExpressions.Regex.Match(body, @"^MIDFAIL\s+(\S+?):\s*(.+)$");
             if (mid.Success)
             {
-                var pid = mid.Groups[1].Value;
+                var (pid, pidRun) = SplitSubject(mid.Groups[1].Value);
                 if (!ownPids.Contains(pid)) continue;   // a later day's own panels are not ours
                 var rest = mid.Groups[2].Value;
 
@@ -213,7 +225,7 @@ public static class OperationLog
                 // ".txt" left every index row reading "(index + host)" while the host
                 // rows named their file.
                 var midName = System.Text.RegularExpressions.Regex.Match(rest, @"\bas (\S+?\.(?:txt|idx))\b");
-                evs.Add(new Ev(when, pid,
+                evs.Add(new Ev(when, pid, pidRun,
                     midName.Success ? midName.Groups[1].Value : "(index + host)",
                     // The count belongs IN the event text: "early host sent (5 files)" reads as one
                     // fact, where a separate column made you look across to see how much of the
@@ -239,7 +251,7 @@ public static class OperationLog
             var finl = System.Text.RegularExpressions.Regex.Match(body, @"^FINALIZE\s+(\S+?):\s*(.+)$");
             if (finl.Success)
             {
-                var fpid = finl.Groups[1].Value;
+                var (fpid, fpidRun) = SplitSubject(finl.Groups[1].Value);
                 if (!ownPids.Contains(fpid)) continue;
                 var frest = finl.Groups[2].Value;
                 var fname = System.Text.RegularExpressions.Regex.Match(frest, @"\bas (\S+\.txt)\b");
@@ -247,7 +259,7 @@ public static class OperationLog
                           : frest.StartsWith("final index", StringComparison.OrdinalIgnoreCase) ? "index" : "";
                 var fidx = System.Text.RegularExpressions.Regex.Match(frest, @"\bas (\S+\.idx)\b");
                 var fcount = System.Text.RegularExpressions.Regex.Match(frest, @"(\d+) files?\b");
-                evs.Add(new Ev(when, fpid,
+                evs.Add(new Ev(when, fpid, fpidRun,
                     fname.Success ? fname.Groups[1].Value : fidx.Success ? fidx.Groups[1].Value : "(index + host)",
                     fkind.Length > 0 ? $"final {fkind} sent{Cnt(fcount)}" : $"final send{Cnt(fcount)}",
                     "ok", "", HostIn(frest), "", "panel event", 3));
@@ -258,7 +270,7 @@ public static class OperationLog
             if (gone.Success)
             {
                 if (!ownPids.Contains(gone.Groups[1].Value)) continue;
-                evs.Add(new Ev(when, gone.Groups[1].Value, gone.Groups[2].Value,
+                evs.Add(new Ev(when, gone.Groups[1].Value, "", gone.Groups[2].Value,
                     "source file no longer exists", "gone", "", "", gone.Groups[3].Value, "panel event", 3));
                 continue;
             }
@@ -267,7 +279,7 @@ public static class OperationLog
             if (pump.Success)
             {
                 if (!ownPids.Contains(pump.Groups[1].Value)) continue;
-                evs.Add(new Ev(when, pump.Groups[1].Value, pump.Groups[2].Value,
+                evs.Add(new Ev(when, pump.Groups[1].Value, "", pump.Groups[2].Value,
                     "transfer threw an error, pump recovered", "failed", "", "", pump.Groups[3].Value, "panel event", 3));
                 continue;
             }
@@ -276,7 +288,7 @@ public static class OperationLog
             if (warn.Success)
             {
                 if (!ownPids.Contains(warn.Groups[2].Value.TrimEnd(':'))) continue;
-                evs.Add(new Ev(when, warn.Groups[2].Value.TrimEnd(':'),
+                evs.Add(new Ev(when, warn.Groups[2].Value.TrimEnd(':'), "",
                     warn.Groups[1].Value == "SEED SKIPPED" ? "(whole panel)" : "(finalize marker)",
                     warn.Groups[1].Value == "SEED SKIPPED"
                         ? "no source files - manifests not written"
@@ -297,7 +309,10 @@ public static class OperationLog
     private static string? WriteCsv(Config cfg, string day, List<Ev> evs)
     {
         var sb = new StringBuilder(evs.Count * 110);
-        sb.AppendLine("date,time,PID,file,event,result,try,host,source,reason");
+        // "run" sits next to the PID: it is what distinguishes two tests of the same panel, and
+        // one grep of a run stamp pulls that run's whole story out of this file, the raw log and
+        // the summary at once.
+        sb.AppendLine("date,time,PID,run,file,event,result,try,host,source,reason");
         foreach (var e in evs)
             sb.Append(Csv(e.When.Length >= 19 ? e.When[..10] : e.When)).Append(',')
               // "06-58-17.613", not "06:58:17.613". Excel reads a colon-separated time as a NUMBER,
@@ -307,6 +322,9 @@ public static class OperationLog
               // plain text, not a spreadsheet, and keeps the colons.
               .Append(e.When.Length >= 19 ? e.When[11..].Replace(':', '-') : "").Append(',')
               .Append(Csv(e.Pid)).Append(',')
+              // Hyphenated like Run start in the summary: Excel reads 14 bare digits as a number
+              // and renders "2.02609E+13", losing the value on screen and in anything pasted out.
+              .Append(e.Run.Length == 14 ? e.Run[..8] + "-" + e.Run[8..] : Csv(e.Run)).Append(',')
               .Append(Csv(e.File)).Append(',')
               .Append(Csv(e.Event)).Append(',')
               .Append(Csv(e.Result)).Append(',')

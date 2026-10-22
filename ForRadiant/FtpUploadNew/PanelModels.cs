@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
 
 namespace FtpUpload;
@@ -135,6 +135,15 @@ public static class PathDerivation
 
     /// <summary>Local host manifest this program creates: {PID}_{DateTime}.txt</summary>
     public static string HostSrc(PanelFile p) => Path.Combine(p.SourceFolder, p.Pid + "_" + p.DateTime + ".txt");
+
+    /// <summary>
+    /// Which RUN of a panel this handoff is. The .panel DateTime already identifies it uniquely —
+    /// it is the {DateTime} segment of every remote path (see DestFor) and the stamp in the host
+    /// manifest name — so a retest of the same PID carries a different one and needs no invention.
+    /// Note the SOURCE FOLDER carries a different stamp (when the capture folder was created);
+    /// that is not the run, and keying off it would not match what the server sees.
+    /// </summary>
+    public static string RunIdOf(PanelFile p) => p.DateTime;
 }
 
 /// <summary>

@@ -25,7 +25,7 @@ namespace FtpUpload;
 /// </summary>
 public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot)
 {
-    private readonly ConcurrentDictionary<string, Job> _jobs = new();      // pid -> job
+    private readonly ConcurrentDictionary<string, Job> _jobs = new();      // "pid|runId" -> job
     private readonly List<JobFile> _queue = new();                          // run order
     private readonly object _gate = new();
     private readonly IFtpTransfer _ftp = FtpEngineFactory.Create(cfg, reuseConnections: true);   // live pump reuses one connection
@@ -68,7 +68,14 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
     public JobFile? InFlight { get { lock (_gate) return _inFlight; } }
     public DateTime InFlightStarted { get { lock (_gate) return _inFlightStarted; } }
     public int QueueLength { get { lock (_gate) return _queue.Count; } }
-    public IReadOnlyCollection<Job> Jobs => _jobs.Values.OrderBy(j => j.Pid).ToList();
+    public IReadOnlyCollection<Job> Jobs => _jobs.Values.OrderBy(j => j.Pid).ThenBy(j => j.RunId).ToList();
+
+    /// <summary>
+    /// Every run of a panel, oldest first. The job table is keyed by panel+run, but the command
+    /// channel and the legacy jobs.txt path only know a PID — they act on all of its runs.
+    /// </summary>
+    private List<Job> RunsOf(string pid) =>
+        _jobs.Values.Where(j => j.Pid == pid).OrderBy(j => j.RunId).ToList();
 
     /// <summary>Raised whenever anything the UI displays has changed.</summary>
     public event Action? Changed;
@@ -137,6 +144,12 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
     /// vanished source files — swamped it: one busy day put thousands of panel lines in front of the
     /// handful of startups and rollovers someone opened it to find.
     /// </summary>
+    /// <summary>
+    /// Panel events. MIDFAIL/FINALIZE lines name the panel as "{PID}#{RunId}" so the operation
+    /// report can tell two runs of one panel apart — the run is not recoverable from the text
+    /// otherwise (the index manifest is "{PID}.idx" on every run). Readers split on '#'; a line
+    /// written before runs existed has no '#' and reads as an empty run, exactly as before.
+    /// </summary>
     private void OpLog(string msg)
     {
         try { SafeFile.Append(cfg.PanelEventsPath(Clock.Now), $"[{Clock.Now:yyyy-MM-dd HH:mm:ss.fff}] {msg}"); }
@@ -168,11 +181,25 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
         {
             foreach (var f in files)
             {
-                var job = _jobs.GetOrAdd(f.Pid, _ => new Job { Pid = f.Pid, Day = Clock.Today });
+                var job = _jobs.GetOrAdd(f.Pid + "|" + f.RunId,
+                                         _ => new Job { Pid = f.Pid, RunId = f.RunId, Day = Clock.Today });
                 // NB: the panel-timeout clock (job.Started) is NOT set here. It starts when the
                 // panel's first file actually begins uploading (see UploadOne), so a panel still
                 // waiting its turn in the queue is not on the clock yet.
-                if (job.Files.Any(x => x.FileName == f.FileName)) continue;
+                //
+                // Dedupe on the FULL identity (panel + run + name), not the name alone. A panel
+                // tested twice in a day produces the same file NAMES from a different folder to a
+                // different remote path; matching on name made the retest collide with the first
+                // run — whose Job stays in _jobs until the day rolls over — so all 13 files were
+                // dropped here and never uploaded, with nothing in any log to say so.
+                var clash = job.Files.FirstOrDefault(x => x.FileName == f.FileName);
+                if (clash is not null)
+                {
+                    if (clash.RemotePath != f.RemotePath)
+                        Log($"panel {f.Pid}: WARNING not queueing {f.FileName} — this run already " +
+                            $"holds that name for {clash.RemotePath}, the new one targets {f.RemotePath}");
+                    continue;
+                }
 
                 // Already resolved earlier today (before a restart): keep it visible in the UI
                 // with its original outcome, but do NOT queue it again. This carries a final
@@ -208,13 +235,13 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
     /// files are added via AddFiles. Idempotent: re-registering an existing panel refreshes the
     /// metadata but never clears its files. The manifest/completion logic reads these fields.
     /// </summary>
-    public void RegisterPanel(string pid, DateTime day, string sourceFolder, string channelIndex,
+    public void RegisterPanel(string pid, string runId, DateTime day, string sourceFolder, string channelIndex,
                               string uploadIndexPath, string uploadHostPath,
                               string indexSrc, string hostSrc, int totalFileCount)
     {
         lock (_gate)
         {
-            var job = _jobs.GetOrAdd(pid, _ => new Job { Pid = pid, Day = day });
+            var job = _jobs.GetOrAdd(pid + "|" + runId, _ => new Job { Pid = pid, RunId = runId, Day = day });
             job.SourceFolder = sourceFolder;
             job.ChannelIndex = channelIndex;
             job.UploadIndexPath = uploadIndexPath;
@@ -230,10 +257,17 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
     /// Seed (create-or-resume) a panel's index/host manifests from its data files. Called by
     /// PanelIntake AFTER the files have been added, so job.Files is populated.
     /// </summary>
+    public void SeedPanelManifest(string pid, string runId)
+    {
+        if (_jobs.TryGetValue(pid + "|" + runId, out var job) && job.IsPanelJob)
+            _manifest.Seed(job);
+    }
+
+    /// <summary>Seed every run of a panel — for callers (legacy jobs.txt intake) with no run.</summary>
     public void SeedPanelManifest(string pid)
     {
-        if (_jobs.TryGetValue(pid, out var job) && job.IsPanelJob)
-            _manifest.Seed(job);
+        foreach (var job in RunsOf(pid))
+            if (job.IsPanelJob) _manifest.Seed(job);
     }
 
     /// <summary>
@@ -307,7 +341,7 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
                     // send produced - the Trace Panel verdict then reports it as unexplained.
                     if (fin.Uploaded)
                         foreach (var line in fin.SentLines(System.IO.Path.GetFileName(job.UploadIndexPath)))
-                            OpLog($"FINALIZE {job.Pid}: {line}");
+                            OpLog($"FINALIZE {job.Pid}#{job.RunId}: {line}");
                 }
                 else
                 {
@@ -321,7 +355,7 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
                     // name, which reads like the name is missing rather than logged a minute earlier.
                     if (fin.Uploaded)
                         foreach (var line in fin.SentLines(System.IO.Path.GetFileName(job.UploadIndexPath)))
-                            OpLog($"FINALIZE {job.Pid}: {line}");
+                            OpLog($"FINALIZE {job.Pid}#{job.RunId}: {line}");
 
                     // Data done live, but the manifest SEND itself failed. Count it; after MaxAttempts,
                     // hand the manifests to NG as real FAILED files (a genuine manifest failure — this
@@ -393,7 +427,7 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
             // attempted, the per-manifest lines below report it - with its file count, which the
             // combined message dropped, so a failed send said nothing about how much it carried.
             if (!r.Sent && r.Sends.Count == 0 && r.Why.Length > 0)
-                OpLog($"MIDFAIL {job.Pid}: NOT sent - {r.Why}");
+                OpLog($"MIDFAIL {job.Pid}#{job.RunId}: NOT sent - {r.Why}");
             if (r.Sends.Count > 0)
             {
                 // ONE LINE PER MANIFEST, each naming the remote file it produced.
@@ -403,13 +437,13 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
                 // name and its own outcome — so a file on the server always maps to a log line.
                 var rec = System.IO.Path.GetFileName(System.IO.Path.ChangeExtension(job.IndexSrc, ".midfail"));
                 foreach (var s in r.Sends)
-                    OpLog($"MIDFAIL {job.Pid}: early {s.Kind} " +
+                    OpLog($"MIDFAIL {job.Pid}#{job.RunId}: early {s.Kind} " +
                           (s.Ok ? "sent" : "FAILED to send") +
                           $" -> {s.Host} as {s.RemoteName}, {s.Files} file{(s.Files == 1 ? "" : "s")}" +
                           (s.Ok ? $" (list in {rec})" : s.Error.Length > 0 ? $" - {s.Error}" : ""));
             }
         }
-        catch (Exception ex) { OpLog($"MIDFAIL {job.Pid}: send error: {ex.Message}"); }
+        catch (Exception ex) { OpLog($"MIDFAIL {job.Pid}#{job.RunId}: send error: {ex.Message}"); }
     }
 
     private void MarkManifestsSucceeded(Job job, List<JobFile> manifests, string host)
@@ -444,7 +478,7 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
     /// </summary>
     public void OnResultTiming(string newPid)
     {
-        if (_jobs.TryGetValue(newPid, out var job))
+        foreach (var job in RunsOf(newPid))
             snapshot.Write(job);
 
         lock (_gate)
@@ -462,11 +496,11 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
     }
 
     /// <summary>UI "Force Upload" — jump this file to the front of the line.</summary>
-    public void ForceUpload(string pid, string fileName)
+    public void ForceUpload(string pid, string runId, string fileName)
     {
         lock (_gate)
         {
-            var f = _jobs.TryGetValue(pid, out var job)
+            var f = _jobs.TryGetValue(pid + "|" + runId, out var job)
                 ? job.Files.FirstOrDefault(x => x.FileName == fileName)
                 : null;
             if (f is null || f.Status == FileStatus.Succeeded) return;
@@ -479,17 +513,23 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
         NotifyChanged();
     }
 
+    /// <summary>Command-channel form: the command file names a panel and a file, not a run.</summary>
+    public void ForceUpload(string pid, string fileName)
+    {
+        foreach (var job in RunsOf(pid)) ForceUpload(pid, job.RunId, fileName);
+    }
+
     /// <summary>
     /// NG-list manual retry (manual only). A file that ran out of attempts (FAILED) or was
     /// skipped by a panel timeout (TIMEDOUT) waits on the NG tab until the operator asks for it.
     /// This resets its attempt budget, re-queues it, and clears its panel's timeout so the retry
     /// gets a fresh window instead of being killed again immediately. History is kept.
     /// </summary>
-    public void RetryFailed(string pid, string fileName)
+    public void RetryFailed(string pid, string runId, string fileName)
     {
         lock (_gate)
         {
-            if (!_jobs.TryGetValue(pid, out var job)) return;
+            if (!_jobs.TryGetValue(pid + "|" + runId, out var job)) return;
             var f = job.Files.FirstOrDefault(x => x.FileName == fileName);
             if (f is null || (f.Status != FileStatus.Failed && f.Status != FileStatus.TimedOut)) return;
 
@@ -540,20 +580,21 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
     {
         lock (_gate)
         {
+            // A PID can have several runs; the caller names only the panel, so all of them go.
+            foreach (var job in RunsOf(pid)) _jobs.TryRemove(job.Key, out _);
             _queue.RemoveAll(f => f.Pid == pid);
-            _jobs.TryRemove(pid, out _);
         }
         Log($"deleted job {pid}");
         NotifyChanged();
     }
 
     /// <summary>Remove a single file from a job (UI "Delete" on one row).</summary>
-    public void DeleteFile(string pid, string fileName)
+    public void DeleteFile(string pid, string runId, string fileName)
     {
         lock (_gate)
         {
-            _queue.RemoveAll(f => f.Pid == pid && f.FileName == fileName);
-            if (_jobs.TryGetValue(pid, out var job))
+            _queue.RemoveAll(f => f.Pid == pid && f.RunId == runId && f.FileName == fileName);
+            if (_jobs.TryGetValue(pid + "|" + runId, out var job))
                 job.Files.RemoveAll(f => f.FileName == fileName);
         }
         Log($"deleted {pid}/{fileName}");
@@ -744,7 +785,7 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
                 next.FailCount++;
                 next.FailTimes.Add(DateTime.Now.ToString("HH:mm:ss"));
                 next.Status = next.Attempts >= cfg.MaxAttempts ? FileStatus.Failed : FileStatus.Pending;
-                _jobs.TryGetValue(next.Pid, out var errJob);
+                _jobs.TryGetValue(next.Pid + "|" + next.RunId, out var errJob);
                 rawLog.Write(next, cfg.MaxAttempts, "", errJob, errJob?.Day);
                 Log($"   upload error on {next.Pid}/{next.FileName}: {ex.Message} — pump continuing");
                 // Per-FILE, so it belongs with the panel events, not the app log: on 2026-09-10
@@ -823,7 +864,7 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
     private async Task UploadOne(JobFile f, CancellationToken stopping)
     {
         var attempt = f.Attempts + 1;
-        _jobs.TryGetValue(f.Pid, out var job);
+        _jobs.TryGetValue(f.Pid + "|" + f.RunId, out var job);
 
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(stopping);
         lock (_gate)
@@ -1037,7 +1078,7 @@ public sealed class UploadEngine(Config cfg, RawLog rawLog, SnapshotLog snapshot
 
         foreach (var x in skipped)
         {
-            _jobs.TryGetValue(x.Pid, out var job);
+            _jobs.TryGetValue(x.Pid + "|" + x.RunId, out var job);
             rawLog.Write(x, cfg.MaxAttempts, "", job, job?.Day);
         }
         foreach (var pid in pannedOut)

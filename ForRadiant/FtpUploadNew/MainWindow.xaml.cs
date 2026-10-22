@@ -556,14 +556,16 @@ public partial class MainWindow : Window
                          it.Pid.Contains(_ngFilter, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
-        // Group by day+PID, preserving first-seen order so cards don't jump around. The list can
-        // span several days (today + the recovery window), and the same panel can legitimately
-        // appear on two of them - grouping on PID alone would merge those into one card.
+        // Group by day+PID+run, preserving first-seen order so cards don't jump around. The list
+        // can span several days (today + the recovery window), and the same panel can legitimately
+        // appear on two of them - grouping on PID alone would merge those into one card. The RUN is
+        // in the key for the same reason: a panel re-tested on the SAME day is two units of work,
+        // with its own files and its own host manifest, and must get its own card.
         var order = new List<string>();
         var byPid = new Dictionary<string, List<NgItem>>();
         foreach (var it in items)
         {
-            var key = it.Day + "|" + it.Pid;
+            var key = it.Day + "|" + it.Pid + "|" + it.RunId;
             if (!byPid.TryGetValue(key, out var list))
             {
                 list = new List<NgItem>();
@@ -593,7 +595,7 @@ public partial class MainWindow : Window
             if (!existing.TryGetValue(key, out var group))
             {
                 var first = byPid[key][0];
-                group = new NgGroupVm(first.Day, first.Pid);
+                group = new NgGroupVm(first.Day, first.Pid, first.RunId);
                 _ng.Add(group);
                 existing[key] = group;
             }
@@ -642,7 +644,7 @@ public partial class MainWindow : Window
     private void ForceUpload_Click(object sender, RoutedEventArgs e)
     {
         if (FindVm<FileRowVm>(sender) is not { } row) return;
-        _host.Engine.ForceUpload(row.Model.Pid, row.Model.FileName);
+        _host.Engine.ForceUpload(row.Model.Pid, row.Model.RunId, row.Model.FileName);
         _dirty = true;
     }
 
@@ -1188,7 +1190,7 @@ public partial class MainWindow : Window
         if (MessageBox.Show($"Remove {row.Model.FileName} from job {row.Model.Pid}?",
                 "Delete file", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
             return;
-        _host.Engine.DeleteFile(row.Model.Pid, row.Model.FileName);
+        _host.Engine.DeleteFile(row.Model.Pid, row.Model.RunId, row.Model.FileName);
         _dirty = true;
     }
 

@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 
 namespace FtpUpload;
 
@@ -18,6 +18,15 @@ public sealed class JobFile
     public string LocalPath { get; init; } = "";
     public string RemotePath { get; init; } = "";
 
+    /// <summary>
+    /// Which RUN of the panel this file belongs to — the .panel handoff's DateTime stamp, the
+    /// same one that appears in RemotePath and in the host manifest name. A PID can be tested
+    /// more than once a day (rework/retest), and every run writes the same 13 file NAMES to a
+    /// different destination. Without this the second run's files were silently dropped as
+    /// duplicates and never uploaded. Empty for legacy jobs.txt panels, which have no run.
+    /// </summary>
+    public string RunId { get; init; } = "";
+
     /// <summary>True for a panel's index/host completion manifest. Counted like any file (so the
     /// panel is only SUCCESS once these are sent too), but NOT queued for the normal pump — the
     /// finalize step sends it once all data files resolve, then marks it Succeeded/Failed.</summary>
@@ -29,7 +38,12 @@ public sealed class JobFile
     public List<string> FailTimes { get; } = new();
     public int Attempts { get; set; }
 
-    public string Key => Pid + "|" + FileName;
+    /// <summary>
+    /// Identity of one file: panel + run + name. The run is part of it because the same name
+    /// recurs on every run of a panel, pointing at a different local file and a different
+    /// remote path.
+    /// </summary>
+    public string Key => Pid + "|" + RunId + "|" + FileName;
 }
 
 /// <summary>
@@ -45,11 +59,12 @@ public sealed class JobsLine
 {
     public string Pid = "", FileName = "", LocalPath = "", RemotePath = "";
     public string IndexSrc = "", HostSrc = "", UploadIndexPath = "", UploadHostPath = "", ChannelIndex = "";
+    public string RunId = "";
     public bool IsPanel;
     public bool IsManifest;
 
     public string ToLine() => IsPanel
-        ? string.Join('|', Pid, FileName, LocalPath, RemotePath, IndexSrc, HostSrc, UploadIndexPath, UploadHostPath, ChannelIndex, IsManifest ? "1" : "0")
+        ? string.Join('|', Pid, FileName, LocalPath, RemotePath, IndexSrc, HostSrc, UploadIndexPath, UploadHostPath, ChannelIndex, IsManifest ? "1" : "0", RunId)
         : string.Join('|', Pid, FileName, LocalPath, RemotePath);
 
     public static JobsLine? Parse(string line)
@@ -69,6 +84,9 @@ public sealed class JobsLine
             j.UploadIndexPath = p[6].Trim(); j.UploadHostPath = p[7].Trim();
             j.ChannelIndex = p[8].Trim();
             if (p.Length >= 10) j.IsManifest = p[9].Trim() == "1";   // 10th field, backward compatible
+            // 11th field, appended the same way: lines written before runs existed simply have
+            // no RunId, and a panel with an empty RunId behaves exactly as it did before.
+            if (p.Length >= 11) j.RunId = p[10].Trim();
         }
         return j;
     }
@@ -78,6 +96,18 @@ public sealed class JobsLine
 public sealed class Job
 {
     public string Pid { get; init; } = "";
+
+    /// <summary>
+    /// Which run of the panel this is — the .panel DateTime stamp. A Job already describes ONE
+    /// run (SourceFolder, IndexSrc, HostSrc and the two upload paths all belong to a single
+    /// handoff), so this is what it is really keyed by; it used to be keyed by PID alone, which
+    /// made a retest collide with the finished run still in memory.
+    /// </summary>
+    public string RunId { get; init; } = "";
+
+    /// <summary>Key in the engine's job table: one entry per panel RUN.</summary>
+    public string Key => Pid + "|" + RunId;
+
     public DateTime Day { get; init; }
     public List<JobFile> Files { get; } = new();
 
@@ -238,6 +268,9 @@ public sealed class NgItem
 {
     public string Day { get; init; } = "";          // original day, yyyyMMdd
     public string Pid { get; init; } = "";
+    /// <summary>Which run of the panel — see JobFile.RunId. Part of the key, because a panel
+    /// tested twice in a day has the same file names in both runs.</summary>
+    public string RunId { get; init; } = "";
     public string FileName { get; init; } = "";
     public string LocalPath { get; init; } = "";
     public string RemotePath { get; init; } = "";
@@ -267,11 +300,11 @@ public sealed class NgItem
     public string LastResult { get; set; } = "";
 
     public int TotalRetries => PriorRetries + SessionRetries;
-    public string Key => Day + "|" + Pid + "|" + FileName;
+    public string Key => Day + "|" + Pid + "|" + RunId + "|" + FileName;
 
     /// <summary>Adapter so the FtpTransfer primitive (which takes a JobFile) can upload this.</summary>
     public JobFile ToJobFile() => new()
     {
-        Pid = Pid, FileName = FileName, LocalPath = LocalPath, RemotePath = RemotePath
+        Pid = Pid, RunId = RunId, FileName = FileName, LocalPath = LocalPath, RemotePath = RemotePath
     };
 }

@@ -102,7 +102,13 @@ public sealed class RawLog(Config cfg)
             // deleted, so no retry can ever help — a transfer failure looks identical in the status
             // column without it, and an operator cannot tell "the server refused" from "the file
             // is not there any more".
-            reason);
+            reason,
+            // 12th: which RUN of the panel this row belongs to. APPENDED, because LogRow.Fields is
+            // positional (0=pid, 1=file, 2=status) and every reader guards on Length — so rows
+            // written before runs existed still parse, exactly like the 10/11-field rows before
+            // them. Without it two runs of one panel are indistinguishable in the raw log, and the
+            // restart history below cannot tell their files apart.
+            f.RunId);
 
         SafeFile.Append(cfg.RawLogPath(day ?? Clock.Now), line);
     }
@@ -125,7 +131,7 @@ public sealed class RawLog(Config cfg)
             var p = LogRow.Fields(line);
             if (p.Length < 8) continue;
 
-            var rec = new JobFile { Pid = p[0], FileName = p[1] };
+            var rec = new JobFile { Pid = p[0], FileName = p[1], RunId = p.Length > 11 ? p[11] : "" };
             rec.Status = p[2] switch
             {
                 "SUCCEEDED" => FileStatus.Succeeded,
@@ -195,7 +201,8 @@ public sealed class NgRetryLog(Config cfg)
             "0",                       // 0 = unlimited retries
             host,
             "NGRETRY",
-            "");                       // reason - kept so the columns line up with the rawlog
+            "",                        // reason - kept so the columns line up with the rawlog
+            item.RunId);               // 12th: the run, matching the rawlog's trailing field
 
         SafeFile.Append(cfg.NgRetryLogPath(item.Day), line);
     }
@@ -205,7 +212,7 @@ public sealed class NgRetryLog(Config cfg)
     /// NG report shows them (index first, then host — host last). This goes ONLY to the ng-retry log,
     /// never the main rawlog, so the main rawlog stays a record of the live pump.
     /// </summary>
-    public void WriteManifestSent(string pid, string day, string uploadIndexPath, string uploadHostPath,
+    public void WriteManifestSent(string pid, string runId, string day, string uploadIndexPath, string uploadHostPath,
                                   int retries, string host)
     {
         var now = Clock.Now.ToString("HH:mm:ss");
@@ -218,7 +225,7 @@ public sealed class NgRetryLog(Config cfg)
                                                         // the same moment on different dates - the timeline then
                                                         // sorted rollover rows after the retries that followed them.
                 pid, Path.GetFileName(remote), "SUCCEEDED", now,
-                retries.ToString(), now, retries.ToString(), "0", host, "NGRETRY", "");
+                retries.ToString(), now, retries.ToString(), "0", host, "NGRETRY", "", runId);
             SafeFile.Append(cfg.NgRetryLogPath(day), line);
         }
     }
@@ -234,7 +241,9 @@ public sealed class NgRetryLog(Config cfg)
         {
             var p = LogRow.Fields(line);
             if (p.Length < 3) continue;
-            var key = p[0] + "|" + p[1];
+            // Same shape as the engine's FileKey and the rawlog: panel + run + file. Rows written
+            // before runs existed carry no 12th field and key with an empty run, as they did.
+            var key = p[0] + "|" + (p.Length > 11 ? p[11] : "") + "|" + p[1];
             var retries = p.Length > 6 && int.TryParse(p[6], out var r) ? r : 0;
             var succeeded = p[2] == "SUCCEEDED";
             var prev = result.TryGetValue(key, out var e) ? e : (0, false);

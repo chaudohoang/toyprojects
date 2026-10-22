@@ -129,7 +129,7 @@ internal sealed class NgBacklog
             {
                 var p = LogRow.Fields(line);   // field 0 = PID, whichever row shape
                 if (p.Length < 3) continue;
-                final[p[0] + "|" + p[1]] = p[2];
+                final[p[0] + "|" + (p.Length > 11 ? p[11] : "") + "|" + p[1]] = p[2];
             }
         }
         catch { return 0; }
@@ -142,7 +142,8 @@ internal sealed class NgBacklog
                 foreach (var line in File.ReadLines(ngPath))
                 {
                     var p = LogRow.Fields(line);   // field 0 = PID, whichever row shape
-                    if (p.Length >= 3 && p[2] == "SUCCEEDED") recovered.Add(p[0] + "|" + p[1]);
+                    if (p.Length >= 3 && p[2] == "SUCCEEDED")
+                        recovered.Add(p[0] + "|" + (p.Length > 11 ? p[11] : "") + "|" + p[1]);
                 }
             }
             catch { /* a missing or half-written ng log just means nothing recovered yet */ }

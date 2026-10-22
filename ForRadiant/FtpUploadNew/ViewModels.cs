@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 // WinForms is referenced for the tray icon, so System.Drawing types collide with WPF's.
@@ -365,10 +365,13 @@ public sealed class NgGroupVm : Notify
     /// day (today + the recovery window), so cards are keyed by day+PID — the same panel re-tested
     /// on two days must not collapse into one card.</summary>
     public string Day { get; }
-    public string GroupKey => Day + "|" + Pid;
+    /// <summary>Which run of the panel this card is for — a panel re-tested on the SAME day is
+    /// two separate runs and must not collapse into one card either.</summary>
+    public string RunId { get; }
+    public string GroupKey => Day + "|" + Pid + "|" + RunId;
     public ObservableCollection<NgItemVm> Items { get; } = new();
 
-    public NgGroupVm(string day, string pid) { Day = day; Pid = pid; }
+    public NgGroupVm(string day, string pid, string runId = "") { Day = day; Pid = pid; RunId = runId; }
 
     private bool _isExpanded = true;
     public bool IsExpanded

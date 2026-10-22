@@ -33,7 +33,11 @@ public static class SummaryLog
             foreach (var line in SafeFile.ReadLines(path))
             {
                 var p = LogRow.Fields(line);   // field 0 = PID, whichever row shape
-                if (p.Length >= 3 && p[2] == "SUCCEEDED") landed.Add(p[0] + "|" + p[1]);
+                // Keyed by panel + RUN + file. A panel tested twice in a day uploads the same
+                // 13 file NAMES to two different destinations; without the run in the key the two
+                // runs collapse and the second one is reported using the first one's results.
+                if (p.Length >= 3 && p[2] == "SUCCEEDED")
+                    landed.Add(p[0] + "|" + (p.Length > 11 ? p[11] : "") + "|" + p[1]);
 
                 // Most recent activity per panel, for the "Last activity" column. Prefer the row's
                 // own write-time (field 0 on newer rows). Older 10/11-field rows carry no date, so
@@ -52,13 +56,17 @@ public static class SummaryLog
                 // shape ("20260910-000555") that Excel must not read as a number.
                 ? stamp[..10].Replace("-", "") + "-" + stamp.Substring(11, 8).Replace(":", "")
                         : day + "-" + ((p.Length > 3 && p[3].Length == 8) ? p[3].Replace(":", "") : "000000");
-                    if (!lastSeen.TryGetValue(p[0], out var prev) || string.CompareOrdinal(v, prev) > 0)
-                        lastSeen[p[0]] = v;
+                    var seenKey = p[0] + "|" + (p.Length > 11 ? p[11] : "");
+                    if (!lastSeen.TryGetValue(seenKey, out var prev) || string.CompareOrdinal(v, prev) > 0)
+                        lastSeen[seenKey] = v;
                 }
             }
 
-        // Panels and the files each one actually has, in first-seen order.
+        // One entry per panel RUN, in first-seen order. The key is "PID|RunId" throughout; `pidOf`
+        // and `runOf` map it back for display, and `runsOfPid` gives "run 2 of 3".
         var order = new List<string>();
+        var pidOf = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var runOf = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         var files = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
         var idxName = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         var hostName = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -68,20 +76,22 @@ public static class SummaryLog
         {
             var jl = JobsLine.Parse(line);
             if (jl is null || jl.Pid.Length == 0) continue;
-            if (!files.TryGetValue(jl.Pid, out var set))
+            var key = jl.Pid + "|" + jl.RunId;
+            if (!files.TryGetValue(key, out var set))
             {
                 set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                files[jl.Pid] = set; order.Add(jl.Pid);
+                files[key] = set; order.Add(key);
+                pidOf[key] = jl.Pid; runOf[key] = jl.RunId;
             }
             // Keep the panel's local index path: the ".idxpartial"/".hostpartial" markers sit
             // beside it, and they are what distinguishes "an early, short manifest is on the
             // server" from "nothing is".
-            if (jl.IndexSrc.Length > 0) idxSrc[jl.Pid] = jl.IndexSrc;
+            if (jl.IndexSrc.Length > 0) idxSrc[key] = jl.IndexSrc;
             if (jl.IsManifest)
             {
                 // The index is "<PID>.idx"; the host manifest is "<PID>_<stamp>.txt".
-                if (jl.FileName.EndsWith(".idx", StringComparison.OrdinalIgnoreCase)) idxName[jl.Pid] = jl.FileName;
-                else hostName[jl.Pid] = jl.FileName;
+                if (jl.FileName.EndsWith(".idx", StringComparison.OrdinalIgnoreCase)) idxName[key] = jl.FileName;
+                else hostName[key] = jl.FileName;
             }
             else set.Add(jl.FileName);
         }
@@ -109,9 +119,10 @@ public static class SummaryLog
             }
 
             var added = 0;
-            foreach (var pid in order)
-                foreach (var f in files[pid].OrderBy(x => x, StringComparer.OrdinalIgnoreCase))
+            foreach (var key in order)
+                foreach (var f in files[key].OrderBy(x => x, StringComparer.OrdinalIgnoreCase))
                 {
+                    var pid = pidOf[key];
                     if (!MatchesPattern(f, entry, pid)) continue;
                     // Put @PID@ back so the header is panel-independent.
                     //
@@ -133,16 +144,28 @@ public static class SummaryLog
         var panelsOk = 0;
 
         var head = new StringBuilder();
-        head.Append("PID,Last activity,LGD Result");
+        // Run identifies WHICH test of this panel the row describes, so two runs of one PID no
+        // longer overwrite each other. "Run start" is the .panel stamp — the same value that names
+        // the host manifest and appears in every remote path, so one grep joins this row to the
+        // operation log and the raw log. Hyphenated for the same reason as Last activity: Excel
+        // renders 14 bare digits as 2.02609E+13.
+        head.Append("PID,Run,Run start,Last activity,LGD Result");
         foreach (var s in slots) head.Append(',').Append(Csv(s));
         // Manifests last, so the recipe columns stay contiguous and line up with LGD's own sheet.
         // Short headers: the column is narrow and "Index manifest" only ever forced it wider.
         head.Append(",Index,Host");
         head.AppendLine();
 
-        foreach (var pid in order)
+        // How many runs each panel had, so a row can say "1 of 2" and a reader can filter the
+        // sheet for anything that is not "1 of 1" to find every retested panel.
+        var runTotal = order.GroupBy(k => pidOf[k]).ToDictionary(g => g.Key, g => g.Count(),
+                                                                 StringComparer.OrdinalIgnoreCase);
+        var runSeen = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var key in order)
         {
-            var have = files[pid];
+            var pid = pidOf[key];
+            var have = files[key];
             var cells = new List<string>(slots.Count);
             var allOk = true;
 
@@ -166,7 +189,7 @@ public static class SummaryLog
                 }
 
                 if (match is null) { cells.Add("-"); continue; }   // panel has no such file
-                var ok = landed.Contains(pid + "|" + match);
+                var ok = landed.Contains(key + "|" + match);
                 cells.Add(foreign ? (ok ? "F" : "X") : (ok ? "O" : "X"));
                 if (!ok || foreign) allOk = false;
             }
@@ -174,14 +197,20 @@ public static class SummaryLog
             // A panel is only good if its manifests landed too — without them the server has the
             // data but nothing telling it the panel is complete. Shown as their own columns so a
             // panel that is "all data O but X on the host manifest" is visible at a glance.
-            idxSrc.TryGetValue(pid, out var panelIdxSrc);
-            var idxCell = Cell(pid, idxName, landed, ref allOk, panelIdxSrc, isIndex: true);
-            var hostCell = Cell(pid, hostName, landed, ref allOk, panelIdxSrc, isIndex: false);
+            idxSrc.TryGetValue(key, out var panelIdxSrc);
+            var idxCell = Cell(key, idxName, landed, ref allOk, panelIdxSrc, isIndex: true);
+            var hostCell = Cell(key, hostName, landed, ref allOk, panelIdxSrc, isIndex: false);
 
             if (allOk) panelsOk++;
 
-            lastSeen.TryGetValue(pid, out var seenAt);
-            body.Append(Csv(pid)).Append(',').Append(seenAt ?? "").Append(',').Append(allOk ? "O" : "X");
+            runSeen[pid] = runSeen.TryGetValue(pid, out var nth) ? nth + 1 : 1;
+            var runLabel = runSeen[pid] + " of " + runTotal[pid];
+            var runStamp = runOf[key];
+            var runStart = runStamp.Length == 14 ? runStamp[..8] + "-" + runStamp[8..] : runStamp;
+
+            lastSeen.TryGetValue(key, out var seenAt);
+            body.Append(Csv(pid)).Append(',').Append(runLabel).Append(',').Append(runStart)
+                .Append(',').Append(seenAt ?? "").Append(',').Append(allOk ? "O" : "X");
             foreach (var c in cells) body.Append(',').Append(c);
             body.Append(',').Append(idxCell).Append(',').Append(hostCell);
             body.AppendLine();
@@ -194,7 +223,9 @@ public static class SummaryLog
         sb.Append("Upload succeed rate,")
           .Append(panelPct.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture))
           .Append("%,Succeeded,").Append(panelsOk)
-          .Append(",Total panels,").Append(order.Count)
+          // Runs, not panels: a retested panel is two units of work and one of them can fail on its
+          // own. Counting panels let a failed retest hide behind its successful first run.
+          .Append(",Total runs,").Append(order.Count)
           .AppendLine();
         sb.Append(head);
         sb.Append(body);
@@ -221,12 +252,12 @@ public static class SummaryLog
     /// mid-fail deliberately writes no rawlog row. Those files live on the machine that uploaded, so
     /// P only appears when the summary is built there — reading a copied log set elsewhere shows X.
     /// </summary>
-    private static string Cell(string pid, Dictionary<string, string> names,
+    private static string Cell(string runKey, Dictionary<string, string> names,
                                HashSet<string> landed, ref bool allOk,
                                string? indexSrc = null, bool isIndex = false)
     {
-        if (!names.TryGetValue(pid, out var name) || name.Length == 0) return "-";
-        var ok = landed.Contains(pid + "|" + name);
+        if (!names.TryGetValue(runKey, out var name) || name.Length == 0) return "-";
+        var ok = landed.Contains(runKey + "|" + name);
         if (ok) return "O";
         allOk = false;
 

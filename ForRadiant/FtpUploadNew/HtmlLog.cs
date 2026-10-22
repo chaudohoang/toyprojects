@@ -26,6 +26,11 @@ public static class HtmlLog
     private sealed class FileEntry
     {
         public string Pid = "", File = "";
+        /// <summary>Which run of the panel this row belongs to. Two runs of one panel are two
+        /// separate units of work — same file NAMES, different folder, different destination —
+        /// so they must not share a row, or the later run's status silently overwrites the
+        /// earlier one's.</summary>
+        public string Run = "";
         public readonly List<(bool Ok, string Ip, string Time)> Events = new();
         public string Status = "", Succeed = "", FailTimes = "";
         public int Attempts;
@@ -63,10 +68,14 @@ public static class HtmlLog
                 if (string.IsNullOrWhiteSpace(line)) continue;
                 var p = LogRow.Fields(line);   // field 0 = PID, whichever row shape
                 if (p.Length < 2) continue;
-                var key = p[0] + "|" + p[1];
+                // A JOBS line has no leading timestamp, so Fields() returns the raw split and the
+                // run is the 11th field (p[10]). On a RAWLOG line the stamp IS stripped, putting
+                // the run at p[11]. Mixing the two indices silently splits or merges runs.
+                var jobRun = p.Length > 10 ? p[10] : "";
+                var key = p[0] + "|" + jobRun + "|" + p[1];
                 if (!byKey.ContainsKey(key))
                 {
-                    byKey[key] = new FileEntry { Pid = p[0], File = p[1], MaxRetries = maxRetriesCfg };
+                    byKey[key] = new FileEntry { Pid = p[0], Run = jobRun, File = p[1], MaxRetries = maxRetriesCfg };
                     order.Add(key);
                 }
             }
@@ -78,10 +87,11 @@ public static class HtmlLog
                 if (string.IsNullOrWhiteSpace(line)) continue;
                 var p = LogRow.Fields(line);   // field 0 = PID, whichever row shape
                 if (p.Length < 8) continue;
-                var key = p[0] + "|" + p[1];
+                var rawRun = p.Length > 11 ? p[11] : "";   // stamp stripped -> run is p[11] here
+                var key = p[0] + "|" + rawRun + "|" + p[1];
                 if (!byKey.TryGetValue(key, out var e))
                 {
-                    e = new FileEntry { Pid = p[0], File = p[1] };
+                    e = new FileEntry { Pid = p[0], Run = rawRun, File = p[1] };
                     byKey[key] = e;
                     order.Add(key);
                 }
@@ -122,21 +132,40 @@ public static class HtmlLog
             }
         }
 
-        // Group into panels (PID)
+        // Group into panel RUNS (PID + run), not PID.
+        //
+        // A panel tested twice in a day produces the same file NAMES twice, from a different
+        // folder to a different destination. Grouping on the PID alone put both runs' files in
+        // one card, where the later run's status silently replaced the earlier one's - so a
+        // failed run could be masked by a successful retest. Runs of the same panel stay
+        // adjacent (first-seen order) and the card names which run it is.
         var panelOrder = new List<string>();
         var panels = new Dictionary<string, List<string>>();
         foreach (var k in order)
         {
-            var pid = byKey[k].Pid;
-            if (!panels.TryGetValue(pid, out var l)) { l = new List<string>(); panels[pid] = l; panelOrder.Add(pid); }
+            var rk = byKey[k].Pid + "|" + byKey[k].Run;
+            if (!panels.TryGetValue(rk, out var l)) { l = new List<string>(); panels[rk] = l; panelOrder.Add(rk); }
             l.Add(k);
         }
+        // "run 2 of 2" needs the panel's total, so count runs per PID first.
+        var runsPerPid = panelOrder.GroupBy(k => k.Split('|')[0])
+                                   .ToDictionary(g => g.Key, g => g.Count());
+        var runNth = new Dictionary<string, int>();
 
         var cards = new StringBuilder();
         var panelsComplete = 0;
-        foreach (var pid in panelOrder)
+        foreach (var runKey in panelOrder)
         {
-            var files = panels[pid].Select(k => byKey[k]).ToList();
+            var pid = runKey.Split('|')[0];
+            var runId = runKey[(pid.Length + 1)..];
+            runNth[pid] = runNth.TryGetValue(pid, out var nth) ? nth + 1 : 1;
+            // Only label when the panel actually ran more than once, so an ordinary single-run
+            // card is unchanged and a retest stands out.
+            var runLabel = runsPerPid[pid] > 1
+                ? $" &middot; run {runNth[pid]} of {runsPerPid[pid]}" +
+                  (runId.Length == 14 ? $" &middot; {runId[8..10]}:{runId[10..12]}:{runId[12..14]}" : "")
+                : "";
+            var files = panels[runKey].Select(k => byKey[k]).ToList();
             int total = files.Count;
             int nSucc = files.Count(f => f.Status == "SUCCEEDED");
             int nFail = files.Count(f => f.Status == "FAILED");
@@ -167,7 +196,7 @@ public static class HtmlLog
             cards.Append($@"
 <div class='panel' data-statuses='{stAttr}'>
   <div class='phead'>
-    <span class='ppid'>{Enc(pid)}</span>
+    <span class='ppid'>{Enc(pid)}{runLabel}</span>
     <span class='ptally'>{nSucc}/{total} succeeded &middot; {nFail + nTO} failed</span>
     <span class='b {ovCls} pov'>{ovText}</span>
   </div>
@@ -456,7 +485,7 @@ public static class HtmlLog
             {
                 var p = LogRow.Fields(line);   // field 0 = PID, whichever row shape
                 if (p.Length < 3) continue;
-                orig[p[0] + "|" + p[1]] = p[2];
+                orig[p[0] + "|" + (p.Length > 11 ? p[11] : "") + "|" + p[1]] = p[2];
             }
 
         var order = new List<string>();
@@ -466,10 +495,11 @@ public static class HtmlLog
             if (string.IsNullOrWhiteSpace(line)) continue;
             var p = LogRow.Fields(line);   // field 0 = PID, whichever row shape
             if (p.Length < 3) continue;
-            var key = p[0] + "|" + p[1];
+            var ngRun = p.Length > 11 ? p[11] : "";
+            var key = p[0] + "|" + ngRun + "|" + p[1];
             if (!byKey.TryGetValue(key, out var e))
             {
-                e = new FileEntry { Pid = p[0], File = p[1] };
+                e = new FileEntry { Pid = p[0], Run = ngRun, File = p[1] };
                 byKey[key] = e; order.Add(key);
             }
             var okv = p[2] == "SUCCEEDED";
@@ -490,7 +520,8 @@ public static class HtmlLog
         foreach (var line in SafeReadLines(cfg.RawLogPathForDay(day)))
         {
             var p = LogRow.Fields(line);   // field 0 = PID, whichever row shape
-            if (p.Length >= 3 && p[2] == "SUCCEEDED") sentInRawLog.Add(p[0] + "|" + p[1]);
+            if (p.Length >= 3 && p[2] == "SUCCEEDED")
+                sentInRawLog.Add(p[0] + "|" + (p.Length > 11 ? p[11] : "") + "|" + p[1]);
         }
 
         var manifestNames = new Dictionary<string, List<string>>();
@@ -498,19 +529,22 @@ public static class HtmlLog
         {
             var jl = JobsLine.Parse(line);
             if (jl is null || !jl.IsManifest) continue;
-            if (!manifestNames.TryGetValue(jl.Pid, out var l)) { l = new(); manifestNames[jl.Pid] = l; }
+            // Keyed by panel RUN: each run has its own host manifest, and a retest's manifests
+            // would otherwise be hidden behind the first run's.
+            var mk = jl.Pid + "|" + jl.RunId;
+            if (!manifestNames.TryGetValue(mk, out var l)) { l = new(); manifestNames[mk] = l; }
             l.Add(jl.FileName);
         }
-        var pidsInReport = order.Select(k => byKey[k].Pid).ToHashSet();
-        foreach (var pid in pidsInReport)
+        var runsInReport = order.Select(k => (byKey[k].Pid, byKey[k].Run)).ToHashSet();
+        foreach (var (pid, run) in runsInReport)
         {
-            if (!manifestNames.TryGetValue(pid, out var names)) continue;
+            if (!manifestNames.TryGetValue(pid + "|" + run, out var names)) continue;
             foreach (var name in names)
             {
-                var key = pid + "|" + name;
+                var key = pid + "|" + run + "|" + name;
                 if (byKey.ContainsKey(key)) continue;     // already in the ng-retry log
                 if (sentInRawLog.Contains(key)) continue; // sent by the live pump — not pending
-                byKey[key] = new FileEntry { Pid = pid, File = name, PendingManifest = true };
+                byKey[key] = new FileEntry { Pid = pid, Run = run, File = name, PendingManifest = true };
                 order.Add(key);
             }
         }
@@ -532,22 +566,33 @@ public static class HtmlLog
         // under a total of 155 — the parts didn't add up to the whole.
         int tot = recovered + failing + pendingMan;
 
-        // Group NG items into panel cards by PID (preserve first-seen order), like the day log.
+        // Group NG items into panel cards by PID + RUN (preserve first-seen order), like the day
+        // log — a panel tested twice is two units of work with their own files and manifests.
         var panelOrder = new List<string>();
         var panels = new Dictionary<string, List<string>>();
         foreach (var k in order)
         {
-            var pid = byKey[k].Pid;
-            if (!panels.TryGetValue(pid, out var l)) { l = new List<string>(); panels[pid] = l; panelOrder.Add(pid); }
+            var rk = byKey[k].Pid + "|" + byKey[k].Run;
+            if (!panels.TryGetValue(rk, out var l)) { l = new List<string>(); panels[rk] = l; panelOrder.Add(rk); }
             l.Add(k);
         }
+        var runsPerPid = panelOrder.GroupBy(k => k.Split('|')[0])
+                                   .ToDictionary(g => g.Key, g => g.Count());
+        var runNth = new Dictionary<string, int>();
 
         var cards = new StringBuilder();
         var panelsComplete = 0;
-        foreach (var pid in panelOrder)
+        foreach (var runKey in panelOrder)
         {
+            var pid = runKey.Split('|')[0];
+            var runId = runKey[(pid.Length + 1)..];
+            runNth[pid] = runNth.TryGetValue(pid, out var nth) ? nth + 1 : 1;
+            var runLabel = runsPerPid[pid] > 1
+                ? $" &middot; run {runNth[pid]} of {runsPerPid[pid]}" +
+                  (runId.Length == 14 ? $" &middot; {runId[8..10]}:{runId[10..12]}:{runId[12..14]}" : "")
+                : "";
             // Order rows like the main rawlog / jobs file: data files first, then index, then host.
-            var keys = panels[pid]
+            var keys = panels[runKey]
                 .Select((k, i) => (k, i))
                 .OrderBy(x => NgManifestRank(byKey[x.k].File, pid))
                 .ThenBy(x => x.i)
@@ -578,7 +623,7 @@ public static class HtmlLog
             cards.Append($@"
 <div class='panel' data-states='{stAttr}'>
   <div class='phead'>
-    <span class='ppid'>{Enc(pid)}</span>
+    <span class='ppid'>{Enc(pid)}{runLabel}</span>
     <span class='ptally'>{tally}</span>
     <span class='b {ovCls} pov'>{ovText}</span>
   </div>

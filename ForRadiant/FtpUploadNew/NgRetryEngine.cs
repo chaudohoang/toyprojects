@@ -31,8 +31,8 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
     /// </summary>
     private readonly HashSet<string> _recovered = new(StringComparer.OrdinalIgnoreCase);
 
-    /// <summary>Normalise any key to "PID|FileName" — NgItem keys carry a leading day.</summary>
-    private static string FileKey(string pid, string fileName) => pid + "|" + fileName;
+    /// <summary>Normalise any key to "PID|RunId|FileName" — NgItem keys carry a leading day.</summary>
+    private static string FileKey(string pid, string runId, string fileName) => pid + "|" + runId + "|" + fileName;
 
     /// <summary>Snapshot of the recovered keys, for the UI. Cheap: in-memory, no file reads.</summary>
     public HashSet<string> RecoveredKeys
@@ -275,7 +275,7 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
             var remote = jl.RemotePath.Length > 0
                 ? jl.RemotePath
                 : $"{cfg.RemoteBaseFolder.TrimEnd('/')}/{jl.Pid}/{jl.FileName}";
-            paths[jl.Pid + "|" + jl.FileName] = (jl.LocalPath, remote, jl.IndexSrc, jl.HostSrc, jl.UploadIndexPath, jl.UploadHostPath, jl.IsManifest);
+            paths[jl.Pid + "|" + jl.RunId + "|" + jl.FileName] = (jl.LocalPath, remote, jl.IndexSrc, jl.HostSrc, jl.UploadIndexPath, jl.UploadHostPath, jl.IsManifest);
         }
 
         var status = new Dictionary<string, string>();     // last line per file wins
@@ -288,7 +288,9 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
         {
             var p = LogRow.Fields(line);   // field 0 = PID, whichever row shape
             if (p.Length < 3) continue;
-            var key = p[0] + "|" + p[1];
+            // 12th field is the run (appended; absent on pre-run rows, which key as "" and behave
+            // exactly as they did before).
+            var key = p[0] + "|" + (p.Length > 11 ? p[11] : "") + "|" + p[1];
             status[key] = p[2];
             if (p.Length >= 11 && p[10].Trim() == "SOURCE_GONE") gone.Add(key);
             else gone.Remove(key);       // a later row supersedes: the file came back
@@ -297,15 +299,15 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
         var prior = ngLog.ReadState(day);
 
         // Seed the recovered set for the UI: anything the ng-retry state already marks as fixed.
-        // State keys are "PID|FileName" like the rawlog, so they need no normalising — but strip a
-        // leading day if one ever appears, so this set only ever holds one key shape.
+        // State keys are "PID|RunId|FileName" like the rawlog, so they need no normalising — but
+        // strip a leading day if one ever appears, so this set only ever holds one key shape.
         lock (_gate)
             foreach (var kv2 in prior)
                 if (kv2.Value.Item2)
                 {
                     var k = kv2.Key;
                     var parts = k.Split('|');
-                    _recovered.Add(parts.Length >= 3 ? FileKey(parts[1], parts[^1]) : k);
+                    _recovered.Add(parts.Length >= 4 ? FileKey(parts[1], parts[2], parts[^1]) : k);
                 }
 
         var items = new List<NgItem>();
@@ -335,7 +337,8 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
             {
                 Day = day,
                 Pid = parts[0],
-                FileName = parts[1],
+                RunId = parts.Length >= 3 ? parts[1] : "",
+                FileName = parts[^1],
                 LocalPath = pp.local ?? "",
                 RemotePath = pp.remote ?? "",
                 IndexSrc = pp.indexSrc ?? "",
@@ -371,7 +374,7 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
             var pp = kv.Value;
             items.Add(new NgItem
             {
-                Day = day, Pid = pid, FileName = parts[1],
+                Day = day, Pid = pid, RunId = parts.Length >= 3 ? parts[1] : "", FileName = parts[^1],
                 LocalPath = pp.local ?? "", RemotePath = pp.remote ?? "",
                 IndexSrc = pp.indexSrc ?? "", HostSrc = pp.hostSrc ?? "",
                 UploadIndexPath = pp.upIdx ?? "", UploadHostPath = pp.upHost ?? "",
@@ -500,10 +503,10 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
     /// ng-retry log and read as "data uploaded, no host manifest" to anything reading the rawlog.
     /// </summary>
     private void WriteManifestToRawLog(NgItem item, string host)
-        => WriteManifestToRawLog(item.Pid, item.Day, item.UploadIndexPath, item.UploadHostPath,
+        => WriteManifestToRawLog(item.Pid, item.RunId, item.Day, item.UploadIndexPath, item.UploadHostPath,
                                  item.TotalRetries + 1, host);
 
-    private void WriteManifestToRawLog(string pid, string dayStr, string upIdx, string upHost, int attempts, string host)
+    private void WriteManifestToRawLog(string pid, string runId, string dayStr, string upIdx, string upHost, int attempts, string host)
     {
         try
         {
@@ -518,13 +521,13 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
                 var name = System.IO.Path.GetFileName(remote);
                 var jf = new JobFile
                 {
-                    Pid = pid, FileName = name, RemotePath = remote,
+                    Pid = pid, RunId = runId, FileName = name, RemotePath = remote,
                     Status = FileStatus.Succeeded,
                     Attempts = attempts,
                     SucceedTime = DateTime.Now.ToString("HH:mm:ss")
                 };
                 rawLog.Write(jf, cfg.MaxAttempts, host, null, day);
-                lock (_gate) _recovered.Add(FileKey(pid, name));   // so the UI strip agrees with the log
+                lock (_gate) _recovered.Add(FileKey(pid, runId, name));   // so the UI strip agrees with the log
             }
         }
         catch { /* the ng-retry log already holds the authoritative record */ }
@@ -725,7 +728,8 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
                 foreach (var line in SafeFile.ReadLines(path))
                 {
                     var p = LogRow.Fields(line);   // field 0 = PID, whichever row shape
-                    if (p.Length >= 3 && p[2] == "SUCCEEDED") sent.Add(p[0] + "|" + p[1]);
+                    if (p.Length >= 3 && p[2] == "SUCCEEDED")
+                        sent.Add(p[0] + "|" + (p.Length > 11 ? p[11] : "") + "|" + p[1]);
                 }
 
             // Panel manifest paths come from that day's jobs file.
@@ -734,7 +738,9 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
             {
                 var jl = JobsLine.Parse(line);
                 if (jl is null || jl.IndexSrc.Length == 0) continue;
-                panels.TryAdd(jl.Pid, jl);
+                // Keyed by panel+run: TryAdd on the PID alone dropped a retest's manifests,
+                // so a re-tested panel could never be finalized.
+                panels.TryAdd(jl.Pid + "|" + jl.RunId, jl);
             }
 
             foreach (var kv in panels)
@@ -744,7 +750,8 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
                 var idxName = Path.GetFileName(jl.UploadIndexPath);
                 var hostName = Path.GetFileName(jl.UploadHostPath);
                 if (idxName.Length == 0 || hostName.Length == 0) continue;
-                if (sent.Contains(jl.Pid + "|" + idxName) && sent.Contains(jl.Pid + "|" + hostName)) continue;
+                if (sent.Contains(jl.Pid + "|" + jl.RunId + "|" + idxName) &&
+                    sent.Contains(jl.Pid + "|" + jl.RunId + "|" + hostName)) continue;
 
                 // Only finalize a panel whose data is genuinely complete.
                 if (!File.Exists(jl.IndexSrc)) continue;
@@ -766,18 +773,18 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
                                     jl.UploadIndexPath, jl.UploadHostPath, _ftp, host);
                     if (fin.Ok && fin.Uploaded)
                     {
-                        ngLog.WriteManifestSent(jl.Pid, day, jl.UploadIndexPath, jl.UploadHostPath, 0, fin.Host);
-                        WriteManifestToRawLog(jl.Pid, day, jl.UploadIndexPath, jl.UploadHostPath, 1, fin.Host);
+                        ngLog.WriteManifestSent(jl.Pid, jl.RunId, day, jl.UploadIndexPath, jl.UploadHostPath, 0, fin.Host);
+                        WriteManifestToRawLog(jl.Pid, jl.RunId, day, jl.UploadIndexPath, jl.UploadHostPath, 1, fin.Host);
                         Log($"   panel {jl.Pid} ({day}): manifests finished by sweep - panel complete");
                         foreach (var line in fin.SentLines(System.IO.Path.GetFileName(jl.UploadIndexPath)))
-                            OpLog($"FINALIZE {jl.Pid}: {line}");
+                            OpLog($"FINALIZE {jl.Pid}#{jl.RunId}: {line}");
                         NotifyChanged();
                     }
                     // A PARTIAL send still put a file on the server. Log it, or the host manifest it
                     // uploaded carries a stamped name that appears in no log line at all.
                     else if (fin.Uploaded)
                         foreach (var line in fin.SentLines(System.IO.Path.GetFileName(jl.UploadIndexPath)))
-                            OpLog($"FINALIZE {jl.Pid}: {line}");
+                            OpLog($"FINALIZE {jl.Pid}#{jl.RunId}: {line}");
                 }
                 catch (Exception ex) { Log($"   panel {jl.Pid}: finalize sweep error: {ex.Message}"); }
             }
@@ -805,7 +812,7 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
             item.LastResult = "OK";
             ngLog.Write(item, true, host);
             WriteRecoveryToRawLog(item, host);
-            lock (_gate) _recovered.Add(FileKey(item.Pid, item.FileName));
+            lock (_gate) _recovered.Add(FileKey(item.Pid, item.RunId, item.FileName));
             // A manifest recovered as its OWN NG item never went through TryFinalizeAsync, so it had
             // no per-file marker written. Without one, the next finalize believes it is still missing
             // and re-sends it — which then records a FAILED row for a file already on the server.
@@ -834,7 +841,7 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
                         {
                             // Record the index + host send in the NG log (index first, host last) so
                             // the NG report shows the manifests too.
-                            ngLog.WriteManifestSent(item.Pid, item.Day, item.UploadIndexPath,
+                            ngLog.WriteManifestSent(item.Pid, item.RunId, item.Day, item.UploadIndexPath,
                                                     item.UploadHostPath, item.TotalRetries, fin.Host);
                             // ...and in the day's MAIN rawlog, so it is self-contained. Without this
                             // the rawlog shows a completed panel's manifests as never sent, which is
@@ -846,13 +853,13 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
                             // other two had it and this one did not, which left 6 of 60 panels
                             // with an unexplained file in the verdict.
                             foreach (var line in fin.SentLines(System.IO.Path.GetFileName(item.UploadIndexPath)))
-                                OpLog($"FINALIZE {item.Pid}: {line}");
+                                OpLog($"FINALIZE {item.Pid}#{item.RunId}: {line}");
                         }
                         // A PARTIAL send still put a file on the server - log it, or the host manifest it
                         // uploaded carries a stamped name that appears in no log line at all.
                         else if (fin.Uploaded)
                             foreach (var line in fin.SentLines(System.IO.Path.GetFileName(item.UploadIndexPath)))
-                                OpLog($"FINALIZE {item.Pid}: {line}");
+                                OpLog($"FINALIZE {item.Pid}#{item.RunId}: {line}");
                     }
                     catch (Exception ex) { Log($"   panel {item.Pid}: finalize error: {ex.Message}"); }
                 }
@@ -880,21 +887,21 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
                                 item.UploadIndexPath, item.UploadHostPath, _ftp, host);
                         if (fin2.Ok && fin2.Uploaded)
                         {
-                            ngLog.WriteManifestSent(item.Pid, item.Day, item.UploadIndexPath,
+                            ngLog.WriteManifestSent(item.Pid, item.RunId, item.Day, item.UploadIndexPath,
                                                     item.UploadHostPath, item.TotalRetries, fin2.Host);
                             WriteManifestToRawLog(item, fin2.Host);
                             // The FOURTH finalize site, and the only one that logged nothing to the
                             // panel-events file. With stamped names that made its file untraceable:
                             // 87 of 1128 host files on the server had no log line naming them, and
                             // the Trace Panel flagged each as unexplained. Same line as the others.
-                            OpLog($"FINALIZE {item.Pid}: {fin2.SentDescription} -> {fin2.Host}" +
+                            OpLog($"FINALIZE {item.Pid}#{item.RunId}: {fin2.SentDescription} -> {fin2.Host}" +
                                   (fin2.HostName.Length > 0 ? $" as {fin2.HostName}" : ""));
                             Log($"   panel {item.Pid}: index + host manifest sent — panel complete");
                         }
                         // A PARTIAL send still put a file on the server - log it, or the host manifest it
                         // uploaded carries a stamped name that appears in no log line at all.
                         else if (fin2.Uploaded)
-                            OpLog($"FINALIZE {item.Pid}: {fin2.SentDescription} -> {fin2.Host}" +
+                            OpLog($"FINALIZE {item.Pid}#{item.RunId}: {fin2.SentDescription} -> {fin2.Host}" +
                                   (fin2.HostName.Length > 0 ? $" as {fin2.HostName}" : ""));
                     }
                     catch (Exception ex) { Log($"   panel {item.Pid}: finalize error: {ex.Message}"); }
@@ -946,18 +953,18 @@ public sealed class NgRetryEngine(Config cfg, NgRetryLog ngLog)
             // readable; the raw log keeps them all.
             // Only a GUARD skip gets the one-line "NOT sent" form - see UploadEngine.
             if (!r.Sent && r.Sends.Count == 0 && r.Why.Length > 0)
-                OpLog($"MIDFAIL {item.Pid}: NOT sent (NG) - {r.Why}");
+                OpLog($"MIDFAIL {item.Pid}#{item.RunId}: NOT sent (NG) - {r.Why}");
             if (r.Sends.Count > 0)
             {
                 // ONE LINE PER MANIFEST, naming the remote file each produced - see UploadEngine.
                 var rec = Path.GetFileName(Path.ChangeExtension(item.IndexSrc, ".midfail"));
                 foreach (var s in r.Sends)
-                    OpLog($"MIDFAIL {item.Pid}: early {s.Kind} " +
+                    OpLog($"MIDFAIL {item.Pid}#{item.RunId}: early {s.Kind} " +
                           (s.Ok ? "sent (NG)" : "FAILED to send (NG)") +
                           $" -> {s.Host} as {s.RemoteName}, {s.Files} file{(s.Files == 1 ? "" : "s")}" +
                           (s.Ok ? $" (list in {rec})" : s.Error.Length > 0 ? $" - {s.Error}" : ""));
             }
         }
-        catch (Exception ex) { OpLog($"MIDFAIL {item.Pid}: send error (NG): {ex.Message}"); }
+        catch (Exception ex) { OpLog($"MIDFAIL {item.Pid}#{item.RunId}: send error (NG): {ex.Message}"); }
     }
 }

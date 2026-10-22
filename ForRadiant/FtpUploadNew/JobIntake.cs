@@ -1,4 +1,4 @@
-namespace FtpUpload;
+﻿namespace FtpUpload;
 
 /// <summary>
 /// Watches the jobs folder for work written by TrueTest.
@@ -31,7 +31,7 @@ public sealed class JobIntake(Config cfg, UploadEngine engine)
         _offsetLines = lines.Length;
 
         var parsed = new List<JobFile>();
-        var panelPids = new HashSet<string>();
+        var panelRuns = new HashSet<(string Pid, string RunId)>();
         foreach (var line in fresh)
         {
             var jl = JobsLine.Parse(line);
@@ -45,20 +45,20 @@ public sealed class JobIntake(Config cfg, UploadEngine engine)
             // fresh run PanelIntake already did this; on RESTART this is the sole restore path).
             if (jl.IsPanel)
             {
-                engine.RegisterPanel(jl.Pid, Clock.Today, sourceFolder: Path.GetDirectoryName(jl.LocalPath) ?? "",
+                engine.RegisterPanel(jl.Pid, jl.RunId, Clock.Today, sourceFolder: Path.GetDirectoryName(jl.LocalPath) ?? "",
                     channelIndex: jl.ChannelIndex, uploadIndexPath: jl.UploadIndexPath, uploadHostPath: jl.UploadHostPath,
                     indexSrc: jl.IndexSrc, hostSrc: jl.HostSrc, totalFileCount: 0);
-                panelPids.Add(jl.Pid);
+                panelRuns.Add((jl.Pid, jl.RunId));
             }
 
-            parsed.Add(new JobFile { Pid = jl.Pid, FileName = jl.FileName, LocalPath = jl.LocalPath,
+            parsed.Add(new JobFile { Pid = jl.Pid, RunId = jl.RunId, FileName = jl.FileName, LocalPath = jl.LocalPath,
                                      RemotePath = remote, IsManifest = jl.IsManifest });
         }
 
         if (parsed.Count > 0)
         {
             engine.AddFiles(parsed);
-            foreach (var pid in panelPids) engine.SeedPanelManifest(pid);   // create-or-resume (idempotent)
+            foreach (var (pid, runId) in panelRuns) engine.SeedPanelManifest(pid, runId);   // create-or-resume (idempotent)
             Logged?.Invoke($"[{DateTime.Now:HH:mm:ss}] intake: +{parsed.Count} file(s)");
         }
     }

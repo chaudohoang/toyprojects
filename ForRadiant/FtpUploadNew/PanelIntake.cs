@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 
 namespace FtpUpload;
 
@@ -100,6 +100,7 @@ public sealed class PanelIntake(Config cfg, UploadEngine engine)
             dataFiles.Add(new JobFile
             {
                 Pid = panel.Pid,
+                RunId = PathDerivation.RunIdOf(panel),
                 FileName = name,
                 LocalPath = full,
                 RemotePath = PathDerivation.DestFor(panel, name)
@@ -121,6 +122,7 @@ public sealed class PanelIntake(Config cfg, UploadEngine engine)
         // Register the panel metadata first (so the Job carries manifest info), then add its files.
         engine.RegisterPanel(
             pid: panel.Pid,
+            runId: PathDerivation.RunIdOf(panel),
             day: Clock.Today,
             sourceFolder: panel.SourceFolder,
             channelIndex: panel.ChannelIndex,
@@ -131,7 +133,7 @@ public sealed class PanelIntake(Config cfg, UploadEngine engine)
             totalFileCount: dataFiles.Count);
 
         engine.AddFiles(dataFiles);
-        engine.SeedPanelManifest(panel.Pid);   // create-or-resume {PID}.idx / {PID}_{DateTime}.txt
+        engine.SeedPanelManifest(panel.Pid, PathDerivation.RunIdOf(panel));   // create-or-resume {PID}.idx / {PID}_{DateTime}.txt
 
         // The index + host completion manifests are tracked as two REAL files on the panel: counted
         // (so the panel is only SUCCESS once they're sent too) but never queued for the normal pump —
@@ -141,9 +143,11 @@ public sealed class PanelIntake(Config cfg, UploadEngine engine)
         var hostSrc = PathDerivation.HostSrc(panel);
         var manifestFiles = new[]
         {
-            new JobFile { Pid = panel.Pid, FileName = Path.GetFileName(panel.UploadIndexPath),
+            new JobFile { Pid = panel.Pid, RunId = PathDerivation.RunIdOf(panel),
+                          FileName = Path.GetFileName(panel.UploadIndexPath),
                           LocalPath = indexSrc, RemotePath = panel.UploadIndexPath, IsManifest = true },
-            new JobFile { Pid = panel.Pid, FileName = Path.GetFileName(panel.UploadHostPath),
+            new JobFile { Pid = panel.Pid, RunId = PathDerivation.RunIdOf(panel),
+                          FileName = Path.GetFileName(panel.UploadHostPath),
                           LocalPath = hostSrc, RemotePath = panel.UploadHostPath, IsManifest = true },
         };
         engine.AddFiles(manifestFiles);
@@ -156,7 +160,8 @@ public sealed class PanelIntake(Config cfg, UploadEngine engine)
             var jl = new JobsLine
             {
                 IsPanel = true,
-                Pid = f.Pid, FileName = f.FileName, LocalPath = f.LocalPath, RemotePath = f.RemotePath,
+                Pid = f.Pid, RunId = f.RunId,
+                FileName = f.FileName, LocalPath = f.LocalPath, RemotePath = f.RemotePath,
                 IndexSrc = indexSrc, HostSrc = hostSrc,
                 UploadIndexPath = panel.UploadIndexPath, UploadHostPath = panel.UploadHostPath,
                 ChannelIndex = panel.ChannelIndex
@@ -168,7 +173,8 @@ public sealed class PanelIntake(Config cfg, UploadEngine engine)
             var jl = new JobsLine
             {
                 IsPanel = true, IsManifest = true,
-                Pid = mf.Pid, FileName = mf.FileName, LocalPath = mf.LocalPath, RemotePath = mf.RemotePath,
+                Pid = mf.Pid, RunId = mf.RunId,
+                FileName = mf.FileName, LocalPath = mf.LocalPath, RemotePath = mf.RemotePath,
                 IndexSrc = indexSrc, HostSrc = hostSrc,
                 UploadIndexPath = panel.UploadIndexPath, UploadHostPath = panel.UploadHostPath,
                 ChannelIndex = panel.ChannelIndex

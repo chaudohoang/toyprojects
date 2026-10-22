@@ -6,6 +6,60 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ---
 
+## 2026-10-22
+
+- **FtpUploadNew: a panel tested twice in a day lost its retest entirely.** `AddFiles`
+  deduped on FILE NAME alone (`UploadEngine.cs`) against a `_jobs` table keyed by PID, and
+  a finished panel's Job stays in memory until the day rollover. A retest produces the same
+  13 names from a different folder to a different remote path, so all 13 were silently
+  dropped — not queued, not logged. Found via `20261012`: 11 of 95 panels, every one of
+  them a retest, 100% of retests affected. The visible symptom was "all files O, Index O,
+  **Host X**" in the summary, because the host manifest `{PID}_{DateTime}.txt` is the only
+  artifact whose NAME carries the run, so it was the only cell that could tell the two runs
+  apart — `SummaryLog` kept the LAST name per PID (last-write-wins) and asked whether the
+  never-sent second one had landed.
+- **Fix: identity is now panel + RUN.** Run id = the `.panel` handoff's `DateTime`
+  (`PathDerivation.RunIdOf`) — already unique per run, already the `{DateTime}` segment of
+  every remote path and the host manifest stamp. **Trap:** the SOURCE FOLDER carries a
+  different stamp (capture-folder creation, e.g. `_20261012083338` vs run `20261012083021`);
+  keying off it would not match what the server sees.
+  `_jobs` → `pid|runId`; `JobFile.Key` → `Pid|RunId|FileName`; `NgItem.Key`,
+  NG card `GroupKey` likewise. `AddFiles` now also WARNS when a name clashes with a
+  different destination instead of dropping it in silence.
+- **All logs carry the run**, every field APPENDED so old rows still parse: `jobs.txt` 11th
+  field, rawlog + ng-retry log 12th. `summary.csv` gained `Run` (`1 of 2`) + `Run start`
+  and is one row per RUN, counting `Total runs` — filter `Run <> "1 of 1"` to find every
+  retested panel. `operation.csv` gained a `run` column. HTML day + NG reports emit one
+  card per run, labelled only when a panel ran more than once.
+  **Index trap:** on a JOBS line the run is `p[10]`; on a RAWLOG line it is `p[11]`, because
+  `LogRow.Fields` strips a leading timestamp only when one is present. Mixing them silently
+  splits or merges runs.
+  Panel-event lines now name the subject `{PID}#{RunId}` — the run is NOT recoverable from
+  the text otherwise (the index manifest is `{PID}.idx` on every run).
+- **Nearly shipped a regression:** `NgRetryLog.ReadState` keyed by `pid|filename`, so the
+  new 3-part keys would never have matched `prior` — already-recovered NG items would have
+  been retried forever. The ng-retry log needed the run too.
+- **Tested against a live FTP server on 127.0.0.1**, not just a green build: 40 panels/12
+  retests, 60 panels/20 retests with the retests landing 6s in (mid-flight, 55% simulated
+  failure), and a kill-mid-upload + restart to exercise the jobs.txt resume path. 52/52,
+  80/80, 35 runs with 0 files re-uploaded after the restart. Audited afterwards: 0 rows
+  missing a run in any log, html cards == runs exactly.
+  Stress trees live under `D:\FtpuploadTest\<run>\` (NOT at `D:\` root).
+  `FtpUpload.exe --reports <yyyyMMdd>` rebuilds a day's reports without starting the engine —
+  the fastest way to see report changes.
+- **Separate, unresolved (`20261005`, "no img in MAS"):** upload side is provably complete
+  (5024 + 1658 = 6682 = 514 x 13, 100%). With `StampManifestNameAtUpload` ON — a setting
+  **LGD asked for** — an NG-recovered panel's host manifest arrives as TWO differently-named
+  files each listing only its own portion (267 of 514 panels that day; 29 of them have ZERO
+  images in the first). Anything consuming only one manifest sees a partial panel. The INDEX
+  is unaffected: fixed name, rewritten complete. Also: that uploader covers CH 1+5 only
+  (514 of 2063 panels on the EQP), so a CH 3 panel missing from its logs is normal.
+- Shipped **1.0.0.10**; deployed to `D:\Log\FtpUpload 1.0.0.10`.
+- **Still open:** the app has not been clicked through in the UI (per-run NG cards unseen);
+  `ForRadiant/CLAUDE.md` still says FtpUploadNew is "not under active change as of 2026-10-01".
+
+---
+
 ## 2026-10-19
 
 - **Moved `CLAUDE.md` and `WORKLOG.md` from `E:\Github` into `toyprojects`** so both travel
