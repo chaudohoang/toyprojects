@@ -64,6 +64,20 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     SEPARATE HWND reached via `LVM_GETHEADER` (0x1000+31) which needs `"DarkMode_ItemsView"` —
     without it the column header strip stays white over a black list. Title bar is
     `DwmSetWindowAttribute` attr 20 (and 19 for 1809..1903).
+  - **Follow-up: white flash on window open.** `Theme.Apply` ran on `Shown`, i.e. after the form
+    had already painted in system colours. Split into `Theme.Init(f)` — called at the END of each
+    ctor — which sets managed colours immediately (before the window is ever shown) and defers
+    only the handle-dependent native calls to `HandleCreated`, which still fires before the
+    window becomes visible. `Theme.Apply` remains for re-theming on toggle.
+  - **Follow-up: theme toggle button** in the top bar, labelled with the mode it switches TO
+    ("☀ Light" while dark). Writes `DarkTheme` to the ini immediately rather than at exit, so
+    the choice survives a kill.
+  - **Removed the "Dark theme" checkbox from Systems & emulators** that had been added an hour
+    earlier: its handler mutated `cfg` directly, so toggling it and then pressing **Cancel** left
+    the theme changed anyway. One control instead of two that can disagree.
+  - Driving the toggle from a script needs **client** coordinates through `ClientToScreen`, not
+    window-relative ones — the first attempt clicked into the title bar and silently did nothing.
+
   - **Follow-up: `DarkMode_ItemsView` darkens the header BACKGROUND but leaves its text black**,
     which is unreadable on it. No theme string fixes that, so the header is owner-drawn:
     `OwnerDraw = true` with `OnDrawColumnHeader` overridden in `FastListView`, while

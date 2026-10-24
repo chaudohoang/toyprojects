@@ -996,14 +996,66 @@ namespace RomLauncher
         }
 
         // ---- the walker ----------------------------------------------------
+
+        // Call at the END of a form's constructor. Colours are set before the
+        // window is ever shown, so it does not paint light first and then flip;
+        // the native calls need a handle, so they wait for HandleCreated, which
+        // still fires before the window becomes visible.
+        public static void Init(Form f)
+        {
+            if (f == null) return;
+            Colors(f);
+            f.HandleCreated += delegate { Native(f); };
+            if (f.IsHandleCreated) Native(f);
+        }
+
+        // Re-apply everything, for the theme toggle.
         public static void Apply(Form f)
         {
             if (f == null) return;
+            Colors(f);
+            Native(f);
+            f.Invalidate(true);
+        }
+
+        static void Colors(Form f)
+        {
             f.BackColor = Window;
             f.ForeColor = Text;
-            TitleBar(f);
             Walk(f);
-            f.Invalidate(true);
+        }
+
+        // Child handles are not all created when the form's is, so this runs
+        // again on Shown; both SetWindowTheme and DwmSetWindowAttribute are
+        // idempotent.
+        static void Native(Form f)
+        {
+            TitleBar(f);
+            WalkNative(f);
+        }
+
+        static void WalkNative(Control parent)
+        {
+            foreach (Control c in parent.Controls)
+            {
+                if (c is ComboBox) NativeTheme(c, "DarkMode_CFD", "Explorer");
+                else if (c is CheckBox) NativeTheme(c, "DarkMode_Explorer", "Explorer");
+                else if (c is ListBox) NativeTheme(c, "DarkMode_Explorer", "Explorer");
+                else if (c is ListView)
+                {
+                    NativeTheme(c, "DarkMode_Explorer", "Explorer");
+                    if (c.IsHandleCreated)
+                    {
+                        IntPtr h = SendMessage(c.Handle, LVM_GETHEADER, IntPtr.Zero, IntPtr.Zero);
+                        if (h != IntPtr.Zero)
+                        {
+                            try { SetWindowTheme(h, Dark ? "DarkMode_ItemsView" : "Explorer", null); }
+                            catch (Exception) { }
+                        }
+                    }
+                }
+                if (c.Controls.Count > 0) WalkNative(c);
+            }
         }
 
         static void Walk(Control parent)
@@ -1034,7 +1086,6 @@ namespace RomLauncher
                 // back to the native control, which DarkMode_CFD then darkens -
                 // arrow included.
                 cb.FlatStyle = FlatStyle.Standard;
-                NativeTheme(cb, "DarkMode_CFD", "Explorer");
                 return;
             }
 
@@ -1043,7 +1094,6 @@ namespace RomLauncher
             {
                 lb.BackColor = Input; lb.ForeColor = Text;
                 lb.BorderStyle = BorderStyle.FixedSingle;
-                NativeTheme(lb, "DarkMode_Explorer", "Explorer");
                 return;
             }
 
@@ -1053,18 +1103,6 @@ namespace RomLauncher
                 lv.BackColor = Input; lv.ForeColor = Text;
                 lv.BorderStyle = BorderStyle.None;
                 lv.OwnerDraw = true;   // header only; rows use DrawDefault
-                // the list itself, then its header - the header is a separate
-                // HWND and keeps the light theme unless told otherwise
-                NativeTheme(lv, "DarkMode_Explorer", "Explorer");
-                if (lv.IsHandleCreated)
-                {
-                    IntPtr h = SendMessage(lv.Handle, LVM_GETHEADER, IntPtr.Zero, IntPtr.Zero);
-                    if (h != IntPtr.Zero)
-                    {
-                        try { SetWindowTheme(h, Dark ? "DarkMode_ItemsView" : "Explorer", null); }
-                        catch (Exception) { }
-                    }
-                }
                 return;
             }
 
@@ -1092,7 +1130,6 @@ namespace RomLauncher
                 // BackColor is transparent - a ticked box renders identically to
                 // an empty one. DarkMode_Explorer darkens the real glyph instead.
                 ck.FlatStyle = FlatStyle.System;
-                NativeTheme(ck, "DarkMode_Explorer", "Explorer");
                 return;
             }
 
@@ -1260,7 +1297,7 @@ namespace RomLauncher
         string listType = "";         // type-ahead buffer for the ROM list
         int listTypeTick = 0;         // last keystroke time (ms), for buffer reset
         CheckBox chkFav;
-        Button btnRescan, btnSystems, btnLaunch, btnClear;
+        Button btnRescan, btnSystems, btnLaunch, btnClear, btnTheme;
         FastListView list;
         StatusStrip status;
         ToolStripStatusLabel lblStatus, lblCount;
@@ -1284,8 +1321,8 @@ namespace RomLauncher
             Theme.Dark = cfg.DarkTheme;
             BuildUi();
             LoadWindowIcon();
+            Theme.Init(this);
             Load += delegate { LoadInitial(); };
-            Shown += delegate { Theme.Apply(this); };
         }
 
         // Use the icon embedded in the exe for the title bar / taskbar.
@@ -1354,6 +1391,15 @@ namespace RomLauncher
             btnSystems.Location = new Point(738, 9);
             btnSystems.Click += delegate { OpenSystems(); };
             top.Controls.Add(btnSystems);
+
+            btnTheme = new Button();
+            btnTheme.Size = new Size(96, 32);
+            btnTheme.Location = new Point(844, 9);
+            // Label names the mode it switches TO, so the button says what it does
+            // rather than what is already on screen.
+            btnTheme.Click += delegate { ToggleTheme(); };
+            top.Controls.Add(btnTheme);
+            UpdateThemeButton();
 
             Label l1 = new Label();
             l1.Text = "System:";
@@ -1460,7 +1506,7 @@ namespace RomLauncher
             list.Resize += delegate { LayoutColumns(); };
             Shown += delegate
             {
-                Theme.Apply(this);
+                Theme.Apply(this);   // child handles exist by now
                 Native.SetPlaceholder(txtSearch, "Type a game name...");
                 Native.SetRightMargin(txtSearch, 26);
                 PositionClearButton();
@@ -1474,6 +1520,23 @@ namespace RomLauncher
                 Ini.Save(cfg);
                 Store.SaveStats(all);
             };
+        }
+
+        void UpdateThemeButton()
+        {
+            if (btnTheme == null) return;
+            btnTheme.Text = Theme.Dark ? "☀  Light" : "☽  Dark";
+        }
+
+        void ToggleTheme()
+        {
+            cfg.DarkTheme = !cfg.DarkTheme;
+            Theme.Dark = cfg.DarkTheme;
+            Theme.Apply(this);
+            UpdateThemeButton();
+            // Written now rather than at exit, so the choice survives a crash or
+            // a kill, and so a second window opened later starts in the same mode.
+            try { Ini.Save(cfg); } catch (Exception ex) { Debug.WriteLine(ex.Message); }
         }
 
         void PositionClearButton()
@@ -2323,7 +2386,7 @@ namespace RomLauncher
         ComboBox cboCore;
         ComboBox cboWinMode;
         ComboBox cboPreset;
-        CheckBox chkEnabled, chkMinimize, chkDupes, chkDark;
+        CheckBox chkEnabled, chkMinimize, chkDupes;
         bool loading;
         SystemConfig cur;
         string initialSelect;
@@ -2592,25 +2655,6 @@ namespace RomLauncher
             chkDupes.Location = new Point(rx, ry);
             Controls.Add(chkDupes);
 
-            ry += 26;
-            chkDark = new CheckBox();
-            chkDark.Text = "Dark theme";
-            chkDark.AutoSize = true;
-            chkDark.Checked = cfg.DarkTheme;
-            chkDark.Location = new Point(rx, ry);
-            // Re-theme live so the choice is visible without a restart. The owner
-            // is re-themed too, otherwise the main window stays the old colour
-            // behind this dialog.
-            chkDark.CheckedChanged += delegate
-            {
-                cfg.DarkTheme = chkDark.Checked;
-                Theme.Dark = chkDark.Checked;
-                Theme.Apply(this);
-                Form ownerForm = Owner;
-                if (ownerForm != null) Theme.Apply(ownerForm);
-            };
-            Controls.Add(chkDark);
-
             Button ok = new Button();
             ok.Text = "OK";
             ok.DialogResult = DialogResult.OK;
@@ -2628,7 +2672,6 @@ namespace RomLauncher
                 cfg.RetroArchPath = newRetro;
                 cfg.MinimizeOnLaunch = chkMinimize.Checked;
                 cfg.HideDiscDupes = chkDupes.Checked;
-                cfg.DarkTheme = chkDark.Checked;
             };
             Controls.Add(ok);
 
@@ -2641,7 +2684,7 @@ namespace RomLauncher
 
             AcceptButton = ok;
             CancelButton = cancel;
-            Shown += delegate { Theme.Apply(this); };
+            Theme.Init(this);
 
             RebuildList();
             FillCores();
@@ -3137,7 +3180,7 @@ namespace RomLauncher
             bClose.Location = new Point(ClientSize.Width - 102, ClientSize.Height - 40);
             Controls.Add(bClose);
             AcceptButton = bClose;
-            Shown += delegate { Theme.Apply(this); };
+            Theme.Init(this);
 
             Repopulate(0);
         }
@@ -3298,7 +3341,7 @@ namespace RomLauncher
             bClose.Size = new Size(90, 28);
             Controls.Add(bClose);
             AcceptButton = bClose;
-            Shown += delegate { Theme.Apply(this); };
+            Theme.Init(this);
 
             Repopulate();
         }
