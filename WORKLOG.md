@@ -6,6 +6,33 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ---
 
+## 2026-10-24
+
+- **`RomLauncher`: resolve No-Intro style folder names to short system ids.** New collection at
+  `F:\Games\TopRoms Collection` names folders `Manufacturer - Full System Name`; the old root
+  `F:\Games\Roms` (303 systems) uses EmulationStation short names (`nes`, `psx`).
+  - **The search was not merely weak on long names, it ranked the wrong system first.** Measured
+    against `Fuzzy.Match`: `nes` scored **566 on "sega - mega drive - geNESis"** (literal
+    substring) versus **383** on "nintendo - nintendo entertainment system" (subsequence fallback
+    only, plus a length penalty). `snes` likewise lost to Genesis 396 vs 387. `psx` matched
+    **nothing** — there is no p→s→x subsequence in "sony - playstation". The dropdown type-ahead
+    (prefix then substring) failed the same way.
+  - Fix is at **discovery**, not in the matcher: `SystemNames.Canonical()` maps the folder to the
+    short id before `cfg.Find()`, so the id *is* the search term and scores an exact 1000. After:
+    `nes` → nes 1000, nes-hacks 794, snes 599, Genesis absent.
+  - **Merging came free.** `SystemConfig.ExtraFolders` ("same system in other roots") already
+    existed, so resolving to `nes` makes the new collection join the configured `nes` system
+    instead of appearing beside it. No merge logic was written.
+  - All **62 folders map, 0 unmapped**, and every base id already existed in the old root with an
+    emulator configured — so the collection inherits emulator setup. Variant suffixes stay
+    separate on purpose: `nes-hacks`, `megadrive-sports`, `mame-chd`, `xbox-dlc`.
+  - New ini keys: `DisplayName=` per system (drives the `nes — Nintendo Entertainment System`
+    dropdown label) and a `[FolderMap]` section for `folder name=system id` overrides, for
+    collections the built-in table does not cover.
+  - **Not yet done:** the root has not been added. Chau adds new collections through the existing
+    "More folders…" button (`RootsForm`), so the first scan is his to run.
+  - Expect ~10 new systems with no emulator configured (`*-hacks`, `*-homebrew`, `mame-chd`,
+    `bios-retroarch`, …). The two BIOS folders are not games and are probably worth `Enabled=0`.
 ## 2026-10-22
 
 - **FtpUploadNew: a panel tested twice in a day lost its retest entirely.** `AddFiles`

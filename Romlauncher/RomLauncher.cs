@@ -47,6 +47,7 @@ namespace RomLauncher
     class SystemConfig
     {
         public string Name = "";
+        public string DisplayName = "";  // long name when the folder supplied one
         public string Folder = "";
         public string Emulator = "";
         public string Args = "\"{rom}\"";
@@ -76,6 +77,12 @@ namespace RomLauncher
         public int SortMode = 0;
         public string LastSystem = "";
         public List<SystemConfig> Systems = new List<SystemConfig>();
+
+        // [FolderMap] in the ini: "<folder name>=<system id>". Overrides the
+        // built-in table for collections it does not cover, or to split a
+        // folder back out of a system it was merged into.
+        public Dictionary<string, string> FolderMap =
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         // Primary root plus any additional roots (existing/non-empty, de-duplicated).
         public List<string> AllRoots()
@@ -155,6 +162,7 @@ namespace RomLauncher
                 if (cur != null)
                 {
                     if (Eq(key, "Folder")) cur.Folder = val;
+                    else if (Eq(key, "DisplayName")) cur.DisplayName = val;
                     else if (Regex.IsMatch(key, @"^Folder\d+$", RegexOptions.IgnoreCase))
                     { if (!string.IsNullOrEmpty(val)) cur.ExtraFolders.Add(val); }
                     else if (Eq(key, "Emulator")) cur.Emulator = val;
@@ -163,6 +171,10 @@ namespace RomLauncher
                     else if (Eq(key, "Enabled")) cur.Enabled = val != "0";
                     else if (key.StartsWith("Alt", StringComparison.OrdinalIgnoreCase))
                         ParseAltKey(cur, key, val);
+                }
+                else if (Eq(section, "FolderMap"))
+                {
+                    if (key.Length > 0) cfg.FolderMap[key] = val;
                 }
                 else if (Eq(section, "General"))
                 {
@@ -193,10 +205,21 @@ namespace RomLauncher
             sb.AppendLine("SortMode=" + cfg.SortMode.ToString(CultureInfo.InvariantCulture));
             sb.AppendLine("LastSystem=" + cfg.LastSystem);
 
+            if (cfg.FolderMap.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine("; Folder name -> system id. Edit to correct a mapping.");
+                sb.AppendLine("[FolderMap]");
+                foreach (KeyValuePair<string, string> kv in cfg.FolderMap)
+                    sb.AppendLine(kv.Key + "=" + kv.Value);
+            }
+
             foreach (SystemConfig s in cfg.Systems)
             {
                 sb.AppendLine();
                 sb.AppendLine("[System:" + s.Name + "]");
+                if (!string.IsNullOrEmpty(s.DisplayName))
+                    sb.AppendLine("DisplayName=" + s.DisplayName);
                 sb.AppendLine("Folder=" + s.Folder);
                 for (int fi = 0; fi < s.ExtraFolders.Count; fi++)
                     sb.AppendLine("Folder" + (fi + 2) + "=" + s.ExtraFolders[fi]);
@@ -524,6 +547,130 @@ namespace RomLauncher
     }
 
     // -------------------------------------------------------------- searching
+
+    // ------------------------------------------------------------- system names
+
+    // Collections in the No-Intro / libretro style name their folders
+    // "Manufacturer - Full System Name", which the search engine handles badly:
+    // "nes" only reaches "nintendo - nintendo entertainment system" through the
+    // subsequence fallback (~380) and loses outright to "sega - mega drive -
+    // geNESis" (~566), which contains the letters literally. Resolving such a
+    // folder to the short id at scan time fixes that at the source - the id IS
+    // the search term, scoring an exact 1000 - and makes the collection merge
+    // into the matching system that is already configured, rather than showing
+    // up as a second, differently named one.
+    static class SystemNames
+    {
+        // folder name, short id, label shown after the id in the dropdown
+        static readonly string[] Table =
+        {
+            "3DO - 3DO Interactive Multiplayer",                      "3do",              "3DO Interactive Multiplayer",
+            "Arcade - MAME",                                          "mame",             "MAME",
+            "Arcade - MAME CHD",                                      "mame-chd",         "MAME CHD",
+            "Arcade - MAME Legacy",                                   "mame-legacy",      "MAME Legacy",
+            "Atari - 2600",                                           "atari2600",        "Atari 2600",
+            "Atari - 2600 - Hacks",                                   "atari2600-hacks",  "Atari 2600 - Hacks",
+            "Atari - Jaguar",                                         "jaguar",           "Atari Jaguar",
+            "Atari - Jaguar CD",                                      "jaguarcd",         "Atari Jaguar CD",
+            "Atari - Lynx",                                           "lynx",             "Atari Lynx",
+            "BIOS - RetroArch",                                       "bios-retroarch",   "BIOS (RetroArch)",
+            "BIOS - Standalone",                                      "bios-standalone",  "BIOS (Standalone)",
+            "Bandai - WonderSwan",                                    "wonderswan",       "WonderSwan",
+            "Bandai - WonderSwan Color",                              "wonderswancolor",  "WonderSwan Color",
+            "Coleco - ColecoVision",                                  "colecovision",     "ColecoVision",
+            "Commodore - Amiga",                                      "amiga",            "Commodore Amiga",
+            "Commodore - Commodore 64",                               "c64",              "Commodore 64",
+            "GCE - Vectrex",                                          "vectrex",          "Vectrex",
+            "Game Park - GP32",                                       "gp32",             "GP32",
+            "Magnavox - Odyssey2",                                    "odyssey2",         "Magnavox Odyssey2",
+            "Mattel - Intellivision",                                 "intellivision",    "Intellivision",
+            "Microsoft - MS-DOS",                                     "dos",              "MS-DOS",
+            "Microsoft - MSX",                                        "msx",              "MSX",
+            "Microsoft - MSX2",                                       "msx2",             "MSX2",
+            "Microsoft - Xbox",                                       "xbox",             "Xbox",
+            "Microsoft - Xbox - DLC",                                 "xbox-dlc",         "Xbox - DLC",
+            "Microsoft - Xbox - Sports",                              "xbox-sports",      "Xbox - Sports",
+            "NEC - PC Engine - SuperGrafx",                           "supergrafx",       "PC Engine SuperGrafx",
+            "NEC - PC Engine - TurboGrafx 16",                        "pcengine",         "PC Engine / TurboGrafx-16",
+            "NEC - PC Engine - TurboGrafx CD",                        "pcenginecd",       "PC Engine / TurboGrafx CD",
+            "Nintendo - Famicom",                                     "famicom",          "Famicom",
+            "Nintendo - Famicom - Classics",                          "famicom-classics", "Famicom - Classics",
+            "Nintendo - Famicom Disk System",                         "fds",              "Famicom Disk System",
+            "Nintendo - Game Boy",                                    "gb",               "Game Boy",
+            "Nintendo - Game Boy Advance",                            "gba",              "Game Boy Advance",
+            "Nintendo - Game Boy Color",                              "gbc",              "Game Boy Color",
+            "Nintendo - GameCube",                                    "gamecube",         "GameCube",
+            "Nintendo - Nintendo 64",                                 "n64",              "Nintendo 64",
+            "Nintendo - Nintendo DS",                                 "nds",              "Nintendo DS",
+            "Nintendo - Nintendo Entertainment System",               "nes",              "Nintendo Entertainment System",
+            "Nintendo - Nintendo Entertainment System - Hacks",       "nes-hacks",        "NES - Hacks",
+            "Nintendo - Nintendo Entertainment System - Homebrew",    "nes-homebrew",     "NES - Homebrew",
+            "Nintendo - Super Famicom",                               "sfc",              "Super Famicom",
+            "Nintendo - Super Nintendo Entertainment System",         "snes",             "Super Nintendo Entertainment System",
+            "Nintendo - Super Nintendo Entertainment System - Hacks", "snes-hacks",       "SNES - Hacks",
+            "Nintendo - Virtual Boy",                                 "virtualboy",       "Virtual Boy",
+            "Philips - CD-i",                                         "cdi",              "Philips CD-i",
+            "SNK - Neo Geo Pocket Color",                             "ngpc",             "Neo Geo Pocket Color",
+            "Sega - 32X",                                             "sega32x",          "Sega 32X",
+            "Sega - Dreamcast",                                       "dreamcast",        "Dreamcast",
+            "Sega - Game Gear",                                       "gamegear",         "Game Gear",
+            "Sega - Master System - Mark III",                        "mastersystem",     "Master System / Mark III",
+            "Sega - Mega Drive - Genesis",                            "megadrive",        "Mega Drive / Genesis",
+            "Sega - Mega Drive - Genesis - Hacks",                    "megadrive-hacks",  "Mega Drive - Hacks",
+            "Sega - Mega Drive - Genesis - Sports",                   "megadrive-sports", "Mega Drive - Sports",
+            "Sega - Mega-CD",                                         "megacd",           "Mega-CD / Sega CD",
+            "Sega - Saturn",                                          "saturn",           "Saturn",
+            "Sinclair - ZX Spectrum",                                 "zxspectrum",       "ZX Spectrum",
+            "Sony - PlayStation",                                     "psx",              "PlayStation",
+            "Sony - PlayStation - Sports",                            "psx-sports",       "PlayStation - Sports",
+            "Sony - PlayStation 2",                                   "ps2",              "PlayStation 2",
+            "Sony - PlayStation 2 - Sports",                          "ps2-sports",       "PlayStation 2 - Sports",
+            "Sony - PlayStation Portable",                            "psp",              "PlayStation Portable",
+        };
+
+        static Dictionary<string, string> idByFolder;
+        static Dictionary<string, string> labelById;
+
+        static void Build()
+        {
+            if (idByFolder != null) return;
+            idByFolder = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            labelById = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            for (int i = 0; i + 2 < Table.Length; i += 3)
+            {
+                idByFolder[Table[i]] = Table[i + 1];
+                if (!labelById.ContainsKey(Table[i + 1])) labelById[Table[i + 1]] = Table[i + 2];
+            }
+        }
+
+        // A folder name resolved to the id the rest of the app uses. User
+        // overrides win, then the built-in table; an unrecognised folder keeps
+        // its own name, which is what short-named roots already relied on.
+        public static string Canonical(string folderName, Dictionary<string, string> overrides)
+        {
+            if (string.IsNullOrEmpty(folderName)) return folderName;
+            Build();
+            string id;
+            if (overrides != null && overrides.TryGetValue(folderName, out id) && id.Length > 0) return id;
+            if (idByFolder.TryGetValue(folderName, out id)) return id;
+            return folderName;
+        }
+
+        // The long name to show beside the id, or null when there isn't one.
+        public static string Label(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return null;
+            Build();
+            string label;
+            return labelById.TryGetValue(id, out label) ? label : null;
+        }
+
+        public static bool IsKnownFolder(string folderName)
+        {
+            Build();
+            return folderName != null && idByFolder.ContainsKey(folderName);
+        }
+    }
 
     static class Fuzzy
     {
@@ -1052,12 +1199,23 @@ namespace RomLauncher
                     {
                         string name = Path.GetFileName(dir);
                         if (name.StartsWith(".") || name.StartsWith("!")) continue;
-                        SystemConfig s = cfg.Find(name);
+
+                        // "Nintendo - Nintendo Entertainment System" -> "nes", so a
+                        // long-named collection lands on the system that is already
+                        // set up instead of becoming a second one next to it.
+                        string id = SystemNames.Canonical(name, cfg.FolderMap);
+
+                        SystemConfig s = cfg.Find(id);
                         if (s == null)
                         {
                             s = new SystemConfig();
-                            s.Name = name;
+                            s.Name = id;
                             cfg.Systems.Add(s);
+                        }
+                        if (string.IsNullOrEmpty(s.DisplayName))
+                        {
+                            string label = SystemNames.Label(id);
+                            if (label != null) s.DisplayName = label;
                         }
                         if (string.IsNullOrEmpty(s.Folder)) s.Folder = dir;
                         else if (!s.ExtraFolders.Contains(dir)) s.ExtraFolders.Add(dir);
@@ -1088,10 +1246,13 @@ namespace RomLauncher
         class SysItem
         {
             public string Name;      // "" means the "All systems" entry
+            public string Display;   // long name, when the system has one
             public int Count;
             public override string ToString()
             {
                 string label = Name.Length == 0 ? "All systems" : Name;
+                if (Name.Length > 0 && !string.IsNullOrEmpty(Display))
+                    label = Name + "  \u2014  " + Display;
                 return label + "  (" + Count.ToString("N0", CultureInfo.CurrentCulture) + ")";
             }
         }
@@ -1132,7 +1293,7 @@ namespace RomLauncher
                     if (!s.Enabled) continue;
                     int c;
                     counts.TryGetValue(s.Name, out c);
-                    cboSystem.Items.Add(new SysItem { Name = s.Name, Count = c });
+                    cboSystem.Items.Add(new SysItem { Name = s.Name, Display = s.DisplayName, Count = c });
                     row++;
                     if (!string.IsNullOrEmpty(prev) && string.Equals(s.Name, prev, StringComparison.OrdinalIgnoreCase))
                         selIdx = row;
