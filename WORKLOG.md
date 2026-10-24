@@ -64,6 +64,18 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     SEPARATE HWND reached via `LVM_GETHEADER` (0x1000+31) which needs `"DarkMode_ItemsView"` —
     without it the column header strip stays white over a black list. Title bar is
     `DwmSetWindowAttribute` attr 20 (and 19 for 1809..1903).
+  - **Follow-up 2: the selected row kept DARK text.** `DrawDefault` on the sub-items let the
+    native highlight paint a light-blue band and keep the item's own (dark-on-light) text on it.
+    Rows are now drawn in `OnDrawSubItem` when dark — background `Theme.Selection` (a deep blue)
+    or the list background, text in the item's own `ForeColor` so favourites stay amber. ~200
+    `DrawText` calls per paint at 40 visible rows, which is nothing; light mode keeps
+    `DrawDefault` throughout.
+  - **Follow-up 2: the flash was NOT fixed by setting colours in the ctor.** Windows fills the
+    window from its class brush before the first `WM_PAINT`, and the dark title-bar attribute
+    only lands on the frame AFTER it is set, so there is a gap no amount of early colouring
+    closes. `Theme.Init` now holds the form at `Opacity = 0` and restores it on `Shown`, which
+    fires after that first paint. Applies to every form, so the dialogs stop flashing too.
+
   - **Follow-up: white flash on window open.** `Theme.Apply` ran on `Shown`, i.e. after the form
     had already painted in system colours. Split into `Theme.Init(f)` — called at the END of each
     ctor — which sets managed colours immediately (before the window is ever shown) and defers

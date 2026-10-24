@@ -949,6 +949,7 @@ namespace RomLauncher
         static readonly Color D_Panel  = Color.FromArgb(40, 40, 43);
         static readonly Color D_Input  = Color.FromArgb(50, 50, 54);
         static readonly Color D_Header = Color.FromArgb(58, 58, 63);
+        static readonly Color D_Sel    = Color.FromArgb(38, 79, 126);
         static readonly Color D_Border = Color.FromArgb(70, 70, 76);
         static readonly Color D_Text   = Color.FromArgb(228, 228, 230);
         static readonly Color D_Muted  = Color.FromArgb(150, 150, 156);
@@ -961,6 +962,7 @@ namespace RomLauncher
         public static Color Input  { get { return Dark ? D_Input  : SystemColors.Window; } }
         public static Color Border { get { return Dark ? D_Border : SystemColors.ControlDark; } }
         public static Color Header { get { return Dark ? D_Header : SystemColors.Control; } }
+        public static Color Selection { get { return Dark ? D_Sel : SystemColors.Highlight; } }
         public static Color Text   { get { return Dark ? D_Text   : SystemColors.ControlText; } }
         public static Color Muted  { get { return Dark ? D_Muted  : Color.Gray; } }
         public static Color Accent { get { return Dark ? D_Accent : SystemColors.Highlight; } }
@@ -1007,6 +1009,19 @@ namespace RomLauncher
             Colors(f);
             f.HandleCreated += delegate { Native(f); };
             if (f.IsHandleCreated) Native(f);
+
+            // Setting the colours early is not enough on its own: Windows fills
+            // the window from its class brush before the first WM_PAINT, and the
+            // dark title-bar attribute only lands on the following frame. Both
+            // show as a white flash. Holding the window fully transparent until
+            // it has painted once hides the gap; Shown fires after that paint.
+            double opaque = f.Opacity;
+            f.Opacity = 0;
+            f.Shown += delegate
+            {
+                Native(f);          // child handles exist by now
+                f.Opacity = opaque;
+            };
         }
 
         // Re-apply everything, for the theme toggle.
@@ -1266,15 +1281,36 @@ namespace RomLauncher
                 TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
         }
 
+        // In Details view the row is drawn per sub-item. Leaving DrawDefault on
+        // meant the native highlight painted a light blue band and kept the
+        // item's dark text on it, which is unreadable. Light mode still uses the
+        // default drawing throughout.
         protected override void OnDrawItem(DrawListViewItemEventArgs e)
         {
-            e.DrawDefault = true;
+            if (!Theme.Dark) e.DrawDefault = true;
             base.OnDrawItem(e);
         }
 
         protected override void OnDrawSubItem(DrawListViewSubItemEventArgs e)
         {
-            e.DrawDefault = true;
+            if (!Theme.Dark) { e.DrawDefault = true; base.OnDrawSubItem(e); return; }
+
+            bool sel = e.Item.Selected;
+            using (SolidBrush b = new SolidBrush(sel ? Theme.Selection : BackColor))
+                e.Graphics.FillRectangle(b, e.Bounds);
+
+            Color fg = e.Item.ForeColor;
+            if (fg.IsEmpty) fg = ForeColor;
+
+            Rectangle tr = new Rectangle(e.Bounds.X + 4, e.Bounds.Y,
+                                         e.Bounds.Width - 7, e.Bounds.Height);
+            TextRenderer.DrawText(e.Graphics, e.SubItem.Text, Font, tr, fg,
+                TextFormatFlags.VerticalCenter | TextFormatFlags.Left |
+                TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
+
+            if (sel && Focused && e.ColumnIndex == 0)
+                ControlPaint.DrawFocusRectangle(e.Graphics, e.Bounds);
+
             base.OnDrawSubItem(e);
         }
     }
@@ -1506,7 +1542,6 @@ namespace RomLauncher
             list.Resize += delegate { LayoutColumns(); };
             Shown += delegate
             {
-                Theme.Apply(this);   // child handles exist by now
                 Native.SetPlaceholder(txtSearch, "Type a game name...");
                 Native.SetRightMargin(txtSearch, 26);
                 PositionClearButton();
