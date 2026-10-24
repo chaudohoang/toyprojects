@@ -64,6 +64,16 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     SEPARATE HWND reached via `LVM_GETHEADER` (0x1000+31) which needs `"DarkMode_ItemsView"` —
     without it the column header strip stays white over a black list. Title bar is
     `DwmSetWindowAttribute` attr 20 (and 19 for 1809..1903).
+  - **Follow-up 6: the `WM_ERASEBKGND` handler had to come back out.** With the flash gone it
+    showed its cost: the list appeared to "keep refreshing" whenever the mouse moved over it.
+    The class comment already warns this control depends on native `LVS_EX_DOUBLEBUFFER` rather
+    than managed double-buffering, and intercepting the erase bypasses exactly that, so every
+    hot-track repaint became visible. Removed, with a comment so it is not re-added. The flash
+    fix that actually worked is the `Theme.Init` reveal ordering, not this.
+  - **Pattern worth remembering:** belt-and-braces fixes added while chasing something else are
+    the first suspects when a NEW symptom appears right after. Two changes shipped together here
+    and the redundant one was the one that broke.
+
   - **Follow-up 5: flash became INTERMITTENT ("most of the time it is clean").** Intermittent =
     a race, and the culprit was the safety timer: it fired unconditionally at 400ms, so on a
     slower start where the queue had not gone idle yet it revealed a half-painted window. Fixed

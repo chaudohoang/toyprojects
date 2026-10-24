@@ -1294,24 +1294,12 @@ namespace RomLauncher
                 (IntPtr)LVS_EX_DOUBLEBUFFER, (IntPtr)LVS_EX_DOUBLEBUFFER);
         }
 
-        // Erase with our own background rather than letting the native control
-        // use its default (light) one. Without this the list can show a white
-        // frame between its handle being created and the first row draw, which
-        // is the flash that survives every timing fix.
-        const int WM_ERASEBKGND = 0x0014;
-
-        protected override void WndProc(ref Message m)
-        {
-            if (m.Msg == WM_ERASEBKGND && m.WParam != IntPtr.Zero)
-            {
-                using (Graphics g = Graphics.FromHdc(m.WParam))
-                using (SolidBrush b = new SolidBrush(BackColor))
-                    g.FillRectangle(b, ClientRectangle);
-                m.Result = (IntPtr)1;
-                return;
-            }
-            base.WndProc(ref m);
-        }
+        // NOTE: do NOT intercept WM_ERASEBKGND here. Filling the background by
+        // hand was tried to kill a startup flash and it bypasses the native
+        // LVS_EX_DOUBLEBUFFER path above, so every hot-track repaint while the
+        // mouse moves over the list becomes visible as constant refreshing.
+        // The startup flash is handled in Theme.Init instead, by not showing
+        // the window until it has finished painting.
 
         // DarkMode_ItemsView darkens the header's BACKGROUND but leaves its text
         // black, which is unreadable on it. The header is the only part drawn by
