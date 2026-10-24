@@ -2090,7 +2090,7 @@ namespace RomLauncher
 
             Text = "Systems & emulators";
             StartPosition = FormStartPosition.CenterParent;
-            ClientSize = new Size(860, 610);
+            ClientSize = new Size(940, 610);
             MinimizeBox = false;
             MaximizeBox = false;
             FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -2200,13 +2200,13 @@ namespace RomLauncher
             Controls.Add(MakeLabel("Emulator exe:", rx, ry + 4));
             txtEmu = new TextBox();
             txtEmu.Location = new Point(rx + 95, ry);
-            txtEmu.Width = 380;
+            txtEmu.Width = 460;
             txtEmu.TextChanged += delegate { if (!loading && cur != null) cur.Emulator = txtEmu.Text.Trim(); };
             Controls.Add(txtEmu);
 
             Button bEmu = new Button();
             bEmu.Text = "Browse";
-            bEmu.Location = new Point(rx + 483, ry - 1);
+            bEmu.Location = new Point(rx + 563, ry - 1);
             bEmu.Size = new Size(75, 24);
             bEmu.Click += delegate
             {
@@ -2220,7 +2220,7 @@ namespace RomLauncher
             Controls.Add(MakeLabel("Arguments:", rx, ry + 4));
             txtArgs = new TextBox();
             txtArgs.Location = new Point(rx + 95, ry);
-            txtArgs.Width = 463;
+            txtArgs.Width = 543;
             txtArgs.TextChanged += delegate { if (!loading && cur != null) cur.Args = txtArgs.Text; };
             Controls.Add(txtArgs);
 
@@ -2237,12 +2237,12 @@ namespace RomLauncher
             cboCore = new ComboBox();
             cboCore.DropDownStyle = ComboBoxStyle.DropDownList;
             cboCore.Location = new Point(rx + 95, ry);
-            cboCore.Width = 380;
+            cboCore.Width = 460;
             Controls.Add(cboCore);
 
             Button bApply = new Button();
             bApply.Text = "Use core";
-            bApply.Location = new Point(rx + 483, ry - 1);
+            bApply.Location = new Point(rx + 563, ry - 1);
             bApply.Size = new Size(75, 24);
             bApply.Click += delegate { ApplyCore(); };
             Controls.Add(bApply);
@@ -2274,13 +2274,13 @@ namespace RomLauncher
             cboPreset = new ComboBox();
             cboPreset.DropDownStyle = ComboBoxStyle.DropDownList;
             cboPreset.Location = new Point(rx + 95, ry);
-            cboPreset.Width = 380;
+            cboPreset.Width = 460;
             cboPreset.Items.AddRange(Presets);
             Controls.Add(cboPreset);
 
             Button bPreset = new Button();
             bPreset.Text = "Apply\u2026";
-            bPreset.Location = new Point(rx + 483, ry - 1);
+            bPreset.Location = new Point(rx + 563, ry - 1);
             bPreset.Size = new Size(75, 24);
             bPreset.Click += delegate { ApplyPreset(); };
             Controls.Add(bPreset);
@@ -2297,7 +2297,7 @@ namespace RomLauncher
             Controls.Add(MakeLabel("Extensions:", rx, ry + 4));
             txtExt = new TextBox();
             txtExt.Location = new Point(rx + 95, ry);
-            txtExt.Width = 463;
+            txtExt.Width = 543;
             txtExt.TextChanged += delegate { if (!loading && cur != null) cur.Extensions = txtExt.Text.Trim(); };
             Controls.Add(txtExt);
 
@@ -2720,7 +2720,7 @@ namespace RomLauncher
             retroExe = retroArchExe;
             Text = "Alternate emulators - " + sys.Name;
             StartPosition = FormStartPosition.CenterParent;
-            ClientSize = new Size(720, 388);
+            ClientSize = new Size(800, 388);
             MinimizeBox = false;
             MaximizeBox = false;
             FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -2771,7 +2771,7 @@ namespace RomLauncher
             Controls.Add(MakeLabel("Name:", rx, 38));
             txtName = new TextBox();
             txtName.Location = new Point(rx + 80, 34);
-            txtName.Width = 380;
+            txtName.Width = 460;
             txtName.TextChanged += delegate { if (!loading) { EmuChoice a = Sel(); if (a != null) a.Name = txtName.Text; } };
             txtName.Leave += delegate { Repopulate(lstAlts.SelectedIndex); };
             Controls.Add(txtName);
@@ -2779,13 +2779,13 @@ namespace RomLauncher
             Controls.Add(MakeLabel("Emulator:", rx, 70));
             txtEmu = new TextBox();
             txtEmu.Location = new Point(rx + 80, 66);
-            txtEmu.Width = 300;
+            txtEmu.Width = 380;
             txtEmu.TextChanged += delegate { if (!loading) { EmuChoice a = Sel(); if (a != null) a.Emulator = txtEmu.Text; } };
             Controls.Add(txtEmu);
 
             Button bBrowse = new Button();
             bBrowse.Text = "Browse";
-            bBrowse.Location = new Point(rx + 383, 65);
+            bBrowse.Location = new Point(rx + 463, 65);
             bBrowse.Size = new Size(77, 24);
             bBrowse.Click += delegate
             {
@@ -2798,7 +2798,7 @@ namespace RomLauncher
             Controls.Add(MakeLabel("Arguments:", rx, 102));
             txtArgs = new TextBox();
             txtArgs.Location = new Point(rx + 80, 98);
-            txtArgs.Width = 380;
+            txtArgs.Width = 460;
             txtArgs.TextChanged += delegate { if (!loading) { EmuChoice a = Sel(); if (a != null) a.Args = txtArgs.Text; } };
             Controls.Add(txtArgs);
 
@@ -2813,13 +2813,13 @@ namespace RomLauncher
             cboPreset = new ComboBox();
             cboPreset.DropDownStyle = ComboBoxStyle.DropDownList;
             cboPreset.Location = new Point(rx + 80, 158);
-            cboPreset.Width = 250;
+            cboPreset.Width = 330;
             cboPreset.Items.AddRange(SystemsForm.Presets);
             Controls.Add(cboPreset);
 
             Button bFill = new Button();
             bFill.Text = "Fill";
-            bFill.Location = new Point(rx + 335, 157);
+            bFill.Location = new Point(rx + 415, 157);
             bFill.Size = new Size(77, 24);
             bFill.Click += delegate { FillFromPreset(); };
             Controls.Add(bFill);
@@ -2835,12 +2835,12 @@ namespace RomLauncher
             cboRACore = new ComboBox();
             cboRACore.DropDownStyle = ComboBoxStyle.DropDownList;
             cboRACore.Location = new Point(rx + 80, 220);
-            cboRACore.Width = 200;
+            cboRACore.Width = 280;
             Controls.Add(cboRACore);
 
             cboRAWin = new ComboBox();
             cboRAWin.DropDownStyle = ComboBoxStyle.DropDownList;
-            cboRAWin.Location = new Point(rx + 286, 220);
+            cboRAWin.Location = new Point(rx + 366, 220);
             cboRAWin.Width = 95;
             cboRAWin.Items.AddRange(new object[] { "Window", "Maximized", "Fullscreen" });
             cboRAWin.SelectedIndex = 1;
@@ -2848,7 +2848,7 @@ namespace RomLauncher
 
             Button bUseCore = new Button();
             bUseCore.Text = "Use core";
-            bUseCore.Location = new Point(rx + 386, 219);
+            bUseCore.Location = new Point(rx + 466, 219);
             bUseCore.Size = new Size(77, 24);
             bUseCore.Click += delegate { UseRetroCore(); };
             Controls.Add(bUseCore);

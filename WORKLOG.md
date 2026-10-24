@@ -55,6 +55,25 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     correct here, since the new exe never creates the long names again.
   - Expect ~10 new systems with no emulator configured (`*-hacks`, `*-homebrew`, `mame-chd`,
     `bios-retroarch`, …). The two BIOS folders are not games and are probably worth `Enabled=0`.
+- **`RomLauncher`: widened the two settings dialogs so the grey hint lines stop clipping.**
+  SystemsForm 860 -> 940, AltEmusForm 720 -> 800. The hints are `AutoSize` labels, so they were
+  not being clipped by a label box but running past the FORM edge - measuring text width against
+  `ClientSize` is how to find these, not inspecting the label.
+  - Overflow was 30px (SystemsForm "Standalone emulators: ... else fullscreen.") and 39px
+    (AltEmusForm "Or make the alternate RetroArch itself ..."). The Extensions hint measured as
+    fitting with 5px to spare yet still clipped on Chau's screen - DPI scaling eats that, so
+    treat anything under ~10px of slack as broken.
+  - One of the two was self-inflicted: the Extensions hint got longer when it was reworded to
+    "empty uses the built-in list for this system" the day before.
+  - Widened the right-hand column with the form rather than leaving a gap: fields +80px
+    (`txtEmu`, `txtArgs`, `cboCore`, `cboPreset`, `txtExt` and the AltEmus equivalents) and the
+    right-edge buttons shifted +80 (`rx + 483` -> `rx + 563`, etc). OK/Cancel/Close already sit
+    at `ClientSize.Width - N` and followed on their own.
+  - No `CACHE_VER` bump: layout only, nothing about what a scan collects changed.
+  - Verified by rendering both dialogs through reflection and `PrintWindow`. AltEmusForm needs a
+    `SystemConfig` built by hand with Name/Emulator/Args set plus a non-null RetroArch path; it
+    throws on a bare one from the config list.
+
 - **`RomLauncher`: extension whitelists moved from the ini into the code as built-in defaults.**
   `Scanner.DefaultExt` (83 systems) is consulted when `Extensions=` is empty; an explicit value
   in the ini still wins, and a system absent from the table keeps the old `IgnoreExt` blacklist
