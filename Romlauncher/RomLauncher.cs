@@ -1041,13 +1041,22 @@ namespace RomLauncher
                     if (idle != null) { Application.Idle -= idle; idle = null; }
                     safety.Stop();
                     safety.Dispose();
-                    if (!f.IsDisposed) f.Opacity = opaque;
+                    if (f.IsDisposed) return;
+                    // Refresh() invalidates this control AND its children and
+                    // then paints them synchronously, so nothing is still
+                    // pending at the moment the window becomes visible. Idle
+                    // alone is not quite enough: the queue can empty briefly
+                    // before the list has drawn.
+                    f.Refresh();
+                    f.Opacity = opaque;
                 };
                 idle = delegate { show(); };
                 Application.Idle += idle;
 
-                // Never let a missed Idle leave the window invisible for good.
-                safety.Interval = 400;
+                // Backstop against a missed Idle. It can stay short because
+                // show() repaints first either way, so losing the race to the
+                // timer no longer means revealing a half-painted window.
+                safety.Interval = 600;
                 safety.Tick += delegate { show(); };
                 safety.Start();
             };

@@ -64,6 +64,18 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     SEPARATE HWND reached via `LVM_GETHEADER` (0x1000+31) which needs `"DarkMode_ItemsView"` —
     without it the column header strip stays white over a black list. Title bar is
     `DwmSetWindowAttribute` attr 20 (and 19 for 1809..1903).
+  - **Follow-up 5: flash became INTERMITTENT ("most of the time it is clean").** Intermittent =
+    a race, and the culprit was the safety timer: it fired unconditionally at 400ms, so on a
+    slower start where the queue had not gone idle yet it revealed a half-painted window. Fixed
+    by making the reveal path itself safe rather than tuning the race — `show()` now calls
+    `f.Refresh()` (invalidates control AND children, paints synchronously) immediately before
+    setting Opacity, so BOTH the Idle path and the timer path reveal a finished window. Timer
+    could then stay short (600ms) instead of being pushed out to 2.5s, which would have risked
+    a visibly late window.
+  - **Harness caveat:** `Application.Idle` does NOT fire under a PowerShell `DoEvents` loop, so
+    reflection harnesses show `Opacity` stuck at 0 and look like a hang. Only `Application.Run`
+    raises it. Verify this path against the real exe (handle appears ~405ms), not a harness.
+
   - **Follow-up 4: still flashing, "just faster".** That symptom is the tell — the remaining
     flash is a LATER paint than the one being waited on. The form painting says nothing about
     its CHILDREN, and a native ListView erases itself light before its first row draw. Two
