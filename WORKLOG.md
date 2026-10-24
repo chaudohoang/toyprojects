@@ -64,6 +64,22 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     SEPARATE HWND reached via `LVM_GETHEADER` (0x1000+31) which needs `"DarkMode_ItemsView"` —
     without it the column header strip stays white over a black list. Title bar is
     `DwmSetWindowAttribute` attr 20 (and 19 for 1809..1903).
+  - **Follow-up 7: checkbox captions were BLACK on another PC (i3-9100f).** The theme relies on
+    `SetWindowTheme(..., "DarkMode_Explorer" / "DarkMode_CFD" / "DarkMode_ItemsView")`, which are
+    **undocumented and only exist on recent Windows builds**. This dev box is Win11 26300 so it
+    all worked here; on an older build the call is a no-op and any control left for the NATIVE
+    side to draw reverts to system colours. Checkboxes were on `FlatStyle.System`, so the native
+    control drew the caption — black on dark.
+    Fixed by taking the drawing back: `FlatStyle.Flat` means WinForms paints glyph AND text, so
+    `ForeColor` is honoured on every OS build. `FlatAppearance.CheckedBackColor` needs an OPAQUE
+    `BackColor` (taken from the parent) to apply — that was the trap that originally pushed this
+    to FlatStyle.System, and it is why the box is given the parent's colour rather than
+    `Color.Transparent`.
+  - **Rule:** anything still drawn natively is only dark where those undocumented themes exist.
+    Verified as portable: the ListView header (owner-drawn), rows (owner-drawn), and now
+    checkboxes. Still native and therefore build-dependent: **ComboBox drop-down arrows** and
+    scrollbars. Test theme changes on an older machine, not just this one.
+
   - **Follow-up 6: the `WM_ERASEBKGND` handler had to come back out.** With the flash gone it
     showed its cost: the list appeared to "keep refreshing" whenever the mouse moved over it.
     The class comment already warns this control depends on native `LVS_EX_DOUBLEBUFFER` rather

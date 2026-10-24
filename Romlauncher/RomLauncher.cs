@@ -1177,12 +1177,20 @@ namespace RomLauncher
             CheckBox ck = c as CheckBox;
             if (ck != null)
             {
-                ck.BackColor = Color.Transparent; ck.ForeColor = Text;
-                // Let the native control draw the box. FlatStyle.Flat hands the
-                // glyph to WinForms, which then ignores CheckedBackColor while
-                // BackColor is transparent - a ticked box renders identically to
-                // an empty one. DarkMode_Explorer darkens the real glyph instead.
-                ck.FlatStyle = FlatStyle.System;
+                // FlatStyle.System lets the NATIVE control draw the caption, which
+                // then uses the system text colour - black - on any Windows where
+                // the undocumented DarkMode_Explorer theme does not apply. Flat
+                // makes WinForms draw both glyph and text, so ForeColor is always
+                // honoured regardless of OS build. The box needs an opaque
+                // BackColor for FlatAppearance.CheckedBackColor to take effect.
+                ck.ForeColor = Text;
+                ck.BackColor = c.Parent != null ? c.Parent.BackColor : Window;
+                ck.FlatStyle = Dark ? FlatStyle.Flat : FlatStyle.Standard;
+                if (Dark)
+                {
+                    ck.FlatAppearance.BorderSize = 0;
+                    ck.FlatAppearance.CheckedBackColor = Accent;
+                }
                 return;
             }
 
