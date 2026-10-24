@@ -1,4 +1,4 @@
-﻿// RomLauncher.cs - single-file WinForms ROM launcher (LaunchBox-lite)
+// RomLauncher.cs - single-file WinForms ROM launcher (LaunchBox-lite)
 // Build with build.bat (csc.exe from .NET Framework 4.x). No VS, no NuGet.
 // C# 5 compatible on purpose (Framework csc does not support C# 6+ syntax).
 
@@ -1020,7 +1020,25 @@ namespace RomLauncher
             f.Shown += delegate
             {
                 Native(f);          // child handles exist by now
-                f.Opacity = opaque;
+                // Shown fires when the window is DISPLAYED, which is before its
+                // first WM_PAINT finishes - restoring opacity here would reveal
+                // an unpainted (white) window, which is the flash itself.
+                // Refresh() paints it synchronously while still invisible, and
+                // BeginInvoke defers the reveal until the queued paints for the
+                // child controls have drained too.
+                f.Refresh();
+
+                // Two independent reveals, both idempotent: whichever happens
+                // first wins. Relying on BeginInvoke alone would leave the
+                // window invisible for good if that message were never pumped.
+                PaintEventHandler reveal = null;
+                reveal = delegate
+                {
+                    f.Opacity = opaque;
+                    f.Paint -= reveal;
+                };
+                f.Paint += reveal;
+                f.BeginInvoke((MethodInvoker)delegate { f.Opacity = opaque; });
             };
         }
 

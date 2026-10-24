@@ -64,6 +64,20 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     SEPARATE HWND reached via `LVM_GETHEADER` (0x1000+31) which needs `"DarkMode_ItemsView"` —
     without it the column header strip stays white over a black list. Title bar is
     `DwmSetWindowAttribute` attr 20 (and 19 for 1809..1903).
+  - **Follow-up 3: the flash survived the Opacity trick, because `Shown` is too early.**
+    `Form.Shown` fires when the window is DISPLAYED, before its first `WM_PAINT` completes, so
+    restoring opacity there reveals an unpainted — i.e. white — window. That IS the flash. Now:
+    `Refresh()` to paint synchronously while still invisible, then reveal from the form's first
+    `Paint` AND from a `BeginInvoke`, whichever lands first (both idempotent). Two paths on
+    purpose: relying on `BeginInvoke` alone leaves the window invisible forever if that message
+    is never pumped, which is a far worse failure than a flash.
+  - **Screen-sampling to detect the flash mostly failed and cost real time.** A dark window over
+    a dark desktop is indistinguishable by average brightness (both ~30-50), so "no change" told
+    me nothing about whether the window had even appeared. What did work: assert on
+    `f.Opacity`/`f.Visible` directly after pumping messages, and only use brightness to catch
+    values >140 (white), which the dark theme can never produce. Startup also takes ~12s loading
+    the cache, so any sampler must run well past that.
+
   - **Follow-up 2: the selected row kept DARK text.** `DrawDefault` on the sub-items let the
     native highlight paint a light-blue band and keep the item's own (dark-on-light) text on it.
     Rows are now drawn in `OnDrawSubItem` when dark — background `Theme.Selection` (a deep blue)
