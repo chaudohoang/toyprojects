@@ -919,7 +919,7 @@ namespace RomLauncher
 
             Text = "ROM Launcher";
             StartPosition = FormStartPosition.CenterScreen;
-            ClientSize = new Size(1000, 620);
+            ClientSize = new Size(1600, 900);
             MinimumSize = new Size(720, 400);
             Font = new Font("Segoe UI", 9f);
             KeyPreview = true;
@@ -1005,14 +1005,14 @@ namespace RomLauncher
             cboSystem = new ComboBox();
             cboSystem.DropDownStyle = ComboBoxStyle.DropDownList;
             cboSystem.Location = new Point(64, 47);
-            cboSystem.Width = 200;
+            cboSystem.Width = 340;   // fits "snes - Super Nintendo Entertainment System (12,345)"
             cboSystem.SelectedIndexChanged += delegate { if (!sysProg) Refilter(); };
             cboSystem.KeyPress += SysTypeSearch;   // "sn" -> snes (accumulating type-ahead)
             top.Controls.Add(cboSystem);
 
             Button btnAllSys = new Button();
             btnAllSys.Text = "All";
-            btnAllSys.Location = new Point(268, 46);
+            btnAllSys.Location = new Point(408, 46);
             btnAllSys.Size = new Size(46, 25);
             btnAllSys.Click += delegate
             {
@@ -1028,12 +1028,12 @@ namespace RomLauncher
             Label l2 = new Label();
             l2.Text = "Sort:";
             l2.AutoSize = true;
-            l2.Location = new Point(328, 51);
+            l2.Location = new Point(468, 51);
             top.Controls.Add(l2);
 
             cboSort = new ComboBox();
             cboSort.DropDownStyle = ComboBoxStyle.DropDownList;
-            cboSort.Location = new Point(366, 47);
+            cboSort.Location = new Point(506, 47);
             cboSort.Width = 150;
             cboSort.Items.AddRange(new object[] { "Relevance", "Name", "System", "Recently played", "Most played" });
             cboSort.SelectedIndex = Math.Max(0, Math.Min(4, cfg.SortMode));
@@ -1043,7 +1043,7 @@ namespace RomLauncher
             chkFav = new CheckBox();
             chkFav.Text = "Favorites only";
             chkFav.AutoSize = true;
-            chkFav.Location = new Point(530, 50);
+            chkFav.Location = new Point(670, 50);
             chkFav.CheckedChanged += delegate { Refilter(); };
             top.Controls.Add(chkFav);
 
@@ -1133,11 +1133,14 @@ namespace RomLauncher
             {
                 int w = list.ClientSize.Width - 4;
                 if (w < 300) w = 300;
-                int c0 = w * 40 / 100;
-                int c1 = w * 15 / 100;
-                int c2 = w * 7 / 100;
-                int c3 = w * 12 / 100;
-                int c4 = w - c0 - c1 - c2 - c3;
+                // Path takes the rest and is the widest column: full paths run
+                // past 100 characters once collections live under several roots,
+                // while System holds a short id and Played holds "12x  24/10/26".
+                int c0 = w * 32 / 100;   // Name
+                int c1 = w * 10 / 100;   // System
+                int c2 = w *  6 / 100;   // Type
+                int c3 = w *  8 / 100;   // Played
+                int c4 = w - c0 - c1 - c2 - c3;   // Path, ~44%
                 list.Columns[0].Width = c0;
                 list.Columns[1].Width = c1;
                 list.Columns[2].Width = c2;

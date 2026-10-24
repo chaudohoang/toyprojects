@@ -40,6 +40,16 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     removes stale systems, so those would have lingered as ghost dropdown rows showing (0).
     Verified all 62 carried no emulator/alts/extensions, backed the ini up to
     `RomLauncher.ini.before-shortnames`, and stripped them — 313 blocks kept, roots untouched.
+  - **Window 1000x620 -> 1600x900, columns rebalanced** so Path is widest: Name 32%, System 10%,
+    Type 6%, Played 8%, Path the remaining ~44%. It was Name 40% / Path 26%, which was backwards
+    once paths carry a root prefix plus a long folder name. At 1600 that is Path 701px against a
+    601px worst-case path, Name 511 against 310.
+  - The `id - Long Name` dropdown labels then overflowed the 200px combo ("snes - Super Nintendo
+    Entertainment System (12,345)" measures 303px); combo widened to 340 and the Sort/Favorites
+    controls shifted right to match. Verified by screenshotting the real window.
+  - **Screenshot trick:** `CopyFromScreen` grabs whatever is on top, so it captured the terminal
+    instead. `PrintWindow(hwnd, hdc, 2)` (PW_RENDERFULLCONTENT) renders the target window itself
+    and works while occluded - use that for WinForms captures.
   - **Deliberately did NOT add auto-pruning** of folder-less systems: if F: is ever disconnected
     at launch, that would wipe the emulator config of all 300+ systems. A one-time data clean is
     correct here, since the new exe never creates the long names again.
