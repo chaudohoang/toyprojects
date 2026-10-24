@@ -74,6 +74,7 @@ namespace RomLauncher
         public string RetroArchPath = "";
         public bool MinimizeOnLaunch = true;
         public bool HideDiscDupes = true;
+        public bool DarkTheme = true;
         public int SortMode = 0;
         public string LastSystem = "";
         public List<SystemConfig> Systems = new List<SystemConfig>();
@@ -184,6 +185,7 @@ namespace RomLauncher
                     else if (Eq(key, "RetroArchPath")) cfg.RetroArchPath = val;
                     else if (Eq(key, "MinimizeOnLaunch")) cfg.MinimizeOnLaunch = val != "0";
                     else if (Eq(key, "HideDiscDupes")) cfg.HideDiscDupes = val != "0";
+                    else if (Eq(key, "DarkTheme")) cfg.DarkTheme = val != "0";
                     else if (Eq(key, "SortMode")) int.TryParse(val, out cfg.SortMode);
                     else if (Eq(key, "LastSystem")) cfg.LastSystem = val;
                 }
@@ -202,6 +204,7 @@ namespace RomLauncher
             sb.AppendLine("RetroArchPath=" + cfg.RetroArchPath);
             sb.AppendLine("MinimizeOnLaunch=" + (cfg.MinimizeOnLaunch ? "1" : "0"));
             sb.AppendLine("HideDiscDupes=" + (cfg.HideDiscDupes ? "1" : "0"));
+            sb.AppendLine("DarkTheme=" + (cfg.DarkTheme ? "1" : "0"));
             sb.AppendLine("SortMode=" + cfg.SortMode.ToString(CultureInfo.InvariantCulture));
             sb.AppendLine("LastSystem=" + cfg.LastSystem);
 
@@ -931,6 +934,206 @@ namespace RomLauncher
 
     // ------------------------------------------------------------- list view
 
+    // ------------------------------------------------------------------ theme
+
+    // WinForms has no dark mode, so this does the two halves by hand: walk the
+    // managed control tree setting colours, and ask the OS to dark-theme the
+    // bits that paint themselves natively (the ListView and its header, combo
+    // drop-downs, scrollbars, and the title bar).
+    static class Theme
+    {
+        public static bool Dark = true;
+
+        // palette - only read through the properties below
+        static readonly Color D_Window = Color.FromArgb(32, 32, 34);
+        static readonly Color D_Panel  = Color.FromArgb(40, 40, 43);
+        static readonly Color D_Input  = Color.FromArgb(50, 50, 54);
+        static readonly Color D_Border = Color.FromArgb(70, 70, 76);
+        static readonly Color D_Text   = Color.FromArgb(228, 228, 230);
+        static readonly Color D_Muted  = Color.FromArgb(150, 150, 156);
+        static readonly Color D_Accent = Color.FromArgb(72, 150, 245);
+        static readonly Color D_Fav    = Color.FromArgb(235, 170, 70);
+        static readonly Color D_Danger = Color.FromArgb(220, 95, 95);
+
+        public static Color Window { get { return Dark ? D_Window : SystemColors.Control; } }
+        public static Color Panel  { get { return Dark ? D_Panel  : SystemColors.Control; } }
+        public static Color Input  { get { return Dark ? D_Input  : SystemColors.Window; } }
+        public static Color Border { get { return Dark ? D_Border : SystemColors.ControlDark; } }
+        public static Color Text   { get { return Dark ? D_Text   : SystemColors.ControlText; } }
+        public static Color Muted  { get { return Dark ? D_Muted  : Color.Gray; } }
+        public static Color Accent { get { return Dark ? D_Accent : SystemColors.Highlight; } }
+        public static Color Fav    { get { return Dark ? D_Fav    : Color.FromArgb(160, 90, 0); } }
+        public static Color Danger { get { return Dark ? D_Danger : Color.FromArgb(230, 90, 90); } }
+
+        // ---- native pieces -------------------------------------------------
+        [DllImport("dwmapi.dll")]
+        static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int value, int size);
+
+        [DllImport("uxtheme.dll", CharSet = CharSet.Unicode)]
+        static extern int SetWindowTheme(IntPtr hwnd, string app, string idlist);
+
+        [DllImport("user32.dll")]
+        static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+
+        const int LVM_GETHEADER = 0x1000 + 31;
+
+        // 20 is the documented attribute on Win10 2004+; 19 was the pre-release
+        // spelling still needed on 1809..1903. Setting both is harmless.
+        static void TitleBar(Form f)
+        {
+            if (!f.IsHandleCreated) return;
+            int on = Dark ? 1 : 0;
+            try { DwmSetWindowAttribute(f.Handle, 20, ref on, 4); } catch (Exception) { }
+            try { DwmSetWindowAttribute(f.Handle, 19, ref on, 4); } catch (Exception) { }
+        }
+
+        static void NativeTheme(Control c, string dark, string light)
+        {
+            if (!c.IsHandleCreated) return;
+            try { SetWindowTheme(c.Handle, Dark ? dark : light, null); } catch (Exception) { }
+        }
+
+        // ---- the walker ----------------------------------------------------
+        public static void Apply(Form f)
+        {
+            if (f == null) return;
+            f.BackColor = Window;
+            f.ForeColor = Text;
+            TitleBar(f);
+            Walk(f);
+            f.Invalidate(true);
+        }
+
+        static void Walk(Control parent)
+        {
+            foreach (Control c in parent.Controls)
+            {
+                Style(c);
+                if (c.Controls.Count > 0) Walk(c);
+            }
+        }
+
+        static void Style(Control c)
+        {
+            TextBox tb = c as TextBox;
+            if (tb != null)
+            {
+                tb.BackColor = Input; tb.ForeColor = Text;
+                tb.BorderStyle = BorderStyle.FixedSingle;
+                return;
+            }
+
+            ComboBox cb = c as ComboBox;
+            if (cb != null)
+            {
+                cb.BackColor = Input; cb.ForeColor = Text;
+                // FlatStyle.Flat makes WinForms paint the drop-down arrow itself,
+                // in system colours, so it stays light. Standard hands painting
+                // back to the native control, which DarkMode_CFD then darkens -
+                // arrow included.
+                cb.FlatStyle = FlatStyle.Standard;
+                NativeTheme(cb, "DarkMode_CFD", "Explorer");
+                return;
+            }
+
+            ListBox lb = c as ListBox;
+            if (lb != null)
+            {
+                lb.BackColor = Input; lb.ForeColor = Text;
+                lb.BorderStyle = BorderStyle.FixedSingle;
+                NativeTheme(lb, "DarkMode_Explorer", "Explorer");
+                return;
+            }
+
+            ListView lv = c as ListView;
+            if (lv != null)
+            {
+                lv.BackColor = Input; lv.ForeColor = Text;
+                lv.BorderStyle = BorderStyle.None;
+                // the list itself, then its header - the header is a separate
+                // HWND and keeps the light theme unless told otherwise
+                NativeTheme(lv, "DarkMode_Explorer", "Explorer");
+                if (lv.IsHandleCreated)
+                {
+                    IntPtr h = SendMessage(lv.Handle, LVM_GETHEADER, IntPtr.Zero, IntPtr.Zero);
+                    if (h != IntPtr.Zero)
+                    {
+                        try { SetWindowTheme(h, Dark ? "DarkMode_ItemsView" : "Explorer", null); }
+                        catch (Exception) { }
+                    }
+                }
+                return;
+            }
+
+            Button bt = c as Button;
+            if (bt != null)
+            {
+                bt.FlatStyle = Dark ? FlatStyle.Flat : FlatStyle.Standard;
+                bt.BackColor = Dark ? Panel : SystemColors.Control;
+                bt.ForeColor = Text;
+                if (Dark)
+                {
+                    bt.FlatAppearance.BorderColor = Border;
+                    bt.FlatAppearance.MouseOverBackColor = Input;
+                    bt.FlatAppearance.MouseDownBackColor = Window;
+                }
+                return;
+            }
+
+            CheckBox ck = c as CheckBox;
+            if (ck != null)
+            {
+                ck.BackColor = Color.Transparent; ck.ForeColor = Text;
+                // Let the native control draw the box. FlatStyle.Flat hands the
+                // glyph to WinForms, which then ignores CheckedBackColor while
+                // BackColor is transparent - a ticked box renders identically to
+                // an empty one. DarkMode_Explorer darkens the real glyph instead.
+                ck.FlatStyle = FlatStyle.System;
+                NativeTheme(ck, "DarkMode_Explorer", "Explorer");
+                return;
+            }
+
+            Label la = c as Label;
+            if (la != null)
+            {
+                la.BackColor = Color.Transparent;
+                // hints were literal Color.Gray; keep them muted but readable
+                if (la.ForeColor == Color.Gray || la.ForeColor == D_Muted) la.ForeColor = Muted;
+                else la.ForeColor = Text;
+                return;
+            }
+
+            StatusStrip ss = c as StatusStrip;
+            if (ss != null)
+            {
+                ss.BackColor = Panel; ss.ForeColor = Muted;
+                ss.RenderMode = ToolStripRenderMode.System;
+                foreach (ToolStripItem it in ss.Items) it.ForeColor = Muted;
+                return;
+            }
+
+            System.Windows.Forms.Panel pn = c as System.Windows.Forms.Panel;
+            if (pn != null) { pn.BackColor = Panel; pn.ForeColor = Text; return; }
+
+            c.BackColor = Window;
+            c.ForeColor = Text;
+        }
+
+        // Context menus are not in Controls, so they need doing separately.
+        public static void ApplyMenu(ToolStripDropDown menu)
+        {
+            if (menu == null) return;
+            menu.BackColor = Panel;
+            menu.ForeColor = Text;
+            menu.RenderMode = ToolStripRenderMode.System;
+            foreach (ToolStripItem it in menu.Items)
+            {
+                it.BackColor = Panel;
+                it.ForeColor = Text;
+            }
+        }
+    }
+
     class FastListView : ListView
     {
         // NOTE: do NOT use the managed DoubleBuffered / OptimizedDoubleBuffer style
@@ -1038,9 +1241,11 @@ namespace RomLauncher
             Font = new Font("Segoe UI", 9f);
             KeyPreview = true;
 
+            Theme.Dark = cfg.DarkTheme;
             BuildUi();
             LoadWindowIcon();
             Load += delegate { LoadInitial(); };
+            Shown += delegate { Theme.Apply(this); };
         }
 
         // Use the icon embedded in the exe for the title bar / taskbar.
@@ -1079,7 +1284,7 @@ namespace RomLauncher
             btnClear.Size = new Size(22, 22);
             btnClear.FlatStyle = FlatStyle.Flat;
             btnClear.FlatAppearance.BorderSize = 0;
-            btnClear.FlatAppearance.MouseOverBackColor = Color.FromArgb(230, 90, 90);
+            btnClear.FlatAppearance.MouseOverBackColor = Theme.Danger;
             btnClear.BackColor = txtSearch.BackColor;
             btnClear.ForeColor = Color.Gray;
             btnClear.TabStop = false;
@@ -1196,6 +1401,7 @@ namespace RomLauncher
             });
             menu.Opening += delegate { BuildLaunchWithMenu(launchWith); };
             list.ContextMenuStrip = menu;
+            menu.Opened += delegate { Theme.ApplyMenu(menu); };
 
             status = new StatusStrip();
             lblStatus = new ToolStripStatusLabel("Ready");
@@ -1214,6 +1420,7 @@ namespace RomLauncher
             list.Resize += delegate { LayoutColumns(); };
             Shown += delegate
             {
+                Theme.Apply(this);
                 Native.SetPlaceholder(txtSearch, "Type a game name...");
                 Native.SetRightMargin(txtSearch, 26);
                 PositionClearButton();
@@ -1672,7 +1879,7 @@ namespace RomLauncher
                 ? ""
                 : r.PlayCount.ToString(CultureInfo.CurrentCulture) + "x  " + r.LastPlayed.ToString("dd/MM/yy", CultureInfo.CurrentCulture));
             it.SubItems.Add(r.FullPath);
-            if (r.Fav) it.ForeColor = Color.FromArgb(160, 90, 0);
+            if (r.Fav) it.ForeColor = Theme.Fav;
             e.Item = it;
         }
 
@@ -2076,7 +2283,7 @@ namespace RomLauncher
         ComboBox cboCore;
         ComboBox cboWinMode;
         ComboBox cboPreset;
-        CheckBox chkEnabled, chkMinimize, chkDupes;
+        CheckBox chkEnabled, chkMinimize, chkDupes, chkDark;
         bool loading;
         SystemConfig cur;
         string initialSelect;
@@ -2345,6 +2552,25 @@ namespace RomLauncher
             chkDupes.Location = new Point(rx, ry);
             Controls.Add(chkDupes);
 
+            ry += 26;
+            chkDark = new CheckBox();
+            chkDark.Text = "Dark theme";
+            chkDark.AutoSize = true;
+            chkDark.Checked = cfg.DarkTheme;
+            chkDark.Location = new Point(rx, ry);
+            // Re-theme live so the choice is visible without a restart. The owner
+            // is re-themed too, otherwise the main window stays the old colour
+            // behind this dialog.
+            chkDark.CheckedChanged += delegate
+            {
+                cfg.DarkTheme = chkDark.Checked;
+                Theme.Dark = chkDark.Checked;
+                Theme.Apply(this);
+                Form ownerForm = Owner;
+                if (ownerForm != null) Theme.Apply(ownerForm);
+            };
+            Controls.Add(chkDark);
+
             Button ok = new Button();
             ok.Text = "OK";
             ok.DialogResult = DialogResult.OK;
@@ -2362,6 +2588,7 @@ namespace RomLauncher
                 cfg.RetroArchPath = newRetro;
                 cfg.MinimizeOnLaunch = chkMinimize.Checked;
                 cfg.HideDiscDupes = chkDupes.Checked;
+                cfg.DarkTheme = chkDark.Checked;
             };
             Controls.Add(ok);
 
@@ -2374,6 +2601,7 @@ namespace RomLauncher
 
             AcceptButton = ok;
             CancelButton = cancel;
+            Shown += delegate { Theme.Apply(this); };
 
             RebuildList();
             FillCores();
@@ -2869,6 +3097,7 @@ namespace RomLauncher
             bClose.Location = new Point(ClientSize.Width - 102, ClientSize.Height - 40);
             Controls.Add(bClose);
             AcceptButton = bClose;
+            Shown += delegate { Theme.Apply(this); };
 
             Repopulate(0);
         }
@@ -3029,6 +3258,7 @@ namespace RomLauncher
             bClose.Size = new Size(90, 28);
             Controls.Add(bClose);
             AcceptButton = bClose;
+            Shown += delegate { Theme.Apply(this); };
 
             Repopulate();
         }

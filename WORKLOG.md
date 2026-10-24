@@ -55,6 +55,32 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     correct here, since the new exe never creates the long names again.
   - Expect ~10 new systems with no emulator configured (`*-hacks`, `*-homebrew`, `mame-chd`,
     `bios-retroarch`, …). The two BIOS folders are not games and are probably worth `Enabled=0`.
+- **`RomLauncher`: dark theme**, on by default, toggled by "Dark theme" in Systems & emulators
+  (`DarkTheme=1` in `[General]`). The app had only 10 hardcoded colours and otherwise rode system
+  defaults, so a `Theme.Apply(Form)` walker that sets colours per control type covers nearly
+  everything.
+  - **WinForms has no dark mode; the native controls need the OS asked separately.**
+    `SetWindowTheme(hwnd, "DarkMode_Explorer")` on the ListView, and crucially the HEADER is a
+    SEPARATE HWND reached via `LVM_GETHEADER` (0x1000+31) which needs `"DarkMode_ItemsView"` —
+    without it the column header strip stays white over a black list. Title bar is
+    `DwmSetWindowAttribute` attr 20 (and 19 for 1809..1903).
+  - Theming must run on **`Shown`, not in the constructor**: both of those APIs need a created
+    handle and silently do nothing before that.
+  - **ComboBox: must stay `FlatStyle.Standard`.** `FlatStyle.Flat` makes WinForms paint the
+    drop-down arrow itself in system colours, so it stays light no matter what; Standard hands
+    painting back to the native control where `DarkMode_CFD` darkens the arrow too.
+  - **CheckBox: `FlatStyle.System` + `DarkMode_Explorer`.** Tried `FlatStyle.Flat` with
+    `FlatAppearance.CheckedBackColor` first — WinForms ignores it while `BackColor` is
+    transparent, so a TICKED box rendered identically to an empty one. Caught only by checking a
+    render against the ini (`MinimizeOnLaunch=1` showing as unchecked); the build was clean and
+    the colours all "looked" right.
+  - Light mode verified too, by flipping `Theme.Dark` through reflection before building the
+    form — the FlatStyle changes above are unconditional, so they had to be checked both ways.
+  - Favourite rows and the search clear-button hover now read `Theme.Fav` / `Theme.Danger`
+    instead of literal RGB.
+  - Unrelated, noticed while verifying: the library is now **55,271 ROMs**, up from 51,563,
+    because a fourth root `G:\Phone roms` was added. Not a regression.
+
 - **`RomLauncher`: widened the two settings dialogs so the grey hint lines stop clipping.**
   SystemsForm 860 -> 940, AltEmusForm 720 -> 800. The hints are `AutoSize` labels, so they were
   not being clipped by a label box but running past the FORM edge - measuring text width against
