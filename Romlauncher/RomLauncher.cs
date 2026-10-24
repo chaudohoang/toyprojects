@@ -458,7 +458,9 @@ namespace RomLauncher
     {
         // Bump whenever scan rules change (ignore list, dedup, etc.) so an old
         // cache written by a previous build is rejected and a rescan is forced.
-        const int CACHE_VER = 2;
+        // 3: folder names resolve to short system ids, so entries cached under
+        //    the long folder name have the wrong system and must be rebuilt.
+        const int CACHE_VER = 3;
 
         public static void SaveCache(string root, List<RomEntry> list)
         {

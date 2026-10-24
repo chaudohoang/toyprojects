@@ -29,8 +29,20 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   - New ini keys: `DisplayName=` per system (drives the `nes — Nintendo Entertainment System`
     dropdown label) and a `[FolderMap]` section for `folder name=system id` overrides, for
     collections the built-in table does not cover.
-  - **Not yet done:** the root has not been added. Chau adds new collections through the existing
-    "More folders…" button (`RootsForm`), so the first scan is his to run.
+  - **`CACHE_VER` 2 → 3.** The cache is keyed on `RootsKey()` (the roots string), which does NOT
+    change when system *naming* changes — so the stale cache, full of entries filed under the
+    long folder names, would have been accepted and the fix would not have shown until a manual
+    rescan. Bumping the version is the built-in mechanism for exactly this and forces the rebuild
+    everywhere. Remember it on any future change to how entries are named or filed.
+  - **Deployed to `F:\Games\Romlauncher`** (the live copy; the repo folder is not the one he
+    runs). Chau had already added the collection as `ExtraRoot2` that morning with the OLD exe,
+    which auto-created **62 placeholder `[System:<long folder name>]` sections**. Discovery never
+    removes stale systems, so those would have lingered as ghost dropdown rows showing (0).
+    Verified all 62 carried no emulator/alts/extensions, backed the ini up to
+    `RomLauncher.ini.before-shortnames`, and stripped them — 313 blocks kept, roots untouched.
+  - **Deliberately did NOT add auto-pruning** of folder-less systems: if F: is ever disconnected
+    at launch, that would wipe the emulator config of all 300+ systems. A one-time data clean is
+    correct here, since the new exe never creates the long names again.
   - Expect ~10 new systems with no emulator configured (`*-hacks`, `*-homebrew`, `mame-chd`,
     `bios-retroarch`, …). The two BIOS folders are not games and are probably worth `Enabled=0`.
 ## 2026-10-22
