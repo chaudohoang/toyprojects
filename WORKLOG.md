@@ -55,6 +55,34 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     correct here, since the new exe never creates the long names again.
   - Expect ~10 new systems with no emulator configured (`*-hacks`, `*-homebrew`, `mame-chd`,
     `bios-retroarch`, …). The two BIOS folders are not games and are probably worth `Enabled=0`.
+- **`RomLauncher`: per-system `Extensions=` whitelists derived from the actual library.** 83 of
+  326 systems now have one; the 243 with no ROMs stay on auto (a whitelist guessed with no
+  evidence would silently hide a format). Derived from `RomLauncher.cache.tsv` rather than by
+  walking the disk - the cache already holds every scanned path, so this is instant.
+  - Each list = observed extensions (minus junk) ∪ a curated per-platform baseline ∪
+    `zip,7z,rar`. The baseline matters: dedup means a `.cue` next to a `.chd` never reaches the
+    cache, so a purely observed list would omit `.cue` and hide games that only have one.
+  - **Net +355 ROMs, not fewer.** A whitelist BYPASSES `Scanner.IgnoreExt`, which was hiding real
+    ROMs: **genesis +395 `.bin`** and **megadrive +19 `.md`**. `.md` is in IgnoreExt as *markdown*
+    and had been silently eating every Mega Drive ROM using that extension — a latent bug the
+    whitelist now works around. Left IgnoreExt alone: dropping `.md` from it globally would let
+    real markdown through everywhere.
+  - Junk correctly removed: singe −22 `.ttf`, ports −9 `.libretro`, saturn −5 `.s`/`.ic8`,
+    psx −4 (`chdman.exe`, `.bat`), and scattered −1s of `.old`. `jaguarcd` fell to 0 and vanished
+    from the list — `F:\Games\Roms\jaguarcd` is empty and its only entries were `.bigpimg`.
+  - **`ps2` was left alone** — it already had a hand-set `chd bin iso`. The script never
+    overwrites a non-empty value, which is also why `.bin` appeared under ps2 in the before-data.
+  - **Skipped as not-game-systems:** `bios`, `bios-standalone` (drops yield nonsense lists like
+    `1024,prefs_backup,sha`) and `TopRoms Collection`. First attempt wrote them anyway — the edit
+    that added the skip list produced two loops and the second ignored it; caught by inspecting
+    the written ini, cleared afterwards. **Verify the file, not the script's success message.**
+  - Backups: `RomLauncher.ini.before-extensions`, and `.before-shortnames` from the earlier pass.
+  - **Data hygiene found, NOT fixed (Chau's call):** `F:\Games\Roms\TopRoms Collection` is a
+    nested copy inside the old root; `sfc`/`sufami` and `sg-1000`/`sg1000` are duplicate pairs
+    with byte-identical extension counts, i.e. the same content scanned twice.
+  - The live ini at `F:\Games\Romlauncher` is NOT in the repo; the tracked
+    `Romlauncher/RomLauncher.ini` is a separate, staler config and did not get these lists.
+
 ## 2026-10-22
 
 - **FtpUploadNew: a panel tested twice in a day lost its retest entirely.** `AddFiles`
