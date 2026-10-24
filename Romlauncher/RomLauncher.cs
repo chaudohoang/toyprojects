@@ -1028,17 +1028,28 @@ namespace RomLauncher
                 // child controls have drained too.
                 f.Refresh();
 
-                // Two independent reveals, both idempotent: whichever happens
-                // first wins. Relying on BeginInvoke alone would leave the
-                // window invisible for good if that message were never pumped.
-                PaintEventHandler reveal = null;
-                reveal = delegate
+                // The form painting is not enough: its CHILDREN paint afterwards,
+                // and a native ListView erases itself light before its first
+                // draw. Revealing on the form's own paint therefore still shows
+                // a brief flash from the list. Application.Idle fires once the
+                // message queue is EMPTY, i.e. after every pending child paint,
+                // which is the first moment the window is genuinely finished.
+                EventHandler idle = null;
+                System.Windows.Forms.Timer safety = new System.Windows.Forms.Timer();
+                MethodInvoker show = delegate
                 {
-                    f.Opacity = opaque;
-                    f.Paint -= reveal;
+                    if (idle != null) { Application.Idle -= idle; idle = null; }
+                    safety.Stop();
+                    safety.Dispose();
+                    if (!f.IsDisposed) f.Opacity = opaque;
                 };
-                f.Paint += reveal;
-                f.BeginInvoke((MethodInvoker)delegate { f.Opacity = opaque; });
+                idle = delegate { show(); };
+                Application.Idle += idle;
+
+                // Never let a missed Idle leave the window invisible for good.
+                safety.Interval = 400;
+                safety.Tick += delegate { show(); };
+                safety.Start();
             };
         }
 
@@ -1272,6 +1283,25 @@ namespace RomLauncher
             base.OnHandleCreated(e);
             SendMessage(Handle, LVM_SETEXTENDEDLISTVIEWSTYLE,
                 (IntPtr)LVS_EX_DOUBLEBUFFER, (IntPtr)LVS_EX_DOUBLEBUFFER);
+        }
+
+        // Erase with our own background rather than letting the native control
+        // use its default (light) one. Without this the list can show a white
+        // frame between its handle being created and the first row draw, which
+        // is the flash that survives every timing fix.
+        const int WM_ERASEBKGND = 0x0014;
+
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == WM_ERASEBKGND && m.WParam != IntPtr.Zero)
+            {
+                using (Graphics g = Graphics.FromHdc(m.WParam))
+                using (SolidBrush b = new SolidBrush(BackColor))
+                    g.FillRectangle(b, ClientRectangle);
+                m.Result = (IntPtr)1;
+                return;
+            }
+            base.WndProc(ref m);
         }
 
         // DarkMode_ItemsView darkens the header's BACKGROUND but leaves its text

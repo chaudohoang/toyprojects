@@ -64,6 +64,17 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     SEPARATE HWND reached via `LVM_GETHEADER` (0x1000+31) which needs `"DarkMode_ItemsView"` —
     without it the column header strip stays white over a black list. Title bar is
     `DwmSetWindowAttribute` attr 20 (and 19 for 1809..1903).
+  - **Follow-up 4: still flashing, "just faster".** That symptom is the tell — the remaining
+    flash is a LATER paint than the one being waited on. The form painting says nothing about
+    its CHILDREN, and a native ListView erases itself light before its first row draw. Two
+    changes: reveal on **`Application.Idle`** (fires when the message queue is EMPTY, so after
+    every pending child paint) instead of the form's own `Paint`, with a 400ms timer so a missed
+    Idle can never strand the window invisible; and `FastListView` now handles `WM_ERASEBKGND`
+    itself, filling with `BackColor`, which removes the white at source rather than hiding it.
+  - **Lesson for this class of bug:** "it still flashes but faster" means the chosen wait point
+    is too early, not that the approach is wrong. Each fix moved the reveal later in the paint
+    sequence — Shown → form Paint → queue empty.
+
   - **Follow-up 3: the flash survived the Opacity trick, because `Shown` is too early.**
     `Form.Shown` fires when the window is DISPLAYED, before its first `WM_PAINT` completes, so
     restoring opacity there reveals an unpainted — i.e. white — window. That IS the flash. Now:
