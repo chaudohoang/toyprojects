@@ -55,6 +55,27 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     correct here, since the new exe never creates the long names again.
   - Expect ~10 new systems with no emulator configured (`*-hacks`, `*-homebrew`, `mame-chd`,
     `bios-retroarch`, …). The two BIOS folders are not games and are probably worth `Enabled=0`.
+- **`RomLauncher`: extension whitelists moved from the ini into the code as built-in defaults.**
+  `Scanner.DefaultExt` (83 systems) is consulted when `Extensions=` is empty; an explicit value
+  in the ini still wins, and a system absent from the table keeps the old `IgnoreExt` blacklist
+  behaviour — guessing a whitelist for an unrecognised system hides files silently. All 83 ini
+  values were cleared afterwards so there is one source of truth, and the defaults now travel to
+  the other PC and survive a regenerated ini.
+  - **`ps2`'s hand-set `chd bin iso` was cleared too**, at Chau's request, so it takes the
+    curated `chd,cso,gz,iso,m3u` + archives. It loses 2 `.bin` files — for PS2 a loose `.bin` is
+    a disc track, not something you launch.
+  - `CACHE_VER` 3 → 4, since the admitted extensions changed what a scan collects.
+  - Verified end to end: **51,563 ROMs / 84 systems**, exactly 51,780 − 215 (nested folder
+    deleted, below) − 2 (ps2 `.bin`). genesis keeps its +395 `.bin`, megadrive its +20 `.md`.
+
+- **Deleted `F:\Games\Roms\TopRoms Collection`** — a real directory (NOT a link), 246 files /
+  6.33 GB, a partial copy of the collection nested inside the old root. Checked every file
+  against `F:\Games\TopRoms Collection` first: 246/246 present at identical sizes, 0 unique.
+  Its orphaned `[System:TopRoms Collection]` ini section was removed too.
+  - **`sufami` and `sg1000` are `SYMLINKD`** to `sfc` and `sg-1000` (confirmed via `dir /al`) —
+    deliberate, leave them. Only the TopRoms one was a real duplicate. Check link status before
+    touching anything that looks duplicated here.
+
 - **`RomLauncher`: per-system `Extensions=` whitelists derived from the actual library.** 83 of
   326 systems now have one; the 243 with no ROMs stay on auto (a whitelist guessed with no
   evidence would silently hide a format). Derived from `RomLauncher.cache.tsv` rather than by

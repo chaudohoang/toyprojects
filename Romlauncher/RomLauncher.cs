@@ -277,6 +277,113 @@ namespace RomLauncher
             ".sub",".ccd",".img",".bin",".raw",".mds",".dll",".sh"
         };
 
+
+        // Per-system extension whitelist used when the INI leaves Extensions
+        // empty. A whitelist deliberately BYPASSES IgnoreExt, which is what
+        // makes these worth having: IgnoreExt blocks ".bin" as a disc track and
+        // ".md" as markdown, yet both are ordinary cartridge ROM extensions, so
+        // Genesis and Mega Drive libraries were partly invisible without this.
+        //
+        // Each list is the formats the platform actually uses plus zip/7z/rar.
+        // A system absent from this table keeps the old behaviour (IgnoreExt
+        // blacklist), which stays the right default for anything unrecognised -
+        // guessing a whitelist for an unknown system hides files silently.
+        // An explicit Extensions= in the INI always wins over this.
+        static readonly Dictionary<string, string> DefaultExt =
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "3do",              "chd,cue,iso,zip,7z,rar" },
+            { "3ds",              "3ds,app,cci,cxi,zip,7z,rar" },
+            { "amiga",            "adf,dms,hdf,ipf,lha,zip,7z,rar" },
+            { "arcade",           "zip,7z,rar" },
+            { "atari2600",        "a26,bin,zip,7z,rar" },
+            { "atari2600-hacks",  "a26,bin,zip,7z,rar" },
+            { "atari5200",        "a52,bin,zip,7z,rar" },
+            { "atari7800",        "a78,bin,zip,7z,rar" },
+            { "atarilynx",        "lnx,lyx,o,zip,7z,rar" },
+            { "atomiswave",       "zip,7z,rar" },
+            { "c64",              "crt,d64,prg,t64,tap,zip,7z,rar" },
+            { "cdi",              "chd,cue,iso,zip,7z,rar" },
+            { "colecovision",     "bin,col,rom,zip,7z,rar" },
+            { "cps1",             "zip,7z,rar" },
+            { "cps2",             "zip,7z,rar" },
+            { "cps3",             "zip,7z,rar" },
+            { "dos",              "bat,com,conf,exe,zip,7z,rar" },
+            { "dreamcast",        "cdi,chd,cue,gdi,m3u,zip,7z,rar" },
+            { "famicom",          "fds,nes,zip,7z,rar" },
+            { "famicom-classics", "nes,zip,7z,rar" },
+            { "fbneo",            "zip,7z,rar" },
+            { "fds",              "fds,nes,rom,zip,7z,rar" },
+            { "gamecube",         "ciso,dol,gcm,gcz,iso,rvz,tgc,zip,7z,rar" },
+            { "gamegear",         "bin,gg,zip,7z,rar" },
+            { "gb",               "gb,gbc,sgb,zip,7z,rar" },
+            { "gba",              "agb,gba,zip,7z,rar" },
+            { "gbc",              "gb,gbc,zip,7z,rar" },
+            { "genesis",          "bin,gen,md,smd,zip,7z,rar" },
+            { "gp32",             "smc,zip,7z,rar" },
+            { "halflife",         "pak,pk3,zip,7z,rar" },
+            { "intellivision",    "bin,int,rom,zip,7z,rar" },
+            { "jaguar",           "abs,cof,j64,jag,rom,zip,7z,rar" },
+            { "jaguarcd",         "cdi,chd,cue,zip,7z,rar" },
+            { "lynx",             "lnx,lyx,o,zip,7z,rar" },
+            { "mame",             "zip,7z,rar" },
+            { "mame-chd",         "chd,zip,7z,rar" },
+            { "mame-legacy",      "zip,7z,rar" },
+            { "mastersystem",     "bin,sms,zip,7z,rar" },
+            { "megacd",           "chd,cue,iso,m3u,zip,7z,rar" },
+            { "megadrive",        "bin,gen,md,smd,zip,7z,rar" },
+            { "megadrive-hacks",  "bin,gen,md,smd,zip,7z,rar" },
+            { "megadrive-sports", "bin,gen,md,smd,zip,7z,rar" },
+            { "msx",              "cas,dsk,mx1,rom,zip,7z,rar" },
+            { "msx2",             "cas,dsk,mx2,rom,zip,7z,rar" },
+            { "n64",              "n64,ndd,v64,z64,zip,7z,rar" },
+            { "nds",              "dsi,ids,nds,zip,7z,rar" },
+            { "neogeo",           "zip,7z,rar" },
+            { "neogeocd",         "chd,cue,m3u,zip,7z,rar" },
+            { "nes",              "fds,nes,nsf,unf,unif,zip,7z,rar" },
+            { "nes-hacks",        "nes,zip,7z,rar" },
+            { "nes-homebrew",     "nes,zip,7z,rar" },
+            { "nesh",             "nes,zip,7z,rar" },
+            { "ngp",              "ngc,ngp,zip,7z,rar" },
+            { "ngpc",             "ngc,ngp,zip,7z,rar" },
+            { "odyssey2",         "bin,zip,7z,rar" },
+            { "pcengine",         "chd,cue,pce,sgx,zip,7z,rar" },
+            { "pcenginecd",       "chd,cue,m3u,zip,7z,rar" },
+            { "pokemini",         "min,zip,7z,rar" },
+            { "ports",            "zip,7z,rar" },
+            { "ps2",              "chd,cso,gz,iso,m3u,zip,7z,rar" },
+            { "ps2-sports",       "chd,cso,iso,m3u,zip,7z,rar" },
+            { "ps5",              "iso,zip,7z,rar" },
+            { "psp",              "chd,cso,dax,iso,pbp,zip,7z,rar" },
+            { "psx",              "chd,cue,ecm,iso,m3u,pbp,zip,7z,rar" },
+            { "psx-sports",       "chd,cue,iso,m3u,pbp,zip,7z,rar" },
+            { "saturn",           "chd,cue,iso,m3u,zip,7z,rar" },
+            { "sega32x",          "32x,bin,md,zip,7z,rar" },
+            { "sfc",              "bs,fig,sfc,smc,st,swc,zip,7z,rar" },
+            { "sg-1000",          "bin,sg,zip,7z,rar" },
+            { "sg1000",           "bin,sg,zip,7z,rar" },
+            { "singe",            "singe,zip,7z,rar" },
+            { "snes",             "bs,fig,sfc,smc,st,swc,zip,7z,rar" },
+            { "snes-hacks",       "sfc,smc,zip,7z,rar" },
+            { "sufami",           "sfc,smc,st,zip,7z,rar" },
+            { "supergrafx",       "pce,sgx,zip,7z,rar" },
+            { "vectrex",          "bin,vec,zip,7z,rar" },
+            { "virtualboy",       "vb,vboy,zip,7z,rar" },
+            { "wonderswan",       "ws,zip,7z,rar" },
+            { "wonderswancolor",  "ws,wsc,zip,7z,rar" },
+            { "xbox",             "iso,xbe,zip,7z,rar" },
+            { "xbox-dlc",         "iso,zip,7z,rar" },
+            { "xbox-sports",      "iso,zip,7z,rar" },
+            { "zxspectrum",       "sna,szx,tap,tzx,z80,zip,7z,rar" },
+        };
+
+        public static string DefaultExtensionsFor(string systemName)
+        {
+            if (string.IsNullOrEmpty(systemName)) return null;
+            string v;
+            return DefaultExt.TryGetValue(systemName, out v) ? v : null;
+        }
+
         // Disc-image family, used for de-duplicating multi-file sets.
         static readonly string[] DiscPriority = { ".m3u", ".chd", ".cue", ".gdi", ".cdi", ".iso", ".pbp", ".nrg" };
 
@@ -310,11 +417,16 @@ namespace RomLauncher
 
                 progress("Scanning " + sys.Name + " ...");
 
+                // An explicit Extensions= wins; otherwise fall back to the built-in
+                // list for this system, and to the IgnoreExt blacklist if there is none.
+                string extSpec = sys.Extensions;
+                if (string.IsNullOrEmpty(extSpec)) extSpec = DefaultExtensionsFor(sys.Name);
+
                 HashSet<string> white = null;
-                if (!string.IsNullOrEmpty(sys.Extensions))
+                if (!string.IsNullOrEmpty(extSpec))
                 {
                     white = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    foreach (string e in sys.Extensions.Split(new char[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries))
+                    foreach (string e in extSpec.Split(new char[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries))
                         white.Add(e.StartsWith(".") ? e.Trim() : "." + e.Trim());
                 }
 
@@ -460,7 +572,9 @@ namespace RomLauncher
         // cache written by a previous build is rejected and a rescan is forced.
         // 3: folder names resolve to short system ids, so entries cached under
         //    the long folder name have the wrong system and must be rebuilt.
-        const int CACHE_VER = 3;
+        // 4: built-in per-system extension whitelists, which admit .bin/.md
+        //    ROMs that the IgnoreExt blacklist used to drop.
+        const int CACHE_VER = 4;
 
         public static void SaveCache(string root, List<RomEntry> list)
         {
@@ -2189,7 +2303,7 @@ namespace RomLauncher
 
             ry += 28;
             Label hint2 = new Label();
-            hint2.Text = "Comma separated whitelist, e.g.  sfc,smc,zip   -  leave empty to auto-detect";
+            hint2.Text = "Comma separated whitelist, e.g.  sfc,smc,zip   -  empty uses the built-in list for this system";
             hint2.AutoSize = true;
             hint2.ForeColor = Color.Gray;
             hint2.Location = new Point(rx + 95, ry);
