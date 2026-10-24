@@ -64,6 +64,13 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     SEPARATE HWND reached via `LVM_GETHEADER` (0x1000+31) which needs `"DarkMode_ItemsView"` —
     without it the column header strip stays white over a black list. Title bar is
     `DwmSetWindowAttribute` attr 20 (and 19 for 1809..1903).
+  - **Follow-up: `DarkMode_ItemsView` darkens the header BACKGROUND but leaves its text black**,
+    which is unreadable on it. No theme string fixes that, so the header is owner-drawn:
+    `OwnerDraw = true` with `OnDrawColumnHeader` overridden in `FastListView`, while
+    `OnDrawItem`/`OnDrawSubItem` just set `DrawDefault = true` so rows keep the native fast path
+    (important with 55k virtual rows). Put in the subclass rather than event handlers so that
+    re-applying the theme cannot attach them twice. Light mode sets `DrawDefault` on the header
+    too, so it still renders natively.
   - Theming must run on **`Shown`, not in the constructor**: both of those APIs need a created
     handle and silently do nothing before that.
   - **ComboBox: must stay `FlatStyle.Standard`.** `FlatStyle.Flat` makes WinForms paint the

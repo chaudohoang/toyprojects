@@ -948,6 +948,7 @@ namespace RomLauncher
         static readonly Color D_Window = Color.FromArgb(32, 32, 34);
         static readonly Color D_Panel  = Color.FromArgb(40, 40, 43);
         static readonly Color D_Input  = Color.FromArgb(50, 50, 54);
+        static readonly Color D_Header = Color.FromArgb(58, 58, 63);
         static readonly Color D_Border = Color.FromArgb(70, 70, 76);
         static readonly Color D_Text   = Color.FromArgb(228, 228, 230);
         static readonly Color D_Muted  = Color.FromArgb(150, 150, 156);
@@ -959,6 +960,7 @@ namespace RomLauncher
         public static Color Panel  { get { return Dark ? D_Panel  : SystemColors.Control; } }
         public static Color Input  { get { return Dark ? D_Input  : SystemColors.Window; } }
         public static Color Border { get { return Dark ? D_Border : SystemColors.ControlDark; } }
+        public static Color Header { get { return Dark ? D_Header : SystemColors.Control; } }
         public static Color Text   { get { return Dark ? D_Text   : SystemColors.ControlText; } }
         public static Color Muted  { get { return Dark ? D_Muted  : Color.Gray; } }
         public static Color Accent { get { return Dark ? D_Accent : SystemColors.Highlight; } }
@@ -1050,6 +1052,7 @@ namespace RomLauncher
             {
                 lv.BackColor = Input; lv.ForeColor = Text;
                 lv.BorderStyle = BorderStyle.None;
+                lv.OwnerDraw = true;   // header only; rows use DrawDefault
                 // the list itself, then its header - the header is a separate
                 // HWND and keeps the light theme unless told otherwise
                 NativeTheme(lv, "DarkMode_Explorer", "Explorer");
@@ -1199,6 +1202,43 @@ namespace RomLauncher
             base.OnHandleCreated(e);
             SendMessage(Handle, LVM_SETEXTENDEDLISTVIEWSTYLE,
                 (IntPtr)LVS_EX_DOUBLEBUFFER, (IntPtr)LVS_EX_DOUBLEBUFFER);
+        }
+
+        // DarkMode_ItemsView darkens the header's BACKGROUND but leaves its text
+        // black, which is unreadable on it. The header is the only part drawn by
+        // hand; rows still draw natively via DrawDefault, so virtual mode keeps
+        // its fast path. Owner-drawing lives here rather than in event handlers
+        // so that re-applying the theme cannot attach them twice.
+        protected override void OnDrawColumnHeader(DrawListViewColumnHeaderEventArgs e)
+        {
+            if (!Theme.Dark) { e.DrawDefault = true; base.OnDrawColumnHeader(e); return; }
+
+            using (SolidBrush b = new SolidBrush(Theme.Header))
+                e.Graphics.FillRectangle(b, e.Bounds);
+            using (Pen pen = new Pen(Theme.Border))
+            {
+                e.Graphics.DrawLine(pen, e.Bounds.Right - 1, e.Bounds.Top + 5,
+                                         e.Bounds.Right - 1, e.Bounds.Bottom - 5);
+                e.Graphics.DrawLine(pen, e.Bounds.Left, e.Bounds.Bottom - 1,
+                                         e.Bounds.Right, e.Bounds.Bottom - 1);
+            }
+            Rectangle tr = new Rectangle(e.Bounds.X + 8, e.Bounds.Y,
+                                         e.Bounds.Width - 12, e.Bounds.Height);
+            TextRenderer.DrawText(e.Graphics, e.Header.Text, Font, tr, Theme.Text,
+                TextFormatFlags.VerticalCenter | TextFormatFlags.Left |
+                TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
+        }
+
+        protected override void OnDrawItem(DrawListViewItemEventArgs e)
+        {
+            e.DrawDefault = true;
+            base.OnDrawItem(e);
+        }
+
+        protected override void OnDrawSubItem(DrawListViewSubItemEventArgs e)
+        {
+            e.DrawDefault = true;
+            base.OnDrawSubItem(e);
         }
     }
 
