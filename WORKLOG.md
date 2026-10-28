@@ -297,7 +297,7 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 - **Still open:** the app has not been clicked through in the UI (per-run NG cards unseen);
   `ForRadiant/CLAUDE.md` still says FtpUploadNew is "not under active change as of 2026-10-01".
 
-- **1.0.0.11: operation.csv column naming.** `run` held a STAMP there while `Run` in
+- **operation.csv column naming (folded back into 1.0.0.10).** `run` held a STAMP there while `Run` in
   summary.csv held an ORDINAL - same word, two meanings, in two reports read side by side.
   Renamed to `run start` so both files mean the same thing by the same header.
   A `run` = `1 of 2` ordinal was added alongside it and then **reverted**: "N of M" is a
@@ -306,6 +306,11 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   report rebuilt later. operation.csv is a timeline that gets grepped and diffed, so a cell
   that changes retroactively does not belong in it. The ordinal stays in summary.csv, the
   per-panel rollup, where a whole-day fact belongs.
+  Shipped as **1.0.0.10**, not .11: the first .10 build never left `D:\Log`, so rather than
+  leave two near-identical versions around, the rename was folded back and the .10 folder's
+  exe swapped in place. `D:\Log\FtpUpload 1.0.0.11` is gone. Note git history still holds a
+  commit stamped 1.0.0.11, so the version is not a unique key for a binary in this range —
+  `run` vs `run start` in operation.csv is the reliable tell.
 - **Deploy recipe learned the hard way:** copy the PREVIOUS `D:\Log\FtpUpload <ver>` folder
   and swap only `FtpUpload.exe` — 18 entries. Copying the repo's `publish\` folder shipped
   49: the test harness, `.pdb`, five config variants, stale September data in
