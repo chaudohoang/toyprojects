@@ -1,0 +1,7 @@
+E:\Github\toyprojects\ForRadiant\QuickTools\FtpUploadQeueModify\bin\Debug\FtpUploadQeueModify.exe.config
+E:\Github\toyprojects\ForRadiant\QuickTools\FtpUploadQeueModify\bin\Debug\FtpUploadQeueModify.exe
+E:\Github\toyprojects\ForRadiant\QuickTools\FtpUploadQeueModify\bin\Debug\FtpUploadQeueModify.pdb
+E:\Github\toyprojects\ForRadiant\QuickTools\FtpUploadQeueModify\obj\Debug\FtpUploadQeueModify.csproj.AssemblyReference.cache
+E:\Github\toyprojects\ForRadiant\QuickTools\FtpUploadQeueModify\obj\Debug\FtpUploadQeueModify.csproj.CoreCompileInputs.cache
+E:\Github\toyprojects\ForRadiant\QuickTools\FtpUploadQeueModify\obj\Debug\FtpUploadQeueModify.exe
+E:\Github\toyprojects\ForRadiant\QuickTools\FtpUploadQeueModify\obj\Debug\FtpUploadQeueModify.pdb

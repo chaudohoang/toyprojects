@@ -6,6 +6,26 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ---
 
+## 2026-11-01
+
+- **Windows reinstalled on the main PC.** Claude's own memory (`C:\Users\Chau\.claude`) was
+  wiped; this file and `CLAUDE.md` survived because they live in the repo on E:. Nothing tracked
+  was uncommitted (checked by hashing the working tree against `.git/index` before git was
+  reinstalled), and one commit from the other PC (`e443fc5`) was pulled.
+  - **After a reinstall git refuses every repo** ("dubious ownership"): the files are owned by
+    the OLD account's SID. `E:\Github\add_git_safe_dirs.ps1` fixes all of them in one go; it
+    calls bare `git`, so run it from a terminal opened after Git was installed.
+  - `core.autocrlf=true` (Git installer default) is required here: the index holds LF, the
+    working tree CRLF. Without it ~3000 text files show as modified.
+- **Committed three groups that had never been added to git**, each one broken on a fresh clone:
+  - `ForRadiant/SeqxcToolset/DataGridEditHelper.cs` (written 2026-10-01). Three tracked views
+    call `DataGridEditHelper.Attach` and the README documents it, so the clone did not build.
+    The committed Release exe (2026-10-02) already contained it — only the source was missing.
+  - `ForRadiant/QuickTools/FtpUploadQeueModify/` — listed in the tracked `ForRadiant.sln` while
+    its project files were absent. `.vs/` left out.
+  - `RomHunter/` (2026-10-07) — WPF / net10.0 scaffold, demo data only, no real search or
+    download yet. Committed with its build output per repo convention.
+
 ## 2026-10-24
 
 - **`RomLauncher`: resolve No-Intro style folder names to short system ids.** New collection at

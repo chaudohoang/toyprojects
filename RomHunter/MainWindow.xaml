@@ -1,0 +1,77 @@
+<Window x:Class="RomHunter.MainWindow"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ Title="ROM Hunter" Height="720" Width="1180"
+ WindowStartupLocation="CenterScreen">
+ <Grid Margin="16">
+  <Grid.RowDefinitions>
+   <RowDefinition Height="Auto"/>
+   <RowDefinition Height="Auto"/>
+   <RowDefinition Height="*"/>
+   <RowDefinition Height="Auto"/>
+  </Grid.RowDefinitions>
+
+  <DockPanel Grid.Row="0" Margin="0,0,0,12">
+   <TextBlock Text="ROM HUNTER" FontSize="26" FontWeight="Bold"/>
+   <Button DockPanel.Dock="Right" Content="Settings" Padding="14,6"/>
+  </DockPanel>
+
+  <Grid Grid.Row="1" Margin="0,0,0,12">
+   <Grid.ColumnDefinitions>
+    <ColumnDefinition Width="*"/><ColumnDefinition Width="170"/>
+    <ColumnDefinition Width="150"/><ColumnDefinition Width="120"/>
+   </Grid.ColumnDefinitions>
+   <TextBox x:Name="SearchBox" Grid.Column="0" Margin="0,0,8,0"
+            VerticalContentAlignment="Center" Padding="8" FontSize="15"
+            Text="Starhawk"/>
+   <ComboBox Grid.Column="1" Margin="0,0,8,0" SelectedIndex="0" Padding="6">
+    <ComboBoxItem Content="All Platforms"/>
+    <ComboBoxItem Content="Game Boy"/>
+    <ComboBoxItem Content="Game Boy Color"/>
+    <ComboBoxItem Content="NES"/>
+    <ComboBoxItem Content="SNES"/>
+    <ComboBoxItem Content="Mega Drive"/>
+   </ComboBox>
+   <ComboBox Grid.Column="2" Margin="0,0,8,0" SelectedIndex="0" Padding="6">
+    <ComboBoxItem Content="Any Region"/>
+    <ComboBoxItem Content="USA"/>
+    <ComboBoxItem Content="Europe"/>
+    <ComboBoxItem Content="Japan"/>
+   </ComboBox>
+   <Button Grid.Column="3" Content="SEARCH" Click="Search_Click" FontWeight="Bold"/>
+  </Grid>
+
+  <Grid Grid.Row="2">
+   <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="170"/></Grid.RowDefinitions>
+   <GroupBox Header="Search Results" Margin="0,0,0,10">
+    <DataGrid x:Name="ResultsGrid" AutoGenerateColumns="False" IsReadOnly="True"
+              SelectionMode="Single">
+     <DataGrid.Columns>
+      <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="*"/>
+      <DataGridTextColumn Header="Platform" Binding="{Binding Platform}" Width="150"/>
+      <DataGridTextColumn Header="Region" Binding="{Binding Region}" Width="100"/>
+      <DataGridTextColumn Header="Language" Binding="{Binding Language}" Width="110"/>
+      <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="180"/>
+      <DataGridCheckBoxColumn Header="Authorized" Binding="{Binding Authorized}" Width="90"/>
+     </DataGrid.Columns>
+    </DataGrid>
+   </GroupBox>
+
+   <GroupBox Grid.Row="1" Header="Download Queue">
+    <DataGrid x:Name="QueueGrid" AutoGenerateColumns="False" IsReadOnly="True">
+     <DataGrid.Columns>
+      <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="*"/>
+      <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="180"/>
+      <DataGridTextColumn Header="Progress" Binding="{Binding Progress}" Width="100"/>
+     </DataGrid.Columns>
+    </DataGrid>
+   </GroupBox>
+  </Grid>
+
+  <StatusBar Grid.Row="3" Margin="0,12,0,0">
+   <StatusBarItem Content="Ready"/>
+   <Separator/>
+   <StatusBarItem Content="Legal/authorized sources only"/>
+  </StatusBar>
+ </Grid>
+</Window>
