@@ -12,6 +12,42 @@ namespace ArpgNameRandomizer
     {
         long Total(Style s);
         List<string> Take(int count, Style style, ISet<string> seen, Random rnd);
+        /// <summary>Any name from the pool (seen or not), or null if the pool is empty.</summary>
+        string RandomName(Style s, Random rnd);
+    }
+
+    /// <summary>
+    /// Adds two digits to another pool's names (Grimjaw07, TacoGoblin42): 100 versions of every name.
+    /// The inner pool is built two characters shorter so the number still fits the max length.
+    /// </summary>
+    class NumberedPool : INamePool
+    {
+        readonly INamePool inner;
+        public NumberedPool(INamePool inner) { this.inner = inner; }
+
+        public long Total(Style s) => inner.Total(s) * 100;
+
+        public string RandomName(Style s, Random rnd)
+        {
+            string b = inner.RandomName(s, rnd);
+            return b == null ? null : b + rnd.Next(100).ToString("00");
+        }
+
+        public List<string> Take(int count, Style style, ISet<string> seen, Random rnd)
+        {
+            var result = new List<string>();
+            // With 100x the names, random picks practically never collide; give up only on a tiny,
+            // nearly used-up pool (the caller then starts the cycle over).
+            for (int miss = 0; result.Count < count && miss < 5000; )
+            {
+                string n = RandomName(style, rnd);
+                if (n == null) break;
+                if (seen.Contains(n)) { miss++; continue; }
+                seen.Add(n);
+                result.Add(n);
+            }
+            return result;
+        }
     }
 
     /// <summary>
@@ -36,12 +72,27 @@ namespace ArpgNameRandomizer
 
         const int MaxFirstLen = 8;
 
-        public NamePool(GameClass cls, Gender gender, int maxLen, string prefix)
+        /// <summary>
+        /// Everything that does not depend on max length, built once per class / gender / prefix and cached,
+        /// so stepping the max length only re-filters (building "Any class" from scratch takes ~0.5 s).
+        /// </summary>
+        class Base
         {
-            prefix = (prefix ?? "").Trim();
-            minLen = 3;
-            this.maxLen = maxLen;
+            public List<string> Fantasy = new List<string>();
+            public List<string> Compound = new List<string>();
+            public List<(string first, string[] titles, int[] upTo)> Firsts = new List<(string, string[], int[])>();
+        }
 
+        static readonly Dictionary<string, Base> baseCache = new Dictionary<string, Base>();
+
+        static Base GetBase(GameClass cls, Gender gender, string prefix)
+        {
+            string key = cls.Name + "|" + gender + "|" + prefix.ToLowerInvariant();
+            if (baseCache.TryGetValue(key, out var b)) return b;
+            b = new Base();
+
+            var fantasySet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var compoundSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var firstThemes = new Dictionary<string, HashSet<Theme>>(StringComparer.Ordinal);
             var themeTitles = new Dictionary<Theme, List<string>>();
 
@@ -49,7 +100,7 @@ namespace ArpgNameRandomizer
             {
                 foreach (var name in FantasyNames(t, gender, prefix))
                 {
-                    if (name.Length >= minLen && name.Length <= maxLen && fantasySet.Add(name)) Fantasy.Add(name);
+                    if (fantasySet.Add(name)) b.Fantasy.Add(name);
                     if (name.Length <= MaxFirstLen)
                     {
                         if (!firstThemes.TryGetValue(name, out var set)) firstThemes[name] = set = new HashSet<Theme>();
@@ -61,31 +112,75 @@ namespace ArpgNameRandomizer
                 {
                     titles.Add(c);
                     bool fitsPrefix = prefix.Length == 0 || c.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
-                    if (fitsPrefix && c.Length >= minLen && c.Length <= maxLen && !fantasySet.Contains(c) && compoundSet.Add(c))
-                        Compound.Add(c);
+                    if (fitsPrefix && compoundSet.Add(c)) b.Compound.Add(c);
                 }
                 themeTitles[t] = titles;
             }
-            // A later theme's made-up name can equal an earlier theme's compound; count it once, as made-up.
-            Compound.RemoveAll(c => fantasySet.Contains(c));
-            compoundSet.ExceptWith(fantasySet);
+            // A made-up name can equal a compound; count it once, as made-up.
+            b.Compound.RemoveAll(c => fantasySet.Contains(c));
 
-            // Firsts that share the same set of themes share one merged title list.
-            var merged = new Dictionary<string, string[]>();
+            // Firsts that share the same set of themes share one merged title list. Each list keeps a
+            // running count of titles by length, so "how many titles fit after this first name" is two
+            // lookups instead of a walk over thousands of titles.
+            var merged = new Dictionary<string, (string[] list, int[] upTo)>();
             foreach (var kv in firstThemes)
             {
-                string key = string.Join("|", kv.Value.Select(t => t.Name).OrderBy(n => n));
-                if (!merged.TryGetValue(key, out var list))
-                    merged[key] = list = kv.Value.SelectMany(t => themeTitles[t]).Distinct(StringComparer.Ordinal).ToArray();
-                int fits = list.Count(c => Fits(kv.Key.Length + c.Length));
+                string mk = string.Join("|", kv.Value.Select(t => t.Name).OrderBy(n => n));
+                if (!merged.TryGetValue(mk, out var m))
+                {
+                    var list = kv.Value.SelectMany(t => themeTitles[t]).Distinct(StringComparer.Ordinal).ToArray();
+                    var upTo = new int[64];                  // upTo[n] = titles with length <= n
+                    foreach (var c in list) upTo[Math.Min(c.Length, 63)]++;
+                    for (int i = 1; i < upTo.Length; i++) upTo[i] += upTo[i - 1];
+                    merged[mk] = m = (list, upTo);
+                }
+                b.Firsts.Add((kv.Key, m.list, m.upTo));
+            }
+            baseCache[key] = b;
+            return b;
+        }
+
+        public NamePool(GameClass cls, Gender gender, int maxLen, string prefix)
+        {
+            prefix = (prefix ?? "").Trim();
+            minLen = 3;
+            this.maxLen = maxLen;
+            var b = GetBase(cls, gender, prefix);
+
+            foreach (var n in b.Fantasy) if (Fits(n.Length)) { Fantasy.Add(n); fantasySet.Add(n); }
+            foreach (var n in b.Compound) if (Fits(n.Length)) { Compound.Add(n); compoundSet.Add(n); }
+            foreach (var (first, titles, upTo) in b.Firsts)
+            {
+                int lo = Math.Max(minLen - first.Length, 1), hi = Math.Min(maxLen - first.Length, 63);
+                int fits = hi < lo ? 0 : upTo[hi] - upTo[lo - 1];
                 if (fits == 0) continue;
-                titlesFor[kv.Key] = list;
-                firsts.Add(kv.Key);
+                titlesFor[first] = titles;
+                firsts.Add(first);
                 TitledTotal += fits;
             }
         }
 
         bool Fits(int len) => len >= minLen && len <= maxLen;
+
+        public string RandomName(Style style, Random rnd)
+        {
+            bool f = (style == Style.Mixed || style == Style.Fantasy) && Fantasy.Count > 0;
+            bool c = (style == Style.Mixed || style == Style.Compound) && Compound.Count > 0;
+            bool t = (style == Style.Mixed || style == Style.NameAndTitle) && firsts.Count > 0;
+            double wF = f ? 45 : 0, wC = c ? 35 : 0, wT = t ? 20 : 0;
+            if (wF + wC + wT == 0) return null;
+            double r = rnd.NextDouble() * (wF + wC + wT);
+            if (r < wF) return Fantasy[rnd.Next(Fantasy.Count)];
+            if (r < wF + wC) return Compound[rnd.Next(Compound.Count)];
+            for (int i = 0; i < 1000; i++)
+            {
+                string first = firsts[rnd.Next(firsts.Count)];
+                var titles = titlesFor[first];
+                string name = first + titles[rnd.Next(titles.Length)];
+                if (Fits(name.Length)) return name;
+            }
+            return Fantasy.Count > 0 ? Fantasy[rnd.Next(Fantasy.Count)] : null;
+        }
 
         public long Total(Style s) =>
             s == Style.Fantasy ? Fantasy.Count :
@@ -123,33 +218,38 @@ namespace ArpgNameRandomizer
         public List<string> Take(int count, Style style, ISet<string> seen, Random rnd)
         {
             var result = new List<string>();
-            var fQueue = new Queue<string>(Shuffle(Fantasy.Where(n => !seen.Contains(n)), rnd));
-            var cQueue = new Queue<string>(Shuffle(Compound.Where(n => !seen.Contains(n)), rnd));
-            long tLeft = style == Style.Mixed || style == Style.NameAndTitle ? Remaining(Style.NameAndTitle, seen) : 0;
+            bool fOk = style == Style.Mixed || style == Style.Fantasy;
+            bool cOk = style == Style.Mixed || style == Style.Compound;
+            bool tOk = style == Style.Mixed || style == Style.NameAndTitle;
 
             while (result.Count < count)
             {
-                bool fOk = (style == Style.Mixed || style == Style.Fantasy) && fQueue.Count > 0;
-                bool cOk = (style == Style.Mixed || style == Style.Compound) && cQueue.Count > 0;
-                bool tOk = tLeft > 0;
                 if (!fOk && !cOk && !tOk) break;
 
                 // Mixed: roughly 45% made-up, 35% compound, 20% name + title, skipping any that ran out.
                 double wF = fOk ? 45 : 0, wC = cOk ? 35 : 0, wT = tOk ? 20 : 0;
                 double r = rnd.NextDouble() * (wF + wC + wT);
                 string name;
-                if (r < wF) name = fQueue.Dequeue();
-                else if (r < wF + wC) name = cQueue.Dequeue();
-                else
-                {
-                    name = NextTitled(seen, rnd);
-                    if (name == null) { tLeft = 0; continue; }
-                    tLeft--;
-                }
+                if (r < wF) { name = NextFrom(Fantasy, seen, rnd); if (name == null) { fOk = false; continue; } }
+                else if (r < wF + wC) { name = NextFrom(Compound, seen, rnd); if (name == null) { cOk = false; continue; } }
+                else { name = NextTitled(seen, rnd); if (name == null) { tOk = false; continue; } }
                 seen.Add(name);
                 result.Add(name);
             }
             return result;
+        }
+
+        // A random unseen entry. Random picks almost always hit; near the end of a list we scan it.
+        static string NextFrom(List<string> list, ISet<string> seen, Random rnd)
+        {
+            if (list.Count == 0) return null;
+            for (int i = 0; i < 200; i++)
+            {
+                string n = list[rnd.Next(list.Count)];
+                if (!seen.Contains(n)) return n;
+            }
+            var left = list.Where(n => !seen.Contains(n)).ToList();
+            return left.Count == 0 ? null : left[rnd.Next(left.Count)];
         }
 
         string NextTitled(ISet<string> seen, Random rnd)
@@ -223,10 +323,18 @@ namespace ArpgNameRandomizer
             b = b.ToLowerInvariant();
             char la = char.ToLowerInvariant(a[a.Length - 1]);
             char fb = b[0];
-            if (IsVowel(la) && IsVowel(fb)) b = b.Substring(1);          // Thra+ana -> Thrana
+            if (IsVowel(la) && IsVowel(fb))
+            {
+                if (la == fb) b = b.Substring(1);                          // Thra+ana -> Thrana
+                else if (SmoothPairs.Contains("" + la + fb)) { }           // Ka+ion -> Kaion: both vowels stay
+                else return a.Substring(0, a.Length - 1) + b;              // Fidmi+ard -> Fidmard (not Fidmird)
+            }
             else if (la == fb && !IsVowel(la)) b = b.Substring(1);       // Gor+rok -> Gorok
             return b.Length == 0 ? a : a + b;
         }
+
+        // Vowel pairs that read well across a syllable join.
+        static readonly HashSet<string> SmoothPairs = new HashSet<string> { "ae", "ai", "au", "ea", "ei", "ia", "ie", "io", "ua" };
 
         static readonly string[] Digraphs = { "th", "sh", "ch", "ph", "gh", "ck", "wh" };
 

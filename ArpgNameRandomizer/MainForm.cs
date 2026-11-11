@@ -24,6 +24,7 @@ namespace ArpgNameRandomizer
         ComboBox cboCategory, cboClass, cboGender, cboStyle;
         NumericUpDown numMaxLen;
         TextBox txtPrefix;
+        CheckBox chkNumber;
         Label lblRules, lblStatus, lblName, lblClass, lblStyle;
         ListBox lstFavorites;
         ToolTip tip = new ToolTip();
@@ -34,7 +35,7 @@ namespace ArpgNameRandomizer
             Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
             Font = new Font("Segoe UI", 9.5f);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(820, 500);
+            ClientSize = new Size(820, 540);
             MinimumSize = new Size(700, 420);
             StartPosition = FormStartPosition.CenterScreen;
 
@@ -63,6 +64,8 @@ namespace ArpgNameRandomizer
             numMaxLen = new NumericUpDown { Width = 70, Minimum = 3, Maximum = 30, Value = 14 };   // one value for both categories
             txtPrefix = new TextBox { Width = w };
             txtPrefix.KeyPress += (s, e) => { if (!char.IsLetter(e.KeyChar) && !char.IsControl(e.KeyChar)) e.Handled = true; };
+            chkNumber = new CheckBox { Text = "Add a number (Name07)", AutoSize = true, Margin = new Padding(3, 10, 3, 3) };
+            tip.SetToolTip(chkNumber, "Two digits at the end: 100x more names. Diablo IV does not allow numbers.");
             lblClass = Lbl("Class");
             lblStyle = Lbl("Style");
             lblRules = new Label { AutoSize = true, MaximumSize = new Size(w, 0), ForeColor = Color.DimGray, Margin = new Padding(3, 8, 3, 3) };
@@ -75,6 +78,7 @@ namespace ArpgNameRandomizer
                 lblStyle, cboStyle,
                 Lbl("Max length"), numMaxLen,
                 Lbl("Starts with (optional)"), txtPrefix,
+                chkNumber,
                 lblRules,
             });
             cboCategory.SelectedIndexChanged += (s, e) => OnCategoryChanged();
@@ -160,11 +164,15 @@ namespace ArpgNameRandomizer
             if (item == null || cboGender.SelectedIndex < 0) return null;
             var gender = (Gender)cboGender.SelectedIndex;
             int maxLen = (int)numMaxLen.Value;
-            string key = string.Join("|", cboCategory.SelectedIndex, item, cboGender.SelectedIndex, maxLen, txtPrefix.Text.Trim().ToLowerInvariant());
+            bool number = chkNumber.Checked;
+            string key = string.Join("|", cboCategory.SelectedIndex, item, cboGender.SelectedIndex, maxLen, txtPrefix.Text.Trim().ToLowerInvariant(), number);
             if (key != poolKey)
             {
-                pool = item is Vibe v ? new ChatPool(v, gender, maxLen, txtPrefix.Text)
-                                      : (INamePool)new NamePool((GameClass)item, gender, maxLen, txtPrefix.Text);
+                // With a number, the name itself gets two characters less so "Name07" still fits.
+                int baseLen = number ? Math.Max(3, maxLen - 2) : maxLen;
+                pool = item is Vibe v ? new ChatPool(v, gender, baseLen, txtPrefix.Text)
+                                      : (INamePool)new NamePool((GameClass)item, gender, baseLen, txtPrefix.Text);
+                if (number) pool = new NumberedPool(pool);
                 poolKey = key;
             }
             return pool;
@@ -278,6 +286,7 @@ namespace ArpgNameRandomizer
             cboGender.SelectedIndex = Int(d, "gender", 0, 0, cboGender.Items.Count - 1);
             cboStyle.SelectedIndex = Int(d, "style", 0, 0, cboStyle.Items.Count - 1);
             if (d.TryGetValue("prefix", out var p)) txtPrefix.Text = p;
+            chkNumber.Checked = d.TryGetValue("number", out var num) && num == "1";
         }
 
         static int Int(Dictionary<string, string> d, string key, int def, int min, int max)
@@ -295,6 +304,7 @@ namespace ArpgNameRandomizer
                     "style=" + cboStyle.SelectedIndex,
                     "maxlen=" + numMaxLen.Value,
                     "prefix=" + txtPrefix.Text,
+                    "number=" + (chkNumber.Checked ? "1" : "0"),
                 });
             }
             catch { }

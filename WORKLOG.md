@@ -42,6 +42,27 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   - **v1.4.0:** chat nicknames are joined without spaces, each word capitalised (`QueenOfNaps`,
     `PartTimeNapper`; "Mr." loses its dot). One shared max length (3-30) for both categories, as
     Chau asked; at 14, "Any vibe" still has about 6.3k chat names.
+  - **v1.5.0: much bigger pools.** At max length 14: ARPG "Any class" went from 1.6M to 17.8M
+    (made-up 12k to 80k, compound 5k to 13k); group chat "Any vibe" went from 6.3k to 73k (about 500
+    to about 4k per vibe). Done by roughly doubling every syllable and word list, adding chat titles
+    (Lil, Mega, Baroness...) and a noun + noun pattern (`TacoGoblin`), which supplies most of the
+    chat growth.
+    - Vowel join rule changed: when two different vowels meet and the pair is not a smooth one
+      (ae ai au ea ei ia ie io ua), drop the LEFT vowel (`Fidmi`+`ard` -> `Fidmard`). The old rule
+      dropped the right one, which ate into endings (`Jacdint`, `Fidmird`).
+    - Speed: counting name + title combinations by walking every title took 1.7-3.4 s for
+      "Any class" after the growth. Now each title list keeps counts by length, and everything
+      that does not depend on max length is cached per class / gender / prefix: first build is
+      about 0.3 s, then a max-length step takes about 15 ms. Generate picks random unseen names
+      instead of shuffling whole lists.
+  - **v1.6.0: chat lists x3 and an "Add a number" option.** About 90 adjectives and 90 nouns per vibe
+    (was ~35): "Any vibe" went from 73k to 446k at max 14, a single vibe from ~4k to 17-24k. The checkbox
+    appends two digits (00-99) for both categories (`NumberedPool` wraps the real pool, built 2 shorter):
+    chat Any vibe ~30M, ARPG Any class ~178M at max 14. Noun + noun is now about half of all chat names
+    (`LasagnaCheese`, `EarmuffFuton`), which is the most random-sounding pattern; if quality complaints
+    come, restrict that pattern before shrinking lists. `ChatPool` is cached per vibe / gender / prefix
+    like `NamePool` (first "Any vibe" build ~0.1 s). Numbered names are picked at random and checked
+    against `seen`; 20k numbered names took 41 ms with no repeats.
   - The PC's PowerShell execution policy blocks `.ps1` files; use `powershell -ExecutionPolicy Bypass -File`.
 
 ## 2026-11-01
