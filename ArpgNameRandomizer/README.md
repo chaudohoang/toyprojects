@@ -2,9 +2,9 @@
 
 Small WinForms tool (.NET Framework 4.7.2) that makes character names for ARPGs.
 
-- **Game**: Path of Exile, Path of Exile 2, Diablo IV, Last Epoch. Each game has its own class list and name rules (max length, underscores).
+- **Game**: Path of Exile, Path of Exile 2, Diablo IV, Last Epoch. Each game has its own class list and name rules (max length). Names are letters only, never underscores.
 - **Class** picks the flavour: Marauder/Warrior → brutal, Witch/Necromancer → dark, Sorceress/Mage → arcane, Monk/Spiritborn → spirit, and so on. "Any class" mixes them all.
-- **Style**: made-up names (`Morvath`), compounds (`Bonecaller`), name + title (`KaelDuskborn`, or `Kael_Duskborn` in PoE), or a mix.
+- **Style**: made-up names (`Morvath`), compounds (`Bonecaller`), name + title (`KaelDuskborn`), or a mix.
 - Gender, max length, "starts with" and count options.
 - Click a name to copy it. Double-click (or press F) to add it to favourites, saved to `favorites.txt` next to the exe. Delete removes a favourite.
 - Last-used options are saved to `settings.txt` next to the exe.

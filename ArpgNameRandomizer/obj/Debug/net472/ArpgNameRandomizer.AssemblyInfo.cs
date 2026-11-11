@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ArpgNameRandomizer")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c9f4620b4d66762c5c1512eb94291c20f0989ed8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e28c8580b138b7deb4511393d12efc723883a636")]
 [assembly: System.Reflection.AssemblyProductAttribute("ArpgNameRandomizer")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ARPG Name Randomizer")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

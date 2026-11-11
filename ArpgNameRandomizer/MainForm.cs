@@ -21,7 +21,6 @@ namespace ArpgNameRandomizer
         ComboBox cboGame, cboClass, cboGender, cboStyle;
         NumericUpDown numMaxLen, numCount;
         TextBox txtPrefix;
-        CheckBox chkUnderscore;
         Label lblRules, lblStatus;
         ListBox lstNames, lstFavorites;
         ToolTip tip = new ToolTip();
@@ -61,7 +60,6 @@ namespace ArpgNameRandomizer
             numCount = new NumericUpDown { Width = 70, Minimum = 1, Maximum = 200, Value = 30 };
             txtPrefix = new TextBox { Width = w };
             txtPrefix.KeyPress += (s, e) => { if (!char.IsLetter(e.KeyChar) && !char.IsControl(e.KeyChar)) e.Handled = true; };
-            chkUnderscore = new CheckBox { Text = "Underscore (Kael_Duskborn)", AutoSize = true };
             lblRules = new Label { AutoSize = true, MaximumSize = new Size(w, 0), ForeColor = Color.DimGray, Margin = new Padding(3, 8, 3, 3) };
             var btnGen = new Button { Text = "Generate", Width = w, Height = 36, Font = new Font(Font, FontStyle.Bold) };
             btnGen.Click += (s, e) => Generate();
@@ -76,7 +74,6 @@ namespace ArpgNameRandomizer
                 Lbl("Max length"), numMaxLen,
                 Lbl("Starts with (optional)"), txtPrefix,
                 Lbl("How many"), numCount,
-                chkUnderscore,
                 btnGen,
                 lblRules,
             });
@@ -142,7 +139,6 @@ namespace ArpgNameRandomizer
             numMaxLen.Maximum = g.MaxLen;
             numMaxLen.Value = Math.Min(Math.Max(keep, numMaxLen.Minimum), numMaxLen.Maximum);
 
-            chkUnderscore.Enabled = g.AllowUnderscore;
             lblRules.Text = g.Rules;
         }
 
@@ -156,7 +152,7 @@ namespace ArpgNameRandomizer
             foreach (string f in lstFavorites.Items) exclude.Add(f);
 
             var names = generator.Generate(g, cls, (Gender)cboGender.SelectedIndex, (Style)cboStyle.SelectedIndex,
-                (int)numMaxLen.Value, txtPrefix.Text, chkUnderscore.Checked, (int)numCount.Value, exclude);
+                (int)numMaxLen.Value, txtPrefix.Text, (int)numCount.Value, exclude);
 
             // Ran dry: forget this session's history and try once more.
             if (names.Count < numCount.Value && shown.Count > 0)
@@ -164,7 +160,7 @@ namespace ArpgNameRandomizer
                 shown.Clear();
                 exclude = new HashSet<string>(lstFavorites.Items.Cast<string>(), StringComparer.OrdinalIgnoreCase);
                 names = generator.Generate(g, cls, (Gender)cboGender.SelectedIndex, (Style)cboStyle.SelectedIndex,
-                    (int)numMaxLen.Value, txtPrefix.Text, chkUnderscore.Checked, (int)numCount.Value, exclude);
+                    (int)numMaxLen.Value, txtPrefix.Text, (int)numCount.Value, exclude);
             }
 
             foreach (var n in names) shown.Add(n);
@@ -250,7 +246,6 @@ namespace ArpgNameRandomizer
             cboStyle.SelectedIndex = Int(d, "style", 0, 0, cboStyle.Items.Count - 1);
             numMaxLen.Value = Int(d, "maxlen", 14, (int)numMaxLen.Minimum, (int)numMaxLen.Maximum);
             numCount.Value = Int(d, "count", 30, 1, 200);
-            chkUnderscore.Checked = d.TryGetValue("underscore", out var u) && u == "1";
             if (d.TryGetValue("prefix", out var p)) txtPrefix.Text = p;
         }
 
@@ -269,7 +264,6 @@ namespace ArpgNameRandomizer
                     "style=" + cboStyle.SelectedIndex,
                     "maxlen=" + numMaxLen.Value,
                     "count=" + numCount.Value,
-                    "underscore=" + (chkUnderscore.Checked ? "1" : "0"),
                     "prefix=" + txtPrefix.Text,
                 });
             }

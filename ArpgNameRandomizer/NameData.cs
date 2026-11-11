@@ -27,7 +27,6 @@ namespace ArpgNameRandomizer
         public string Name;
         public int MinLen;
         public int MaxLen;
-        public bool AllowUnderscore;
         public string Rules;      // shown under the options
         public List<GameClass> Classes = new List<GameClass>();
         public override string ToString() => Name;
@@ -127,8 +126,8 @@ namespace ArpgNameRandomizer
 
         public static readonly List<Game> Games = new List<Game>
         {
-            G("Path of Exile", 3, 23, true,
-              "PoE: 3-23 letters, underscores allowed. Names are global, so short ones are usually taken.",
+            G("Path of Exile", 3, 23,
+              "PoE: 3-23 characters. Names are global, so short ones are usually taken.",
               C("Marauder", Brutal),
               C("Duelist", Blade, Brutal),
               C("Ranger", Wild),
@@ -137,8 +136,8 @@ namespace ArpgNameRandomizer
               C("Templar", Holy, Arcane),
               C("Scion", Blade, Holy, Wild)),
 
-            G("Path of Exile 2", 3, 23, true,
-              "PoE2: 3-23 letters, underscores allowed. Shares the name pool with PoE1.",
+            G("Path of Exile 2", 3, 23,
+              "PoE2: 3-23 characters. Shares the name pool with PoE1.",
               C("Warrior", Brutal),
               C("Mercenary", Blade, Shadow),
               C("Ranger", Wild),
@@ -149,7 +148,7 @@ namespace ArpgNameRandomizer
               C("Druid", Wild, Brutal)),
 
             // Limits for D4 / LE are from memory, not checked in-game - adjust here if the game rejects a name.
-            G("Diablo IV", 2, 12, false,
+            G("Diablo IV", 2, 12,
               "Diablo IV: letters only, up to 12 (unverified - check in game).",
               C("Barbarian", Brutal),
               C("Druid", Wild, Brutal),
@@ -159,7 +158,7 @@ namespace ArpgNameRandomizer
               C("Spiritborn", Spirit, Wild),
               C("Paladin", Holy)),
 
-            G("Last Epoch", 3, 20, false,
+            G("Last Epoch", 3, 20,
               "Last Epoch: letters only, up to 20 (unverified - check in game).",
               C("Primalist", Wild, Brutal),
               C("Mage", Arcane),
@@ -172,9 +171,9 @@ namespace ArpgNameRandomizer
 
         static GameClass C(string name, params Theme[] themes) => new GameClass { Name = name, Themes = themes };
 
-        static Game G(string name, int min, int max, bool underscore, string rules, params GameClass[] classes)
+        static Game G(string name, int min, int max, string rules, params GameClass[] classes)
         {
-            var g = new Game { Name = name, MinLen = min, MaxLen = max, AllowUnderscore = underscore, Rules = rules };
+            var g = new Game { Name = name, MinLen = min, MaxLen = max, Rules = rules };
             // "Any class" mixes every theme that game's classes use.
             g.Classes.Add(new GameClass { Name = "Any class", Themes = classes.SelectMany(c => c.Themes).Distinct().ToArray() });
             g.Classes.AddRange(classes);

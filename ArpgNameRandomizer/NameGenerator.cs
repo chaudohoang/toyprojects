@@ -13,14 +13,13 @@ namespace ArpgNameRandomizer
         readonly Random rnd = new Random();
 
         public List<string> Generate(Game game, GameClass cls, Gender gender, Style style,
-                                     int maxLen, string prefix, bool underscore, int count,
+                                     int maxLen, string prefix, int count,
                                      ISet<string> exclude)
         {
             prefix = (prefix ?? "").Trim();
             var result = new List<string>();
             var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             int minLen = Math.Max(game.MinLen, 3);
-            string sep = underscore && game.AllowUnderscore ? "_" : "";
 
             // Give up after enough misses (tight length + prefix can make some combos impossible).
             for (int attempt = 0; attempt < 40000 && result.Count < count; attempt++)
@@ -32,7 +31,7 @@ namespace ArpgNameRandomizer
                 switch (s)
                 {
                     case Style.Compound: name = Compound(t); break;
-                    case Style.NameAndTitle: name = Titled(t, gender, sep, prefix); break;
+                    case Style.NameAndTitle: name = Titled(t, gender, prefix); break;
                     default: name = Fantasy(t, gender, prefix); break;
                 }
                 if (name == null) continue;
@@ -79,14 +78,14 @@ namespace ArpgNameRandomizer
             return a + b;
         }
 
-        // Kael + Duskborn -> KaelDuskborn / Kael_Duskborn
-        string Titled(Theme t, Gender g, string sep, string prefix)
+        // Kael + Duskborn -> KaelDuskborn (letters only, no underscore)
+        string Titled(Theme t, Gender g, string prefix)
         {
             string first = Fantasy(t, g, prefix);
             if (first == null || first.Length > 8) return null;
             string title = Compound(t);
             if (title == null) return null;
-            return Cap(first) + sep + Cap(title);
+            return Cap(first) + Cap(title);
         }
 
         static string Join(string a, string b)

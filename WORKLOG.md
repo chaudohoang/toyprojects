@@ -15,7 +15,8 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     them about 1 in 10 made-up names was junk (`Brugrigorn`, `Uraraji`, `Sererira`, `Veelle`). Rejecting
     a repeated letter pair, doubled vowels and 3+ consonant runs (th/sh/ch count as one) fixed most of it.
     Compounds reject joins that double a sound (`Steel`+`lash`, `Ash`+`shroud`).
-  - PoE rules (3-23 chars, underscores allowed) are known. The D4 (12) and Last Epoch (20) limits are
+  - No underscores in any name, even though PoE allows them: Chau doesn't want `Thuga_Ashfang`-style
+    names, so name + title is always joined CamelCase (`ThugaAshfang`). PoE allows 3-23 characters. The D4 (12) and Last Epoch (20) limits are
     from memory and **not checked in game**.
   - `favorites.txt` / `settings.txt` are written next to the exe, so they land in `bin/`; the tool's
     own `.gitignore` excludes just those two files, not the build output.
