@@ -1,0 +1,3 @@
+# Per-user data the app writes next to its exe (build output itself IS committed on purpose)
+favorites.txt
+settings.txt

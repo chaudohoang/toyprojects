@@ -6,6 +6,21 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ---
 
+## 2026-11-11
+
+- **New tool `ArpgNameRandomizer/`** (WinForms, net472, SDK-style csproj, built with `dotnet build`;
+  output in `ArpgNameRandomizer/bin/Debug/net472`). Game picker (PoE1, PoE2, Diablo IV, Last Epoch)
+  → class → flavour themes in `NameData.cs`; generator in `NameGenerator.cs`. Click to copy, favourites.
+  - Name quality comes from the filters in `NameGenerator.Pronounceable`, not the word lists: without
+    them about 1 in 10 made-up names was junk (`Brugrigorn`, `Uraraji`, `Sererira`, `Veelle`). Rejecting
+    a repeated letter pair, doubled vowels and 3+ consonant runs (th/sh/ch count as one) fixed most of it.
+    Compounds reject joins that double a sound (`Steel`+`lash`, `Ash`+`shroud`).
+  - PoE rules (3-23 chars, underscores allowed) are known. The D4 (12) and Last Epoch (20) limits are
+    from memory and **not checked in game**.
+  - `favorites.txt` / `settings.txt` are written next to the exe, so they land in `bin/`; the tool's
+    own `.gitignore` excludes just those two files, not the build output.
+  - The PC's PowerShell execution policy blocks `.ps1` files; use `powershell -ExecutionPolicy Bypass -File`.
+
 ## 2026-11-01
 
 - **Windows reinstalled on the main PC.** Claude's own memory (`C:\Users\Chau\.claude`) was
