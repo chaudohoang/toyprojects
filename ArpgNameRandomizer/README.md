@@ -7,6 +7,7 @@ Small WinForms tool (.NET Framework 4.7.2) that makes character names for ARPGs.
 - **Style**: made-up names (`Morvath`), compounds (`Bonecaller`), name + title (`KaelDuskborn`), or a mix.
 - Gender, max length, "starts with" and count options.
 - Click a name to copy it. Double-click (or press F) to add it to favourites, saved to `favorites.txt` next to the exe. Delete removes a favourite.
+- **No repeats while the app is open**: it lists every name the settings can make (about 1.4 million for PoE "Any class") and hands them out shuffled, skipping names already shown and favourites. The panel shows how many are possible and how many are not shown yet. Nothing is saved, so restarting starts a fresh cycle.
 - Last-used options are saved to `settings.txt` next to the exe.
 
 Run `bin\Debug\net472\ArpgNameRandomizer.exe`. Build with `dotnet build` in this folder.

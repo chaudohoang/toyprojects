@@ -14,14 +14,16 @@ namespace ArpgNameRandomizer
         string FavoritesPath => Path.Combine(appDir, "favorites.txt");
         string SettingsPath => Path.Combine(appDir, "settings.txt");
 
-        readonly NameGenerator generator = new NameGenerator();
-        // Names already shown this session, so pressing Generate again gives fresh ones.
-        readonly HashSet<string> shown = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        readonly Random rnd = new Random();
+        // Names shown since the app started (plus favourites), so a name never comes up twice in a session.
+        readonly HashSet<string> seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        NamePool pool;
+        string poolKey;
 
         ComboBox cboGame, cboClass, cboGender, cboStyle;
         NumericUpDown numMaxLen, numCount;
         TextBox txtPrefix;
-        Label lblRules, lblStatus;
+        Label lblRules, lblStatus, lblPool;
         ListBox lstNames, lstFavorites;
         ToolTip tip = new ToolTip();
 
@@ -37,7 +39,9 @@ namespace ArpgNameRandomizer
 
             BuildUi();
             LoadFavorites();
+            foreach (string f in lstFavorites.Items) seen.Add(f);
             LoadSettings();
+            UpdatePoolLabel();
             FormClosing += (s, e) => SaveSettings();
             Shown += (s, e) => Generate();
         }
@@ -64,6 +68,7 @@ namespace ArpgNameRandomizer
             var btnGen = new Button { Text = "Generate", Width = w, Height = 36, Font = new Font(Font, FontStyle.Bold) };
             btnGen.Click += (s, e) => Generate();
             AcceptButton = btnGen;
+            lblPool = new Label { AutoSize = true, MaximumSize = new Size(w, 0), Margin = new Padding(3, 8, 3, 3) };
 
             opts.Controls.AddRange(new Control[]
             {
@@ -75,9 +80,15 @@ namespace ArpgNameRandomizer
                 Lbl("Starts with (optional)"), txtPrefix,
                 Lbl("How many"), numCount,
                 btnGen,
+                lblPool,
                 lblRules,
             });
             cboGame.SelectedIndexChanged += (s, e) => OnGameChanged();
+            cboClass.SelectedIndexChanged += (s, e) => UpdatePoolLabel();
+            cboGender.SelectedIndexChanged += (s, e) => UpdatePoolLabel();
+            cboStyle.SelectedIndexChanged += (s, e) => UpdatePoolLabel();
+            numMaxLen.ValueChanged += (s, e) => UpdatePoolLabel();
+            txtPrefix.TextChanged += (s, e) => UpdatePoolLabel();
 
             // ---- results ----
             var mid = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 2, ColumnCount = 1 };
@@ -142,35 +153,58 @@ namespace ArpgNameRandomizer
             lblRules.Text = g.Rules;
         }
 
-        void Generate()
+        NamePool CurrentPool()
         {
             var g = CurrentGame;
             var cls = cboClass.SelectedItem as GameClass;
-            if (g == null || cls == null) return;
+            if (g == null || cls == null || cboGender.SelectedIndex < 0) return null;
+            string key = string.Join("|", g.Name, cls.Name, cboGender.SelectedIndex, numMaxLen.Value, txtPrefix.Text.Trim().ToLowerInvariant());
+            if (key != poolKey) { pool = new NamePool(g, cls, (Gender)cboGender.SelectedIndex, (int)numMaxLen.Value, txtPrefix.Text); poolKey = key; }
+            return pool;
+        }
 
-            var exclude = new HashSet<string>(shown, StringComparer.OrdinalIgnoreCase);
-            foreach (string f in lstFavorites.Items) exclude.Add(f);
+        Style CurrentStyle => cboStyle.SelectedIndex < 0 ? Style.Mixed : (Style)cboStyle.SelectedIndex;
 
-            var names = generator.Generate(g, cls, (Gender)cboGender.SelectedIndex, (Style)cboStyle.SelectedIndex,
-                (int)numMaxLen.Value, txtPrefix.Text, (int)numCount.Value, exclude);
+        void UpdatePoolLabel()
+        {
+            var p = CurrentPool();
+            if (p == null || lblPool == null) return;
+            long total = p.Total(CurrentStyle), left = p.Remaining(CurrentStyle, seen);
+            lblPool.Text = $"{total:N0} possible names for these settings, {left:N0} not shown yet";
+        }
 
-            // Ran dry: forget this session's history and try once more.
-            if (names.Count < numCount.Value && shown.Count > 0)
+        void Generate()
+        {
+            var p = CurrentPool();
+            if (p == null) return;
+
+            int want = (int)numCount.Value;
+            var names = p.Take(want, CurrentStyle, seen, rnd);
+            bool wrapped = false;
+            if (names.Count < want && p.Total(CurrentStyle) > 0)
             {
-                shown.Clear();
-                exclude = new HashSet<string>(lstFavorites.Items.Cast<string>(), StringComparer.OrdinalIgnoreCase);
-                names = generator.Generate(g, cls, (Gender)cboGender.SelectedIndex, (Style)cboStyle.SelectedIndex,
-                    (int)numMaxLen.Value, txtPrefix.Text, (int)numCount.Value, exclude);
+                // Every name for these settings was shown: start the cycle over (favourites stay out).
+                var keep = new HashSet<string>(names, StringComparer.OrdinalIgnoreCase);
+                seen.Clear();
+                foreach (string f in lstFavorites.Items) seen.Add(f);
+                foreach (var n in keep) seen.Add(n);
+                names.AddRange(p.Take(want - names.Count, CurrentStyle, seen, rnd));
+                wrapped = true;
             }
 
-            foreach (var n in names) shown.Add(n);
             lstNames.BeginUpdate();
             lstNames.Items.Clear();
             lstNames.Items.AddRange(names.ToArray());
             lstNames.EndUpdate();
-            Status(names.Count == 0
-                ? "No names fit those settings - try a longer max length or a shorter prefix."
-                : $"{names.Count} names for {g.Name} / {cls.Name}.");
+            UpdatePoolLabel();
+
+            var cls = (GameClass)cboClass.SelectedItem;
+            if (p.Total(CurrentStyle) == 0)
+                Status("No names fit those settings - try a longer max length or a shorter prefix.");
+            else if (wrapped)
+                Status("Every name for these settings has been shown - starting over.");
+            else
+                Status($"{names.Count} new names for {CurrentGame.Name} / {cls.Name}.");
         }
 
         void CopySelected(ListBox list)

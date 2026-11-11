@@ -20,6 +20,14 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     from memory and **not checked in game**.
   - `favorites.txt` / `settings.txt` are written next to the exe, so they land in `bin/`; the tool's
     own `.gitignore` excludes just those two files, not the build output.
+  - **No repeats (v1.1.0)**, like the online name generators. The generator no longer rolls dice:
+    `NamePool` lists every name the settings can make and hands out unseen ones shuffled, so the
+    "N not shown yet" count is exact. When a pool runs out, the cycle starts over.
+    Name + title is too big to list, so it is counted from per-first-name title lists and sampled.
+    History is **in memory only**. A `seen.txt` that remembered names across restarts was built and
+    then dropped at Chau's request; bigger pools do the job instead. Compound word lists were roughly
+    doubled. At max 14, PoE2 Witch has 1,848 made-up, 639 compound and 190k title names; PoE
+    "Any class" has about 1.44M. Building a pool takes about 150 ms for "Any class"; it is cached per settings.
   - The PC's PowerShell execution policy blocks `.ps1` files; use `powershell -ExecutionPolicy Bypass -File`.
 
 ## 2026-11-01
