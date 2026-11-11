@@ -101,7 +101,7 @@ namespace NameRandomizer
                 foreach (var name in FantasyNames(t, gender, prefix))
                 {
                     if (fantasySet.Add(name)) b.Fantasy.Add(name);
-                    if (name.Length <= MaxFirstLen)
+                    if (name.Length >= 3 && name.Length <= MaxFirstLen)
                     {
                         if (!firstThemes.TryGetValue(name, out var set)) firstThemes[name] = set = new HashSet<Theme>();
                         set.Add(t);

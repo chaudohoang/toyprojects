@@ -78,6 +78,12 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     AssemblyTitle, since it is no longer ARPG-only. Entries above that say `ArpgNameRandomizer/` mean
     this folder. Old `bin`/`obj` output was deleted and rebuilt so no `ArpgNameRandomizer.*` files are
     left. The desktop shortcut was replaced by "Name Randomizer.lnk" pointing at the new exe.
+  - **v1.8.0: "Starts with" became "Add in front"**, a tag glued on as typed, any characters (`FR_`,
+    `_`), as Chau asked. Tag, name and number together stay within max length (the name gets
+    max - tag - 2). The pools' letter-prefix filter code is still there, called with "" now.
+    Also fixed: after switching category the Style box could show above its label (hiding the label
+    and box one by one in the options flow); they now sit in one panel that is hidden as a whole.
+    Name + title first names must be 3+ letters (`PiSkysoul` slipped through).
   - The PC's PowerShell execution policy blocks `.ps1` files; use `powershell -ExecutionPolicy Bypass -File`.
 
 ## 2026-11-01

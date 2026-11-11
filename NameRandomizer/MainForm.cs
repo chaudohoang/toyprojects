@@ -26,6 +26,7 @@ namespace NameRandomizer
         TextBox txtPrefix;
         CheckBox chkNumber;
         Label lblRules, lblStatus, lblName, lblClass, lblStyle;
+        FlowLayoutPanel styleBox;
         ListBox lstFavorites;
         ToolTip tip = new ToolTip();
 
@@ -62,12 +63,18 @@ namespace NameRandomizer
             cboGender.Items.AddRange(new object[] { "Any", "Male", "Female" });
             cboStyle.Items.AddRange(new object[] { "Mixed", "Fantasy name (Morvath)", "Compound (Bonecaller)", "Name + title (KaelDuskborn)" });
             numMaxLen = new NumericUpDown { Width = 70, Minimum = 3, Maximum = 30, Value = 14 };   // one value for both categories
+            // A tag glued in front of every name as typed, any characters: "FR_" -> FR_Safveth63.
             txtPrefix = new TextBox { Width = w };
-            txtPrefix.KeyPress += (s, e) => { if (!char.IsLetter(e.KeyChar) && !char.IsControl(e.KeyChar)) e.Handled = true; };
+            tip.SetToolTip(txtPrefix, "Added in front of every name, exactly as typed (any characters). Counts toward max length.");
             chkNumber = new CheckBox { Text = "Add a number (Name07)", AutoSize = true, Margin = new Padding(3, 10, 3, 3) };
             tip.SetToolTip(chkNumber, "Two digits at the end: 100x more names. Diablo IV does not allow numbers.");
             lblClass = Lbl("Class");
             lblStyle = Lbl("Style");
+            // Label and box sit in one panel that is hidden as a whole: hiding them one by one in the
+            // options flow let the box come back above its label after switching categories.
+            styleBox = new FlowLayoutPanel { FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, Margin = Padding.Empty };
+            styleBox.Controls.Add(lblStyle);
+            styleBox.Controls.Add(cboStyle);
             lblRules = new Label { AutoSize = true, MaximumSize = new Size(w, 0), ForeColor = Color.DimGray, Margin = new Padding(3, 8, 3, 3) };
 
             opts.Controls.AddRange(new Control[]
@@ -75,9 +82,9 @@ namespace NameRandomizer
                 Lbl("Category"), cboCategory,
                 lblClass, cboClass,
                 Lbl("Gender"), cboGender,
-                lblStyle, cboStyle,
+                styleBox,
                 Lbl("Max length"), numMaxLen,
-                Lbl("Starts with (optional)"), txtPrefix,
+                Lbl("Add in front (optional, e.g. FR_)"), txtPrefix,
                 chkNumber,
                 lblRules,
             });
@@ -155,7 +162,7 @@ namespace NameRandomizer
             }
             cboClass.SelectedIndex = 0;
             // Name styles only apply to ARPG names.
-            lblStyle.Visible = cboStyle.Visible = !IsChat;
+            styleBox.Visible = !IsChat;
         }
 
         INamePool CurrentPool()
@@ -165,18 +172,20 @@ namespace NameRandomizer
             var gender = (Gender)cboGender.SelectedIndex;
             int maxLen = (int)numMaxLen.Value;
             bool number = chkNumber.Checked;
-            string key = string.Join("|", cboCategory.SelectedIndex, item, cboGender.SelectedIndex, maxLen, txtPrefix.Text.Trim().ToLowerInvariant(), number);
+            // The tag in front and the number at the end both use up max length; the name gets the rest.
+            int baseLen = maxLen - NameTag.Length - (number ? 2 : 0);
+            string key = string.Join("|", cboCategory.SelectedIndex, item, cboGender.SelectedIndex, baseLen, number);
             if (key != poolKey)
             {
-                // With a number, the name itself gets two characters less so "Name07" still fits.
-                int baseLen = number ? Math.Max(3, maxLen - 2) : maxLen;
-                pool = item is Vibe v ? new ChatPool(v, gender, baseLen, txtPrefix.Text)
-                                      : (INamePool)new NamePool((GameClass)item, gender, baseLen, txtPrefix.Text);
+                pool = item is Vibe v ? new ChatPool(v, gender, baseLen, "")
+                                      : (INamePool)new NamePool((GameClass)item, gender, baseLen, "");
                 if (number) pool = new NumberedPool(pool);
                 poolKey = key;
             }
             return pool;
         }
+
+        string NameTag => txtPrefix.Text.Replace("\r", "").Replace("\n", "");
 
         Style CurrentStyle => cboStyle.SelectedIndex < 0 ? Style.Mixed : (Style)cboStyle.SelectedIndex;
 
@@ -187,7 +196,7 @@ namespace NameRandomizer
             if (p.Total(CurrentStyle) == 0)
             {
                 lblName.Text = "";
-                Status("No names fit those settings - try a longer max length or a shorter prefix.");
+                Status("No names fit - raise max length, or shorten the text in front.");
                 return;
             }
 
@@ -199,8 +208,8 @@ namespace NameRandomizer
                 foreach (string f in lstFavorites.Items) seen.Add(f);
                 names = p.Take(1, CurrentStyle, seen, rnd);
             }
-            if (names.Count == 0) { lblName.Text = ""; Status("Every name for these settings is a favourite already."); return; }
-            lblName.Text = names[0];
+            if (names.Count == 0) { lblName.Text = ""; Status("No names fit - raise max length, or shorten the text in front."); return; }
+            lblName.Text = NameTag + names[0];
             FitName();
             Status($"{cboCategory.Text} / {cboClass.Text}");
         }
