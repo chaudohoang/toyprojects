@@ -28,6 +28,10 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     then dropped at Chau's request; bigger pools do the job instead. Compound word lists were roughly
     doubled. At max 14, PoE2 Witch has 1,848 made-up, 639 compound and 190k title names; PoE
     "Any class" has about 1.44M. Building a pool takes about 150 ms for "Any class"; it is cached per settings.
+  - **v1.2.0: one name at a time**, big and centred (Chau's request), with no list, count or
+    "N left" label. The font shrinks for long names so 23-letter PoE names stay on one line.
+    Trap: `ActiveControl = button` inside the constructor throws "Invisible or disabled control
+    cannot be activated" and the app dies silently at startup; focus it in `Shown` instead.
   - The PC's PowerShell execution policy blocks `.ps1` files; use `powershell -ExecutionPolicy Bypass -File`.
 
 ## 2026-11-01
