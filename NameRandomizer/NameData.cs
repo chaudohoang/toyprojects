@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ArpgNameRandomizer
+namespace NameRandomizer
 {
     /// <summary>A flavour pool: syllables for made-up names, word halves for compound names.</summary>
     class Theme

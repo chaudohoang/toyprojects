@@ -1,7 +1,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace ArpgNameRandomizer
+namespace NameRandomizer
 {
     static class Program
     {

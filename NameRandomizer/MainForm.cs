@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 
-namespace ArpgNameRandomizer
+namespace NameRandomizer
 {
     public class MainForm : Form
     {

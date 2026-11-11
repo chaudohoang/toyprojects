@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ArpgNameRandomizer
+namespace NameRandomizer
 {
     enum Gender { Any, Male, Female }
     enum Style { Mixed, Fantasy, Compound, NameAndTitle }

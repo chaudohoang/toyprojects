@@ -8,7 +8,7 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ## 2026-11-11
 
-- **New tool `ArpgNameRandomizer/`** (WinForms, net472, SDK-style csproj, built with `dotnet build`;
+- **New tool `ArpgNameRandomizer/`** (renamed `NameRandomizer/` later the same day) (WinForms, net472, SDK-style csproj, built with `dotnet build`;
   output in `ArpgNameRandomizer/bin/Debug/net472`). Game picker (PoE1, PoE2, Diablo IV, Last Epoch)
   → class → flavour themes in `NameData.cs`; generator in `NameGenerator.cs`. Click to copy, favourites.
   - Name quality comes from the filters in `NameGenerator.Pronounceable`, not the word lists: without
@@ -63,6 +63,21 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     come, restrict that pattern before shrinking lists. `ChatPool` is cached per vibe / gender / prefix
     like `NamePool` (first "Any vibe" build ~0.1 s). Numbered names are picked at random and checked
     against `seen`; 20k numbered names took 41 ms with no repeats.
+  - **v1.7.0: 8 more vibes** (Spooky, Space, Music, Sports, Nature, Fantasy, Office / school, Tech),
+    about 70 adjectives and 70 nouns each. "Any vibe" went from 446k to 1.52M at max 14 (101M with a
+    number). Still about 10x below ARPG: chat names must be real words (~1,000 adjectives, ~1,000 nouns),
+    while ARPG made-up first names come from syllables (~80k) and are multiplied by ~13k titles.
+    - `ChatPool` no longer lists names: millions of strings would be hundreds of MB. Each pattern keeps
+      its word lists plus a count of Y words by length, so the size is counted and names are built when
+      picked (cached word lists ~0.7 MB; max-length step ~0.1 ms). With a "starts with" prefix the
+      pool is small and is listed outright. Total slightly overcounts names that two patterns can both
+      make (Food at max 8: 1,138 counted, 1,128 real); harmless, `seen` still prevents repeats.
+    - Noun + noun is half the pool but sounds the most random (`PetalQuark`), so it is picked with
+      bias 0.35: every name is still reachable, it just comes up less often.
+  - **Renamed to `NameRandomizer/`** (v1.7.1): folder, `NameRandomizer.csproj`, exe, namespace and
+    AssemblyTitle, since it is no longer ARPG-only. Entries above that say `ArpgNameRandomizer/` mean
+    this folder. Old `bin`/`obj` output was deleted and rebuilt so no `ArpgNameRandomizer.*` files are
+    left. The desktop shortcut was replaced by "Name Randomizer.lnk" pointing at the new exe.
   - The PC's PowerShell execution policy blocks `.ps1` files; use `powershell -ExecutionPolicy Bypass -File`.
 
 ## 2026-11-01

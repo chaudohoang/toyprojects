@@ -12,13 +12,13 @@
     "C:\\Users\\Chau\\.nuget\\packages\\": {}
   },
   "project": {
-    "version": "1.6.0",
+    "version": "1.7.1",
     "restore": {
-      "projectUniqueName": "E:\\Github\\toyprojects\\ArpgNameRandomizer\\ArpgNameRandomizer.csproj",
-      "projectName": "ArpgNameRandomizer",
-      "projectPath": "E:\\Github\\toyprojects\\ArpgNameRandomizer\\ArpgNameRandomizer.csproj",
+      "projectUniqueName": "E:\\Github\\toyprojects\\NameRandomizer\\NameRandomizer.csproj",
+      "projectName": "NameRandomizer",
+      "projectPath": "E:\\Github\\toyprojects\\NameRandomizer\\NameRandomizer.csproj",
       "packagesPath": "C:\\Users\\Chau\\.nuget\\packages\\",
-      "outputPath": "E:\\Github\\toyprojects\\ArpgNameRandomizer\\obj\\",
+      "outputPath": "E:\\Github\\toyprojects\\NameRandomizer\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Chau\\AppData\\Roaming\\NuGet\\NuGet.Config",

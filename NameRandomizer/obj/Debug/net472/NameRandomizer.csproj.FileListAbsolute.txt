@@ -1,0 +1,11 @@
+E:\Github\toyprojects\NameRandomizer\bin\Debug\net472\NameRandomizer.exe.config
+E:\Github\toyprojects\NameRandomizer\bin\Debug\net472\NameRandomizer.exe
+E:\Github\toyprojects\NameRandomizer\bin\Debug\net472\NameRandomizer.pdb
+E:\Github\toyprojects\NameRandomizer\obj\Debug\net472\NameRandomizer.csproj.AssemblyReference.cache
+E:\Github\toyprojects\NameRandomizer\obj\Debug\net472\NameRandomizer.GeneratedMSBuildEditorConfig.editorconfig
+E:\Github\toyprojects\NameRandomizer\obj\Debug\net472\NameRandomizer.AssemblyInfoInputs.cache
+E:\Github\toyprojects\NameRandomizer\obj\Debug\net472\NameRandomizer.AssemblyInfo.cs
+E:\Github\toyprojects\NameRandomizer\obj\Debug\net472\NameRandomizer.csproj.CoreCompileInputs.cache
+E:\Github\toyprojects\NameRandomizer\obj\Debug\net472\NameRandomizer.sourcelink.json
+E:\Github\toyprojects\NameRandomizer\obj\Debug\net472\NameRandomizer.exe
+E:\Github\toyprojects\NameRandomizer\obj\Debug\net472\NameRandomizer.pdb
