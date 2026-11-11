@@ -22,16 +22,6 @@ namespace ArpgNameRandomizer
         public override string ToString() => Name;
     }
 
-    class Game
-    {
-        public string Name;
-        public int MinLen;
-        public int MaxLen;
-        public string Rules;      // shown under the options
-        public List<GameClass> Classes = new List<GameClass>();
-        public override string ToString() => Name;
-    }
-
     static class NameData
     {
         static readonly Theme Brutal = new Theme
@@ -124,60 +114,28 @@ namespace ArpgNameRandomizer
 
         public static readonly Theme[] AllThemes = { Brutal, Blade, Wild, Shadow, Dark, Holy, Arcane, Spirit };
 
-        public static readonly List<Game> Games = new List<Game>
+        // One ARPG list for every game: each entry names the matching class in PoE / PoE2 / D4 / Last Epoch.
+        // Game name rules differ only in length, which the "Max length" box covers.
+        public static readonly List<GameClass> ArpgClasses = new List<GameClass>
         {
-            G("Path of Exile", 3, 23,
-              "PoE: 3-23 characters. Names are global, so short ones are usually taken.",
-              C("Marauder", Brutal),
-              C("Duelist", Blade, Brutal),
-              C("Ranger", Wild),
-              C("Shadow", Shadow),
-              C("Witch", Dark, Arcane),
-              C("Templar", Holy, Arcane),
-              C("Scion", Blade, Holy, Wild)),
-
-            G("Path of Exile 2", 3, 23,
-              "PoE2: 3-23 characters. Shares the name pool with PoE1.",
-              C("Warrior", Brutal),
-              C("Mercenary", Blade, Shadow),
-              C("Ranger", Wild),
-              C("Huntress", Wild, Blade),
-              C("Monk", Spirit),
-              C("Sorceress", Arcane),
-              C("Witch", Dark),
-              C("Druid", Wild, Brutal)),
-
-            // Limits for D4 / LE are from memory, not checked in-game - adjust here if the game rejects a name.
-            G("Diablo IV", 2, 12,
-              "Diablo IV: letters only, up to 12 (unverified - check in game).",
-              C("Barbarian", Brutal),
-              C("Druid", Wild, Brutal),
-              C("Necromancer", Dark),
-              C("Rogue", Shadow, Blade),
-              C("Sorcerer", Arcane),
-              C("Spiritborn", Spirit, Wild),
-              C("Paladin", Holy)),
-
-            G("Last Epoch", 3, 20,
-              "Last Epoch: letters only, up to 20 (unverified - check in game).",
-              C("Primalist", Wild, Brutal),
-              C("Mage", Arcane),
-              C("Sentinel", Holy, Blade),
-              C("Acolyte", Dark),
-              C("Rogue", Shadow, Blade)),
+            C("Any class", AllThemes),
+            C("Warrior / Barbarian / Marauder", Brutal),
+            C("Duelist / Mercenary", Blade, Brutal),
+            C("Ranger / Huntress", Wild, Blade),
+            C("Rogue / Shadow", Shadow, Blade),
+            C("Witch / Necromancer / Acolyte", Dark),
+            C("Sorceress / Mage", Arcane),
+            C("Templar / Paladin / Sentinel", Holy),
+            C("Monk / Spiritborn", Spirit),
+            C("Druid / Primalist", Wild, Brutal),
         };
+
+        public const string ArpgRules =
+            "Name limits: PoE / PoE2 3-23, Last Epoch ~20, Diablo IV ~12 (D4 and LE not checked in game). " +
+            "PoE names are global, so short ones are usually taken.";
 
         static string[] S(string words) => words.Split(new[] { ' ' }, System.StringSplitOptions.RemoveEmptyEntries);
 
         static GameClass C(string name, params Theme[] themes) => new GameClass { Name = name, Themes = themes };
-
-        static Game G(string name, int min, int max, string rules, params GameClass[] classes)
-        {
-            var g = new Game { Name = name, MinLen = min, MaxLen = max, Rules = rules };
-            // "Any class" mixes every theme that game's classes use.
-            g.Classes.Add(new GameClass { Name = "Any class", Themes = classes.SelectMany(c => c.Themes).Distinct().ToArray() });
-            g.Classes.AddRange(classes);
-            return g;
-        }
     }
 }

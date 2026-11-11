@@ -32,6 +32,16 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     "N left" label. The font shrinks for long names so 23-letter PoE names stay on one line.
     Trap: `ActiveControl = button` inside the constructor throws "Invisible or disabled control
     cannot be activated" and the app dies silently at startup; focus it in `Shown` instead.
+  - **v1.3.0: Category picker.** "ARPG character" (the per-game picker was folded into one class list,
+    e.g. "Witch / Necromancer / Acolyte", with max length covering game limits) and "Group chat
+    nickname" (`ChatNames.cs`: vibes x patterns like `Sleepy Potato`, `Queen of Naps`, `Certified
+    Overthinker`, about 7.6k for "Any vibe"). Both pools implement `INamePool`. Window title is now
+    "Name Randomizer"; the folder and exe keep the old name so the desktop shortcut still works.
+    Chat traps: "___ of X" only after real ranks (no "Mr. of Memes"); no "of the Night" (reads as
+    "Lady of the Night"); no Bro/Sis suffixes ("Taco Sis").
+  - **v1.4.0:** chat nicknames are joined without spaces, each word capitalised (`QueenOfNaps`,
+    `PartTimeNapper`; "Mr." loses its dot). One shared max length (3-30) for both categories, as
+    Chau asked; at 14, "Any vibe" still has about 6.3k chat names.
   - The PC's PowerShell execution policy blocks `.ps1` files; use `powershell -ExecutionPolicy Bypass -File`.
 
 ## 2026-11-01

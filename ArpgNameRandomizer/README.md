@@ -1,19 +1,29 @@
-# ARPG Name Randomizer
+# Name Randomizer (ArpgNameRandomizer)
 
-Small WinForms tool (.NET Framework 4.7.2) that makes character names for ARPGs.
+Small WinForms tool (.NET Framework 4.7.2) that makes names, one at a time. Pick a **Category**:
 
-- **Game**: Path of Exile, Path of Exile 2, Diablo IV, Last Epoch. Each game has its own class list and name rules (max length). Names are letters only, never underscores.
-- **Class** picks the flavour: Marauder/Warrior → brutal, Witch/Necromancer → dark, Sorceress/Mage → arcane, Monk/Spiritborn → spirit, and so on. "Any class" mixes them all.
-- **Style**: made-up names (`Morvath`), compounds (`Bonecaller`), name + title (`KaelDuskborn`), or a mix.
-- Gender, max length and "starts with" options.
-- Shows **one name at a time**, big. Generate (or Enter / Space) gives the next one. Click the name to copy it, and **Add to favourites** saves it to `favorites.txt` next to the exe. Delete removes a favourite.
-- **No repeats while the app is open**: it lists every name the settings can make (about 1.4 million for PoE "Any class") and hands them out shuffled, skipping names already shown and favourites. Nothing is saved, so restarting starts a fresh shuffle.
+## ARPG character
+
+- **Class** sets the flavour. One list covers every game: "Witch / Necromancer / Acolyte" goes dark, "Warrior / Barbarian / Marauder" goes brutal, "Sorceress / Mage" goes arcane, and so on. "Any class" mixes them all.
+- **Style**: made-up names (`Morvath`), compounds (`Bonecaller`), name + title (`KaelDuskborn`), or a mix. Letters only, never underscores.
+- **Max length** (shared with group chat names) covers each game's limit: PoE / PoE2 3-23, Last Epoch ~20, Diablo IV ~12 (the D4 and LE limits were not checked in game).
+
+## Group chat nickname
+
+- **Vibe**: Funny / chaos, Cute, Food, Sleepy / lazy, Gamer, Cool, or Any (which mixes words across vibes: "Fluffy Shark").
+- Patterns like `SleepyPotato`, `CaptainNoodle`, `GoblinQueen`, `QueenOfNaps`, `TheUnhingedOne`, `CertifiedOverthinker`. Words are joined without spaces.
+- Gender picks King/Lord vs Queen/Lady style titles; Any uses all of them.
+
+## Both
+
+- Generate (or Enter / Space) gives the next name. Click the name to copy it. **Add to favourites** saves it to `favorites.txt` next to the exe; Delete removes one.
+- Gender, max length (3-30, one value for both categories) and "starts with" options.
+- **No repeats while the app is open**: it lists every name the settings can make (about 1.6 million ARPG names for "Any class", about 6,300 chat nicknames for "Any vibe" at max length 14) and hands them out shuffled, skipping names already shown and favourites. Nothing is saved, so restarting starts a fresh shuffle.
 - Last-used options are saved to `settings.txt` next to the exe.
 
-Run `bin\Debug\net472\ArpgNameRandomizer.exe`. Build with `dotnet build` in this folder.
+Run `bin\Debug\net472\ArpgNameRandomizer.exe`. Build with `dotnet build` in this folder (close the app first, it locks the exe).
 
-## Adding a game or class
+## Adding words
 
-Everything lives in `NameData.cs`: add a `G(...)` entry with its length limits and classes, mapping each class to one or more themes. Add a new `Theme` if none of the existing word lists fit.
-
-The Diablo IV (12) and Last Epoch (20) length limits were not checked in game. If a game rejects a name, fix the number there.
+- ARPG: `NameData.cs`. Each `Theme` has syllables and compound halves; `ArpgClasses` maps class choices to themes.
+- Group chat: `ChatNames.cs`. Each `Vibe` has adjectives, nouns, "___ of X" endings and "Professional ___" jobs.

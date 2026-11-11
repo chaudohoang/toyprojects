@@ -17,19 +17,20 @@ namespace ArpgNameRandomizer
         readonly Random rnd = new Random();
         // Names shown since the app started (plus favourites), so a name never comes up twice in a session.
         readonly HashSet<string> seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        NamePool pool;
+        INamePool pool;
         string poolKey;
 
-        ComboBox cboGame, cboClass, cboGender, cboStyle;
+
+        ComboBox cboCategory, cboClass, cboGender, cboStyle;
         NumericUpDown numMaxLen;
         TextBox txtPrefix;
-        Label lblRules, lblStatus, lblName;
+        Label lblRules, lblStatus, lblName, lblClass, lblStyle;
         ListBox lstFavorites;
         ToolTip tip = new ToolTip();
 
         public MainForm()
         {
-            Text = "ARPG Name Randomizer - " + Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
+            Text = "Name Randomizer - " + Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
             Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
             Font = new Font("Segoe UI", 9.5f);
             AutoScaleMode = AutoScaleMode.Font;
@@ -54,27 +55,30 @@ namespace ArpgNameRandomizer
 
             // ---- options ----
             var opts = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink };
-            int w = 210;
-            cboGame = Combo(w); cboClass = Combo(w); cboGender = Combo(w); cboStyle = Combo(w);
-            cboGame.Items.AddRange(NameData.Games.ToArray());
+            int w = 240;
+            cboCategory = Combo(w); cboClass = Combo(w); cboGender = Combo(w); cboStyle = Combo(w);
+            cboCategory.Items.AddRange(new object[] { "ARPG character", "Group chat nickname" });
             cboGender.Items.AddRange(new object[] { "Any", "Male", "Female" });
             cboStyle.Items.AddRange(new object[] { "Mixed", "Fantasy name (Morvath)", "Compound (Bonecaller)", "Name + title (KaelDuskborn)" });
-            numMaxLen = new NumericUpDown { Width = 70, Minimum = 3, Maximum = 23, Value = 14 };
+            numMaxLen = new NumericUpDown { Width = 70, Minimum = 3, Maximum = 30, Value = 14 };   // one value for both categories
             txtPrefix = new TextBox { Width = w };
             txtPrefix.KeyPress += (s, e) => { if (!char.IsLetter(e.KeyChar) && !char.IsControl(e.KeyChar)) e.Handled = true; };
+            lblClass = Lbl("Class");
+            lblStyle = Lbl("Style");
             lblRules = new Label { AutoSize = true, MaximumSize = new Size(w, 0), ForeColor = Color.DimGray, Margin = new Padding(3, 8, 3, 3) };
 
             opts.Controls.AddRange(new Control[]
             {
-                Lbl("Game"), cboGame,
-                Lbl("Class"), cboClass,
-                Lbl("Gender (made-up names only)"), cboGender,
-                Lbl("Style"), cboStyle,
+                Lbl("Category"), cboCategory,
+                lblClass, cboClass,
+                Lbl("Gender"), cboGender,
+                lblStyle, cboStyle,
                 Lbl("Max length"), numMaxLen,
                 Lbl("Starts with (optional)"), txtPrefix,
                 lblRules,
             });
-            cboGame.SelectedIndexChanged += (s, e) => OnGameChanged();
+            cboCategory.SelectedIndexChanged += (s, e) => OnCategoryChanged();
+
 
             // ---- the name: one at a time, big ----
             var mid = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 3, ColumnCount = 1 };
@@ -128,33 +132,41 @@ namespace ArpgNameRandomizer
         static Label Lbl(string text) => new Label { Text = text, AutoSize = true, Margin = new Padding(3, 8, 3, 2) };
         static ComboBox Combo(int width) => new ComboBox { Width = width, DropDownStyle = ComboBoxStyle.DropDownList };
 
-        Game CurrentGame => cboGame.SelectedItem as Game;
+        bool IsChat => cboCategory.SelectedIndex == 1;
 
-        void OnGameChanged()
+        void OnCategoryChanged()
         {
-            var g = CurrentGame;
-            if (g == null) return;
-            string prevClass = (cboClass.SelectedItem as GameClass)?.Name;
             cboClass.Items.Clear();
-            cboClass.Items.AddRange(g.Classes.ToArray());
-            int idx = g.Classes.FindIndex(c => c.Name == prevClass);
-            cboClass.SelectedIndex = idx >= 0 ? idx : 0;
-
-            decimal keep = numMaxLen.Value;
-            numMaxLen.Minimum = Math.Max(3, g.MinLen);
-            numMaxLen.Maximum = g.MaxLen;
-            numMaxLen.Value = Math.Min(Math.Max(keep, numMaxLen.Minimum), numMaxLen.Maximum);
-
-            lblRules.Text = g.Rules;
+            if (IsChat)
+            {
+                lblClass.Text = "Vibe";
+                cboClass.Items.AddRange(ChatData.VibeChoices.ToArray());
+                lblRules.Text = ChatData.Rules;
+            }
+            else
+            {
+                lblClass.Text = "Class";
+                cboClass.Items.AddRange(NameData.ArpgClasses.ToArray());
+                lblRules.Text = NameData.ArpgRules;
+            }
+            cboClass.SelectedIndex = 0;
+            // Name styles only apply to ARPG names.
+            lblStyle.Visible = cboStyle.Visible = !IsChat;
         }
 
-        NamePool CurrentPool()
+        INamePool CurrentPool()
         {
-            var g = CurrentGame;
-            var cls = cboClass.SelectedItem as GameClass;
-            if (g == null || cls == null || cboGender.SelectedIndex < 0) return null;
-            string key = string.Join("|", g.Name, cls.Name, cboGender.SelectedIndex, numMaxLen.Value, txtPrefix.Text.Trim().ToLowerInvariant());
-            if (key != poolKey) { pool = new NamePool(g, cls, (Gender)cboGender.SelectedIndex, (int)numMaxLen.Value, txtPrefix.Text); poolKey = key; }
+            var item = cboClass.SelectedItem;
+            if (item == null || cboGender.SelectedIndex < 0) return null;
+            var gender = (Gender)cboGender.SelectedIndex;
+            int maxLen = (int)numMaxLen.Value;
+            string key = string.Join("|", cboCategory.SelectedIndex, item, cboGender.SelectedIndex, maxLen, txtPrefix.Text.Trim().ToLowerInvariant());
+            if (key != poolKey)
+            {
+                pool = item is Vibe v ? new ChatPool(v, gender, maxLen, txtPrefix.Text)
+                                      : (INamePool)new NamePool((GameClass)item, gender, maxLen, txtPrefix.Text);
+                poolKey = key;
+            }
             return pool;
         }
 
@@ -182,7 +194,7 @@ namespace ArpgNameRandomizer
             if (names.Count == 0) { lblName.Text = ""; Status("Every name for these settings is a favourite already."); return; }
             lblName.Text = names[0];
             FitName();
-            Status($"{CurrentGame.Name} / {((GameClass)cboClass.SelectedItem).Name}");
+            Status($"{cboCategory.Text} / {cboClass.Text}");
         }
 
         // Shrink the font for long names (PoE allows 23 letters) so they stay on one line.
@@ -258,16 +270,13 @@ namespace ArpgNameRandomizer
             }
             catch { }
 
-            int gi = d.TryGetValue("game", out var gs) ? NameData.Games.FindIndex(x => x.Name == gs) : -1;
-            cboGame.SelectedIndex = gi >= 0 ? gi : 0;
+            numMaxLen.Value = Int(d, "maxlen", 14, 3, 30);
+            cboCategory.SelectedIndex = Int(d, "category", 0, 0, cboCategory.Items.Count - 1);
             if (d.TryGetValue("class", out var cs))
-            {
-                int ci = CurrentGame.Classes.FindIndex(x => x.Name == cs);
-                if (ci >= 0) cboClass.SelectedIndex = ci;
-            }
+                for (int i = 0; i < cboClass.Items.Count; i++)
+                    if (cboClass.Items[i].ToString() == cs) cboClass.SelectedIndex = i;
             cboGender.SelectedIndex = Int(d, "gender", 0, 0, cboGender.Items.Count - 1);
             cboStyle.SelectedIndex = Int(d, "style", 0, 0, cboStyle.Items.Count - 1);
-            numMaxLen.Value = Int(d, "maxlen", 14, (int)numMaxLen.Minimum, (int)numMaxLen.Maximum);
             if (d.TryGetValue("prefix", out var p)) txtPrefix.Text = p;
         }
 
@@ -280,8 +289,8 @@ namespace ArpgNameRandomizer
             {
                 File.WriteAllLines(SettingsPath, new[]
                 {
-                    "game=" + CurrentGame?.Name,
-                    "class=" + (cboClass.SelectedItem as GameClass)?.Name,
+                    "category=" + cboCategory.SelectedIndex,
+                    "class=" + cboClass.SelectedItem,
                     "gender=" + cboGender.SelectedIndex,
                     "style=" + cboStyle.SelectedIndex,
                     "maxlen=" + numMaxLen.Value,

@@ -7,6 +7,13 @@ namespace ArpgNameRandomizer
     enum Gender { Any, Male, Female }
     enum Style { Mixed, Fantasy, Compound, NameAndTitle }
 
+    /// <summary>Every name a category's current settings can make; hands out ones not in <c>seen</c>.</summary>
+    interface INamePool
+    {
+        long Total(Style s);
+        List<string> Take(int count, Style style, ISet<string> seen, Random rnd);
+    }
+
     /// <summary>
     /// Every name the current settings can produce, listed up front rather than rolled at random,
     /// so the app can hand out names that were never shown before and say exactly how many are left.
@@ -14,7 +21,7 @@ namespace ArpgNameRandomizer
     /// Made-up and compound names are small enough to hold as lists. Name + title (first name x title)
     /// runs to hundreds of thousands, so it is counted, and sampled on demand, without building the list.
     /// </summary>
-    class NamePool
+    class NamePool : INamePool
     {
         public readonly List<string> Fantasy = new List<string>();
         public readonly List<string> Compound = new List<string>();
@@ -29,10 +36,10 @@ namespace ArpgNameRandomizer
 
         const int MaxFirstLen = 8;
 
-        public NamePool(Game game, GameClass cls, Gender gender, int maxLen, string prefix)
+        public NamePool(GameClass cls, Gender gender, int maxLen, string prefix)
         {
             prefix = (prefix ?? "").Trim();
-            minLen = Math.Max(game.MinLen, 3);
+            minLen = 3;
             this.maxLen = maxLen;
 
             var firstThemes = new Dictionary<string, HashSet<Theme>>(StringComparer.Ordinal);
