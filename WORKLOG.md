@@ -287,6 +287,34 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     first scroll test used `>nul`. Now `IsExistingDir` catches it and the bare-name test is
     "no \ or /". Both modes verified passing `>nul a|b <x` through unchanged.
   - Testing aid: `LogLine.ToString()` returns the text, so UI Automation reads real rows.
+- **Kit Helper 1.6.0: "Kits from old TrueTest…"** (top-row button next to Rescan, and on the
+  icon's menu). The engineers' TrueTest update routine: rename `TrueTest 1.8` →
+  `1.8.5756.961`, install a new `TrueTest 1.8`, copy the deployed kit folders back. Popup
+  (`MigrateWindow`): To / From combos (From excludes To), one checkbox per copy target
+  (POCB4.1Net+POCB4.1, POCB4.2, PUC, ScratchDustDetect_NY, LGDVHCustomApp) ticked when the
+  source has it and greyed when not, and "Skip EDT_Mobile.csv" under LGDVHCustomApp (ticked).
+  - **Installs are found by `TrueTest.exe`, not by name** (`TrueTest.AllInstalls`): a renamed
+    folder needn't start with "TrueTest". `RVSConverter 1.9` has no TrueTest.exe → excluded.
+    The panel's own install list still uses `TrueTest*`, so renamed old installs do not
+    appear as copy targets there.
+  - **Default From = most recently renamed.** A rename does not touch a folder's created /
+    modified dates, but it does update NTFS's ChangeTime, read with
+    `GetFileInformationByHandleEx(FileBasicInfo)` (CreateFile needs
+    FILE_FLAG_BACKUP_SEMANTICS for a directory). Order: renamed-looking first (name not
+    `^TrueTest \d+\.\d+( .*)?$`), then ChangeTime. On a PC with no renamed install it falls
+    back to the most recently changed other install and says "Not a renamed install".
+  - `KitMigration.Run`: whole folders incl. subfolders and empty folders, overwrite same-name
+    files, keep files only in the new install, skip Thumbs.db; EDT_Mobile.csv skipped only
+    in LGDVHCustomApp. Helper exes are NOT filtered here (they may be deployed on purpose).
+  - The close-TrueTest prompt / result line / restart offer were pulled out of DoCopy
+    (`AskCloseTrueTest`, `LogCopyResult`, `OfferRestart`) and shared.
+  - Verified: core on a fake RVS folder (renamed 1.8.5756.961 picked over an older renamed
+    1.7.1.1 and a more recently changed but standard 1.9; EDT kept NEW when skipped, OLD when
+    not; new-only file kept; subfolder + empty folder copied; Thumbs.db not). Dialog opened
+    via UI Automation on the real installs: defaults and checkboxes as above, Cancel copies
+    nothing. **Not run for real into Program Files** (needs a real rename + new install).
+  - Test trap: PowerShell variables are case-insensitive - `$r` (result) silently replaced
+    `$R` (root folder) in the test script.
 
 ## 2026-11-11
 

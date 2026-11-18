@@ -9,6 +9,7 @@
             <MenuItem x:Name="MenuToggle" Header="Show panel" Click="Toggle_Click" FontWeight="SemiBold"/>
             <MenuItem x:Name="MenuRightClick" Click="RightClick_Click"/>
             <MenuItem Header="Open kit folder in Explorer" Click="OpenFolder_Click"/>
+            <MenuItem Header="Copy kits from an old TrueTest…" Click="Migrate_Click"/>
             <Separator/>
             <MenuItem Header="Exit Kit Helper" Click="Exit_Click"/>
         </ContextMenu>

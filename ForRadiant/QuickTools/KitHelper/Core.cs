@@ -28,6 +28,52 @@ namespace KitHelper
                 .ToList();
         }
 
+        // Every TrueTest install, recognised by TrueTest.exe rather than by name: before
+        // installing a new TrueTest, engineers rename the old folder ("TrueTest 1.8" ->
+        // "1.8.5756.961"), and that renamed one is what kits get copied back from.
+        public static List<string> AllInstalls(string root = Root)
+        {
+            if (!Directory.Exists(root)) return new List<string>();
+            return Directory.GetDirectories(root)
+                .Where(d => File.Exists(Path.Combine(d, "TrueTest.exe")))
+                .OrderBy(d => Path.GetFileName(d), StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+
+        // "TrueTest 1.8", "TrueTest 1.9 debug Mobile": what an installer creates. Anything else
+        // ("1.8.5756.961", "TrueTest 1.8.5756.961") was renamed by hand.
+        static readonly Regex InstallerName = new Regex(@"^TrueTest \d+\.\d+( .*)?$", RegexOptions.IgnoreCase);
+        public static bool LooksRenamed(string dir) => !InstallerName.IsMatch(Path.GetFileName(dir.TrimEnd('\\')));
+
+        // The old install to copy kits from: a renamed-looking folder first, then the most
+        // recently renamed. A rename leaves created/modified dates alone but updates NTFS's
+        // change time, which is read here.
+        public static string GuessSource(IEnumerable<string> candidates) =>
+            candidates.OrderByDescending(LooksRenamed).ThenByDescending(ChangeTime).FirstOrDefault();
+
+        public static DateTime ChangeTime(string dir)
+        {
+            using (var h = CreateFile(dir, 0x80 /* FILE_READ_ATTRIBUTES */, 7, IntPtr.Zero, 3 /* OPEN_EXISTING */,
+                                      0x02000000 /* FILE_FLAG_BACKUP_SEMANTICS: needed for a directory */, IntPtr.Zero))
+            {
+                if (!h.IsInvalid && GetFileInformationByHandleEx(h, 0 /* FileBasicInfo */, out FILE_BASIC_INFO info,
+                                                                (uint)System.Runtime.InteropServices.Marshal.SizeOf(typeof(FILE_BASIC_INFO))))
+                    return DateTime.FromFileTimeUtc(info.ChangeTime);
+            }
+            try { return Directory.GetLastWriteTimeUtc(dir); } catch { return DateTime.MinValue; }
+        }
+
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        struct FILE_BASIC_INFO { public long CreationTime, LastAccessTime, LastWriteTime, ChangeTime; public uint FileAttributes; }
+
+        [System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError = true, CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+        static extern Microsoft.Win32.SafeHandles.SafeFileHandle CreateFile(string name, uint access, uint share, IntPtr security,
+                                                                            uint disposition, uint flags, IntPtr template);
+
+        [System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError = true)]
+        static extern bool GetFileInformationByHandleEx(Microsoft.Win32.SafeHandles.SafeFileHandle h, int infoClass,
+                                                        out FILE_BASIC_INFO info, uint size);
+
         public static Process FindRunning() => Process.GetProcessesByName("TrueTest").FirstOrDefault();
 
         // MainModule throws for an elevated process when we are not elevated.
@@ -134,7 +180,7 @@ namespace KitHelper
         }
 
         // 3 attempts on IOException (a file briefly held by a closing TrueTest), as the POCB exe did.
-        static void CopyOne(string from, string to, Result r, LogFn log, string label = null)
+        internal static void CopyOne(string from, string to, Result r, LogFn log, string label = null)
         {
             label = label ?? Path.GetFileName(from);
             for (int attempt = 1; ; attempt++)
@@ -159,6 +205,53 @@ namespace KitHelper
                     return;
                 }
             }
+        }
+    }
+
+    // After a TrueTest update: copy the kit folders already deployed in the old (renamed)
+    // install into the freshly installed one. Whole folders, subfolders included, as they are
+    // in the old install; same-name files in the new one are overwritten.
+    public static class KitMigration
+    {
+        // EDT_Mobile.csv in LGDVHCustomApp ships with each TrueTest; by default the new
+        // install's copy is kept.
+        public const string EdtMobile = "EDT_Mobile.csv";
+
+        public static Copier.Result Run(string from, string to, IEnumerable<CopyTarget> targets, bool skipEdtMobile, LogFn log)
+        {
+            var r = new Copier.Result();
+            foreach (string sub in targets.SelectMany(t => t.SubFolders))
+            {
+                string src = Path.Combine(from, sub), dst = Path.Combine(to, sub);
+                if (!Directory.Exists(src)) { log($"{sub}: not in {from}, skipped", LogLevel.Warn); continue; }
+                log($"{sub} → {dst}", LogLevel.Info);
+                foreach (string f in Directory.GetFiles(src, "*", SearchOption.AllDirectories))
+                {
+                    string rel = f.Substring(src.TrimEnd('\\').Length + 1);
+                    string name = Path.GetFileName(f);
+                    bool edt = skipEdtMobile && sub == "LGDVHCustomApp" && string.Equals(name, EdtMobile, StringComparison.OrdinalIgnoreCase);
+                    if (edt || string.Equals(name, "Thumbs.db", StringComparison.OrdinalIgnoreCase))
+                    {
+                        r.Skipped++;
+                        log($"  skipped {sub}\\{rel}{(edt ? " (keeping the new install's)" : "")}", LogLevel.Detail);
+                        continue;
+                    }
+                    string target = Path.Combine(dst, rel);
+                    try { Directory.CreateDirectory(Path.GetDirectoryName(target)); }
+                    catch (Exception ex)
+                    {
+                        log($"  FAILED  {sub}\\{rel}: {ex.Message}", LogLevel.Error);
+                        r.Failed++;
+                        r.AccessDenied |= ex is UnauthorizedAccessException;
+                        continue;
+                    }
+                    Copier.CopyOne(f, target, r, log, sub + "\\" + rel);
+                }
+                // Empty folders too, as xcopy /E would.
+                foreach (string d in Directory.GetDirectories(src, "*", SearchOption.AllDirectories))
+                    try { Directory.CreateDirectory(Path.Combine(dst, d.Substring(src.TrimEnd('\\').Length + 1))); } catch { }
+            }
+            return r;
         }
     }
 

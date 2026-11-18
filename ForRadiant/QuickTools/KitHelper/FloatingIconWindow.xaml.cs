@@ -114,6 +114,7 @@ namespace KitHelper
         void Toggle_Click(object sender, RoutedEventArgs e) => panel.Toggle();
         void RightClick_Click(object sender, RoutedEventArgs e) => ShowToast(panel.ToggleExplorerMenu());
         void OpenFolder_Click(object sender, RoutedEventArgs e) => panel.OpenInExplorer();
+        void Migrate_Click(object sender, RoutedEventArgs e) => panel.ShowMigrate();
         void Exit_Click(object sender, RoutedEventArgs e) => Program.Exit();
     }
 }

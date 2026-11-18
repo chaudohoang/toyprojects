@@ -389,47 +389,78 @@ namespace KitHelper
             if (!CheckSource()) return;
             if (Install == null) { Log("Pick a TrueTest install first.", LogLevel.Error); return; }
             string install = Install, source = Source;
-
-            string restartPath = null;
-            if (ChkCloseTT.IsChecked == true)
-            {
-                var p = TrueTest.FindRunning();
-                if (p != null)
-                {
-                    string path = TrueTest.PathOf(p);
-                    var answer = Modal(() => MessageBox.Show(this,
-                        $"TrueTest is running{(path != null ? ":\n" + path : ".")}\n\nClose it before copying to\n{install}?",
-                        "Copy to " + target.Name, MessageBoxButton.YesNoCancel, MessageBoxImage.Question));
-                    if (answer == MessageBoxResult.Cancel) return;
-                    if (answer == MessageBoxResult.Yes)
-                    {
-                        Log("Closing TrueTest…", LogLevel.Info);
-                        try { p.Kill(); p.WaitForExit(10000); restartPath = path; Log("TrueTest closed.", LogLevel.Ok); }
-                        catch (Exception ex) { Log("Could not close TrueTest: " + ex.Message, LogLevel.Error); }
-                    }
-                }
-            }
+            if (!AskCloseTrueTest($"Close it before copying to\n{install}?", "Copy to " + target.Name, out string restartPath)) return;
 
             Log($"Copy {source} → {install} [{string.Join(", ", target.SubFolders)}]", LogLevel.Info);
             var r = await Busy(() => Copier.Run(source, install, target, ownExe, Log));
-            if (r != null)
-            {
-                Log($"Done: {r.Copied} copied, {r.Failed} failed, {r.Skipped} skipped.", r.Failed == 0 ? LogLevel.Ok : LogLevel.Error);
-                if (r.AccessDenied && !IsElevated())
-                    Log("Access denied writing to Program Files - use \"Run as admin\".", LogLevel.Warn);
-            }
+            LogCopyResult(r);
+            OfferRestart(restartPath);
+            LoadInstalls();
+        }
 
-            if (restartPath != null &&
-                Modal(() => MessageBox.Show(this, "Copy finished. Restart TrueTest?\n\n" + restartPath, "TrueTest",
-                                MessageBoxButton.YesNo, MessageBoxImage.Question)) == MessageBoxResult.Yes)
+        // If "Close TrueTest before copying" is ticked and TrueTest runs, ask to close it.
+        // False = the user cancelled. restartPath = the TrueTest that was closed, or null.
+        bool AskCloseTrueTest(string question, string title, out string restartPath)
+        {
+            restartPath = null;
+            if (ChkCloseTT.IsChecked != true) return true;
+            var p = TrueTest.FindRunning();
+            if (p == null) return true;
+            string path = TrueTest.PathOf(p);
+            var answer = Modal(() => MessageBox.Show(this,
+                $"TrueTest is running{(path != null ? ":\n" + path : ".")}\n\n{question}",
+                title, MessageBoxButton.YesNoCancel, MessageBoxImage.Question));
+            if (answer == MessageBoxResult.Cancel) return false;
+            if (answer == MessageBoxResult.Yes)
             {
-                try
-                {
-                    Process.Start(new ProcessStartInfo(restartPath) { WorkingDirectory = Path.GetDirectoryName(restartPath), UseShellExecute = true });
-                    Log("TrueTest restarted.", LogLevel.Ok);
-                }
-                catch (Exception ex) { Log("Restart failed: " + ex.Message, LogLevel.Error); }
+                Log("Closing TrueTest…", LogLevel.Info);
+                try { p.Kill(); p.WaitForExit(10000); restartPath = path; Log("TrueTest closed.", LogLevel.Ok); }
+                catch (Exception ex) { Log("Could not close TrueTest: " + ex.Message, LogLevel.Error); }
             }
+            return true;
+        }
+
+        void LogCopyResult(Copier.Result r)
+        {
+            if (r == null) return;
+            Log($"Done: {r.Copied} copied, {r.Failed} failed, {r.Skipped} skipped.", r.Failed == 0 ? LogLevel.Ok : LogLevel.Error);
+            if (r.AccessDenied && !IsElevated())
+                Log("Access denied writing to Program Files - use \"Run as admin\".", LogLevel.Warn);
+        }
+
+        void OfferRestart(string restartPath)
+        {
+            if (restartPath == null ||
+                Modal(() => MessageBox.Show(this, "Copy finished. Restart TrueTest?\n\n" + restartPath, "TrueTest",
+                                MessageBoxButton.YesNo, MessageBoxImage.Question)) != MessageBoxResult.Yes) return;
+            try
+            {
+                Process.Start(new ProcessStartInfo(restartPath) { WorkingDirectory = Path.GetDirectoryName(restartPath), UseShellExecute = true });
+                Log("TrueTest restarted.", LogLevel.Ok);
+            }
+            catch (Exception ex) { Log("Restart failed: " + ex.Message, LogLevel.Error); }
+        }
+
+        // ---------------------------------------------------------------- kits → new TrueTest
+
+        void Migrate_Click(object sender, RoutedEventArgs e) => ShowMigrate();
+
+        // Also opened from the floating icon's menu.
+        public async void ShowMigrate()
+        {
+            if (!IsVisible) ShowNear(Anchor);
+            var w = new MigrateWindow(Install) { Owner = this };
+            if (Modal(() => w.ShowDialog()) != true) return;
+            string from = w.From, to = w.To;
+            var targets = w.Targets;
+            bool skipEdt = w.SkipEdtMobile;
+            if (!AskCloseTrueTest($"Close it before copying kits into\n{to}?", "Copy kits", out string restartPath)) return;
+
+            Log($"Copy kits {from} → {to} [{string.Join(", ", targets.SelectMany(t => t.SubFolders))}]"
+                + (skipEdt && targets.Any(t => t.Name == "LGDVHCustomApp") ? $", skipping {KitMigration.EdtMobile}" : ""), LogLevel.Info);
+            var r = await Busy(() => KitMigration.Run(from, to, targets, skipEdt, Log));
+            LogCopyResult(r);
+            OfferRestart(restartPath);
             LoadInstalls();
         }
 

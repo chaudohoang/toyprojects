@@ -17,3 +17,5 @@ E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\MainWind
 E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\Theme.g.cs
 E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\Kit Helper_MarkupCompile.cache
 E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\Kit Helper.g.resources
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\MigrateWindow.baml
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\MigrateWindow.g.cs

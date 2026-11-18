@@ -54,6 +54,8 @@
                 <ComboBox x:Name="CboInstall" Grid.Row="2" Grid.Column="1" SelectionChanged="CboInstall_SelectionChanged"/>
                 <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Horizontal">
                     <Button Content="Rescan" Click="Rescan_Click"/>
+                    <Button Content="Kits from old TrueTest…" Click="Migrate_Click"
+                            ToolTip="After installing a new TrueTest: copy the kit folders from the old (renamed) install"/>
                     <Button x:Name="BtnAdmin" Content="Run as admin" Click="Admin_Click"/>
                 </StackPanel>
                 <TextBlock x:Name="TxtRunning" Grid.Row="3" Grid.Column="1" Style="{StaticResource Hint}" Margin="2,3,0,0"/>
