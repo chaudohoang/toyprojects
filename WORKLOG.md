@@ -207,6 +207,11 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     through reflection. Fix: FilePath moved above Current, with a comment saying why.
   - Verified with real button clicks via UI Automation (powershell.exe 5.1,
     InvokePattern): fresh start adds; Remove → restart stays removed; Add → restart stays.
+- **Kit Helper 1.4.3: Remove is no longer remembered** (Chau: he wanted "every start", not
+  "unless removed" - my question offered both and the answer combined them). Remove only
+  deletes the entry; the next start re-adds it. To be rid of it: remove it and stop starting
+  the app. `MenuRemoved` dropped from code and from his settings file. Verified: Remove →
+  entry gone → restart → entry back.
 
 ## 2026-11-11
 

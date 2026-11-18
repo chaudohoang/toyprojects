@@ -36,7 +36,7 @@ namespace KitHelper
             TxtVersion.Text = InstalledCopy.Self + (IsElevated() ? "  ·  Administrator" : "");
             BtnAdmin.Visibility = IsElevated() ? Visibility.Collapsed : Visibility.Visible;
             TxtVignettingTitle.Text = "Vignetting  (" + Vignetting.Key + " in kit *.ini)";
-            TxtExplorerHint.Text = "Added automatically whenever Kit Helper starts, unless you remove it. Runs the copy in "
+            TxtExplorerHint.Text = "Added automatically whenever Kit Helper starts; Remove lasts until the next start. Runs the copy in "
                                  + InstalledCopy.Folder + ". Windows 11: under \"Show more options\".";
             LstLog.ItemsSource = log;
 
@@ -597,14 +597,12 @@ namespace KitHelper
                 ? "\"Open in Kit Helper\" is already in the folder right-click menu."
                 : ToggleExplorerMenu("add");
 
-        // Every start: put "Open in Kit Helper" in place, or point it back at the installed copy,
-        // unless the user removed it (then it stays off until Add). Running the exe once is
-        // therefore all a PC needs. Returns the note for the icon, or null if nothing changed.
-        public string EnsureRightClickEntry()
-        {
-            if (settings.Get("MenuRemoved") == "1" || MenuPointsAtInstalled()) return null;
-            return ToggleExplorerMenu("add");
-        }
+        // Every start: put "Open in Kit Helper" in place, or point it back at the installed copy.
+        // Running the exe once is therefore all a PC needs. A Remove is deliberately NOT
+        // remembered (Chau's call): it lasts until Kit Helper next starts, so to be rid of the
+        // entry, remove it and stop starting the app. Returns the icon's note, or null.
+        public string EnsureRightClickEntry() =>
+            MenuPointsAtInstalled() ? null : ToggleExplorerMenu("add");
 
         // action: "add" / "remove", or null = whichever the button currently offers.
         // Returns a one-line summary (for the icon's note); details go to the log.
@@ -616,20 +614,16 @@ namespace KitHelper
             {
                 // Normally a no-op: this window already is the installed copy (see RunInstalled).
                 Log(InstalledCopy.EnsureInstalled(), LogLevel.Info);
-                // Remembered so the start-up check (EnsureRightClickEntry) respects a Remove.
                 if (action == "remove")
                 {
                     foreach (var key in ExplorerKeys) Microsoft.Win32.Registry.CurrentUser.DeleteSubKeyTree(key, false);
-                    settings.Set("MenuRemoved", "1");
-                    summary = "Removed \"Open in Kit Helper\" from the folder right-click menu. It stays off until you add it again.";
+                    summary = "Removed \"Open in Kit Helper\" from the folder right-click menu. It comes back the next time Kit Helper starts.";
                 }
                 else
                 {
                     RegisterMenu();
-                    settings.Set("MenuRemoved", "");
                     summary = "Added \"Open in Kit Helper\" to the folder right-click menu.";
                 }
-                settings.Save();
                 Log(summary, LogLevel.Ok);
             }
             catch (Exception ex)
