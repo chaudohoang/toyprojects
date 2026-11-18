@@ -13,14 +13,20 @@ namespace ScriptToolbox
     // All controls are built in code (no designer file) so the layout is readable in one place.
     public sealed class MainForm : Form
     {
-        readonly TextBox txtSource = new TextBox();
+        // Package folder, with the recently used ones in the drop-down.
+        readonly ComboBox txtSource = new ComboBox { DropDownStyle = ComboBoxStyle.DropDown, MaxDropDownItems = 15 };
         readonly Label lblSourceInfo = new Label { AutoSize = true, ForeColor = Color.DimGray };
+        readonly Dictionary<CopyTarget, Button> copyButtons = new Dictionary<CopyTarget, Button>();
+        readonly Label lblSuggest = new Label { AutoSize = true, ForeColor = Color.SteelBlue, Margin = new Padding(3, 2, 3, 3) };
+        readonly Button btnExplorer = new Button { AutoSize = true, Margin = new Padding(3) };
+        readonly RadioButton rbOmit = new RadioButton { Text = "Omit", AutoSize = true, Checked = true };
+        readonly RadioButton rbPuc = new RadioButton { Text = "PUC", AutoSize = true };
         readonly ComboBox cboInstall = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
         readonly Label lblRunning = new Label { AutoSize = true };
         readonly CheckBox chkCloseTT = new CheckBox { Text = "Close TrueTest before copying (offer restart after)", AutoSize = true, Checked = true };
         readonly ListView lvIni = new ListView { View = View.Details, FullRowSelect = true, GridLines = true, HeaderStyle = ColumnHeaderStyle.Nonclickable };
         readonly CheckBox chkDx = new CheckBox { Text = "Include DX ini", AutoSize = true };
-        readonly TextBox txtRunInput = new TextBox();
+        readonly ComboBox txtRunInput = new ComboBox { DropDownStyle = ComboBoxStyle.DropDown };
         readonly ComboBox cboWorkDir = new ComboBox { DropDownStyle = ComboBoxStyle.DropDown };
         readonly Button btnRun = new Button { Text = "Run", AutoSize = true };
         readonly Button btnStop = new Button { Text = "Stop", AutoSize = true, Enabled = false };
@@ -36,8 +42,8 @@ namespace ScriptToolbox
             Text = "Script Toolbox" + (IsElevated() ? " (Administrator)" : "");
             Font = new Font("Segoe UI", 9f);
             AutoScaleMode = AutoScaleMode.Dpi;
-            ClientSize = new Size(980, 760);
-            MinimumSize = new Size(820, 600);
+            ClientSize = new Size(980, 840);
+            MinimumSize = new Size(900, 700);
             StartPosition = FormStartPosition.CenterScreen;
             AllowDrop = true;
             DragEnter += (s, e) => e.Effect = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
@@ -49,12 +55,12 @@ namespace ScriptToolbox
             // folder they sat in, so dropping this exe into a package folder keeps that habit).
             string folder = !string.IsNullOrEmpty(startFolder) && Directory.Exists(startFolder)
                 ? startFolder : AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
-            SetSource(folder);
-            txtRunInput.Text = settings.Get("RunInput");
             chkCloseTT.Checked = settings.Get("CloseTrueTest") != "0";
             LoadInstalls();
+            SetSource(folder);
+            UpdateExplorerButton();
 
-            Shown += (s, e) => txtSource.Select(txtSource.TextLength, 0);
+            Shown += (s, e) => txtSource.Select(txtSource.Text.Length, 0);
             FormClosing += (s, e) => SaveSettings();
             Log($"Script Toolbox ready. Drop a folder here to work on it, or a .txt to use as the run-test input.", LogLevel.Info);
         }
@@ -64,6 +70,9 @@ namespace ScriptToolbox
         void BuildLayout()
         {
             var root = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 3, Padding = new Padding(8) };
+            // Without an explicit 100% column the root sizes to its content, and a long folder
+            // path in the combo then widens the whole layout past the window edge.
+            root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
@@ -75,6 +84,7 @@ namespace ScriptToolbox
             txtSource.Dock = DockStyle.Fill;
             txtSource.Leave += (s, e) => SetSource(txtSource.Text.Trim());
             txtSource.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) { SetSource(txtSource.Text.Trim()); e.SuppressKeyPress = true; } };
+            txtSource.SelectionChangeCommitted += (s, e) => { if (txtSource.SelectedItem is string f) BeginInvoke(new Action(() => SetSource(f))); };
             top.Controls.Add(Lbl("Package folder:"), 0, 0);
             top.Controls.Add(txtSource, 1, 0);
             top.Controls.Add(Btn("Browse…", BrowseSource), 2, 0);
@@ -128,8 +138,10 @@ namespace ScriptToolbox
                 var b = Btn(label, () => DoCopy(target));
                 b.AutoSize = false; b.Height = 30; b.Width = 330; b.TextAlign = ContentAlignment.MiddleLeft;
                 actionControls.Add(b);
+                copyButtons[t] = b;
                 cs.Controls.Add(b);
             }
+            cs.Controls.Add(lblSuggest);
             cs.Controls.Add(chkCloseTT);
             cs.Controls.Add(Hint("POCB skips *.tif, *.csv and LGD_VNTT.ini.\nOther targets copy every file in the folder."));
             col.Controls.Add(Group("Copy package folder to TrueTest", cs));
@@ -140,7 +152,12 @@ namespace ScriptToolbox
             actionControls.Add(ub);
             us.Controls.Add(ub);
             us.Controls.Add(Hint("Removes the \"downloaded from internet\" mark,\nincluding files in subfolders."));
-            col.Controls.Add(Group("Unblock files", us));
+            btnExplorer.AutoSize = false; btnExplorer.Height = 30; btnExplorer.Width = 330; btnExplorer.TextAlign = ContentAlignment.MiddleLeft;
+            btnExplorer.Margin = new Padding(3, 10, 3, 3);
+            btnExplorer.Click += (s, e) => ToggleExplorerMenu();
+            us.Controls.Add(btnExplorer);
+            us.Controls.Add(Hint("Then right-click a package folder → \"Open in Script\nToolbox\" (Windows 11: under \"Show more options\")."));
+            col.Controls.Add(Group("Other", us));
             return col;
         }
 
@@ -167,18 +184,27 @@ namespace ScriptToolbox
             g.ColumnStyles[1] = new ColumnStyle(SizeType.Absolute, 340);
             txtRunInput.Dock = DockStyle.Fill;
             cboWorkDir.Dock = DockStyle.Fill;
+            txtRunInput.SelectedIndexChanged += (s, e) => OnRunInputChanged();
+            txtRunInput.Leave += (s, e) => OnRunInputChanged();
             g.Controls.Add(Lbl("Input .txt:"), 0, 0);
             g.Controls.Add(txtRunInput, 1, 0);
             g.Controls.Add(Btn("Browse…", BrowseRunInput), 2, 0);
-            g.Controls.Add(Lbl("Working dir:"), 0, 1);
-            g.Controls.Add(cboWorkDir, 1, 1);
+            var modes = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(0) };
+            rbPuc.CheckedChanged += (s, e) => UpdateRunMode();
+            modes.Controls.Add(rbOmit); modes.Controls.Add(rbPuc);
+            modes.Controls.Add(Hint("PUC runs in the package folder, outputs to …\\Test\\"));
+            g.Controls.Add(Lbl("Mode:"), 0, 1);
+            g.Controls.Add(modes, 1, 1);
+            g.SetColumnSpan(modes, 2);
+            g.Controls.Add(Lbl("Working dir:"), 0, 2);
+            g.Controls.Add(cboWorkDir, 1, 2);
             var buttons = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(0) };
             btnRun.Click += (s, e) => DoRunTest();
             btnStop.Click += (s, e) => { try { runningTest?.Kill(); } catch { } };
             buttons.Controls.Add(btnRun); buttons.Controls.Add(btnStop);
-            g.Controls.Add(buttons, 1, 2);
+            g.Controls.Add(buttons, 1, 3);
             actionControls.Add(btnRun);
-            col.Controls.Add(Group("Run test  (RunTestOmit input file)", g));
+            col.Controls.Add(Group("Run test  (RunTestOmit / RunTestPUC input file)", g));
             return col;
         }
 
@@ -224,12 +250,99 @@ namespace ScriptToolbox
                 lvIni.Items.Clear();
                 return;
             }
-            int files = Directory.GetFiles(folder).Count(f => !string.Equals(Path.GetFileName(f), ownExe, StringComparison.OrdinalIgnoreCase));
+            int files = Directory.GetFiles(folder).Count(f => !Package.IsHelper(f) && !string.Equals(Path.GetFileName(f), ownExe, StringComparison.OrdinalIgnoreCase));
             int dirs = Directory.GetDirectories(folder).Length;
             int inis = Vignetting.IniFiles(folder).Length;
             lblSourceInfo.Text = $"{files} file(s), {dirs} subfolder(s), {inis} ini";
             lblSourceInfo.ForeColor = Color.DimGray;
             RefreshIni();
+            RememberRecent(folder);
+
+            // Mark the copy target this folder is meant for.
+            var suggested = Package.Suggest(folder, out string why);
+            foreach (var kv in copyButtons)
+            {
+                bool on = kv.Key == suggested;
+                kv.Value.Font = new Font(Font, on ? FontStyle.Bold : FontStyle.Regular);
+                kv.Value.BackColor = on ? Color.FromArgb(220, 235, 252) : SystemColors.Control;
+                kv.Value.UseVisualStyleBackColor = !on;
+            }
+            lblSuggest.Text = suggested == null ? "" : $"Suggested: {suggested.Name}  ({why})";
+
+            // Run inputs found in this folder; keep a browsed file from elsewhere if one is set.
+            string current = RunInputPath;
+            txtRunInput.Items.Clear();
+            foreach (string f in Package.RunInputs(folder)) txtRunInput.Items.Add(new RunInputItem(f));
+            var match = txtRunInput.Items.Cast<RunInputItem>().FirstOrDefault(i => string.Equals(i.Path, current, StringComparison.OrdinalIgnoreCase));
+            if (match != null) txtRunInput.SelectedItem = match;
+            else if (txtRunInput.Items.Count > 0) txtRunInput.SelectedIndex = 0;
+            else if (!File.Exists(current)) txtRunInput.Text = "";
+            OnRunInputChanged();
+        }
+
+        void RememberRecent(string folder)
+        {
+            var recent = settings.Get("Recent").Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries)
+                .Where(f => !string.Equals(f, folder, StringComparison.OrdinalIgnoreCase) && Directory.Exists(f))
+                .Prepend(folder).Take(15).ToList();
+            settings.Set("Recent", string.Join("|", recent));
+            int caret = txtSource.SelectionStart;
+            txtSource.BeginUpdate();
+            txtSource.Items.Clear();
+            foreach (var f in recent) txtSource.Items.Add(f);
+            txtSource.EndUpdate();
+            txtSource.Text = folder;
+            txtSource.Select(Math.Min(caret, folder.Length), 0);
+        }
+
+        // A run input in the drop-down shows its file name; a typed or browsed path is used as is.
+        sealed class RunInputItem
+        {
+            public readonly string Path;
+            public RunInputItem(string path) { Path = path; }
+            public override string ToString() => System.IO.Path.GetFileName(Path);
+        }
+
+        string RunInputPath
+        {
+            get
+            {
+                if (txtRunInput.SelectedItem is RunInputItem i && txtRunInput.Text == i.ToString()) return i.Path;
+                string t = txtRunInput.Text.Trim();
+                return t == "" || Path.IsPathRooted(t) ? t : Path.Combine(Source, t);
+            }
+        }
+
+        string lastRunInput;
+        void OnRunInputChanged()
+        {
+            string p = RunInputPath;
+            if (p == lastRunInput) return;
+            lastRunInput = p;
+            if (File.Exists(p)) rbPuc.Checked = RunTest.LooksLikePuc(p);
+            rbOmit.Checked = !rbPuc.Checked;
+            UpdateRunMode();
+        }
+
+        // PUC runs where its input lives (RunTestPUC.exe had no working-dir choice: it ran in the
+        // folder it sat in). Omit runs in the chosen ScratchDustDetect_NY folder.
+        void UpdateRunMode()
+        {
+            if (rbPuc.Checked)
+            {
+                cboWorkDir.Enabled = false;
+                // Clear the list first: a combo whose text matched an item re-selects that item
+                // when its handle is created, overwriting a Text set before the form was shown.
+                cboWorkDir.Items.Clear();
+                string p = RunInputPath;
+                cboWorkDir.Text = File.Exists(p) ? Path.GetDirectoryName(p) : Source;
+            }
+            else if (!cboWorkDir.Enabled)
+            {
+                cboWorkDir.Enabled = true;
+                cboWorkDir.Text = "";
+                LoadWorkDirs();
+            }
         }
 
         void RefreshIni()
@@ -275,6 +388,7 @@ namespace ScriptToolbox
 
         void LoadWorkDirs()
         {
+            if (rbPuc.Checked) return;      // PUC's working dir is fixed (see UpdateRunMode)
             string keep = cboWorkDir.Text;
             if (string.IsNullOrEmpty(keep)) keep = settings.Get("RunWorkDir");
             cboWorkDir.Items.Clear();
@@ -288,8 +402,7 @@ namespace ScriptToolbox
         void SaveSettings()
         {
             settings.Set("Install", Install);
-            settings.Set("RunInput", txtRunInput.Text);
-            settings.Set("RunWorkDir", cboWorkDir.Text);
+            if (!rbPuc.Checked) settings.Set("RunWorkDir", cboWorkDir.Text);
             settings.Set("CloseTrueTest", chkCloseTT.Checked ? "1" : "0");
             settings.Save();
         }
@@ -390,7 +503,8 @@ namespace ScriptToolbox
 
         async void DoRunTest()
         {
-            string input = txtRunInput.Text.Trim(), workDir = cboWorkDir.Text.Trim();
+            string input = RunInputPath, workDir = cboWorkDir.Text.Trim();
+            bool puc = rbPuc.Checked;
             if (!File.Exists(input)) { Log("Run test: input file not found - " + input, LogLevel.Error); return; }
             if (!Directory.Exists(workDir)) { Log("Run test: working dir not found - " + workDir, LogLevel.Error); return; }
             SaveSettings();
@@ -398,8 +512,8 @@ namespace ScriptToolbox
             btnStop.Enabled = true;
             int code = await Busy(() =>
             {
-                var psi = RunTest.Parse(input, workDir, Log);
-                Log($"Running in {workDir}", LogLevel.Info);
+                var psi = RunTest.Parse(input, workDir, puc, Log);
+                Log($"Run test ({(puc ? "PUC" : "Omit")}) {Path.GetFileName(input)} in {workDir}", LogLevel.Info);
                 Log($"> {psi.FileName} {psi.Arguments}", LogLevel.Info);
                 using (var p = new Process { StartInfo = psi })
                 {
@@ -449,9 +563,9 @@ namespace ScriptToolbox
         {
             using (var d = new OpenFileDialog { Filter = "Run input (*.txt)|*.txt|All files|*.*" })
             {
-                string cur = txtRunInput.Text.Trim();
+                string cur = RunInputPath;
                 d.InitialDirectory = File.Exists(cur) ? Path.GetDirectoryName(cur) : Source;
-                if (d.ShowDialog(this) == DialogResult.OK) txtRunInput.Text = d.FileName;
+                if (d.ShowDialog(this) == DialogResult.OK) { txtRunInput.Text = d.FileName; OnRunInputChanged(); }
             }
         }
 
@@ -461,8 +575,66 @@ namespace ScriptToolbox
             if (paths == null || paths.Length == 0) return;
             string p = paths[0];
             if (Directory.Exists(p)) SetSource(p);
-            else if (string.Equals(Path.GetExtension(p), ".txt", StringComparison.OrdinalIgnoreCase)) txtRunInput.Text = p;
+            else if (string.Equals(Path.GetExtension(p), ".txt", StringComparison.OrdinalIgnoreCase)) { txtRunInput.Text = p; OnRunInputChanged(); }
             else if (File.Exists(p)) SetSource(Path.GetDirectoryName(p));
+        }
+
+        // "Open in Script Toolbox" on the folder right-click menu, per user (HKCU, no admin).
+        // Directory = right-click a folder; Directory\Background = right-click inside one.
+        static readonly string[] ExplorerKeys =
+        {
+            @"Software\Classes\Directory\shell\ScriptToolbox",
+            @"Software\Classes\Directory\Background\shell\ScriptToolbox",
+        };
+
+        bool ExplorerMenuInstalled(out string registeredExe)
+        {
+            registeredExe = null;
+            using (var k = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(ExplorerKeys[0] + @"\command"))
+            {
+                string cmd = k?.GetValue("") as string;
+                if (cmd == null) return false;
+                registeredExe = cmd.Split('"').Skip(1).FirstOrDefault();
+                return true;
+            }
+        }
+
+        void UpdateExplorerButton()
+        {
+            bool on = ExplorerMenuInstalled(out string exe);
+            bool moved = on && !string.Equals(exe, Application.ExecutablePath, StringComparison.OrdinalIgnoreCase);
+            btnExplorer.Text = !on ? "Add \"Open in Script Toolbox\" to folder right-click"
+                : moved ? "Point right-click menu at this exe (now: other copy)"
+                : "Remove \"Open in Script Toolbox\" from right-click";
+        }
+
+        void ToggleExplorerMenu()
+        {
+            bool on = ExplorerMenuInstalled(out string exe);
+            bool moved = on && !string.Equals(exe, Application.ExecutablePath, StringComparison.OrdinalIgnoreCase);
+            try
+            {
+                if (on && !moved)
+                {
+                    foreach (var key in ExplorerKeys) Microsoft.Win32.Registry.CurrentUser.DeleteSubKeyTree(key, false);
+                    Log("Removed \"Open in Script Toolbox\" from the Explorer right-click menu.", LogLevel.Ok);
+                }
+                else
+                {
+                    string self = Application.ExecutablePath;
+                    foreach (var key in ExplorerKeys)
+                        using (var k = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(key))
+                        {
+                            k.SetValue("", "Open in Script Toolbox");
+                            k.SetValue("Icon", "\"" + self + "\"");
+                            using (var c = k.CreateSubKey("command"))
+                                c.SetValue("", "\"" + self + "\" \"" + (key.Contains("Background") ? "%V" : "%1") + "\"");
+                        }
+                    Log($"Explorer right-click → \"Open in Script Toolbox\" now runs {self}", LogLevel.Ok);
+                }
+            }
+            catch (Exception ex) { Log("Explorer menu: " + ex.Message, LogLevel.Error); }
+            UpdateExplorerButton();
         }
 
         static bool IsElevated()

@@ -77,6 +77,10 @@ namespace ScriptToolbox
             var files = Directory.GetFiles(source)
                 .Where(f => !string.Equals(Path.GetFileName(f), ownExe, StringComparison.OrdinalIgnoreCase))
                 .ToList();
+            var helpers = files.Where(Package.IsHelper).ToList();
+            files = files.Except(helpers).ToList();
+            if (helpers.Count > 0)
+                log($"Not copying helper tools: {string.Join(", ", helpers.Select(Path.GetFileName))}", LogLevel.Detail);
             var skipped = files.Where(target.Skip).ToList();
             files = files.Except(skipped).ToList();
             r.Skipped = skipped.Count;
@@ -190,6 +194,48 @@ namespace ScriptToolbox
         }
     }
 
+    // What a package folder is, judged from its contents.
+    public static class Package
+    {
+        // The per-folder helper tools this app replaces. Copying them into TrueTest was never
+        // intended - the old scripts only excluded themselves - so every copy target skips them.
+        public static bool IsHelper(string fileName)
+        {
+            string n = Path.GetFileName(fileName);
+            return n.StartsWith("Copy all to ", StringComparison.OrdinalIgnoreCase)
+                || new[] { "ScriptToolbox.exe", "UnblockFiles.exe", "VignetingOn.exe", "VignetingOff.exe",
+                           "RunTestOmit.exe", "RunTestPUC.exe" }
+                   .Contains(n, StringComparer.OrdinalIgnoreCase);
+        }
+
+        // The copy target this folder is meant for, or null. A leftover "Copy all to X folder"
+        // script is the surest sign; otherwise recognise the payload.
+        public static CopyTarget Suggest(string folder, out string why)
+        {
+            why = null;
+            if (!Directory.Exists(folder)) return null;
+            var names = Directory.GetFiles(folder).Select(Path.GetFileName).ToList();
+            CopyTarget T(string name) => CopyTarget.All.First(t => t.Name == name);
+            bool Has(string pattern) => names.Any(n => Regex.IsMatch(n, pattern, RegexOptions.IgnoreCase));
+
+            foreach (var t in CopyTarget.All)
+                if (Has("^Copy all to " + Regex.Escape(t.Name) + " folder")) { why = "old copy script found"; return t; }
+
+            if (Has(@"^ScratchDustDetect.*\.exe$") || Has("^LGD_OMIT_INI")) { why = "ScratchDustDetect / LGD_OMIT_INI files"; return T("ScratchDustDetect_NY"); }
+            if (Has(@"^VNTT_Interp.*\.exe$")) { why = "VNTT_Interp exes"; return T("LGDVHCustomApp"); }
+            if (Has(@"^LGD_PO_Compensation") || Has("^LGD_COMP_INI")) { why = "LGD_PO_Compensation / LGD_COMP_INI files"; return T("POCB4.1Net"); }
+            if (Has(@"PUC.*\.exe$")) { why = "PUC exe"; return T("PUC"); }
+            return null;
+        }
+
+        // .txt files in the folder whose first line is an exe, i.e. RunTest inputs.
+        public static string[] RunInputs(string folder) =>
+            Directory.Exists(folder)
+                ? Directory.GetFiles(folder, "*.txt").Where(f => RunTest.ExeOf(f) != null)
+                    .OrderBy(f => f, StringComparer.OrdinalIgnoreCase).ToArray()
+                : new string[0];
+    }
+
     public static class Unblocker
     {
         // Deletes the Zone.Identifier stream ("downloaded from the internet" mark). Recursive,
@@ -224,33 +270,85 @@ namespace ScriptToolbox
     {
         public const string CustomWorkDir = @"D:\Batch\ScratchNY_Custom\Exe Files";
 
-        // RunTestOmit.exe input format: line 1 = executable, each further line = one argument.
-        // An argument that ends in "\" (or is an existing folder) is a folder and is created if
-        // missing; arguments with spaces are quoted.
-        public static ProcessStartInfo Parse(string inputFile, string workDir, LogFn log)
+        // Line 1 of an input file is the executable. Used to tell run inputs from other .txt.
+        public static string ExeOf(string inputFile)
+        {
+            try
+            {
+                using (var r = new StreamReader(inputFile))
+                {
+                    string first = r.ReadLine()?.Trim();
+                    return first != null && first.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) ? first : null;
+                }
+            }
+            catch { return null; }
+        }
+
+        // RunTestPUC.exe was used for inputs whose exe is a PUC tool; RunTestOmit.exe for the rest.
+        public static bool LooksLikePuc(string inputFile) =>
+            (ExeOf(inputFile) ?? "").IndexOf("PUC", StringComparison.OrdinalIgnoreCase) >= 0;
+
+        // Input format shared by RunTestOmit.exe and RunTestPUC.exe: line 1 = executable, each
+        // further line = one argument. An argument that ends in "\" (or is an existing folder)
+        // is a folder and is created if missing; arguments with spaces are quoted.
+        //
+        // puc = RunTestPUC rules on top: every folder argument gets "Test\" appended, and a bare
+        // file name containing "puc" ending .hex/.txt (not "dummy") is placed in that Test folder.
+        //
+        // The old launchers sat in the package folder, which was therefore their current
+        // directory: a relative exe or folder was looked up there. That folder is the input
+        // file's folder, so relative names resolve against it here (exe: then workDir).
+        public static ProcessStartInfo Parse(string inputFile, string workDir, bool puc, LogFn log)
         {
             var lines = File.ReadAllLines(inputFile);
             if (lines.Length == 0 || lines[0].Trim() == "")
                 throw new InvalidDataException("Input file is empty - line 1 must be the executable.");
+            string pkg = Path.GetDirectoryName(Path.GetFullPath(inputFile));
+
+            string exe = lines[0].Trim();
+            if (!Path.IsPathRooted(exe))
+            {
+                string hit = new[] { pkg, workDir }.Select(d => Path.Combine(d, exe)).FirstOrDefault(File.Exists);
+                if (hit != null) exe = hit;
+                else log($"{exe} not found in the package folder or working dir - relying on PATH.", LogLevel.Warn);
+            }
 
             var args = new List<string>();
+            string testOutput = "";
             foreach (string raw in lines.Skip(1))
             {
                 string arg = raw.Trim();
-                if (arg.EndsWith("\\") && !Directory.Exists(arg))
+                bool isFolder = arg.EndsWith("\\") || (arg != "" && Directory.Exists(Path.Combine(pkg, arg)));
+                if (isFolder)
                 {
-                    try { Directory.CreateDirectory(arg); log($"Created folder: {arg}", LogLevel.Detail); }
-                    catch (Exception ex) { log($"Error creating folder {arg}: {ex.Message}", LogLevel.Warn); }
+                    if (puc)
+                    {
+                        if (!arg.EndsWith("\\")) arg += "\\";
+                        arg += "Test\\";
+                        testOutput = arg;
+                    }
+                    string full = Path.Combine(pkg, arg);
+                    if (!Directory.Exists(full))
+                    {
+                        try { Directory.CreateDirectory(full); log($"Created folder: {arg}", LogLevel.Detail); }
+                        catch (Exception ex) { log($"Error creating folder {arg}: {ex.Message}", LogLevel.Warn); }
+                    }
                 }
+                if (puc && Path.GetFileName(arg) == arg
+                        && arg.IndexOf("puc", StringComparison.OrdinalIgnoreCase) >= 0
+                        && (arg.EndsWith(".hex", StringComparison.OrdinalIgnoreCase) || arg.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
+                        && arg.IndexOf("dummy", StringComparison.OrdinalIgnoreCase) < 0)
+                    arg = testOutput + arg;
+
                 // A trailing "\" right before the closing quote would escape it ("C:\a b\" → C:\a b"),
-                // so double it. RunTestOmit.exe had this bug for folder arguments with spaces.
+                // so double it. Both old launchers had this bug for folder arguments with spaces.
                 if (arg.Contains(" ")) arg = "\"" + (arg.EndsWith("\\") ? arg + "\\" : arg) + "\"";
                 args.Add(arg);
             }
 
             return new ProcessStartInfo
             {
-                FileName = lines[0].Trim(),
+                FileName = exe,
                 Arguments = string.Join(" ", args),
                 WorkingDirectory = workDir,
                 UseShellExecute = false,

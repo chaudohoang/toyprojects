@@ -39,6 +39,34 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     Include DX + Set ON clicked in the live exe (PostMessage BM_CLICK), files and log checked,
     no APPCRASH. **Not exercised live:** the copy buttons against real Program Files, the
     TrueTest close/restart prompts, and Run test with a real input file.
+- **ScriptToolbox, round 2: replace the per-folder script copies entirely.** Chau keeps a
+  copy of the relevant scripts INSIDE each package folder (`D:\Log\PUC\<model>`,
+  `D:\Log\Kit\<model>\<kit>\InputIMG\<model>`, `...\Omit\<model>`, `...\R2R`). Surveying those
+  turned up gaps:
+  - **`RunTestPUC.exe` was never in `D:\Log\Script`** but lives in the PUC folders. It is NOT
+    RunTestOmit: no working-dir prompt (runs in the folder it sits in), every folder arg gets
+    `Test\` appended, and a bare `*puc*.hex/.txt` arg (not `dummy*`) is placed in that Test
+    folder. Now a PUC mode in Run test, auto-picked when line 1's exe contains "PUC".
+  - **Relative exe names relied on the launcher's own location.** The Omit input's line 1 is
+    `ScratchDustDetect_NY_10.20.100.exe`, found only because RunTestOmit.exe sat beside it
+    (CreateProcess searches the parent exe's folder). A central toolbox resolves relative
+    exe/folder names against the input .txt's folder, then the working dir.
+  - **The helper tools were being copied into TrueTest.** The old scripts excluded only
+    themselves, so `UnblockFiles.exe`, `VignetingOn.exe`, `RunTestOmit.exe`... landed in
+    Program Files on every copy. `Package.IsHelper` now skips them for every target.
+  - Added: recent-folders drop-down, run inputs listed from the folder (any .txt whose line 1
+    is an .exe), the matching copy target highlighted (a leftover "Copy all to X" script
+    wins, else payload patterns), and a button that adds "Open in Script Toolbox" to the
+    Explorer folder right-click menu (HKCU `Directory\shell` + `Directory\Background\shell`,
+    no admin; it notices when it points at a different copy of the exe).
+  - Layout traps: a root TableLayoutPanel with no ColumnStyle sizes to content, so a long
+    path in the folder combo widened the whole window; and a DropDown ComboBox re-selects its
+    old matching item when its handle is created, overwriting a Text set in the ctor (PUC
+    working dir showed the TrueTest path) - clear Items first.
+  - Verified on the real folders read-only: all 4 get the right target, PUC/Omit inputs and
+    mode detected, Omit parse resolves the exe in the package folder. PUC parse checked on a
+    copy with `D:\POCB\HEX\` redirected to scratch (Parse creates folders). **Not tested:**
+    the Explorer menu button (writes HKCU; left for Chau to click), and a real run.
 
 ## 2026-11-11
 
