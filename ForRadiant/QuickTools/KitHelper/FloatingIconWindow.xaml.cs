@@ -32,18 +32,31 @@ namespace KitHelper
                 Top = t;
             }
             else
-            {
-                // First start: top centre of the screen. Not top right, where it would cover the
-                // close / minimize buttons of maximized windows (the icon is always on top).
-                var wa = SystemParameters.WorkArea;
-                Left = wa.Left + (wa.Width - Width) / 2;
-                Top = wa.Top + 4;
-            }
+                MoveToDefault();
 
             toastTimer.Tick += (s2, e) => { toastTimer.Stop(); Toast.IsOpen = false; };
 
             panel.BusyChanged += SetBusy;
             Drop += OnDrop;
+        }
+
+        // First-start position: top centre of the main screen. Not top right, where it would
+        // cover the close / minimize buttons of maximized windows (the icon is always on top).
+        void MoveToDefault()
+        {
+            var wa = SystemParameters.WorkArea;
+            Left = wa.Left + (wa.Width - Width) / 2;
+            Top = wa.Top + 4;
+        }
+
+        // Menu "Default position": back to the first-start spot, and forget the dragged one.
+        void DefaultPosition_Click(object sender, RoutedEventArgs e)
+        {
+            MoveToDefault();
+            Settings.Current.Remove("IconLeft");
+            Settings.Current.Remove("IconTop");
+            Settings.Current.Save();
+            if (panel.IsVisible) panel.ShowNear(this);
         }
 
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)

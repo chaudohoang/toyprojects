@@ -39,6 +39,7 @@ namespace KitHelper
 
         public string Get(string key) => values.TryGetValue(key, out var v) ? v : "";
         public void Set(string key, string value) => values[key] = value ?? "";
+        public void Remove(string key) => values.Remove(key);
 
         public double? GetDouble(string key) =>
             double.TryParse(Get(key), System.Globalization.NumberStyles.Float,

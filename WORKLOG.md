@@ -360,6 +360,13 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     dragged it to 264,565, and the test's "reset to default" step deleted his saved
     position. Restored (IconLeft=264, IconTop=565). Read the icon's real position before
     driving it, and never reset a user's saved settings as test cleanup.
+  - **Icon menu: "Default position"** moves the icon back to the first-start spot (top centre,
+    `MoveToDefault`) and removes IconLeft/IconTop (`Settings.Remove`); an open panel re-docks.
+    Verified via the real context menu (right-click + UIA Invoke): 911,3 → 930,4, keys gone.
+  - **Same mistake again, caught by the test's own "before" line:** Chau had meanwhile moved
+    the icon to 911,3, and the cleanup restored the OLD remembered 264,565. Fixed to 911,3.
+    Restore the value the test itself read just before it changed anything - never one
+    remembered from earlier in the session.
 
 ## 2026-11-11
 
