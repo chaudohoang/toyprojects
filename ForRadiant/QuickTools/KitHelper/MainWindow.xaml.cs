@@ -345,8 +345,12 @@ namespace KitHelper
             CboWorkDir.Items.Clear();
             foreach (var i in TrueTest.Installs()) CboWorkDir.Items.Add(Path.Combine(i, "ScratchDustDetect_NY"));
             CboWorkDir.Items.Add(RunTest.CustomWorkDir);
-            // Free text is allowed, so keep whatever was there even if it is not in the list.
-            CboWorkDir.Text = !string.IsNullOrEmpty(keep) ? keep
+            // A TrueTest ScratchDustDetect_NY folder follows the selected install, so the run
+            // tests the same TrueTest the kit is copied to. Anything else (the custom batch
+            // folder, a typed path) was picked on purpose and is kept.
+            bool followsInstall = string.IsNullOrEmpty(keep)
+                || keep.StartsWith(TrueTest.Root + "\\", StringComparison.OrdinalIgnoreCase);
+            CboWorkDir.Text = !followsInstall ? keep
                 : Install != null ? Path.Combine(Install, "ScratchDustDetect_NY") : RunTest.CustomWorkDir;
         }
 

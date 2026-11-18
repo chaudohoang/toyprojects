@@ -244,6 +244,15 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   ScratchDustDetect_NY, so tested on a copy of a real Omit kit with an added nested folder:
   9/9 top-level files + nested files + empty folder copied, the subfolder's UnblockFiles.exe
   and Thumbs.db skipped. Only POCB4.1Net and PUC remain top-level-only.
+- **Kit Helper 1.5.2: Run test working dir follows the TrueTest install.** Chau saw install
+  = 1.8 but working dir = 1.9 debug Mobile. The two had independent rules: install = running
+  TrueTest > last used > last in list; working dir = current text > saved `RunWorkDir` >
+  install. Now in `LoadWorkDirs` (runs at start and on every install change) any working
+  dir under `C:\Program Files\Radiant Vision Systems\` is replaced by
+  `<selected install>\ScratchDustDetect_NY`; the custom `D:\Batch\ScratchNY_Custom\Exe Files`
+  or a typed path is kept. Verified through UI Automation (ExpandCollapse + SelectionItem on
+  the combos, ValuePattern to read): start matched despite a saved 1.9-debug value, follows
+  1.9 debug Mobile → 1.9 → 1.8 debug Mobile → 1.8, custom folder survives an install change.
 
 ## 2026-11-11
 
