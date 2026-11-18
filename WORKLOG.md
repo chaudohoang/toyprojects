@@ -315,6 +315,11 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     nothing. **Not run for real into Program Files** (needs a real rename + new install).
   - Test trap: PowerShell variables are case-insensitive - `$r` (result) silently replaced
     `$R` (root folder) in the test script.
+- **Kit Helper 1.6.1: popup starts with nothing ticked**, plus Select all / Unselect all
+  beside "Folders to copy" (Chau's call). Both act only on folders the old install has and
+  leave "Skip EDT_Mobile.csv" alone; Copy stays disabled until something is ticked.
+  Changing From keeps the ticks of folders the new source also has. Verified via UI
+  Automation: open [-----x] Copy off → Select all [xxxxxx] on → Unselect all [-----x] off.
 
 ## 2026-11-11
 

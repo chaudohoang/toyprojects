@@ -60,12 +60,13 @@ namespace KitHelper
                 : TrueTest.LooksRenamed(from) ? $"Renamed install, changed {TrueTest.ChangeTime(from).ToLocalTime():yyyy-MM-dd HH:mm}"
                 : "Not a renamed install - make sure this is the old one";
             // A folder the old install does not have cannot be copied: greyed out, unticked.
+            // Nothing is ticked up front (Chau's call): the engineer picks, or uses Select all.
             foreach (var kv in checks)
             {
                 var have = kv.Key.SubFolders.Where(s => from != null && Directory.Exists(Path.Combine(from, s))).ToList();
                 string label = string.Join(" + ", kv.Key.SubFolders);
                 kv.Value.IsEnabled = have.Count > 0;
-                kv.Value.IsChecked = have.Count > 0;
+                if (have.Count == 0) kv.Value.IsChecked = false;
                 kv.Value.Content = have.Count > 0 ? label : label + "   (not in this install)";
                 kv.Value.Opacity = have.Count > 0 ? 1 : 0.5;
             }
@@ -78,6 +79,16 @@ namespace KitHelper
             ChkEdt.IsEnabled = lgdvh.IsEnabled && lgdvh.IsChecked == true;
             ChkEdt.Opacity = ChkEdt.IsEnabled ? 1 : 0.5;
             BtnCopy.IsEnabled = From != null && To != null && Targets.Count > 0;
+        }
+
+        void SelectAll_Click(object sender, RoutedEventArgs e) => SetAll(true);
+        void UnselectAll_Click(object sender, RoutedEventArgs e) => SetAll(false);
+
+        // Only folders the old install has; the EDT_Mobile.csv option is left as it is.
+        void SetAll(bool on)
+        {
+            foreach (var c in checks.Values) if (c.IsEnabled) c.IsChecked = on;
+            Refresh();
         }
 
         void Copy_Click(object sender, RoutedEventArgs e) => DialogResult = true;
