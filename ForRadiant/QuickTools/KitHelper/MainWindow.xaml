@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Kit Helper" Width="940" Height="920"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
-        ShowInTaskbar="False" ResizeMode="NoResize" AllowDrop="True"
+        ShowInTaskbar="False" ResizeMode="NoResize"
         FontFamily="Segoe UI" FontSize="12.5" Foreground="{StaticResource Fg}">
     <Border CornerRadius="12" Background="{StaticResource Bg}" BorderBrush="#33FFFFFF" BorderThickness="1" Margin="10">
         <Border.Effect>

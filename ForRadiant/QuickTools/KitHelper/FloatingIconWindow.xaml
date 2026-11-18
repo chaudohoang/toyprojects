@@ -15,7 +15,7 @@
         </ContextMenu>
     </Window.ContextMenu>
     <Grid Cursor="Hand"
-          ToolTip="Click: show / hide · Double-click: add &quot;Open in Kit Helper&quot; · Drag: move · Drop a folder to open it · Right-click: menu">
+          ToolTip="Click: show / hide · Drag: move · Drop a kit folder or a run-input .txt here to open it · Right-click: menu">
         <Ellipse Margin="6" Fill="{StaticResource Brand}">
             <Ellipse.Effect>
                 <DropShadowEffect BlurRadius="8" ShadowDepth="1" Opacity="0.45"/>

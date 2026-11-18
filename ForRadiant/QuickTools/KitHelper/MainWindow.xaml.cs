@@ -66,11 +66,10 @@ namespace KitHelper
             SetSource(folder);
             UpdateExplorerButton();
 
-            Drop += OnDrop;
             KeyDown += (s, e) => { if (e.Key == Key.Escape) HidePanel(); };
             Closing += (s, e) => { if (!Program.Exiting) { e.Cancel = true; HidePanel(); } };
             Deactivated += (s, e) => AutoHide();
-            Log("Kit Helper ready. Drop a kit folder on the icon or here, or a .txt to use as the run-test input.", LogLevel.Info);
+            Log("Kit Helper ready. Drop a kit folder, or a run-input .txt, on the K icon to open it.", LogLevel.Info);
         }
 
         // ---------------------------------------------------------------- show / hide
@@ -148,6 +147,17 @@ namespace KitHelper
             Log($"Opened {folder}", LogLevel.Info);
             LoadInstalls();                             // TrueTest may have started or stopped since
             SetSource(folder.TrimEnd('\\'));
+        }
+
+        // A file dropped on the icon: open its folder; a .txt also becomes the run-test input.
+        public void OpenFile(string path)
+        {
+            OpenFolder(Path.GetDirectoryName(path));
+            if (!string.Equals(Path.GetExtension(path), ".txt", StringComparison.OrdinalIgnoreCase)) return;
+            var item = CboRunInput.Items.OfType<RunInputItem>().FirstOrDefault(i => string.Equals(i.Path, path, StringComparison.OrdinalIgnoreCase));
+            if (item != null) CboRunInput.SelectedItem = item;
+            else CboRunInput.Text = path;               // not a run input by its first line: use it anyway
+            Dispatcher.BeginInvoke(new Action(OnRunInputChanged), DispatcherPriority.Background);
         }
 
         // From a second launch (see IpcHost). Empty = a plain relaunch: just show the panel.
@@ -597,15 +607,6 @@ namespace KitHelper
             if (Modal(() => d.ShowDialog(this)) == true) { CboRunInput.Text = d.FileName; OnRunInputChanged(); }
         }
 
-        void OnDrop(object sender, DragEventArgs e)
-        {
-            if (!(e.Data.GetData(DataFormats.FileDrop) is string[] paths) || paths.Length == 0) return;
-            string p = paths[0];
-            if (Directory.Exists(p)) SetSource(p);
-            else if (string.Equals(Path.GetExtension(p), ".txt", StringComparison.OrdinalIgnoreCase)) { CboRunInput.Text = p; OnRunInputChanged(); }
-            else if (File.Exists(p)) SetSource(Path.GetDirectoryName(p));
-        }
-
         // ---------------------------------------------------------------- Explorer right-click
 
         // "Open in Kit Helper" on the folder right-click menu, per user (HKCU, no admin).
@@ -652,12 +653,6 @@ namespace KitHelper
         }
 
         void Explorer_Click(object sender, RoutedEventArgs e) => ToggleExplorerMenu();
-
-        // Double-click on the floating icon. Returns the note shown above the icon.
-        public string AddRightClickEntry() =>
-            MenuPointsAtInstalled()
-                ? "\"Open in Kit Helper\" is already in the folder right-click menu."
-                : ToggleExplorerMenu("add");
 
         // Every start: put "Open in Kit Helper" in place, or point it back at the installed copy.
         // Running the exe once is therefore all a PC needs. A Remove is deliberately NOT

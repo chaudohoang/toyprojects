@@ -11,9 +11,10 @@ namespace KitHelper
     // The always-on-top round icon (modelled on CharlieTheSlave's). It is the app: the panel is
     // only shown on demand.
     //   click        show / hide the panel (it also hides itself when focus goes elsewhere)
-    //   double-click install + add "Open in Kit Helper" to the folder right-click menu
     //   drag         move (position remembered)
-    //   drop folder  open it in the panel
+    //   drop         a folder opens it in the panel; a run-input .txt opens its folder and
+    //                selects it. The icon is the only drop target: starting a drag in Explorer
+    //                deactivates the panel, which then hides.
     public partial class FloatingIconWindow : Window
     {
         readonly MainWindow panel;
@@ -46,14 +47,9 @@ namespace KitHelper
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
         {
             base.OnMouseLeftButtonDown(e);
-            // A click toggles at once. A double-click's first click has therefore already
-            // toggled the panel; the second only adds the right-click entry. Waiting out the
-            // double-click time to tell them apart made every single click feel ~0.5 s late.
-            if (e.ClickCount == 2)
-            {
-                ShowToast(panel.AddRightClickEntry());
-                return;
-            }
+            // A click toggles at once. The second click of a double-click is ignored, so a
+            // double-click acts like one click instead of opening and closing the panel.
+            if (e.ClickCount >= 2) return;
 
             double startLeft = Left, startTop = Top;
             DragMove(); // returns on mouse up
@@ -82,9 +78,9 @@ namespace KitHelper
         {
             if (!(e.Data.GetData(DataFormats.FileDrop) is string[] paths) || paths.Length == 0) return;
             string p = paths[0];
-            string folder = Directory.Exists(p) ? p : File.Exists(p) ? Path.GetDirectoryName(p) : null;
-            if (folder == null) ShowToast("Drop a kit folder here to open it.");
-            else panel.OpenFolder(folder);
+            if (Directory.Exists(p)) panel.OpenFolder(p);
+            else if (File.Exists(p)) panel.OpenFile(p);
+            else ShowToast("Drop a kit folder or a run-input .txt here to open it.");
         }
 
         void SetBusy(bool busy)

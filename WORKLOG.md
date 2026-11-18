@@ -328,6 +328,22 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   - Pinning to the taskbar was asked for and NOT done: Windows 10 1809+ has no supported way
     for an app to pin itself (only the user, or an admin taskbar-layout policy). Offered
     instead: Startup-folder shortcut and/or Desktop + Start-menu shortcuts - not decided.
+- **1.0.0 rebuilt (version kept) after Chau's review:**
+  - Double-click on the K icon no longer adds the right-click entry (start-up already does,
+    and the panel / icon menu have Add/Remove). The second click of a double-click is now
+    ignored, so a double-click toggles once.
+  - **Dropping onto the panel removed: it could never work.** Starting a drag in Explorer is
+    a click outside the panel, which auto-hides it. The K icon (always on top, never hides)
+    is the drop target: a folder opens it; a file opens its folder, and a .txt is also
+    selected as the run-test input (`MainWindow.OpenFile`) - that .txt drop used to exist
+    only on the panel.
+  - Verified with a REAL OLE drag: a throwaway WinForms window calling `DoDragDrop` with a
+    FileDrop on mouse-down, the mouse driven by SetCursorPos/mouse_event onto the icon.
+    Folder → PUC kit opened; `second_run.txt` (2nd of 2 inputs) → its folder opened with
+    that file selected. Drag result Copy|Link both times.
+  - User manual (Claude doc "Kit Helper – Hướng dẫn sử dụng / User Manual",
+    https://claude.ai/artifact/TWrCgMZX3tcRCYCP3XLciy), VI then EN, 8 sections each; updated
+    for the two points above.
 
 ## 2026-11-11
 
