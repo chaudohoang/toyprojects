@@ -68,6 +68,7 @@ namespace KitHelper
             Drop += OnDrop;
             KeyDown += (s, e) => { if (e.Key == Key.Escape) HidePanel(); };
             Closing += (s, e) => { if (!Program.Exiting) { e.Cancel = true; HidePanel(); } };
+            Deactivated += (s, e) => AutoHide();
             Log("Kit Helper ready. Drop a kit folder on the icon or here, or a .txt to use as the run-test input.", LogLevel.Info);
         }
 
@@ -95,6 +96,37 @@ namespace KitHelper
         }
 
         static double Clamp(double v, double min, double max) => v < min ? min : v > max ? max : v;
+
+        // Clicking anywhere else hides the panel, like a menu. Two exceptions:
+        //  - the click is on the floating icon: the icon's own click handler toggles, so hiding
+        //    here would make that click re-open it;
+        //  - one of the panel's own dialogs took focus (see Modal).
+        int modalDepth;
+
+        void AutoHide()
+        {
+            if (!IsVisible || modalDepth > 0 || Program.Exiting || CursorOver(Anchor)) return;
+            HidePanel();
+        }
+
+        // Runs a dialog with auto-hide suspended: opening it deactivates the panel.
+        T Modal<T>(Func<T> dialog)
+        {
+            modalDepth++;
+            try { return dialog(); }
+            finally { modalDepth--; }
+        }
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        static extern bool GetCursorPos(out POINT p);
+        struct POINT { public int X, Y; }
+
+        static bool CursorOver(Window w)
+        {
+            if (w == null || !w.IsVisible || !GetCursorPos(out POINT p)) return false;
+            var local = w.PointFromScreen(new Point(p.X, p.Y));     // screen pixels → window DIPs
+            return local.X >= 0 && local.Y >= 0 && local.X <= w.ActualWidth && local.Y <= w.ActualHeight;
+        }
 
         public void Toggle()
         {
@@ -340,9 +372,9 @@ namespace KitHelper
                 if (p != null)
                 {
                     string path = TrueTest.PathOf(p);
-                    var answer = MessageBox.Show(this,
+                    var answer = Modal(() => MessageBox.Show(this,
                         $"TrueTest is running{(path != null ? ":\n" + path : ".")}\n\nClose it before copying to\n{install}?",
-                        "Copy to " + target.Name, MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+                        "Copy to " + target.Name, MessageBoxButton.YesNoCancel, MessageBoxImage.Question));
                     if (answer == MessageBoxResult.Cancel) return;
                     if (answer == MessageBoxResult.Yes)
                     {
@@ -363,8 +395,8 @@ namespace KitHelper
             }
 
             if (restartPath != null &&
-                MessageBox.Show(this, "Copy finished. Restart TrueTest?\n\n" + restartPath, "TrueTest",
-                                MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                Modal(() => MessageBox.Show(this, "Copy finished. Restart TrueTest?\n\n" + restartPath, "TrueTest",
+                                MessageBoxButton.YesNo, MessageBoxImage.Question)) == MessageBoxResult.Yes)
             {
                 try
                 {
@@ -481,7 +513,7 @@ namespace KitHelper
         void Browse_Click(object sender, RoutedEventArgs e)
         {
             using (var d = new System.Windows.Forms.FolderBrowserDialog { SelectedPath = Source, Description = "Kit folder (the files to copy / edit)" })
-                if (d.ShowDialog(new Win32Owner(this)) == System.Windows.Forms.DialogResult.OK) SetSource(d.SelectedPath);
+                if (Modal(() => d.ShowDialog(new Win32Owner(this))) == System.Windows.Forms.DialogResult.OK) SetSource(d.SelectedPath);
         }
 
         sealed class Win32Owner : System.Windows.Forms.IWin32Window
@@ -499,7 +531,7 @@ namespace KitHelper
             var d = new Microsoft.Win32.OpenFileDialog { Filter = "Run input (*.txt)|*.txt|All files|*.*" };
             string cur = RunInputPath;
             d.InitialDirectory = File.Exists(cur) ? Path.GetDirectoryName(cur) : Source;
-            if (d.ShowDialog(this) == true) { CboRunInput.Text = d.FileName; OnRunInputChanged(); }
+            if (Modal(() => d.ShowDialog(this)) == true) { CboRunInput.Text = d.FileName; OnRunInputChanged(); }
         }
 
         void OnDrop(object sender, DragEventArgs e)

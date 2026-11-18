@@ -10,16 +10,13 @@ namespace KitHelper
 {
     // The always-on-top round icon (modelled on CharlieTheSlave's). It is the app: the panel is
     // only shown on demand.
-    //   click        show / hide the panel
+    //   click        show / hide the panel (it also hides itself when focus goes elsewhere)
     //   double-click install + add "Open in Kit Helper" to the folder right-click menu
     //   drag         move (position remembered)
     //   drop folder  open it in the panel
     public partial class FloatingIconWindow : Window
     {
         readonly MainWindow panel;
-        // A single click waits for the double-click time first, so a double-click does not
-        // also flash the panel open and shut.
-        readonly DispatcherTimer clickTimer;
         readonly DispatcherTimer toastTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(4) };
 
         public FloatingIconWindow(MainWindow panel)
@@ -40,8 +37,6 @@ namespace KitHelper
                 Top = wa.Bottom - Height - 24;
             }
 
-            clickTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(System.Windows.Forms.SystemInformation.DoubleClickTime) };
-            clickTimer.Tick += (s2, e) => { clickTimer.Stop(); panel.Toggle(); };
             toastTimer.Tick += (s2, e) => { toastTimer.Stop(); Toast.IsOpen = false; };
 
             panel.BusyChanged += SetBusy;
@@ -51,9 +46,11 @@ namespace KitHelper
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
         {
             base.OnMouseLeftButtonDown(e);
+            // A click toggles at once. A double-click's first click has therefore already
+            // toggled the panel; the second only adds the right-click entry. Waiting out the
+            // double-click time to tell them apart made every single click feel ~0.5 s late.
             if (e.ClickCount == 2)
             {
-                clickTimer.Stop();
                 ShowToast(panel.AddRightClickEntry());
                 return;
             }
@@ -62,10 +59,7 @@ namespace KitHelper
             DragMove(); // returns on mouse up
 
             if (Math.Abs(Left - startLeft) < 3 && Math.Abs(Top - startTop) < 3)
-            {
-                clickTimer.Stop();
-                clickTimer.Start();
-            }
+                panel.Toggle();
             else
             {
                 Settings.Current.SetDouble("IconLeft", Left);

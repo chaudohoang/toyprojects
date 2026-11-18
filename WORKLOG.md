@@ -175,6 +175,21 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     token through the new IPC window); bare relaunch shows a hidden panel. **Not tested:**
     Exit from the icon menu, folder drop on the icon, copy/run actions in the WPF panel
     (logic unchanged from 1.3.0), an elevated instance.
+- **Kit Helper 1.4.1: instant icon click + click-away hides the panel.**
+  - The "delay" Chau noticed was not work: a single click waited `DoubleClickTime` (500 ms)
+    to rule out a double-click. Now a click toggles at once (measured 12-15 ms); a
+    double-click's first click therefore toggles too, its second only adds the right-click
+    entry. Accepted trade-off: double-click is a one-time setup action.
+  - Panel hides on `Deactivated`, except (a) when the cursor is over the floating icon -
+    clicking the icon deactivates the panel first, and hiding there would make the icon's
+    own toggle re-open it - checked with `GetCursorPos` + `PointFromScreen`; (b) while one
+    of its dialogs is open: every MessageBox / FolderBrowser / OpenFileDialog goes through
+    `Modal()`, which suspends auto-hide (opening a dialog deactivates the owner).
+  - Verified with real input: icon click hide/show, click on another window hides at once,
+    Browse dialog opened (screenshot) with the panel kept visible and still visible after Esc.
+    Test trap: a new window opening also steals focus, so it legitimately hides the panel -
+    open the click target BEFORE showing the panel. Each PowerShell tool call is a fresh
+    session, so Add-Type helpers must be re-loaded (dot-source a helper .ps1).
 
 ## 2026-11-11
 
