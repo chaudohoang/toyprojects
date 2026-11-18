@@ -181,7 +181,7 @@ namespace KitHelper
                 LvIni.ItemsSource = null;
                 return;
             }
-            int files = Directory.GetFiles(folder).Count(f => !Kit.IsHelper(f) && !string.Equals(Path.GetFileName(f), ownExe, StringComparison.OrdinalIgnoreCase));
+            int files = Directory.GetFiles(folder).Count(f => !Kit.NeverCopy(f) && !string.Equals(Path.GetFileName(f), ownExe, StringComparison.OrdinalIgnoreCase));
             int dirs = Directory.GetDirectories(folder).Length;
             int inis = Vignetting.IniFiles(folder).Length;
             TxtSourceInfo.Text = $"{files} file(s), {dirs} subfolder(s), {inis} ini";

@@ -221,6 +221,24 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   scratch files (2 of 3, subfolder included). Now: "Nothing to unblock: none of the N file(s)
   is marked…", "Done: unblocked X of N file(s); the rest were not marked.", or the failure
   count in red. Both wordings checked by clicking Unblock through UI Automation.
+- **Kit Helper 1.5.0: new copy target POCB4.2** (second button). Kit example:
+  `D:\Log\Kit\X4023-P2-KS151C- test kit V1.0.1(...)\20261104_X4023  MATLAB + LGD Crop_TT163\POCB4.2`
+  - Copies **with subfolders**: the kit has `X4023\` (Crop_params.json, PANEL_SHAPE*.tif) and
+    `mainTemplate\` (main_*.txt), the same layout as the installed `TrueTest *\POCB4.2`
+    (which every install here has). No .tif/.csv exclusions, unlike POCB4.1Net: the .tif files
+    are needed under X4023\.
+  - Suggested when the folder is NAMED `POCB4.2`, or holds `Crop_params.json` / a
+    `mainTemplate` subfolder (or an old "Copy all to POCB4.2 folder" script). The parent kit
+    folder (holds OMIT/POCB4.2/PUC/R2R) correctly gets no suggestion.
+  - **Subfolder copies used to include helper tools**: the kit has `X4023\UnblockFiles.exe`
+    and `X4023\Thumbs.db`, and the never-copy filter only looked at top-level files. Now
+    `Kit.NeverCopy` (helpers + Thumbs.db + desktop.ini) applies at every depth, for
+    LGDVHCustomApp too. Panel file count uses the same rule.
+  - Verified headless from the built exe: 28 of 31 kit files copied to a scratch fake install,
+    byte-identical, subfolders recreated, the 3 excluded are exactly the two UnblockFiles.exe
+    and Thumbs.db; suggestions for the four earlier kits unchanged.
+  - Fifth button pushed the log off the card again: panel 860 → 920 px tall. Still fits a
+    1080p work area; ShowNear shrinks it to the work area on smaller screens.
 
 ## 2026-11-11
 

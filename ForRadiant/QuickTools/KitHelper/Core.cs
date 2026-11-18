@@ -59,6 +59,9 @@ namespace KitHelper
                         || string.Equals(Path.GetFileName(f), "LGD_VNTT.ini", StringComparison.OrdinalIgnoreCase);
                 },
             },
+            // POCB4.2 kits carry X<model>\ (crop params, panel shapes) and mainTemplate\ beside
+            // the dlls, mirroring TrueTest's own POCB4.2 folder, so subfolders are copied.
+            new CopyTarget { Name = "POCB4.2", SubFolders = new[] { "POCB4.2" }, IncludeSubdirs = true },
             new CopyTarget { Name = "PUC", SubFolders = new[] { "PUC" } },
             new CopyTarget { Name = "ScratchDustDetect_NY", SubFolders = new[] { "ScratchDustDetect_NY" } },
             new CopyTarget { Name = "LGDVHCustomApp", SubFolders = new[] { "LGDVHCustomApp" }, IncludeSubdirs = true },
@@ -77,17 +80,27 @@ namespace KitHelper
             var files = Directory.GetFiles(source)
                 .Where(f => !string.Equals(Path.GetFileName(f), ownExe, StringComparison.OrdinalIgnoreCase))
                 .ToList();
-            var helpers = files.Where(Kit.IsHelper).ToList();
-            files = files.Except(helpers).ToList();
-            if (helpers.Count > 0)
-                log($"Not copying helper tools: {string.Join(", ", helpers.Select(Path.GetFileName))}", LogLevel.Detail);
             var skipped = files.Where(target.Skip).ToList();
             files = files.Except(skipped).ToList();
             r.Skipped = skipped.Count;
             if (skipped.Count > 0)
                 log($"Skipping {skipped.Count} file(s) by rule: {string.Join(", ", skipped.Select(Path.GetFileName))}", LogLevel.Detail);
 
+            string root = source.TrimEnd('\\');
             var dirs = target.IncludeSubdirs ? Directory.GetDirectories(source) : new string[0];
+            // Subfolder files as (full path, path relative to the kit), gathered once for all
+            // destinations.
+            var subFiles = dirs.SelectMany(d => Directory.GetFiles(d, "*", SearchOption.AllDirectories))
+                               .Select(f => (from: f, rel: f.Substring(root.Length + 1))).ToList();
+
+            // Helper tools and Explorer's cache files are never copied, at any depth (kits keep
+            // an UnblockFiles.exe in subfolders too).
+            var never = files.Where(Kit.NeverCopy).Select(Path.GetFileName)
+                .Concat(subFiles.Where(s => Kit.NeverCopy(s.from)).Select(s => s.rel)).ToList();
+            files = files.Where(f => !Kit.NeverCopy(f)).ToList();
+            subFiles = subFiles.Where(s => !Kit.NeverCopy(s.from)).ToList();
+            if (never.Count > 0)
+                log($"Not copying helper tools / Thumbs.db: {string.Join(", ", never)}", LogLevel.Detail);
 
             foreach (string sub in target.SubFolders)
             {
@@ -105,19 +118,16 @@ namespace KitHelper
                 foreach (string f in files)
                     CopyOne(f, Path.Combine(dest, Path.GetFileName(f)), r, log);
 
-                foreach (string d in dirs)
+                foreach (var (from, rel) in subFiles)
                 {
-                    foreach (string f in Directory.GetFiles(d, "*", SearchOption.AllDirectories))
-                    {
-                        string rel = f.Substring(source.TrimEnd('\\').Length + 1);
-                        string to = Path.Combine(dest, rel);
-                        try { Directory.CreateDirectory(Path.GetDirectoryName(to)); } catch { }
-                        CopyOne(f, to, r, log, rel);
-                    }
-                    // xcopy /E also recreates empty folders, including `d` itself.
-                    foreach (string e in Directory.GetDirectories(d, "*", SearchOption.AllDirectories).Prepend(d))
-                        try { Directory.CreateDirectory(Path.Combine(dest, e.Substring(source.TrimEnd('\\').Length + 1))); } catch { }
+                    string to = Path.Combine(dest, rel);
+                    try { Directory.CreateDirectory(Path.GetDirectoryName(to)); } catch { }
+                    CopyOne(from, to, r, log, rel);
                 }
+                // xcopy /E also recreates empty folders, including each top subfolder itself.
+                foreach (string d in dirs)
+                    foreach (string e in Directory.GetDirectories(d, "*", SearchOption.AllDirectories).Prepend(d))
+                        try { Directory.CreateDirectory(Path.Combine(dest, e.Substring(root.Length + 1))); } catch { }
             }
             return r;
         }
@@ -208,6 +218,15 @@ namespace KitHelper
                    .Contains(n, StringComparer.OrdinalIgnoreCase);
         }
 
+        // Never copied by any target: the helper tools, and Explorer's per-folder cache files.
+        public static bool NeverCopy(string fileName)
+        {
+            string n = Path.GetFileName(fileName);
+            return IsHelper(n)
+                || string.Equals(n, "Thumbs.db", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(n, "desktop.ini", StringComparison.OrdinalIgnoreCase);
+        }
+
         // The copy target this folder is meant for, or null. A leftover "Copy all to X folder"
         // script is the surest sign; otherwise recognise the payload.
         public static CopyTarget Suggest(string folder, out string why)
@@ -221,6 +240,10 @@ namespace KitHelper
             foreach (var t in CopyTarget.All)
                 if (Has("^Copy all to " + Regex.Escape(t.Name) + " folder")) { why = "old copy script found"; return t; }
 
+            if (string.Equals(Path.GetFileName(folder.TrimEnd('\\')), "POCB4.2", StringComparison.OrdinalIgnoreCase))
+            { why = "folder named POCB4.2"; return T("POCB4.2"); }
+            if (Has(@"^Crop_params\.json$") || Directory.Exists(Path.Combine(folder, "mainTemplate")))
+            { why = "Crop_params.json / mainTemplate folder"; return T("POCB4.2"); }
             if (Has(@"^ScratchDustDetect.*\.exe$") || Has("^LGD_OMIT_INI")) { why = "ScratchDustDetect / LGD_OMIT_INI files"; return T("ScratchDustDetect_NY"); }
             if (Has(@"^VNTT_Interp.*\.exe$")) { why = "VNTT_Interp exes"; return T("LGDVHCustomApp"); }
             if (Has(@"^LGD_PO_Compensation") || Has("^LGD_COMP_INI")) { why = "LGD_PO_Compensation / LGD_COMP_INI files"; return T("POCB4.1Net"); }
