@@ -735,19 +735,59 @@ namespace KitHelper
         sealed class LogLine
         {
             public string Text { get; set; }
+            public LogLevel Level;
             public Brush Brush { get; set; }
+            public override string ToString() => Text;   // what UI Automation / screen readers see
         }
 
         Brush Brush(string key) => (Brush)FindResource(key);
 
+        // Every line, from any thread, goes through one FIFO queue. Before, worker-thread lines
+        // were posted to the UI thread while UI-thread lines were added at once, so a "Done"
+        // written right after an await could land above the last few "copied" lines.
+        readonly System.Collections.Concurrent.ConcurrentQueue<LogLine> pendingLog = new System.Collections.Concurrent.ConcurrentQueue<LogLine>();
+        int flushScheduled;
+
         void Log(string text, LogLevel level)
         {
-            if (!Dispatcher.CheckAccess()) { Dispatcher.BeginInvoke(new Action(() => Log(text, level))); return; }
-            string key = level == LogLevel.Detail ? "Dim" : level == LogLevel.Ok ? "Ok"
-                       : level == LogLevel.Warn ? "Warn" : level == LogLevel.Error ? "Err" : "Fg";
-            log.Add(new LogLine { Text = $"{DateTime.Now:HH:mm:ss}  {text}", Brush = Brush(key) });
-            if (log.Count > 5000) log.RemoveAt(0);
-            LstLog.ScrollIntoView(log[log.Count - 1]);
+            pendingLog.Enqueue(new LogLine { Text = $"{DateTime.Now:HH:mm:ss}  {text}", Level = level });
+            if (Dispatcher.CheckAccess()) FlushLog();     // drains anything queued before this line too
+            else if (System.Threading.Interlocked.Exchange(ref flushScheduled, 1) == 0)
+                Dispatcher.BeginInvoke(new Action(FlushLog));
+        }
+
+        void FlushLog()
+        {
+            System.Threading.Interlocked.Exchange(ref flushScheduled, 0);
+            bool any = false;
+            while (pendingLog.TryDequeue(out var line))
+            {
+                line.Brush = Brush(line.Level == LogLevel.Detail ? "Dim" : line.Level == LogLevel.Ok ? "Ok"
+                                 : line.Level == LogLevel.Warn ? "Warn" : line.Level == LogLevel.Error ? "Err" : "Fg");
+                log.Add(line);
+                any = true;
+            }
+            if (!any) return;
+            while (log.Count > 5000) log.RemoveAt(0);
+            // Down to the newest line only. ScrollIntoView also scrolled SIDEWAYS to the end of
+            // a long line (a PUC command line), hiding the start of every other line.
+            if (logScroller == null) logScroller = FindChild<ScrollViewer>(LstLog);
+            if (logScroller != null) logScroller.ScrollToBottom();
+            else LstLog.ScrollIntoView(log[log.Count - 1]);   // template not applied yet
+        }
+
+        ScrollViewer logScroller;
+
+        static T FindChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var c = VisualTreeHelper.GetChild(parent, i);
+                if (c is T t) return t;
+                var deeper = FindChild<T>(c);
+                if (deeper != null) return deeper;
+            }
+            return null;
         }
 
         void CopyLog_Click(object sender, RoutedEventArgs e)

@@ -342,7 +342,7 @@ namespace KitHelper
             foreach (string raw in lines.Skip(1))
             {
                 string arg = raw.Trim();
-                bool isFolder = arg.EndsWith("\\") || (arg != "" && Directory.Exists(Path.Combine(pkg, arg)));
+                bool isFolder = arg.EndsWith("\\") || IsExistingDir(pkg, arg);
                 if (isFolder)
                 {
                     if (puc)
@@ -351,14 +351,16 @@ namespace KitHelper
                         arg += "Test\\";
                         testOutput = arg;
                     }
-                    string full = Path.Combine(pkg, arg);
-                    if (!Directory.Exists(full))
+                    try
                     {
-                        try { Directory.CreateDirectory(full); log($"Created folder: {arg}", LogLevel.Detail); }
-                        catch (Exception ex) { log($"Error creating folder {arg}: {ex.Message}", LogLevel.Warn); }
+                        string full = Path.Combine(pkg, arg);
+                        if (!Directory.Exists(full)) { Directory.CreateDirectory(full); log($"Created folder: {arg}", LogLevel.Detail); }
                     }
+                    catch (Exception ex) { log($"Error creating folder {arg}: {ex.Message}", LogLevel.Warn); }
                 }
-                if (puc && Path.GetFileName(arg) == arg
+                // "Bare file name" = no path separator. Path.GetFileName is not used for this: on
+                // .NET Framework it throws for < > | in the argument.
+                if (puc && arg.IndexOfAny(new[] { '\\', '/' }) < 0
                         && arg.IndexOf("puc", StringComparison.OrdinalIgnoreCase) >= 0
                         && (arg.EndsWith(".hex", StringComparison.OrdinalIgnoreCase) || arg.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
                         && arg.IndexOf("dummy", StringComparison.OrdinalIgnoreCase) < 0)
@@ -380,6 +382,16 @@ namespace KitHelper
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
             };
+        }
+
+        // An argument with < > | (e.g. ">nul") makes Path.Combine throw on .NET Framework, which
+        // used to abort the whole run with "Illegal characters in path". Such an argument is
+        // simply not a folder.
+        static bool IsExistingDir(string pkg, string arg)
+        {
+            if (arg == "") return false;
+            try { return Directory.Exists(Path.Combine(pkg, arg)); }
+            catch (ArgumentException) { return false; }
         }
     }
 }

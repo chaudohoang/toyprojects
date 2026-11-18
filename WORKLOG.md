@@ -269,6 +269,24 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     version before testing.
   - Verified: Omit kit opened 4x → 1.8 each time; PUC → Omit → 1.8; install → 1.9 debug
     Mobile follows and survives a reopen; picked custom survives a reopen.
+- **Kit Helper 1.5.4: log fixes + run-input argument fix.**
+  - **"Done" appeared above the last "copied" lines.** Worker-thread lines were posted to the
+    UI thread (BeginInvoke) while UI-thread lines were added immediately, so the "Done"
+    written after `await` overtook still-queued lines. Now every line goes through one
+    `ConcurrentQueue` (timestamped at the call); a UI-thread call drains the queue first.
+    Verified: 300-file unblock through the real button, log read back via its Copy button
+    (the ListBox virtualises, UIA only sees visible rows) → Done is line 302 of 302.
+  - **Log scrolled sideways during a PUC run** (Chau's screenshot). Auto-scroll used
+    `ScrollIntoView(last)`; now `ScrollViewer.ScrollToBottom()`, which never touches the
+    horizontal offset. **Not reproduced** on either build (short log, long scrolling log with
+    a long last line held for 6 s via `waitfor`, clicking a long row) - so the change is
+    believed, not proven, to be the fix. Ask for a screenshot if it recurs.
+  - **A run-input argument containing < > | aborted the run** ("Illegal characters in
+    path"): `Path.Combine` / `Path.GetFileName` throw for those on .NET Framework, used to
+    test "is this argument a folder" and the PUC "bare file name" rule. Found because the
+    first scroll test used `>nul`. Now `IsExistingDir` catches it and the bare-name test is
+    "no \ or /". Both modes verified passing `>nul a|b <x` through unchanged.
+  - Testing aid: `LogLine.ToString()` returns the text, so UI Automation reads real rows.
 
 ## 2026-11-11
 
