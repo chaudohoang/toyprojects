@@ -320,6 +320,14 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   leave "Skip EDT_Mobile.csv" alone; Copy stays disabled until something is ticked.
   Changing From keeps the ticks of folders the new source also has. Verified via UI
   Automation: open [-----x] Copy off → Select all [xxxxxx] on → Unselect all [-----x] off.
+- **Kit Helper released as 1.0.0** (Chau is shipping it). Everything above 1.0.0 (1.1–1.6.1)
+  was pre-release on this PC only. **Trap:** copies compare (Version, build time), so a
+  1.0.0 build counts as OLDER than an installed pre-release and would never replace it; on
+  this PC `D:\Program\RVS\Kit Helper.exe` (1.6.1) was overwritten by hand. Any other PC that
+  got a 1.1–1.6.1 build needs the same once. Next release: 1.0.1 / 1.1.0 from here.
+  - Pinning to the taskbar was asked for and NOT done: Windows 10 1809+ has no supported way
+    for an app to pin itself (only the user, or an admin taskbar-layout policy). Offered
+    instead: Startup-folder shortcut and/or Desktop + Start-menu shortcuts - not decided.
 
 ## 2026-11-11
 
