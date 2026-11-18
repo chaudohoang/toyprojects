@@ -648,10 +648,45 @@ namespace ScriptToolbox
             SaveSettings();
             try
             {
-                Process.Start(new ProcessStartInfo(Application.ExecutablePath, "\"" + Source + "\"") { UseShellExecute = true, Verb = "runas" });
+                Process.Start(new ProcessStartInfo(Application.ExecutablePath, "\"" + Source + "\" " + Program.NewInstanceFlag) { UseShellExecute = true, Verb = "runas" });
                 Close();
             }
             catch (Exception ex) { Log("Not elevated: " + ex.Message, LogLevel.Warn); }   // UAC declined
+        }
+
+        // ---------------------------------------------------------------- single instance
+
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            SingleInstance.AllowFromLowerIntegrity(Handle);
+        }
+
+        // A second launch sends its folder here (see SingleInstance.ForwardToRunning).
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == SingleInstance.WM_COPYDATA)
+            {
+                string folder = SingleInstance.Read(ref m);
+                if (folder != null)
+                {
+                    m.Result = (IntPtr)1;
+                    // Reply first; the sender is blocked in SendMessage until WndProc returns.
+                    BeginInvoke(new Action(() => OpenForwarded(folder)));
+                    return;
+                }
+            }
+            base.WndProc(ref m);
+        }
+
+        void OpenForwarded(string folder)
+        {
+            if (WindowState == FormWindowState.Minimized) WindowState = FormWindowState.Normal;
+            Activate();
+            if (folder == "") return;                   // plain relaunch: just come forward
+            Log($"Opened {folder}", LogLevel.Info);
+            LoadInstalls();                             // TrueTest may have started or stopped since
+            SetSource(folder.TrimEnd('\\'));
         }
 
         // ---------------------------------------------------------------- log

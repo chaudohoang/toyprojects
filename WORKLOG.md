@@ -67,6 +67,20 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     mode detected, Omit parse resolves the exe in the package folder. PUC parse checked on a
     copy with `D:\POCB\HEX\` redirected to scratch (Parse creates folders). **Not tested:**
     the Explorer menu button (writes HKCU; left for Chau to click), and a real run.
+  - Chau then registered the right-click menu himself (HKCU command points at
+    `D:\Log\Script\ScriptToolbox.exe`).
+- **ScriptToolbox: single instance.** A second launch finds another process with the same
+  exe name and a window, sends its folder by `WM_COPYDATA` (tagged `dwData` "STBO"), restores
+  + foregrounds that window itself (the launched process holds foreground rights; the
+  receiver could not take focus on its own), and exits. Receiver replies first and loads
+  via `BeginInvoke` so the sender is not held inside SendMessage. No arg = just come forward.
+  - **UIPI:** an elevated window silently drops WM_COPYDATA from a non-elevated sender, which
+    is exactly the Explorer→"Run as admin" window case; the form calls
+    `ChangeWindowMessageFilterEx(WM_COPYDATA, MSGFLT_ALLOW)`. Not tested (needs a UAC click).
+  - **"Run as admin" passes `/new`**: the old window is still closing when the elevated
+    process starts, so without it the new one forwards to the dying window and exits.
+  - Verified: minimized first window, second launch exits in ~110 ms, first restored with the
+    new folder and "Opened …" logged, 1 process; no-arg relaunch leaves 1; `/new` gives 2.
 
 ## 2026-11-11
 

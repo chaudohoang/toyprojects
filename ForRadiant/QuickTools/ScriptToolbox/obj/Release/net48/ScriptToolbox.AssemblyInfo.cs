@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ScriptToolbox")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3c13f61b7779a1dad4754fb0e9688974f29fbf44")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d031024204330fbf63bf7a8a01cb7f094e214d29")]
 [assembly: System.Reflection.AssemblyProductAttribute("ScriptToolbox")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ScriptToolbox")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
