@@ -19,6 +19,8 @@ namespace ScriptToolbox
         readonly Dictionary<CopyTarget, Button> copyButtons = new Dictionary<CopyTarget, Button>();
         readonly Label lblSuggest = new Label { AutoSize = true, ForeColor = Color.SteelBlue, Margin = new Padding(3, 2, 3, 3) };
         readonly Button btnExplorer = new Button { AutoSize = true, Margin = new Padding(3) };
+        readonly Label lblInstalled = new Label { AutoSize = true, Margin = new Padding(3, 2, 3, 3) };
+        readonly string pendingMenuAction;
         readonly RadioButton rbOmit = new RadioButton { Text = "Omit", AutoSize = true, Checked = true };
         readonly RadioButton rbPuc = new RadioButton { Text = "PUC", AutoSize = true };
         readonly ComboBox cboInstall = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
@@ -37,9 +39,10 @@ namespace ScriptToolbox
         readonly string ownExe = Path.GetFileName(Application.ExecutablePath);
         Process runningTest;
 
-        public MainForm(string startFolder)
+        public MainForm(string startFolder, string menuAction = null)
         {
-            Text = "Script Toolbox" + (IsElevated() ? " (Administrator)" : "");
+            pendingMenuAction = menuAction;
+            Text = $"Script Toolbox {InstalledCopy.Self}" + (IsElevated() ? " (Administrator)" : "");
             Font = new Font("Segoe UI", 9f);
             AutoScaleMode = AutoScaleMode.Dpi;
             ClientSize = new Size(980, 840);
@@ -60,7 +63,12 @@ namespace ScriptToolbox
             SetSource(folder);
             UpdateExplorerButton();
 
-            Shown += (s, e) => txtSource.Select(txtSource.Text.Length, 0);
+            Shown += (s, e) =>
+            {
+                txtSource.Select(txtSource.Text.Length, 0);
+                // An older copy handed an Add/Remove click over to this (installed) one.
+                if (pendingMenuAction == "add" || pendingMenuAction == "remove") ToggleExplorerMenu(pendingMenuAction);
+            };
             FormClosing += (s, e) => SaveSettings();
             Log($"Script Toolbox ready. Drop a folder here to work on it, or a .txt to use as the run-test input.", LogLevel.Info);
         }
@@ -156,7 +164,8 @@ namespace ScriptToolbox
             btnExplorer.Margin = new Padding(3, 10, 3, 3);
             btnExplorer.Click += (s, e) => ToggleExplorerMenu();
             us.Controls.Add(btnExplorer);
-            us.Controls.Add(Hint("Then right-click a package folder → \"Open in Script\nToolbox\" (Windows 11: under \"Show more options\")."));
+            us.Controls.Add(Hint("Copies this exe to " + InstalledCopy.Folder + " first; the right-click\nentry runs that copy. Windows 11: under \"Show more options\"."));
+            us.Controls.Add(lblInstalled);
             col.Controls.Add(Group("Other", us));
             return col;
         }
@@ -599,29 +608,62 @@ namespace ScriptToolbox
             }
         }
 
+        // The entry always runs the installed copy, so "on" means: registered AND pointing there.
+        // An entry pointing at some other copy (set up before 1.1.0) counts as not set up.
+        bool MenuPointsAtInstalled() => ExplorerMenuInstalled(out string exe) && InstalledCopy.IsStatic(exe);
+
         void UpdateExplorerButton()
         {
-            bool on = ExplorerMenuInstalled(out string exe);
-            bool moved = on && !string.Equals(exe, Application.ExecutablePath, StringComparison.OrdinalIgnoreCase);
-            btnExplorer.Text = !on ? "Add \"Open in Script Toolbox\" to folder right-click"
-                : moved ? "Point right-click menu at this exe (now: other copy)"
-                : "Remove \"Open in Script Toolbox\" from right-click";
+            bool registered = ExplorerMenuInstalled(out _);
+            btnExplorer.Text = MenuPointsAtInstalled() ? "Remove \"Open in Script Toolbox\" from right-click"
+                : registered ? "Move right-click entry to " + InstalledCopy.Folder + " (now: other copy)"
+                : "Add \"Open in Script Toolbox\" to folder right-click";
+
+            var inst = InstalledCopy.Installed;
+            var self = InstalledCopy.Self;
+            if (inst == null) { lblInstalled.Text = "Installed copy: none yet."; lblInstalled.ForeColor = Color.DimGray; return; }
+            int c = inst.CompareTo(self);
+            lblInstalled.Text = "Installed copy: " + inst
+                + (InstalledCopy.IsStatic(InstalledCopy.SelfExe) ? "  (this window)"
+                   : c > 0 ? "  - newer than this copy"
+                   : c < 0 ? "  - older; Add/Remove updates it"
+                   : "  - same as this copy");
+            lblInstalled.ForeColor = c < 0 ? Color.DarkOrange : Color.DimGray;
         }
 
-        void ToggleExplorerMenu()
+        // action: "add" / "remove", or null = whichever the button currently offers.
+        void ToggleExplorerMenu(string action = null)
         {
-            bool on = ExplorerMenuInstalled(out string exe);
-            bool moved = on && !string.Equals(exe, Application.ExecutablePath, StringComparison.OrdinalIgnoreCase);
+            action = action ?? (MenuPointsAtInstalled() ? "remove" : "add");
+
+            // The installed copy became newer while this window was open (another engineer
+            // installed a later build): let that one do it, and close this one.
+            if (InstalledCopy.InstalledIsNewer)
+            {
+                Log($"A newer Script Toolbox is installed ({InstalledCopy.Installed}). Switching to it.", LogLevel.Info);
+                try
+                {
+                    SaveSettings();
+                    Process.Start(new ProcessStartInfo(InstalledCopy.StaticExe,
+                        InstalledCopy.Join(new[] { Source, Program.NewInstanceFlag, Program.MenuFlag + action })) { UseShellExecute = false });
+                    Close();
+                }
+                catch (Exception ex) { Log("Could not start the installed copy: " + ex.Message, LogLevel.Error); }
+                return;
+            }
+
             try
             {
-                if (on && !moved)
+                // Both Add and Remove first make sure the installed copy is this build or newer.
+                Log(InstalledCopy.EnsureInstalled(), LogLevel.Info);
+                if (action == "remove")
                 {
                     foreach (var key in ExplorerKeys) Microsoft.Win32.Registry.CurrentUser.DeleteSubKeyTree(key, false);
                     Log("Removed \"Open in Script Toolbox\" from the Explorer right-click menu.", LogLevel.Ok);
                 }
                 else
                 {
-                    string self = Application.ExecutablePath;
+                    string self = InstalledCopy.StaticExe;
                     foreach (var key in ExplorerKeys)
                         using (var k = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(key))
                         {
@@ -668,6 +710,13 @@ namespace ScriptToolbox
             if (m.Msg == SingleInstance.WM_COPYDATA)
             {
                 string folder = SingleInstance.Read(ref m);
+                if (folder == SingleInstance.QuitToken)
+                {
+                    // A newer build was started and takes over from this window.
+                    m.Result = (IntPtr)1;
+                    BeginInvoke(new Action(Close));
+                    return;
+                }
                 if (folder != null)
                 {
                     m.Result = (IntPtr)1;

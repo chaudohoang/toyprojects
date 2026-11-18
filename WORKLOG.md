@@ -81,6 +81,32 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     process starts, so without it the new one forwards to the dying window and exits.
   - Verified: minimized first window, second launch exits in ~110 ms, first restored with the
     new folder and "Opened …" logged, 1 process; no-arg relaunch leaves 1; `/new` gives 2.
+- **ScriptToolbox 1.1.0: one installed copy at `D:\Program\RVS\ScriptToolbox.exe`.**
+  Engineers keep copies everywhere, so the newest build wins (`InstalledCopy.cs`):
+  - Every build stamps its time into the product version (`1.1.0+20261118111621`, via
+    `InformationalVersion` in the csproj, `IncludeSourceRevisionInInformationalVersion=false`
+    so no git hash is appended). Another copy's stamp is read with `FileVersionInfo`, no load.
+    Order = `<Version>` then build time; a 1.0.0 exe has no stamp and sorts oldest. **Bump
+    `<Version>` for real releases**: the build time alone only orders builds of one version.
+  - Add AND Remove first copy this exe to the static folder unless the copy there is the same
+    or newer; the right-click entry always runs the static copy. An entry pointing elsewhere
+    (set up before 1.1.0) shows as "Move right-click entry to D:\Program\RVS".
+  - Any copy started while the static one is newer re-launches the static one with the same
+    args and exits. A copy clicking Add/Remove after the static one became newer starts it
+    with `/new /menu:add|remove` and closes; the static copy performs it on `Shown`.
+  - A newer copy started while an OLDER window is open sends a quit token (WM_COPYDATA) and
+    takes over instead of forwarding to it; equal builds forward as before. If the old window
+    has not exited in 5 s it is used anyway.
+  - **Name clash:** the class was first called `Install`, which MainForm's `Install` property
+    (selected TrueTest folder) shadowed - hence `InstalledCopy`.
+  - `D:\Program\RVS` already existed with other tools' data folders (AutoBackupDataLog, EZAE,
+    UploadQueue...); only `ScriptToolbox.exe` is added there.
+  - Verified with two real builds 33 s apart (old in scratch, new in D:\Program\RVS): old
+    launch → static window (twice, folder forwarded, 1 process); static launch closes an old
+    `/new` window; Add from the newer copy upgraded the static exe and pointed the menu at it;
+    Add from an older copy handed over and the static copy registered it. HKCU menu keys were
+    exported first and re-imported afterwards, so Chau's entry still points at
+    `D:\Log\Script` until he clicks "Move right-click entry".
 
 ## 2026-11-11
 
