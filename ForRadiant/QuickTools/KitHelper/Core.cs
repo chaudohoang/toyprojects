@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 
-namespace ScriptToolbox
+namespace KitHelper
 {
     // Log sink: text plus a level, so the UI can colour it. Called from worker threads.
     public enum LogLevel { Info, Detail, Ok, Warn, Error }
@@ -203,7 +203,7 @@ namespace ScriptToolbox
         {
             string n = Path.GetFileName(fileName);
             return n.StartsWith("Copy all to ", StringComparison.OrdinalIgnoreCase)
-                || new[] { "ScriptToolbox.exe", "UnblockFiles.exe", "VignetingOn.exe", "VignetingOff.exe",
+                || new[] { "Kit Helper.exe", "ScriptToolbox.exe", "UnblockFiles.exe", "VignetingOn.exe", "VignetingOff.exe",
                            "RunTestOmit.exe", "RunTestPUC.exe" }
                    .Contains(n, StringComparer.OrdinalIgnoreCase);
         }

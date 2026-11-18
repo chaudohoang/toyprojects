@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace ScriptToolbox
+namespace KitHelper
 {
     static class Program
     {
@@ -23,7 +23,7 @@ namespace ScriptToolbox
                 // Any copy outside D:\Program\RVS installs itself there if newer, then runs the
                 // installed copy instead - so the window in use is always the latest build.
                 if (InstalledCopy.RunInstalled(args)) return;
-                // One window: a second launch (e.g. Explorer's "Open in Script Toolbox") hands its
+                // One window: a second launch (e.g. Explorer's "Open in Kit Helper") hands its
                 // folder to the running instance and exits.
                 if (SingleInstance.ForwardToRunning(folder)) return;
             }

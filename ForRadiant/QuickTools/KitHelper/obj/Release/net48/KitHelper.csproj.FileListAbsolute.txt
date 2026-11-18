@@ -1,0 +1,11 @@
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\bin\Release\net48\Kit Helper.exe.config
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\bin\Release\net48\Kit Helper.exe
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\bin\Release\net48\Kit Helper.pdb
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\KitHelper.csproj.AssemblyReference.cache
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\KitHelper.GeneratedMSBuildEditorConfig.editorconfig
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\KitHelper.AssemblyInfoInputs.cache
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\KitHelper.AssemblyInfo.cs
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\KitHelper.csproj.CoreCompileInputs.cache
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\KitHelper.sourcelink.json
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\Kit Helper.exe
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\Kit Helper.pdb

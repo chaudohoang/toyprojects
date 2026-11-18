@@ -8,7 +8,7 @@ using System.Security.Principal;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace ScriptToolbox
+namespace KitHelper
 {
     // All controls are built in code (no designer file) so the layout is readable in one place.
     public sealed class MainForm : Form
@@ -40,7 +40,7 @@ namespace ScriptToolbox
 
         public MainForm(string startFolder)
         {
-            Text = $"Script Toolbox {InstalledCopy.Self}" + (IsElevated() ? " (Administrator)" : "");
+            Text = $"Kit Helper {InstalledCopy.Self}" + (IsElevated() ? " (Administrator)" : "");
             Font = new Font("Segoe UI", 9f);
             AutoScaleMode = AutoScaleMode.Dpi;
             ClientSize = new Size(980, 840);
@@ -63,9 +63,13 @@ namespace ScriptToolbox
             SetSource(folder);
             UpdateExplorerButton();
 
-            Shown += (s, e) => txtSource.Select(txtSource.Text.Length, 0);
+            Shown += (s, e) =>
+            {
+                txtSource.Select(txtSource.Text.Length, 0);
+                MigrateFromScriptToolbox();
+            };
             FormClosing += (s, e) => SaveSettings();
-            Log($"Script Toolbox ready. Drop a folder here to work on it, or a .txt to use as the run-test input.", LogLevel.Info);
+            Log($"Kit Helper ready. Drop a folder here to work on it, or a .txt to use as the run-test input.", LogLevel.Info);
         }
 
         // ---------------------------------------------------------------- layout
@@ -583,12 +587,12 @@ namespace ScriptToolbox
             else if (File.Exists(p)) SetSource(Path.GetDirectoryName(p));
         }
 
-        // "Open in Script Toolbox" on the folder right-click menu, per user (HKCU, no admin).
+        // "Open in Kit Helper" on the folder right-click menu, per user (HKCU, no admin).
         // Directory = right-click a folder; Directory\Background = right-click inside one.
         static readonly string[] ExplorerKeys =
         {
-            @"Software\Classes\Directory\shell\ScriptToolbox",
-            @"Software\Classes\Directory\Background\shell\ScriptToolbox",
+            @"Software\Classes\Directory\shell\KitHelper",
+            @"Software\Classes\Directory\Background\shell\KitHelper",
         };
 
         bool ExplorerMenuInstalled(out string registeredExe)
@@ -610,9 +614,9 @@ namespace ScriptToolbox
         void UpdateExplorerButton()
         {
             bool registered = ExplorerMenuInstalled(out _);
-            btnExplorer.Text = MenuPointsAtInstalled() ? "Remove \"Open in Script Toolbox\" from right-click"
+            btnExplorer.Text = MenuPointsAtInstalled() ? "Remove \"Open in Kit Helper\" from right-click"
                 : registered ? "Move right-click entry to " + InstalledCopy.Folder + " (now: other copy)"
-                : "Add \"Open in Script Toolbox\" to folder right-click";
+                : "Add \"Open in Kit Helper\" to folder right-click";
 
             var inst = InstalledCopy.Installed;
             var self = InstalledCopy.Self;
@@ -637,23 +641,62 @@ namespace ScriptToolbox
                 if (action == "remove")
                 {
                     foreach (var key in ExplorerKeys) Microsoft.Win32.Registry.CurrentUser.DeleteSubKeyTree(key, false);
-                    Log("Removed \"Open in Script Toolbox\" from the Explorer right-click menu.", LogLevel.Ok);
+                    Log("Removed \"Open in Kit Helper\" from the Explorer right-click menu.", LogLevel.Ok);
                 }
                 else
                 {
-                    string self = InstalledCopy.StaticExe;
-                    foreach (var key in ExplorerKeys)
-                        using (var k = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(key))
-                        {
-                            k.SetValue("", "Open in Script Toolbox");
-                            k.SetValue("Icon", "\"" + self + "\"");
-                            using (var c = k.CreateSubKey("command"))
-                                c.SetValue("", "\"" + self + "\" \"" + (key.Contains("Background") ? "%V" : "%1") + "\"");
-                        }
-                    Log($"Explorer right-click → \"Open in Script Toolbox\" now runs {self}", LogLevel.Ok);
+                    RegisterMenu();
+                    Log($"Explorer right-click → \"Open in Kit Helper\" now runs {InstalledCopy.StaticExe}", LogLevel.Ok);
                 }
             }
             catch (Exception ex) { Log("Explorer menu: " + ex.Message, LogLevel.Error); }
+            UpdateExplorerButton();
+        }
+
+        static void RegisterMenu()
+        {
+            string exe = InstalledCopy.StaticExe;
+            foreach (var key in ExplorerKeys)
+                using (var k = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(key))
+                {
+                    k.SetValue("", "Open in Kit Helper");
+                    k.SetValue("Icon", "\"" + exe + "\"");
+                    using (var c = k.CreateSubKey("command"))
+                        c.SetValue("", "\"" + exe + "\" \"" + (key.Contains("Background") ? "%V" : "%1") + "\"");
+                }
+        }
+
+        // Kit Helper was called Script Toolbox up to 1.2.1. On a PC that ran it, the installed
+        // Kit Helper takes over its right-click entry and removes its installed exe, so the old
+        // name cannot linger next to the new one. Settings move in Settings.Load.
+        void MigrateFromScriptToolbox()
+        {
+            if (!InstalledCopy.IsStatic(InstalledCopy.SelfExe)) return;
+            string[] oldKeys =
+            {
+                @"Software\Classes\Directory\shell\ScriptToolbox",
+                @"Software\Classes\Directory\Background\shell\ScriptToolbox",
+            };
+            try
+            {
+                bool had = false;
+                foreach (var k in oldKeys)
+                    using (var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(k)) had |= key != null;
+                if (had)
+                {
+                    foreach (var k in oldKeys) Microsoft.Win32.Registry.CurrentUser.DeleteSubKeyTree(k, false);
+                    if (!ExplorerMenuInstalled(out _)) RegisterMenu();
+                    Log("Right-click entry renamed: \"Open in Script Toolbox\" → \"Open in Kit Helper\".", LogLevel.Ok);
+                }
+            }
+            catch (Exception ex) { Log("Could not move the old right-click entry: " + ex.Message, LogLevel.Warn); }
+
+            string oldExe = Path.Combine(InstalledCopy.Folder, "ScriptToolbox.exe");
+            if (File.Exists(oldExe))
+            {
+                try { File.Delete(oldExe); Log($"Removed the old {oldExe} (renamed to Kit Helper).", LogLevel.Ok); }
+                catch (Exception ex) { Log($"Old {oldExe} not removed ({ex.Message}); it is retried next start.", LogLevel.Warn); }
+            }
             UpdateExplorerButton();
         }
 
@@ -737,11 +780,11 @@ namespace ScriptToolbox
         }
     }
 
-    // key=value lines in %APPDATA%\ScriptToolbox\settings.txt
+    // key=value lines in %APPDATA%\KitHelper\settings.txt
     sealed class Settings
     {
         static readonly string FilePath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ScriptToolbox", "settings.txt");
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "KitHelper", "settings.txt");
         readonly Dictionary<string, string> values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         public static Settings Load()
@@ -749,8 +792,11 @@ namespace ScriptToolbox
             var s = new Settings();
             try
             {
-                if (File.Exists(FilePath))
-                    foreach (string line in File.ReadAllLines(FilePath))
+                // First run after the rename: start from Script Toolbox's settings (left in place).
+                string old = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ScriptToolbox", "settings.txt");
+                string path = File.Exists(FilePath) ? FilePath : File.Exists(old) ? old : null;
+                if (path != null)
+                    foreach (string line in File.ReadAllLines(path))
                     {
                         int i = line.IndexOf('=');
                         if (i > 0) s.values[line.Substring(0, i)] = line.Substring(i + 1);

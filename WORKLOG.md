@@ -130,6 +130,21 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   UI labels, log messages, comments, and the `Package` class (now `Kit`). Deployed by the
   normal path (new exe into `D:\Log\Script`, double-click), which upgraded `D:\Program\RVS`
   to 1.2.1 by itself. Chau had meanwhile moved his right-click entry to `D:\Program\RVS`.
+- **Renamed ScriptToolbox → Kit Helper (1.3.0).** Folder `ForRadiant/QuickTools/KitHelper/`,
+  `KitHelper.csproj`, namespace `KitHelper`, exe **`Kit Helper.exe`** (AssemblyName with a
+  space, like "Seqxc Toolset"), installed as `D:\Program\RVS\Kit Helper.exe`, settings in
+  `%APPDATA%\KitHelper\`, HKCU keys `Directory\[Background\]shell\KitHelper`.
+  - **Migration, in the app** (every PC that ran Script Toolbox): `Settings.Load` falls back to
+    `%APPDATA%\ScriptToolbox\settings.txt` (left in place); the installed Kit Helper, on
+    `Shown`, deletes the `ScriptToolbox` right-click keys and registers its own if none exist,
+    and deletes `D:\Program\RVS\ScriptToolbox.exe` (retried next start if locked).
+  - **Old copies can't be fixed from here:** a ScriptToolbox.exe 1.1–1.2.1 still on someone's
+    PC installs itself as `ScriptToolbox.exe` again when double-clicked, and its process name
+    differs so the two do not see each other. Kit Helper cleans that up on its next start;
+    the real fix is replacing old copies. `Kit.IsHelper` skips both exe names when copying.
+  - Done on this PC via the normal path (D:\Log\Script\ScriptToolbox.exe renamed to
+    Kit Helper.exe and replaced, double-clicked on R2R): log showed both migration lines.
+    Backups of the old keys and installed exe are in the session scratchpad only.
 
 ## 2026-11-11
 

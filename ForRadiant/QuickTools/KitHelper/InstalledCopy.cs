@@ -5,9 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace ScriptToolbox
+namespace KitHelper
 {
-    // Version + build time of a ScriptToolbox.exe, read from its file version resource.
+    // Version + build time of a Kit Helper.exe, read from its file version resource.
     public sealed class BuildInfo : IComparable<BuildInfo>
     {
         public Version Version;
@@ -47,7 +47,7 @@ namespace ScriptToolbox
     public static class InstalledCopy
     {
         public const string Folder = @"D:\Program\RVS";
-        public static string StaticExe => Path.Combine(Folder, "ScriptToolbox.exe");
+        public static string StaticExe => Path.Combine(Folder, "Kit Helper.exe");
         public static string SelfExe => Assembly.GetEntryAssembly().Location;
 
         public static bool IsStatic(string exe) =>

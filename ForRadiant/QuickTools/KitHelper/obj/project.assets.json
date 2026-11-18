@@ -12,13 +12,13 @@
     "C:\\Users\\Chau\\.nuget\\packages\\": {}
   },
   "project": {
-    "version": "1.0.0",
+    "version": "1.3.0",
     "restore": {
-      "projectUniqueName": "E:\\Github\\toyprojects\\ForRadiant\\QuickTools\\ScriptToolbox\\ScriptToolbox.csproj",
-      "projectName": "ScriptToolbox",
-      "projectPath": "E:\\Github\\toyprojects\\ForRadiant\\QuickTools\\ScriptToolbox\\ScriptToolbox.csproj",
+      "projectUniqueName": "E:\\Github\\toyprojects\\ForRadiant\\QuickTools\\KitHelper\\KitHelper.csproj",
+      "projectName": "Kit Helper",
+      "projectPath": "E:\\Github\\toyprojects\\ForRadiant\\QuickTools\\KitHelper\\KitHelper.csproj",
       "packagesPath": "C:\\Users\\Chau\\.nuget\\packages\\",
-      "outputPath": "E:\\Github\\toyprojects\\ForRadiant\\QuickTools\\ScriptToolbox\\obj\\",
+      "outputPath": "E:\\Github\\toyprojects\\ForRadiant\\QuickTools\\KitHelper\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Chau\\AppData\\Roaming\\NuGet\\NuGet.Config",
