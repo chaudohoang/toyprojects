@@ -277,6 +277,7 @@ namespace KitHelper
         {
             if (RbPuc.IsChecked == true)
             {
+                if (CboWorkDir.IsEnabled) omitWorkDir = CboWorkDir.Text;   // leaving Omit: remember it
                 CboWorkDir.IsEnabled = false;
                 CboWorkDir.Items.Clear();
                 string p = RunInputPath;
@@ -284,11 +285,16 @@ namespace KitHelper
             }
             else if (!CboWorkDir.IsEnabled)
             {
+                // Back to Omit: restore what the box held before the PUC kit (re-matched to the
+                // install), NOT the value saved by a previous run - that brought back a custom
+                // folder nobody had picked this session.
                 CboWorkDir.IsEnabled = true;
-                CboWorkDir.Text = "";
-                LoadWorkDirs();
+                CboWorkDir.Text = omitWorkDir ?? "";
+                LoadWorkDirs(useSaved: false);
             }
         }
+
+        string omitWorkDir;
 
         sealed class IniRow
         {
@@ -315,6 +321,10 @@ namespace KitHelper
         {
             string keep = Install ?? settings.Get("Install");
             var installs = TrueTest.Installs();
+            // Refilling the list passes through "no install selected"; the working dir must not
+            // react to that (it fell back to the custom folder, which then counted as a
+            // deliberate choice and stuck). It is matched once, at the end.
+            refillingInstalls = true;
             CboInstall.Items.Clear();
             foreach (var i in installs) CboInstall.Items.Add(i);
 
@@ -330,18 +340,25 @@ namespace KitHelper
             string pick = runningInstall ?? installs.FirstOrDefault(i => string.Equals(i, keep, StringComparison.OrdinalIgnoreCase));
             if (pick != null) CboInstall.SelectedItem = pick;
             else if (CboInstall.Items.Count > 0) CboInstall.SelectedIndex = CboInstall.Items.Count - 1;
+            refillingInstalls = false;
 
             if (installs.Count == 0) Log($"No TrueTest install found under {TrueTest.Root}. Copy is unavailable.", LogLevel.Warn);
             LoadWorkDirs();
         }
 
-        void CboInstall_SelectionChanged(object sender, SelectionChangedEventArgs e) => LoadWorkDirs();
+        bool refillingInstalls;
 
-        void LoadWorkDirs()
+        void CboInstall_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!refillingInstalls) LoadWorkDirs();
+        }
+
+        // useSaved: an empty box falls back to the working dir saved by the last run (start-up).
+        void LoadWorkDirs(bool useSaved = true)
         {
             if (RbPuc.IsChecked == true) return;      // PUC's working dir is fixed (see UpdateRunMode)
             string keep = CboWorkDir.Text;
-            if (string.IsNullOrEmpty(keep)) keep = settings.Get("RunWorkDir");
+            if (string.IsNullOrEmpty(keep) && useSaved) keep = settings.Get("RunWorkDir");
             CboWorkDir.Items.Clear();
             foreach (var i in TrueTest.Installs()) CboWorkDir.Items.Add(Path.Combine(i, "ScratchDustDetect_NY"));
             CboWorkDir.Items.Add(RunTest.CustomWorkDir);
@@ -350,8 +367,11 @@ namespace KitHelper
             // folder, a typed path) was picked on purpose and is kept.
             bool followsInstall = string.IsNullOrEmpty(keep)
                 || keep.StartsWith(TrueTest.Root + "\\", StringComparison.OrdinalIgnoreCase);
+            // No install at all (none found): leave a TrueTest path alone rather than swap in
+            // the custom folder.
             CboWorkDir.Text = !followsInstall ? keep
-                : Install != null ? Path.Combine(Install, "ScratchDustDetect_NY") : RunTest.CustomWorkDir;
+                : Install != null ? Path.Combine(Install, "ScratchDustDetect_NY")
+                : !string.IsNullOrEmpty(keep) ? keep : RunTest.CustomWorkDir;
         }
 
         public void SaveSettings()

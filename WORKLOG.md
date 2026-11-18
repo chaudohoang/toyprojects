@@ -253,6 +253,22 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   or a typed path is kept. Verified through UI Automation (ExpandCollapse + SelectionItem on
   the combos, ValuePattern to read): start matched despite a saved 1.9-debug value, follows
   1.9 debug Mobile → 1.9 → 1.8 debug Mobile → 1.8, custom folder survives an install change.
+- **Kit Helper 1.5.3: two holes in that matching**, found when Chau opened an Omit kit and
+  got install 1.8 + working dir = the custom batch folder.
+  1. `LoadInstalls` refills the install combo: `Items.Clear()` fires SelectionChanged with
+     NO install selected, `LoadWorkDirs` then fell back to `RunTest.CustomWorkDir`, and when
+     1.8 was re-selected that custom folder counted as a deliberate choice and stuck. Every
+     kit open calls LoadInstalls. Fix: `refillingInstalls` guard (match once at the end) and
+     never substitute the custom folder for a TrueTest path when no install is known.
+  2. PUC → Omit mode switch emptied the box and refilled it from the SAVED `RunWorkDir` of a
+     previous run (my UIA test had left the custom folder there). Now leaving Omit stores the
+     box in `omitWorkDir` and returning restores that, re-matched; saved value only at start.
+  - Test trap: launching a new build while the old one runs leaves TWO processes for a few
+    seconds (old one exiting); a UIA script picking "the first Kit Helper process" then drove
+    the OLD build and reported the bug as unfixed. Wait for a single process of the new
+    version before testing.
+  - Verified: Omit kit opened 4x → 1.8 each time; PUC → Omit → 1.8; install → 1.9 debug
+    Mobile follows and survives a reopen; picked custom survives a reopen.
 
 ## 2026-11-11
 
