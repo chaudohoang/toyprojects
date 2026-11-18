@@ -107,6 +107,25 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     Add from an older copy handed over and the static copy registered it. HKCU menu keys were
     exported first and re-imported afterwards, so Chau's entry still points at
     `D:\Log\Script` until he clicks "Move right-click entry".
+- **ScriptToolbox 1.2.0: install on every launch, always run the installed copy** (Chau's
+  simplification of the above). Any copy outside `D:\Program\RVS` copies itself there if it
+  is newer (or none is installed), then starts the installed copy with the same args and
+  exits (`InstalledCopy.RunInstalled`). The open window is therefore always the latest build
+  and Add/Remove just register it; the `/menu:` hand-over and `InstalledIsNewer` were removed.
+  - **An older installed window locks the exe**, so it is sent the quit token first
+    (`SingleInstance.CloseOlder`) and the copy retries 10x200 ms while the handle is released.
+    If install or start fails (no D:, no rights, still locked) the copy runs itself.
+  - **No folder arg used to mean "the folder the exe sits in"** (the drop-exe-in-package-folder
+    habit). Running from the static folder would turn that into `D:\Program\RVS`, so the copy
+    passes its own folder along; the installed copy started bare opens the most recent folder.
+  - Known gap: a non-elevated copy cannot read an ELEVATED window's exe path, so it cannot tell
+    that window is older, does not close it, and the copy over its locked exe fails → the new
+    copy runs from where it is. Rare (needs an old admin window open during an upgrade).
+  - Verified (1.1.0 installed + open, 1.2.0 copy in a scratch "package" folder): double-click
+    upgrades and replaces the open window and opens the copy's folder; old 1.1.0 copy with a
+    folder → installed 1.2.0 opens it; bare installed launch → most recent folder; fresh
+    install with nothing in D:\Program\RVS; same build relaunch does not rewrite the exe.
+    Right-click entry not touched this round (still `D:\Log\Script`, which now redirects).
 
 ## 2026-11-11
 

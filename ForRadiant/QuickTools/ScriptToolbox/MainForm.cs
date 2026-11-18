@@ -20,7 +20,6 @@ namespace ScriptToolbox
         readonly Label lblSuggest = new Label { AutoSize = true, ForeColor = Color.SteelBlue, Margin = new Padding(3, 2, 3, 3) };
         readonly Button btnExplorer = new Button { AutoSize = true, Margin = new Padding(3) };
         readonly Label lblInstalled = new Label { AutoSize = true, Margin = new Padding(3, 2, 3, 3) };
-        readonly string pendingMenuAction;
         readonly RadioButton rbOmit = new RadioButton { Text = "Omit", AutoSize = true, Checked = true };
         readonly RadioButton rbPuc = new RadioButton { Text = "PUC", AutoSize = true };
         readonly ComboBox cboInstall = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
@@ -39,9 +38,8 @@ namespace ScriptToolbox
         readonly string ownExe = Path.GetFileName(Application.ExecutablePath);
         Process runningTest;
 
-        public MainForm(string startFolder, string menuAction = null)
+        public MainForm(string startFolder)
         {
-            pendingMenuAction = menuAction;
             Text = $"Script Toolbox {InstalledCopy.Self}" + (IsElevated() ? " (Administrator)" : "");
             Font = new Font("Segoe UI", 9f);
             AutoScaleMode = AutoScaleMode.Dpi;
@@ -54,21 +52,18 @@ namespace ScriptToolbox
 
             BuildLayout();
 
-            // Folder: command-line arg > the exe's own folder (the old tools always ran on the
-            // folder they sat in, so dropping this exe into a package folder keeps that habit).
-            string folder = !string.IsNullOrEmpty(startFolder) && Directory.Exists(startFolder)
-                ? startFolder : AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
+            // Folder: command-line arg (another copy passes the folder it sits in) > the most
+            // recent folder when this is the installed copy > this exe's own folder.
+            string recent = settings.Get("Recent").Split('|').FirstOrDefault(Directory.Exists);
+            string folder = !string.IsNullOrEmpty(startFolder) && Directory.Exists(startFolder) ? startFolder
+                : InstalledCopy.IsStatic(InstalledCopy.SelfExe) && recent != null ? recent
+                : AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
             chkCloseTT.Checked = settings.Get("CloseTrueTest") != "0";
             LoadInstalls();
             SetSource(folder);
             UpdateExplorerButton();
 
-            Shown += (s, e) =>
-            {
-                txtSource.Select(txtSource.Text.Length, 0);
-                // An older copy handed an Add/Remove click over to this (installed) one.
-                if (pendingMenuAction == "add" || pendingMenuAction == "remove") ToggleExplorerMenu(pendingMenuAction);
-            };
+            Shown += (s, e) => txtSource.Select(txtSource.Text.Length, 0);
             FormClosing += (s, e) => SaveSettings();
             Log($"Script Toolbox ready. Drop a folder here to work on it, or a .txt to use as the run-test input.", LogLevel.Info);
         }
@@ -635,26 +630,9 @@ namespace ScriptToolbox
         void ToggleExplorerMenu(string action = null)
         {
             action = action ?? (MenuPointsAtInstalled() ? "remove" : "add");
-
-            // The installed copy became newer while this window was open (another engineer
-            // installed a later build): let that one do it, and close this one.
-            if (InstalledCopy.InstalledIsNewer)
-            {
-                Log($"A newer Script Toolbox is installed ({InstalledCopy.Installed}). Switching to it.", LogLevel.Info);
-                try
-                {
-                    SaveSettings();
-                    Process.Start(new ProcessStartInfo(InstalledCopy.StaticExe,
-                        InstalledCopy.Join(new[] { Source, Program.NewInstanceFlag, Program.MenuFlag + action })) { UseShellExecute = false });
-                    Close();
-                }
-                catch (Exception ex) { Log("Could not start the installed copy: " + ex.Message, LogLevel.Error); }
-                return;
-            }
-
             try
             {
-                // Both Add and Remove first make sure the installed copy is this build or newer.
+                // Normally a no-op: this window already is the installed copy (see RunInstalled).
                 Log(InstalledCopy.EnsureInstalled(), LogLevel.Info);
                 if (action == "remove")
                 {

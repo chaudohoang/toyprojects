@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 namespace ScriptToolbox
@@ -41,8 +42,8 @@ namespace ScriptToolbox
             Version.ToString(3) + (Built == DateTime.MinValue ? "" : $" (built {Built:yyyy-MM-dd HH:mm:ss})");
     }
 
-    // Engineers keep copies of the exe all over the place. One fixed copy is "installed": the
-    // Explorer right-click entry runs it, and any older copy hands over to it on start.
+    // Engineers keep copies of the exe all over the place. One fixed copy is "installed": every
+    // other copy updates it (if newer) and starts it, and the Explorer right-click entry runs it.
     public static class InstalledCopy
     {
         public const string Folder = @"D:\Program\RVS";
@@ -56,26 +57,51 @@ namespace ScriptToolbox
         public static BuildInfo Self => BuildInfo.Of(SelfExe);
         public static BuildInfo Installed => File.Exists(StaticExe) ? BuildInfo.Of(StaticExe) : null;
 
-        // True when this is some other copy and the installed one is strictly newer.
-        public static bool InstalledIsNewer
+        // Called at start by any copy outside the static folder: install this build there if it
+        // is newer (or none is installed), then start the installed copy with the same args.
+        // False = could not, so this copy should run itself.
+        public static bool RunInstalled(string[] args)
         {
-            get
+            if (IsStatic(SelfExe)) return false;
+            try
             {
-                if (IsStatic(SelfExe)) return false;
                 var inst = Installed;
-                return inst != null && inst.CompareTo(Self) > 0;
+                if (inst == null || inst.CompareTo(Self) < 0)
+                {
+                    // An older installed window holds the exe open: close it before overwriting.
+                    SingleInstance.CloseOlder(Self);
+                    Directory.CreateDirectory(Folder);
+                    CopySelf();
+                }
+                // No folder given = "the folder this copy sits in", as the old per-folder tools
+                // worked. Pass it on, or the installed copy would open D:\Program\RVS instead.
+                if (!args.Any(a => !a.StartsWith("/")))
+                    args = args.Concat(new[] { Path.GetDirectoryName(SelfExe) }).ToArray();
+                Process.Start(new ProcessStartInfo(StaticExe, Join(args)) { UseShellExecute = false });
+                return true;
+            }
+            catch { return false; }     // D: missing, no rights, still locked: run from here
+        }
+
+        // A just-closed process can hold the file for a moment after it exits.
+        static void CopySelf()
+        {
+            for (int attempt = 1; ; attempt++)
+            {
+                try { File.Copy(SelfExe, StaticExe, true); return; }
+                catch (IOException) when (attempt < 10) { System.Threading.Thread.Sleep(200); }
             }
         }
 
-        // Puts this exe in the static folder unless the copy there is the same or newer.
-        // Returns what happened, for the log.
+        // Add/Remove call this too, for the rare window not running from the static folder
+        // (RunInstalled failed at start). Returns what happened, for the log.
         public static string EnsureInstalled()
         {
             if (IsStatic(SelfExe)) return $"Running the installed copy ({Self}).";
             var inst = Installed;
             if (inst != null && inst.CompareTo(Self) >= 0) return $"{StaticExe} is already {inst}.";
             Directory.CreateDirectory(Folder);
-            File.Copy(SelfExe, StaticExe, true);
+            CopySelf();
             return inst == null ? $"Installed {Self} to {StaticExe}." : $"Updated {StaticExe}: {inst} → {Self}.";
         }
 
