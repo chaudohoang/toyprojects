@@ -239,6 +239,11 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     and Thumbs.db; suggestions for the four earlier kits unchanged.
   - Fifth button pushed the log off the card again: panel 860 → 920 px tall. Still fits a
     1080p work area; ShowNear shrinks it to the work area on smaller screens.
+- **Kit Helper 1.5.1: ScratchDustDetect_NY copies subfolders too** (Chau: Omit kits sometimes
+  have them). None of the ~35 Omit kits under `D:\Log` has one today, nor does TrueTest's own
+  ScratchDustDetect_NY, so tested on a copy of a real Omit kit with an added nested folder:
+  9/9 top-level files + nested files + empty folder copied, the subfolder's UnblockFiles.exe
+  and Thumbs.db skipped. Only POCB4.1Net and PUC remain top-level-only.
 
 ## 2026-11-11
 

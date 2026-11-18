@@ -42,7 +42,7 @@ namespace KitHelper
     {
         public string Name;
         public string[] SubFolders;
-        public bool IncludeSubdirs;          // xcopy /E of subfolders (LGDVHCustomApp bat only)
+        public bool IncludeSubdirs;          // xcopy /E of subfolders
         public Func<string, bool> Skip = _ => false;
 
         public static readonly CopyTarget[] All =
@@ -63,7 +63,8 @@ namespace KitHelper
             // the dlls, mirroring TrueTest's own POCB4.2 folder, so subfolders are copied.
             new CopyTarget { Name = "POCB4.2", SubFolders = new[] { "POCB4.2" }, IncludeSubdirs = true },
             new CopyTarget { Name = "PUC", SubFolders = new[] { "PUC" } },
-            new CopyTarget { Name = "ScratchDustDetect_NY", SubFolders = new[] { "ScratchDustDetect_NY" } },
+            // Some Omit kits carry subfolders too (the old .bat copied top-level files only).
+            new CopyTarget { Name = "ScratchDustDetect_NY", SubFolders = new[] { "ScratchDustDetect_NY" }, IncludeSubdirs = true },
             new CopyTarget { Name = "LGDVHCustomApp", SubFolders = new[] { "LGDVHCustomApp" }, IncludeSubdirs = true },
         };
     }
