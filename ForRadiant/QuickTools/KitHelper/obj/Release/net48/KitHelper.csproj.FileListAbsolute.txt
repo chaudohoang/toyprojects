@@ -9,3 +9,11 @@ E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\KitHelpe
 E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\KitHelper.sourcelink.json
 E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\Kit Helper.exe
 E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\Kit Helper.pdb
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\FloatingIconWindow.baml
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\MainWindow.baml
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\Theme.baml
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\FloatingIconWindow.g.cs
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\MainWindow.g.cs
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\Theme.g.cs
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\Kit Helper_MarkupCompile.cache
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\Kit Helper.g.resources

@@ -145,6 +145,36 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   - Done on this PC via the normal path (D:\Log\Script\ScriptToolbox.exe renamed to
     Kit Helper.exe and replaced, double-clicked on R2R): log showed both migration lines.
     Backups of the old keys and installed exe are in the session scratchpad only.
+- **Kit Helper 1.4.0: WPF rewrite with a floating icon**, styled after
+  `E:\Dev\c#\CharlieTheSlave` (its `FloatingIconWindow`, `#1E1F26` card, `#7C5CFF→#22B8CF`).
+  Stays **net48** (Charlie is net8) so line PCs need nothing installed. `Core.cs` and
+  `InstalledCopy.cs` unchanged; `MainForm.cs` replaced by `MainWindow.xaml`, plus
+  `FloatingIconWindow.xaml`, `Theme.xaml` (dark templates for button/combo/check/radio/
+  ListView/scrollbar), `Settings.cs` (now shared, `Settings.Current`).
+  - Icon: click toggles the panel, double-click installs + adds "Open in Kit Helper" (or says
+    it is already there, in a note above the icon), drag moves (saved as IconLeft/IconTop),
+    folder drop opens it, right-click menu has show/hide, add/remove, open folder, Exit.
+    **Single click waits `DoubleClickTime`** before toggling, else a double-click would
+    flash the panel open and shut first. Panel ✕/Esc only hides; Exit is on the icon menu.
+  - Started for a folder → panel shown; started bare → icon only.
+  - **IPC moved to a message-only window** (`HwndSource`, parent `HWND_MESSAGE`, name
+    `KitHelper.Ipc`), found with `FindWindowEx(HWND_MESSAGE, …)`: it exists whether or not
+    the panel is shown. The sender calls `AllowSetForegroundWindow(pid)` so the panel can come
+    forward. Legacy 1.3.0 WinForms windows are still found via `MainWindowHandle` and get the
+    quit token (verified: a 1.3.0 window is replaced by 1.4.0).
+  - **Startup race found in testing:** two launches ~3 s apart both ran (the first had not
+    created its IPC window yet). Fixed with mutex `Local\KitHelper.Running`, taken before the
+    slow part of start-up; a launch that sees it but no IPC window polls up to 10 s.
+    Verified with launches 300 ms apart → 1 process, second kit shown. Real start ≈ 0.4 s.
+  - Trap: PowerShell passes `$null` to a `string` P/Invoke parameter as `""`, so a
+    `FindWindowEx(..., $null, name)` probe from PS never matches - use a C# helper.
+  - Layered windows (AllowsTransparency) come out blank/odd with PrintWindow; screenshots
+    were taken with `CopyFromScreen` over the window bounds instead.
+  - Verified with real mouse input (SetCursorPos + mouse_event): click hide/show/hide,
+    double-click shows the note and does not toggle; upgrade over a running 1.4.0 (quit
+    token through the new IPC window); bare relaunch shows a hidden panel. **Not tested:**
+    Exit from the icon menu, folder drop on the icon, copy/run actions in the WPF panel
+    (logic unchanged from 1.3.0), an elevated instance.
 
 ## 2026-11-11
 
