@@ -9,10 +9,13 @@ namespace KitHelper
     // the panel.
     sealed class Settings
     {
-        public static Settings Current { get; } = Load();
-
+        // Must stay ABOVE Current: static initialisers run in text order, and with Current
+        // first, Load() ran while FilePath was still null and silently read the old Script
+        // Toolbox file on every start (1.4.0-1.4.1), while Save() wrote the new one.
         static readonly string FilePath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "KitHelper", "settings.txt");
+
+        public static Settings Current { get; } = Load();
         readonly Dictionary<string, string> values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         static Settings Load()

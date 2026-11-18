@@ -190,6 +190,23 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     Test trap: a new window opening also steals focus, so it legitimately hides the panel -
     open the click target BEFORE showing the panel. Each PowerShell tool call is a fresh
     session, so Add-Type helpers must be re-loaded (dot-source a helper .ps1).
+- **Kit Helper 1.4.2: right-click entry added on every start, unless removed.** Chau's
+  original "double-click → add Open with Kit Helper" meant double-clicking the EXE; I had
+  read it as the floating icon, so starting the app never added it. Now
+  `EnsureRightClickEntry` runs at start-up: adds the entry (or re-points it at
+  `D:\Program\RVS`) and shows the note on the icon. Remove sets `MenuRemoved=1` in settings
+  and the start-up check then leaves it off; Add (button, icon menu, icon double-click)
+  clears it.
+  - **Settings bug found on the way, present since 1.4.0:** in `Settings.cs`, the static
+    `Current = Load()` was declared above `static readonly FilePath`. Static initialisers
+    run in text order, so Load() ran with FilePath null, `File.Exists(null)` was false, and
+    it fell back to the OLD `%APPDATA%\ScriptToolbox\settings.txt` on every start - while
+    Save() wrote the new file. Effect: nothing saved since the WPF rewrite (recent folders,
+    TrueTest choice, MenuRemoved) survived a restart. Found because the Remove flag was
+    written and verified in the file yet ignored; confirmed by reading `Settings.Current`
+    through reflection. Fix: FilePath moved above Current, with a comment saying why.
+  - Verified with real button clicks via UI Automation (powershell.exe 5.1,
+    InvokePattern): fresh start adds; Remove → restart stays removed; Add → restart stays.
 
 ## 2026-11-11
 

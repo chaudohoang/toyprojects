@@ -46,6 +46,8 @@ namespace KitHelper
             var ipc = new IpcHost(panel);
 
             panel.MigrateFromScriptToolbox();
+            string added = panel.EnsureRightClickEntry();
+            if (added != null) icon.ShowToast(added);
             // Started for a folder (right-click, a copy double-clicked in a kit): show it.
             // Started bare: just the icon.
             if (folder != null) panel.ShowNear(icon);
