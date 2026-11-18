@@ -126,6 +126,10 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     folder → installed 1.2.0 opens it; bare installed launch → most recent folder; fresh
     install with nothing in D:\Program\RVS; same build relaunch does not rewrite the exe.
     Right-click entry not touched this round (still `D:\Log\Script`, which now redirects).
+- **ScriptToolbox 1.2.1: "package" → "kit" everywhere** - the team's word for these folders.
+  UI labels, log messages, comments, and the `Package` class (now `Kit`). Deployed by the
+  normal path (new exe into `D:\Log\Script`, double-click), which upgraded `D:\Program\RVS`
+  to 1.2.1 by itself. Chau had meanwhile moved his right-click entry to `D:\Program\RVS`.
 
 ## 2026-11-11
 

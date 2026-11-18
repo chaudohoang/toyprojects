@@ -13,7 +13,7 @@ namespace ScriptToolbox
     // All controls are built in code (no designer file) so the layout is readable in one place.
     public sealed class MainForm : Form
     {
-        // Package folder, with the recently used ones in the drop-down.
+        // Kit folder, with the recently used ones in the drop-down.
         readonly ComboBox txtSource = new ComboBox { DropDownStyle = ComboBoxStyle.DropDown, MaxDropDownItems = 15 };
         readonly Label lblSourceInfo = new Label { AutoSize = true, ForeColor = Color.DimGray };
         readonly Dictionary<CopyTarget, Button> copyButtons = new Dictionary<CopyTarget, Button>();
@@ -88,7 +88,7 @@ namespace ScriptToolbox
             txtSource.Leave += (s, e) => SetSource(txtSource.Text.Trim());
             txtSource.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) { SetSource(txtSource.Text.Trim()); e.SuppressKeyPress = true; } };
             txtSource.SelectionChangeCommitted += (s, e) => { if (txtSource.SelectedItem is string f) BeginInvoke(new Action(() => SetSource(f))); };
-            top.Controls.Add(Lbl("Package folder:"), 0, 0);
+            top.Controls.Add(Lbl("Kit folder:"), 0, 0);
             top.Controls.Add(txtSource, 1, 0);
             top.Controls.Add(Btn("Browse…", BrowseSource), 2, 0);
             top.Controls.Add(Btn("Open", () => { if (Directory.Exists(txtSource.Text)) Process.Start("explorer.exe", "\"" + txtSource.Text + "\""); }), 3, 0);
@@ -147,10 +147,10 @@ namespace ScriptToolbox
             cs.Controls.Add(lblSuggest);
             cs.Controls.Add(chkCloseTT);
             cs.Controls.Add(Hint("POCB skips *.tif, *.csv and LGD_VNTT.ini.\nOther targets copy every file in the folder."));
-            col.Controls.Add(Group("Copy package folder to TrueTest", cs));
+            col.Controls.Add(Group("Copy kit folder to TrueTest", cs));
 
             var us = Stack();
-            var ub = Btn("Unblock package folder", DoUnblock);
+            var ub = Btn("Unblock kit folder", DoUnblock);
             ub.AutoSize = false; ub.Height = 30; ub.Width = 330; ub.TextAlign = ContentAlignment.MiddleLeft;
             actionControls.Add(ub);
             us.Controls.Add(ub);
@@ -182,7 +182,7 @@ namespace ScriptToolbox
             chkDx.Margin = new Padding(12, 7, 3, 3);
             row.Controls.Add(on); row.Controls.Add(off); row.Controls.Add(chkDx);
             vs.Controls.Add(row);
-            col.Controls.Add(Group("Vignetting  (" + Vignetting.Key + " in package *.ini)", vs));
+            col.Controls.Add(Group("Vignetting  (" + Vignetting.Key + " in kit *.ini)", vs));
 
             var g = Grid(3);
             g.ColumnStyles[1] = new ColumnStyle(SizeType.Absolute, 340);
@@ -196,7 +196,7 @@ namespace ScriptToolbox
             var modes = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(0) };
             rbPuc.CheckedChanged += (s, e) => UpdateRunMode();
             modes.Controls.Add(rbOmit); modes.Controls.Add(rbPuc);
-            modes.Controls.Add(Hint("PUC runs in the package folder, outputs to …\\Test\\"));
+            modes.Controls.Add(Hint("PUC runs in the kit folder, outputs to …\\Test\\"));
             g.Controls.Add(Lbl("Mode:"), 0, 1);
             g.Controls.Add(modes, 1, 1);
             g.SetColumnSpan(modes, 2);
@@ -254,7 +254,7 @@ namespace ScriptToolbox
                 lvIni.Items.Clear();
                 return;
             }
-            int files = Directory.GetFiles(folder).Count(f => !Package.IsHelper(f) && !string.Equals(Path.GetFileName(f), ownExe, StringComparison.OrdinalIgnoreCase));
+            int files = Directory.GetFiles(folder).Count(f => !Kit.IsHelper(f) && !string.Equals(Path.GetFileName(f), ownExe, StringComparison.OrdinalIgnoreCase));
             int dirs = Directory.GetDirectories(folder).Length;
             int inis = Vignetting.IniFiles(folder).Length;
             lblSourceInfo.Text = $"{files} file(s), {dirs} subfolder(s), {inis} ini";
@@ -263,7 +263,7 @@ namespace ScriptToolbox
             RememberRecent(folder);
 
             // Mark the copy target this folder is meant for.
-            var suggested = Package.Suggest(folder, out string why);
+            var suggested = Kit.Suggest(folder, out string why);
             foreach (var kv in copyButtons)
             {
                 bool on = kv.Key == suggested;
@@ -276,7 +276,7 @@ namespace ScriptToolbox
             // Run inputs found in this folder; keep a browsed file from elsewhere if one is set.
             string current = RunInputPath;
             txtRunInput.Items.Clear();
-            foreach (string f in Package.RunInputs(folder)) txtRunInput.Items.Add(new RunInputItem(f));
+            foreach (string f in Kit.RunInputs(folder)) txtRunInput.Items.Add(new RunInputItem(f));
             var match = txtRunInput.Items.Cast<RunInputItem>().FirstOrDefault(i => string.Equals(i.Path, current, StringComparison.OrdinalIgnoreCase));
             if (match != null) txtRunInput.SelectedItem = match;
             else if (txtRunInput.Items.Count > 0) txtRunInput.SelectedIndex = 0;
@@ -553,13 +553,13 @@ namespace ScriptToolbox
         bool CheckSource()
         {
             if (Directory.Exists(Source)) return true;
-            Log("Package folder not found: " + Source, LogLevel.Error);
+            Log("Kit folder not found: " + Source, LogLevel.Error);
             return false;
         }
 
         void BrowseSource()
         {
-            using (var d = new FolderBrowserDialog { SelectedPath = Source, Description = "Package folder (the files to copy / edit)" })
+            using (var d = new FolderBrowserDialog { SelectedPath = Source, Description = "Kit folder (the files to copy / edit)" })
                 if (d.ShowDialog(this) == DialogResult.OK) SetSource(d.SelectedPath);
         }
 

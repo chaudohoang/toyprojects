@@ -77,7 +77,7 @@ namespace ScriptToolbox
             var files = Directory.GetFiles(source)
                 .Where(f => !string.Equals(Path.GetFileName(f), ownExe, StringComparison.OrdinalIgnoreCase))
                 .ToList();
-            var helpers = files.Where(Package.IsHelper).ToList();
+            var helpers = files.Where(Kit.IsHelper).ToList();
             files = files.Except(helpers).ToList();
             if (helpers.Count > 0)
                 log($"Not copying helper tools: {string.Join(", ", helpers.Select(Path.GetFileName))}", LogLevel.Detail);
@@ -194,8 +194,8 @@ namespace ScriptToolbox
         }
     }
 
-    // What a package folder is, judged from its contents.
-    public static class Package
+    // What a kit folder is, judged from its contents.
+    public static class Kit
     {
         // The per-folder helper tools this app replaces. Copying them into TrueTest was never
         // intended - the old scripts only excluded themselves - so every copy target skips them.
@@ -239,7 +239,7 @@ namespace ScriptToolbox
     public static class Unblocker
     {
         // Deletes the Zone.Identifier stream ("downloaded from the internet" mark). Recursive,
-        // unlike UnblockFiles.exe, because extracted packages carry subfolders too.
+        // unlike UnblockFiles.exe, because extracted kits carry subfolders too.
         public static (int unblocked, int total, int failed) Run(string folder, LogFn log)
         {
             int un = 0, total = 0, failed = 0;
@@ -295,7 +295,7 @@ namespace ScriptToolbox
         // puc = RunTestPUC rules on top: every folder argument gets "Test\" appended, and a bare
         // file name containing "puc" ending .hex/.txt (not "dummy") is placed in that Test folder.
         //
-        // The old launchers sat in the package folder, which was therefore their current
+        // The old launchers sat in the kit folder, which was therefore their current
         // directory: a relative exe or folder was looked up there. That folder is the input
         // file's folder, so relative names resolve against it here (exe: then workDir).
         public static ProcessStartInfo Parse(string inputFile, string workDir, bool puc, LogFn log)
@@ -310,7 +310,7 @@ namespace ScriptToolbox
             {
                 string hit = new[] { pkg, workDir }.Select(d => Path.Combine(d, exe)).FirstOrDefault(File.Exists);
                 if (hit != null) exe = hit;
-                else log($"{exe} not found in the package folder or working dir - relying on PATH.", LogLevel.Warn);
+                else log($"{exe} not found in the kit folder or working dir - relying on PATH.", LogLevel.Warn);
             }
 
             var args = new List<string>();
