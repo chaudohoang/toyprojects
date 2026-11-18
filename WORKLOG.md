@@ -212,6 +212,15 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   deletes the entry; the next start re-adds it. To be rid of it: remove it and stop starting
   the app. `MenuRemoved` dropped from code and from his settings file. Verified: Remove →
   entry gone → restart → entry back.
+  - Start-up only writes when needed: it checks the `Directory\shell` command; if that exists
+    and points at the installed exe it does nothing. It does NOT check the
+    `Directory\Background` half, so a hand-deleted Background key is not repaired.
+- **Kit Helper 1.4.4: clearer unblock result.** Chau read "Done: 0 unblocked of 10" on the
+  PUC kit as a failure; the files simply had no `Zone.Identifier` stream (checked with
+  `Get-Item -Stream *`: no alternate streams at all). Unblock itself was verified on marked
+  scratch files (2 of 3, subfolder included). Now: "Nothing to unblock: none of the N file(s)
+  is marked…", "Done: unblocked X of N file(s); the rest were not marked.", or the failure
+  count in red. Both wordings checked by clicking Unblock through UI Automation.
 
 ## 2026-11-11
 

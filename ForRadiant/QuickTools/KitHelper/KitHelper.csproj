@@ -14,7 +14,7 @@
     <LangVersion>latest</LangVersion>
     <!-- Bump on each release. Copies compare (Version, build time) to decide which is newer:
          see BuildInfo in InstalledCopy.cs. -->
-    <Version>1.4.3</Version>
+    <Version>1.4.4</Version>
     <!-- Build time rides in the product version ("1.4.0+20261118104512") so another copy's
          stamp can be read with FileVersionInfo, without loading that exe. -->
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>

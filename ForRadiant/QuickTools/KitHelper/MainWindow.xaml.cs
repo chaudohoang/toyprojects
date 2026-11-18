@@ -451,8 +451,15 @@ namespace KitHelper
             string source = Source;
             Log($"Unblock {source}", LogLevel.Info);
             var r = await Busy(() => Unblocker.Run(source, Log));
-            Log($"Done: {r.unblocked} unblocked of {r.total} file(s){(r.failed > 0 ? $", {r.failed} failed" : "")}.",
-                r.failed == 0 ? LogLevel.Ok : LogLevel.Error);
+            // "0 unblocked" read like a failure when the files simply were not marked.
+            if (r.failed > 0)
+                Log($"Done: {r.unblocked} unblocked, {r.failed} failed, of {r.total} file(s).", LogLevel.Error);
+            else if (r.total == 0)
+                Log("Nothing to unblock: the folder has no files.", LogLevel.Ok);
+            else if (r.unblocked == 0)
+                Log($"Nothing to unblock: none of the {r.total} file(s) is marked as downloaded from the internet.", LogLevel.Ok);
+            else
+                Log($"Done: unblocked {r.unblocked} of {r.total} file(s); the rest were not marked.", LogLevel.Ok);
         }
 
         async void Run_Click(object sender, RoutedEventArgs e)
