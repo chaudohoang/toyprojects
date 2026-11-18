@@ -33,9 +33,11 @@ namespace KitHelper
             }
             else
             {
+                // First start: top centre of the screen. Not top right, where it would cover the
+                // close / minimize buttons of maximized windows (the icon is always on top).
                 var wa = SystemParameters.WorkArea;
-                Left = wa.Right - Width - 24;
-                Top = wa.Bottom - Height - 24;
+                Left = wa.Left + (wa.Width - Width) / 2;
+                Top = wa.Top + 4;
             }
 
             toastTimer.Tick += (s2, e) => { toastTimer.Stop(); Toast.IsOpen = false; };

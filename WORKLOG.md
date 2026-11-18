@@ -344,6 +344,12 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   - User manual (Claude doc "Kit Helper – Hướng dẫn sử dụng / User Manual",
     https://claude.ai/artifact/TWrCgMZX3tcRCYCP3XLciy), VI then EN, 8 sections each; updated
     for the two points above.
+  - K icon's first-start position is now the **top centre** (4 px below the work-area top),
+    not the bottom right; a dragged position is still saved (IconLeft/IconTop) and wins.
+    Not top RIGHT: the always-on-top icon would cover maximized windows' close buttons.
+    ShowNear already opens the panel BELOW the icon when there is no room above. Verified:
+    icon 930,4 with the panel below it; dragged to 1470,304 → kept across a restart; saved
+    keys removed again so this PC keeps the default.
 
 ## 2026-11-11
 
