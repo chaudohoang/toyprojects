@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.6.11819.183
@@ -180,6 +180,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeqxcEditor", "SeqxcEditor\SeqxcEditor.csproj", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeqxcToolset", "SeqxcToolset\SeqxcToolset.csproj", "{A35A5BFC-5F31-B346-AA35-CE9E9F246809}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptToolbox", "QuickTools\ScriptToolbox\ScriptToolbox.csproj", "{0E1106F4-B51D-405E-88F4-662854FF7CD2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1247,6 +1249,18 @@ Global
 		{A35A5BFC-5F31-B346-AA35-CE9E9F246809}.Release|x64.Build.0 = Release|Any CPU
 		{A35A5BFC-5F31-B346-AA35-CE9E9F246809}.Release|x86.ActiveCfg = Release|Any CPU
 		{A35A5BFC-5F31-B346-AA35-CE9E9F246809}.Release|x86.Build.0 = Release|Any CPU
+		{0E1106F4-B51D-405E-88F4-662854FF7CD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E1106F4-B51D-405E-88F4-662854FF7CD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E1106F4-B51D-405E-88F4-662854FF7CD2}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0E1106F4-B51D-405E-88F4-662854FF7CD2}.Debug|x64.Build.0 = Debug|Any CPU
+		{0E1106F4-B51D-405E-88F4-662854FF7CD2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0E1106F4-B51D-405E-88F4-662854FF7CD2}.Debug|x86.Build.0 = Debug|Any CPU
+		{0E1106F4-B51D-405E-88F4-662854FF7CD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E1106F4-B51D-405E-88F4-662854FF7CD2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E1106F4-B51D-405E-88F4-662854FF7CD2}.Release|x64.ActiveCfg = Release|Any CPU
+		{0E1106F4-B51D-405E-88F4-662854FF7CD2}.Release|x64.Build.0 = Release|Any CPU
+		{0E1106F4-B51D-405E-88F4-662854FF7CD2}.Release|x86.ActiveCfg = Release|Any CPU
+		{0E1106F4-B51D-405E-88F4-662854FF7CD2}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1274,6 +1288,7 @@ Global
 		{51573EA4-FA2A-42A3-A059-AD45100D67C5} = {62CFD8A0-B705-4B6B-B80F-814562E4DABF}
 		{D94AF84D-8C38-4C84-865F-6B569D58D884} = {62CFD8A0-B705-4B6B-B80F-814562E4DABF}
 		{FE7B38B5-A743-4002-8E92-77FA03F2CA6F} = {62CFD8A0-B705-4B6B-B80F-814562E4DABF}
+		{0E1106F4-B51D-405E-88F4-662854FF7CD2} = {62CFD8A0-B705-4B6B-B80F-814562E4DABF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {60C14AFF-CFF7-46E8-9345-65A46A64495F}

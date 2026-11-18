@@ -6,6 +6,40 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ---
 
+## 2026-11-18
+
+- **New tool `ForRadiant/QuickTools/ScriptToolbox/`** — one WinForms (net48, SDK-style) UI
+  replacing the 8 single-purpose tools in `D:\Log\Script`: the 3 "Copy all to X folder"
+  `.bat`s, `Copy all to POCB4.1Net folder.exe`, `VignetingOn/Off.exe`, `UnblockFiles.exe`,
+  `RunTestOmit.exe`. Logic rewritten in `Core.cs` (not launching the old exes), UI in
+  `MainForm.cs` built in code. Deployed as `D:\Log\Script\ScriptToolbox.exe`; old files left
+  in place.
+  - **All old tools work on "the folder they sit in"**, so the toolbox has a *package folder*
+    (default: its own folder, or a command-line arg / dropped folder). Its own exe is never
+    copied.
+  - **TrueTest installs are discovered** (`C:\Program Files\Radiant Vision Systems\TrueTest*`)
+    instead of hardcoded. The old lists did not agree with each other or with this PC: they
+    name `TrueTest 1.9 debug`, the installed one is `TrueTest 1.9 debug Mobile`. The install
+    TrueTest is running from is preselected.
+  - Behaviour kept from the old tools: POCB copies to `POCB4.1Net` AND `POCB4.1`, skipping
+    `*.tif`, `*.csv`, `LGD_VNTT.ini`; only LGDVHCustomApp copies subfolders (xcopy /E, empty
+    folders too); 3x retry on IOException; vignetting regex anchored at line start, DX ini
+    skipped unless ticked.
+  - Deliberate changes: "close TrueTest first" now applies to every copy target and asks
+    before killing (the POCB exe killed silently; the .bats never closed it). Unblock is
+    recursive. Vignetting writes only on change and keeps the file's encoding/BOM. The
+    hidden "0 + HHmm password" per-file vignetting menu was dropped (Chau's call).
+  - **Latent RunTestOmit bug fixed:** a folder argument with spaces AND a trailing `\` was
+    quoted as `"C:\a b\"`, where `\"` escapes the closing quote. Trailing `\` is now doubled.
+  - **WinForms trap:** an `AutoSize` GroupBox with a *docked* child collapses to zero width
+    (titles rendered one letter per line). Children must be undocked with a set Location.
+  - Not elevated by manifest (no UAC on every launch); a "Run as admin" button restarts it
+    elevated, and access-denied copy failures point at it.
+  - Verified: logic headless against a scratch package + fake `TrueTest 9.9` install;
+    Include DX + Set ON clicked in the live exe (PostMessage BM_CLICK), files and log checked,
+    no APPCRASH. **Not exercised live:** the copy buttons against real Program Files, the
+    TrueTest close/restart prompts, and Run test with a real input file.
+
 ## 2026-11-11
 
 - **New tool `ArpgNameRandomizer/`** (renamed `NameRandomizer/` later the same day) (WinForms, net472, SDK-style csproj, built with `dotnet build`;

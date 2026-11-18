@@ -1,0 +1,66 @@
+{
+  "version": 4,
+  "targets": {
+    "net48": {},
+    "net48/win-x86": {}
+  },
+  "libraries": {},
+  "projectFileDependencyGroups": {
+    "net48": []
+  },
+  "packageFolders": {
+    "C:\\Users\\Chau\\.nuget\\packages\\": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "E:\\Github\\toyprojects\\ForRadiant\\QuickTools\\ScriptToolbox\\ScriptToolbox.csproj",
+      "projectName": "ScriptToolbox",
+      "projectPath": "E:\\Github\\toyprojects\\ForRadiant\\QuickTools\\ScriptToolbox\\ScriptToolbox.csproj",
+      "packagesPath": "C:\\Users\\Chau\\.nuget\\packages\\",
+      "outputPath": "E:\\Github\\toyprojects\\ForRadiant\\QuickTools\\ScriptToolbox\\obj\\",
+      "projectStyle": "PackageReference",
+      "configFilePaths": [
+        "C:\\Users\\Chau\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net48"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net48": {
+          "framework": "net48",
+          "targetAlias": "net48",
+          "projectReferences": {}
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "11.0.100"
+    },
+    "frameworks": {
+      "net48": {
+        "framework": "net48",
+        "targetAlias": "net48",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\11.0.100\\RuntimeIdentifierGraph.json"
+      }
+    },
+    "runtimes": {
+      "win-x86": {
+        "#import": []
+      }
+    }
+  }
+}
