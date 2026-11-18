@@ -350,6 +350,16 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     ShowNear already opens the panel BELOW the icon when there is no room above. Verified:
     icon 930,4 with the panel below it; dragged to 1470,304 → kept across a restart; saved
     keys removed again so this PC keeps the default.
+  - **Panel now docks to the right edge of the screen** (Chau), not hanging off the icon:
+    Left = work-area right - width; Top = just below the icon if the icon's centre is in the
+    top half, else just above it; clamped to the work area. Work area = the icon's monitor
+    (`Screen.FromHandle` + `TransformFromDevice` to DIPs), not `SystemParameters.WorkArea`,
+    which is the primary monitor only. Verified: icon top centre → panel 980..1920 × 64..984;
+    icon bottom left → 980..1920 × 10..930.
+  - **Mistake made and fixed:** a test assumed the icon was at the default, but Chau had
+    dragged it to 264,565, and the test's "reset to default" step deleted his saved
+    position. Restored (IconLeft=264, IconTop=565). Read the icon's real position before
+    driving it, and never reset a user's saved settings as test cleanup.
 
 ## 2026-11-11
 

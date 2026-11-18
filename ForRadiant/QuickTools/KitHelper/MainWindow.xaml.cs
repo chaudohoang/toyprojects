@@ -77,25 +77,34 @@ namespace KitHelper
         public void ShowNear(Window anchor)
         {
             anchor = anchor ?? Anchor;
-            var wa = SystemParameters.WorkArea;
+            // Docked to the right edge of the screen the icon is on. Vertically next to the
+            // icon: below it when the icon is in the top half, above it otherwise; always
+            // fully on that screen.
+            var wa = WorkAreaOf(anchor ?? this);
             if (Height > wa.Height) Height = wa.Height;
+            Left = wa.Right - Width;
+            double top = wa.Top;
             if (anchor != null)
-            {
-                // Above the icon, right edges aligned; below it if there is no room above.
-                double left = anchor.Left + anchor.Width - Width;
-                double top = anchor.Top - Height;
-                if (top < SystemParameters.VirtualScreenTop) top = anchor.Top + anchor.Height;
-                Left = Clamp(left, SystemParameters.VirtualScreenLeft,
-                    SystemParameters.VirtualScreenLeft + SystemParameters.VirtualScreenWidth - Width);
-                Top = Clamp(top, SystemParameters.VirtualScreenTop,
-                    SystemParameters.VirtualScreenTop + SystemParameters.VirtualScreenHeight - Height);
-            }
+                top = anchor.Top + anchor.Height / 2 < wa.Top + wa.Height / 2 ? anchor.Top + anchor.Height : anchor.Top - Height;
+            Top = Clamp(top, wa.Top, wa.Bottom - Height);
             Show();
             if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
             Activate();
         }
 
         static double Clamp(double v, double min, double max) => v < min ? min : v > max ? max : v;
+
+        // Work area (screen minus taskbar) of the monitor a window is on, in WPF units.
+        // SystemParameters.WorkArea is the primary monitor only.
+        static Rect WorkAreaOf(Window w)
+        {
+            var h = new WindowInteropHelper(w).Handle;
+            var source = PresentationSource.FromVisual(w);
+            if (h == IntPtr.Zero || source?.CompositionTarget == null) return SystemParameters.WorkArea;
+            var px = System.Windows.Forms.Screen.FromHandle(h).WorkingArea;    // device pixels
+            var toDip = source.CompositionTarget.TransformFromDevice;
+            return new Rect(toDip.Transform(new Point(px.Left, px.Top)), toDip.Transform(new Point(px.Right, px.Bottom)));
+        }
 
         // Clicking anywhere else hides the panel, like a menu. Two exceptions:
         //  - the click is on the floating icon: the icon's own click handler toggles, so hiding
