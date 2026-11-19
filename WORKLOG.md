@@ -32,6 +32,20 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   pushed the log box below the window edge. Tested: Suggest on the real kit folder (parent folder
   suggests nothing), `Copier.Run` into a scratch install → 10/10 files, screenshot of the panel.
   Manual (Claude Doc) updated in both languages.
+- **Kit Helper: Run test POCBMobile mode** (`RunTest.IsPocbMobileInput` / `PreparePocbMobile`,
+  new `PocbTemplate` in `Core.cs`; `RbPocb` in `MainWindow`). Inputs starting with `debugMode:`
+  are listed and pick the mode; Run writes the content to `<install>\POCBMobile\input.txt` and
+  starts `POCBMobile.exe` there (no args). Templates are NOT runnable as shipped: placeholders
+  `ExeDebugMode nMonth nDay DLLDefFolder mPUCDLLModel PID INIFile` (worked out by diffing
+  `POCBMobile\inputTemplate\X.txt` against TrueTest's filled `POCBMobile\inputTest\X.txt`). Values
+  come from the `.seqxc` Analysis step whose `<PUCTempplateArgFile>` names the template (sibling
+  `<ExeDebugMode>` false→0, `<DLLDefFolder>`, `<PUCDLLModel>`, `<INIFile>`); in the D997 kit all 113
+  steps share them. nMonth/nDay = today; PID = panel folder under `InputIMG\<model>` holding the
+  first image, else TEMP (inputTest uses TEMP). No .seqxc → model unknown → Run refuses.
+  POCBMobile.exe ends with "Press Enter to exit..." → stdin redirected and closed, or the run hangs.
+  Tested: fill of `inputTemplateY25GIBFWMono2nd.txt` from the D997 kit, real POCBMobile.exe in a
+  scratch copy of TT 1.8's folder → exits, code 1 "Select Comp. Mode Error" (no D997 images on this
+  PC, TT 1.8 DLL); not run against a real install with images. UI screenshot: mode auto-picked.
 
 ## 2026-11-18
 

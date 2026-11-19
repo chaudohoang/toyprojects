@@ -279,8 +279,13 @@ namespace KitHelper
             string p = RunInputPath;
             if (p == lastRunInput) return;
             lastRunInput = p;
-            if (File.Exists(p)) RbPuc.IsChecked = RunTest.LooksLikePuc(p);
-            RbOmit.IsChecked = RbPuc.IsChecked != true;
+            if (File.Exists(p))
+            {
+                bool pocb = RunTest.IsPocbMobileInput(p);
+                RbPocb.IsChecked = pocb;
+                RbPuc.IsChecked = !pocb && RunTest.LooksLikePuc(p);
+            }
+            RbOmit.IsChecked = RbPuc.IsChecked != true && RbPocb.IsChecked != true;
             UpdateRunMode();
         }
 
@@ -291,16 +296,24 @@ namespace KitHelper
         void RunMode_Changed(object sender, RoutedEventArgs e) => UpdateRunMode();
 
         // PUC runs where its input lives (RunTestPUC.exe had no working-dir choice: it ran in the
-        // folder it sat in). Omit runs in the chosen ScratchDustDetect_NY folder.
+        // folder it sat in). POCBMobile runs in the selected install's POCBMobile folder. Omit runs
+        // in the chosen ScratchDustDetect_NY folder.
+        bool FixedWorkDir => RbPuc.IsChecked == true || RbPocb.IsChecked == true;
+
         void UpdateRunMode()
         {
-            if (RbPuc.IsChecked == true)
+            if (TxtRunModeHint == null) return;     // radio events while the window is still loading
+            TxtRunModeHint.Text = RbPuc.IsChecked == true ? @"PUC runs in the kit folder, outputs to …\Test\"
+                : RbPocb.IsChecked == true ? "Fills it into input.txt"
+                : "Omit runs in the working dir";
+            if (FixedWorkDir)
             {
                 if (CboWorkDir.IsEnabled) omitWorkDir = CboWorkDir.Text;   // leaving Omit: remember it
                 CboWorkDir.IsEnabled = false;
                 CboWorkDir.Items.Clear();
                 string p = RunInputPath;
-                CboWorkDir.Text = File.Exists(p) ? Path.GetDirectoryName(p) : Source;
+                CboWorkDir.Text = RbPocb.IsChecked == true ? (Install == null ? "" : Path.Combine(Install, "POCBMobile"))
+                    : File.Exists(p) ? Path.GetDirectoryName(p) : Source;
             }
             else if (!CboWorkDir.IsEnabled)
             {
@@ -375,7 +388,7 @@ namespace KitHelper
         // useSaved: an empty box falls back to the working dir saved by the last run (start-up).
         void LoadWorkDirs(bool useSaved = true)
         {
-            if (RbPuc.IsChecked == true) return;      // PUC's working dir is fixed (see UpdateRunMode)
+            if (FixedWorkDir) { UpdateRunMode(); return; }   // fixed working dir (see UpdateRunMode)
             string keep = CboWorkDir.Text;
             if (string.IsNullOrEmpty(keep) && useSaved) keep = settings.Get("RunWorkDir");
             CboWorkDir.Items.Clear();
@@ -396,7 +409,7 @@ namespace KitHelper
         public void SaveSettings()
         {
             settings.Set("Install", Install);
-            if (RbPuc.IsChecked != true) settings.Set("RunWorkDir", CboWorkDir.Text);
+            if (!FixedWorkDir) settings.Set("RunWorkDir", CboWorkDir.Text);
             settings.Set("CloseTrueTest", ChkCloseTT.IsChecked == true ? "1" : "0");
             settings.Save();
         }
@@ -539,22 +552,25 @@ namespace KitHelper
         async void Run_Click(object sender, RoutedEventArgs e)
         {
             string input = RunInputPath, workDir = CboWorkDir.Text.Trim();
-            bool puc = RbPuc.IsChecked == true;
+            bool puc = RbPuc.IsChecked == true, pocb = RbPocb.IsChecked == true;
             if (!File.Exists(input)) { Log("Run test: input file not found - " + input, LogLevel.Error); return; }
-            if (!Directory.Exists(workDir)) { Log("Run test: working dir not found - " + workDir, LogLevel.Error); return; }
+            if (pocb && Install == null) { Log("Run test: pick a TrueTest install for POCBMobile.", LogLevel.Error); return; }
+            if (!pocb && !Directory.Exists(workDir)) { Log("Run test: working dir not found - " + workDir, LogLevel.Error); return; }
+            string install = Install;
             SaveSettings();
 
             BtnStop.IsEnabled = true;
             int code = await Busy(() =>
             {
-                var psi = RunTest.Parse(input, workDir, puc, Log);
-                Log($"Run test ({(puc ? "PUC" : "Omit")}) {Path.GetFileName(input)} in {workDir}", LogLevel.Info);
+                Log($"Run test ({(pocb ? "POCBMobile" : puc ? "PUC" : "Omit")}) {Path.GetFileName(input)} in {(pocb ? Path.Combine(install, "POCBMobile") : workDir)}", LogLevel.Info);
+                var psi = pocb ? RunTest.PreparePocbMobile(input, install, Log) : RunTest.Parse(input, workDir, puc, Log);
                 Log($"> {psi.FileName} {psi.Arguments}", LogLevel.Info);
                 using (var p = new Process { StartInfo = psi })
                 {
                     p.OutputDataReceived += (s, ev) => { if (ev.Data != null) Log(ev.Data, LogLevel.Detail); };
                     p.ErrorDataReceived += (s, ev) => { if (ev.Data != null) Log(ev.Data, LogLevel.Warn); };
                     p.Start();
+                    if (psi.RedirectStandardInput) p.StandardInput.Close();   // answers "Press Enter to exit"
                     runningTest = p;
                     p.BeginOutputReadLine();
                     p.BeginErrorReadLine();

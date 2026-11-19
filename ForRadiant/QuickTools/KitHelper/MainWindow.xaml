@@ -121,7 +121,7 @@
 
                     <Border Style="{StaticResource Section}">
                         <StackPanel>
-                            <TextBlock Text="Run test  (RunTestOmit / RunTestPUC input file)" Style="{StaticResource SectionTitle}"/>
+                            <TextBlock Text="Run test  (RunTestOmit / RunTestPUC / POCBMobile input file)" Style="{StaticResource SectionTitle}"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -143,8 +143,8 @@
                                 <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,8,0,0">
                                     <RadioButton x:Name="RbOmit" Content="Omit" IsChecked="True"/>
                                     <RadioButton x:Name="RbPuc" Content="PUC" Checked="RunMode_Changed" Unchecked="RunMode_Changed"/>
-                                    <TextBlock Style="{StaticResource Hint}" Margin="4,0,0,0" VerticalAlignment="Center"
-                                               Text="PUC runs in the kit folder, outputs to …\Test\"/>
+                                    <RadioButton x:Name="RbPocb" Content="POCBMobile" Checked="RunMode_Changed" Unchecked="RunMode_Changed"/>
+                                    <TextBlock x:Name="TxtRunModeHint" Style="{StaticResource Hint}" Margin="4,0,0,0" VerticalAlignment="Center" Text="Omit runs in the working dir"/>
                                 </StackPanel>
 
                                 <TextBlock Grid.Row="2" Text="Working dir" Style="{StaticResource FieldLabel}" Margin="0,8,10,0"/>
