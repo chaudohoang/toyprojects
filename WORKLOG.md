@@ -55,6 +55,9 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   model pick via UI Automation (221 models in C:\DATABASE\InputIMG here), fill with
   D997-2CB-GIB00_TLSM / TEMP, real POCBMobile.exe in a scratch copy → still "1_Select Comp. Mode
   Error" with images present, so it's POCBMobile's DLL/data on this PC (TT 1.8), not the fill.
+  Model list now re-reads `<db>\InputIMG` on every DropDownOpened (Chau: new folders didn't
+  appear). Note: UI Automation's ExpandCollapse.Expand did NOT show the refreshed items in the test;
+  a real mouse click did - verify such lists with a click + screenshot.
 
 ## 2026-11-18
 

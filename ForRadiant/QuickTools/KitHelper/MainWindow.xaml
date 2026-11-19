@@ -158,7 +158,7 @@
                                 <ComboBox x:Name="CboPocbDb" Grid.Row="3" Grid.Column="1" IsEditable="True" Margin="0,8,0,0"
                                           SelectionChanged="CboPocbDb_SelectionChanged" LostKeyboardFocus="CboPocbDb_LostFocus"/>
                                 <TextBlock x:Name="LblPocbModel" Grid.Row="4" Text="Model" Style="{StaticResource FieldLabel}" Margin="0,8,10,0"/>
-                                <ComboBox x:Name="CboPocbModel" Grid.Row="4" Grid.Column="1" Margin="0,8,0,0"/>
+                                <ComboBox x:Name="CboPocbModel" Grid.Row="4" Grid.Column="1" Margin="0,8,0,0" DropDownOpened="CboPocbModel_DropDownOpened"/>
                                 <TextBlock x:Name="LblPocbPid" Grid.Row="5" Text="Panel ID" Style="{StaticResource FieldLabel}" Margin="0,8,10,0"/>
                                 <StackPanel x:Name="PnlPocbPid" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,8,0,0">
                                     <TextBox x:Name="TxtPocbPid" Width="160" Text="TEMP"/>

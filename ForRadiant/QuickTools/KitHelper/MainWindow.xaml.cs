@@ -367,6 +367,9 @@ namespace KitHelper
             CboPocbModel.SelectedItem = hit;
         }
 
+        // Folders appear in InputIMG while the panel is open (a new model's images): re-read on open.
+        void CboPocbModel_DropDownOpened(object sender, EventArgs e) => LoadPocbModels();
+
         string lastPocbDb;
         void PocbDbChanged()
         {
