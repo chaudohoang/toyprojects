@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
@@ -89,9 +90,25 @@ namespace KitHelper
             toastTimer.Start();
         }
 
+        // Run as administrator, Explorer cannot OLE-drag into this window: see AdminDrop.
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            if (!AdminDrop.IsElevated) return;
+            var src = (HwndSource)PresentationSource.FromVisual(this);
+            AdminDrop.Enable(src, OpenDropped);
+            Loaded += (s, e2) => Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle,
+                new Action(() => AdminDrop.Use(src.Handle)));
+        }
+
         void OnDrop(object sender, DragEventArgs e)
         {
-            if (!(e.Data.GetData(DataFormats.FileDrop) is string[] paths) || paths.Length == 0) return;
+            if (e.Data.GetData(DataFormats.FileDrop) is string[] paths) OpenDropped(paths);
+        }
+
+        void OpenDropped(string[] paths)
+        {
+            if (paths == null || paths.Length == 0) return;
             string p = paths[0];
             if (Directory.Exists(p)) panel.OpenFolder(p);
             else if (File.Exists(p)) panel.OpenFile(p);

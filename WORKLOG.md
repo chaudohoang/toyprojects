@@ -6,6 +6,23 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ---
 
+## 2026-11-19
+
+- **CharlieTheSlave → net48** (side session, `E:\Dev\c#\CharlieTheSlave`, not in this repo):
+  single 3.6 MB exe instead of 74 MB self-contained net8; backup `CharlieTheSlave.bak-2026-11-19`.
+  Untested: UAC admin launch, TrueTest steps/POI, installer flow, clean factory PC.
+- **Kit Helper: drop onto the K icon works when run as administrator** (`AdminDrop.cs`,
+  `FloatingIconWindow.OnSourceInitialized`). Cause: UIPI blocks OLE drag from medium-integrity
+  Explorer into an elevated window, so WPF's `Drop` never fired ("no entry" cursor).
+  ChangeWindowMessageFilterEx cannot open OLE drag-drop; the only way through is the legacy
+  path: `RevokeDragDrop` (with an OLE target registered OLE never falls back), `DragAcceptFiles`,
+  and allow `WM_DROPFILES` + `WM_COPYDATA` + `WM_COPYGLOBALDATA (0x49)`. Re-applied at
+  ApplicationIdle after Loaded in case WPF re-registers its target. Only when elevated
+  (`IsInRole(Administrator)` is false for a filtered UAC token); normal windows keep OLE.
+  Tested: elevated instance, real OLE drag from a medium-integrity process — folder and .txt
+  both opened. UI Automation can't read an elevated window from medium, so checked by screenshot.
+  Still version 1.0.0 (build 20261119131826), deployed to `D:\Log\Script` and `D:\Program\RVS`.
+
 ## 2026-11-18
 
 - **New tool `ForRadiant/QuickTools/ScriptToolbox/`** — one WinForms (net48, SDK-style) UI
