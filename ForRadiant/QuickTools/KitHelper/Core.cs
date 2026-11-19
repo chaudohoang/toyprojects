@@ -422,7 +422,7 @@ namespace KitHelper
             return false;
         }
 
-        // Writes the input to <install>\POCBMobile\input.txt and returns how to start
+        // Copies the model's files and writes the input to <install>\POCBMobile\input.txt, and returns how to start
         // POCBMobile.exe there. A template (inputTemplate*.txt) is filled first with the picked
         // database / model / panel ID (see PocbTemplate); a filled input (inputTest*.txt) is
         // copied as is.
@@ -439,6 +439,10 @@ namespace KitHelper
                 if (left.Length > 0)
                     throw new InvalidDataException($"Could not fill {string.Join(", ", left)} in {Path.GetFileName(inputFile)}.");
             }
+            // A filled input (inputTest*.txt) names its own database and model; a template uses the picked ones.
+            string fileDb = Line(text, "defaultFolder"), fileModel = Line(text, "model");
+            CopyModelFiles(fileDb ?? database, fileModel ?? model, dir, log);
+
             string input = Path.Combine(dir, "input.txt");
             File.WriteAllText(input, text, Encoding.Default);   // content only: no Zone.Identifier from the kit
             log($"Wrote {Path.GetFileName(inputFile)} → {input}", LogLevel.Info);
@@ -454,6 +458,31 @@ namespace KitHelper
                 // read returns at once instead of hanging the run.
                 RedirectStandardInput = true,
             };
+        }
+
+        // "key: value" line of a POCBMobile input; null if missing or still a placeholder.
+        static string Line(string text, string key)
+        {
+            var m = Regex.Match(text, "^" + key + @":\s*(.+?)\s*$", RegexOptions.Multiline | RegexOptions.IgnoreCase);
+            return m.Success && PocbTemplate.Tokens(m.Groups[1].Value).Length == 0 ? m.Groups[1].Value : null;
+        }
+
+        // POCBMobile.exe loads the model's files (LGD_PO_Compensation.dll, PANEL_SHAPE_*.tif, LUT,
+        // csv...) from its own folder, so the files of <database>\InputIMG\<model> are copied there
+        // first. Files only: subfolders are panel image folders (TEMP\...), read where they are.
+        static void CopyModelFiles(string database, string model, string dir, LogFn log)
+        {
+            if (string.IsNullOrEmpty(database) || string.IsNullOrEmpty(model))
+                throw new InvalidDataException("No database / model to copy the model files from.");
+            string src = Path.Combine(database, "InputIMG", model);
+            if (!Directory.Exists(src)) throw new DirectoryNotFoundException("Model folder not found: " + src);
+            var files = Directory.GetFiles(src).Where(f => !Kit.NeverCopy(f)).ToList();
+            log($"Copy {files.Count} model file(s) {src} → {dir}", LogLevel.Info);
+            var r = new Copier.Result();
+            foreach (string f in files) Copier.CopyOne(f, Path.Combine(dir, Path.GetFileName(f)), r, log);
+            if (r.Failed > 0)
+                throw new IOException($"{r.Failed} model file(s) could not be copied"
+                    + (r.AccessDenied ? " - access denied: use \"Run as admin\"." : "."));
         }
 
         // RunTestPUC.exe was used for inputs whose exe is a PUC tool; RunTestOmit.exe for the rest.

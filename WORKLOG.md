@@ -58,6 +58,11 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   Model list now re-reads `<db>\InputIMG` on every DropDownOpened (Chau: new folders didn't
   appear). Note: UI Automation's ExpandCollapse.Expand did NOT show the refreshed items in the test;
   a real mouse click did - verify such lists with a click + screenshot.
+  Then: Run copies the files (not subfolders) of `<db>\InputIMG\<model>` into POCBMobile first -
+  it loads LGD_PO_Compensation.dll / PANEL_SHAPE / LUT / csv from its own folder (Chau). An
+  inputTest file uses its own `defaultFolder:` / `model:` lines. Effect measured in the scratch copy:
+  "1_Select Comp. Mode Error" (TT 1.8's own DLL) → now "4_Initail Parameter Setting Error" with the
+  D997 DLL, which on this PC has no `TEMP` image folder for D997-CB-CGDIM00_TLSM.
 
 ## 2026-11-18
 
