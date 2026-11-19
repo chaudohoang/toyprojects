@@ -108,6 +108,9 @@ namespace KitHelper
             // POCB4.2 kits carry X<model>\ (crop params, panel shapes) and mainTemplate\ beside
             // the dlls, mirroring TrueTest's own POCB4.2 folder, so subfolders are copied.
             new CopyTarget { Name = "POCB4.2", SubFolders = new[] { "POCB4.2" }, IncludeSubdirs = true },
+            // POCBMobile reads its input templates (inputTemplate<model><step>.txt) from here; kits
+            // ship new ones in a folder like inputTemplateGIBD992_D997.
+            new CopyTarget { Name = "POCBMobile inputTemplate", SubFolders = new[] { @"POCBMobile\inputTemplate" } },
             new CopyTarget { Name = "PUC", SubFolders = new[] { "PUC" } },
             // Some Omit kits carry subfolders too (the old .bat copied top-level files only).
             new CopyTarget { Name = "ScratchDustDetect_NY", SubFolders = new[] { "ScratchDustDetect_NY" }, IncludeSubdirs = true },
@@ -338,6 +341,8 @@ namespace KitHelper
             { why = "folder named POCB4.2"; return T("POCB4.2"); }
             if (Has(@"^Crop_params\.json$") || Directory.Exists(Path.Combine(folder, "mainTemplate")))
             { why = "Crop_params.json / mainTemplate folder"; return T("POCB4.2"); }
+            if (Has(@"^inputTemplate.*\.txt$") || Path.GetFileName(folder.TrimEnd('\\')).StartsWith("inputTemplate", StringComparison.OrdinalIgnoreCase))
+            { why = "inputTemplate*.txt"; return T("POCBMobile inputTemplate"); }
             if (Has(@"^ScratchDustDetect.*\.exe$") || Has("^LGD_OMIT_INI")) { why = "ScratchDustDetect / LGD_OMIT_INI files"; return T("ScratchDustDetect_NY"); }
             if (Has(@"^VNTT_Interp.*\.exe$")) { why = "VNTT_Interp exes"; return T("LGDVHCustomApp"); }
             if (Has(@"^LGD_PO_Compensation") || Has("^LGD_COMP_INI")) { why = "LGD_PO_Compensation / LGD_COMP_INI files"; return T("POCB4.1Net"); }

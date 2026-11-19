@@ -22,6 +22,16 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   Tested: elevated instance, real OLE drag from a medium-integrity process — folder and .txt
   both opened. UI Automation can't read an elevated window from medium, so checked by screenshot.
   Still version 1.0.0 (build 20261119131826), deployed to `D:\Log\Script` and `D:\Program\RVS`.
+- **Kit Helper: new copy target `POCBMobile\inputTemplate`** (`CopyTarget.All` + `Kit.Suggest`
+  in `Core.cs`). Kits now ship POCBMobile input templates in a folder like
+  `…\20261105 D997 1st CPP + LGD Crop(Gooil)_TT959\inputTemplateGIBD992_D997` (10 ×
+  `inputTemplateY25GIB*.txt`, YAML-ish `key: value`, no subfolders). TrueTest's folder is spelled
+  `POCBMobile\inputTemplate` (lower-case t). Suggested when the folder holds `inputTemplate*.txt`
+  or its name starts with `inputTemplate`; checked before the other content rules. Also appears in
+  "Kits from old TrueTest…" (whole folder, recursive). Panel 920 → 960 px tall: the extra button
+  pushed the log box below the window edge. Tested: Suggest on the real kit folder (parent folder
+  suggests nothing), `Copier.Run` into a scratch install → 10/10 files, screenshot of the panel.
+  Manual (Claude Doc) updated in both languages.
 
 ## 2026-11-18
 

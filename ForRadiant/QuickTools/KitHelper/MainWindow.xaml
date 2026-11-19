@@ -1,7 +1,7 @@
 <Window x:Class="KitHelper.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Kit Helper" Width="940" Height="920"
+        Title="Kit Helper" Width="940" Height="960"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ShowInTaskbar="False" ResizeMode="NoResize"
         FontFamily="Segoe UI" FontSize="12.5" Foreground="{StaticResource Fg}">

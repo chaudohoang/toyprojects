@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Kit Helper")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+20261119131826")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+20261119134022")]
 [assembly: System.Reflection.AssemblyProductAttribute("Kit Helper")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Kit Helper")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
