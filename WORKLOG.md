@@ -8,6 +8,13 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ## 2026-11-19
 
+- **Kit Helper 1.1.0: exe icon** (`ForRadiant/QuickTools/KitHelper/KitHelper.ico`, `<ApplicationIcon>`):
+  same gradient "K" circle as the floating icon (#7C5CFF→#22B8CF), so Explorer, taskbar,
+  Alt+Tab and the right-click menu entry stop showing the blank default. Sizes 16–128 are
+  stored as classic 32-bit DIBs and only 256 as PNG: System.Drawing.Icon (net48) throws on
+  PNG frames below 256. WPF windows without an `Icon` take it from the exe. First version
+  bump under the "bump on every change" rule; manual intro updated to 1.1.0.
+
 - **CharlieTheSlave → net48** (side session, `E:\Dev\c#\CharlieTheSlave`, not in this repo):
   single 3.6 MB exe instead of 74 MB self-contained net8; backup `CharlieTheSlave.bak-2026-11-19`.
   Untested: UAC admin launch, TrueTest steps/POI, installer flow, clean factory PC.
