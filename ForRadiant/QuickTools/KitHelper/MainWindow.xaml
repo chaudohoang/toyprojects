@@ -133,6 +133,9 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <TextBlock Text="Input .txt" Style="{StaticResource FieldLabel}"/>
                                 <ComboBox x:Name="CboRunInput" Grid.Column="1" IsEditable="True"
@@ -150,7 +153,20 @@
                                 <TextBlock Grid.Row="2" Text="Working dir" Style="{StaticResource FieldLabel}" Margin="0,8,10,0"/>
                                 <ComboBox x:Name="CboWorkDir" Grid.Row="2" Grid.Column="1" IsEditable="True" Margin="0,8,0,0"/>
 
-                                <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,10,0,0">
+                                <!-- POCBMobile only: the values filled into the template (see PocbTemplate) -->
+                                <TextBlock x:Name="LblPocbDb" Grid.Row="3" Text="Database" Style="{StaticResource FieldLabel}" Margin="0,8,10,0"/>
+                                <ComboBox x:Name="CboPocbDb" Grid.Row="3" Grid.Column="1" IsEditable="True" Margin="0,8,0,0"
+                                          SelectionChanged="CboPocbDb_SelectionChanged" LostKeyboardFocus="CboPocbDb_LostFocus"/>
+                                <TextBlock x:Name="LblPocbModel" Grid.Row="4" Text="Model" Style="{StaticResource FieldLabel}" Margin="0,8,10,0"/>
+                                <ComboBox x:Name="CboPocbModel" Grid.Row="4" Grid.Column="1" Margin="0,8,0,0"/>
+                                <TextBlock x:Name="LblPocbPid" Grid.Row="5" Text="Panel ID" Style="{StaticResource FieldLabel}" Margin="0,8,10,0"/>
+                                <StackPanel x:Name="PnlPocbPid" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,8,0,0">
+                                    <TextBox x:Name="TxtPocbPid" Width="160" Text="TEMP"/>
+                                    <TextBlock Style="{StaticResource Hint}" Margin="10,0,0,0" VerticalAlignment="Center"
+                                               Text="Model: highlighted = PUC model (00 in the name)"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal" Margin="0,10,0,0">
                                     <Button x:Name="BtnRun" Content="Run" Style="{StaticResource PrimaryButton}" Margin="0" MinWidth="80" Click="Run_Click"/>
                                     <Button x:Name="BtnStop" Content="Stop" MinWidth="70" IsEnabled="False" Click="Stop_Click"/>
                                 </StackPanel>

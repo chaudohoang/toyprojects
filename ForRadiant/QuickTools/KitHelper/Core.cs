@@ -423,16 +423,18 @@ namespace KitHelper
         }
 
         // Writes the input to <install>\POCBMobile\input.txt and returns how to start
-        // POCBMobile.exe there. A template (inputTemplate*.txt) is filled first, as TrueTest does
-        // (see PocbTemplate); a filled input (inputTest*.txt) is copied as is.
-        public static ProcessStartInfo PreparePocbMobile(string inputFile, string install, LogFn log)
+        // POCBMobile.exe there. A template (inputTemplate*.txt) is filled first with the picked
+        // database / model / panel ID (see PocbTemplate); a filled input (inputTest*.txt) is
+        // copied as is.
+        public static ProcessStartInfo PreparePocbMobile(string inputFile, string install,
+            string database, string model, string pid, LogFn log)
         {
             string dir = Path.Combine(install, "POCBMobile"), exe = Path.Combine(dir, "POCBMobile.exe");
             if (!File.Exists(exe)) throw new FileNotFoundException("POCBMobile.exe not found: " + exe);
             string text = File.ReadAllText(inputFile, Encoding.Default);
             if (PocbTemplate.Tokens(text).Length > 0)
             {
-                text = PocbTemplate.Fill(text, PocbTemplate.Values(inputFile, text, log));
+                text = PocbTemplate.Fill(text, PocbTemplate.Values(inputFile, database, model, pid, log));
                 var left = PocbTemplate.Tokens(text);
                 if (left.Length > 0)
                     throw new InvalidDataException($"Could not fill {string.Join(", ", left)} in {Path.GetFileName(inputFile)}.");
@@ -541,76 +543,78 @@ namespace KitHelper
         }
     }
     // POCBMobile input templates (inputTemplate*.txt) hold placeholders that TrueTest replaces
-    // when it writes POCBMobile\input.txt for a PUC step. The values come from that step in the
-    // sequence (.seqxc), where the template is named in <PUCTempplateArgFile>:
-    //   ExeDebugMode  <ExeDebugMode> false/true -> 0/1     DLLDefFolder  <DLLDefFolder>
-    //   mPUCDLLModel  <PUCDLLModel>                         INIFile       <INIFile>
-    //   nMonth, nDay  today (2 digits)                      PID           panel ID (see PanelId)
-    // Worked out by comparing with TrueTest's POCBMobile\inputTest\*.txt (filled templates).
+    // when it writes POCBMobile\input.txt for a PUC step (worked out by comparing with TrueTest's
+    // filled POCBMobile\inputTest\*.txt):
+    //   DLLDefFolder, mPUCDLLModel, PID   picked in the Run test panel (Database / Model / Panel ID)
+    //   nMonth, nDay                      today (2 digits)
+    //   ExeDebugMode (false/true -> 0/1), INIFile   from the sequence step naming the template in
+    //                                     <PUCTempplateArgFile>, else 0 and LGD_NY_COMP_INI.ini
     public static class PocbTemplate
     {
+        public static readonly string[] Databases = { @"C:\DATABASE", @"D:\DATABASE", @"E:\DATABASE" };
+
         static readonly Regex Token = new Regex(@"\b(ExeDebugMode|nMonth|nDay|DLLDefFolder|mPUCDLLModel|PID|INIFile)\b");
 
         public static string[] Tokens(string text) =>
             Token.Matches(text).Cast<Match>().Select(m => m.Value).Distinct().ToArray();
 
         public static string Fill(string text, IDictionary<string, string> values) =>
-            Token.Replace(text, m => values.TryGetValue(m.Value, out string v) && v != null ? v : m.Value);
+            Token.Replace(text, m => values.TryGetValue(m.Value, out string v) && !string.IsNullOrEmpty(v) ? v : m.Value);
 
-        public static Dictionary<string, string> Values(string template, string text, LogFn log)
+        // Model folders to pick from: <database>\InputIMG\*. The PUC model is the one with "00".
+        public static string[] Models(string database)
+        {
+            try
+            {
+                string dir = Path.Combine(database, "InputIMG");
+                return Directory.Exists(dir)
+                    ? Directory.GetDirectories(dir).Select(Path.GetFileName).OrderBy(n => n, StringComparer.OrdinalIgnoreCase).ToArray()
+                    : new string[0];
+            }
+            catch { return new string[0]; }
+        }
+
+        public static bool IsPucModel(string model) => model.Contains("00");
+
+        // <PUCDLLModel> of the kit's sequence step for this template: the default pick in the list.
+        public static string SequenceModel(string template)
+        {
+            try
+            {
+                string seq = FindSequence(template);
+                return seq == null ? null : StepOf(seq, Path.GetFileName(template), out _)?.Element("PUCDLLModel")?.Value.Trim();
+            }
+            catch { return null; }
+        }
+
+        public static Dictionary<string, string> Values(string template, string database, string model, string pid, LogFn log)
         {
             var v = new Dictionary<string, string>
             {
                 ["ExeDebugMode"] = "0",
                 ["nMonth"] = DateTime.Now.ToString("MM"),
                 ["nDay"] = DateTime.Now.ToString("dd"),
-                ["DLLDefFolder"] = @"C:\DATABASE",
+                ["DLLDefFolder"] = database,
+                ["mPUCDLLModel"] = model,
+                ["PID"] = pid,
                 ["INIFile"] = "LGD_NY_COMP_INI.ini",
             };
             string seq = FindSequence(template);
             bool exact = false;
             var step = seq == null ? null : StepOf(seq, Path.GetFileName(template), out exact);
-            if (step == null)
-                log(seq == null ? "No .seqxc next to the template or above it: using defaults, and the model is unknown."
-                                : Path.GetFileName(seq) + " has no PUC step: using defaults, and the model is unknown.", LogLevel.Warn);
-            else
+            if (step != null)
             {
                 string Get(string tag) => step.Element(tag)?.Value.Trim();
                 string d = Get("ExeDebugMode");
                 if (!string.IsNullOrEmpty(d))
                     v["ExeDebugMode"] = d.Equals("true", StringComparison.OrdinalIgnoreCase) ? "1"
                                       : d.Equals("false", StringComparison.OrdinalIgnoreCase) ? "0" : d;
-                if (!string.IsNullOrEmpty(Get("DLLDefFolder"))) v["DLLDefFolder"] = Get("DLLDefFolder");
                 if (!string.IsNullOrEmpty(Get("INIFile"))) v["INIFile"] = Get("INIFile");
-                if (!string.IsNullOrEmpty(Get("PUCDLLModel"))) v["mPUCDLLModel"] = Get("PUCDLLModel");
-                log("Template values from " + Path.GetFileName(seq)
-                    + (exact ? "" : " (no step names this template: first PUC step used)"), LogLevel.Info);
+                log("ExeDebugMode / INIFile from " + Path.GetFileName(seq)
+                    + (exact ? "" : " (no step names this template: first PUC step used)"), LogLevel.Detail);
             }
-            v.TryGetValue("mPUCDLLModel", out string model);
-            v["PID"] = PanelId(v["DLLDefFolder"], model, text);
-            log("  " + string.Join(", ", v.Select(kv => kv.Key + " = " + kv.Value)), LogLevel.Info);
+            log("Template values: " + string.Join(", ", v.Select(kv => kv.Key + " = " + kv.Value)), LogLevel.Info);
             return v;
-        }
-
-        // The panel whose images the run reads: the folder under <DefFolder>\InputIMG\<model>
-        // that holds the template's first image (newest if several), else TEMP, as in inputTest.
-        static string PanelId(string defFolder, string model, string text)
-        {
-            try
-            {
-                if (model == null) return "TEMP";
-                string modelDir = Path.Combine(defFolder, "InputIMG", model);
-                if (!Directory.Exists(modelDir)) return "TEMP";
-                string firstImage = text.Split('\n').Select(l => l.Trim())
-                    .FirstOrDefault(l => l.IndexOf(@"\PID\", StringComparison.Ordinal) >= 0);
-                if (firstImage == null) return "TEMP";
-                string name = firstImage.Substring(firstImage.LastIndexOf('\\') + 1);
-                var hit = new DirectoryInfo(modelDir).GetDirectories()
-                    .Where(d => File.Exists(Path.Combine(d.FullName, name)))
-                    .OrderByDescending(d => d.LastWriteTime).FirstOrDefault();
-                return hit?.Name ?? "TEMP";
-            }
-            catch { return "TEMP"; }
         }
 
         // The kit's sequence: in the template's folder or up to two folders above

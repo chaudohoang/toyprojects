@@ -62,6 +62,8 @@ namespace KitHelper
                 : InstalledCopy.IsStatic(InstalledCopy.SelfExe) && recent != null ? recent
                 : AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
             ChkCloseTT.IsChecked = settings.Get("CloseTrueTest") != "0";
+            foreach (string db in PocbTemplate.Databases) CboPocbDb.Items.Add(db);
+            CboPocbDb.Text = settings.Get("PocbDatabase") is string savedDb && savedDb != "" ? savedDb : PocbTemplate.Databases[0];
             LoadInstalls();
             SetSource(folder);
             UpdateExplorerButton();
@@ -306,6 +308,14 @@ namespace KitHelper
             TxtRunModeHint.Text = RbPuc.IsChecked == true ? @"PUC runs in the kit folder, outputs to …\Test\"
                 : RbPocb.IsChecked == true ? "Fills it into input.txt"
                 : "Omit runs in the working dir";
+            var pocbVisibility = RbPocb.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+            foreach (UIElement c in new UIElement[] { LblPocbDb, CboPocbDb, LblPocbModel, CboPocbModel, LblPocbPid, PnlPocbPid })
+                c.Visibility = pocbVisibility;
+            if (RbPocb.IsChecked == true)
+            {
+                string p = RunInputPath;
+                LoadPocbModels(File.Exists(p) ? PocbTemplate.SequenceModel(p) : null);
+            }
             if (FixedWorkDir)
             {
                 if (CboWorkDir.IsEnabled) omitWorkDir = CboWorkDir.Text;   // leaving Omit: remember it
@@ -327,6 +337,47 @@ namespace KitHelper
         }
 
         string omitWorkDir;
+
+        // ---------------------------------------------------------------- POCBMobile values
+
+        string PocbDatabase => CboPocbDb.Text.Trim().TrimEnd('\\');
+        string PocbModel => (CboPocbModel.SelectedItem as ComboBoxItem)?.Tag as string;
+
+        // Model list = <database>\InputIMG\*, the PUC models ("00" in the name) highlighted.
+        // Selection: the given model (the kit sequence's), else the one picked before, else none.
+        void LoadPocbModels(string prefer = null)
+        {
+            string keep = prefer ?? PocbModel;
+            CboPocbModel.Items.Clear();
+            foreach (string m in PocbTemplate.Models(PocbDatabase))
+            {
+                bool puc = PocbTemplate.IsPucModel(m);
+                CboPocbModel.Items.Add(new ComboBoxItem
+                {
+                    Content = m,
+                    Tag = m,
+                    FontWeight = puc ? FontWeights.Bold : FontWeights.Normal,
+                    Foreground = Brush(puc ? "Accent" : "Dim"),
+                });
+            }
+            var hit = CboPocbModel.Items.Cast<ComboBoxItem>()
+                .FirstOrDefault(i => string.Equals((string)i.Tag, keep, StringComparison.OrdinalIgnoreCase))
+                ?? CboPocbModel.Items.Cast<ComboBoxItem>()
+                    .FirstOrDefault(i => string.Equals((string)i.Tag, PocbModel, StringComparison.OrdinalIgnoreCase));
+            CboPocbModel.SelectedItem = hit;
+        }
+
+        string lastPocbDb;
+        void PocbDbChanged()
+        {
+            if (PocbDatabase == lastPocbDb) return;
+            lastPocbDb = PocbDatabase;
+            LoadPocbModels();
+        }
+        // SelectionChanged fires before the editable text follows the new item: read it after.
+        void CboPocbDb_SelectionChanged(object sender, SelectionChangedEventArgs e) =>
+            Dispatcher.BeginInvoke(new Action(PocbDbChanged), DispatcherPriority.Background);
+        void CboPocbDb_LostFocus(object sender, KeyboardFocusChangedEventArgs e) => PocbDbChanged();
 
         sealed class IniRow
         {
@@ -410,6 +461,7 @@ namespace KitHelper
         {
             settings.Set("Install", Install);
             if (!FixedWorkDir) settings.Set("RunWorkDir", CboWorkDir.Text);
+            if (RbPocb.IsChecked == true) settings.Set("PocbDatabase", PocbDatabase);
             settings.Set("CloseTrueTest", ChkCloseTT.IsChecked == true ? "1" : "0");
             settings.Save();
         }
@@ -555,6 +607,10 @@ namespace KitHelper
             bool puc = RbPuc.IsChecked == true, pocb = RbPocb.IsChecked == true;
             if (!File.Exists(input)) { Log("Run test: input file not found - " + input, LogLevel.Error); return; }
             if (pocb && Install == null) { Log("Run test: pick a TrueTest install for POCBMobile.", LogLevel.Error); return; }
+            string pocbDb = PocbDatabase, pocbModel = PocbModel, pocbPid = TxtPocbPid.Text.Trim();
+            if (pocb && !Directory.Exists(pocbDb)) { Log("Run test: database folder not found - " + pocbDb, LogLevel.Error); return; }
+            if (pocb && pocbModel == null) { Log("Run test: pick the model (folder in " + Path.Combine(pocbDb, "InputIMG") + ").", LogLevel.Error); return; }
+            if (pocb && pocbPid == "") { Log("Run test: type the panel ID (TEMP by default).", LogLevel.Error); return; }
             if (!pocb && !Directory.Exists(workDir)) { Log("Run test: working dir not found - " + workDir, LogLevel.Error); return; }
             string install = Install;
             SaveSettings();
@@ -563,7 +619,7 @@ namespace KitHelper
             int code = await Busy(() =>
             {
                 Log($"Run test ({(pocb ? "POCBMobile" : puc ? "PUC" : "Omit")}) {Path.GetFileName(input)} in {(pocb ? Path.Combine(install, "POCBMobile") : workDir)}", LogLevel.Info);
-                var psi = pocb ? RunTest.PreparePocbMobile(input, install, Log) : RunTest.Parse(input, workDir, puc, Log);
+                var psi = pocb ? RunTest.PreparePocbMobile(input, install, pocbDb, pocbModel, pocbPid, Log) : RunTest.Parse(input, workDir, puc, Log);
                 Log($"> {psi.FileName} {psi.Arguments}", LogLevel.Info);
                 using (var p = new Process { StartInfo = psi })
                 {

@@ -46,6 +46,15 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   Tested: fill of `inputTemplateY25GIBFWMono2nd.txt` from the D997 kit, real POCBMobile.exe in a
   scratch copy of TT 1.8's folder → exits, code 1 "Select Comp. Mode Error" (no D997 images on this
   PC, TT 1.8 DLL); not run against a real install with images. UI screenshot: mode auto-picked.
+- **Same day, revised at Chau's request:** DLLDefFolder / mPUCDLLModel / PID are now picked in the
+  panel instead of guessed (POCBMobile-only rows `CboPocbDb`, `CboPocbModel`, `TxtPocbPid`):
+  Database = C:\ / D:\ / E:\DATABASE or typed, remembered as `PocbDatabase`; Model = folders of
+  `<db>\InputIMG`, those with "00" in the name (= PUC model) bold + accent, the kit `.seqxc`'s
+  `<PUCDLLModel>` preselected if present; Panel ID = TEMP, editable. The `.seqxc` now only gives
+  ExeDebugMode / INIFile. The auto PID (panel folder holding the first image) is gone. Tested:
+  model pick via UI Automation (221 models in C:\DATABASE\InputIMG here), fill with
+  D997-2CB-GIB00_TLSM / TEMP, real POCBMobile.exe in a scratch copy → still "1_Select Comp. Mode
+  Error" with images present, so it's POCBMobile's DLL/data on this PC (TT 1.8), not the fill.
 
 ## 2026-11-18
 
