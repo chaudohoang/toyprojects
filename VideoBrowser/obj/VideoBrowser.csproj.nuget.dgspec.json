@@ -1,0 +1,70 @@
+{
+  "format": 1,
+  "restore": {
+    "E:\\Github\\toyprojects\\VideoBrowser\\VideoBrowser.csproj": {}
+  },
+  "projects": {
+    "E:\\Github\\toyprojects\\VideoBrowser\\VideoBrowser.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "E:\\Github\\toyprojects\\VideoBrowser\\VideoBrowser.csproj",
+        "projectName": "VideoBrowser",
+        "projectPath": "E:\\Github\\toyprojects\\VideoBrowser\\VideoBrowser.csproj",
+        "packagesPath": "C:\\Users\\Chau\\.nuget\\packages\\",
+        "outputPath": "E:\\Github\\toyprojects\\VideoBrowser\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\Chau\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "framework": "net48",
+            "targetAlias": "net48",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "11.0.100"
+      },
+      "frameworks": {
+        "net48": {
+          "framework": "net48",
+          "targetAlias": "net48",
+          "dependencies": {
+            "LibVLCSharp.WinForms": {
+              "target": "Package",
+              "version": "[3.9.0, )"
+            },
+            "VideoLAN.LibVLC.Windows": {
+              "target": "Package",
+              "version": "[3.0.21, )"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\11.0.100\\RuntimeIdentifierGraph.json"
+        }
+      },
+      "runtimes": {
+        "win-x64": {
+          "#import": []
+        }
+      }
+    }
+  }
+}

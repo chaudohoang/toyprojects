@@ -179,6 +179,20 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     visibility, dialogs) was not clicked through.
   - The manual intro still says 1.1.0; it isn't in this repo.
 
+- **New tool `VideoBrowser`** (WinForms net48 x64): folder → video-only playlist on the right,
+  play, Del → Recycle Bin / Shift+Del → permanent. Player is LibVLCSharp 3.9.0 +
+  VideoLAN.LibVLC.Windows 3.0.21 because this PC has neither `wmp.dll` (WMP legacy feature absent,
+  so the AxHost/WPF MediaElement route is dead) nor VLC/mpv/ffmpeg; libvlc adds ~100 MB to `bin`
+  (x86 copy disabled via `VlcWindowsX86Enabled=false`).
+  Traps hit: (1) VLC `EndReached` → BeginInvoke runs inside a MessageBox's modal loop, so
+  auto-next changed the selection under the delete confirmation — now deferred while `_inDialog`.
+  (2) Shrinking a virtual ListView's `VirtualListSize` asks `RetrieveVirtualItem` for a stale
+  index → ArgumentOutOfRange; guarded with a blank item. (3) `Process.MainWindowHandle` was 0
+  right after start; enumerate windows when automating it.
+  Tested by SendKeys + screenshots: .mkv with Vietnamese name, .mp4, .webm play; natural sort;
+  .txt excluded; deleting the playing file releases it and recycles it. Not tested: real .ts
+  files, recursive mode, fullscreen, huge folders.
+
 ## 2026-11-19
 
 - **Kit Helper 1.1.0: exe icon** (`ForRadiant/QuickTools/KitHelper/KitHelper.ico`, `<ApplicationIcon>`):

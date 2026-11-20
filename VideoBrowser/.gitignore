@@ -1,0 +1,2 @@
+# Per-user data the app writes next to its exe (build output itself IS committed on purpose)
+settings.txt
