@@ -487,7 +487,9 @@ namespace KitHelper
             if (!AskCloseTrueTest($"Close it before copying to\n{install}?", "Copy to " + target.Name, out string restartPath)) return;
 
             Log($"Copy {source} → {install} [{string.Join(", ", target.SubFolders)}]", LogLevel.Info);
-            var r = await Busy(() => Copier.Run(source, install, target, ownExe, Log));
+            var backup = new Backup(target.Name, source, install, null);
+            var r = await Busy(() => Copier.Run(source, install, target, ownExe, Log, backup));
+            backup.Report(Log);
             LogCopyResult(r);
             OfferRestart(restartPath);
             LoadInstalls();
@@ -506,7 +508,9 @@ namespace KitHelper
 
             var into = new CopyTarget { Name = target.Name, SubFolders = new[] { model }, IncludeSubdirs = false };
             Log($"Copy {source} → {Path.Combine(inputImg, model)}", LogLevel.Info);
-            var r = await Busy(() => Copier.Run(source, inputImg, into, ownExe, Log));
+            var backup = new Backup(target.Name + " " + model, source, null, db);
+            var r = await Busy(() => Copier.Run(source, inputImg, into, ownExe, Log, backup, Path.Combine(Package.DatabaseDir, "InputIMG")));
+            backup.Report(Log);
             LogCopyResult(r);
         }
 
@@ -526,15 +530,15 @@ namespace KitHelper
 
             int n = Package.Plan(source, install, db).Count;
             string where = $"TrueTest\\  →  {install}" + (db != null ? $"\nDATABASE\\  →  {db}" : "");
-            if (Modal(() => MessageBox.Show(this, $"Copy {n} file(s) from the package:\n\n{where}\n\nReplaced files are backed up to\n{source}\\Backup_<date>_<time>",
+            if (Modal(() => MessageBox.Show(this, $"Copy {n} file(s) from the package:\n\n{where}\n\nReplaced files are backed up to\n{Backup.BaseDir}",
                     "Copy package", MessageBoxButton.OKCancel, MessageBoxImage.Question)) != MessageBoxResult.OK) return;
             if (!AskCloseTrueTest($"Close it before copying to\n{install}?", "Copy package", out string restartPath)) return;
 
             Log($"Copy package {source} → {install}" + (db != null ? $" + {db}" : ""), LogLevel.Info);
-            string backup = null;
-            var r = await Busy(() => Package.Run(source, install, db, Log, out backup));
+            var backup = new Backup("Package " + Path.GetFileName(source), source, install, db);
+            var r = await Busy(() => Package.Run(source, install, db, Log, backup));
+            backup.Report(Log);
             LogCopyResult(r);
-            if (backup != null) Log("To undo: copy the folders in " + backup + " back over the same places.", LogLevel.Info);
             OfferRestart(restartPath);
             LoadInstalls();
         }
@@ -599,7 +603,9 @@ namespace KitHelper
 
             Log($"Copy kits {from} → {to} [{string.Join(", ", targets.SelectMany(t => t.SubFolders))}]"
                 + (skipEdt && targets.Any(t => t.Name == "LGDVHCustomApp") ? $", skipping {KitMigration.EdtMobile}" : ""), LogLevel.Info);
-            var r = await Busy(() => KitMigration.Run(from, to, targets, skipEdt, Log));
+            var backup = new Backup("Kits from " + Path.GetFileName(from), from, to, null);
+            var r = await Busy(() => KitMigration.Run(from, to, targets, skipEdt, Log, backup));
+            backup.Report(Log);
             LogCopyResult(r);
             OfferRestart(restartPath);
             LoadInstalls();
@@ -791,6 +797,13 @@ namespace KitHelper
         }
 
         void Explorer_Click(object sender, RoutedEventArgs e) => ToggleExplorerMenu();
+
+        void Backups_Click(object sender, RoutedEventArgs e)
+        {
+            string dir = Backup.BaseDir;
+            if (!Directory.Exists(dir)) { Log("No backups yet: " + dir + " is created by the first copy that overwrites a file.", LogLevel.Info); return; }
+            Process.Start("explorer.exe", "\"" + dir + "\"");
+        }
 
         // Every start: put "Open in Kit Helper" in place, or point it back at the installed copy.
         // Running the exe once is therefore all a PC needs. A Remove is deliberately NOT

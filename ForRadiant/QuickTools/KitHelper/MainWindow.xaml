@@ -75,11 +75,13 @@
                             <TextBlock Text="Copy kit folder to TrueTest" Style="{StaticResource SectionTitle}"/>
                             <!-- Combined package (TrueTest\ + DATABASE\ inside): shown only for one. -->
                             <Button x:Name="BtnPackage" Style="{StaticResource ActionButton}" Visibility="Collapsed" Click="Package_Click"
-                                    Content="Copy package → install + database  (backs up what it replaces)"/>
+                                    Content="Copy package → install + database"/>
                             <StackPanel x:Name="CopyButtons"/>
                             <TextBlock x:Name="TxtSuggest" Foreground="{StaticResource Accent}" Margin="0,0,0,6"/>
                             <CheckBox x:Name="ChkCloseTT" Content="Close TrueTest before copying (offer restart after)" Margin="0,2,0,4"/>
                             <TextBlock Style="{StaticResource Hint}" Text="POCB skips *.tif, *.csv and LGD_VNTT.ini. Other targets copy every file in the folder."/>
+                            <TextBlock Style="{StaticResource Hint}" Text="Every copy first saves the files it overwrites (one folder per copy)."/>
+                            <Button x:Name="BtnBackups" Content="Open backups folder" Style="{StaticResource ActionButton}" Click="Backups_Click" Margin="0,4,0,0"/>
                         </StackPanel>
                     </Border>
                     <Border Style="{StaticResource Section}">

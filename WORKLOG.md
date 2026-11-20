@@ -8,6 +8,26 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ## 2026-11-20
 
+- **Kit Helper 1.3.0: every copy is backed up; one POCBMobile target.**
+  - `Backup` (Core.cs): every copy action (single target, Database model, Copy package, Kits from
+    old TrueTest) first saves each file it overwrites to
+    `D:\Program\RVS\Kit Helper Backups\<yyyyMMdd_HHmmss> <action>\`, laid out as `TrueTest\...`
+    and `DATABASE\...` plus a `backup.txt` saying what each part maps back to. If a file's backup
+    fails, it is not overwritten. No folder is created when nothing was overwritten. Backups sit
+    beside the installed copy, not in the kit: a later POCB4.2/ScratchDustDetect_NY copy (which
+    includes subfolders) would otherwise carry an old backup into TrueTest. This replaces 1.2.0's
+    `<package>\Backup_*`. "Open backups folder" button added. Not covered: the Run test POCBMobile
+    prep (copying model files into POCBMobile), which is not a copy action.
+  - The `POCBMobile inputTemplate` and `POCBMobile inputTest` targets are merged into
+    **POCBMobile** (`CopyTarget.Route`). In a flat kit, inputTest*.txt go to `inputTest`, everything
+    else to `inputTemplate`; a kit named `inputTest…` goes entirely to `inputTest`; `inputTemplate\`
+    / `inputTest\` subfolders map to themselves. A half the kit doesn't have is skipped (logged,
+    folder not created). Migration logs a missing install folder as Info, not Warn.
+  - The X402x package no longer ships Install.bat; its README points to Kit Helper only.
+  - Tested in a sandbox (27 checks, Windows PowerShell 5.1 loading the built exe, `Backup.BaseDir`
+    redirected): all POCBMobile kit shapes, backups per action, no-overwrite case, and backup
+    failure blocking the overwrite. The UI itself was not clicked through.
+
 - **Kit Helper 1.2.0: combined packages** (`Core.cs` `Package`, `MainWindow` `Package_Click`).
   A folder with `TrueTest\` and/or `DATABASE\` inside is a package. "Copy package" copies
   `TrueTest\<sub>\...` into the picked install and `DATABASE\...` into the database picked in
