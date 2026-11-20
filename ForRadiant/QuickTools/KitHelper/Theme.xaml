@@ -218,8 +218,13 @@
                     <StackPanel Orientation="Horizontal" Background="Transparent">
                         <Border x:Name="Box" Width="16" Height="16" CornerRadius="4" VerticalAlignment="Center"
                                 Background="{StaticResource Bg}" BorderBrush="{StaticResource Line}" BorderThickness="1">
-                            <Path x:Name="Mark" Data="M2.5,7 L5.5,10 L11.5,3.5" Stroke="White" StrokeThickness="2"
-                                  Visibility="Collapsed" Margin="0.5"/>
+                            <Grid>
+                                <Path x:Name="Mark" Data="M2.5,7 L5.5,10 L11.5,3.5" Stroke="White" StrokeThickness="2"
+                                      Visibility="Collapsed" Margin="0.5"/>
+                                <!-- Mixed (IsChecked = null): some of a group ticked. -->
+                                <Rectangle x:Name="Partial" Width="8" Height="2" RadiusX="1" RadiusY="1" Fill="{StaticResource Accent2}"
+                                           Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
                         </Border>
                         <ContentPresenter Margin="8,0,0,0" VerticalAlignment="Center"/>
                     </StackPanel>
@@ -227,6 +232,10 @@
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="Mark" Property="Visibility" Value="Visible"/>
                             <Setter TargetName="Box" Property="Background" Value="{StaticResource Accent2}"/>
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{StaticResource Accent2}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="{x:Null}">
+                            <Setter TargetName="Partial" Property="Visibility" Value="Visible"/>
                             <Setter TargetName="Box" Property="BorderBrush" Value="{StaticResource Accent2}"/>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">

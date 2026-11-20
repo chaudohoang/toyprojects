@@ -21,6 +21,14 @@ namespace KitHelper
         readonly string backupRoot;
         readonly string text;
         readonly bool preview;
+        readonly Copier.Result result;
+
+        // Confirmation only: one checkbox per file that would be written (ticked = copy it), and
+        // one per folder that ticks / unticks its files (null = some).
+        readonly Dictionary<CheckBox, (CopyItem item, TextBlock name)> fileChecks = new Dictionary<CheckBox, (CopyItem, TextBlock)>();
+        readonly Dictionary<CheckBox, List<CheckBox>> groupChecks = new Dictionary<CheckBox, List<CheckBox>>();
+        readonly Dictionary<CheckBox, CheckBox> groupOf = new Dictionary<CheckBox, CheckBox>();
+        bool syncing;
 
         // where: one line saying what was copied where. backupRoot: null when nothing was backed up.
         public CopyResultWindow(string title, string where, Copier.Result r, string backupRoot, bool preview = false)
@@ -28,9 +36,10 @@ namespace KitHelper
             InitializeComponent();
             this.backupRoot = backupRoot;
             this.preview = preview;
+            result = r;
             KeyDown += (s, e) => { if (e.Key == Key.Escape) Close(); };
 
-            TxtTitle.Text = preview ? "Confirmation of " + title : title;
+            TxtTitle.Text = (preview ? "Confirmation of " : "Result of ") + title;
             TxtWhere.Text = where;
 
             int nNew = r.Items.Count(i => i.Status == CopyStatus.New);
@@ -41,16 +50,11 @@ namespace KitHelper
                 TxtSummary.Inlines.Add(new Run(s) { Foreground = B(brush), FontWeight = bold ? FontWeights.SemiBold : FontWeights.Normal });
             if (preview)
             {
-                Run($"Copy {nNew + nRep} file(s)?  ", "Fg", true);
-                Run($"{nRep} will be replaced", nRep > 0 ? "Accent" : "Dim");
-                Run("  ·  ", "Dim");
-                Run($"{nNew} new", nNew > 0 ? "Ok" : "Dim");
-                if (nSkip > 0) { Run("  ·  ", "Dim"); Run($"{nSkip} not copied", "Dim"); }
-                TxtBackup.Text = nRep > 0 ? "Files that get replaced are backed up first to " + Backup.BaseDir
-                                          : "Nothing will be overwritten.";
+                // Counts: UpdatePreviewSummary, once the checkboxes exist (and on every tick).
                 BtnOpenBackup.Visibility = Visibility.Collapsed;
                 BtnCopyText.Visibility = Visibility.Collapsed;     // a confirmation, not a report
                 BtnCancel.Visibility = Visibility.Visible;
+                BtnSelectAll.Visibility = BtnSelectNone.Visibility = Visibility.Visible;
                 BtnPrimary.Content = "OK";
             }
             else
@@ -88,6 +92,16 @@ namespace KitHelper
                 var countText = new TextBlock { Text = counts, Foreground = B("Dim"), VerticalAlignment = VerticalAlignment.Bottom };
                 DockPanel.SetDock(countText, Dock.Right);
                 header.Children.Add(countText);
+                // Confirmation: a folder checkbox when the folder has files that would be written.
+                CheckBox groupBox = null;
+                if (preview && items.Any(Checkable))
+                {
+                    groupBox = new CheckBox { IsChecked = true, Margin = new Thickness(0, 0, 6, 0), VerticalAlignment = VerticalAlignment.Center,
+                                              ToolTip = "Tick / untick every file in this folder" };
+                    groupBox.Click += (s, e) => SetGroup((CheckBox)s);
+                    groupChecks[groupBox] = new List<CheckBox>();
+                    header.Children.Add(groupBox);
+                }
                 header.Children.Add(new TextBlock
                 {
                     Text = g.Key == "" ? "(top level)" : g.Key,
@@ -103,20 +117,104 @@ namespace KitHelper
                 foreach (var it in items)
                 {
                     var row = new Grid { Margin = new Thickness(0, 1, 0, 1) };
+                    // Confirmation: a checkbox column first (empty for rows that won't be written).
+                    row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(preview ? 24 : 0) });
                     row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(92) });
                     row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
                     row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
                     var tag = new TextBlock { Text = Label(it.Status), Foreground = B(BrushOf(it.Status)), FontWeight = FontWeights.SemiBold };
                     var name = new TextBlock { Text = it.Name, Margin = new Thickness(0, 0, 12, 0), Foreground = B(it.Status == CopyStatus.Skipped ? "Dim" : "Fg") };
                     var detail = new TextBlock { Text = it.Detail ?? "", Foreground = B(it.Status == CopyStatus.Failed ? "Err" : "Dim"), TextWrapping = TextWrapping.Wrap };
-                    Grid.SetColumn(name, 1);
-                    Grid.SetColumn(detail, 2);
+                    Grid.SetColumn(tag, 1);
+                    Grid.SetColumn(name, 2);
+                    Grid.SetColumn(detail, 3);
+                    if (groupBox != null && Checkable(it))
+                    {
+                        var box = new CheckBox { IsChecked = true, VerticalAlignment = VerticalAlignment.Center,
+                                                 ToolTip = "Untick to leave this file as it is" };
+                        box.Checked += File_Toggled;
+                        box.Unchecked += File_Toggled;
+                        fileChecks[box] = (it, name);
+                        groupChecks[groupBox].Add(box);
+                        groupOf[box] = groupBox;
+                        row.Children.Add(box);
+                    }
                     row.Children.Add(tag); row.Children.Add(name); row.Children.Add(detail);
                     Groups.Children.Add(row);
                     sb.AppendLine($"  {Label(it.Status),-10} {it.Name}{(string.IsNullOrEmpty(it.Detail) ? "" : "  - " + it.Detail)}");
                 }
             }
             text = sb.ToString();
+            if (preview) UpdatePreviewSummary();
+        }
+
+        // ---- confirmation: tick / untick
+
+        static bool Checkable(CopyItem i) => (i.Status == CopyStatus.New || i.Status == CopyStatus.Replaced) && i.To != null;
+
+        // Destination files to leave alone (pass to Copier.Excluding).
+        public ISet<string> Excluded =>
+            new HashSet<string>(fileChecks.Where(kv => kv.Key.IsChecked != true).Select(kv => kv.Value.item.To), StringComparer.OrdinalIgnoreCase);
+
+        void File_Toggled(object sender, RoutedEventArgs e)
+        {
+            var box = (CheckBox)sender;
+            fileChecks[box].name.Foreground = B(box.IsChecked == true ? "Fg" : "Dim");
+            if (syncing) return;
+            SyncGroup(groupOf[box]);
+            UpdatePreviewSummary();
+        }
+
+        // Folder checkbox clicked: all its files follow (a mixed folder becomes all ticked).
+        void SetGroup(CheckBox group)
+        {
+            bool on = group.IsChecked == true;
+            syncing = true;
+            foreach (var f in groupChecks[group]) f.IsChecked = on;
+            syncing = false;
+            SyncGroup(group);
+            UpdatePreviewSummary();
+        }
+
+        void SyncGroup(CheckBox group)
+        {
+            var files = groupChecks[group];
+            int on = files.Count(f => f.IsChecked == true);
+            group.IsChecked = on == files.Count ? true : on == 0 ? (bool?)false : null;
+        }
+
+        void SelectAll_Click(object sender, RoutedEventArgs e) => SetAll(true);
+        void SelectNone_Click(object sender, RoutedEventArgs e) => SetAll(false);
+
+        void SetAll(bool on)
+        {
+            syncing = true;
+            foreach (var box in fileChecks.Keys) box.IsChecked = on;
+            syncing = false;
+            foreach (var g in groupChecks.Keys) SyncGroup(g);
+            UpdatePreviewSummary();
+        }
+
+        // "Copy 80 file(s)?  66 will be replaced · 14 new · 13 not copied · 5 unticked"
+        void UpdatePreviewSummary()
+        {
+            var ticked = fileChecks.Where(kv => kv.Key.IsChecked == true).Select(kv => kv.Value.item).ToList();
+            int nRep = ticked.Count(i => i.Status == CopyStatus.Replaced);
+            int nNew = ticked.Count(i => i.Status == CopyStatus.New);
+            int nOff = fileChecks.Count - ticked.Count;
+            int nSkip = result.Items.Count(i => i.Status == CopyStatus.Skipped);
+            TxtSummary.Inlines.Clear();
+            void Run(string s, string brush, bool bold = false) =>
+                TxtSummary.Inlines.Add(new Run(s) { Foreground = B(brush), FontWeight = bold ? FontWeights.SemiBold : FontWeights.Normal });
+            Run($"Copy {nNew + nRep} file(s)?  ", "Fg", true);
+            Run($"{nRep} will be replaced", nRep > 0 ? "Accent" : "Dim");
+            Run("  ·  ", "Dim");
+            Run($"{nNew} new", nNew > 0 ? "Ok" : "Dim");
+            if (nSkip > 0) { Run("  ·  ", "Dim"); Run($"{nSkip} not copied", "Dim"); }
+            if (nOff > 0) { Run("  ·  ", "Dim"); Run($"{nOff} unticked", "Warn", true); }
+            TxtBackup.Text = nRep > 0 ? "Files that get replaced are backed up first to " + Backup.BaseDir
+                                      : "Nothing will be overwritten.";
+            BtnPrimary.IsEnabled = nNew + nRep > 0;
         }
 
         string Label(CopyStatus s) =>

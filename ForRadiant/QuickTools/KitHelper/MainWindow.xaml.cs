@@ -592,11 +592,12 @@ namespace KitHelper
             var into = new CopyTarget { Name = target.Name, SubFolders = new[] { model }, IncludeSubdirs = false };
             // Confirm with the list of what will happen: the same copy, as a dry run.
             var preview = Copier.Run(source, inputImg, into, ownExe, (s, l) => { }, null, Path.Combine(Package.DatabaseDir, "InputIMG"), dryRun: true);
-            if (!ConfirmCopy("Copy to Database model " + model, $"{source}\n→ {Path.Combine(inputImg, model)}", preview)) return;
+            if (!ConfirmCopy("Copy to Database model " + model, $"{source}\n→ {Path.Combine(inputImg, model)}", preview, out var excluded)) return;
 
             Log($"Copy {source} → {Path.Combine(inputImg, model)}", LogLevel.Info);
             var backup = new Backup(target.Name + " " + model, source, null, db);
-            var r = await Busy(() => Copier.Run(source, inputImg, into, ownExe, Log, backup, Path.Combine(Package.DatabaseDir, "InputIMG")));
+            var r = await Busy(() => Copier.Excluding(excluded, () =>
+                Copier.Run(source, inputImg, into, ownExe, Log, backup, Path.Combine(Package.DatabaseDir, "InputIMG"))));
             backup.Report(Log);
             LogCopyResult(r);
             ShowCopyResult("Copy to Database model " + model, $"{source}\n→ {Path.Combine(inputImg, model)}", r, backup);
@@ -630,12 +631,14 @@ namespace KitHelper
             if (Modal(() => confirm.ShowDialog()) != true) return;
             string vigValue = confirm.VignettingValue;
             bool vigDx = confirm.VignettingIncludeDx;
+            var excluded = confirm.Excluded;               // files unticked in the confirmation
             string restartPath = null;
             if (install != null && !AskCloseTrueTest(install, "Copy package", out restartPath)) return;
 
             Log($"Copy package {source} → {install}" + (db != null ? $" + {db}" : ""), LogLevel.Info);
             var backup = new Backup("Package " + Path.GetFileName(source), source, install, db);
-            var r = await Busy(() =>
+            if (excluded.Count > 0) Log($"{excluded.Count} file(s) unticked, left as they are.", LogLevel.Info);
+            var r = await Busy(() => Copier.Excluding(excluded, () =>
             {
                 var res = Package.Run(source, install, db, ownExe, Log, backup);
                 if (vigValue != null)
@@ -644,7 +647,7 @@ namespace KitHelper
                     Vignetting.ApplyToCopied(res, vigValue, vigDx, Log);
                 }
                 return res;
-            });
+            }));
             backup.Report(Log);
             LogCopyResult(r);
             ShowCopyResult("Copy package " + Path.GetFileName(source), where, r, backup);
@@ -653,10 +656,13 @@ namespace KitHelper
         }
 
         // The confirmation before a copy: CopyResultWindow in preview mode. True = Copy.
-        bool ConfirmCopy(string title, string where, Copier.Result preview)
+        // excluded: the destination files unticked there (for Copier.Excluding).
+        bool ConfirmCopy(string title, string where, Copier.Result preview, out ISet<string> excluded)
         {
             var w = new CopyResultWindow(title, where, preview, null, preview: true) { Owner = this };
-            return Modal(() => w.ShowDialog()) == true;
+            bool ok = Modal(() => w.ShowDialog()) == true;
+            excluded = w.Excluded;
+            return ok;
         }
 
         // If "Close TrueTest before copying" is ticked and TrueTest runs, ask to close it.

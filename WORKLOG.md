@@ -8,6 +8,24 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ## 2026-11-20
 
+- **Kit Helper 1.8.0: untick files in the confirmation; report titled "Result of …".**
+  - Confirmation (Copy package, Database model): a checkbox per file that would be written,
+    ticked by default; a folder checkbox ticks / unticks its group and shows a "–" when only some
+    are ticked (new mixed-state look in Theme.xaml's CheckBox). Select all / Select none in the
+    footer. Live counts ("… · 3 unticked"); OK is disabled when nothing is ticked.
+  - Unticked = destination paths (`CopyResultWindow.Excluded`), passed with
+    `Copier.Excluding(set, () => copy)`. That is a [ThreadStatic] set read by `CopyOne`, the one
+    place every copy path writes through, so no signature changed. The report lists them as Not
+    copied, "unticked in the confirmation, left as it was". Keyed by destination, so one INI can be
+    unticked for POCB4.1Net only. Vignetting only touches written files, so unticked INIs keep their
+    value.
+  - Tested on the D997 kit in a sandbox: 11 unticked (one INI's POCB4.1Net copy + all of
+    LGDVHCustomApp) were left alone; that INI's POCB4.1 and Database copies were written; 57 = 68 − 11
+    copied; the set is cleared after the copy. Window: 68 checkboxes, mixed folder state, Excluded=3,
+    "3 unticked", Select none disables OK.
+  - Harness gotchas: PowerShell variables ignore case (`$W` type vs `$w` window collided), and a
+    HashSet passed to `MethodInfo.Invoke` must be `.psobject.BaseObject`.
+
 - **Kit Helper 1.7.0: InputIMG folders always also go to the Database; vignetting option in the
   package confirmation.**
   - `Package.Scan`: an `InputIMG\<model>` folder whose own target is not the Database (D997's

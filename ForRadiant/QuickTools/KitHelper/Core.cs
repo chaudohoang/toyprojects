@@ -226,6 +226,20 @@ namespace KitHelper
 
     public static class Copier
     {
+        // Destination files unticked in the confirmation. Set around one copy with Excluding(), which
+        // runs on a single worker thread; CopyOne, the one place every copy path writes through,
+        // skips them. Keyed by destination path, so one source copied to three places can be
+        // unticked in one place only.
+        [ThreadStatic] static ISet<string> excluded;
+
+        public static T Excluding<T>(ISet<string> files, Func<T> copy)
+        {
+            var previous = excluded;
+            excluded = files != null && files.Count > 0 ? files : null;
+            try { return copy(); }
+            finally { excluded = previous; }
+        }
+
         public sealed class Result
         {
             public int Copied, Failed, Skipped;
@@ -375,6 +389,13 @@ namespace KitHelper
             // Where it lands, as the summary groups it: the backup layout when there is one.
             string shown = backupRel ?? to;
             bool existed = File.Exists(to);
+            if (excluded != null && excluded.Contains(to))
+            {
+                log($"  skipped {label} (unticked)", LogLevel.Detail);
+                r.Skipped++;
+                r.Add(shown, CopyStatus.Skipped, "unticked in the confirmation, left as it was", from, to);
+                return;
+            }
             if (dryRun) { r.Add(shown, existed ? CopyStatus.Replaced : CopyStatus.New, null, from, to); return; }
             if (backup != null && !backup.Save(to, backupRel, log))
             {
