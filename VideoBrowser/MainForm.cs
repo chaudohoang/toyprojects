@@ -109,8 +109,22 @@ namespace VideoBrowser
             _video.Dock = DockStyle.Fill;
             _video.BackColor = Color.Black;
             _video.MediaPlayer = _mp;
-            _video.DoubleClick += (s, e) => ToggleFullscreen();
-            _video.MouseClick += (s, e) => { if (e.Button == MouseButtons.Left) _list.Focus(); };
+            // Click = play/pause (like MPC). The first click of a double-click already toggled,
+            // so the double-click toggles back before switching fullscreen — net: no pause change.
+            bool clickToggled = false;
+            _video.MouseClick += (s, e) =>
+            {
+                if (e.Button != MouseButtons.Left) return;
+                var st = _mp.State;
+                clickToggled = st == VLCState.Playing || st == VLCState.Paused;
+                if (clickToggled) _mp.Pause();
+                _list.Focus();
+            };
+            _video.DoubleClick += (s, e) =>
+            {
+                if (clickToggled) { _mp.Pause(); clickToggled = false; }
+                ToggleFullscreen();
+            };
 
             _overlay.Dock = DockStyle.Fill;
             _overlay.TextAlign = ContentAlignment.MiddleCenter;

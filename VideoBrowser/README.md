@@ -28,7 +28,7 @@ on the right, double-click to play, Del to send the file to the Recycle Bin.
 | Key | Action |
 |---|---|
 | Enter / double-click | Play selected |
-| Space | Play / pause |
+| Space / click on video | Play / pause |
 | S | Stop |
 | N / P | Next / previous |
 | ← / → | Seek 5 s (Shift: 30 s) |

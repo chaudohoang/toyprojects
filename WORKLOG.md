@@ -17,6 +17,10 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   surface is a native child HWND and its MouseMove events can't be relied on. Trap: on leaving
   fullscreen, `_split.BringToFront()` is needed to restore dock order (Fill must have the lowest
   z-index), otherwise the bottom panel overlaps the video.
+- **VideoBrowser: click on video = play/pause** (windowed and fullscreen). Toggles immediately (no
+  wait for the double-click timeout, which would add ~500 ms lag); the double-click handler toggles
+  back before switching fullscreen, so a double-click leaves pause state unchanged (brief hitch, same
+  as MPC). Only acts in Playing/Paused, so a click after Stop/End doesn't restart the file.
 - **VideoBrowser icon**: `VideoBrowser\app.ico` (blue tile, play triangle + playlist lines; ≤24 px
   shows only the triangle), generated with System.Drawing from a throwaway PowerShell script, PNG
   entries 16–256. Wired via `<ApplicationIcon>` + `Icon.ExtractAssociatedIcon(Application.ExecutablePath)`,
