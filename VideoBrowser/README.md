@@ -15,7 +15,8 @@ on the right, double-click to play, Del to send the file to the Recycle Bin.
 - Optional *Include subfolders*; natural sort (`clip 2` before `clip 10`); filter box (Ctrl+F,
   space-separated terms all must match).
 - Playlist shows `[001]` index, name, size; the playing file is highlighted.
-- Auto-play next video (option). Fullscreen with F / F11 / double-click, Esc to leave.
+- Auto-play next video (option). Fullscreen with F / F11 / double-click, Esc to leave; in fullscreen the
+  control bar slides over the bottom of the video when the mouse moves and hides after 2.5 s idle.
 - **Delete**: Del → Recycle Bin (confirmation can be switched off in Options),
   Shift+Del → permanent (always confirms). Multi-select works. If the playing file is
   deleted, playback stops first (to release the file), then continues with the next one.

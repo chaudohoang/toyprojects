@@ -1492,21 +1492,19 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\Github\\toyprojects\\VideoBrowser\\VideoBrowser.csproj",
+      "projectUniqueName": "D:\\Github\\toyprojects\\VideoBrowser\\VideoBrowser.csproj",
       "projectName": "VideoBrowser",
-      "projectPath": "E:\\Github\\toyprojects\\VideoBrowser\\VideoBrowser.csproj",
+      "projectPath": "D:\\Github\\toyprojects\\VideoBrowser\\VideoBrowser.csproj",
       "packagesPath": "C:\\Users\\Chau\\.nuget\\packages\\",
-      "outputPath": "E:\\Github\\toyprojects\\VideoBrowser\\obj\\",
+      "outputPath": "D:\\Github\\toyprojects\\VideoBrowser\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\Chau\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Users\\Chau\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net48"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -1526,7 +1524,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "11.0.100"
+      "SdkAnalysisLevel": "10.0.400"
     },
     "frameworks": {
       "net48": {
@@ -1542,7 +1540,7 @@
             "version": "[3.0.21, )"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\11.0.100\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.404\\RuntimeIdentifierGraph.json"
       }
     },
     "runtimes": {

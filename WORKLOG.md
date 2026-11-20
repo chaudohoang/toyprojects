@@ -8,6 +8,14 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ## 2026-11-20
 
+- **VideoBrowser: control bar in fullscreen.** Fullscreen used to hide `_controls` with no way back.
+  Now it's undocked (`Dock=None`, anchored bottom, `BringToFront`) so it floats over the video
+  without resizing it; shown on mouse movement, hidden after 2.5 s idle unless hovered/dragging.
+  Mouse movement is detected by polling `Cursor.Position` in the existing 250 ms timer, because the
+  LibVLC video surface is a native child HWND and its MouseMove events can't be relied on. Trap: on
+  leaving fullscreen, `_split.BringToFront()` is needed to restore dock order (Fill must have the
+  lowest z-index), otherwise the bottom panel overlaps the video.
+
 - **`E:\Dev` moved into `toyprojects\DevWorkspace`**, its own `.git` dropped (history lost, by choice).
   Compared first with `\\victus16\E\Dev`: 0 files newer there, 1 file only there (a runtime DLL in
   YdkeDeckBuilder `bin`), 541 newer here — so this PC's copy was the one kept. Source only is committed
