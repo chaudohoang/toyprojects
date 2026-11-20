@@ -622,6 +622,16 @@ namespace KitHelper
             return string.Join(", ", parts);
         }
 
+        // What Run would do, for the confirmation (CopyResultWindow preview): each file as
+        // Replaced (exists now, will be backed up) or New. Nothing is touched.
+        public static Copier.Result Preview(string folder, string install, string database)
+        {
+            var r = new Copier.Result();
+            foreach (var it in Plan(folder, install, database))
+                r.Add(it.Rel, File.Exists(it.To) ? CopyStatus.Replaced : CopyStatus.New);
+            return r;
+        }
+
         public static Copier.Result Run(string folder, string install, string database, LogFn log, Backup backup)
         {
             var r = new Copier.Result();

@@ -13,16 +13,20 @@ namespace KitHelper
 {
     // Shown when a copy finishes: every file, grouped by the folder it went to, with what
     // happened to it (New / Replaced / Failed / Not copied). Easier to check than the log.
+    // Preview mode is the confirmation before a copy: the same list as it WILL happen
+    // (Replace / New / Not copied) with Cancel / Copy; ShowDialog() == true means Copy.
     public partial class CopyResultWindow : Window
     {
         readonly string backupRoot;
         readonly string text;
+        readonly bool preview;
 
         // where: one line saying what was copied where. backupRoot: null when nothing was backed up.
-        public CopyResultWindow(string title, string where, Copier.Result r, string backupRoot)
+        public CopyResultWindow(string title, string where, Copier.Result r, string backupRoot, bool preview = false)
         {
             InitializeComponent();
             this.backupRoot = backupRoot;
+            this.preview = preview;
             KeyDown += (s, e) => { if (e.Key == Key.Escape) Close(); };
 
             TxtTitle.Text = title;
@@ -34,16 +38,32 @@ namespace KitHelper
             int nSkip = r.Items.Count(i => i.Status == CopyStatus.Skipped);
             void Run(string s, string brush, bool bold = false) =>
                 TxtSummary.Inlines.Add(new Run(s) { Foreground = B(brush), FontWeight = bold ? FontWeights.SemiBold : FontWeights.Normal });
-            Run(nFail == 0 ? "Done.  " : "Finished with errors.  ", nFail == 0 ? "Ok" : "Err", true);
-            Run($"{nRep} replaced", nRep > 0 ? "Accent" : "Dim");
-            Run("  ·  ", "Dim");
-            Run($"{nNew} new", nNew > 0 ? "Ok" : "Dim");
-            Run("  ·  ", "Dim");
-            Run($"{nFail} failed", nFail > 0 ? "Err" : "Dim", nFail > 0);
-            if (nSkip > 0) { Run("  ·  ", "Dim"); Run($"{nSkip} not copied", "Dim"); }
+            if (preview)
+            {
+                Run($"Copy {nNew + nRep} file(s)?  ", "Fg", true);
+                Run($"{nRep} will be replaced", nRep > 0 ? "Accent" : "Dim");
+                Run("  ·  ", "Dim");
+                Run($"{nNew} new", nNew > 0 ? "Ok" : "Dim");
+                if (nSkip > 0) { Run("  ·  ", "Dim"); Run($"{nSkip} not copied", "Dim"); }
+                TxtBackup.Text = nRep > 0 ? "Files that get replaced are backed up first to " + Backup.BaseDir
+                                          : "Nothing will be overwritten.";
+                BtnOpenBackup.Visibility = Visibility.Collapsed;
+                BtnCancel.Visibility = Visibility.Visible;
+                BtnPrimary.Content = "Copy";
+            }
+            else
+            {
+                Run(nFail == 0 ? "Done.  " : "Finished with errors.  ", nFail == 0 ? "Ok" : "Err", true);
+                Run($"{nRep} replaced", nRep > 0 ? "Accent" : "Dim");
+                Run("  ·  ", "Dim");
+                Run($"{nNew} new", nNew > 0 ? "Ok" : "Dim");
+                Run("  ·  ", "Dim");
+                Run($"{nFail} failed", nFail > 0 ? "Err" : "Dim", nFail > 0);
+                if (nSkip > 0) { Run("  ·  ", "Dim"); Run($"{nSkip} not copied", "Dim"); }
 
-            if (backupRoot != null) TxtBackup.Text = "Replaced files were backed up to " + backupRoot;
-            else { TxtBackup.Text = "Nothing was overwritten, so no backup was made."; BtnOpenBackup.Visibility = Visibility.Collapsed; }
+                if (backupRoot != null) TxtBackup.Text = "Replaced files were backed up to " + backupRoot;
+                else { TxtBackup.Text = "Nothing was overwritten, so no backup was made."; BtnOpenBackup.Visibility = Visibility.Collapsed; }
+            }
 
             // Folders with a failure first, then by name; "Not copied" last.
             var groups = r.Items.GroupBy(i => i.Category, StringComparer.OrdinalIgnoreCase)
@@ -97,8 +117,9 @@ namespace KitHelper
             text = sb.ToString();
         }
 
-        static string Label(CopyStatus s) =>
-            s == CopyStatus.New ? "New" : s == CopyStatus.Replaced ? "Replaced" : s == CopyStatus.Failed ? "Failed" : "Not copied";
+        string Label(CopyStatus s) =>
+            s == CopyStatus.New ? "New" : s == CopyStatus.Replaced ? (preview ? "Replace" : "Replaced")
+            : s == CopyStatus.Failed ? "Failed" : "Not copied";
 
         static string BrushOf(CopyStatus s) =>
             s == CopyStatus.New ? "Ok" : s == CopyStatus.Replaced ? "Accent" : s == CopyStatus.Failed ? "Err" : "Dim";
@@ -107,6 +128,13 @@ namespace KitHelper
 
         void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => DragMove();
         void Close_Click(object sender, RoutedEventArgs e) => Close();
+
+        // Preview: "Copy" confirms (ShowDialog returns true). Result: "Close".
+        void Primary_Click(object sender, RoutedEventArgs e)
+        {
+            if (preview) DialogResult = true;
+            else Close();
+        }
 
         void OpenBackup_Click(object sender, RoutedEventArgs e)
         {

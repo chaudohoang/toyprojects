@@ -561,7 +561,7 @@ namespace KitHelper
             if (target.ToDatabase) { DoCopyToDatabase(target); return; }
             if (Install == null) { Log("Pick a TrueTest install first.", LogLevel.Error); return; }
             string install = Install, source = Source;
-            if (!AskCloseTrueTest($"Close it before copying to\n{install}?", "Copy to " + target.Name, out string restartPath)) return;
+            if (!AskCloseTrueTest(install, "Copy to " + target.Name, out string restartPath)) return;
 
             Log($"Copy {source} → {install} [{string.Join(", ", target.SubFolders)}]", LogLevel.Info);
             var backup = new Backup(target.Name, source, install, null);
@@ -589,8 +589,18 @@ namespace KitHelper
             string db = PocbDatabase, source = Source, model = Path.GetFileName(source);
             if (!Directory.Exists(db)) { Log($"Database folder not found: {db} (pick it under Database at the top).", LogLevel.Error); return; }
             string inputImg = Path.Combine(db, "InputIMG");
-            if (Modal(() => MessageBox.Show(this, $"Copy the files of\n{source}\n\ninto\n{Path.Combine(inputImg, model)}?",
-                    "Copy to database model", MessageBoxButton.OKCancel, MessageBoxImage.Question)) != MessageBoxResult.OK) return;
+            // Confirm with the list of what will happen (top-level files only, as Copier.Run does).
+            var preview = new Copier.Result();
+            foreach (string f in Directory.GetFiles(source).OrderBy(f => f, StringComparer.OrdinalIgnoreCase))
+            {
+                string name = Path.GetFileName(f);
+                if (Kit.NeverCopy(f) || string.Equals(name, ownExe, StringComparison.OrdinalIgnoreCase))
+                    preview.Add(name, CopyStatus.Skipped, "helper tool / Explorer file, never copied");
+                else
+                    preview.Add(Path.Combine(Package.DatabaseDir, "InputIMG", model, name),
+                                File.Exists(Path.Combine(inputImg, model, name)) ? CopyStatus.Replaced : CopyStatus.New);
+            }
+            if (!ConfirmCopy("Copy to Database model " + model, $"{source}\n→ {Path.Combine(inputImg, model)}", preview)) return;
 
             var into = new CopyTarget { Name = target.Name, SubFolders = new[] { model }, IncludeSubdirs = false };
             Log($"Copy {source} → {Path.Combine(inputImg, model)}", LogLevel.Info);
@@ -615,37 +625,42 @@ namespace KitHelper
                 if (!Directory.Exists(db)) { Log($"Database folder not found: {db} (pick it under Database at the top).", LogLevel.Error); return; }
             }
 
-            int n = Package.Plan(source, install, db).Count;
-            string where = $"TrueTest\\  →  {install}" + (db != null ? $"\nDATABASE\\  →  {db}" : "");
-            if (Modal(() => MessageBox.Show(this, $"Copy {n} file(s) from the package:\n\n{where}\n\nReplaced files are backed up to\n{Backup.BaseDir}",
-                    "Copy package", MessageBoxButton.OKCancel, MessageBoxImage.Question)) != MessageBoxResult.OK) return;
-            if (!AskCloseTrueTest($"Close it before copying to\n{install}?", "Copy package", out string restartPath)) return;
+            string where = $"TrueTest\\ → {install}" + (db != null ? $"     DATABASE\\ → {db}" : "");
+            if (!ConfirmCopy("Copy package " + Path.GetFileName(source), where, Package.Preview(source, install, db))) return;
+            if (!AskCloseTrueTest(install, "Copy package", out string restartPath)) return;
 
             Log($"Copy package {source} → {install}" + (db != null ? $" + {db}" : ""), LogLevel.Info);
             var backup = new Backup("Package " + Path.GetFileName(source), source, install, db);
             var r = await Busy(() => Package.Run(source, install, db, Log, backup));
             backup.Report(Log);
             LogCopyResult(r);
-            ShowCopyResult("Copy package " + Path.GetFileName(source),
-                           $"TrueTest\\ → {install}" + (db != null ? $"     DATABASE\\ → {db}" : ""), r, backup);
+            ShowCopyResult("Copy package " + Path.GetFileName(source), where, r, backup);
             OfferRestart(restartPath);
             LoadInstalls();
         }
 
+        // The confirmation before a copy: CopyResultWindow in preview mode. True = Copy.
+        bool ConfirmCopy(string title, string where, Copier.Result preview)
+        {
+            var w = new CopyResultWindow(title, where, preview, null, preview: true) { Owner = this };
+            return Modal(() => w.ShowDialog()) == true;
+        }
+
         // If "Close TrueTest before copying" is ticked and TrueTest runs, ask to close it.
         // False = the user cancelled. restartPath = the TrueTest that was closed, or null.
-        bool AskCloseTrueTest(string question, string title, out string restartPath)
+        // copyTo: the install being copied into, shown under the question.
+        bool AskCloseTrueTest(string copyTo, string title, out string restartPath)
         {
             restartPath = null;
             if (ChkCloseTT.IsChecked != true) return true;
             var p = TrueTest.FindRunning();
             if (p == null) return true;
             string path = TrueTest.PathOf(p);
-            var answer = Modal(() => MessageBox.Show(this,
-                $"TrueTest is running{(path != null ? ":\n" + path : ".")}\n\n{question}",
-                title, MessageBoxButton.YesNoCancel, MessageBoxImage.Question));
-            if (answer == MessageBoxResult.Cancel) return false;
-            if (answer == MessageBoxResult.Yes)
+            // 0 = close it, 1 = copy anyway, 2 / closed = cancel the copy.
+            int answer = Modal(() => AskWindow.Ask(this, title, "TrueTest is running. Close it before copying?",
+                $"Running:  {path ?? "(path unknown)"}\nCopy to:  {copyTo}", "Close TrueTest", "Copy without closing", "Cancel"));
+            if (answer != 0 && answer != 1) return false;
+            if (answer == 0)
             {
                 Log("Closing TrueTest…", LogLevel.Info);
                 try { p.Kill(); p.WaitForExit(10000); restartPath = path; Log("TrueTest closed.", LogLevel.Ok); }
@@ -665,8 +680,7 @@ namespace KitHelper
         void OfferRestart(string restartPath)
         {
             if (restartPath == null ||
-                Modal(() => MessageBox.Show(this, "Copy finished. Restart TrueTest?\n\n" + restartPath, "TrueTest",
-                                MessageBoxButton.YesNo, MessageBoxImage.Question)) != MessageBoxResult.Yes) return;
+                Modal(() => AskWindow.Ask(this, "TrueTest", "Copy finished. Restart TrueTest?", restartPath, "Restart", "Not now")) != 0) return;
             try
             {
                 Process.Start(new ProcessStartInfo(restartPath) { WorkingDirectory = Path.GetDirectoryName(restartPath), UseShellExecute = true });
@@ -688,7 +702,7 @@ namespace KitHelper
             string from = w.From, to = w.To;
             var targets = w.Targets;
             bool skipEdt = w.SkipEdtMobile;
-            if (!AskCloseTrueTest($"Close it before copying kits into\n{to}?", "Copy kits", out string restartPath)) return;
+            if (!AskCloseTrueTest(to, "Copy kits", out string restartPath)) return;
 
             Log($"Copy kits {from} → {to} [{string.Join(", ", targets.SelectMany(t => t.SubFolders))}]"
                 + (skipEdt && targets.Any(t => t.Name == "LGDVHCustomApp") ? $", skipping {KitMigration.EdtMobile}" : ""), LogLevel.Info);

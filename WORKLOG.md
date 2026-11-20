@@ -8,6 +8,19 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ## 2026-11-20
 
+- **Kit Helper 1.5.0: no more Windows MessageBoxes.**
+  - Copy confirmations (Copy package, Database model) are `CopyResultWindow` in preview mode
+    (`Package.Preview`, or the model folder's files): every file grouped by destination as
+    Replace (exists, backed up first) / New / Not copied, with Cancel / Copy (`ShowDialog()==true`).
+    It's the same look as the report afterwards.
+  - "TrueTest is running" and "Restart TrueTest?" use `AskWindow` (same chrome; `Ask` returns the
+    button index, -1 when closed). The first button is primary and drawn on the right. The question
+    no longer embeds the path: `Running:` / `Copy to:` lines under it. The first render cut the
+    message off after "copying to" when the path was inside it.
+  - Single-target copies still have no confirmation (unchanged); they show only the report.
+  - Gotcha: a `\n` inside a C# string sent through a bash heredoc to Python lost its backslash,
+    so the replace matched nothing. Use the Edit tool for such lines.
+
 - **Kit Helper 1.4.1: the K icon works while a dialog is open.** WPF's `ShowDialog` disables every
   window of the app, the floating icon included, so with the copy report (or any Kit Helper
   dialog) open, clicking K did nothing, even when the dialog was behind other apps.
