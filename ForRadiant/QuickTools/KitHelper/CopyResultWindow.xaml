@@ -1,0 +1,44 @@
+<Window x:Class="KitHelper.CopyResultWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Copy result" Width="760" SizeToContent="Height"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ShowInTaskbar="False" ResizeMode="NoResize" WindowStartupLocation="CenterOwner"
+        FontFamily="Segoe UI" FontSize="12.5" Foreground="{StaticResource Fg}">
+    <Border CornerRadius="12" Background="{StaticResource Bg}" BorderBrush="#33FFFFFF" BorderThickness="1" Margin="10">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="16" ShadowDepth="2" Opacity="0.5"/>
+        </Border.Effect>
+        <DockPanel Margin="16,10,16,14">
+            <!-- header (drag to move) -->
+            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8" Background="Transparent" MouseLeftButtonDown="Header_MouseLeftButtonDown">
+                <Button DockPanel.Dock="Right" Content="✕" Style="{StaticResource ChromeButton}" Click="Close_Click"/>
+                <Ellipse Width="14" Height="14" Fill="{StaticResource Brand}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBlock x:Name="TxtTitle" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+            </DockPanel>
+
+            <!-- counts: one coloured run per status -->
+            <TextBlock x:Name="TxtSummary" DockPanel.Dock="Top" FontSize="13.5" Margin="0,0,0,4" TextWrapping="Wrap"/>
+            <TextBlock x:Name="TxtWhere" DockPanel.Dock="Top" Style="{StaticResource Hint}" Margin="0,0,0,6" TextWrapping="Wrap"/>
+
+            <!-- backup -->
+            <DockPanel x:Name="PnlBackup" DockPanel.Dock="Top" Margin="0,0,0,10">
+                <Button x:Name="BtnOpenBackup" DockPanel.Dock="Right" Content="Open backup" Click="OpenBackup_Click" Margin="8,0,0,0"/>
+                <TextBlock x:Name="TxtBackup" Style="{StaticResource Hint}" VerticalAlignment="Center" TextWrapping="Wrap"/>
+            </DockPanel>
+
+            <!-- footer -->
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+                <Button Content="Copy as text" Click="CopyText_Click"/>
+                <Button Content="Close" Style="{StaticResource PrimaryButton}" MinWidth="90" Click="Close_Click" IsDefault="True"/>
+            </StackPanel>
+
+            <!-- one block per destination folder -->
+            <Border Style="{StaticResource Section}" Margin="0">
+                <ScrollViewer x:Name="Scroller" MaxHeight="560" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel x:Name="Groups"/>
+                </ScrollViewer>
+            </Border>
+        </DockPanel>
+    </Border>
+</Window>

@@ -22,3 +22,5 @@ E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\MigrateW
 E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\bin\_verify\Kit Helper.exe.config
 E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\bin\_verify\Kit Helper.exe
 E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\bin\_verify\Kit Helper.pdb
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\CopyResultWindow.baml
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\CopyResultWindow.g.cs

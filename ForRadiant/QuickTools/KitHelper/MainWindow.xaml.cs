@@ -527,8 +527,17 @@ namespace KitHelper
             var r = await Busy(() => Copier.Run(source, install, target, ownExe, Log, backup));
             backup.Report(Log);
             LogCopyResult(r);
+            ShowCopyResult("Copy all → " + target.Name, $"{source}\n→ {install}", r, backup);
             OfferRestart(restartPath);
             LoadInstalls();
+        }
+
+        // The per-file summary (CopyResultWindow) after any copy. Null r = the copy threw (logged).
+        void ShowCopyResult(string title, string where, Copier.Result r, Backup backup)
+        {
+            if (r == null) return;
+            var w = new CopyResultWindow(title, where, r, backup.Count > 0 ? backup.Root : null) { Owner = this };
+            Modal(() => w.ShowDialog());
         }
 
         // A model folder → <database>\InputIMG\<its name>, the database being the one picked in the
@@ -548,6 +557,7 @@ namespace KitHelper
             var r = await Busy(() => Copier.Run(source, inputImg, into, ownExe, Log, backup, Path.Combine(Package.DatabaseDir, "InputIMG")));
             backup.Report(Log);
             LogCopyResult(r);
+            ShowCopyResult("Copy to Database model " + model, $"{source}\n→ {Path.Combine(inputImg, model)}", r, backup);
         }
 
         async void Package_Click(object sender, RoutedEventArgs e)
@@ -575,6 +585,8 @@ namespace KitHelper
             var r = await Busy(() => Package.Run(source, install, db, Log, backup));
             backup.Report(Log);
             LogCopyResult(r);
+            ShowCopyResult("Copy package " + Path.GetFileName(source),
+                           $"TrueTest\\ → {install}" + (db != null ? $"     DATABASE\\ → {db}" : ""), r, backup);
             OfferRestart(restartPath);
             LoadInstalls();
         }
@@ -643,6 +655,7 @@ namespace KitHelper
             var r = await Busy(() => KitMigration.Run(from, to, targets, skipEdt, Log, backup));
             backup.Report(Log);
             LogCopyResult(r);
+            ShowCopyResult("Copy kits from " + Path.GetFileName(from), $"{from}\n→ {to}", r, backup);
             OfferRestart(restartPath);
             LoadInstalls();
         }

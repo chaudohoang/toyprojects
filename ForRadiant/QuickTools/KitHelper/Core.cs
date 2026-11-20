@@ -212,9 +212,34 @@ namespace KitHelper
         }
     }
 
+    // What happened to one file in a copy, for the summary window. Category is where it went,
+    // relative to the install / database ("TrueTest\POCB4.2\mainTemplate"), or NotCopied.
+    public enum CopyStatus { New, Replaced, Failed, Skipped }
+    public sealed class CopyItem
+    {
+        public const string NotCopied = "Not copied";
+        public string Category, Name, Detail;
+        public CopyStatus Status;
+    }
+
     public static class Copier
     {
-        public sealed class Result { public int Copied, Failed, Skipped; public bool AccessDenied; }
+        public sealed class Result
+        {
+            public int Copied, Failed, Skipped;
+            public bool AccessDenied;
+            public readonly List<CopyItem> Items = new List<CopyItem>();
+
+            // rel: path as shown, its folder becomes the category ("TrueTest\PUC\x.exe").
+            public void Add(string rel, CopyStatus status, string detail = null) =>
+                Items.Add(new CopyItem
+                {
+                    Category = status == CopyStatus.Skipped ? CopyItem.NotCopied : (Path.GetDirectoryName(rel) ?? ""),
+                    Name = status == CopyStatus.Skipped ? rel : Path.GetFileName(rel),
+                    Status = status,
+                    Detail = detail,
+                });
+        }
 
         // Copies the top-level files of `source` (and subfolders when the target asks for it)
         // into each of target.SubFolders under `install`. `ownExe` is never copied.
@@ -232,6 +257,7 @@ namespace KitHelper
             r.Skipped = skipped.Count;
             if (skipped.Count > 0)
                 log($"Skipping {skipped.Count} file(s) by rule: {string.Join(", ", skipped.Select(Path.GetFileName))}", LogLevel.Detail);
+            foreach (string f in skipped) r.Add(Path.GetFileName(f), CopyStatus.Skipped, $"{target.Name} skips this kind of file");
 
             string root = source.TrimEnd('\\');
             var dirs = target.IncludeSubdirs ? Directory.GetDirectories(source) : new string[0];
@@ -248,6 +274,7 @@ namespace KitHelper
             subFiles = subFiles.Where(s => !Kit.NeverCopy(s.from)).ToList();
             if (never.Count > 0)
                 log($"Not copying helper tools / Thumbs.db: {string.Join(", ", never)}", LogLevel.Detail);
+            foreach (string n in never) r.Add(n, CopyStatus.Skipped, "helper tool / Explorer file, never copied");
 
             foreach (string sub in target.SubFolders)
             {
@@ -257,8 +284,10 @@ namespace KitHelper
                 catch (Exception ex)
                 {
                     log($"Cannot create {dest}: {ex.Message}", LogLevel.Error);
-                    r.Failed += files.Count;
+                    r.Failed += files.Count + subFiles.Count;
                     r.AccessDenied |= ex is UnauthorizedAccessException;
+                    foreach (string f in files) r.Add(Path.Combine(backupPrefix, sub, Path.GetFileName(f)), CopyStatus.Failed, "cannot create the folder: " + ex.Message);
+                    foreach (var s in subFiles) r.Add(Path.Combine(backupPrefix, sub, s.rel), CopyStatus.Failed, "cannot create the folder: " + ex.Message);
                     continue;
                 }
 
@@ -295,12 +324,18 @@ namespace KitHelper
                 .ToList();
             var left = routed.Where(x => x.to == null).Select(x => x.rel).ToList();
             if (left.Count > 0) log($"Not for {target.Name}, not copied: {string.Join(", ", left)}", LogLevel.Detail);
+            foreach (string l in left) r.Add(l, CopyStatus.Skipped, $"not an input for {target.Name}");
 
             foreach (string sub in target.SubFolders)
             {
                 var mine = routed.Where(x => x.to != null && x.to.StartsWith(sub + "\\", StringComparison.OrdinalIgnoreCase)).ToList();
                 string dest = Path.Combine(install, sub);
-                if (mine.Count == 0) { log($"{sub}: nothing in the kit for it, skipped.", LogLevel.Info); continue; }
+                if (mine.Count == 0)
+                {
+                    log($"{sub}: nothing in the kit for it, skipped.", LogLevel.Info);
+                    r.Add(sub + "\\", CopyStatus.Skipped, "nothing in the kit for this folder");
+                    continue;
+                }
                 log($"→ {dest}", LogLevel.Info);
                 foreach (var (from, rel, to) in mine)
                 {
@@ -311,6 +346,7 @@ namespace KitHelper
                         log($"  FAILED  {rel}: {ex.Message}", LogLevel.Error);
                         r.Failed++;
                         r.AccessDenied |= ex is UnauthorizedAccessException;
+                        r.Add(Path.Combine(backupPrefix, to), CopyStatus.Failed, "cannot create the folder: " + ex.Message);
                         continue;
                     }
                     CopyOne(from, full, r, log, rel, backup, Path.Combine(backupPrefix, to));
@@ -325,7 +361,15 @@ namespace KitHelper
                                      Backup backup = null, string backupRel = null)
         {
             label = label ?? Path.GetFileName(from);
-            if (backup != null && !backup.Save(to, backupRel, log)) { r.Failed++; return; }
+            // Where it lands, as the summary groups it: the backup layout when there is one.
+            string shown = backupRel ?? to;
+            bool existed = File.Exists(to);
+            if (backup != null && !backup.Save(to, backupRel, log))
+            {
+                r.Failed++;
+                r.Add(shown, CopyStatus.Failed, "could not back up the existing file, not replaced");
+                return;
+            }
             for (int attempt = 1; ; attempt++)
             {
                 try
@@ -333,6 +377,7 @@ namespace KitHelper
                     File.Copy(from, to, true);
                     log($"  copied  {label}", LogLevel.Detail);
                     r.Copied++;
+                    r.Add(shown, existed ? CopyStatus.Replaced : CopyStatus.New);
                     return;
                 }
                 catch (IOException ex) when (attempt < 3)
@@ -345,6 +390,7 @@ namespace KitHelper
                     log($"  FAILED  {label}: {ex.Message}", LogLevel.Error);
                     r.Failed++;
                     r.AccessDenied |= ex is UnauthorizedAccessException;
+                    r.Add(shown, CopyStatus.Failed, ex.Message);
                     return;
                 }
             }
@@ -367,7 +413,12 @@ namespace KitHelper
             {
                 string src = Path.Combine(from, sub), dst = Path.Combine(to, sub);
                 // Not every install has every folder (POCBMobile\inputTest is newer): skip quietly.
-                if (!Directory.Exists(src)) { log($"{sub}: not in {from}, skipped", LogLevel.Info); continue; }
+                if (!Directory.Exists(src))
+                {
+                    log($"{sub}: not in {from}, skipped", LogLevel.Info);
+                    r.Add(sub + "\\", CopyStatus.Skipped, "not in the old install");
+                    continue;
+                }
                 log($"{sub} → {dst}", LogLevel.Info);
                 foreach (string f in Directory.GetFiles(src, "*", SearchOption.AllDirectories))
                 {
@@ -378,6 +429,7 @@ namespace KitHelper
                     {
                         r.Skipped++;
                         log($"  skipped {sub}\\{rel}{(edt ? " (keeping the new install's)" : "")}", LogLevel.Detail);
+                        r.Add(sub + "\\" + rel, CopyStatus.Skipped, edt ? "keeping the new install's" : "Explorer file, never copied");
                         continue;
                     }
                     string target = Path.Combine(dst, rel);
@@ -387,6 +439,7 @@ namespace KitHelper
                         log($"  FAILED  {sub}\\{rel}: {ex.Message}", LogLevel.Error);
                         r.Failed++;
                         r.AccessDenied |= ex is UnauthorizedAccessException;
+                        r.Add(Path.Combine(Package.TrueTestDir, sub, rel), CopyStatus.Failed, "cannot create the folder: " + ex.Message);
                         continue;
                     }
                     Copier.CopyOne(f, target, r, log, sub + "\\" + rel, backup, Path.Combine(Package.TrueTestDir, sub, rel));
@@ -589,6 +642,7 @@ namespace KitHelper
                     log($"  FAILED  {it.Rel}: {ex.Message}", LogLevel.Error);
                     r.Failed++;
                     r.AccessDenied |= ex is UnauthorizedAccessException;
+                    r.Add(it.Rel, CopyStatus.Failed, "cannot create the folder: " + ex.Message);
                     continue;
                 }
                 // it.Rel is already TrueTest\... / DATABASE\..., the backup layout.

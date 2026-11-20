@@ -8,6 +8,16 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ## 2026-11-20
 
+- **Kit Helper 1.4.0: copy result popup** (`CopyResultWindow`). After every copy action (single
+  target, Database model, Copy package, Kits from old TrueTest), a window lists each file grouped
+  by the folder it went to (`TrueTest\POCB4.2\mainTemplate`, `DATABASE\InputIMG\<model>`…) with
+  New / Replaced / Failed (+ reason) / Not copied (+ reason, grouped last). It also shows colored
+  counts, the backup folder with "Open backup", and "Copy as text". Folders with a failure are
+  listed first. Data: `Copier.Result.Items` (`CopyItem`), filled in `CopyOne` (New vs Replaced =
+  whether the destination existed) and in every skip/failure branch. The log keeps its lines.
+  Checked by running a real package copy into a sandbox (4 existing files, 1 read-only) and
+  rendering the window: 37 new, 4 replaced, 1 failed with the access-denied reason.
+
 - **Kit Helper 1.3.2: Run test finds POCBMobile inputs in inputTemplate\ / inputTest\.**
   The mode switch (Omit / PUC / POCBMobile) was never broken: it follows the picked Input .txt,
   and `Kit.RunInputs` only scanned the opened folder's top level. A package's `TrueTest\POCBMobile`
