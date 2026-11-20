@@ -73,6 +73,9 @@
                     <Border Style="{StaticResource Section}">
                         <StackPanel>
                             <TextBlock Text="Copy kit folder to TrueTest" Style="{StaticResource SectionTitle}"/>
+                            <!-- Combined package (TrueTest\ + DATABASE\ inside): shown only for one. -->
+                            <Button x:Name="BtnPackage" Style="{StaticResource ActionButton}" Visibility="Collapsed" Click="Package_Click"
+                                    Content="Copy package → install + database  (backs up what it replaces)"/>
                             <StackPanel x:Name="CopyButtons"/>
                             <TextBlock x:Name="TxtSuggest" Foreground="{StaticResource Accent}" Margin="0,0,0,6"/>
                             <CheckBox x:Name="ChkCloseTT" Content="Close TrueTest before copying (offer restart after)" Margin="0,2,0,4"/>

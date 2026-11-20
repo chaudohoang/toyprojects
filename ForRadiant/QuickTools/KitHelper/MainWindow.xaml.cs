@@ -45,7 +45,8 @@ namespace KitHelper
                 var target = t;
                 var b = new Button
                 {
-                    Content = "Copy all → " + string.Join(" + ", t.SubFolders) + (t.IncludeSubdirs ? "  (with subfolders)" : ""),
+                    Content = t.ToDatabase ? @"Copy all → database\InputIMG\<this folder's name>"
+                            : "Copy all → " + string.Join(" + ", t.SubFolders) + (t.IncludeSubdirs ? "  (with subfolders)" : ""),
                     Style = (Style)FindResource("ActionButton"),
                 };
                 b.Click += (s, e) => DoCopy(target);
@@ -53,7 +54,7 @@ namespace KitHelper
                 actionControls.Add(b);
                 CopyButtons.Children.Add(b);
             }
-            actionControls.AddRange(new UIElement[] { BtnUnblock, BtnVigOn, BtnVigOff, BtnRun });
+            actionControls.AddRange(new UIElement[] { BtnPackage, BtnUnblock, BtnVigOn, BtnVigOff, BtnRun });
 
             // Folder: command-line arg (another copy passes the folder it sits in) > the most
             // recent folder when this is the installed copy > this exe's own folder.
@@ -211,10 +212,16 @@ namespace KitHelper
             RememberRecent(folder);
 
             // Mark the copy target this folder is meant for.
-            var suggested = Kit.Suggest(folder, out string why);
+            // A package is copied as a whole; its root matches no single target.
+            bool package = Package.Is(folder);
+            string why = null;
+            var suggested = package ? null : Kit.Suggest(folder, out why);
             foreach (var kv in copyButtons) kv.Value.Tag = kv.Key == suggested ? "suggested" : null;
-            TxtSuggest.Text = suggested == null ? "" : $"Suggested: {suggested.Name}  ({why})";
-            TxtSuggest.Visibility = suggested == null ? Visibility.Collapsed : Visibility.Visible;
+            BtnPackage.Visibility = package ? Visibility.Visible : Visibility.Collapsed;
+            BtnPackage.Tag = package ? "suggested" : null;
+            TxtSuggest.Text = package ? "Package: " + Package.Describe(folder)
+                            : suggested == null ? "" : $"Suggested: {suggested.Name}  ({why})";
+            TxtSuggest.Visibility = TxtSuggest.Text == "" ? Visibility.Collapsed : Visibility.Visible;
 
             // Run inputs found in this folder; keep a browsed file from elsewhere if one is set.
             string current = RunInputPath;
@@ -474,6 +481,7 @@ namespace KitHelper
         async void DoCopy(CopyTarget target)
         {
             if (!CheckSource()) return;
+            if (target.ToDatabase) { DoCopyToDatabase(target); return; }
             if (Install == null) { Log("Pick a TrueTest install first.", LogLevel.Error); return; }
             string install = Install, source = Source;
             if (!AskCloseTrueTest($"Close it before copying to\n{install}?", "Copy to " + target.Name, out string restartPath)) return;
@@ -481,6 +489,52 @@ namespace KitHelper
             Log($"Copy {source} → {install} [{string.Join(", ", target.SubFolders)}]", LogLevel.Info);
             var r = await Busy(() => Copier.Run(source, install, target, ownExe, Log));
             LogCopyResult(r);
+            OfferRestart(restartPath);
+            LoadInstalls();
+        }
+
+        // A model folder → <database>\InputIMG\<its name>, the database being the one picked in the
+        // POCBMobile run panel. TrueTest copies the PUC dll from there when a PUC step runs, so
+        // it need not be closed for this.
+        async void DoCopyToDatabase(CopyTarget target)
+        {
+            string db = PocbDatabase, source = Source, model = Path.GetFileName(source);
+            if (!Directory.Exists(db)) { Log($"Database folder not found: {db} (pick it in Run test → POCBMobile).", LogLevel.Error); return; }
+            string inputImg = Path.Combine(db, "InputIMG");
+            if (Modal(() => MessageBox.Show(this, $"Copy the files of\n{source}\n\ninto\n{Path.Combine(inputImg, model)}?",
+                    "Copy to database model", MessageBoxButton.OKCancel, MessageBoxImage.Question)) != MessageBoxResult.OK) return;
+
+            var into = new CopyTarget { Name = target.Name, SubFolders = new[] { model }, IncludeSubdirs = false };
+            Log($"Copy {source} → {Path.Combine(inputImg, model)}", LogLevel.Info);
+            var r = await Busy(() => Copier.Run(source, inputImg, into, ownExe, Log));
+            LogCopyResult(r);
+        }
+
+        async void Package_Click(object sender, RoutedEventArgs e)
+        {
+            if (!CheckSource()) return;
+            string source = Source;
+            if (!Package.Is(source)) { Log("Not a package: no TrueTest\\ or DATABASE\\ folder in " + source, LogLevel.Error); return; }
+            if (Install == null) { Log("Pick a TrueTest install first.", LogLevel.Error); return; }
+            string install = Install;
+            string db = null;
+            if (Package.HasDatabasePart(source))
+            {
+                db = PocbDatabase;
+                if (!Directory.Exists(db)) { Log($"Database folder not found: {db} (pick it in Run test → POCBMobile).", LogLevel.Error); return; }
+            }
+
+            int n = Package.Plan(source, install, db).Count;
+            string where = $"TrueTest\\  →  {install}" + (db != null ? $"\nDATABASE\\  →  {db}" : "");
+            if (Modal(() => MessageBox.Show(this, $"Copy {n} file(s) from the package:\n\n{where}\n\nReplaced files are backed up to\n{source}\\Backup_<date>_<time>",
+                    "Copy package", MessageBoxButton.OKCancel, MessageBoxImage.Question)) != MessageBoxResult.OK) return;
+            if (!AskCloseTrueTest($"Close it before copying to\n{install}?", "Copy package", out string restartPath)) return;
+
+            Log($"Copy package {source} → {install}" + (db != null ? $" + {db}" : ""), LogLevel.Info);
+            string backup = null;
+            var r = await Busy(() => Package.Run(source, install, db, Log, out backup));
+            LogCopyResult(r);
+            if (backup != null) Log("To undo: copy the folders in " + backup + " back over the same places.", LogLevel.Info);
             OfferRestart(restartPath);
             LoadInstalls();
         }

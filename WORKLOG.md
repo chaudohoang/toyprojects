@@ -6,6 +6,26 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ---
 
+## 2026-11-20
+
+- **Kit Helper 1.2.0: combined packages** (`Core.cs` `Package`, `MainWindow` `Package_Click`).
+  A folder with `TrueTest\` and/or `DATABASE\` inside is a package. "Copy package" copies
+  `TrueTest\<sub>\...` into the picked install and `DATABASE\...` into the database picked in
+  Run test → POCBMobile, each file at its own relative path. Every file it overwrites is backed up
+  to `<package>\Backup_<yyyyMMdd_HHmmss>\`. If the backup of a file fails, that file is not
+  overwritten (counted as failed). Files at the package root (README, Install.bat) are ignored.
+  First package: `D:\Log\X402x_NewFlowSetup_2nd\ReplacePackage_X402x_20261120` (36 files).
+  - New targets: `POCBMobile inputTest`, and `Database model` (→ `<db>\InputIMG\<folder name>`,
+    hidden from the migrate window since it isn't an install folder).
+  - Fixed: `Kit.Suggest` on a model folder (`InputIMG\X4023-CB-MP00_MATHON`, holding
+    `LGD_PO_Compensation.dll`) suggested **POCB4.1Net**. That would have copied an X4023 PUC
+    dll into TrueTest's POCB4.1Net/POCB4.1. A folder whose parent is `InputIMG` is now checked first.
+  - Tested by loading the built exe in Windows PowerShell 5.1 against sandbox copies: Suggest for
+    every package subfolder, Plan (36 files), Run (backup = exactly the overwritten files,
+    unrelated files untouched, read-only target reported as 1 failure). The UI itself (button
+    visibility, dialogs) was not clicked through.
+  - The manual intro still says 1.1.0; it isn't in this repo.
+
 ## 2026-11-19
 
 - **Kit Helper 1.1.0: exe icon** (`ForRadiant/QuickTools/KitHelper/KitHelper.ico`, `<ApplicationIcon>`):

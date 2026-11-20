@@ -25,7 +25,7 @@ namespace KitHelper
         public MigrateWindow(string to)
         {
             InitializeComponent();
-            foreach (var t in CopyTarget.All)
+            foreach (var t in CopyTarget.All.Where(t => !t.ToDatabase))   // migration is install -> install
             {
                 var c = new CheckBox { Margin = new Thickness(0, 0, 0, 8), Tag = t };
                 c.Checked += (s, e) => Refresh();

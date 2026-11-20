@@ -89,6 +89,9 @@ namespace KitHelper
         public string Name;
         public string[] SubFolders;
         public bool IncludeSubdirs;          // xcopy /E of subfolders
+        // Copies into <database>\InputIMG\<kit folder name> instead of the TrueTest install
+        // (SubFolders is not used). Not offered when migrating kits between installs.
+        public bool ToDatabase;
         public Func<string, bool> Skip = _ => false;
 
         public static readonly CopyTarget[] All =
@@ -111,10 +114,16 @@ namespace KitHelper
             // POCBMobile reads its input templates (inputTemplate<model><step>.txt) from here; kits
             // ship new ones in a folder like inputTemplateGIBD992_D997.
             new CopyTarget { Name = "POCBMobile inputTemplate", SubFolders = new[] { @"POCBMobile\inputTemplate" } },
+            // The filled offline-test inputs (inputTest<model><step>.txt) beside the templates.
+            new CopyTarget { Name = "POCBMobile inputTest", SubFolders = new[] { @"POCBMobile\inputTest" } },
             new CopyTarget { Name = "PUC", SubFolders = new[] { "PUC" } },
             // Some Omit kits carry subfolders too (the old .bat copied top-level files only).
             new CopyTarget { Name = "ScratchDustDetect_NY", SubFolders = new[] { "ScratchDustDetect_NY" }, IncludeSubdirs = true },
             new CopyTarget { Name = "LGDVHCustomApp", SubFolders = new[] { "LGDVHCustomApp" }, IncludeSubdirs = true },
+            // A model folder (InputIMG\X4023-CB-MP00_MATHON: LGD_PO_Compensation.dll, panel
+            // shapes...). TrueTest copies the PUC dll from here at run time, so it goes to the
+            // database, never into the install.
+            new CopyTarget { Name = "Database model", SubFolders = new[] { "InputIMG" }, ToDatabase = true },
         };
     }
 
@@ -337,12 +346,20 @@ namespace KitHelper
             foreach (var t in CopyTarget.All)
                 if (Has("^Copy all to " + Regex.Escape(t.Name) + " folder")) { why = "old copy script found"; return t; }
 
+            // Before the payload rules: a model folder holds LGD_PO_Compensation.dll, which the
+            // POCB4.1Net rule below would otherwise claim - copying an X4023 PUC dll into
+            // TrueTest's POCB4.1Net / POCB4.1.
+            if (string.Equals(Path.GetFileName(Path.GetDirectoryName(folder.TrimEnd('\\')) ?? ""), "InputIMG", StringComparison.OrdinalIgnoreCase))
+            { why = "folder inside InputIMG"; return T("Database model"); }
+
             if (string.Equals(Path.GetFileName(folder.TrimEnd('\\')), "POCB4.2", StringComparison.OrdinalIgnoreCase))
             { why = "folder named POCB4.2"; return T("POCB4.2"); }
             if (Has(@"^Crop_params\.json$") || Directory.Exists(Path.Combine(folder, "mainTemplate")))
             { why = "Crop_params.json / mainTemplate folder"; return T("POCB4.2"); }
             if (Has(@"^inputTemplate.*\.txt$") || Path.GetFileName(folder.TrimEnd('\\')).StartsWith("inputTemplate", StringComparison.OrdinalIgnoreCase))
             { why = "inputTemplate*.txt"; return T("POCBMobile inputTemplate"); }
+            if (Has(@"^inputTest.*\.txt$") || Path.GetFileName(folder.TrimEnd('\\')).StartsWith("inputTest", StringComparison.OrdinalIgnoreCase))
+            { why = "inputTest*.txt"; return T("POCBMobile inputTest"); }
             if (Has(@"^ScratchDustDetect.*\.exe$") || Has("^LGD_OMIT_INI")) { why = "ScratchDustDetect / LGD_OMIT_INI files"; return T("ScratchDustDetect_NY"); }
             if (Has(@"^VNTT_Interp.*\.exe$")) { why = "VNTT_Interp exes"; return T("LGDVHCustomApp"); }
             if (Has(@"^LGD_PO_Compensation") || Has("^LGD_COMP_INI")) { why = "LGD_PO_Compensation / LGD_COMP_INI files"; return T("POCB4.1Net"); }
@@ -357,6 +374,109 @@ namespace KitHelper
                 ? Directory.GetFiles(folder, "*.txt").Where(f => RunTest.ExeOf(f) != null || RunTest.IsPocbMobileInput(f))
                     .OrderBy(f => f, StringComparer.OrdinalIgnoreCase).ToArray()
                 : new string[0];
+    }
+
+    // A combined package: several kits in one folder, laid out as they are installed.
+    //   <package>\TrueTest\<sub>\...   -> <TrueTest install>\<sub>\...   (POCB4.2, PUC, POCBMobile\inputTemplate...)
+    //   <package>\DATABASE\...         -> <database>\...                 (InputIMG\<model>\LGD_PO_Compensation.dll...)
+    // Every file is copied at its relative path; anything it overwrites is saved first to
+    // <package>\Backup_<yyyyMMdd_HHmmss>\TrueTest|DATABASE\..., so the package can be rolled back
+    // by copying that folder back. Files at the package root (README, Install.bat) are not copied.
+    public static class Package
+    {
+        public const string TrueTestDir = "TrueTest", DatabaseDir = "DATABASE";
+
+        public static bool Is(string folder) =>
+            Directory.Exists(folder) &&
+            (Directory.Exists(Path.Combine(folder, TrueTestDir)) || Directory.Exists(Path.Combine(folder, DatabaseDir)));
+
+        public static bool HasDatabasePart(string folder) => Directory.Exists(Path.Combine(folder, DatabaseDir));
+
+        public sealed class Item { public string From, To, Rel; }   // Rel = "TrueTest\POCB4.2\Crop.dll"
+
+        // What would be copied where. database may be null when the package has no DATABASE\.
+        public static List<Item> Plan(string folder, string install, string database)
+        {
+            var items = new List<Item>();
+            void Add(string part, string destRoot)
+            {
+                string src = Path.Combine(folder, part);
+                if (!Directory.Exists(src)) return;
+                foreach (string f in Directory.GetFiles(src, "*", SearchOption.AllDirectories).OrderBy(f => f, StringComparer.OrdinalIgnoreCase))
+                {
+                    if (Kit.NeverCopy(f)) continue;
+                    string rel = f.Substring(src.TrimEnd('\\').Length + 1);
+                    items.Add(new Item { From = f, To = Path.Combine(destRoot, rel), Rel = Path.Combine(part, rel) });
+                }
+            }
+            Add(TrueTestDir, install);
+            if (database != null) Add(DatabaseDir, database);
+            return items;
+        }
+
+        // "TrueTest\POCB4.2 (12), TrueTest\PUC (7), DATABASE\InputIMG (2)": one entry per second-level folder.
+        public static string Describe(string folder)
+        {
+            var parts = new List<string>();
+            foreach (string part in new[] { TrueTestDir, DatabaseDir })
+            {
+                string src = Path.Combine(folder, part);
+                if (!Directory.Exists(src)) continue;
+                foreach (string d in Directory.GetDirectories(src).OrderBy(d => d, StringComparer.OrdinalIgnoreCase))
+                    parts.Add($@"{part}\{Path.GetFileName(d)} ({Directory.GetFiles(d, "*", SearchOption.AllDirectories).Count(f => !Kit.NeverCopy(f))})");
+                int loose = Directory.GetFiles(src).Count(f => !Kit.NeverCopy(f));
+                if (loose > 0) parts.Add($@"{part}\ ({loose})");
+            }
+            return string.Join(", ", parts);
+        }
+
+        public static Copier.Result Run(string folder, string install, string database, LogFn log, out string backup)
+        {
+            var r = new Copier.Result();
+            backup = Path.Combine(folder, "Backup_" + DateTime.Now.ToString("yyyyMMdd_HHmmss"));
+
+            // A TrueTest\<sub> that the install does not have is most likely a misnamed folder
+            // (it would create a new folder TrueTest never reads): say so, but still copy.
+            string tt = Path.Combine(folder, TrueTestDir);
+            if (Directory.Exists(tt))
+                foreach (string d in Directory.GetDirectories(tt))
+                    if (!Directory.Exists(Path.Combine(install, Path.GetFileName(d))))
+                        log($@"{TrueTestDir}\{Path.GetFileName(d)}: not in {install} - a new folder will be created there.", LogLevel.Warn);
+
+            int backedUp = 0;
+            foreach (var it in Plan(folder, install, database))
+            {
+                try { Directory.CreateDirectory(Path.GetDirectoryName(it.To)); }
+                catch (Exception ex)
+                {
+                    log($"  FAILED  {it.Rel}: {ex.Message}", LogLevel.Error);
+                    r.Failed++;
+                    r.AccessDenied |= ex is UnauthorizedAccessException;
+                    continue;
+                }
+                if (File.Exists(it.To))
+                {
+                    string bk = Path.Combine(backup, it.Rel);
+                    try
+                    {
+                        Directory.CreateDirectory(Path.GetDirectoryName(bk));
+                        File.Copy(it.To, bk, true);
+                        backedUp++;
+                    }
+                    catch (Exception ex)
+                    {
+                        // No backup, no overwrite: the package must stay reversible.
+                        log($"  FAILED  {it.Rel}: could not back up the existing file ({ex.Message}), not replaced.", LogLevel.Error);
+                        r.Failed++;
+                        continue;
+                    }
+                }
+                Copier.CopyOne(it.From, it.To, r, log, it.Rel);
+            }
+            if (backedUp == 0) { backup = null; }
+            else log($"Backed up {backedUp} replaced file(s) to {backup}", LogLevel.Info);
+            return r;
+        }
     }
 
     public static class Unblocker
