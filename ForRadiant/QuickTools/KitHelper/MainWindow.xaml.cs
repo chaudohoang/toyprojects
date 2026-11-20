@@ -124,12 +124,45 @@ namespace KitHelper
         }
 
         // Runs a dialog with auto-hide suspended: opening it deactivates the panel.
+        // WPF's ShowDialog disables every window of the app, the floating K icon included, so a
+        // click on the icon did nothing while e.g. the copy report was open (and it could sit
+        // behind other apps). Once the dialog is up, the icon is enabled again; while InModal
+        // its click calls FocusModal instead of toggling the panel.
         T Modal<T>(Func<T> dialog)
         {
             modalDepth++;
+            // Queued before the dialog starts, so it runs inside the dialog's message loop, after
+            // ShowDialog has disabled the windows (MessageBox pumps the dispatcher too).
+            Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(EnableIcon));
             try { return dialog(); }
             finally { modalDepth--; }
         }
+
+        public bool InModal => modalDepth > 0;
+
+        void EnableIcon()
+        {
+            if (modalDepth == 0 || Anchor == null) return;
+            IntPtr h = new WindowInteropHelper(Anchor).Handle;
+            if (h != IntPtr.Zero) EnableWindow(h, true);
+        }
+
+        // Brings the panel and the dialog open on it to the front: the K icon's click while a
+        // dialog is open. GetLastActivePopup finds that dialog (a Kit Helper window or a MessageBox).
+        public void FocusModal()
+        {
+            if (!IsVisible) Show();
+            IntPtr h = new WindowInteropHelper(this).Handle;
+            IntPtr popup = GetLastActivePopup(h);
+            SetForegroundWindow(popup != IntPtr.Zero ? popup : h);
+        }
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        static extern bool EnableWindow(IntPtr hWnd, bool enable);
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        static extern IntPtr GetLastActivePopup(IntPtr hWnd);
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        static extern bool SetForegroundWindow(IntPtr hWnd);
 
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         static extern bool GetCursorPos(out POINT p);
@@ -157,6 +190,13 @@ namespace KitHelper
         // A folder opened with Kit Helper (Explorer right-click, another copy, a drop on the icon).
         public void OpenFolder(string folder)
         {
+            // Not under an open dialog: the folder would change beneath it. Bring the dialog back.
+            if (InModal)
+            {
+                FocusModal();
+                (Anchor as FloatingIconWindow)?.ShowToast("Close the open dialog first, then open the folder again.");
+                return;
+            }
             ShowNear(Anchor);
             Log($"Opened {folder}", LogLevel.Info);
             LoadInstalls();                             // TrueTest may have started or stopped since
@@ -166,6 +206,7 @@ namespace KitHelper
         // A file dropped on the icon: open its folder; a .txt also becomes the run-test input.
         public void OpenFile(string path)
         {
+            if (InModal) { OpenFolder(Path.GetDirectoryName(path)); return; }   // just brings the dialog back
             OpenFolder(Path.GetDirectoryName(path));
             if (!string.Equals(Path.GetExtension(path), ".txt", StringComparison.OrdinalIgnoreCase)) return;
             var item = CboRunInput.Items.OfType<RunInputItem>().FirstOrDefault(i => string.Equals(i.Path, path, StringComparison.OrdinalIgnoreCase));

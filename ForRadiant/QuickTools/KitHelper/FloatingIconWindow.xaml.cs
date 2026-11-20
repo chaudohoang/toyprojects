@@ -63,6 +63,9 @@ namespace KitHelper
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
         {
             base.OnMouseLeftButtonDown(e);
+            // A dialog is open on the panel (copy report, a question): bring it back instead of
+            // toggling, which would hide the panel under the dialog. See MainWindow.Modal.
+            if (panel.InModal) { panel.FocusModal(); return; }
             // A click toggles at once. The second click of a double-click is ignored, so a
             // double-click acts like one click instead of opening and closing the panel.
             if (e.ClickCount >= 2) return;
@@ -109,6 +112,7 @@ namespace KitHelper
         void OpenDropped(string[] paths)
         {
             if (paths == null || paths.Length == 0) return;
+            if (panel.InModal) { panel.FocusModal(); ShowToast("Close the open dialog first, then drop it again."); return; }
             string p = paths[0];
             if (Directory.Exists(p)) panel.OpenFolder(p);
             else if (File.Exists(p)) panel.OpenFile(p);
@@ -139,10 +143,12 @@ namespace KitHelper
                 : "Add \"Open in Kit Helper\" to right-click";
         }
 
-        void Toggle_Click(object sender, RoutedEventArgs e) => panel.Toggle();
+        // While a dialog is open, menu items that would hide the panel or open a second dialog
+        // bring the open one back instead.
+        void Toggle_Click(object sender, RoutedEventArgs e) { if (panel.InModal) panel.FocusModal(); else panel.Toggle(); }
         void RightClick_Click(object sender, RoutedEventArgs e) => ShowToast(panel.ToggleExplorerMenu());
         void OpenFolder_Click(object sender, RoutedEventArgs e) => panel.OpenInExplorer();
-        void Migrate_Click(object sender, RoutedEventArgs e) => panel.ShowMigrate();
+        void Migrate_Click(object sender, RoutedEventArgs e) { if (panel.InModal) panel.FocusModal(); else panel.ShowMigrate(); }
         void Exit_Click(object sender, RoutedEventArgs e) => Program.Exit();
     }
 }

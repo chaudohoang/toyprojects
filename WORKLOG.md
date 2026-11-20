@@ -8,6 +8,20 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ## 2026-11-20
 
+- **Kit Helper 1.4.1: the K icon works while a dialog is open.** WPF's `ShowDialog` disables every
+  window of the app, the floating icon included, so with the copy report (or any Kit Helper
+  dialog) open, clicking K did nothing, even when the dialog was behind other apps.
+  `MainWindow.Modal` now re-enables the icon once the dialog is up (a BeginInvoke queued before
+  the dialog runs inside its message loop, after the disabling; MessageBox pumps the dispatcher
+  too). While `InModal`, an icon click, the menu's Show/Hide and Kits from old TrueTest, a drop on
+  the icon, and Explorer's "Open in Kit Helper" all call `FocusModal`
+  (`GetLastActivePopup` + `SetForegroundWindow`), which brings the panel and dialog back without
+  toggling the panel or changing the kit folder under the dialog. A drop or open shows a toast.
+  Verified with the real icon + panel and a dialog through `Modal`: 1.4.0 icon disabled during the
+  dialog, 1.4.1 enabled. The foreground jump itself needs a real click and wasn't automated. The
+  first harness hung (ContentRendered + BeginInvoke from a PowerShell scriptblock never closed the
+  dialog); a DispatcherTimer started before ShowDialog, plus a kill timer, works.
+
 - **Kit Helper 1.4.0: copy result popup** (`CopyResultWindow`). After every copy action (single
   target, Database model, Copy package, Kits from old TrueTest), a window lists each file grouped
   by the folder it went to (`TrueTest\POCB4.2\mainTemplate`, `DATABASE\InputIMG\<model>`…) with
