@@ -36,8 +36,8 @@ namespace KitHelper
             TxtVersion.Text = InstalledCopy.Self + (IsElevated() ? "  ·  Administrator" : "");
             BtnAdmin.Visibility = IsElevated() ? Visibility.Collapsed : Visibility.Visible;
             TxtVignettingTitle.Text = "Vignetting  (" + Vignetting.Key + " in kit *.ini)";
-            TxtExplorerHint.Text = "Added automatically whenever Kit Helper starts; Remove lasts until the next start. Runs the copy in "
-                                 + InstalledCopy.Folder + ". Windows 11: under \"Show more options\".";
+            BtnExplorer.ToolTip = "Added automatically whenever Kit Helper starts; Remove lasts until the next start. Runs the copy in "
+                                + InstalledCopy.Folder + ". Windows 11: under \"Show more options\".";
             LstLog.ItemsSource = log;
 
             foreach (var t in CopyTarget.All)
@@ -45,8 +45,7 @@ namespace KitHelper
                 var target = t;
                 var b = new Button
                 {
-                    Content = t.ToDatabase ? @"Copy all → database\InputIMG\<this folder's name>"
-                            : "Copy all → " + string.Join(" + ", t.SubFolders) + (t.IncludeSubdirs ? "  (with subfolders)" : ""),
+                    Content = "Copy all → " + (t.Label ?? string.Join(" + ", t.SubFolders)) + (t.IncludeSubdirs ? "  (with subfolders)" : ""),
                     Style = (Style)FindResource("ActionButton"),
                 };
                 b.Click += (s, e) => DoCopy(target);
@@ -64,7 +63,10 @@ namespace KitHelper
                 : AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
             ChkCloseTT.IsChecked = settings.Get("CloseTrueTest") != "0";
             foreach (string db in PocbTemplate.Databases) CboPocbDb.Items.Add(db);
-            CboPocbDb.Text = settings.Get("PocbDatabase") is string savedDb && savedDb != "" ? savedDb : PocbTemplate.Databases[0];
+            // The one picked last time, else the first of C/D/E:\DATABASE that exists on this PC.
+            CboPocbDb.Text = settings.Get("PocbDatabase") is string savedDb && savedDb != "" ? savedDb
+                           : PocbTemplate.Databases.FirstOrDefault(Directory.Exists) ?? PocbTemplate.Databases[0];
+            UpdateDbInfo();
             LoadInstalls();
             SetSource(folder);
             UpdateExplorerButton();
@@ -316,7 +318,7 @@ namespace KitHelper
                 : RbPocb.IsChecked == true ? "Fills it into input.txt"
                 : "Omit runs in the working dir";
             var pocbVisibility = RbPocb.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
-            foreach (UIElement c in new UIElement[] { LblPocbDb, CboPocbDb, LblPocbModel, CboPocbModel, LblPocbPid, PnlPocbPid })
+            foreach (UIElement c in new UIElement[] { LblPocbModel, CboPocbModel, LblPocbPid, PnlPocbPid })
                 c.Visibility = pocbVisibility;
             if (RbPocb.IsChecked == true)
             {
@@ -382,7 +384,33 @@ namespace KitHelper
         {
             if (PocbDatabase == lastPocbDb) return;
             lastPocbDb = PocbDatabase;
+            UpdateDbInfo();
             LoadPocbModels();
+        }
+
+        // Under the Database box: whether it exists and how many model folders it holds, plus
+        // the other C/D/E:\DATABASE folders on this PC, so a wrong pick is visible at a glance.
+        void UpdateDbInfo()
+        {
+            if (TxtDbInfo == null) return;
+            string db = PocbDatabase;
+            var others = PocbTemplate.Databases.Where(d => Directory.Exists(d) && !string.Equals(d, db, StringComparison.OrdinalIgnoreCase)).ToList();
+            string also = others.Count > 0 ? "  ·  also on this PC: " + string.Join(", ", others) : "";
+            if (!Directory.Exists(db))
+            {
+                TxtDbInfo.Text = "Folder not found." + also;
+                TxtDbInfo.Foreground = Brush("Err");
+                return;
+            }
+            int models = PocbTemplate.Models(db).Length;
+            TxtDbInfo.Text = $"{models} model folder(s) in InputIMG" + also;
+            TxtDbInfo.Foreground = Brush("Dim");
+        }
+
+        void OpenDb_Click(object sender, RoutedEventArgs e)
+        {
+            if (Directory.Exists(PocbDatabase)) Process.Start("explorer.exe", "\"" + PocbDatabase + "\"");
+            else Log("Database folder not found: " + PocbDatabase, LogLevel.Error);
         }
         // SelectionChanged fires before the editable text follows the new item: read it after.
         void CboPocbDb_SelectionChanged(object sender, SelectionChangedEventArgs e) =>
@@ -471,7 +499,7 @@ namespace KitHelper
         {
             settings.Set("Install", Install);
             if (!FixedWorkDir) settings.Set("RunWorkDir", CboWorkDir.Text);
-            if (RbPocb.IsChecked == true) settings.Set("PocbDatabase", PocbDatabase);
+            settings.Set("PocbDatabase", PocbDatabase);
             settings.Set("CloseTrueTest", ChkCloseTT.IsChecked == true ? "1" : "0");
             settings.Save();
         }
@@ -501,7 +529,7 @@ namespace KitHelper
         async void DoCopyToDatabase(CopyTarget target)
         {
             string db = PocbDatabase, source = Source, model = Path.GetFileName(source);
-            if (!Directory.Exists(db)) { Log($"Database folder not found: {db} (pick it in Run test → POCBMobile).", LogLevel.Error); return; }
+            if (!Directory.Exists(db)) { Log($"Database folder not found: {db} (pick it under Database at the top).", LogLevel.Error); return; }
             string inputImg = Path.Combine(db, "InputIMG");
             if (Modal(() => MessageBox.Show(this, $"Copy the files of\n{source}\n\ninto\n{Path.Combine(inputImg, model)}?",
                     "Copy to database model", MessageBoxButton.OKCancel, MessageBoxImage.Question)) != MessageBoxResult.OK) return;
@@ -525,7 +553,7 @@ namespace KitHelper
             if (Package.HasDatabasePart(source))
             {
                 db = PocbDatabase;
-                if (!Directory.Exists(db)) { Log($"Database folder not found: {db} (pick it in Run test → POCBMobile).", LogLevel.Error); return; }
+                if (!Directory.Exists(db)) { Log($"Database folder not found: {db} (pick it under Database at the top).", LogLevel.Error); return; }
             }
 
             int n = Package.Plan(source, install, db).Count;

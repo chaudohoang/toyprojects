@@ -87,6 +87,7 @@ namespace KitHelper
     public sealed class CopyTarget
     {
         public string Name;
+        public string Label;                 // button text after "Copy all → "; default: SubFolders joined
         public string[] SubFolders;
         public bool IncludeSubdirs;          // xcopy /E of subfolders
         // Copies into <database>\InputIMG\<kit folder name> instead of the TrueTest install
@@ -124,6 +125,7 @@ namespace KitHelper
             new CopyTarget
             {
                 Name = "POCBMobile",
+                Label = @"POCBMobile\inputTemplate + inputTest",
                 SubFolders = new[] { @"POCBMobile\inputTemplate", @"POCBMobile\inputTest" },
                 Route = (kitName, rel) =>
                 {
@@ -145,7 +147,7 @@ namespace KitHelper
             // A model folder (InputIMG\X4023-CB-MP00_MATHON: LGD_PO_Compensation.dll, panel
             // shapes...). TrueTest copies the PUC dll from here at run time, so it goes to the
             // database, never into the install.
-            new CopyTarget { Name = "Database model", SubFolders = new[] { "InputIMG" }, ToDatabase = true },
+            new CopyTarget { Name = "Database model", Label = @"Database\InputIMG\<this folder's name>", SubFolders = new[] { "InputIMG" }, ToDatabase = true },
         };
     }
 

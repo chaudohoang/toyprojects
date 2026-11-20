@@ -8,6 +8,24 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ## 2026-11-20
 
+- **Kit Helper 1.3.1: Database row at the top; log no longer cut off.**
+  - The database box (`CboPocbDb`) moved from Run test, where it only showed in POCBMobile mode,
+    to a "Database" row under TrueTest install. Copy package, Database model and the POCBMobile
+    run all use it. Default: the saved pick, else the first of `C/D/E:\DATABASE` that exists. The
+    line under it shows the model count and the other DATABASE folders on the PC; it is now
+    saved in every mode.
+  - Why the log was cut: the window is a fixed height (NoResize) and the tools row was Auto, so the
+    extra 1.2/1.3 buttons pushed the `*` log row off the bottom. Now the tools row is `*` inside a
+    ScrollViewer and the log row is a fixed 160 px. "Other" moved to the right column with
+    its two buttons side by side (explanations as tooltips). The window is 990 px tall
+    (ShowNear still clamps to the work area).
+  - Labels: "Database", "Copy package → TrueTest install + Database", POCBMobile button
+    `CopyTarget.Label` = "inputTemplate + inputTest", and the package line wraps.
+  - Checked by rendering the real window offscreen (PS 5.1 STA, RenderTargetBitmap) in Omit and
+    POCBMobile modes. Gotcha: Kit Helper calls `Assembly.GetEntryAssembly()`, which is null
+    under PowerShell; set it through `AppDomainManager.m_entryAssembly` /
+    `AppDomain._domainManager`. Never Close/Hide the window in a harness: HidePanel saves settings.
+
 - **Kit Helper 1.3.0: every copy is backed up; one POCBMobile target.**
   - `Backup` (Core.cs): every copy action (single target, Database model, Copy package, Kits from
     old TrueTest) first saves each file it overwrites to
