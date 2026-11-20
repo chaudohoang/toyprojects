@@ -8,6 +8,17 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ## 2026-11-20
 
+- **Kit Helper 1.3.2: Run test finds POCBMobile inputs in inputTemplate\ / inputTest\.**
+  The mode switch (Omit / PUC / POCBMobile) was never broken: it follows the picked Input .txt,
+  and `Kit.RunInputs` only scanned the opened folder's top level. A package's `TrueTest\POCBMobile`
+  keeps its inputs one level down, so nothing was picked and the mode stayed Omit. RunInputs
+  now also reads `inputTemplate\` and `inputTest\`, and the list shows them as
+  `inputTemplate\x.txt` / `inputTest\x.txt`. The package's ScratchDustDetect_NY had no
+  `LGD_OMIT_INI_*.txt` at all (LGD's drop lacked them); they were added to the package, not to
+  Kit Helper. Checked by opening each package folder in the real window offscreen:
+  ScratchDustDetect_NY → 6 inputs, Omit; POCBMobile → 8, POCBMobile; POCBMobile\inputTest → 4,
+  POCBMobile; PUC → 5, PUC.
+
 - **Kit Helper 1.3.1: Database row at the top; log no longer cut off.**
   - The database box (`CboPocbDb`) moved from Run test, where it only showed in POCBMobile mode,
     to a "Database" row under TrueTest install. Copy package, Database model and the POCBMobile

@@ -501,12 +501,18 @@ namespace KitHelper
         }
 
         // .txt files in the folder that are run inputs: first line an exe (RunTest), or a
-        // POCBMobile input (inputTemplate / inputTest).
-        public static string[] RunInputs(string folder) =>
-            Directory.Exists(folder)
-                ? Directory.GetFiles(folder, "*.txt").Where(f => RunTest.ExeOf(f) != null || RunTest.IsPocbMobileInput(f))
-                    .OrderBy(f => f, StringComparer.OrdinalIgnoreCase).ToArray()
-                : new string[0];
+        // POCBMobile input (inputTemplate / inputTest). A POCBMobile folder laid out as installed
+        // (inputTemplate\ + inputTest\, as in a package) is read one level down as well.
+        public static string[] RunInputs(string folder)
+        {
+            if (!Directory.Exists(folder)) return new string[0];
+            bool IsInput(string f) => RunTest.ExeOf(f) != null || RunTest.IsPocbMobileInput(f);
+            var top = Directory.GetFiles(folder, "*.txt").Where(IsInput).OrderBy(f => f, StringComparer.OrdinalIgnoreCase);
+            var nested = new[] { "inputTemplate", "inputTest" }
+                .Select(d => Path.Combine(folder, d)).Where(Directory.Exists)
+                .SelectMany(d => Directory.GetFiles(d, "*.txt").Where(IsInput).OrderBy(f => f, StringComparer.OrdinalIgnoreCase));
+            return top.Concat(nested).ToArray();
+        }
     }
 
     // A combined package: several kits in one folder, laid out as they are installed.

@@ -228,7 +228,7 @@ namespace KitHelper
             // Run inputs found in this folder; keep a browsed file from elsewhere if one is set.
             string current = RunInputPath;
             CboRunInput.Items.Clear();
-            foreach (string f in Kit.RunInputs(folder)) CboRunInput.Items.Add(new RunInputItem(f));
+            foreach (string f in Kit.RunInputs(folder)) CboRunInput.Items.Add(new RunInputItem(f, folder));
             var match = CboRunInput.Items.Cast<RunInputItem>().FirstOrDefault(i => string.Equals(i.Path, current, StringComparison.OrdinalIgnoreCase));
             if (match != null) CboRunInput.SelectedItem = match;
             else if (CboRunInput.Items.Count > 0) CboRunInput.SelectedIndex = 0;
@@ -270,8 +270,16 @@ namespace KitHelper
         sealed class RunInputItem
         {
             public readonly string Path;
-            public RunInputItem(string path) { Path = path; }
-            public override string ToString() => System.IO.Path.GetFileName(Path);
+            readonly string shown;
+            // shown relative to the kit folder, so inputTest\x.txt and inputTemplate\x.txt stay apart
+            public RunInputItem(string path, string kit = null)
+            {
+                Path = path;
+                string k = kit?.TrimEnd('\\');
+                shown = k != null && path.StartsWith(k + "\\", StringComparison.OrdinalIgnoreCase)
+                    ? path.Substring(k.Length + 1) : System.IO.Path.GetFileName(path);
+            }
+            public override string ToString() => shown;
         }
 
         string RunInputPath
