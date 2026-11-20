@@ -8,6 +8,11 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ## 2026-11-20
 
+- **Kit Helper 1.8.1: state colours on the popups** (`CopyResultWindow.SetMood`, also used by
+  `AskWindow`). The window outline, a tinted title band, a badge and the title text take one
+  colour: confirmation = Warn/amber "CONFIRM", result = Ok/green "DONE" or Err/red "ERRORS" (any
+  Failed item), the TrueTest question = amber "QUESTION". Checked by rendering all four.
+
 - **Kit Helper 1.8.0: untick files in the confirmation; report titled "Result of …".**
   - Confirmation (Copy package, Database model): a checkbox per file that would be written,
     ticked by default; a folder checkbox ticks / unticks its group and shows a "–" when only some

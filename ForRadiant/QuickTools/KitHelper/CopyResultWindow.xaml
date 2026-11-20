@@ -5,17 +5,23 @@
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ShowInTaskbar="False" ResizeMode="NoResize" WindowStartupLocation="CenterOwner"
         FontFamily="Segoe UI" FontSize="12.5" Foreground="{StaticResource Fg}">
-    <Border CornerRadius="12" Background="{StaticResource Bg}" BorderBrush="#33FFFFFF" BorderThickness="1" Margin="10">
+    <!-- Frame / HeaderBand / BadgeBox are coloured per state by SetMood (confirm amber, done green, errors red). -->
+    <Border x:Name="Frame" CornerRadius="12" Background="{StaticResource Bg}" BorderBrush="#33FFFFFF" BorderThickness="2" Margin="10">
         <Border.Effect>
             <DropShadowEffect BlurRadius="16" ShadowDepth="2" Opacity="0.5"/>
         </Border.Effect>
         <DockPanel Margin="16,10,16,14">
             <!-- header (drag to move) -->
-            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8" Background="Transparent" MouseLeftButtonDown="Header_MouseLeftButtonDown">
-                <Button DockPanel.Dock="Right" Content="✕" Style="{StaticResource ChromeButton}" Click="Close_Click"/>
-                <Ellipse Width="14" Height="14" Fill="{StaticResource Brand}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                <TextBlock x:Name="TxtTitle" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-            </DockPanel>
+            <Border x:Name="HeaderBand" DockPanel.Dock="Top" CornerRadius="8" Padding="10,6,4,6" Margin="-6,0,-6,10"
+                    MouseLeftButtonDown="Header_MouseLeftButtonDown">
+                <DockPanel Background="Transparent">
+                    <Button DockPanel.Dock="Right" Content="✕" Style="{StaticResource ChromeButton}" Click="Close_Click"/>
+                    <Border x:Name="BadgeBox" CornerRadius="4" Padding="7,1,7,2" Margin="0,0,10,0" VerticalAlignment="Center">
+                        <TextBlock x:Name="TxtBadge" FontSize="11" FontWeight="Bold" Foreground="#FF14161C"/>
+                    </Border>
+                    <TextBlock x:Name="TxtTitle" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                </DockPanel>
+            </Border>
 
             <!-- counts: one coloured run per status -->
             <TextBlock x:Name="TxtSummary" DockPanel.Dock="Top" FontSize="13.5" Margin="0,0,0,4" TextWrapping="Wrap"/>

@@ -41,6 +41,10 @@ namespace KitHelper
 
             TxtTitle.Text = (preview ? "Confirmation of " : "Result of ") + title;
             TxtWhere.Text = where;
+            bool anyFailed = r.Items.Any(i => i.Status == CopyStatus.Failed);
+            if (preview) SetMood(this, "Warn", "CONFIRM");
+            else if (anyFailed) SetMood(this, "Err", "ERRORS");
+            else SetMood(this, "Ok", "DONE");
 
             int nNew = r.Items.Count(i => i.Status == CopyStatus.New);
             int nRep = r.Items.Count(i => i.Status == CopyStatus.Replaced);
@@ -245,6 +249,19 @@ namespace KitHelper
         public bool VignettingIncludeDx => ChkVigDx.IsChecked == true;
 
         Brush B(string key) => (Brush)FindResource(key);
+
+        // The state colour, so a confirmation / result / failure is told apart at a glance:
+        // outline, tinted title band, badge and title text. Also used by AskWindow.
+        internal static void SetMood(Window w, string brushKey, string badge)
+        {
+            var color = ((SolidColorBrush)w.FindResource(brushKey)).Color;
+            var solid = new SolidColorBrush(color);
+            ((Border)w.FindName("Frame")).BorderBrush = solid;
+            ((Border)w.FindName("HeaderBand")).Background = new SolidColorBrush(Color.FromArgb(0x26, color.R, color.G, color.B));
+            ((Border)w.FindName("BadgeBox")).Background = solid;
+            ((TextBlock)w.FindName("TxtBadge")).Text = badge;
+            ((TextBlock)w.FindName("TxtTitle")).Foreground = solid;
+        }
 
         void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => DragMove();
         void Close_Click(object sender, RoutedEventArgs e) => Close();

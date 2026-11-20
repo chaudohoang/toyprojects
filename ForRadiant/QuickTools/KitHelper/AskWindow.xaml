@@ -6,16 +6,21 @@
         ShowInTaskbar="False" ResizeMode="NoResize" WindowStartupLocation="CenterOwner"
         FontFamily="Segoe UI" FontSize="12.5" Foreground="{StaticResource Fg}">
     <!-- A question in Kit Helper's own style (replaces MessageBox): see AskWindow.Ask. -->
-    <Border CornerRadius="12" Background="{StaticResource Bg}" BorderBrush="#33FFFFFF" BorderThickness="1" Margin="10">
+    <!-- Coloured like the copy confirmation (CopyResultWindow.SetMood): amber + QUESTION badge. -->
+    <Border x:Name="Frame" CornerRadius="12" Background="{StaticResource Bg}" BorderBrush="#33FFFFFF" BorderThickness="2" Margin="10">
         <Border.Effect>
             <DropShadowEffect BlurRadius="16" ShadowDepth="2" Opacity="0.5"/>
         </Border.Effect>
         <StackPanel Margin="16,10,16,14">
-            <DockPanel Margin="0,0,0,10" Background="Transparent" MouseLeftButtonDown="Header_MouseLeftButtonDown">
-                <Button DockPanel.Dock="Right" Content="✕" Style="{StaticResource ChromeButton}" Click="Close_Click"/>
-                <Ellipse Width="14" Height="14" Fill="{StaticResource Brand}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                <TextBlock x:Name="TxtTitle" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center"/>
-            </DockPanel>
+            <Border x:Name="HeaderBand" CornerRadius="8" Padding="10,6,4,6" Margin="-6,0,-6,12" MouseLeftButtonDown="Header_MouseLeftButtonDown">
+                <DockPanel Background="Transparent">
+                    <Button DockPanel.Dock="Right" Content="✕" Style="{StaticResource ChromeButton}" Click="Close_Click"/>
+                    <Border x:Name="BadgeBox" CornerRadius="4" Padding="7,1,7,2" Margin="0,0,10,0" VerticalAlignment="Center">
+                        <TextBlock x:Name="TxtBadge" FontSize="11" FontWeight="Bold" Foreground="#FF14161C"/>
+                    </Border>
+                    <TextBlock x:Name="TxtTitle" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </DockPanel>
+            </Border>
             <TextBlock x:Name="TxtMessage" FontSize="13.5" TextWrapping="Wrap" Margin="0,0,0,6"/>
             <TextBlock x:Name="TxtDetail" Style="{StaticResource Hint}" TextWrapping="Wrap" Margin="0,0,0,4"/>
             <StackPanel x:Name="Buttons" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0"/>

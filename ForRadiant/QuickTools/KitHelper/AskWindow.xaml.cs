@@ -16,6 +16,7 @@ namespace KitHelper
             InitializeComponent();
             KeyDown += (s, e) => { if (e.Key == Key.Escape) Close(); };
             TxtTitle.Text = title;
+            CopyResultWindow.SetMood(this, "Warn", "QUESTION");
             TxtMessage.Text = message;
             TxtDetail.Text = detail ?? "";
             TxtDetail.Visibility = string.IsNullOrEmpty(detail) ? Visibility.Collapsed : Visibility.Visible;
