@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sandboxie Plus — Shortcut Creator</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #222222;
+    --border: #2e2e2e;
+    --border2: #3a3a3a;
+    --text: #e8e8e8;
+    --muted: #888;
+    --accent: #f0a500;
+    --accent-dim: rgba(240,165,0,0.12);
+    --accent-border: rgba(240,165,0,0.35);
+    --green: #3ecf8e;
+    --green-dim: rgba(62,207,142,0.12);
+    --red: #f87171;
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .app { width: 100%; max-width: 660px; }
+
+  /* Header */
+  .header { margin-bottom: 2rem; }
+  .header h1 { font-size: 20px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 10px; }
+  .header h1 svg { color: var(--accent); }
+  .header p { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+  /* Steps */
+  .step { margin-bottom: 1.75rem; }
+  .step-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .step-label span.num { background: var(--accent); color: #000; font-size: 10px; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  /* Sandbox grid */
+  .sb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px; }
+  .sb-item { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 12px; cursor: pointer; transition: border-color 0.15s, background 0.15s; user-select: none; }
+  .sb-item:hover { border-color: var(--border2); }
+  .sb-item.checked { border-color: var(--accent-border); background: var(--accent-dim); }
+  .sb-item input[type=checkbox] { width: 14px; height: 14px; accent-color: var(--accent); flex-shrink: 0; cursor: pointer; }
+  .sb-item .sb-name { font-size: 13px; color: var(--text); }
+  .sb-item.checked .sb-name { color: var(--accent); font-weight: 500; }
+
+  .sel-row { display: flex; gap: 6px; margin-bottom: 8px; }
+  .sel-row button { font-size: 12px; padding: 4px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--muted); cursor: pointer; transition: border-color 0.15s, color 0.15s; }
+  .sel-row button:hover { border-color: var(--border2); color: var(--text); }
+
+  /* Fields */
+  .field { margin-bottom: 1rem; }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .field input, .field select { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 9px 12px; color: var(--text); font-size: 13px; outline: none; transition: border-color 0.15s; }
+  .field input:focus, .field select:focus { border-color: var(--accent-border); }
+  .field input::placeholder { color: #555; }
+  .field select option { background: var(--surface2); }
+  .field .hint { font-size: 12px; color: #555; margin-top: 5px; }
+
+  .path-row { display: flex; gap: 6px; }
+  .path-row input { flex: 1; font-family: 'Consolas', 'Courier New', monospace; }
+  .browse-btn { display: flex; align-items: center; gap: 6px; padding: 0 14px; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius); color: var(--text); font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: border-color 0.15s, background 0.15s; }
+  .browse-btn:hover { border-color: var(--accent-border); background: var(--accent-dim); color: var(--accent); }
+
+  /* Divider */
+  hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+
+  /* Preview */
+  .preview-wrap { display: flex; flex-wrap: wrap; gap: 5px; min-height: 28px; }
+  .preview-tag { font-size: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 3px 10px; color: var(--muted); }
+
+  /* Generate button */
+  .gen-btn { width: 100%; padding: 11px; background: var(--accent); color: #000; font-size: 14px; font-weight: 600; border: none; border-radius: var(--radius); cursor: pointer; margin-top: 1.25rem; transition: opacity 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .gen-btn:hover { opacity: 0.88; }
+
+  /* Output */
+  .output-section { margin-top: 1.5rem; display: none; }
+  .output-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .output-header span { font-size: 12px; color: var(--muted); font-weight: 500; }
+  .copy-btn { display: flex; align-items: center; gap: 6px; font-size: 12px; padding: 5px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text); cursor: pointer; transition: border-color 0.15s; }
+  .copy-btn:hover { border-color: var(--border2); }
+  .copy-btn.copied { border-color: var(--green); color: var(--green); }
+  .output-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; font-family: 'Consolas', 'Courier New', monospace; font-size: 12px; color: #bbb; white-space: pre; overflow-x: auto; line-height: 1.65; }
+  .output-box .c-comment { color: #555; }
+  .output-box .c-cmd { color: var(--accent); }
+  .output-box .c-str { color: var(--green); }
+  .output-box .c-ok { color: var(--green); font-weight: 600; }
+
+  .action-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .action-btn { display: flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity 0.15s, border-color 0.15s; border: 1px solid; }
+  .save-ps1 { background: var(--surface2); border-color: var(--border2); color: var(--text); }
+  .save-ps1:hover { border-color: var(--accent-border); color: var(--accent); }
+  .save-bat { background: var(--accent); border-color: var(--accent); color: #000; }
+  .save-bat:hover { opacity: 0.88; }
+  .badge-run { font-size: 10px; font-weight: 600; background: rgba(0,0,0,0.2); border-radius: 4px; padding: 2px 6px; letter-spacing: 0.04em; }
+  .full-path-preview { margin-top: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .how-to { margin-top: 10px; background: var(--green-dim); border: 1px solid rgba(62,207,142,0.2); border-radius: var(--radius); padding: 10px 14px; font-size: 12px; color: #7be0b4; line-height: 1.6; display: none; }
+  .how-to strong { color: var(--green); }
+
+  /* Error */
+  .err { font-size: 12px; color: var(--red); margin-top: 8px; display: none; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <h1>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Sandboxie Plus — Shortcut Creator
+    </h1>
+    <p>Select sandboxes, pick your exe, name the app — get a ready-to-run PowerShell script.</p>
+  </div>
+
+  <!-- Step 1: Sandboxes -->
+  <div class="step">
+    <div class="step-label"><span class="num">1</span> Select sandboxes</div>
+    <div class="sel-row">
+      <button onclick="toggleAll(true)">Select all</button>
+      <button onclick="toggleAll(false)">Clear all</button>
+    </div>
+    <div class="sb-grid" id="sbGrid"></div>
+  </div>
+
+  <hr>
+
+  <!-- Step 2: EXE -->
+  <div class="step">
+    <div class="step-label"><span class="num">2</span> Application path</div>
+    <div class="field">
+      <label>Folder path <span style="color:#555;">(paste the folder where the .exe lives)</span></label>
+      <input type="text" id="exeFolder" placeholder="C:\Program Files\MyApp" oninput="rebuildPath()" />
+    </div>
+    <div class="field">
+      <label>Executable file</label>
+      <div class="path-row">
+        <input type="text" id="exeFile" placeholder="app.exe" oninput="rebuildPath()" />
+        <button class="browse-btn" onclick="document.getElementById('filePicker').click()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          Browse
+        </button>
+        <input type="file" id="filePicker" accept=".exe" style="display:none" onchange="onFilePicked(this)" />
+      </div>
+      <p class="hint" id="pathHint">Browse fills the filename — paste the folder path above to complete it.</p>
+    </div>
+    <div class="full-path-preview" id="fullPathPreview" style="display:none;">
+      <span style="color:#555; font-size:12px;">Full path:</span>
+      <span id="fullPathText" style="font-family:'Consolas',monospace; font-size:12px; color:var(--accent);"></span>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- Step 3: Name & destination -->
+  <div class="step">
+    <div class="step-label"><span class="num">3</span> Shortcut name &amp; location</div>
+    <div class="field">
+      <label>App name (used in shortcut filename)</label>
+      <input type="text" id="appName" placeholder="e.g. Facebook Web" oninput="updatePreview()" />
+    </div>
+    <div class="field">
+      <label>Save shortcuts to</label>
+      <select id="destSelect" onchange="onDestChange()">
+        <option value="desktop">Desktop</option>
+        <option value="startmenu">Start Menu — Programs folder</option>
+        <option value="custom">Custom folder...</option>
+      </select>
+    </div>
+    <div class="field" id="customPathRow" style="display:none;">
+      <label>Custom folder path</label>
+      <input type="text" id="customPath" placeholder="C:\MyShortcuts" oninput="updatePreview()" />
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- Preview -->
+  <div class="step">
+    <div class="step-label"><span class="num">&#10003;</span> Shortcut names preview</div>
+    <div class="preview-wrap" id="preview">
+      <span style="font-size:13px; color:#555;">Fill in the fields above to see a preview.</span>
+    </div>
+  </div>
+
+  <div class="err" id="errMsg"></div>
+  <button class="gen-btn" onclick="generate()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+    Generate PowerShell script
+  </button>
+
+  <!-- Output -->
+  <div class="output-section" id="outputSection">
+    <div class="output-header">
+      <span id="outputLabel">PowerShell script</span>
+      <button class="copy-btn" id="copyBtn" onclick="copyScript()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy
+      </button>
+    </div>
+    <div class="output-box" id="output"></div>
+    <div class="action-row">
+      <button class="action-btn save-ps1" onclick="savePs1()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Save as .ps1
+      </button>
+      <button class="action-btn save-bat" onclick="saveBat()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Save &amp; Run (.bat)
+        <span class="badge-run">double-click to run</span>
+      </button>
+    </div>
+    <div class="how-to" id="howTo"></div>
+  </div>
+
+</div>
+
+<script>
+const sandboxes = ['DefaultBox','Sandbox1','Sandbox2','Sandbox3','Sandbox4','Sandbox5','Sandbox6','Sandbox7','Sandbox8','Sandbox9'];
+const grid = document.getElementById('sbGrid');
+
+sandboxes.forEach(name => {
+  const label = document.createElement('label');
+  label.className = 'sb-item';
+  label.innerHTML = `<input type="checkbox" value="${name}" onchange="this.closest('.sb-item').classList.toggle('checked',this.checked);updatePreview()"><span class="sb-name">${name}</span>`;
+  grid.appendChild(label);
+});
+
+function onFilePicked(input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  document.getElementById('exeFile').value = file.name;
+  document.getElementById('pathHint').textContent = '✓ Filename filled — paste the folder path above to complete it.';
+  rebuildPath();
+}
+
+function rebuildPath() {
+  const folder = document.getElementById('exeFolder').value.trim().replace(/\\+$/, '');
+  const file = document.getElementById('exeFile').value.trim();
+  const full = folder && file ? folder + '\\' + file : '';
+  const preview = document.getElementById('fullPathPreview');
+  const pathText = document.getElementById('fullPathText');
+  if (full) {
+    pathText.textContent = full;
+    preview.style.display = 'block';
+  } else {
+    preview.style.display = 'none';
+  }
+  updatePreview();
+}
+
+function getExePath() {
+  const folder = document.getElementById('exeFolder').value.trim().replace(/\\+$/, '');
+  const file = document.getElementById('exeFile').value.trim();
+  return folder && file ? folder + '\\' + file : '';
+}
+
+function toggleAll(v) {
+  grid.querySelectorAll('input[type=checkbox]').forEach(c => {
+    c.checked = v;
+    c.closest('.sb-item').classList.toggle('checked', v);
+  });
+  updatePreview();
+}
+
+function onDestChange() {
+  const v = document.getElementById('destSelect').value;
+  document.getElementById('customPathRow').style.display = v === 'custom' ? 'block' : 'none';
+  updatePreview();
+}
+
+function getChecked() {
+  return [...grid.querySelectorAll('input:checked')].map(c => c.value);
+}
+
+function updatePreview() {
+  const checked = getChecked();
+  const name = document.getElementById('appName').value.trim();
+  const p = document.getElementById('preview');
+  if (!name || !checked.length) {
+    p.innerHTML = '<span style="font-size:13px;color:#555;">Select at least one sandbox and enter an app name.</span>';
+    return;
+  }
+  p.innerHTML = checked.map(sb => `<span class="preview-tag">${name} - ${sb}.lnk</span>`).join('');
+}
+
+function getDestExpr() {
+  const d = document.getElementById('destSelect').value;
+  if (d === 'desktop') return '$env:USERPROFILE + "\\Desktop"';
+  if (d === 'startmenu') return '$env:APPDATA + "\\Microsoft\\Windows\\Start Menu\\Programs"';
+  const cp = document.getElementById('customPath').value.trim() || 'C:\\Shortcuts';
+  return `"${cp}"`;
+}
+
+function showErr(msg) {
+  const e = document.getElementById('errMsg');
+  e.textContent = msg;
+  e.style.display = msg ? 'block' : 'none';
+}
+
+function generate() {
+  const checked = getChecked();
+  const name = document.getElementById('appName').value.trim();
+  const exe = getExePath();
+
+  if (!checked.length) { showErr('⚠ Please select at least one sandbox.'); return; }
+  if (!name) { showErr('⚠ Please enter an app name.'); return; }
+  if (!exe) { showErr('⚠ Please enter the path to the .exe file.'); return; }
+  showErr('');
+
+  const destExpr = getDestExpr();
+  const lines = [];
+  lines.push(`$Shell = New-Object -ComObject WScript.Shell`);
+  lines.push(`$Dest  = ${destExpr}`);
+  lines.push(``);
+
+  checked.forEach(sb => {
+    const lnkName = `${name} - ${sb}.lnk`;
+    lines.push(`# ${lnkName}`);
+    lines.push(`$s = $Shell.CreateShortcut($Dest + "\\${lnkName}")`);
+    lines.push(`$s.TargetPath  = "C:\\Program Files\\Sandboxie-Plus\\Start.exe"`);
+    lines.push(`$s.Arguments   = '/box:${sb} "${exe}"'`);
+    lines.push(`$s.IconLocation= "${exe}, 0"`);
+    lines.push(`$s.Description = "${name} in ${sb}"`);
+    lines.push(`$s.Save()`);
+    lines.push(`Write-Host "  Created: ${lnkName}" -ForegroundColor Cyan`);
+    lines.push(``);
+  });
+
+  lines.push(`Write-Host "" `);
+  lines.push(`Write-Host "Done — ${checked.length} shortcut(s) created!" -ForegroundColor Green`);
+
+  const raw = lines.join('\n');
+
+  // Syntax-highlighted version
+  const highlighted = lines.map(line => {
+    if (line.startsWith('#')) return `<span class="c-comment">${esc(line)}</span>`;
+    if (line.includes('Write-Host') && line.includes('Green')) return `<span class="c-ok">${esc(line)}</span>`;
+    return esc(line)
+      .replace(/(\$\w+)/g, '<span class="c-cmd">$1</span>')
+      .replace(/("(?:[^"\\]|\\.)*")/g, '<span class="c-str">$1</span>');
+  }).join('\n');
+
+  document.getElementById('output').innerHTML = highlighted;
+  document.getElementById('outputLabel').textContent = `PowerShell script — ${checked.length} shortcut(s)`;
+  document.getElementById('outputSection').style.display = 'block';
+  document.getElementById('howTo').style.display = 'none';
+  document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  window._rawScript = raw;
+}
+
+function downloadFile(filename, content, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function savePs1() {
+  if (!window._rawScript) return;
+  const name = document.getElementById('appName').value.trim() || 'shortcuts';
+  downloadFile(`Create Sandbox Shortcut - ${name}.ps1`, window._rawScript, 'text/plain');
+}
+
+function toBase64PS(script) {
+  // PowerShell -EncodedCommand requires UTF-16 LE base64
+  const utf16 = [];
+  for (let i = 0; i < script.length; i++) {
+    const code = script.charCodeAt(i);
+    utf16.push(code & 0xff, (code >> 8) & 0xff);
+  }
+  const bytes = new Uint8Array(utf16);
+  let binary = '';
+  bytes.forEach(b => binary += String.fromCharCode(b));
+  return btoa(binary);
+}
+
+function saveBat() {
+  if (!window._rawScript) return;
+  const name = document.getElementById('appName').value.trim() || 'shortcuts';
+  const encoded = toBase64PS(window._rawScript);
+  const batLines = [
+    '@echo off',
+    'echo Creating Sandboxie shortcuts...',
+    'echo.',
+    `powershell -ExecutionPolicy Bypass -NoProfile -EncodedCommand ${encoded}`,
+    'echo.',
+    'pause'
+  ];
+  const filename = `Create Sandbox Shortcut - ${name}.bat`;
+  downloadFile(filename, batLines.join('\r\n'), 'text/plain');
+  const howTo = document.getElementById('howTo');
+  howTo.innerHTML = `<strong>✓ "${filename}" downloaded.</strong> Find it in your Downloads folder and double-click it — shortcuts will be created immediately.`;
+  howTo.style.display = 'block';
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function copyScript() {
+  if (!window._rawScript) return;
+  navigator.clipboard.writeText(window._rawScript).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy`;
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+</script>
+</body>
+</html>

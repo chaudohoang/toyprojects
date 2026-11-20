@@ -1,0 +1,167 @@
+<Window x:Class="YdkeDeckBuilderWpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="YDKE Deck Builder" Width="1200" Height="820" MinWidth="820" MinHeight="520"
+        WindowStartupLocation="CenterScreen" Icon="app.ico"
+        Background="{DynamicResource Bg}" Foreground="{DynamicResource Ink}"
+        FontFamily="Segoe UI" FontSize="14" UseLayoutRounding="True"
+        AllowDrop="True" PreviewDragOver="Window_DragOver" Drop="Window_Drop">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel>
+            <TextBlock Text="YDKE Deck Builder" FontSize="22" FontWeight="SemiBold" />
+            <TextBlock Foreground="{DynamicResource Muted}" Margin="0,4,0,16" TextWrapping="Wrap">
+                Paste a deck list, or a screenshot of a deck, get a ydke:// code for EDOPro, YGO Omega, Dueling Book and YGOPRODeck.
+                Card data from the
+                <Hyperlink NavigateUri="https://ygoprodeck.com/api-guide/" RequestNavigate="OnLink">YGOPRODeck API</Hyperlink>.
+            </TextBlock>
+        </StackPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="5*" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="7*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Left: the deck list -->
+            <Border Style="{StaticResource Panel}">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Bottom" Margin="0,10,0,0">
+                        <WrapPanel>
+                            <Button x:Name="BuildButton" Content="Build deck" Style="{StaticResource Primary}"
+                                    Click="Build_Click" Margin="0,0,8,6" />
+                            <Button x:Name="ImageButton" Content="Open image…" Click="OpenImage_Click" Margin="0,0,12,6"
+                                    ToolTip="Read the cards from a deck screenshot (Master Duel and similar). You can also paste one into the list (Ctrl+V or right-click, Paste), a copied image file too, or drop the file here." />
+                            <Button x:Name="MdProButton" Content="MDPro folder…" Click="MdPro_Click" Margin="0,0,12,6" />
+                            <TextBlock Text="Banlist" VerticalAlignment="Center" Foreground="{DynamicResource Muted}" Margin="0,0,6,6" />
+                            <Border BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="7" Padding="2"
+                                    VerticalAlignment="Center" Margin="0,0,14,6">
+                                <StackPanel x:Name="FormatPicker" Orientation="Horizontal">
+                                    <RadioButton Content="TCG" Tag="tcg" GroupName="Format" IsChecked="True" Style="{StaticResource Segment}" />
+                                    <RadioButton Content="OCG" Tag="ocg" GroupName="Format" Style="{StaticResource Segment}" />
+                                    <RadioButton Content="None" Tag="" GroupName="Format" Style="{StaticResource Segment}" />
+                                </StackPanel>
+                            </Border>
+                            <CheckBox x:Name="AutoMoveBox" IsChecked="True" VerticalAlignment="Center" Margin="0,0,0,6"
+                                      Foreground="{DynamicResource Muted}"
+                                      Content="Move Extra Deck monsters out of the Main Deck" />
+                        </WrapPanel>
+                        <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource Muted}" FontSize="13" Margin="0,6,0,0">
+                            Lines look like <Run FontFamily="{StaticResource Mono}">3 Card Name</Run>,
+                            <Run FontFamily="{StaticResource Mono}">3x Card Name</Run>,
+                            <Run FontFamily="{StaticResource Mono}">Card Name x3</Run> or just
+                            <Run FontFamily="{StaticResource Mono}">Card Name</Run>. Headings containing
+                            <Bold>main</Bold>, <Bold>extra</Bold>, or <Bold>side</Bold> / <Bold>alternative</Bold>
+                            switch sections. Ctrl+Enter builds. No list? Paste or drop a screenshot of the deck.
+                        </TextBlock>
+                    </StackPanel>
+
+                    <Border Style="{StaticResource Field}">
+                        <Grid>
+                            <TextBox x:Name="Input" AcceptsReturn="True" TextWrapping="NoWrap"
+                                     VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                                     BorderThickness="0" Background="Transparent" Padding="8"
+                                     FontFamily="{StaticResource Mono}" FontSize="13" SpellCheck.IsEnabled="False"
+                                     PreviewKeyDown="Input_PreviewKeyDown" TextChanged="Input_TextChanged"
+                                     CommandManager.PreviewCanExecute="Input_PreviewCanExecute" CommandManager.PreviewExecuted="Input_PreviewExecuted" />
+                            <TextBlock x:Name="Placeholder" IsHitTestVisible="False" Margin="12,10"
+                                       Foreground="{DynamicResource Muted}" FontFamily="{StaticResource Mono}" FontSize="13"
+                                       Text="Main Deck:&#10;3 Blue-Eyes White Dragon&#10;3 Ash Blossom &amp; Joyous Spring&#10;...&#10;&#10;Extra Deck:&#10;2 Blue-Eyes Spirit Dragon&#10;...&#10;&#10;Side Deck:&#10;1 Nibiru, the Primal Being" />
+                        </Grid>
+                    </Border>
+                </DockPanel>
+            </Border>
+
+            <!-- Right: the result -->
+            <Border Grid.Column="2" Style="{StaticResource Panel}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="0,0,12,0">
+                        <TextBlock x:Name="Status" Foreground="{DynamicResource Muted}" TextWrapping="Wrap"
+                                   Text="Paste a list and press Build deck." />
+
+                        <StackPanel x:Name="Output" Visibility="Collapsed">
+                            <TextBlock Text="YDKE code" Style="{StaticResource Heading}" />
+                            <DockPanel>
+                                <Button DockPanel.Dock="Right" Content="Copy" Click="Copy_Click" Margin="8,0,0,0" />
+                                <Border Style="{StaticResource Field}">
+                                    <TextBox x:Name="YdkeBox" IsReadOnly="True" BorderThickness="0" Background="Transparent"
+                                             Padding="8,7" FontFamily="{StaticResource Mono}" FontSize="12" TextWrapping="NoWrap"
+                                             VerticalContentAlignment="Center" />
+                                </Border>
+                            </DockPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                <Button Content="Save .ydk file" Click="Save_Click" />
+                                <TextBlock x:Name="Copied" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="10,0,0,0" />
+                            </StackPanel>
+
+                            <ItemsControl x:Name="IssuesList" Margin="0,12,0,0">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{DynamicResource Bg}" BorderBrush="{Binding Brush}" BorderThickness="3,0,0,0"
+                                                CornerRadius="4" Padding="10,6" Margin="0,0,0,4">
+                                            <TextBlock Text="{Binding Text}" TextWrapping="Wrap" />
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <ItemsControl x:Name="SectionsList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource Heading}">
+                                                <Run Text="{Binding Title, Mode=OneWay}" />
+                                                <Run Text="{Binding CountText, Mode=OneWay}" FontWeight="Normal" FontSize="13"
+                                                     Foreground="{DynamicResource Muted}" />
+                                            </TextBlock>
+                                            <ItemsControl ItemsSource="{Binding Rows}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1" Padding="4,5">
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="28" />
+                                                                    <ColumnDefinition Width="*" />
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                    <ColumnDefinition Width="80" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Text="{Binding Count}" HorizontalAlignment="Right" Margin="0,0,10,0" />
+                                                                <DockPanel Grid.Column="1">
+                                                                    <Ellipse Width="8" Height="8" Fill="{Binding Dot}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                                                    <TextBlock TextWrapping="Wrap">
+                                                                        <Hyperlink NavigateUri="{Binding Url}" RequestNavigate="OnLink">
+                                                                            <Run Text="{Binding Name, Mode=OneWay}" />
+                                                                        </Hyperlink>
+                                                                    </TextBlock>
+                                                                </DockPanel>
+                                                                <TextBlock Grid.Column="2" Text="{Binding Type}" Foreground="{DynamicResource Muted}"
+                                                                           FontSize="13" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                                                <Border Grid.Column="3" Margin="10,0,0,0" BorderBrush="{Binding BanBrush}" BorderThickness="1"
+                                                                        CornerRadius="4" Padding="6,0" VerticalAlignment="Center"
+                                                                        Visibility="{Binding BanVisibility}">
+                                                                    <TextBlock Text="{Binding Ban}" Foreground="{Binding BanBrush}" FontSize="11" />
+                                                                </Border>
+                                                                <TextBlock Grid.Column="4" Text="{Binding Id}" Foreground="{DynamicResource Muted}"
+                                                                           FontSize="13" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

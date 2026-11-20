@@ -1,0 +1,107 @@
+﻿<Window x:Class="SnakeGameWPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Snake Game"
+        Background="#0F0F19"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        SizeToContent="WidthAndHeight"
+        PreviewKeyDown="OnKeyDown">
+    <Window.Resources>
+        <!-- Tiled 2x2 cell checkerboard, drawn by the GPU instead of 600 Rectangles -->
+        <DrawingBrush x:Key="CheckerBrush"
+                      TileMode="Tile"
+                      Viewport="0,0,40,40"
+                      ViewportUnits="Absolute"
+                      Stretch="None">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="#141423">
+                        <GeometryDrawing.Geometry>
+                            <GeometryGroup>
+                                <RectangleGeometry Rect="0,0,20,20"/>
+                                <RectangleGeometry Rect="20,20,20,20"/>
+                            </GeometryGroup>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="#19192A">
+                        <GeometryDrawing.Geometry>
+                            <GeometryGroup>
+                                <RectangleGeometry Rect="20,0,20,20"/>
+                                <RectangleGeometry Rect="0,20,20,20"/>
+                            </GeometryGroup>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+            <TextBlock x:Name="ScoreText" Text="Score: 0"
+                       Foreground="#FFFFFF" FontFamily="Segoe UI" FontSize="20" FontWeight="Bold"
+                       HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            <TextBlock x:Name="BestText" Text="Best: 0"
+                       Foreground="#969696" FontFamily="Segoe UI" FontSize="14"
+                       HorizontalAlignment="Right" VerticalAlignment="Center"/>
+        </Grid>
+
+        <Border Grid.Row="1" BorderBrush="#3C3C50" BorderThickness="2" CornerRadius="4">
+            <Grid>
+                <Canvas x:Name="GameCanvas" Width="760" Height="520"
+                        Background="{StaticResource CheckerBrush}"
+                        ClipToBounds="True"/>
+
+                <Border x:Name="MenuPanel" Background="#E60F0F19">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Text="SNAKE" Foreground="#FFD700"
+                                   FontFamily="Segoe UI" FontSize="52" FontWeight="Bold"
+                                   TextAlignment="Center"/>
+                        <TextBlock Text="Arrow keys or WASD to steer"
+                                   Foreground="#FFFFFF" FontFamily="Segoe UI" FontSize="15"
+                                   TextAlignment="Center" Margin="0,24,0,0"/>
+                        <TextBlock Text="Eat the red apples to score"
+                                   Foreground="#FFFFFF" FontFamily="Segoe UI" FontSize="15"
+                                   TextAlignment="Center" Margin="0,6,0,0"/>
+                        <TextBlock Text="Press SPACE or ENTER to start"
+                                   Foreground="#32C832" FontFamily="Segoe UI" FontSize="16" FontWeight="Bold"
+                                   TextAlignment="Center" Margin="0,28,0,0"/>
+                        <TextBlock Text="Press ESC to quit"
+                                   Foreground="#969696" FontFamily="Segoe UI" FontSize="13"
+                                   TextAlignment="Center" Margin="0,8,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="OverlayPanel" Background="#96000000" Visibility="Collapsed">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Text="GAME OVER" Foreground="#DC3232"
+                                   FontFamily="Segoe UI" FontSize="44" FontWeight="Bold"
+                                   TextAlignment="Center"/>
+                        <TextBlock x:Name="FinalScoreText" Text="Score: 0"
+                                   Foreground="#FFFFFF" FontFamily="Segoe UI" FontSize="22"
+                                   TextAlignment="Center" Margin="0,18,0,0"/>
+                        <TextBlock x:Name="NewBestText" Text="New record!"
+                                   Foreground="#FFD700" FontFamily="Segoe UI" FontSize="18" FontWeight="Bold"
+                                   TextAlignment="Center" Margin="0,8,0,0"
+                                   Visibility="Collapsed"/>
+                        <TextBlock Text="SPACE to play again  |  ESC for menu"
+                                   Foreground="#32C832" FontFamily="Segoe UI" FontSize="15"
+                                   TextAlignment="Center" Margin="0,26,0,0"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <TextBlock Grid.Row="2" Margin="0,8,0,0"
+                   Text="WASD / Arrow Keys = Move    |    R = Restart    |    ESC = Back"
+                   Foreground="#787878" FontFamily="Segoe UI" FontSize="12"
+                   HorizontalAlignment="Center"/>
+    </Grid>
+</Window>

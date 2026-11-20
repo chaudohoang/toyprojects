@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YDKE Deck Builder</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --ink: #1d2230; --muted: #667085; --line: #dfe3ea;
+    --accent: #3b5bdb; --ok: #2b8a3e; --warn: #b7791f; --err: #c92a2a;
+    --monster: #c98a2b; --spell: #1d8a7a; --trap: #b0337d; --extra: #6741d9;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161c; --panel: #1d2029; --ink: #e6e8ee; --muted: #9aa3b2; --line: #2e3340;
+      --accent: #748ffc; --ok: #69db7c; --warn: #ffd43b; --err: #ff8787;
+      --monster: #e8a54a; --spell: #38d9a9; --trap: #f783ac; --extra: #b197fc;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1200px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  .grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 16px; }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+  textarea { width: 100%; min-height: 460px; resize: vertical; border: 1px solid var(--line); border-radius: 8px;
+    padding: 10px; font: 13px/1.5 ui-monospace, Consolas, monospace; background: var(--bg); color: var(--ink); }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+  button { border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 7px;
+    padding: 7px 14px; font: inherit; cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  button:disabled { opacity: .5; cursor: default; }
+  select { font: inherit; padding: 6px; border-radius: 7px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+  label { color: var(--muted); }
+  .status { color: var(--muted); min-height: 1.4em; }
+  .out { display: flex; gap: 8px; }
+  .out input { flex: 1; min-width: 0; font: 12px ui-monospace, Consolas, monospace; padding: 8px; border-radius: 7px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
+  h2 { font-size: 15px; margin: 18px 0 8px; display: flex; gap: 8px; align-items: baseline; }
+  h2:first-child { margin-top: 0; }
+  h2 .count { color: var(--muted); font-weight: 400; font-size: 13px; }
+  .issues { margin: 12px 0 0; padding: 0; list-style: none; }
+  .issues li { padding: 6px 10px; border-radius: 6px; margin-bottom: 4px; border-left: 3px solid; background: var(--bg); }
+  .issues .err { border-color: var(--err); }
+  .issues .warn { border-color: var(--warn); }
+  .issues .info { border-color: var(--accent); }
+  .tablewrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  td, th { padding: 4px 8px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+  th { color: var(--muted); font-weight: 500; }
+  td.name { white-space: normal; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+  .ban { font-size: 11px; padding: 1px 6px; border-radius: 4px; border: 1px solid currentColor; }
+  .ban.Forbidden { color: var(--err); } .ban.Limited, .ban.Semi-Limited { color: var(--warn); }
+  .muted { color: var(--muted); }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>YDKE Deck Builder</h1>
+  <p class="sub">Paste a deck list, get a <code>ydke://</code> code for EDOPro, YGO Omega, Dueling Book and YGOPRODeck.
+    Card data from the <a href="https://ygoprodeck.com/api-guide/" target="_blank" rel="noopener">YGOPRODeck API</a>.</p>
+
+  <div class="grid">
+    <section class="panel">
+      <textarea id="input" spellcheck="false" placeholder="Main Deck:
+3 Blue-Eyes White Dragon
+3 Ash Blossom &amp; Joyous Spring
+...
+
+Extra Deck:
+2 Blue-Eyes Spirit Dragon
+...
+
+Side Deck:
+1 Nibiru, the Primal Being"></textarea>
+      <div class="row">
+        <button class="primary" id="build">Build deck</button>
+        <label>Banlist <select id="format"><option value="tcg">TCG</option><option value="ocg">OCG</option><option value="">None</option></select></label>
+        <label><input type="checkbox" id="autoMove" checked> Move Extra Deck monsters out of the Main Deck</label>
+      </div>
+      <p class="muted" style="margin:10px 0 0">Lines look like <code>3 Card Name</code>, <code>3x Card Name</code>, <code>Card Name x3</code> or just
+        <code>Card Name</code>. Headings containing <b>main</b>, <b>extra</b>, or <b>side</b> / <b>alternative</b> switch sections.</p>
+    </section>
+
+    <section class="panel" id="result">
+      <div class="status" id="status">Paste a list and press Build deck.</div>
+      <div id="output" hidden>
+        <h2>YDKE code</h2>
+        <div class="out"><input id="ydke" readonly><button id="copy">Copy</button></div>
+        <div class="row"><button id="saveYdk">Save .ydk file</button><span class="muted" id="copied"></span></div>
+        <ul class="issues" id="issues"></ul>
+        <div id="sections"></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+const API = "https://db.ygoprodeck.com/api/v7/cardinfo.php";
+const EXTRA_FRAMES = new Set(["fusion", "synchro", "xyz", "link", "fusion_pendulum", "synchro_pendulum", "xyz_pendulum"]);
+const SECTIONS = [["main", "Main Deck"], ["extra", "Extra Deck"], ["side", "Side Deck"]];
+const $ = id => document.getElementById(id);
+
+// ---------- Parsing ----------
+
+function parseList(text) {
+  const entries = [];
+  let section = "main";
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith("#") || line.startsWith("//")) continue;
+
+    // A heading switches section: "Main Deck:", "Extra Deck", "Side Deck:", "Alternative Cards you can play:"
+    const heading = line.replace(/[:\-=*]+$/, "").trim().toLowerCase();
+    if (line.endsWith(":") || /^(main|extra|side)( deck)?$/.test(heading) || /^!side$/.test(heading)) {
+      if (/extra/.test(heading)) { section = "extra"; continue; }
+      if (/side|alternative|alternate|optional|tech/.test(heading)) { section = "side"; continue; }
+      if (/main/.test(heading)) { section = "main"; continue; }
+    }
+
+    let m, count = 1, name = line;
+    if ((m = line.match(/^(\d+)\s*[x×]?\s+(.+)$/i))) { count = +m[1]; name = m[2]; }
+    else if ((m = line.match(/^(.+?)\s+[x×]\s*(\d+)$/i) || line.match(/^(.+?)\s+\((\d+)\)$/))) { name = m[1]; count = +m[2]; }
+    entries.push({ section, count, name: name.trim(), line: raw.trim() });
+  }
+  return entries;
+}
+
+// ---------- Card lookup ----------
+
+const norm = s => s.toLowerCase().replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/[^a-z0-9]/g, "");
+
+async function getJson(url) {
+  const res = await fetch(url);
+  if (res.status === 400) return []; // "No card matching your query was found"
+  if (!res.ok) throw new Error(`YGOPRODeck returned ${res.status}`);
+  return (await res.json()).data ?? [];
+}
+
+/** Exact names in one batched request, then a fuzzy search per name that missed. */
+async function lookup(names) {
+  // Normalized names collide for different cards ("Hero Flash!!" / "H.E.R.O. Flash!", "Raimei" / "Rai-Mei"),
+  // so the exact spelling is tried first.
+  const found = new Map(), foundExact = new Map(); // normalized / lowercased name -> card
+  const unique = [...new Set(names)];
+  for (let i = 0; i < unique.length; i += 40) {
+    const batch = unique.slice(i, i + 40);
+    for (const card of await getJson(`${API}?name=${encodeURIComponent(batch.join("|"))}`)) {
+      found.set(norm(card.name), card);
+      foundExact.set(card.name.toLowerCase(), card);
+    }
+  }
+
+  const result = new Map(), suggestions = new Map();
+  for (const name of unique) {
+    const exact = foundExact.get(name.toLowerCase()) ?? found.get(norm(name));
+    if (exact) { result.set(name, exact); continue; }
+
+    // Fuzzy: search on the longest word, then pick the closest name.
+    const words = name.replace(/[^\p{L}\p{N}' -]/gu, " ").split(/\s+/).filter(w => w.length >= 3)
+      .sort((a, b) => b.length - a.length);
+    let candidates = [];
+    for (const w of words.slice(0, 2)) {
+      candidates = await getJson(`${API}?fname=${encodeURIComponent(w)}`);
+      if (candidates.length) break;
+    }
+    const want = norm(name);
+    const scored = candidates.map(c => ({ c, score: similarity(want, norm(c.name)) })).sort((a, b) => b.score - a.score);
+    if (scored.length && scored[0].score >= 0.85) result.set(name, scored[0].c);
+    else suggestions.set(name, scored.slice(0, 3).map(s => s.c.name));
+  }
+  return { result, suggestions };
+}
+
+/** 1 - normalized Levenshtein distance. */
+function similarity(a, b) {
+  if (a === b) return 1;
+  const prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    let diag = prev[0]; prev[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const tmp = prev[j];
+      prev[j] = Math.min(prev[j] + 1, prev[j - 1] + 1, diag + (a[i - 1] === b[j - 1] ? 0 : 1));
+      diag = tmp;
+    }
+  }
+  return 1 - prev[b.length] / Math.max(a.length, b.length);
+}
+
+// ---------- YDKE ----------
+
+/** Each section is the passcodes as little-endian uint32s, base64-encoded: ydke://main!extra!side! */
+function encodeSection(ids) {
+  const bytes = new Uint8Array(ids.length * 4);
+  const view = new DataView(bytes.buffer);
+  ids.forEach((id, i) => view.setUint32(i * 4, id, true));
+  let bin = "";
+  bytes.forEach(b => bin += String.fromCharCode(b));
+  return btoa(bin);
+}
+
+const toYdke = deck => "ydke://" + SECTIONS.map(([k]) => encodeSection(deck[k].flatMap(e => Array(e.count).fill(e.card.id)))).join("!") + "!";
+
+function toYdk(deck) {
+  const lines = ["#created by YDKE Deck Builder", "#main"];
+  const ids = k => deck[k].flatMap(e => Array(e.count).fill(String(e.card.id)));
+  lines.push(...ids("main"), "#extra", ...ids("extra"), "!side", ...ids("side"));
+  return lines.join("\n") + "\n";
+}
+
+// ---------- Build ----------
+
+const isExtra = card => EXTRA_FRAMES.has(card.frameType);
+const limitOf = (card, format) => {
+  const ban = format && card.banlist_info?.[`ban_${format}`];
+  return { Forbidden: 0, Limited: 1, "Semi-Limited": 2 }[ban] ?? 3;
+};
+
+async function build() {
+  const entries = parseList($("input").value);
+  if (!entries.length) { $("status").textContent = "Nothing to build: paste a deck list first."; return; }
+
+  $("build").disabled = true;
+  $("status").textContent = `Looking up ${new Set(entries.map(e => e.name)).size} cards…`;
+  let looked;
+  try { looked = await lookup(entries.map(e => e.name)); }
+  catch (err) {
+    $("status").textContent = `Couldn't reach YGOPRODeck (${err.message}). Check your internet connection.`;
+    $("build").disabled = false;
+    return;
+  }
+  $("build").disabled = false;
+
+  const format = $("format").value;
+  const issues = [];
+  const deck = { main: [], extra: [], side: [] };
+
+  for (const e of entries) {
+    const card = looked.result.get(e.name);
+    if (!card) {
+      const s = looked.suggestions.get(e.name) ?? [];
+      issues.push(["err", `Not found: “${e.name}”` + (s.length ? `. Did you mean ${s.map(n => `“${n}”`).join(", ")}?` : ".")]);
+      continue;
+    }
+    if (norm(card.name) !== norm(e.name)) issues.push(["info", `“${e.name}” read as “${card.name}”.`]);
+
+    let section = e.section;
+    if ($("autoMove").checked && section !== "side") {
+      if (section === "main" && isExtra(card)) { section = "extra"; issues.push(["info", `${card.name} is an Extra Deck monster: moved to the Extra Deck.`]); }
+      else if (section === "extra" && !isExtra(card)) { section = "main"; issues.push(["info", `${card.name} isn't an Extra Deck monster: moved to the Main Deck.`]); }
+    }
+    const existing = deck[section].find(x => x.card.id === card.id);
+    if (existing) existing.count += e.count;
+    else deck[section].push({ card, count: e.count });
+  }
+
+  // Deck-size and copy-limit rules.
+  const size = k => deck[k].reduce((n, e) => n + e.count, 0);
+  const [m, x, s] = [size("main"), size("extra"), size("side")];
+  if (m < 40) issues.unshift(["err", `Main Deck has ${m} cards; it needs at least 40.`]);
+  if (m > 60) issues.unshift(["err", `Main Deck has ${m} cards; the maximum is 60.`]);
+  if (x > 15) issues.unshift(["err", `Extra Deck has ${x} cards; the maximum is 15.`]);
+  if (s > 15) issues.unshift(["err", `Side Deck has ${s} cards; the maximum is 15.`]);
+
+  const totals = new Map();
+  for (const [k] of SECTIONS) for (const e of deck[k]) {
+    const t = totals.get(e.card.id) ?? { card: e.card, count: 0 };
+    t.count += e.count; totals.set(e.card.id, t);
+  }
+  for (const { card, count } of totals.values()) {
+    const limit = limitOf(card, format);
+    if (count > limit) {
+      const why = limit === 3 ? "the limit is 3 copies" : `it is ${card.banlist_info[`ban_${format}`]} in ${format.toUpperCase()} (max ${limit})`;
+      issues.unshift([limit === 3 ? "err" : "warn", `${count}× ${card.name} across Main/Extra/Side, but ${why}.`]);
+    }
+  }
+
+  render(deck, issues, format, { m, x, s });
+}
+
+// ---------- Rendering ----------
+
+function render(deck, issues, format, sizes) {
+  const errors = issues.filter(i => i[0] === "err").length;
+  $("status").textContent = errors
+    ? `Built with ${errors} problem${errors > 1 ? "s" : ""}. The code still contains every card that was found.`
+    : `Main ${sizes.m} · Extra ${sizes.x} · Side ${sizes.s}`;
+  $("output").hidden = false;
+  $("ydke").value = toYdke(deck);
+  $("copied").textContent = "";
+  window.currentDeck = deck;
+
+  $("issues").replaceChildren(...issues.map(([kind, text]) => {
+    const li = document.createElement("li"); li.className = kind; li.textContent = text; return li;
+  }));
+
+  const order = c => c.type.includes("Monster") ? 0 : c.type.includes("Spell") ? 1 : 2;
+  const color = c => isExtra(c) ? "var(--extra)" : ["var(--monster)", "var(--spell)", "var(--trap)"][order(c)];
+  $("sections").replaceChildren(...SECTIONS.flatMap(([key, title]) => {
+    if (!deck[key].length) return [];
+    const h = document.createElement("h2");
+    h.innerHTML = `${title} <span class="count">${deck[key].reduce((n, e) => n + e.count, 0)} cards</span>`;
+    const rows = [...deck[key]].sort((a, b) => order(a.card) - order(b.card)).map(({ card, count }) => {
+      const ban = format && card.banlist_info?.[`ban_${format}`];
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td class="num">${count}</td><td class="name"><span class="dot" style="background:${color(card)}"></span>` +
+        `<a target="_blank" rel="noopener"></a></td><td class="muted">${card.type}</td>` +
+        `<td>${ban ? `<span class="ban ${ban}">${ban}</span>` : ""}</td><td class="num muted">${card.id}</td>`;
+      const a = tr.querySelector("a"); a.textContent = card.name; a.href = card.ygoprodeck_url;
+      return tr;
+    });
+    const wrap = document.createElement("div"); wrap.className = "tablewrap";
+    const table = document.createElement("table"); table.append(...rows); wrap.append(table);
+    return [h, wrap];
+  }));
+}
+
+$("build").addEventListener("click", build);
+$("input").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) build(); });
+$("copy").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText($("ydke").value); $("copied").textContent = "Copied."; }
+  catch { $("ydke").select(); $("copied").textContent = "Press Ctrl+C to copy."; }
+});
+$("saveYdk").addEventListener("click", () => {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([toYdk(window.currentDeck)], { type: "text/plain" }));
+  a.download = "deck.ydk";
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+</script>
+</body>
+</html>

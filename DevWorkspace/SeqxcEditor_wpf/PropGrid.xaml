@@ -1,0 +1,92 @@
+<UserControl x:Class="SeqxcEditor.PropGrid"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel>
+
+        <!-- Filter box -->
+        <Grid DockPanel.Dock="Top">
+            <TextBox x:Name="txtFilter" Height="28" Padding="6,4"
+                     FontFamily="Segoe UI" FontSize="12"
+                     BorderBrush="#D0D0D0" BorderThickness="0,0,0,1"
+                     TextChanged="TxtFilter_Changed" GotFocus="TxtFilter_GotFocus"
+                     LostFocus="TxtFilter_LostFocus"/>
+            <TextBlock x:Name="filterHint" Text="Filter properties…"
+                       IsHitTestVisible="False"
+                       Foreground="#AAAAAA" FontSize="12" FontFamily="Segoe UI"
+                       Margin="7,5,0,0" VerticalAlignment="Top"/>
+        </Grid>
+
+        <!-- Property DataGrid -->
+        <DataGrid x:Name="dgProps"
+                  HeadersVisibility="Column"
+                  CanUserResizeRows="False"
+                  CanUserResizeColumns="True"
+                  RowHeight="22"
+                  SelectionChanged="DgProps_SelectionChanged"
+                  PreviewMouseRightButtonUp="DgProps_RightClick"
+                  PreviewMouseLeftButtonUp="DgProps_LeftClick">
+
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="Background" Value="White"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsComplex}" Value="True">
+                            <Setter Property="Background" Value="#F5F7FB"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Indent}" Value="1">
+                            <Setter Property="Background" Value="#FCFCFF"/>
+                        </DataTrigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="#C6DAF7"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
+
+            <DataGrid.Columns>
+
+                <!-- PROPERTY column -->
+                <DataGridTemplateColumn Header="PROPERTY" Width="240" MinWidth="80" IsReadOnly="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <DockPanel Margin="{Binding IndentMargin}">
+                                <Button DockPanel.Dock="Left"
+                                        Content="{Binding ExpandIcon}"
+                                        Visibility="{Binding ExpandBtnVisibility}"
+                                        Tag="{Binding}"
+                                        Click="ExpandBtn_Click"
+                                        Width="20" Height="18"
+                                        Padding="0" Margin="0,0,2,0"
+                                        FontSize="10" Cursor="Hand"
+                                        Background="Transparent" BorderThickness="0"
+                                        Foreground="#4070B0"/>
+                                <TextBlock Text="{Binding PropText}"
+                                           Foreground="{Binding PropForeground}"
+                                           VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis"/>
+                            </DockPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- VALUE column — TextBox always visible for instant editing -->
+                <DataGridTemplateColumn Header="VALUE" Width="*" MinWidth="80">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                     IsReadOnly="{Binding IsComplex}"
+                                     BorderThickness="0"
+                                     Padding="2,0"
+                                     Background="Transparent"
+                                     FontFamily="Segoe UI" FontSize="12"
+                                     VerticalAlignment="Center"
+                                     Foreground="{Binding ValueForeground}"
+                                     KeyDown="ValueBox_KeyDown"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</UserControl>

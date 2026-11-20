@@ -1,0 +1,24 @@
+@host = http://localhost:5023
+
+### GET all orders
+GET {{host}}/api/orders
+Accept: application/json
+
+### GET order by id
+GET {{host}}/api/orders/1
+Accept: application/json
+
+### POST create order
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{
+  "customerName": "Le Van C",
+  "status": "pending"
+}
+
+### PUT update status
+PUT {{host}}/api/orders/1/status
+Content-Type: application/json
+
+"processing"

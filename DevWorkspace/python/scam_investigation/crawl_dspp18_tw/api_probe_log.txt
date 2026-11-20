@@ -1,0 +1,198 @@
+[200] POST https://api.ddjea.com/api/app/now
+  {
+  "resultCode": true,
+  "errCode": 0,
+  "errCodeDes": "ok",
+  "data": 1777126505591
+}
+
+[200] POST https://api.ddjea.com/api/app/language
+  {
+  "resultCode": true,
+  "errCode": 0,
+  "errCodeDes": "ok",
+  "data": [
+    {
+      "key": "ENGLISH",
+      "name": "ENGLISH"
+    },
+    {
+      "key": "TRADITIONAL_CHINESE",
+      "name": "TRADITIONAL_CHINESE"
+    },
+    {
+      "key": "GERMAN",
+      "name": "GERMAN"
+    },
+    {
+      "key": "FRENCH",
+      "name": "FRENCH"
+    },
+    {
+      "key": "KOREAN",
+      "name": "KOREAN"
+    },
+    {
+      "key": "JAPANESE",
+      "name": "JAPANESE"
+    },
+    {
+      "key": "ARAB",
+      "name": "ARAB"
+    },
+    {
+      "key": "RUSSIAN",
+      "name": "RUSSI
+
+[ERROR] POST https://api.ddjea.com/api/app/basis/notice
+
+[200] POST https://api.ddjea.com/api/app/quotes/sort
+  {
+  "resultCode": false,
+  "errCode": 100003,
+  "errCodeDes": "Missing parameters",
+  "data": {}
+}
+
+[200] POST https://api.ddjea.com/api/app/quotes/trade
+  {
+  "resultCode": false,
+  "errCode": 100003,
+  "errCodeDes": "Missing parameters",
+  "data": {}
+}
+
+[ERROR] POST https://api.ddjea.com/api/app/second/product
+
+[200] POST https://api.ddjea.com/api/app/second/now/period/profit
+  {
+  "resultCode": false,
+  "errCode": 100003,
+  "errCodeDes": "Missing parameters",
+  "data": {}
+}
+
+[200] POST https://api.ddjea.com/api/app/mining/product
+  {
+  "resultCode": true,
+  "errCode": 0,
+  "errCodeDes": "ok",
+  "data": []
+}
+
+[200] POST https://api.ddjea.com/api/app/basis/article/list
+  {
+  "resultCode": false,
+  "errCode": 100003,
+  "errCodeDes": "Missing parameters",
+  "data": {}
+}
+
+[200] POST https://api.ddjea.com/api/app/funds/overview
+  {
+  "resultCode": true,
+  "errCode": 0,
+  "errCodeDes": "ok",
+  "data": {
+    "usdtTotal": 1129.5,
+    "usdtAvailable": 1129.5,
+    "usdtUnavailable": 0.0,
+    "demoUsdtTotal": 0.0,
+    "demoUsdtAvailable": 0.0,
+    "demoUsdtUnavailable": 0.0,
+    "usdtTotalStr": "1129.50",
+    "usdtAvailableStr": "1129.50",
+    "usdtUnavailableStr": "0.00",
+    "demoUsdtTotalStr": "0.00",
+    "demoUsdtAvailableStr": "0.00",
+    "demoUsdtUnavailableStr": "0.00",
+    "todayIncome": "13.93",
+    "demoTodayIncome": "0",
+    "info": [
+      {
+        "id": 1,
+        "showName": "Exchange",
+
+
+[200] POST https://api.ddjea.com/api/app/funds/wallet/money
+  {
+  "resultCode": false,
+  "errCode": 100003,
+  "errCodeDes": "Missing parameters",
+  "data": {}
+}
+
+[200] POST https://api.ddjea.com/api/app/user/withdrawal/password/status
+  {
+  "resultCode": true,
+  "errCode": 0,
+  "errCodeDes": "ok",
+  "data": false
+}
+
+[ERROR] POST https://api.ddjea.com/api/app/user/credit/list
+
+[ERROR] POST https://api.ddjea.com/api/app/share/team
+
+[ERROR] POST https://api.ddjea.com/api/app/share/my/award
+
+[200] POST https://api.ddjea.com/api/app/second/share/list
+  {
+  "resultCode": true,
+  "errCode": 0,
+  "errCodeDes": "ok",
+  "data": {
+    "page": {
+      "content": [],
+      "pageable": {
+        "sort": {
+          "sorted": true,
+          "empty": false,
+          "unsorted": false
+        },
+        "pageNumber": 1,
+        "pageSize": 10,
+        "offset": 10,
+        "paged": true,
+        "unpaged": false
+      },
+      "last": true,
+      "totalElements": 0,
+      "totalPages": 0,
+      "size": 10,
+      "number": 1,
+      "sort": {
+        "sorted": true,
+        "empty": false,
+        "unsorted": false
+      },
+
+
+[200] POST https://api.ddjea.com/api/app/recharge/otc
+  {
+  "resultCode": true,
+  "errCode": 0,
+  "errCodeDes": "ok",
+  "data": []
+}
+
+[200] POST https://api.ddjea.com/api/app/financial/borrow
+  {
+  "resultCode": false,
+  "errCode": 100106,
+  "errCodeDes": "Insufficient quota",
+  "data": {}
+}
+
+[ERROR] POST https://api.ddjea.com/api/app/c2c/order
+
+[ERROR] POST https://api.ddjea.com/api/app/user/verify/now
+
+[200] POST https://api.ddjea.com/api/app/second/share/user/info/code
+  {
+  "resultCode": false,
+  "errCode": 100003,
+  "errCodeDes": "Missing parameters",
+  "data": {}
+}
+

@@ -1,0 +1,212 @@
+[
+  {
+    "endpoint": "/api/app/now",
+    "method": "POST",
+    "url": "https://api.ddjea.com/api/app/now",
+    "status": 200,
+    "body_sent": "{}",
+    "response": "{\r\n  \"resultCode\": true,\r\n  \"errCode\": 0,\r\n  \"errCodeDes\": \"ok\",\r\n  \"data\": 1777126505591\r\n}",
+    "interesting": true,
+    "notes": "SUCCESS - real data returned"
+  },
+  {
+    "endpoint": "/api/app/language",
+    "method": "POST",
+    "url": "https://api.ddjea.com/api/app/language",
+    "status": 200,
+    "body_sent": "{}",
+    "response": "{\r\n  \"resultCode\": true,\r\n  \"errCode\": 0,\r\n  \"errCodeDes\": \"ok\",\r\n  \"data\": [\r\n    {\r\n      \"key\": \"ENGLISH\",\r\n      \"name\": \"ENGLISH\"\r\n    },\r\n    {\r\n      \"key\": \"TRADITIONAL_CHINESE\",\r\n      \"name\": \"TRADITIONAL_CHINESE\"\r\n    },\r\n    {\r\n      \"key\": \"GERMAN\",\r\n      \"name\": \"GERMAN\"\r\n    },\r\n    {\r\n      \"key\": \"FRENCH\",\r\n      \"name\": \"FRENCH\"\r\n    },\r\n    {\r\n      \"key\": \"KOREAN\",\r\n      \"name\": \"KOREAN\"\r\n    },\r\n    {\r\n      \"key\": \"JAPANESE\",\r\n      \"name\": \"JAPANESE\"\r\n    },\r\n    {\r\n      \"key\": \"ARAB\",\r\n      \"name\": \"ARAB\"\r\n    },\r\n    {\r\n      \"key\": \"RUSSIAN\",\r\n      \"name\": \"RUSSIAN\"\r\n    },\r\n    {\r\n      \"key\": \"SPANISH\",\r\n      \"name\": \"SPANISH\"\r\n    },\r\n    {\r\n      \"key\": \"ITALIAN\",\r\n      \"name\": \"ITALIAN\"\r\n    },\r\n    {\r\n      \"key\": \"TURKIYE\",\r\n      \"name\": \"TURKIYE\"\r\n    },\r\n    {\r\n      \"key\": \"VIETNAMESE\",\r\n      \"name\": \"VIETNAMESE\"\r\n    }\r\n  ]\r\n}",
+    "interesting": true,
+    "notes": "SUCCESS - real data returned"
+  },
+  {
+    "endpoint": "/api/app/basis/notice",
+    "method": "POST",
+    "url": "https://api.ddjea.com/api/app/basis/notice",
+    "status": "ERROR",
+    "body_sent": "{\"pageNum\":1,\"pageSize\":10}",
+    "response": null,
+    "interesting": false,
+    "notes": "Response status code does not indicate success: 404 (Not Found)."
+  },
+  {
+    "endpoint": "/api/app/quotes/sort",
+    "method": "POST",
+    "url": "https://api.ddjea.com/api/app/quotes/sort",
+    "status": 200,
+    "body_sent": "{}",
+    "response": "{\r\n  \"resultCode\": false,\r\n  \"errCode\": 100003,\r\n  \"errCodeDes\": \"Missing parameters\",\r\n  \"data\": {}\r\n}",
+    "interesting": true,
+    "notes": "SUCCESS - real data returned"
+  },
+  {
+    "endpoint": "/api/app/quotes/trade",
+    "method": "POST",
+    "url": "https://api.ddjea.com/api/app/quotes/trade",
+    "status": 200,
+    "body_sent": "{\"symbol\":\"BTCUSDT\"}",
+    "response": "{\r\n  \"resultCode\": false,\r\n  \"errCode\": 100003,\r\n  \"errCodeDes\": \"Missing parameters\",\r\n  \"data\": {}\r\n}",
+    "interesting": true,
+    "notes": "SUCCESS - real data returned"
+  },
+  {
+    "endpoint": "/api/app/second/product",
+    "method": "POST",
+    "url": "https://api.ddjea.com/api/app/second/product",
+    "status": "ERROR",
+    "body_sent": "{}",
+    "response": null,
+    "interesting": false,
+    "notes": "Response status code does not indicate success: 405 (Method Not Allowed)."
+  },
+  {
+    "endpoint": "/api/app/second/now/period/profit",
+    "method": "POST",
+    "url": "https://api.ddjea.com/api/app/second/now/period/profit",
+    "status": 200,
+    "body_sent": "{\"periodId\":1,\"symbol\":\"BTCUSDT\"}",
+    "response": "{\r\n  \"resultCode\": false,\r\n  \"errCode\": 100003,\r\n  \"errCodeDes\": \"Missing parameters\",\r\n  \"data\": {}\r\n}",
+    "interesting": true,
+    "notes": "SUCCESS - real data returned"
+  },
+  {
+    "endpoint": "/api/app/mining/product",
+    "method": "POST",
+    "url": "https://api.ddjea.com/api/app/mining/product",
+    "status": 200,
+    "body_sent": "{}",
+    "response": "{\r\n  \"resultCode\": true,\r\n  \"errCode\": 0,\r\n  \"errCodeDes\": \"ok\",\r\n  \"data\": []\r\n}",
+    "interesting": true,
+    "notes": "SUCCESS - real data returned"
+  },
+  {
+    "endpoint": "/api/app/basis/article/list",
+    "method": "POST",
+    "url": "https://api.ddjea.com/api/app/basis/article/list",
+    "status": 200,
+    "body_sent": "{\"pageNum\":1,\"pageSize\":10}",
+    "response": "{\r\n  \"resultCode\": false,\r\n  \"errCode\": 100003,\r\n  \"errCodeDes\": \"Missing parameters\",\r\n  \"data\": {}\r\n}",
+    "interesting": true,
+    "notes": "SUCCESS - real data returned"
+  },
+  {
+    "endpoint": "/api/app/funds/overview",
+    "method": "POST",
+    "url": "https://api.ddjea.com/api/app/funds/overview",
+    "status": 200,
+    "body_sent": "{}",
+    "response": "{\r\n  \"resultCode\": true,\r\n  \"errCode\": 0,\r\n  \"errCodeDes\": \"ok\",\r\n  \"data\": {\r\n    \"usdtTotal\": 1129.5,\r\n    \"usdtAvailable\": 1129.5,\r\n    \"usdtUnavailable\": 0.0,\r\n    \"demoUsdtTotal\": 0.0,\r\n    \"demoUsdtAvailable\": 0.0,\r\n    \"demoUsdtUnavailable\": 0.0,\r\n    \"usdtTotalStr\": \"1129.50\",\r\n    \"usdtAvailableStr\": \"1129.50\",\r\n    \"usdtUnavailableStr\": \"0.00\",\r\n    \"demoUsdtTotalStr\": \"0.00\",\r\n    \"demoUsdtAvailableStr\": \"0.00\",\r\n    \"demoUsdtUnavailableStr\": \"0.00\",\r\n    \"todayIncome\": \"13.93\",\r\n    \"demoTodayIncome\": \"0\",\r\n    \"info\": [\r\n      {\r\n        \"id\": 1,\r\n        \"showName\": \"Exchange\",\r\n        \"wallets\": [\r\n          {\r\n            \"id\": \"437569213837250560\",\r\n            \"userId\": \"437569213765947392\",\r\n            \"standardId\": \"1\",\r\n            \"typeId\": 1,\r\n            \"fee\": 0.0,\r\n            \"freezeFee\": 0.0,\r\n            \"demoFee\": 0.0,\r\n            \"demoFreezeFee\": 0.0,\r\n            \"standardName\": \"USDT\",\r\n            \"standardLogo\": \"https://s2.coinmarketcap.com/static/img/coins/64x64/825.png\",\r\n            \"typeName\": null,\r\n            \"feeStr\": \"0.00000000\",\r\n            \"freezeFeeStr\": \"0.00000000\",\r\n            \"demoFeeStr\": \"0.00000000\",\r\n            \"demoFreezeFeeStr\": \"0.00000000\",\r\n            \"asset\": 0.0,\r\n            \"demoAsset\": 0.0,\r\n            \"maxUserId\": null,\r\n            \"minUserId\": null,\r\n            \"minFee\": null,\r\n            \"maxFee\": null,\r\n            \"user\": null,\r\n            \"pageNum\": 0,\r\n            \"pageSize\": 20\r\n          },\r\n          {\r\n            \"id\": \"437569213862416384\",\r\n            \"userId\": \"437569213765947392\",\r\n            \"standardId\": \"2\",\r\n            \"typeId\": 1,\r\n            \"fee\": 0.0,\r\n            \"freezeFee\": 0.0,\r\n            \"demoFee\": 0.0,\r\n            \"demoFreezeFee\": 0.0,\r\n            \"standardName\": \"ETH\",\r\n            \"standardLogo\": \"https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png\",\r\n            \"typeName\": null,\r\n            \"feeStr\": \"0.00000000\",\r\n            \"freezeFeeStr\": \"0.00000000\",\r\n            \"demoFeeStr\": \"0.00000000\",\r\n            \"demoFreezeFeeStr\": \"0.00000000\",\r\n            \"asset\": 0.0,\r\n            \"demoAsset\": 0.0,\r\n            \"maxUserId\": null,\r\n            \"minUserId\": null,\r\n            \"minFee\": null,\r\n            \"maxFee\": null,\r\n            \"user\": null,\r\n            \"pageNum\": 0,\r\n            \"pageSize\": 20\r\n          },\r\n          {\r\n            \"id\": \"437569213891776512\",\r\n            \"userId\": \"437569213765947392\",\r\n            \"standardId\": \"3\",\r\n            \"typeId\": 1,\r\n            \"fee\": 0.0,\r\n            \"freezeFee\": 0.0,\r\n            \"demoFee\": 0.0,\r\n            \"demoFreezeFee\": 0.0,\r\n            \"standardName\": \"BTC\",\r\n            \"standardLogo\": \"https://s3.coinmarketcap.com/static-gravity/image/6fbea0356edd48a4a68a4b877195443c.png\",\r\n            \"typeName\": null,\r\n            \"feeStr\": \"0.00000000\",\r\n            \"freezeFeeStr\": \"0.00000000\",\r\n            \"demoFeeStr\": \"0.00000000\",\r\n            \"demoFreezeFeeStr\": \"0.00000000\",\r\n            \"asset\": 0.0,\r\n            \"demoAsset\": 0.0,\r\n            \"maxUserId\": null,\r\n            \"minUserId\": null,\r\n            \"minFee\": null,\r\n            \"maxFee\": null,\r\n            \"user\": null,\r\n            \"pageNum\": 0,\r\n            \"pageSize\": 20\r\n          },\r\n          {\r\n            \"id\": \"437569213916942336\",\r\n            \"userId\": \"437569213765947392\",\r\n            \"standardId\": \"4\",\r\n            \"typeId\": 1,\r\n            \"fee\": 0.0,\r\n            \"freezeFee\": 0.0,\r\n            \"demoFee\": 0.0,\r\n            \"demoFreezeFee\": 0.0,\r\n            \"standardName\": \"USDC\",\r\n            \"standardLogo\": \"https://s3.coinmarketcap.com/static-gravity/image/5a8229787b5e4c809b5914eef709b59a.png\",\r\n            \"typeName\": null,\r\n            \"feeStr\": \"0.00000000\",\r\n            \"freezeFeeStr\": \"0.00000000\",\r\n            \"demoFeeStr\": \"0.00000000\",\r\n            \"demoFreezeFeeStr\": \"0.00000000\",\r\n            \"asset\": 0.0,\r\n            \"demoAsset\": 0.0,\r\n            \"maxUserId\": null,\r\n            \"minUserId\": null,\r\n            \"minFee\": null,\r\n            \"maxFee\": null,\r\n            \"user\": null,\r\n            \"pageNum\": 0,\r\n            \"pageSize\": 20\r\n          },\r\n          {\r\n            \"id\": \"437569213946302464\",\r\n            \"userId\": \"437569213765947392\",\r\n            \"standardId\": \"5\",\r\n            \"typeId\": 1,\r\n            \"fee\": 0.0,\r\n            \"freezeFee\": 0.0,\r\n            \"demoFee\": 0.0,\r\n            \"demoFreezeFee\": 0.0,\r\n            \"standardName\": \"DAI\",\r\n            \"standardLogo\": \"https://s3.coinmarketcap.com/static-gravity/image/47f58ac1aa854d448df91ea0e6fbfe6f.png\",\r\n            \"typeName\": null,\r\n            \"feeStr\": \"0.00000000\",\r\n            \"freezeFeeStr\": \"0.00000000\",\r\n            \"demoFeeStr\": \"0.00000000\",\r\n            \"demoFreezeFeeStr\": \"0.00000000\",\r\n            \"asset\": 0.0,\r\n            \"demoAsset\": 0.0,\r\n            \"maxUserId\": null,\r\n            \"minUserId\": null,\r\n            \"minFee\": null,\r\n            \"maxFee\": null,\r\n            \"user\": null,\r\n            \"pageNum\": 0,\r\n            \"pageSize\": 20\r\n          },\r\n          {\r\n            \"id\": \"437569213979856896\",\r\n            \"userId\": \"437569213765947392\",\r\n            \"standardId\": \"7\",\r\n            \"typeId\": 1,\r\n            \"fee\": 0.0,\r\n            \"freezeFee\": 0.0,\r\n            \"demoFee\": 0.0,\r\n            \"demoFreezeFee\": 0.0,\r\n            \"standardName\": \"SHIB\",\r\n            \"standardLogo\": \"https://s3.coinmarketcap.com/static-gravity/image/9dac2cd700b746fda0444282ff49dd32.png\",\r\n            \"typeName\": null,\r\n            \"feeStr\": \"0.00000000\",\r\n            \"freezeFeeStr\": \"0.00000000\",\r\n            \"demoFeeStr\": \"0.00000000\",\r\n            \"demoFreezeFeeStr\": \"0.00000000\",\r\n            \"asset\": 0.0,\r\n            \"demoAsset\": 0.0,\r\n            \"maxUserId\": null,\r\n            \"minUserId\": null,\r\n            \"minFee\": null,\r\n            \"maxFee\": null,\r\n            \"user\": null,\r\n            \"pageNum\": 0,\r\n            \"pageSize\": 20\r\n          }\r\n        ],\r\n        \"usdtTotal\": 0.0,\r\n        \"usdtAvailable\": 0.0,\r\n        \"usdtUnavailable\": 0.0,\r\n        \"demoUsdtTotal\": 0.0,\r\n        \"demoUsdtAvailable\": 0.0,\r\n        \"demoUsdtUnavailable\": 0.0,\r\n        \"usdtTotalStr\": \"0.00\",\r\n        \"usdtAvailableStr\": \"0.00\",\r\n        \"usdtUnavailableStr\": \"0.00\",\r\n        \"demoUsdtTotalStr\": \"0.00\",\r\n        \"demoUsdtAvailableStr\": \"0.00\",\r\n        \"demoUsdtUnavailableStr\": \"0.00\",\r\n        \"todayIncome\": \"0\",\r\n        \"demoTodayIncome\": \"0\"\r\n      },\r\n      {\r\n        \"id\": 2,\r\n        \"showName\": \"Trade\",\r\n        \"wallets\": [\r\n          {\r\n            \"id\": \"437569214009217024\",\r\n            \"userId\": \"437569213765947392\",\r\n            \"standardId\": \"1\",\r\n            \"typeId\": 2,\r\n            \"fee\": 1129.5,\r\n            \"freezeFee\": 0.0,\r\n            \"demoFee\": 0.0,\r\n            \"demoFreezeFee\": 0.0,\r\n            \"standardName\": \"USDT\",\r\n            \"standardLogo\": \"https://s2.coinmarketcap.com/static/img/coins/64x64/825.png\",\r\n            \"typeName\": null,\r\n            \"feeStr\": \"1129.50000000\",\r\n            \"freezeFeeStr\": \"0.00000000\",\r\n            \"demoFeeStr\": \"0.00000000\",\r\n            \"demoFreezeFeeStr\": \"0.00000000\",\r\n            \"asset\": 1129.5,\r\n            \"demoAsset\": 0.0,\r\n            \"maxUserId\": null,\r\n            \"minUserId\": null,\r\n            \"minFee\": null,\r\n            \"maxFee\": null,\r\n            \"user\": null,\r\n            \"pageNum\": 0,\r\n            \"pageSize\": 20\r\n          },\r\n          {\r\n            \"id\": \"437569214038577152\",\r\n            \"userId\": \"437569213765947392\",\r\n            \"standardId\": \"2\",\r\n            \"typeId\": 2,\r\n            \"fee\": 0.0,\r\n            \"freezeFee\": 0.0,\r\n            \"demoFee\": 0.0,\r\n            \"demoFreezeFee\": 0.0,\r\n            \"standardName\": \"ETH\",\r\n            \"standardLogo\": \"https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png\",\r\n            \"typeName\": null,\r\n            \"feeStr\": \"0.00000000\",\r\n            \"freezeFeeStr\": \"0.00000000\",\r\n            \"demoFeeStr\": \"0.00000000\",\r\n            \"demoFreezeFeeStr\": \"0.00000000\",\r\n            \"asset\": 0.0,\r\n            \"demoAsset\": 0.0,\r\n            \"maxUserId\": null,\r\n            \"minUserId\": null,\r\n            \"minFee\": null,\r\n            \"maxFee\": null,\r\n            \"user\": null,\r\n            \"pageNum\": 0,\r\n            \"pageSize\": 20\r\n          },\r\n          {\r\n            \"id\": \"437569214067937280\",\r\n            \"userId\": \"437569213765947392\",\r\n            \"standardId\": \"3\",\r\n            \"typeId\": 2,\r\n            \"fee\": 0.0,\r\n            \"freezeFee\": 0.0,\r\n            \"demoFee\": 0.0,\r\n            \"demoFreezeFee\": 0.0,\r\n            \"standardName\": \"BTC\",\r\n            \"standardLogo\": \"https://s3.coinmarketcap.com/static-gravity/image/6fbea0356edd48a4a68a4b877195443c.png\",\r\n            \"typeName\": null,\r\n            \"feeStr\": \"0.00000000\",\r\n            \"freezeFeeStr\": \"0.00000000\",\r\n            \"demoFeeStr\": \"0.00000000\",\r\n            \"demoFreezeFeeStr\": \"0.00000000\",\r\n            \"asset\": 0.0,\r\n            \"demoAsset\": 0.0,\r\n            \"maxUserId\": null,\r\n            \"minUserId\": null,\r\n            \"minFee\": null,\r\n            \"maxFee\": null,\r\n            \"user\": null,\r\n            \"pageNum\": 0,\r\n            \"pageSize\": 20\r\n          },\r\n          {\r\n            \"id\": \"437569214093103104\",\r\n            \"userId\": \"437569213765947392\",\r\n            \"standardId\": \"4\",\r\n            \"typeId\": 2,\r\n            \"fee\": 0.0,\r\n            \"freezeFee\": 0.0,\r\n            \"demoFee\": 0.0,\r\n            \"demoFreezeFee\": 0.0,\r\n            \"standardName\": \"USDC\",\r\n            \"standardLogo\": \"https://s3.coinmarketcap.com/static-gravity/image/5a8229787b5e4c809b5914eef709b59a.png\",\r\n            \"typeName\": null,\r\n            \"feeStr\": \"0.00000000\",\r\n            \"freezeFeeStr\": \"0.00000000\",\r\n            \"demoFeeStr\": \"0.00000000\",\r\n            \"demoFreezeFeeStr\": \"0.00000000\",\r\n            \"asset\": 0.0,\r\n            \"demoAsset\": 0.0,\r\n            \"maxUserId\": null,\r\n            \"minUserId\": null,\r\n            \"minFee\": null,\r\n            \"maxFee\": null,\r\n            \"user\": null,\r\n            \"pageNum\": 0,\r\n            \"pageSize\": 20\r\n          },\r\n          {\r\n            \"id\": \"437569214122463232\",\r\n            \"userId\": \"437569213765947392\",\r\n            \"standardId\": \"5\",\r\n            \"typeId\": 2,\r\n            \"fee\": 0.0,\r\n            \"freezeFee\": 0.0,\r\n            \"demoFee\": 0.0,\r\n            \"demoFreezeFee\": 0.0,\r\n            \"standardName\": \"DAI\",\r\n            \"standardLogo\": \"https://s3.coinmarketcap.com/static-gravity/image/47f58ac1aa854d448df91ea0e6fbfe6f.png\",\r\n            \"typeName\": null,\r\n            \"feeStr\": \"0.00000000\",\r\n            \"freezeFeeStr\": \"0.00000000\",\r\n            \"demoFeeStr\": \"0.00000000\",\r\n            \"demoFreezeFeeStr\": \"0.00000000\",\r\n            \"asset\": 0.0,\r\n            \"demoAsset\": 0.0,\r\n            \"maxUserId\": null,\r\n            \"minUserId\": null,\r\n            \"minFee\": null,\r\n            \"maxFee\": null,\r\n            \"user\": null,\r\n            \"pageNum\": 0,\r\n            \"pageSize\": 20\r\n          },\r\n          {\r\n            \"id\": \"437569214147629056\",\r\n            \"userId\": \"437569213765947392\",\r\n            \"standardId\": \"7\",\r\n            \"typeId\": 2,\r\n            \"fee\": 0.0,\r\n            \"freezeFee\": 0.0,\r\n            \"demoFee\": 0.0,\r\n            \"demoFreezeFee\": 0.0,\r\n            \"standardName\": \"SHIB\",\r\n            \"standardLogo\": \"https://s3.coinmarketcap.com/static-gravity/image/9dac2cd700b746fda0444282ff49dd32.png\",\r\n            \"typeName\": null,\r\n            \"feeStr\": \"0.00000000\",\r\n            \"freezeFeeStr\": \"0.00000000\",\r\n            \"demoFeeStr\": \"0.00000000\",\r\n            \"demoFreezeFeeStr\": \"0.00000000\",\r\n            \"asset\": 0.0,\r\n            \"demoAsset\": 0.0,\r\n            \"maxUserId\": null,\r\n            \"minUserId\": null,\r\n            \"minFee\": null,\r\n            \"maxFee\": null,\r\n            \"user\": null,\r\n            \"pageNum\": 0,\r\n            \"pageSize\": 20\r\n          }\r\n        ],\r\n        \"usdtTotal\": 1129.5,\r\n        \"usdtAvailable\": 1129.5,\r\n        \"usdtUnavailable\": 0.0,\r\n        \"demoUsdtTotal\": 0.0,\r\n        \"demoUsdtAvailable\": 0.0,\r\n        \"demoUsdtUnavailable\": 0.0,\r\n        \"usdtTotalStr\": \"1129.50\",\r\n        \"usdtAvailableStr\": \"1129.50\",\r\n        \"usdtUnavailableStr\": \"0.00\",\r\n        \"demoUsdtTotalStr\": \"0.00\",\r\n        \"demoUsdtAvailableStr\": \"0.00\",\r\n        \"demoUsdtUnavailableStr\": \"0.00\",\r\n        \"todayIncome\": \"13.93000000\",\r\n        \"demoTodayIncome\": \"0\"\r\n      },\r\n      {\r\n        \"id\": 5,\r\n        \"showName\": \"Perpetual\",\r\n        \"wallets\": [\r\n          {\r\n            \"id\": \"437569214181183488\",\r\n            \"userId\": \"437569213765947392\",\r\n            \"standardId\": \"1\",\r\n            \"typeId\": 5,\r\n            \"fee\": 0.0,\r\n            \"freezeFee\": 0.0,\r\n            \"demoFee\": 0.0,\r\n            \"demoFreezeFee\": 0.0,\r\n            \"standardName\": \"USDT\",\r\n            \"standardLogo\": \"https://s2.coinmarketcap.com/static/img/coins/64x64/825.png\",\r\n            \"typeName\": null,\r\n            \"feeStr\": \"0.00000000\",\r\n            \"freezeFeeStr\": \"0.00000000\",\r\n            \"demoFeeStr\": \"0.00000000\",\r\n            \"demoFreezeFeeStr\": \"0.00000000\",\r\n            \"asset\": 0.0,\r\n            \"demoAsset\": 0.0,\r\n            \"maxUserId\": null,\r\n            \"minUserId\": null,\r\n            \"minFee\": null,\r\n            \"maxFee\": null,\r\n            \"user\": null,\r\n            \"pageNum\": 0,\r\n            \"pageSize\": 20\r\n          },\r\n          {\r\n            \"id\": \"437569214214737920\",\r\n            \"userId\": \"437569213765947392\",\r\n            \"standardId\": \"2\",\r\n            \"typeId\": 5,\r\n            \"fee\": 0.0,\r\n            \"freezeFee\": 0.0,\r\n            \"demoFee\": 0.0,\r\n            \"demoFreezeFee\": 0.0,\r\n            \"standardName\": \"ETH\",\r\n            \"standardLogo\": \"https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png\",\r\n            \"typeName\": null,\r\n            \"feeStr\": \"0.00000000\",\r\n            \"freezeFeeStr\": \"0.00000000\",\r\n            \"demoFeeStr\": \"0.00000000\",\r\n            \"demoFreezeFeeStr\": \"0.00000000\",\r\n            \"asset\": 0.0,\r\n            \"demoAsset\": 0.0,\r\n            \"maxUserId\": null,\r\n            \"minUserId\": null,\r\n            \"minFee\": null,\r\n            \"maxFee\": null,\r\n            \"user\": null,\r\n            \"pageNum\": 0,\r\n            \"pageSize\": 20\r\n          },\r\n          {\r\n            \"id\": \"437569214239903744\",\r\n            \"userId\": \"437569213765947392\",\r\n            \"standardId\": \"3\",\r\n            \"typeId\": 5,\r\n            \"fee\": 0.0,\r\n            \"freezeFee\": 0.0,\r\n            \"demoFee\": 0.0,\r\n            \"demoFreezeFee\": 0.0,\r\n            \"standardName\": \"BTC\",\r\n            \"standardLogo\": \"https://s3.coinmarketcap.com/static-gravity/image/6fbea0356edd48a4a68a4b877195443c.png\",\r\n            \"typeName\": null,\r\n            \"feeStr\": \"0.00000000\",\r\n            \"freezeFeeStr\": \"0.00000000\",\r\n            \"demoFeeStr\": \"0.00000000\",\r\n            \"demoFreezeFeeStr\": \"0.00000000\",\r\n            \"asset\": 0.0,\r\n            \"demoAsset\": 0.0,\r\n            \"maxUserId\": null,\r\n            \"minUserId\": null,\r\n            \"minFee\": null,\r\n            \"maxFee\": null,\r\n            \"user\": null,\r\n            \"pageNum\": 0,\r\n            \"pageSize\": 20\r\n          },\r\n          {\r\n            \"id\": \"437569214269263872\",\r\n            \"userId\": \"437569213765947392\",\r\n            \"standardId\": \"4\",\r\n            \"typeId\": 5,\r\n            \"fee\": 0.0,\r\n            \"freezeFee\": 0.0,\r\n            \"demoFee\": 0.0,\r\n            \"demoFreezeFee\": 0.0,\r\n            \"standardName\": \"USDC\",\r\n            \"standardLogo\": \"https://s3.coinmarketcap.com/static-gravity/image/5a8229787b5e4c809b5914eef709b59a.png\",\r\n            \"typeName\": null,\r\n            \"feeStr\": \"0.00000000\",\r\n            \"freezeFeeStr\": \"0.00000000\",\r\n            \"demoFeeStr\": \"0.00000000\",\r\n            \"demoFreezeFeeStr\": \"0.00000000\",\r\n            \"asset\": 0.0,\r\n            \"demoAsset\": 0.0,\r\n            \"maxUserId\": null,\r\n            \"minUserId\": null,\r\n            \"minFee\": null,\r\n            \"maxFee\": null,\r\n            \"user\": null,\r\n            \"pageNum\": 0,\r\n            \"pageSize\": 20\r\n          },\r\n          {\r\n            \"id\": \"437569214294429696\",\r\n            \"userId\": \"437569213765947392\",\r\n            \"standardId\": \"5\",\r\n            \"typeId\": 5,\r\n            \"fee\": 0.0,\r\n            \"freezeFee\": 0.0,\r\n            \"demoFee\": 0.0,\r\n            \"demoFreezeFee\": 0.0,\r\n            \"standardName\": \"DAI\",\r\n            \"standardLogo\": \"https://s3.coinmarketcap.com/static-gravity/image/47f58ac1aa854d448df91ea0e6fbfe6f.png\",\r\n            \"typeName\": null,\r\n            \"feeStr\": \"0.00000000\",\r\n            \"freezeFeeStr\": \"0.00000000\",\r\n            \"demoFeeStr\": \"0.00000000\",\r\n            \"demoFreezeFeeStr\": \"0.00000000\",\r\n            \"asset\": 0.0,\r\n            \"demoAsset\": 0.0,\r\n            \"maxUserId\": null,\r\n            \"minUserId\": null,\r\n            \"minFee\": null,\r\n            \"maxFee\": null,\r\n            \"user\": null,\r\n            \"pageNum\": 0,\r\n            \"pageSize\": 20\r\n          },\r\n          {\r\n            \"id\": \"437569214323789824\",\r\n            \"userId\": \"437569213765947392\",\r\n            \"standardId\": \"7\",\r\n            \"typeId\": 5,\r\n            \"fee\": 0.0,\r\n            \"freezeFee\": 0.0,\r\n            \"demoFee\": 0.0,\r\n            \"demoFreezeFee\": 0.0,\r\n            \"standardName\": \"SHIB\",\r\n            \"standardLogo\": \"https://s3.coinmarketcap.com/static-gravity/image/9dac2cd700b746fda0444282ff49dd32.png\",\r\n            \"typeName\": null,\r\n            \"feeStr\": \"0.00000000\",\r\n            \"freezeFeeStr\": \"0.00000000\",\r\n            \"demoFeeStr\": \"0.00000000\",\r\n            \"demoFreezeFeeStr\": \"0.00000000\",\r\n            \"asset\": 0.0,\r\n            \"demoAsset\": 0.0,\r\n            \"maxUserId\": null,\r\n            \"minUserId\": null,\r\n            \"minFee\": null,\r\n            \"maxFee\": null,\r\n            \"user\": null,\r\n            \"pageNum\": 0,\r\n            \"pageSize\": 20\r\n          }\r\n        ],\r\n        \"usdtTotal\": 0.0,\r\n        \"usdtAvailable\": 0.0,\r\n        \"usdtUnavailable\": 0.0,\r\n        \"demoUsdtTotal\": 0.0,\r\n        \"demoUsdtAvailable\": 0.0,\r\n        \"demoUsdtUnavailable\": 0.0,\r\n        \"usdtTotalStr\": \"0.00\",\r\n        \"usdtAvailableStr\": \"0.00\",\r\n        \"usdtUnavailableStr\": \"0.00\",\r\n        \"demoUsdtTotalStr\": \"0.00\",\r\n        \"demoUsdtAvailableStr\": \"0.00\",\r\n        \"demoUsdtUnavailableStr\": \"0.00\",\r\n        \"todayIncome\": \"0\",\r\n        \"demoTodayIncome\": \"0\"\r\n      }\r\n    ],\r\n    \"freeDemoFee\": 10000,\r\n    \"flowStr\": \"923.33\"\r\n  }\r\n}",
+    "interesting": true,
+    "notes": "SUCCESS - real data returned"
+  },
+  {
+    "endpoint": "/api/app/funds/wallet/money",
+    "method": "POST",
+    "url": "https://api.ddjea.com/api/app/funds/wallet/money",
+    "status": 200,
+    "body_sent": "{}",
+    "response": "{\r\n  \"resultCode\": false,\r\n  \"errCode\": 100003,\r\n  \"errCodeDes\": \"Missing parameters\",\r\n  \"data\": {}\r\n}",
+    "interesting": true,
+    "notes": "SUCCESS - real data returned"
+  },
+  {
+    "endpoint": "/api/app/user/withdrawal/password/status",
+    "method": "POST",
+    "url": "https://api.ddjea.com/api/app/user/withdrawal/password/status",
+    "status": 200,
+    "body_sent": "{}",
+    "response": "{\r\n  \"resultCode\": true,\r\n  \"errCode\": 0,\r\n  \"errCodeDes\": \"ok\",\r\n  \"data\": false\r\n}",
+    "interesting": true,
+    "notes": "SUCCESS - real data returned"
+  },
+  {
+    "endpoint": "/api/app/user/credit/list",
+    "method": "POST",
+    "url": "https://api.ddjea.com/api/app/user/credit/list",
+    "status": "ERROR",
+    "body_sent": "{\"pageNum\":1,\"pageSize\":10}",
+    "response": null,
+    "interesting": false,
+    "notes": "Response status code does not indicate success: 404 (Not Found)."
+  },
+  {
+    "endpoint": "/api/app/share/team",
+    "method": "POST",
+    "url": "https://api.ddjea.com/api/app/share/team",
+    "status": "ERROR",
+    "body_sent": "{}",
+    "response": null,
+    "interesting": false,
+    "notes": "Response status code does not indicate success: 404 (Not Found)."
+  },
+  {
+    "endpoint": "/api/app/share/my/award",
+    "method": "POST",
+    "url": "https://api.ddjea.com/api/app/share/my/award",
+    "status": "ERROR",
+    "body_sent": "{}",
+    "response": null,
+    "interesting": false,
+    "notes": "Response status code does not indicate success: 404 (Not Found)."
+  },
+  {
+    "endpoint": "/api/app/second/share/list",
+    "method": "POST",
+    "url": "https://api.ddjea.com/api/app/second/share/list",
+    "status": 200,
+    "body_sent": "{\"pageNum\":1,\"pageSize\":10}",
+    "response": "{\r\n  \"resultCode\": true,\r\n  \"errCode\": 0,\r\n  \"errCodeDes\": \"ok\",\r\n  \"data\": {\r\n    \"page\": {\r\n      \"content\": [],\r\n      \"pageable\": {\r\n        \"sort\": {\r\n          \"sorted\": true,\r\n          \"empty\": false,\r\n          \"unsorted\": false\r\n        },\r\n        \"pageNumber\": 1,\r\n        \"pageSize\": 10,\r\n        \"offset\": 10,\r\n        \"paged\": true,\r\n        \"unpaged\": false\r\n      },\r\n      \"last\": true,\r\n      \"totalElements\": 0,\r\n      \"totalPages\": 0,\r\n      \"size\": 10,\r\n      \"number\": 1,\r\n      \"sort\": {\r\n        \"sorted\": true,\r\n        \"empty\": false,\r\n        \"unsorted\": false\r\n      },\r\n      \"first\": false,\r\n      \"numberOfElements\": 0,\r\n      \"empty\": true\r\n    },\r\n    \"report\": {\r\n      \"id\": \"437644145291948032\",\r\n      \"userId\": 437569213765947392,\r\n      \"postCount\": 0,\r\n      \"allCount\": 0,\r\n      \"quantity\": 0.0,\r\n      \"winCount\": 0,\r\n      \"loseCount\": 0,\r\n      \"winQuantity\": 0.0,\r\n      \"loseQuantity\": 0.0,\r\n      \"followCount\": 11,\r\n      \"followQuantity\": 126.67,\r\n      \"followWinCount\": 11,\r\n      \"followLoseCount\": 0,\r\n      \"followWinQuantity\": 79.5,\r\n      \"followLoseQuantity\": 0.0,\r\n      \"isSalesman\": false,\r\n      \"salesmanId\": \"334189467237281792\",\r\n      \"agentId\": \"334189355157110784\",\r\n      \"account\": null,\r\n      \"pageNum\": 0,\r\n      \"pageSize\": 20\r\n    }\r\n  }\r\n}",
+    "interesting": true,
+    "notes": "SUCCESS - real data returned"
+  },
+  {
+    "endpoint": "/api/app/recharge/otc",
+    "method": "POST",
+    "url": "https://api.ddjea.com/api/app/recharge/otc",
+    "status": 200,
+    "body_sent": "{}",
+    "response": "{\r\n  \"resultCode\": true,\r\n  \"errCode\": 0,\r\n  \"errCodeDes\": \"ok\",\r\n  \"data\": []\r\n}",
+    "interesting": true,
+    "notes": "SUCCESS - real data returned"
+  },
+  {
+    "endpoint": "/api/app/financial/borrow",
+    "method": "POST",
+    "url": "https://api.ddjea.com/api/app/financial/borrow",
+    "status": 200,
+    "body_sent": "{}",
+    "response": "{\r\n  \"resultCode\": false,\r\n  \"errCode\": 100106,\r\n  \"errCodeDes\": \"Insufficient quota\",\r\n  \"data\": {}\r\n}",
+    "interesting": true,
+    "notes": "SUCCESS - real data returned"
+  },
+  {
+    "endpoint": "/api/app/c2c/order",
+    "method": "POST",
+    "url": "https://api.ddjea.com/api/app/c2c/order",
+    "status": "ERROR",
+    "body_sent": "{\"pageNum\":1,\"pageSize\":10}",
+    "response": null,
+    "interesting": false,
+    "notes": "Response status code does not indicate success: 404 (Not Found)."
+  },
+  {
+    "endpoint": "/api/app/user/verify/now",
+    "method": "POST",
+    "url": "https://api.ddjea.com/api/app/user/verify/now",
+    "status": "ERROR",
+    "body_sent": "{}",
+    "response": null,
+    "interesting": false,
+    "notes": "Response status code does not indicate success: 404 (Not Found)."
+  },
+  {
+    "endpoint": "/api/app/second/share/user/info/code",
+    "method": "POST",
+    "url": "https://api.ddjea.com/api/app/second/share/user/info/code",
+    "status": 200,
+    "body_sent": "{}",
+    "response": "{\r\n  \"resultCode\": false,\r\n  \"errCode\": 100003,\r\n  \"errCodeDes\": \"Missing parameters\",\r\n  \"data\": {}\r\n}",
+    "interesting": true,
+    "notes": "SUCCESS - real data returned"
+  }
+]

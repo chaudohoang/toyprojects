@@ -1,0 +1,61 @@
+{
+  "chain_summary": {
+    "step1_master_to_intermediate": "TWF1bcuNLXtwQCRxb6Qn6uKqWCuXRatiei \u2192 TPcgRgCbc34BoFgLG4QSy4S9PYcFAe63W4",
+    "step2_intermediate_to_binance": "TPcgRgCbc34BoFgLG4QSy4S9PYcFAe63W4 \u2192 TDqSquXBgUCLYvYC4XZgrprLK589dkhSCf",
+    "binance_label": "Binance Hot 7"
+  },
+  "hop1_transactions": [],
+  "hop2_transactions": [],
+  "intermediate_sources": {
+    "TJXH4FqXkRMbh3mv3VEtVikHhLeA383ZaT": {
+      "count": 1,
+      "total": 243.0,
+      "sample_tx": "ad564d819b5ec1c6c09f92c9dff2d12c8e55e7e4cf23fbac30a376a2993cdf52"
+    },
+    "TCLgK89AnXbC9rewvhNb9UgXCc2qJJpBXh": {
+      "count": 1,
+      "total": 10000.0,
+      "sample_tx": "e9d659581cc51ae0b417cbd87d81f67d0ac8115ee8a558aa0f16b866b0a08f67"
+    },
+    "TLyxnSFD14ELy7SwAYe1unTr83EUkWA2Gk": {
+      "count": 1,
+      "total": 28.7,
+      "sample_tx": "5522a08615ebbe1eb60351220f0c5ea8a003024f137302067b067f03fe3051e9"
+    },
+    "TLaGjwhvA8XQYSxFAcAXy7Dvuue9eGYitv": {
+      "count": 9,
+      "total": 12274.4908,
+      "sample_tx": "684ce8a08d8cb8af0075ee7b664b3ba00cac9361960076cb3d945918c2526602"
+    },
+    "TQwjLYo7pGsQ8WpiLrPvzDE5QTRWxBWAci": {
+      "count": 1,
+      "total": 1000.0,
+      "sample_tx": "7812727dcef506ddf4a158fd3862f98e8223c495496f0989382a4d9055087cbd"
+    },
+    "TDqSquXBgUCLYvYC4XZgrprLK589dkhSCf": {
+      "count": 1,
+      "total": 29051.0,
+      "sample_tx": "7ea748824d21ac143eb4b45e49f187426ba20a09bb8b5570ebc4289652fd4951"
+    },
+    "TNXoiAJ3dct8Fjg4M9fkLFh9S2v9TXc32G": {
+      "count": 1,
+      "total": 29.0,
+      "sample_tx": "0810d17dbb1a3e3e69dcf6a5c2b1b3094e9ff0946ca79409da7b7ca0b053b937"
+    },
+    "TKnUQCwK7h9dWfeX38R4X9WFP6YjDc6H3f": {
+      "count": 1,
+      "total": 4000.0,
+      "sample_tx": "9a6bb96f64cd030703c3aef9fe2da30756196f6b43f51a2b51c36af160613e5c"
+    },
+    "TShEUwHszN7Q51SHxZzfG2qFJ8hBmneUk3": {
+      "count": 1,
+      "total": 1000.0,
+      "sample_tx": "5256bd0a06669196948eb84eec1e4833ff750bcb37a432341bc6473d39ece936"
+    },
+    "TW4VT97WPjvvDqgj52z1FGW2ZN8veCgLJh": {
+      "count": 1,
+      "total": 3000.0,
+      "sample_tx": "c5bd496ea4288c1829bf0e33201872352451d62b30471d9cf37b8b3bd560e897"
+    }
+  }
+}

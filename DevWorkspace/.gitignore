@@ -1,0 +1,18 @@
+# DevWorkspace (moved from E:\Dev on 2026-11-20): commit source only.
+# Unlike the rest of toyprojects, build output here is NOT committed (chosen to keep the repo small;
+# YdkeDeckBuilder\publish alone was 543 MB). Rebuild with each project's build script.
+bin/
+obj/
+publish/
+dist/
+.vs/
+
+# Python environments and caches
+.venv/
+__pycache__/
+
+# Secrets (bot tokens) — keep the .env.example templates
+.env
+!.env.example
+
+node_modules/

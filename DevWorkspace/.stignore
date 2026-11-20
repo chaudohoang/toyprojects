@@ -1,0 +1,77 @@
+// ==========================================
+// TỔNG HỢP DANH SÁCH IGNORE CHO SYNCTHING
+// (Dùng chung cho toàn bộ D:\Projects)
+// ==========================================
+
+// ------------------------------------------
+// 1. Python
+// ------------------------------------------
+.venv
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+// Lưu ý: KHÔNG ignore file .env nếu Sếp muốn tất cả các máy dùng chung 1 Token Telegram.
+
+// ------------------------------------------
+// 2. Javascript / Typescript / Node.js / Electron / Web
+// ------------------------------------------
+node_modules
+dist
+build
+.next
+.nuxt
+out
+.cache
+
+// ------------------------------------------
+// 3. C# / VB.NET / WinForms / WPF / Avalonia
+// ------------------------------------------
+bin
+obj
+TestResults
+*.user
+*.suo
+.vs
+
+// ------------------------------------------
+// 4. Java
+// ------------------------------------------
+target
+.gradle
+build
+*.class
+
+// 5. C++ / C / Qt
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+*.pdb
+*.ilk
+Debug
+Release
+x64
+x86
+build-*-*
+CMakeCache.txt
+CMakeFiles
+
+// ------------------------------------------
+// 6. Các phần mềm IDE & Rác hệ thống
+// ------------------------------------------
+.idea
+.vscode
+.openclaw
+*.swp
+*.tmp
+*.log
+.DS_Store
+Thumbs.db
+
+// ------------------------------------------
+// 7. Version Control
+// ------------------------------------------
+.git

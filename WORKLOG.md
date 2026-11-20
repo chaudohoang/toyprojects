@@ -8,6 +8,15 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ## 2026-11-20
 
+- **`E:\Dev` moved into `toyprojects\DevWorkspace`**, its own `.git` dropped (history lost, by choice).
+  Compared first with `\\victus16\E\Dev`: 0 files newer there, 1 file only there (a runtime DLL in
+  YdkeDeckBuilder `bin`), 541 newer here — so this PC's copy was the one kept. Source only is committed
+  (`DevWorkspace\.gitignore`: bin/obj/publish/dist/.vs/.venv/__pycache__/.env): 325 files / 36 MB
+  instead of 1.2 GB. The three `.env` files (Telegram bot tokens) stay local; `.env.example` is
+  committed. Same-volume move kept the folder's ACLs (Low integrity label, Medium on
+  `c#\YdkeDeckBuilder\publish`, `Everyone:(DENY)(DC)`). Repointed the "YDKE Deck Builder" Start Menu
+  and Desktop shortcuts. `\\victus16\E\Dev` was left untouched.
+
 - **Kit Helper 1.8.1 (rebuilt, version kept on request): `BlockFiles.exe` is a helper tool**
   (`Kit.IsHelper`), like UnblockFiles. LGD's POCB4.1Net / InputIMG folders ship it, and it was being
   copied into TrueTest and the Database. Checked on the D997 kit preview: both copies now Not copied.

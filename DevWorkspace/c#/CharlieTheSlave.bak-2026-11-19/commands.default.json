@@ -1,0 +1,130 @@
+﻿{
+  // CharlieTheSlave commands (this file sits next to CharlieTheSlave.exe; rebuilding the app never overwrites it).
+  // Edit and save: the assistant reloads this file automatically.
+  // "reset commands" in the assistant restores the defaults (your old file is kept as a .bak.json).
+  //
+  // PATTERN SYNTAX (the whole message must match; case, extra spaces and a trailing ? . ! don't matter)
+  //   word          a word                         "true test" also matches "truetest"
+  //   (a|b c)       one of the alternatives
+  //   [a|b]         optional
+  //   {name}        captures text     {name:int} a number     {name:version} 158 / 1.9.226.158 / latest
+  //   Need more? Add "regex": ["..."] with .NET regular expressions (named groups work the same way).
+  //
+  // ACTIONS (built into the app) and the captures they use
+  //   updateTrueTest   {version} {components}      choose/install a TrueTest installer and click through it
+  //   showComponents                               which installer components will be kept
+  //   listSteps                                    TrueTest sequence steps
+  //   openInstallers                               open the installer folder, asking for it if missing
+  //   exportPoi        [{set}]                     read every measurement's points of interest to .xlsx
+  //                                                (takes over the mouse; Ctrl+Alt+Q stops it)
+  //   saveSequence                                 click TrueTest's Save Sequence     (asks to confirm)
+  //   macro            "lines": [...]              run several commands in order; "{name}" inserts a capture
+  //   open             "text", "arguments"         start a program, file, folder or web address
+  //   close            "text"                      close a program by name, e.g. "TrueTest" (asks to confirm)
+  //   say              "text"                      reply with fixed text
+  //   help, stop, clear, model {name}, exit
+  // OPTIONS: "help" (shown in the help list and to the AI), "confirm": true/false
+  //
+  // Anything that matches no command goes to the Ollama model.
+
+  "systemPrompt": "You are Charlie The Slave, a small helper that lives in a floating icon on the user's Windows desktop. The user tests displays with Radiant Vision Systems' TrueTest software. Answer briefly and plainly; the chat window is small, so prefer a few sentences or a short list. You cannot run programs or click things yourself. The app has the built-in commands listed below, which the user must type. If one of them does what the user wants, tell them exactly what to type. If none of them fits, say plainly that the assistant can't do that yet and, if useful, how the user can do it themselves. Never answer with only a command name.\n{help}",
+
+  "installerFolder": "%USERPROFILE%\\Downloads\\Programs",
+
+  // Which points-of-interest set "export poi" uses when you don't name one.
+  "defaultPoiSet": "CA410 5 points",
+
+  // TrueTest's internal control names. Only change these if a TrueTest update renames something.
+  "trueTest": {
+    "processName": "TrueTest",
+    "mainWindow": "TrueTestMDIForm",
+    "sequenceGrid": "SequenceDataGridView",
+    "saveSequenceButton": "Save Sequence",
+
+    "measurementListWindow": "Measurement List",
+    "mdiClientClass": "WindowsForms10.MDICLIENT.app.0.13965fa_r6_ad1",
+    "measurementDateColumn": "Measurement Date / Time",
+    "measurementSetupColumn": "Measurement Setup",
+    "poiMenuItem": "Define Points of Interest...",
+    "poiWindowTitle": "Define Points of Interest",
+    "poiSetMarkerButton": "Save Points of Interest Set As",
+    "poiPointColumn": "Point Description",
+    "poiLuminanceColumn": "Luminance",
+    "poiCxColumn": "Color Cx",
+    "poiCyColumn": "Color Cy"
+  },
+
+  "commands": [
+    {
+      "action": "updateTrueTest",
+      "patterns": [ "(update|upgrade|install|reinstall) [the] true test [to|version] [{version:version}] [(with|only) {components}]" ],
+      "help": "update TrueTest [158 | latest] [with A, B]: install TrueTest and click through the installer"
+    },
+    {
+      "action": "showComponents",
+      "patterns": [ "[show] components" ],
+      "help": "components: which installer components I'll keep"
+    },
+    {
+      "action": "listSteps",
+      "patterns": [ "[show|list] [the] [true test] [sequence] steps" ],
+      "help": "steps: list the TrueTest sequence steps"
+    },
+    {
+      "action": "exportPoi",
+      "patterns": [
+        "export [the] (poi|pois|points of interest) [(for|using|with) {set}]",
+        "(read|get) [the] (poi|pois|points of interest) [(for|using|with) {set}]"
+      ],
+      "help": "export poi [for CA410 5 points]: read measurements' points of interest to Excel; I ask all-or-one first (Ctrl+Alt+Q stops it)"
+    },
+    {
+      "action": "saveSequence",
+      "patterns": [ "save [the] sequence" ],
+      "help": "save sequence: click TrueTest's Save Sequence"
+    },
+    {
+      "action": "help",
+      "patterns": [ "help", "what can you do", "commands" ]
+    },
+    {
+      "action": "stop",
+      "patterns": [ "(stop|cancel|abort)" ],
+      "help": "stop: stop auto-clicking or the current answer"
+    },
+    {
+      "action": "clear",
+      "patterns": [ "(clear|new chat|reset)" ],
+      "help": "clear: start a fresh conversation"
+    },
+    {
+      "action": "model",
+      "patterns": [ "[use] model [{name}]" ],
+      "help": "model [name]: show or switch the Ollama model"
+    },
+    {
+      "action": "exit",
+      "patterns": [ "(exit|quit)" ],
+      "help": "exit: close the assistant"
+    },
+
+    // ---- Examples of your own commands: edit or delete freely ----
+    {
+      "action": "open",
+      "patterns": [ "(open|start|launch) true test" ],
+      "text": "C:\\Program Files\\Radiant Vision Systems\\TrueTest 1.9\\TrueTest.exe",
+      "help": "open TrueTest: start TrueTest"
+    },
+    {
+      "action": "close",
+      "patterns": [ "(close|shutdown|shut down|exit|quit|kill|stop|end) true test" ],
+      "text": "TrueTest",
+      "help": "close TrueTest: close TrueTest (it may ask you to save)"
+    },
+    {
+      "action": "openInstallers",
+      "patterns": [ "open [the] installers [folder]" ],
+      "help": "open installers: open the installer folder (I ask where it is if I can't find it)"
+    }
+    ]
+}

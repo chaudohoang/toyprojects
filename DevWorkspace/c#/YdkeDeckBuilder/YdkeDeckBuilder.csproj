@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>YdkeDeckBuilder</AssemblyName>
+    <RootNamespace>YdkeDeckBuilder</RootNamespace>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <Product>YDKE Deck Builder</Product>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+
+  <!-- dotnet publish makes one YdkeDeckBuilder.exe. Framework-dependent by default (needs the .NET 8
+       Desktop Runtime); pass -p:SelfContained=true for an exe that runs without it (much larger).
+       Nothing is extracted by the .NET host: WebView2Loader.dll is embedded as a plain resource and the
+       app writes it out itself (App.PrepareWebView2Loader). Host extraction to %TEMP%\.net failed with
+       "Failed to create directory ... for extracting bundled files" and the exe exited without a word. -->
+  <PropertyGroup>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>false</SelfContained>
+    <EnableCompressionInSingleFile Condition="'$(SelfContained)' == 'true'">true</EnableCompressionInSingleFile>
+    <DebugType>embedded</DebugType>
+    <WebView2LoaderDll>$(NuGetPackageRoot)microsoft.web.webview2\1.0.2592.51\runtimes\win-x64\native\WebView2Loader.dll</WebView2LoaderDll>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2592.51" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="app.ico" />
+    <EmbeddedResource Include="$(WebView2LoaderDll)" LogicalName="WebView2Loader.dll" />
+    <!-- The page itself lives in web\YdkeDeckBuilder so it still works on its own in a browser.
+         It is embedded in the exe and served from https://ydke.example/. -->
+    <EmbeddedResource Include="..\..\web\YdkeDeckBuilder\**\*" LogicalName="wwwroot/%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <!-- The package still drops WebView2Loader.dll next to the exe; the app doesn't need it there. -->
+  <Target Name="RemoveLooseWebView2Loader" AfterTargets="Publish">
+    <Delete Files="$(PublishDir)WebView2Loader.dll" />
+    <RemoveDir Directories="$(PublishDir)runtimes" />
+  </Target>
+
+</Project>

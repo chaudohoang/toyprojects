@@ -1,0 +1,23 @@
+
+The full transaction path from scam master wallet to your Binance 
+Hot Wallet 7 is as follows:
+
+STEP 1 — Master collection wallet to intermediate:
+  From : TWF1bcuNLXtwQCRxb6Qn6uKqWCuXRatiei (scam master wallet, 101,902 victim txs)
+  To   : TPcgRgCbc34BoFgLG4QSy4S9PYcFAe63W4 (intermediate mixer)
+  TX   : [see full_path_evidence.txt]
+  Link : https://tronscan.org/#/address/TPcgRgCbc34BoFgLG4QSy4S9PYcFAe63W4
+
+STEP 2 — Intermediate to Binance Hot 7:
+  From : TPcgRgCbc34BoFgLG4QSy4S9PYcFAe63W4
+  To   : TDqSquXBgUCLYvYC4XZgrprLK589dkhSCf (Binance Hot 7)
+  TX   : [see binance_tx_evidence.json]
+  Link : 
+
+24 confirmed transactions from this intermediate wallet to 
+Binance Hot 7 totaling approximately $70,000+ USDT.
+
+Please identify the Binance account that deposited funds 
+matching this transaction chain and freeze it immediately.
+
+Full evidence: full_path_evidence.txt (attached)
