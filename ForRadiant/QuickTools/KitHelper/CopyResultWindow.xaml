@@ -27,10 +27,25 @@
                 <TextBlock x:Name="TxtBackup" Style="{StaticResource Hint}" VerticalAlignment="Center" TextWrapping="Wrap"/>
             </DockPanel>
 
+            <!-- Confirmation only, when INIs with the vignetting key are being copied. -->
+            <Border x:Name="PnlVignetting" DockPanel.Dock="Top" Style="{StaticResource Section}" Margin="0,0,0,10" Visibility="Collapsed">
+                <StackPanel>
+                    <TextBlock x:Name="TxtVignetting" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton x:Name="RbVigKeep" Content="Keep as is" IsChecked="True"/>
+                        <RadioButton x:Name="RbVigOn" Content="Set ON (1)" Margin="16,0,0,0"/>
+                        <RadioButton x:Name="RbVigOff" Content="Set OFF (0)" Margin="16,0,0,0"/>
+                        <CheckBox x:Name="ChkVigDx" Content="Include DX ini" Margin="28,0,0,0" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <TextBlock Style="{StaticResource Hint}" Margin="0,6,0,0" TextWrapping="Wrap"
+                               Text="Applied to the copied files after the copy; the kit itself is not changed."/>
+                </StackPanel>
+            </Border>
+
             <!-- footer -->
             <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
-                <Button Content="Copy as text" Click="CopyText_Click"/>
-                <!-- Preview only: Cancel / Copy. Result: Close. -->
+                <Button x:Name="BtnCopyText" Content="Copy as text" Click="CopyText_Click"/>
+                <!-- Preview (confirmation): Cancel / OK, no Copy as text. Result: Copy as text / Close. -->
                 <Button x:Name="BtnCancel" Content="Cancel" MinWidth="90" Click="Close_Click" Visibility="Collapsed"/>
                 <Button x:Name="BtnPrimary" Content="Close" Style="{StaticResource PrimaryButton}" MinWidth="90" Click="Primary_Click" IsDefault="True"/>
             </StackPanel>

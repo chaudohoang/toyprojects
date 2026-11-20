@@ -262,7 +262,7 @@ namespace KitHelper
             foreach (var kv in copyButtons) kv.Value.Tag = kv.Key == suggested ? "suggested" : null;
             BtnPackage.Visibility = package ? Visibility.Visible : Visibility.Collapsed;
             BtnPackage.Tag = package ? "suggested" : null;
-            TxtSuggest.Text = package ? "Package: " + Package.Describe(folder)
+            TxtSuggest.Text = package ? "Package:\n" + Package.Describe(Package.Scan(folder))
                             : suggested == null ? "" : $"Suggested: {suggested.Name}  ({why})";
             TxtSuggest.Visibility = TxtSuggest.Text == "" ? Visibility.Collapsed : Visibility.Visible;
 
@@ -589,20 +589,11 @@ namespace KitHelper
             string db = PocbDatabase, source = Source, model = Path.GetFileName(source);
             if (!Directory.Exists(db)) { Log($"Database folder not found: {db} (pick it under Database at the top).", LogLevel.Error); return; }
             string inputImg = Path.Combine(db, "InputIMG");
-            // Confirm with the list of what will happen (top-level files only, as Copier.Run does).
-            var preview = new Copier.Result();
-            foreach (string f in Directory.GetFiles(source).OrderBy(f => f, StringComparer.OrdinalIgnoreCase))
-            {
-                string name = Path.GetFileName(f);
-                if (Kit.NeverCopy(f) || string.Equals(name, ownExe, StringComparison.OrdinalIgnoreCase))
-                    preview.Add(name, CopyStatus.Skipped, "helper tool / Explorer file, never copied");
-                else
-                    preview.Add(Path.Combine(Package.DatabaseDir, "InputIMG", model, name),
-                                File.Exists(Path.Combine(inputImg, model, name)) ? CopyStatus.Replaced : CopyStatus.New);
-            }
+            var into = new CopyTarget { Name = target.Name, SubFolders = new[] { model }, IncludeSubdirs = false };
+            // Confirm with the list of what will happen: the same copy, as a dry run.
+            var preview = Copier.Run(source, inputImg, into, ownExe, (s, l) => { }, null, Path.Combine(Package.DatabaseDir, "InputIMG"), dryRun: true);
             if (!ConfirmCopy("Copy to Database model " + model, $"{source}\n→ {Path.Combine(inputImg, model)}", preview)) return;
 
-            var into = new CopyTarget { Name = target.Name, SubFolders = new[] { model }, IncludeSubdirs = false };
             Log($"Copy {source} → {Path.Combine(inputImg, model)}", LogLevel.Info);
             var backup = new Backup(target.Name + " " + model, source, null, db);
             var r = await Busy(() => Copier.Run(source, inputImg, into, ownExe, Log, backup, Path.Combine(Package.DatabaseDir, "InputIMG")));
@@ -615,23 +606,45 @@ namespace KitHelper
         {
             if (!CheckSource()) return;
             string source = Source;
-            if (!Package.Is(source)) { Log("Not a package: no TrueTest\\ or DATABASE\\ folder in " + source, LogLevel.Error); return; }
-            if (Install == null) { Log("Pick a TrueTest install first.", LogLevel.Error); return; }
-            string install = Install;
-            string db = null;
-            if (Package.HasDatabasePart(source))
+            var layout = Package.Scan(source);
+            if (!Package.Is(source)) { Log("Not a package: no kit folders found in " + source, LogLevel.Error); return; }
+            // Ask only for what the package needs: a TrueTest install and/or a database.
+            string install = null, db = null;
+            if (layout.NeedsInstall)
+            {
+                if (Install == null) { Log("Pick a TrueTest install first.", LogLevel.Error); return; }
+                install = Install;
+            }
+            if (layout.NeedsDatabase)
             {
                 db = PocbDatabase;
                 if (!Directory.Exists(db)) { Log($"Database folder not found: {db} (pick it under Database at the top).", LogLevel.Error); return; }
             }
 
-            string where = $"TrueTest\\ → {install}" + (db != null ? $"     DATABASE\\ → {db}" : "");
-            if (!ConfirmCopy("Copy package " + Path.GetFileName(source), where, Package.Preview(source, install, db))) return;
-            if (!AskCloseTrueTest(install, "Copy package", out string restartPath)) return;
+            string where = (install != null ? $"TrueTest install: {install}" : "") + (install != null && db != null ? "     " : "")
+                         + (db != null ? $"Database: {db}" : "") + "\n" + Package.Describe(layout);
+            // Confirmation, with the vignetting option when INIs carrying the key are copied.
+            var preview = Package.Preview(source, install, db, ownExe);
+            var confirm = new CopyResultWindow("Copy package " + Path.GetFileName(source), where, preview, null, preview: true) { Owner = this };
+            confirm.OfferVignetting(Vignetting.CopiedInis(preview));
+            if (Modal(() => confirm.ShowDialog()) != true) return;
+            string vigValue = confirm.VignettingValue;
+            bool vigDx = confirm.VignettingIncludeDx;
+            string restartPath = null;
+            if (install != null && !AskCloseTrueTest(install, "Copy package", out restartPath)) return;
 
             Log($"Copy package {source} → {install}" + (db != null ? $" + {db}" : ""), LogLevel.Info);
             var backup = new Backup("Package " + Path.GetFileName(source), source, install, db);
-            var r = await Busy(() => Package.Run(source, install, db, Log, backup));
+            var r = await Busy(() =>
+            {
+                var res = Package.Run(source, install, db, ownExe, Log, backup);
+                if (vigValue != null)
+                {
+                    Log($"Vignetting → {vigValue} in the copied INIs" + (vigDx ? " (DX included)" : " (DX left as is)"), LogLevel.Info);
+                    Vignetting.ApplyToCopied(res, vigValue, vigDx, Log);
+                }
+                return res;
+            });
             backup.Report(Log);
             LogCopyResult(r);
             ShowCopyResult("Copy package " + Path.GetFileName(source), where, r, backup);

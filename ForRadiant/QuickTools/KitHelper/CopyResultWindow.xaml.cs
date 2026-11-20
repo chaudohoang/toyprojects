@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace KitHelper
     // Shown when a copy finishes: every file, grouped by the folder it went to, with what
     // happened to it (New / Replaced / Failed / Not copied). Easier to check than the log.
     // Preview mode is the confirmation before a copy: the same list as it WILL happen
-    // (Replace / New / Not copied) with Cancel / Copy; ShowDialog() == true means Copy.
+    // (Replace / New / Not copied) with Cancel / OK; ShowDialog() == true means OK (copy).
     public partial class CopyResultWindow : Window
     {
         readonly string backupRoot;
@@ -29,7 +30,7 @@ namespace KitHelper
             this.preview = preview;
             KeyDown += (s, e) => { if (e.Key == Key.Escape) Close(); };
 
-            TxtTitle.Text = title;
+            TxtTitle.Text = preview ? "Confirmation of " + title : title;
             TxtWhere.Text = where;
 
             int nNew = r.Items.Count(i => i.Status == CopyStatus.New);
@@ -48,8 +49,9 @@ namespace KitHelper
                 TxtBackup.Text = nRep > 0 ? "Files that get replaced are backed up first to " + Backup.BaseDir
                                           : "Nothing will be overwritten.";
                 BtnOpenBackup.Visibility = Visibility.Collapsed;
+                BtnCopyText.Visibility = Visibility.Collapsed;     // a confirmation, not a report
                 BtnCancel.Visibility = Visibility.Visible;
-                BtnPrimary.Content = "Copy";
+                BtnPrimary.Content = "OK";
             }
             else
             {
@@ -119,17 +121,37 @@ namespace KitHelper
 
         string Label(CopyStatus s) =>
             s == CopyStatus.New ? "New" : s == CopyStatus.Replaced ? (preview ? "Replace" : "Replaced")
-            : s == CopyStatus.Failed ? "Failed" : "Not copied";
+            : s == CopyStatus.Failed ? "Failed" : s == CopyStatus.Changed ? "Set" : s == CopyStatus.Kept ? "Kept" : "Not copied";
 
         static string BrushOf(CopyStatus s) =>
-            s == CopyStatus.New ? "Ok" : s == CopyStatus.Replaced ? "Accent" : s == CopyStatus.Failed ? "Err" : "Dim";
+            s == CopyStatus.New ? "Ok" : s == CopyStatus.Replaced || s == CopyStatus.Changed ? "Accent"
+            : s == CopyStatus.Failed ? "Err" : "Dim";
+
+        // ---- vignetting option (confirmation only)
+
+        // inis: CopiedInis of the preview. Shows the panel with their current values.
+        public void OfferVignetting(IList<CopyItem> inis)
+        {
+            if (!preview || inis == null || inis.Count == 0) return;
+            string now = string.Join(", ", inis.GroupBy(i => (value: Vignetting.Read(i.From), dx: Vignetting.IsDx(i.From)))
+                                               .OrderBy(g => g.Key.dx).ThenBy(g => g.Key.value)
+                                               .Select(g => $"{g.Key.value} in {g.Count()}{(g.Key.dx ? " DX" : "")}"));
+            TxtVignetting.Inlines.Clear();
+            TxtVignetting.Inlines.Add(new Run("Vignetting  ") { FontWeight = FontWeights.SemiBold });
+            TxtVignetting.Inlines.Add(new Run($"{inis.Count} INI file(s) being copied have {Vignetting.Key}; now {now}.") { Foreground = B("Dim") });
+            PnlVignetting.Visibility = Visibility.Visible;
+        }
+
+        // "1" / "0" to set, null to keep.
+        public string VignettingValue => RbVigOn.IsChecked == true ? "1" : RbVigOff.IsChecked == true ? "0" : null;
+        public bool VignettingIncludeDx => ChkVigDx.IsChecked == true;
 
         Brush B(string key) => (Brush)FindResource(key);
 
         void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => DragMove();
         void Close_Click(object sender, RoutedEventArgs e) => Close();
 
-        // Preview: "Copy" confirms (ShowDialog returns true). Result: "Close".
+        // Preview: "OK" confirms (ShowDialog returns true). Result: "Close".
         void Primary_Click(object sender, RoutedEventArgs e)
         {
             if (preview) DialogResult = true;

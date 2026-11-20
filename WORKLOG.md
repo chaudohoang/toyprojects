@@ -8,6 +8,50 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ## 2026-11-20
 
+- **Kit Helper 1.7.0: InputIMG folders always also go to the Database; vignetting option in the
+  package confirmation.**
+  - `Package.Scan`: an `InputIMG\<model>` folder whose own target is not the Database (D997's
+    `D997-CB-CGDIM_TLSM`, "Copy all to POCB4.1Net" script) gets a second unit,
+    `Database\InputIMG\<model>`. `00` model folders are unchanged (Database only). The station
+    really keeps it there: the preview against C:\DATABASE showed all 10 files as Replace.
+  - The confirmation shows a Vignetting panel when INIs with STEP_3_VIGNETTING_CORRECTION are being
+    copied (current values listed): Keep as is (default) / Set ON (1) / Set OFF (0) + Include DX
+    ini. After the copy, `Vignetting.ApplyToCopied` edits the copied files only (not the kit); the
+    report lists them in a "Vignetting set to N" group as Set ("was 0") or Kept (DX).
+  - `CopyItem` now carries From/To; `Result.Written` = New/Replaced items with a destination.
+  - Tested on a sandbox copy of the D997 kit with an extra `_DX` INI: 2 units for CGDIM_TLSM, 21
+    INIs offered (7 × POCB4.1Net / POCB4.1 / Database). With ON and no DX, 18 were set 0→1 and 3
+    DX kept, at all three destinations; the kit INIs were unchanged.
+
+- **Kit Helper 1.6.0: Copy package understands LGD's kit layout too** (`Package.Scan`).
+  - LGD kits are category folders, some with a model folder inside: `OMIT\<model>\`,
+    `PUC\<model>\`, `InputIMG\<model>\`, plus `POCB4.2\`, `R2R\`, `inputTemplateGIB…\`, and a .seqxc
+    at the top. Each folder goes through `Kit.Suggest` (the same rule as opening it alone). A
+    recognised folder is one unit for that target. Only `OMIT\ PUC\ InputIMG\` are searched one
+    level deeper; any other unrecognised folder, and loose files (.seqxc, .bmp, README), are
+    listed as Not copied. The TrueTest\ / DATABASE\ mirror layout still works and can be mixed in.
+  - `InputIMG\<model>` goes to the Database unless its own "Copy all to X" script says otherwise:
+    D997's `InputIMG\D997-CB-CGDIM_TLSM` has "Copy all to POCB4.1Net folder.exe" → POCB4.1Net.
+  - Package root rule (so `D:\Log`, `D:\Log\Kit` and drop folders aren't packages): not itself a
+    single-target kit, AND (TrueTest\/DATABASE\, or a .seqxc, or ≥2 known category folders), AND
+    ≥1 unit. The first version without this treated `D:\Log` as a package with 25 scattered units.
+  - The confirmation lists one line per unit ("OMIT\D997-CB-GIB_TLSM\ → ScratchDustDetect_NY"). It
+    asks only for the install / database the units need, and closes TrueTest only when
+    something goes into the install.
+  - `Copier.Run(..., dryRun)` / `CopyOne(dryRun)`: the preview runs the real copy code without
+    touching anything, so the confirmation can't disagree with the copy. The Database model
+    preview uses it too.
+  - Tested (PS 5.1, built exe) on the 11/11 BT kit, 11/04 MATLAB kit, D997 CGDIM kit and our
+    package: detection as above, preview touched nothing, the real copy into an empty sandbox gave
+    Items identical to the preview (77/98/67/43), files on disk = copied count, no helper tools.
+    Also checked that `D:\Log`, `D:\Log\Kit`, the X402x drop folder, and a lone POCB4.2 or
+    OMIT\<model> kit are not packages. `Is(D:\Log)` takes 1 ms.
+  - Open question: `BlockFiles.exe` (D997 POCB4.1Net folder) is copied into TrueTest. It is not in
+    `Kit.IsHelper` (UnblockFiles is), and the old POCB4.1Net copy exe copied it too.
+
+- **Kit Helper 1.5.1:** the copy confirmation is titled "Confirmation of <action>", its buttons
+  are Cancel / OK, and it has no "Copy as text" (that stays on the report only).
+
 - **Kit Helper 1.5.0: no more Windows MessageBoxes.**
   - Copy confirmations (Copy package, Database model) are `CopyResultWindow` in preview mode
     (`Package.Preview`, or the model folder's files): every file grouped by destination as

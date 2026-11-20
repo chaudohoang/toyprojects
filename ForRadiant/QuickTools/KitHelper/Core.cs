@@ -214,11 +214,13 @@ namespace KitHelper
 
     // What happened to one file in a copy, for the summary window. Category is where it went,
     // relative to the install / database ("TrueTest\POCB4.2\mainTemplate"), or NotCopied.
-    public enum CopyStatus { New, Replaced, Failed, Skipped }
+    // Changed / Kept: an INI's vignetting value after the copy (set, or left alone as DX).
+    public enum CopyStatus { New, Replaced, Failed, Skipped, Changed, Kept }
     public sealed class CopyItem
     {
         public const string NotCopied = "Not copied";
         public string Category, Name, Detail;
+        public string From, To;                  // source / destination file, when known
         public CopyStatus Status;
     }
 
@@ -231,23 +233,31 @@ namespace KitHelper
             public readonly List<CopyItem> Items = new List<CopyItem>();
 
             // rel: path as shown, its folder becomes the category ("TrueTest\PUC\x.exe").
-            public void Add(string rel, CopyStatus status, string detail = null) =>
+            public void Add(string rel, CopyStatus status, string detail = null, string from = null, string to = null) =>
                 Items.Add(new CopyItem
                 {
                     Category = status == CopyStatus.Skipped ? CopyItem.NotCopied : (Path.GetDirectoryName(rel) ?? ""),
                     Name = status == CopyStatus.Skipped ? rel : Path.GetFileName(rel),
                     Status = status,
                     Detail = detail,
+                    From = from,
+                    To = to,
                 });
+
+            // Files that were (or, in a dry run, would be) written.
+            public IEnumerable<CopyItem> Written =>
+                Items.Where(i => (i.Status == CopyStatus.New || i.Status == CopyStatus.Replaced) && i.To != null);
         }
 
         // Copies the top-level files of `source` (and subfolders when the target asks for it)
         // into each of target.SubFolders under `install`. `ownExe` is never copied.
         // Overwritten files go to `backup` as <backupPrefix>\<sub>\<rel>.
+        // dryRun: touch nothing, only fill Items with what would happen (New / Replaced / Not
+        // copied) - the confirmation uses the same code as the copy, so they cannot disagree.
         public static Result Run(string source, string install, CopyTarget target, string ownExe, LogFn log,
-                                 Backup backup, string backupPrefix = Package.TrueTestDir)
+                                 Backup backup, string backupPrefix = Package.TrueTestDir, bool dryRun = false)
         {
-            if (target.Route != null) return RunRouted(source, install, target, ownExe, log, backup, backupPrefix);
+            if (target.Route != null) return RunRouted(source, install, target, ownExe, log, backup, backupPrefix, dryRun);
             var r = new Result();
             var files = Directory.GetFiles(source)
                 .Where(f => !string.Equals(Path.GetFileName(f), ownExe, StringComparison.OrdinalIgnoreCase))
@@ -280,7 +290,7 @@ namespace KitHelper
             {
                 string dest = Path.Combine(install, sub);
                 log($"→ {dest}", LogLevel.Info);
-                try { Directory.CreateDirectory(dest); }
+                try { if (!dryRun) Directory.CreateDirectory(dest); }
                 catch (Exception ex)
                 {
                     log($"Cannot create {dest}: {ex.Message}", LogLevel.Error);
@@ -293,14 +303,15 @@ namespace KitHelper
 
                 foreach (string f in files)
                     CopyOne(f, Path.Combine(dest, Path.GetFileName(f)), r, log, null,
-                            backup, Path.Combine(backupPrefix, sub, Path.GetFileName(f)));
+                            backup, Path.Combine(backupPrefix, sub, Path.GetFileName(f)), dryRun);
 
                 foreach (var (from, rel) in subFiles)
                 {
                     string to = Path.Combine(dest, rel);
-                    try { Directory.CreateDirectory(Path.GetDirectoryName(to)); } catch { }
-                    CopyOne(from, to, r, log, rel, backup, Path.Combine(backupPrefix, sub, rel));
+                    if (!dryRun) try { Directory.CreateDirectory(Path.GetDirectoryName(to)); } catch { }
+                    CopyOne(from, to, r, log, rel, backup, Path.Combine(backupPrefix, sub, rel), dryRun);
                 }
+                if (dryRun) continue;
                 // xcopy /E also recreates empty folders, including each top subfolder itself.
                 foreach (string d in dirs)
                     foreach (string e in Directory.GetDirectories(d, "*", SearchOption.AllDirectories).Prepend(d))
@@ -312,7 +323,7 @@ namespace KitHelper
         // A target that routes each file (CopyTarget.Route). Every SubFolders entry that receives
         // no file is reported and skipped - never created empty.
         static Result RunRouted(string source, string install, CopyTarget target, string ownExe, LogFn log,
-                                Backup backup, string backupPrefix)
+                                Backup backup, string backupPrefix, bool dryRun)
         {
             var r = new Result();
             string root = source.TrimEnd('\\'), kitName = Path.GetFileName(root);
@@ -340,7 +351,7 @@ namespace KitHelper
                 foreach (var (from, rel, to) in mine)
                 {
                     string full = Path.Combine(install, to);
-                    try { Directory.CreateDirectory(Path.GetDirectoryName(full)); }
+                    try { if (!dryRun) Directory.CreateDirectory(Path.GetDirectoryName(full)); }
                     catch (Exception ex)
                     {
                         log($"  FAILED  {rel}: {ex.Message}", LogLevel.Error);
@@ -349,7 +360,7 @@ namespace KitHelper
                         r.Add(Path.Combine(backupPrefix, to), CopyStatus.Failed, "cannot create the folder: " + ex.Message);
                         continue;
                     }
-                    CopyOne(from, full, r, log, rel, backup, Path.Combine(backupPrefix, to));
+                    CopyOne(from, full, r, log, rel, backup, Path.Combine(backupPrefix, to), dryRun);
                 }
             }
             return r;
@@ -358,16 +369,17 @@ namespace KitHelper
         // 3 attempts on IOException (a file briefly held by a closing TrueTest), as the POCB exe did.
         // With a backup, an existing `to` is saved first as backupRel; if that fails it is not overwritten.
         internal static void CopyOne(string from, string to, Result r, LogFn log, string label = null,
-                                     Backup backup = null, string backupRel = null)
+                                     Backup backup = null, string backupRel = null, bool dryRun = false)
         {
             label = label ?? Path.GetFileName(from);
             // Where it lands, as the summary groups it: the backup layout when there is one.
             string shown = backupRel ?? to;
             bool existed = File.Exists(to);
+            if (dryRun) { r.Add(shown, existed ? CopyStatus.Replaced : CopyStatus.New, null, from, to); return; }
             if (backup != null && !backup.Save(to, backupRel, log))
             {
                 r.Failed++;
-                r.Add(shown, CopyStatus.Failed, "could not back up the existing file, not replaced");
+                r.Add(shown, CopyStatus.Failed, "could not back up the existing file, not replaced", from, to);
                 return;
             }
             for (int attempt = 1; ; attempt++)
@@ -377,7 +389,7 @@ namespace KitHelper
                     File.Copy(from, to, true);
                     log($"  copied  {label}", LogLevel.Detail);
                     r.Copied++;
-                    r.Add(shown, existed ? CopyStatus.Replaced : CopyStatus.New);
+                    r.Add(shown, existed ? CopyStatus.Replaced : CopyStatus.New, null, from, to);
                     return;
                 }
                 catch (IOException ex) when (attempt < 3)
@@ -390,7 +402,7 @@ namespace KitHelper
                     log($"  FAILED  {label}: {ex.Message}", LogLevel.Error);
                     r.Failed++;
                     r.AccessDenied |= ex is UnauthorizedAccessException;
-                    r.Add(shown, CopyStatus.Failed, ex.Message);
+                    r.Add(shown, CopyStatus.Failed, ex.Message, from, to);
                     return;
                 }
             }
@@ -484,6 +496,44 @@ namespace KitHelper
             return old;
         }
 
+        // INIs a copy writes (or would write) that hold the key, read from their source.
+        public static List<CopyItem> CopiedInis(Copier.Result r) =>
+            r.Written.Where(i => i.From != null && i.From.EndsWith(".ini", StringComparison.OrdinalIgnoreCase)
+                              && File.Exists(i.From) && Read(i.From) != null).ToList();
+
+        // After a copy: set the key in the copied INIs (the kit is not touched) and record each in
+        // r as Changed ("was 0") or Kept (a DX ini while includeDx is off). The original
+        // destination files were already backed up by the copy.
+        public static void ApplyToCopied(Copier.Result r, string value, bool includeDx, LogFn log)
+        {
+            string category = $"Vignetting set to {value}  ({Key})";
+            foreach (var i in r.Written.Where(i => i.To.EndsWith(".ini", StringComparison.OrdinalIgnoreCase)).ToList())
+            {
+                string rel = Path.Combine(i.Category, i.Name);
+                string current;
+                try { current = Read(i.To); } catch { continue; }
+                if (current == null) continue;
+                if (!includeDx && IsDx(i.To))
+                {
+                    r.Items.Add(new CopyItem { Category = category, Name = rel, Status = CopyStatus.Kept, Detail = $"DX ini, left at {current}", To = i.To });
+                    continue;
+                }
+                try
+                {
+                    string old = Set(i.To, value);
+                    log($"  vignetting {old} → {value}  {rel}", LogLevel.Detail);
+                    r.Items.Add(new CopyItem { Category = category, Name = rel, Status = CopyStatus.Changed,
+                                               Detail = old == value ? $"already {value}" : $"was {old}", To = i.To });
+                }
+                catch (Exception ex)
+                {
+                    log($"  FAILED  vignetting {rel}: {ex.Message}", LogLevel.Error);
+                    r.Failed++;
+                    r.Items.Add(new CopyItem { Category = category, Name = rel, Status = CopyStatus.Failed, Detail = ex.Message, To = i.To });
+                }
+            }
+        }
+
         static string ReadText(string path, out Encoding enc)
         {
             using (var r = new StreamReader(path, Encoding.Default, true))
@@ -568,95 +618,205 @@ namespace KitHelper
         }
     }
 
-    // A combined package: several kits in one folder, laid out as they are installed.
-    //   <package>\TrueTest\<sub>\...   -> <TrueTest install>\<sub>\...   (POCB4.2, PUC, POCBMobile\inputTemplate...)
-    //   <package>\DATABASE\...         -> <database>\...                 (InputIMG\<model>\LGD_PO_Compensation.dll...)
-    // Every file is copied at its relative path; anything it overwrites is saved first by the
-    // caller's Backup, whose TrueTest\ / DATABASE\ layout is the package's own. Files at the
-    // package root (README) are not copied.
+    // A combined package: several kits in one folder. Two layouts, which may be mixed:
+    //
+    //  1. Mirrored, laid out as installed (what we build ourselves):
+    //       <package>\TrueTest\<sub>\...   -> <TrueTest install>\<sub>\...
+    //       <package>\DATABASE\...         -> <database>\...
+    //  2. LGD's kit layout: category folders, some with a model folder inside, e.g.
+    //       OMIT\<model>\  PUC\<model>\  InputIMG\<model>\  POCB4.2\  R2R\  inputTemplateGIB...\
+    //     Every folder is offered to Kit.Suggest, the same rule as opening it alone. A folder it
+    //     recognises becomes one unit, copied by that target (an "InputIMG\<model>" folder →
+    //     <database>\InputIMG\<model>, unless its own "Copy all to X" script says otherwise). A
+    //     folder it doesn't recognise is a container: its subfolders are tried in turn.
+    //
+    // Files no unit takes (.seqxc, README, a loose .bmp) are listed as Not copied. Anything
+    // overwritten is saved first by the caller's Backup (TrueTest\ / DATABASE\ layout).
     public static class Package
     {
         public const string TrueTestDir = "TrueTest", DatabaseDir = "DATABASE";
+        const int MaxDepth = 3;                      // package\InputIMG\<model> is depth 2
 
-        public static bool Is(string folder) =>
-            Directory.Exists(folder) &&
-            (Directory.Exists(Path.Combine(folder, TrueTestDir)) || Directory.Exists(Path.Combine(folder, DatabaseDir)));
-
-        public static bool HasDatabasePart(string folder) => Directory.Exists(Path.Combine(folder, DatabaseDir));
-
-        public sealed class Item { public string From, To, Rel; }   // Rel = "TrueTest\POCB4.2\Crop.dll"
-
-        // What would be copied where. database may be null when the package has no DATABASE\.
-        public static List<Item> Plan(string folder, string install, string database)
+        // Mirror = TrueTestDir / DatabaseDir for layout 1; else Target is the kit folder's target.
+        public sealed class Unit
         {
-            var items = new List<Item>();
-            void Add(string part, string destRoot)
+            public string Folder, Rel, Mirror, Why;
+            public CopyTarget Target;
+            public bool NeedsDatabase => Mirror == DatabaseDir || Target?.ToDatabase == true;
+            public bool NeedsInstall => !NeedsDatabase;
+            public string Destination => Mirror == TrueTestDir ? "TrueTest install"
+                                       : Mirror == DatabaseDir ? "Database"
+                                       : Target.ToDatabase ? $@"Database\InputIMG\{Path.GetFileName(Folder)}"
+                                       : Target.Label ?? string.Join(" + ", Target.SubFolders);
+        }
+
+        public sealed class Layout
+        {
+            public readonly List<Unit> Units = new List<Unit>();
+            public readonly List<(string rel, string why)> Left = new List<(string, string)>();   // not copied
+            public bool TooBig;                      // scan stopped: not a package (e.g. D:\Log itself)
+            public bool NeedsDatabase => Units.Any(u => u.NeedsDatabase);
+            public bool NeedsInstall => Units.Any(u => u.NeedsInstall);
+        }
+
+        // LGD kits nest model folders only inside these; nothing else is searched deeper.
+        static readonly string[] Containers = { "OMIT", "PUC", "InputIMG" };
+        static bool IsContainer(string name) => Containers.Contains(name, StringComparer.OrdinalIgnoreCase);
+
+        // Top-level folder names LGD kits use (containers + kits named after their target).
+        static bool IsKnownCategory(string name) =>
+            IsContainer(name)
+            || new[] { "POCB4.2", "POCB4.1", "POCB4.1Net", "POCBMobile", "R2R", "LGDVHCustomApp", "ScratchDustDetect_NY" }
+                   .Contains(name, StringComparer.OrdinalIgnoreCase)
+            || name.StartsWith("inputTemplate", StringComparison.OrdinalIgnoreCase)
+            || name.StartsWith("inputTest", StringComparison.OrdinalIgnoreCase);
+
+        // A folder is a package when:
+        //  - it is not itself a kit for one target (a POCB4.2 kit has subfolders that look like units),
+        //  - it looks like a package root: TrueTest\ / DATABASE\, a .seqxc (every LGD kit ships its
+        //    sequence), or at least two known category folders - so a parent folder full of kits
+        //    (D:\Log, D:\Log\Kit) is not mistaken for one,
+        //  - and it holds at least one unit.
+        public static bool Is(string folder)
+        {
+            if (!Directory.Exists(folder) || Kit.Suggest(folder, out _) != null) return false;
+            var dirs = Directory.GetDirectories(folder).Select(Path.GetFileName).ToList();
+            bool rooted = dirs.Any(n => n.Equals(TrueTestDir, StringComparison.OrdinalIgnoreCase) || n.Equals(DatabaseDir, StringComparison.OrdinalIgnoreCase))
+                       || Directory.EnumerateFiles(folder, "*.seqxc").Any()
+                       || dirs.Count(IsKnownCategory) >= 2;
+            if (!rooted) return false;
+            var l = Scan(folder);
+            return !l.TooBig && l.Units.Count > 0;
+        }
+
+        // Runs on every folder opened, so it gives up on a big tree instead of walking it.
+        const int MaxFolders = 150;
+
+        public static Layout Scan(string folder)
+        {
+            var l = new Layout();
+            string root = folder.TrimEnd('\\');
+            string Rel(string p) => p.Substring(root.Length + 1);
+            bool HasFiles(string d) => Directory.EnumerateFiles(d, "*", SearchOption.AllDirectories).Any(f => !Kit.NeverCopy(f));
+            int visited = 0;
+
+            foreach (string f in Directory.GetFiles(root).Where(f => !Kit.NeverCopy(f)))
+                l.Left.Add((Rel(f), "not in a kit folder"));
+
+            void Discover(string dir, int depth)
             {
-                string src = Path.Combine(folder, part);
-                if (!Directory.Exists(src)) return;
-                foreach (string f in Directory.GetFiles(src, "*", SearchOption.AllDirectories).OrderBy(f => f, StringComparer.OrdinalIgnoreCase))
+                if (l.TooBig) return;
+                if (++visited > MaxFolders) { l.TooBig = true; return; }
+                if (!HasFiles(dir)) return;                                  // empty, or only Thumbs.db / helpers
+                var t = Kit.Suggest(dir, out string why);
+                if (t != null)
                 {
-                    if (Kit.NeverCopy(f)) continue;
-                    string rel = f.Substring(src.TrimEnd('\\').Length + 1);
-                    items.Add(new Item { From = f, To = Path.Combine(destRoot, rel), Rel = Path.Combine(part, rel) });
+                    l.Units.Add(new Unit { Folder = dir, Rel = Rel(dir), Target = t, Why = why });
+                    // Every InputIMG\<model> also belongs in the database, including one whose own
+                    // copy script sends it elsewhere (D997's CGDIM_TLSM → POCB4.1Net).
+                    bool inInputImg = string.Equals(Path.GetFileName(Path.GetDirectoryName(dir)), "InputIMG", StringComparison.OrdinalIgnoreCase);
+                    if (inInputImg && !t.ToDatabase)
+                        l.Units.Add(new Unit { Folder = dir, Rel = Rel(dir), Target = CopyTarget.All.First(x => x.ToDatabase),
+                                               Why = "InputIMG folder: also kept in the database" });
+                    return;
                 }
+                // Only OMIT\ PUC\ InputIMG\ hold model folders; anything else unrecognised is reported, not searched.
+                if (depth >= MaxDepth || !IsContainer(Path.GetFileName(dir)))
+                {
+                    l.Left.Add((Rel(dir) + "\\", "kit type not recognised"));
+                    return;
+                }
+                foreach (string f in Directory.GetFiles(dir).Where(f => !Kit.NeverCopy(f)))
+                    l.Left.Add((Rel(f), "not in a kit folder"));
+                foreach (string d in Directory.GetDirectories(dir).OrderBy(d => d, StringComparer.OrdinalIgnoreCase))
+                    Discover(d, depth + 1);
             }
-            Add(TrueTestDir, install);
-            if (database != null) Add(DatabaseDir, database);
-            return items;
-        }
 
-        // "TrueTest\POCB4.2 (12), TrueTest\PUC (7), DATABASE\InputIMG (2)": one entry per second-level folder.
-        public static string Describe(string folder)
-        {
-            var parts = new List<string>();
-            foreach (string part in new[] { TrueTestDir, DatabaseDir })
+            foreach (string d in Directory.GetDirectories(root).OrderBy(d => d, StringComparer.OrdinalIgnoreCase))
             {
-                string src = Path.Combine(folder, part);
-                if (!Directory.Exists(src)) continue;
-                foreach (string d in Directory.GetDirectories(src).OrderBy(d => d, StringComparer.OrdinalIgnoreCase))
-                    parts.Add($@"{part}\{Path.GetFileName(d)} ({Directory.GetFiles(d, "*", SearchOption.AllDirectories).Count(f => !Kit.NeverCopy(f))})");
-                int loose = Directory.GetFiles(src).Count(f => !Kit.NeverCopy(f));
-                if (loose > 0) parts.Add($@"{part}\ ({loose})");
+                string name = Path.GetFileName(d);
+                if (name.Equals(TrueTestDir, StringComparison.OrdinalIgnoreCase) || name.Equals(DatabaseDir, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (HasFiles(d)) l.Units.Add(new Unit { Folder = d, Rel = name, Mirror = name.Equals(TrueTestDir, StringComparison.OrdinalIgnoreCase) ? TrueTestDir : DatabaseDir, Why = "mirrors the install layout" });
+                }
+                else if (name.StartsWith("Backup_", StringComparison.OrdinalIgnoreCase)) continue;   // a 1.2.0 in-package backup
+                else Discover(d, 1);
+                if (l.TooBig) { l.Units.Clear(); break; }
             }
-            return string.Join(", ", parts);
+            return l;
         }
 
-        // What Run would do, for the confirmation (CopyResultWindow preview): each file as
-        // Replaced (exists now, will be backed up) or New. Nothing is touched.
-        public static Copier.Result Preview(string folder, string install, string database)
+        // One line per unit, for the panel and the confirmation:  OMIT\X4023-… → ScratchDustDetect_NY
+        public static string Describe(Layout l) =>
+            string.Join("\n", l.Units.Select(u => $"{u.Rel}\\  →  {u.Destination}"));
+
+        // What Run would do (CopyResultWindow preview). Nothing is touched.
+        public static Copier.Result Preview(string folder, string install, string database, string ownExe) =>
+            Execute(folder, install, database, ownExe, (s, l) => { }, null, dryRun: true);
+
+        public static Copier.Result Run(string folder, string install, string database, string ownExe, LogFn log, Backup backup) =>
+            Execute(folder, install, database, ownExe, log, backup, dryRun: false);
+
+        static Copier.Result Execute(string folder, string install, string database, string ownExe, LogFn log, Backup backup, bool dryRun)
+        {
+            var layout = Scan(folder);
+            var all = new Copier.Result();
+            void Merge(Copier.Result r)
+            {
+                if (r == null) return;
+                all.Copied += r.Copied; all.Failed += r.Failed; all.Skipped += r.Skipped;
+                all.AccessDenied |= r.AccessDenied;
+                all.Items.AddRange(r.Items);
+            }
+
+            foreach (var u in layout.Units)
+            {
+                if (u.NeedsDatabase && database == null) { log($"{u.Rel}: no database picked, skipped.", LogLevel.Warn); continue; }
+                if (u.NeedsInstall && install == null) { log($"{u.Rel}: no TrueTest install picked, skipped.", LogLevel.Warn); continue; }
+                log($"{u.Rel}  →  {u.Destination}", LogLevel.Info);
+                if (u.Mirror != null)
+                    Merge(Mirror(u.Folder, u.Mirror, u.Mirror == TrueTestDir ? install : database, ownExe, log, backup, dryRun));
+                else if (u.Target.ToDatabase)
+                {
+                    var into = new CopyTarget { Name = u.Target.Name, SubFolders = new[] { Path.GetFileName(u.Folder) } };
+                    Merge(Copier.Run(u.Folder, Path.Combine(database, "InputIMG"), into, ownExe, log, backup,
+                                     Path.Combine(DatabaseDir, "InputIMG"), dryRun));
+                }
+                else
+                    Merge(Copier.Run(u.Folder, install, u.Target, ownExe, log, backup, TrueTestDir, dryRun));
+            }
+            foreach (var (rel, why) in layout.Left) all.Add(rel, CopyStatus.Skipped, why);
+            return all;
+        }
+
+        // Layout 1: every file at its relative path under destRoot (shown as <part>\...).
+        static Copier.Result Mirror(string src, string part, string destRoot, string ownExe, LogFn log, Backup backup, bool dryRun)
         {
             var r = new Copier.Result();
-            foreach (var it in Plan(folder, install, database))
-                r.Add(it.Rel, File.Exists(it.To) ? CopyStatus.Replaced : CopyStatus.New);
-            return r;
-        }
+            if (part == TrueTestDir && !dryRun)
+                // A TrueTest\<sub> the install lacks is most likely misnamed (a folder TrueTest never reads).
+                foreach (string d in Directory.GetDirectories(src))
+                    if (!Directory.Exists(Path.Combine(destRoot, Path.GetFileName(d))))
+                        log($@"{TrueTestDir}\{Path.GetFileName(d)}: not in {destRoot} - a new folder will be created there.", LogLevel.Warn);
 
-        public static Copier.Result Run(string folder, string install, string database, LogFn log, Backup backup)
-        {
-            var r = new Copier.Result();
-
-            // A TrueTest\<sub> that the install does not have is most likely a misnamed folder
-            // (it would create a new folder TrueTest never reads): say so, but still copy.
-            string tt = Path.Combine(folder, TrueTestDir);
-            if (Directory.Exists(tt))
-                foreach (string d in Directory.GetDirectories(tt))
-                    if (!Directory.Exists(Path.Combine(install, Path.GetFileName(d))))
-                        log($@"{TrueTestDir}\{Path.GetFileName(d)}: not in {install} - a new folder will be created there.", LogLevel.Warn);
-
-            foreach (var it in Plan(folder, install, database))
+            string root = src.TrimEnd('\\');
+            foreach (string f in Directory.GetFiles(src, "*", SearchOption.AllDirectories).OrderBy(f => f, StringComparer.OrdinalIgnoreCase))
             {
-                try { Directory.CreateDirectory(Path.GetDirectoryName(it.To)); }
-                catch (Exception ex)
-                {
-                    log($"  FAILED  {it.Rel}: {ex.Message}", LogLevel.Error);
-                    r.Failed++;
-                    r.AccessDenied |= ex is UnauthorizedAccessException;
-                    r.Add(it.Rel, CopyStatus.Failed, "cannot create the folder: " + ex.Message);
-                    continue;
-                }
-                // it.Rel is already TrueTest\... / DATABASE\..., the backup layout.
-                Copier.CopyOne(it.From, it.To, r, log, it.Rel, backup, it.Rel);
+                string rel = f.Substring(root.Length + 1), shown = Path.Combine(part, rel);
+                if (Kit.NeverCopy(f) || string.Equals(Path.GetFileName(f), ownExe, StringComparison.OrdinalIgnoreCase))
+                { r.Add(shown, CopyStatus.Skipped, "helper tool / Explorer file, never copied"); continue; }
+                string to = Path.Combine(destRoot, rel);
+                if (!dryRun)
+                    try { Directory.CreateDirectory(Path.GetDirectoryName(to)); }
+                    catch (Exception ex)
+                    {
+                        log($"  FAILED  {shown}: {ex.Message}", LogLevel.Error);
+                        r.Failed++;
+                        r.AccessDenied |= ex is UnauthorizedAccessException;
+                        r.Add(shown, CopyStatus.Failed, "cannot create the folder: " + ex.Message);
+                        continue;
+                    }
+                Copier.CopyOne(f, to, r, log, shown, backup, shown, dryRun);
             }
             return r;
         }
