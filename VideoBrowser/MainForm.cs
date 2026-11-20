@@ -76,13 +76,12 @@ namespace VideoBrowser
         bool _fullscreen;
         FormWindowState _prevState;
         Rectangle _prevBounds;
-        Point _fsLastMouse;
-        DateTime _fsLastMove;
-        const int FsHideMs = 2500;
+        readonly System.Windows.Forms.Timer _fsTimer = new System.Windows.Forms.Timer { Interval = 50 };
 
         public MainForm(string startFolder)
         {
             Text = "Video Browser";
+            Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
             BackColor = BgDark;
             ForeColor = Fg;
             Font = new Font("Segoe UI", 9f);
@@ -205,7 +204,8 @@ namespace VideoBrowser
             Controls.Add(_menu);
             MainMenuStrip = _menu;
 
-            _timer.Tick += (s, e) => { UpdateTime(); UpdateFullscreenControls(); };
+            _timer.Tick += (s, e) => UpdateTime();
+            _fsTimer.Tick += (s, e) => UpdateFullscreenControls();
             _timer.Start();
 
             DragEnter += (s, e) => e.Effect = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Link : DragDropEffects.None;
@@ -801,17 +801,17 @@ namespace VideoBrowser
                 WindowState = FormWindowState.Normal;
                 Bounds = Screen.FromControl(this).Bounds;
                 // controls float over the bottom of the video instead of taking space;
-                // shown on mouse movement, hidden again after FsHideMs (UpdateFullscreenControls)
+                // hidden, and shown only while the mouse is over their area (UpdateFullscreenControls)
                 _controls.Dock = DockStyle.None;
                 _controls.Bounds = new Rectangle(0, ClientSize.Height - _controls.Height, ClientSize.Width, _controls.Height);
                 _controls.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
                 _controls.BringToFront();
-                _fsLastMouse = Cursor.Position;
-                _fsLastMove = DateTime.UtcNow;
-                _controls.Visible = true;
+                _controls.Visible = false;
+                _fsTimer.Start();
             }
             else
             {
+                _fsTimer.Stop();
                 FormBorderStyle = FormBorderStyle.Sizable;
                 _menu.Visible = true;
                 _controls.Anchor = AnchorStyles.Top | AnchorStyles.Left;
@@ -827,24 +827,15 @@ namespace VideoBrowser
             _list.Focus();
         }
 
-        // Polled from the timer: the VLC video surface is a native child window, so relying on
+        // Polled from _fsTimer (fullscreen only): the VLC video surface is a native child window, so relying on
         // MouseMove events from it is unreliable — the cursor position works regardless.
         void UpdateFullscreenControls()
         {
             if (!_fullscreen) return;
-            var p = Cursor.Position;
-            var now = DateTime.UtcNow;
-            if (p != _fsLastMouse)
-            {
-                _fsLastMouse = p;
-                _fsLastMove = now;
-                if (!_controls.Visible) _controls.Visible = true;
-                return;
-            }
-            if (_controls.Visible && (now - _fsLastMove).TotalMilliseconds > FsHideMs
-                && !_controls.RectangleToScreen(_controls.ClientRectangle).Contains(p)
-                && !_seek.Dragging && !_volume.Dragging)
-                _controls.Visible = false;
+            // like MPC: visible only while the cursor is over the bar's area (or a slider is being dragged)
+            bool over = RectangleToScreen(_controls.Bounds).Contains(Cursor.Position);
+            bool show = over || _seek.Dragging || _volume.Dragging;
+            if (_controls.Visible != show) _controls.Visible = show;
         }
 
         // =====================================================================

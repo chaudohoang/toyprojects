@@ -10,11 +10,17 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 - **VideoBrowser: control bar in fullscreen.** Fullscreen used to hide `_controls` with no way back.
   Now it's undocked (`Dock=None`, anchored bottom, `BringToFront`) so it floats over the video
-  without resizing it; shown on mouse movement, hidden after 2.5 s idle unless hovered/dragging.
-  Mouse movement is detected by polling `Cursor.Position` in the existing 250 ms timer, because the
-  LibVLC video surface is a native child HWND and its MouseMove events can't be relied on. Trap: on
-  leaving fullscreen, `_split.BringToFront()` is needed to restore dock order (Fill must have the
-  lowest z-index), otherwise the bottom panel overlaps the video.
+  without resizing it. First version (bb7c7052) showed it on any mouse movement with a 2.5 s
+  auto-hide; changed on request to MPC-HC behaviour: hidden always, visible only while the cursor is
+  over the bar's own area (or a slider is being dragged). The cursor is polled by a 50 ms `_fsTimer`
+  that runs only in fullscreen (250 ms felt too slow for hover-reveal), because the LibVLC video
+  surface is a native child HWND and its MouseMove events can't be relied on. Trap: on leaving
+  fullscreen, `_split.BringToFront()` is needed to restore dock order (Fill must have the lowest
+  z-index), otherwise the bottom panel overlaps the video.
+- **VideoBrowser icon**: `VideoBrowser\app.ico` (blue tile, play triangle + playlist lines; ≤24 px
+  shows only the triangle), generated with System.Drawing from a throwaway PowerShell script, PNG
+  entries 16–256. Wired via `<ApplicationIcon>` + `Icon.ExtractAssociatedIcon(Application.ExecutablePath)`,
+  same as CredentialManager/EmailBrowser.
 
 - **`E:\Dev` moved into `toyprojects\DevWorkspace`**, its own `.git` dropped (history lost, by choice).
   Compared first with `\\victus16\E\Dev`: 0 files newer there, 1 file only there (a runtime DLL in
