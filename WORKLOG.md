@@ -8,6 +8,10 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ## 2026-11-20
 
+- **Kit Helper 1.8.1 (rebuilt, version kept on request): `BlockFiles.exe` is a helper tool**
+  (`Kit.IsHelper`), like UnblockFiles. LGD's POCB4.1Net / InputIMG folders ship it, and it was being
+  copied into TrueTest and the Database. Checked on the D997 kit preview: both copies now Not copied.
+
 - **Kit Helper 1.8.1: state colours on the popups** (`CopyResultWindow.SetMood`, also used by
   `AskWindow`). The window outline, a tinted title band, a badge and the title text take one
   colour: confirmation = Warn/amber "CONFIRM", result = Ok/green "DONE" or Err/red "ERRORS" (any

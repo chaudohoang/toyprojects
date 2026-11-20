@@ -575,7 +575,7 @@ namespace KitHelper
         {
             string n = Path.GetFileName(fileName);
             return n.StartsWith("Copy all to ", StringComparison.OrdinalIgnoreCase)
-                || new[] { "Kit Helper.exe", "ScriptToolbox.exe", "UnblockFiles.exe", "VignetingOn.exe", "VignetingOff.exe",
+                || new[] { "Kit Helper.exe", "ScriptToolbox.exe", "UnblockFiles.exe", "BlockFiles.exe", "VignetingOn.exe", "VignetingOff.exe",
                            "RunTestOmit.exe", "RunTestPUC.exe" }
                    .Contains(n, StringComparer.OrdinalIgnoreCase);
         }
