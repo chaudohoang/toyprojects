@@ -43,6 +43,8 @@ namespace KitHelper
             var icon = new FloatingIconWindow(panel);
             panel.Anchor = icon;
             icon.Show();
+            var tray = new TrayIcon(icon, panel);
+            app.Exit += (s, e) => tray.Dispose();
             var ipc = new IpcHost(panel);
 
             panel.MigrateFromScriptToolbox();
@@ -91,7 +93,12 @@ namespace KitHelper
             panel.Dispatcher.BeginInvoke(new Action(() =>
             {
                 if (text == SingleInstance.QuitToken) Program.Exit();   // a newer build takes over
-                else panel.OpenForwarded(text);
+                else
+                {
+                    // Started again (shortcut, right-click entry): also brings a lost icon back.
+                    (panel.Anchor as FloatingIconWindow)?.KeepOnScreen();
+                    panel.OpenForwarded(text);
+                }
             }));
             return (IntPtr)1;
         }

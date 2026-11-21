@@ -93,8 +93,7 @@
                                     Content="Copy package → TrueTest install + Database"/>
                             <StackPanel x:Name="CopyButtons"/>
                             <TextBlock x:Name="TxtSuggest" Foreground="{StaticResource Accent}" Margin="0,0,0,6" TextWrapping="Wrap"/>
-                            <CheckBox x:Name="ChkCloseTT" Content="Close TrueTest before copying (offer restart after)" Margin="0,2,0,4"/>
-                            <TextBlock Style="{StaticResource Hint}" Text="Every copy first backs up what it overwrites. POCB4.1Net skips *.tif, *.csv, LGD_VNTT.ini."/>
+                            <TextBlock Style="{StaticResource Hint}" Text="If TrueTest is running, you're asked whether to close it first (and restart it after). Every copy first backs up what it overwrites. POCB4.1Net skips *.tif, *.csv, LGD_VNTT.ini."/>
                             <Button x:Name="BtnBackups" Content="Open backups folder" Style="{StaticResource ActionButton}" Click="Backups_Click" Margin="0,4,0,0"
                                     ToolTip="One folder per copy, with backup.txt saying where its TrueTest\ and DATABASE\ go back to."/>
                         </StackPanel>

@@ -37,6 +37,11 @@ namespace KitHelper
 
             toastTimer.Tick += (s2, e) => { toastTimer.Stop(); Toast.IsOpen = false; };
 
+            // A saved spot may be half off a screen now (resolution changed, monitor unplugged):
+            // pull it in again whenever the screen layout changes (and at start, see OnSourceInitialized).
+            Microsoft.Win32.SystemEvents.DisplaySettingsChanged += (s2, e) =>
+                Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() => KeepOnScreen()));
+
             panel.BusyChanged += SetBusy;
             Drop += OnDrop;
         }
@@ -51,13 +56,35 @@ namespace KitHelper
         }
 
         // Menu "Default position": back to the first-start spot, and forget the dragged one.
-        void DefaultPosition_Click(object sender, RoutedEventArgs e)
+        void DefaultPosition_Click(object sender, RoutedEventArgs e) => MoveToMainScreen();
+
+        // Also the tray icon's "Bring icon back here": the way back when the icon sits on a
+        // monitor that is hard to reach, where its own menu can't be.
+        public void MoveToMainScreen()
         {
             MoveToDefault();
             Settings.Current.Remove("IconLeft");
             Settings.Current.Remove("IconTop");
             Settings.Current.Save();
+            Activate();
+            ShowToast("Here I am. Drag me wherever you like.");
             if (panel.IsVisible) panel.ShowNear(this);
+        }
+
+        // Moves the icon fully inside the work area (screen minus taskbar) of the monitor it is
+        // on, or the nearest one. Without it the icon could be dragged off-screen with no way to
+        // grab it again.
+        public void KeepOnScreen()
+        {
+            var h = new WindowInteropHelper(this).Handle;
+            var src = PresentationSource.FromVisual(this);
+            if (h == IntPtr.Zero || src?.CompositionTarget == null) return;
+            var px = System.Windows.Forms.Screen.FromHandle(h).WorkingArea;    // device pixels, nearest monitor
+            var toDip = src.CompositionTarget.TransformFromDevice;
+            var tl = toDip.Transform(new Point(px.Left, px.Top));
+            var br = toDip.Transform(new Point(px.Right, px.Bottom));
+            Left = Math.Max(tl.X, Math.Min(Left, br.X - Width));
+            Top = Math.Max(tl.Y, Math.Min(Top, br.Y - Height));
         }
 
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
@@ -77,6 +104,7 @@ namespace KitHelper
                 panel.Toggle();
             else
             {
+                KeepOnScreen();   // dragged (partly) off the screen: snap back onto the nearest one
                 Settings.Current.SetDouble("IconLeft", Left);
                 Settings.Current.SetDouble("IconTop", Top);
                 Settings.Current.Save();
@@ -97,6 +125,7 @@ namespace KitHelper
         protected override void OnSourceInitialized(EventArgs e)
         {
             base.OnSourceInitialized(e);
+            KeepOnScreen();   // needs the handle to find the monitor
             if (!AdminDrop.IsElevated) return;
             var src = (HwndSource)PresentationSource.FromVisual(this);
             AdminDrop.Enable(src, OpenDropped);

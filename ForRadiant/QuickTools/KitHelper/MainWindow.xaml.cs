@@ -61,7 +61,6 @@ namespace KitHelper
             string folder = !string.IsNullOrEmpty(startFolder) && Directory.Exists(startFolder) ? startFolder
                 : InstalledCopy.IsStatic(InstalledCopy.SelfExe) && recent != null ? recent
                 : AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
-            ChkCloseTT.IsChecked = settings.Get("CloseTrueTest") != "0";
             foreach (string db in PocbTemplate.Databases) CboPocbDb.Items.Add(db);
             // The one picked last time, else the first of C/D/E:\DATABASE that exists on this PC.
             CboPocbDb.Text = settings.Get("PocbDatabase") is string savedDb && savedDb != "" ? savedDb
@@ -549,7 +548,6 @@ namespace KitHelper
             settings.Set("Install", Install);
             if (!FixedWorkDir) settings.Set("RunWorkDir", CboWorkDir.Text);
             settings.Set("PocbDatabase", PocbDatabase);
-            settings.Set("CloseTrueTest", ChkCloseTT.IsChecked == true ? "1" : "0");
             settings.Save();
         }
 
@@ -665,13 +663,13 @@ namespace KitHelper
             return ok;
         }
 
-        // If "Close TrueTest before copying" is ticked and TrueTest runs, ask to close it.
+        // If TrueTest runs, ask whether to close it first: always, as a popup. (1.9.1 removed the
+        // "Close TrueTest before copying" checkbox that gated this question: Chau prefers being asked.)
         // False = the user cancelled. restartPath = the TrueTest that was closed, or null.
         // copyTo: the install being copied into, shown under the question.
         bool AskCloseTrueTest(string copyTo, string title, out string restartPath)
         {
             restartPath = null;
-            if (ChkCloseTT.IsChecked != true) return true;
             var p = TrueTest.FindRunning();
             if (p == null) return true;
             string path = TrueTest.PathOf(p);
