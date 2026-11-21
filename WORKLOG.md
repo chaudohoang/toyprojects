@@ -8,6 +8,24 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ## 2026-11-21
 
+- **Kit Helper 1.9.3: LGD package roots with inputTemplate\ / mainTemplate\ were not packages.**
+  First made on this PC as 1.8.2 (97e43c31, never pushed); the other PC meanwhile shipped
+  1.9.0–1.9.2 without it, so this PC was reset to origin and the same `Core.cs` change re-applied.
+  Reported on `D:\Log\Kit\D994-GIB FMM Installation kit ...`. That outer folder is (by design) not
+  a package: it holds alternative station packages (1stPUC DongA / 2ndPUC Dooone) that must not
+  be copied together. The real miss was its `2ndPUC` subfolder: `Kit.Suggest`'s 1.3.2 rule
+  "folder contains inputTemplate\ → POCBMobile kit" claimed the whole package root, and
+  `Package.Is` rejects any folder Suggest recognises. The `mainTemplate\ → POCB4.2` rule did the
+  same to the X4024 kit. Fix: those subfolder rules are skipped when the folder looks like a
+  package root (a .seqxc, or OMIT\ / PUC\ / InputIMG\ inside). A package's `mainTemplate\` is now
+  its own unit → `<TrueTest>\POCB4.2\mainTemplate` (where all four local TrueTest installs keep it).
+  - Swept every folder and subfolder of `D:\Log\Kit` with `Package.Is` (exe loaded in Windows
+    PowerShell 5.1): 16 dated package folders went False→True (every D993/D994 2ndPUC, D993-MP,
+    X4024), none went True→False. Dry-run Preview of X4024 sends main_*.txt to
+    `TrueTest 1.9\POCB4.2\mainTemplate\`. The UI itself was not clicked through.
+  - Manual (Claude Doc) was brought up to 1.8.2 today by a side session, including this fix; the
+    1.9.x features from the other PC (tray icon, icon on taskbar...) are not in it yet.
+
 - **VideoBrowser: seek-bar hover thumbnails** (MPC-HC / VLC style). New `VideoBrowser\SeekPreview.cs`;
   `SeekBar` gained `HoverMoved` / `HoverEnded` events; the plain time tooltip on the seek bar is gone
   (the popup shows the time under the frame).

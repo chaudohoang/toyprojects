@@ -610,12 +610,20 @@ namespace KitHelper
 
             if (string.Equals(Path.GetFileName(folder.TrimEnd('\\')), "POCB4.2", StringComparison.OrdinalIgnoreCase))
             { why = "folder named POCB4.2"; return T("POCB4.2"); }
-            if (Has(@"^Crop_params\.json$") || Directory.Exists(Path.Combine(folder, "mainTemplate")))
+            // The subfolder rules below (mainTemplate\, inputTemplate\, inputTest\) describe a kit laid out
+            // as installed. A package root holds those subfolders too, next to its sequence and its
+            // OMIT\ / PUC\ / InputIMG\ folders (D994 2ndPUC: inputTemplate\; X4024: mainTemplate\) - there
+            // they are units of the package, not the folder's own type.
+            bool packageRoot = Has(@"\.seqxc$")
+                || new[] { "OMIT", "PUC", "InputIMG" }.Any(d => Directory.Exists(Path.Combine(folder, d)));
+            bool Sub(string name) => !packageRoot && Directory.Exists(Path.Combine(folder, name));
+
+            if (Has(@"^Crop_params\.json$") || Sub("mainTemplate"))
             { why = "Crop_params.json / mainTemplate folder"; return T("POCB4.2"); }
             string own = Path.GetFileName(folder.TrimEnd('\\'));
             if (Has(@"^input(Template|Test).*\.txt$") || own.StartsWith("inputTemplate", StringComparison.OrdinalIgnoreCase)
                 || own.StartsWith("inputTest", StringComparison.OrdinalIgnoreCase)
-                || Directory.Exists(Path.Combine(folder, "inputTemplate")) || Directory.Exists(Path.Combine(folder, "inputTest")))
+                || Sub("inputTemplate") || Sub("inputTest"))
             { why = "inputTemplate / inputTest files"; return T("POCBMobile"); }
             if (Has(@"^ScratchDustDetect.*\.exe$") || Has("^LGD_OMIT_INI")) { why = "ScratchDustDetect / LGD_OMIT_INI files"; return T("ScratchDustDetect_NY"); }
             if (Has(@"^VNTT_Interp.*\.exe$")) { why = "VNTT_Interp exes"; return T("LGDVHCustomApp"); }
@@ -684,10 +692,13 @@ namespace KitHelper
         static readonly string[] Containers = { "OMIT", "PUC", "InputIMG" };
         static bool IsContainer(string name) => Containers.Contains(name, StringComparer.OrdinalIgnoreCase);
 
+        static readonly CopyTarget MainTemplate = new CopyTarget
+            { Name = "POCB4.2", Label = @"POCB4.2\mainTemplate", SubFolders = new[] { @"POCB4.2\mainTemplate" } };
+
         // Top-level folder names LGD kits use (containers + kits named after their target).
         static bool IsKnownCategory(string name) =>
             IsContainer(name)
-            || new[] { "POCB4.2", "POCB4.1", "POCB4.1Net", "POCBMobile", "R2R", "LGDVHCustomApp", "ScratchDustDetect_NY" }
+            || new[] { "POCB4.2", "mainTemplate", "POCB4.1", "POCB4.1Net", "POCBMobile", "R2R", "LGDVHCustomApp", "ScratchDustDetect_NY" }
                    .Contains(name, StringComparer.OrdinalIgnoreCase)
             || name.StartsWith("inputTemplate", StringComparison.OrdinalIgnoreCase)
             || name.StartsWith("inputTest", StringComparison.OrdinalIgnoreCase);
@@ -730,6 +741,10 @@ namespace KitHelper
                 if (++visited > MaxFolders) { l.TooBig = true; return; }
                 if (!HasFiles(dir)) return;                                  // empty, or only Thumbs.db / helpers
                 var t = Kit.Suggest(dir, out string why);
+                // POCB4.2's main_<model>_<step>.txt templates, shipped beside POCB4.2\ instead of in it
+                // (X4024). Kit.Suggest has no rule for them alone; TrueTest reads POCB4.2\mainTemplate.
+                if (t == null && Path.GetFileName(dir).Equals("mainTemplate", StringComparison.OrdinalIgnoreCase))
+                { t = MainTemplate; why = "mainTemplate folder"; }
                 if (t != null)
                 {
                     l.Units.Add(new Unit { Folder = dir, Rel = Rel(dir), Target = t, Why = why });
