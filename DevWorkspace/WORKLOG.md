@@ -1,5 +1,22 @@
 # Work log
 
+## 2026-11-21
+
+- **CharlieTheSlave: floating icon can't be lost off-screen, plus a tray icon** (ported from
+  toyprojects' Quick Launcher, where Chau dragged its icon off-screen and asked for a way back).
+  `FloatingIconWindow.KeepOnScreen` clamps into the nearest monitor's work area after a drag, at
+  start and on `DisplaySettingsChanged`; new `TrayIcon.cs` (WinForms NotifyIcon, icon drawn in code
+  to match the ✦ orb): click opens/hides the prompt, menu Open prompt / Bring icon back here / Exit.
+  A second launch now signals `Local\CharlieTheSlave.Show` instead of exiting silently: the running
+  copy pulls its icon on screen and opens the prompt (both copies are elevated by the manifest, so
+  the event is allowed across them). csproj gained `System.Windows.Forms` / `System.Drawing`
+  references, not `UseWindowsForms`, to avoid name clashes with WPF.
+  - Tested headlessly (reflection; `UnsafeLoadFrom` because the sandbox refuses `LoadFrom`): orb on the
+    left monitor → "Bring icon back here" → bottom-right of the main screen; half off an edge → fully
+    on a monitor; tray removed on exit. Not started for real (it needs the UAC prompt).
+  - Published: `publish\CharlieTheSlave\CharlieTheSlave.exe` (hash = build) and the zip rebuilt with
+    README.txt, which now explains the tray icon.
+
 ## 2026-11-19
 
 - **YdkeDeckBuilderWpf: read a deck from a screenshot** (`CardRecognition.cs`, new; wired into

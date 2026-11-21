@@ -1,0 +1,131 @@
+<Window x:Class="QuickLauncher.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Quick Launcher" Width="900" Height="760"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ShowInTaskbar="False" ResizeMode="NoResize" AllowDrop="True"
+        FontFamily="Segoe UI" FontSize="12.5" Foreground="{StaticResource Fg}">
+    <!-- Shadow: three faint rounded rings behind the panel, not a DropShadowEffect. Measured: the
+         blur effect on the panel made every repaint (hover, scroll) 26 ms instead of 8 ms, and even
+         as a separate layer the blur cost 15 ms wherever a repaint touched it. These cost nothing. -->
+    <Grid>
+    <Border CornerRadius="18" Margin="4,5,4,3" Background="#14000000"/>
+    <Border CornerRadius="16" Margin="6,7,6,5" Background="#1E000000"/>
+    <Border CornerRadius="14" Margin="8,9,8,7" Background="#2E000000"/>
+    <Border CornerRadius="12" Background="{StaticResource Bg}" BorderBrush="#33FFFFFF" BorderThickness="1" Margin="10">
+        <Grid Margin="14,10,14,12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- ======================================================== header (drag to move) -->
+            <DockPanel Grid.Row="0" Margin="0,0,0,10" Background="Transparent" MouseLeftButtonDown="Header_MouseLeftButtonDown">
+                <Button DockPanel.Dock="Right" Content="✕" Style="{StaticResource ChromeButton}" Click="Hide_Click"
+                        ToolTip="Hide (Esc). The icon stays; right-click it to exit."/>
+                <!-- "v2.1.0 · built 2026-11-21 10:30": which build this PC runs. -->
+                <TextBlock x:Name="TxtVersion" DockPanel.Dock="Right" Foreground="{StaticResource Dim}" FontSize="11.5"
+                           VerticalAlignment="Center" Margin="0,1,8,0"/>
+                <Ellipse Width="14" Height="14" Fill="{StaticResource Brand}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBlock Text="Quick Launcher" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                <!-- Games / Apps (Ctrl+Tab switches). Labels carry the counts; set in code. -->
+                <Border Background="{StaticResource Surface}" BorderBrush="{StaticResource Line}" BorderThickness="1"
+                        CornerRadius="16" Padding="2" Margin="16,0,0,0" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton x:Name="TabGames" Style="{StaticResource TabButton}" GroupName="Tabs" Checked="Tab_Checked"/>
+                        <RadioButton x:Name="TabApps" Style="{StaticResource TabButton}" GroupName="Tabs" Checked="Tab_Checked"/>
+                    </StackPanel>
+                </Border>
+                <TextBlock x:Name="TxtCount" Foreground="{StaticResource Dim}" VerticalAlignment="Center" Margin="12,1,0,0"/>
+            </DockPanel>
+
+            <!-- ======================================================== game folders -->
+            <Grid Grid.Row="1" Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock x:Name="LblRoots" Text="Game folders" Style="{StaticResource FieldLabel}"/>
+                <TextBox x:Name="TxtRoots" Grid.Column="1" Style="{StaticResource Field}"
+                         ToolTip="Folders to scan, separated by ;  Every folder directly inside one is one game / app."
+                         KeyDown="TxtRoots_KeyDown"/>
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button Content="Add…" Click="AddRoot_Click" ToolTip="Add a folder of games"/>
+                    <Button x:Name="BtnRescan" Content="Rescan" Click="Rescan_Click" ToolTip="Look for new and removed games"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- ======================================================== search / sort -->
+            <Grid Grid.Row="2" Margin="0,0,0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid>
+                    <!-- Right padding leaves room for the clear button. -->
+                    <TextBox x:Name="TxtSearch" Style="{StaticResource Field}" Padding="6,0,30,0"
+                             TextChanged="Search_TextChanged" PreviewKeyDown="Search_PreviewKeyDown"/>
+                    <TextBlock x:Name="SearchHint" Text="Search games…  (Enter plays the first one)" Foreground="{StaticResource Dim}"
+                               IsHitTestVisible="False" VerticalAlignment="Center" Margin="9,0,0,0"/>
+                    <Button x:Name="BtnClearSearch" Content="✕" Style="{StaticResource ChromeButton}" Visibility="Collapsed"
+                            HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,2,0" Padding="7,0" MinHeight="22"
+                            FontSize="11" Focusable="False" Click="ClearSearch_Click" ToolTip="Clear (Esc)"/>
+                </Grid>
+                <ComboBox x:Name="CboSort" Grid.Column="1" Width="150" Margin="8,0,0,0" SelectionChanged="Sort_Changed">
+                    <ComboBoxItem Content="Recently used"/>
+                    <ComboBoxItem Content="Name"/>
+                    <ComboBoxItem Content="Most used"/>
+                    <ComboBoxItem Content="Folder"/>
+                </ComboBox>
+                <CheckBox x:Name="ChkHidden" Grid.Column="2" Content="Show hidden" Margin="12,0,2,0" VerticalAlignment="Center"
+                          Checked="Filter_Changed" Unchecked="Filter_Changed"/>
+
+                <!-- One on/off toggle per game folder (and "Added manually"), filled in code. Own row,
+                     full width, wrapping: more folders add lines instead of squeezing the search box. -->
+                <WrapPanel x:Name="FolderToggles" Grid.Row="1" Grid.ColumnSpan="3" Margin="0,8,0,0"/>
+            </Grid>
+
+            <!-- ======================================================== tiles -->
+            <ScrollViewer Grid.Row="3" x:Name="Scroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <ItemsControl x:Name="Tiles" Focusable="False">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Style="{StaticResource Tile}" Tag="{Binding TileTag}" ToolTip="{Binding Tooltip}"
+                                    Click="Tile_Click" MouseRightButtonUp="Tile_RightClick">
+                                <StackPanel>
+                                    <!-- Icons come pre-shrunk to this exact size (IconLoader): no scaling per repaint. -->
+                                    <Image Source="{Binding Icon}" Width="64" Height="64" Margin="0,0,0,8"/>
+                                    <TextBlock Text="{Binding Name}" TextWrapping="Wrap" TextAlignment="Center"
+                                               TextTrimming="CharacterEllipsis" MaxHeight="34" LineHeight="16"
+                                               LineStackingStrategy="BlockLineHeight"/>
+                                </StackPanel>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+            <TextBlock x:Name="TxtEmpty" Grid.Row="3" Foreground="{StaticResource Dim}" HorizontalAlignment="Center"
+                       VerticalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="420" Visibility="Collapsed"/>
+
+            <!-- ======================================================== status -->
+            <DockPanel Grid.Row="4" Margin="2,8,0,0">
+                <TextBlock x:Name="TxtHelp" DockPanel.Dock="Right" Style="{StaticResource Hint}" Margin="0"
+                           Text="Click: play · Right-click: run as admin, choose exe, rename, hide"/>
+                <TextBlock x:Name="TxtStatus" Style="{StaticResource Hint}" Margin="0" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+            </DockPanel>
+        </Grid>
+    </Border>
+    </Grid>
+</Window>

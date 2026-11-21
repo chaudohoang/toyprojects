@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <!-- net48 like Kit Helper: runs on any Windows 10/11 PC with nothing to install. -->
+    <TargetFramework>net48</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <!-- FolderBrowserDialog and Screen only. -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <Prefer32Bit>false</Prefer32Bit>
+    <RootNamespace>QuickLauncher</RootNamespace>
+    <AssemblyName>Quick Launcher</AssemblyName>
+    <StartupObject>QuickLauncher.Program</StartupObject>
+    <ApplicationIcon>QuickLauncher.ico</ApplicationIcon>
+    <Nullable>disable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <!-- Bump on each release. -->
+    <Version>2.3.0</Version>
+    <!-- Build time rides in the product version ("2.1.0+20261121103000"), like Kit Helper, so it can
+         be shown in the panel and read from any copy's file properties without running it. -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <InformationalVersion>$(Version)+$([System.DateTime]::Now.ToString("yyyyMMddHHmmss"))</InformationalVersion>
+  </PropertyGroup>
+</Project>

@@ -1,7 +1,9 @@
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Threading;
 
 namespace CharlieTheSlave;
 
@@ -21,13 +23,24 @@ public partial class FloatingIconWindow : Window
             Top = t;
         }
         else
-        {
-            var wa = SystemParameters.WorkArea;
-            Left = wa.Right - Width - 24;
-            Top = wa.Bottom - Height - 24;
-        }
+            MoveToDefault();
+
+        // A saved spot may be half off a screen now (resolution changed, monitor unplugged):
+        // pull it in once the window has a handle to find its monitor with, and again whenever
+        // the screen layout changes.
+        SourceInitialized += (_, _) => KeepOnScreen();
+        Microsoft.Win32.SystemEvents.DisplaySettingsChanged += (_, _) =>
+            Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(KeepOnScreen));
 
         _prompt.BusyChanged += SetBusy;
+    }
+
+    // First-start spot: bottom right of the main screen.
+    void MoveToDefault()
+    {
+        var wa = SystemParameters.WorkArea;
+        Left = wa.Right - Width - 24;
+        Top = wa.Bottom - Height - 24;
     }
 
     protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
@@ -42,6 +55,7 @@ public partial class FloatingIconWindow : Window
         }
         else
         {
+            KeepOnScreen();   // dragged (partly) off the screen: snap back onto the nearest one
             AppSettings.Current.IconLeft = Left;
             AppSettings.Current.IconTop = Top;
             AppSettings.Current.Save();
@@ -49,7 +63,34 @@ public partial class FloatingIconWindow : Window
         }
     }
 
-    void TogglePrompt()
+    // Moves the icon fully inside the work area (screen minus taskbar) of the monitor it is on,
+    // or the nearest one. Without it the icon could be dragged off-screen with no way to grab it.
+    public void KeepOnScreen()
+    {
+        var h = new WindowInteropHelper(this).Handle;
+        var src = PresentationSource.FromVisual(this);
+        if (h == IntPtr.Zero || src?.CompositionTarget == null) return;
+        var px = System.Windows.Forms.Screen.FromHandle(h).WorkingArea;    // device pixels, nearest monitor
+        var toDip = src.CompositionTarget.TransformFromDevice;
+        var tl = toDip.Transform(new Point(px.Left, px.Top));
+        var br = toDip.Transform(new Point(px.Right, px.Bottom));
+        Left = Math.Max(tl.X, Math.Min(Left, br.X - Width));
+        Top = Math.Max(tl.Y, Math.Min(Top, br.Y - Height));
+    }
+
+    // The tray icon's "Bring icon back here": back to the first-start spot on the main screen,
+    // forgetting the dragged one. The way back when the icon sits on a monitor hard to reach.
+    public void MoveToMainScreen()
+    {
+        MoveToDefault();
+        AppSettings.Current.IconLeft = null;
+        AppSettings.Current.IconTop = null;
+        AppSettings.Current.Save();
+        Activate();
+        if (_prompt.IsVisible) _prompt.ShowNear(this);
+    }
+
+    public void TogglePrompt()
     {
         if (_prompt.IsVisible) _prompt.Hide();
         else _prompt.ShowNear(this);

@@ -51,6 +51,7 @@ not be overwritten with the repo's.
 | Tool | Deploy folder | Diverges from the repo copy by |
 |---|---|---|
 | `toyprojects\MultiRemoteTool` | `E:\PortableApps\MultiRemoteTool` | Has a `Radmin` platform the repo lacks; its own contact CSVs (real hosts); its own `settings.txt` ordering. |
+| `toyprojects\QuickLauncher` (was `GameLauncher`) | `D:\PortableApps\QuickLauncher` on this PC **and on all 8 others**: desktops `i5-2500`, `i5-3470`, `i5-3570`, `i5-4670`, `i3-9100f`, laptops `tp550ld`, `vpcca15fg`, `victus16` — reached as `\\<pc>\D\PortableApps\QuickLauncher` | Nothing: the folder holds only `Quick Launcher.exe` + `.exe.config` (data is in each PC's `%APPDATA%\QuickLauncher`). The desktop shortcut here points to it. To deploy, close the running copy here (single instance), copy the two files from `bin\Release\net48` to every PC, check the hash, start it again here. Copies on the other PCs are not running-checked: a running copy there locks the exe and the copy fails. |
 
 Sync the exe, the INIs and bundled viewers; leave `contacts_*.csv` alone on each side.
 

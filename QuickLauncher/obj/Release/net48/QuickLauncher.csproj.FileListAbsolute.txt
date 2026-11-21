@@ -1,0 +1,19 @@
+E:\Github\toyprojects\QuickLauncher\bin\Release\net48\Quick Launcher.exe.config
+E:\Github\toyprojects\QuickLauncher\bin\Release\net48\Quick Launcher.exe
+E:\Github\toyprojects\QuickLauncher\bin\Release\net48\Quick Launcher.pdb
+E:\Github\toyprojects\QuickLauncher\obj\Release\net48\QuickLauncher.csproj.AssemblyReference.cache
+E:\Github\toyprojects\QuickLauncher\obj\Release\net48\FloatingIconWindow.baml
+E:\Github\toyprojects\QuickLauncher\obj\Release\net48\MainWindow.baml
+E:\Github\toyprojects\QuickLauncher\obj\Release\net48\Theme.baml
+E:\Github\toyprojects\QuickLauncher\obj\Release\net48\FloatingIconWindow.g.cs
+E:\Github\toyprojects\QuickLauncher\obj\Release\net48\MainWindow.g.cs
+E:\Github\toyprojects\QuickLauncher\obj\Release\net48\Theme.g.cs
+E:\Github\toyprojects\QuickLauncher\obj\Release\net48\Quick Launcher_MarkupCompile.cache
+E:\Github\toyprojects\QuickLauncher\obj\Release\net48\Quick Launcher.g.resources
+E:\Github\toyprojects\QuickLauncher\obj\Release\net48\QuickLauncher.GeneratedMSBuildEditorConfig.editorconfig
+E:\Github\toyprojects\QuickLauncher\obj\Release\net48\QuickLauncher.AssemblyInfoInputs.cache
+E:\Github\toyprojects\QuickLauncher\obj\Release\net48\QuickLauncher.AssemblyInfo.cs
+E:\Github\toyprojects\QuickLauncher\obj\Release\net48\QuickLauncher.csproj.CoreCompileInputs.cache
+E:\Github\toyprojects\QuickLauncher\obj\Release\net48\QuickLauncher.sourcelink.json
+E:\Github\toyprojects\QuickLauncher\obj\Release\net48\Quick Launcher.exe
+E:\Github\toyprojects\QuickLauncher\obj\Release\net48\Quick Launcher.pdb
