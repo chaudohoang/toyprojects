@@ -2,6 +2,11 @@
 
 ## 2026-11-21
 
+- **CharlieTheSlave: smaller floating icon that may sit on the taskbar** (same change as Quick
+  Launcher / Kit Helper, see toyprojects\WORKLOG.md). 44 px window, 36 px circle, fits the
+  Windows 11 taskbar; `KeepOnScreen` clamps to the monitor's full bounds; `TaskbarZ.cs` keeps it
+  above the taskbar (1 s timer, only while it overlaps one). Published exe + zip refreshed.
+
 - **CharlieTheSlave: floating icon can't be lost off-screen, plus a tray icon** (ported from
   toyprojects' Quick Launcher, where Chau dragged its icon off-screen and asked for a way back).
   `FloatingIconWindow.KeepOnScreen` clamps into the nearest monitor's work area after a drag, at

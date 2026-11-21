@@ -32,6 +32,13 @@ public partial class FloatingIconWindow : Window
         Microsoft.Win32.SystemEvents.DisplaySettingsChanged += (_, _) =>
             Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(KeepOnScreen));
 
+        // The taskbar is topmost too and comes to the front whenever it is clicked, which would
+        // bury an icon sitting on it. While the icon overlaps a taskbar, put it back on top every
+        // second (only then, so it never fights other topmost windows elsewhere).
+        var onTop = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        onTop.Tick += (_, _) => { if (OverTaskbar()) TaskbarZ.BringToTop(this); };
+        onTop.Start();
+
         _prompt.BusyChanged += SetBusy;
     }
 
@@ -63,14 +70,15 @@ public partial class FloatingIconWindow : Window
         }
     }
 
-    // Moves the icon fully inside the work area (screen minus taskbar) of the monitor it is on,
-    // or the nearest one. Without it the icon could be dragged off-screen with no way to grab it.
+    // Moves the icon fully onto the monitor it is on, or the nearest one. Without it the icon could
+    // be dragged off-screen with no way to grab it. The whole screen counts, taskbar included: the
+    // icon may sit on the taskbar (it fits in it), never partly off a screen.
     public void KeepOnScreen()
     {
         var h = new WindowInteropHelper(this).Handle;
         var src = PresentationSource.FromVisual(this);
         if (h == IntPtr.Zero || src?.CompositionTarget == null) return;
-        var px = System.Windows.Forms.Screen.FromHandle(h).WorkingArea;    // device pixels, nearest monitor
+        var px = System.Windows.Forms.Screen.FromHandle(h).Bounds;    // device pixels, nearest monitor
         var toDip = src.CompositionTarget.TransformFromDevice;
         var tl = toDip.Transform(new Point(px.Left, px.Top));
         var br = toDip.Transform(new Point(px.Right, px.Bottom));
@@ -104,6 +112,15 @@ public partial class FloatingIconWindow : Window
                 new DoubleAnimation(0, 360, TimeSpan.FromSeconds(2)) { RepeatBehavior = RepeatBehavior.Forever });
         else
             BusyRotation.BeginAnimation(RotateTransform.AngleProperty, null);
+    }
+
+    // True when part of the icon lies outside its monitor's work area, i.e. on the taskbar.
+    bool OverTaskbar()
+    {
+        var h = new WindowInteropHelper(this).Handle;
+        if (h == IntPtr.Zero || !IsVisible) return false;
+        var wa = System.Windows.Forms.Screen.FromHandle(h).WorkingArea;
+        return TaskbarZ.GetWindowRect(h, out var r) && (r.L < wa.Left || r.T < wa.Top || r.R > wa.Right || r.B > wa.Bottom);
     }
 
     static bool IsOnScreen(double left, double top) =>

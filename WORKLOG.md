@@ -34,6 +34,17 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     hides on leave, works in fullscreen, file unlocked after Stop. Not tested on big HEVC/4K files.
     Deploy copy `D:\PortableApps\VideoBrowser` **not updated** (it was running).
 
+- **Smaller orb that may sit on the taskbar: Quick Launcher 2.4.0, Kit Helper 1.9.2** (and
+  CharlieTheSlave, see DevWorkspace\WORKLOG.md). Window 60 → 44 px, circle 48 → 36 px, glyph
+  smaller: fits inside the Windows 11 taskbar (48 px). `KeepOnScreen` now clamps to the monitor's
+  `Bounds` instead of its `WorkingArea`, so the orb may stay on the taskbar but never hangs off a
+  screen. The taskbar is topmost too and comes to the front when clicked; while the orb overlaps
+  a taskbar (outside the work area) a 1 s timer re-asserts `HWND_TOPMOST` (`TaskbarZ.cs`), only
+  then, so it doesn't fight other topmost windows elsewhere. Tested headlessly: at y=1034 on the
+  1032-1080 taskbar it stays and reports "over taskbar"; at y=1070 it snaps to 1036.
+  - Quick Launcher deploy found it **running on 7 of the 8 other PCs**: their exe was renamed to
+    `Quick Launcher.old.exe` and the new one copied beside it (new version on next start; the
+    next deploy deletes the .old file).
 - **Kit Helper 1.9.1: "Close TrueTest before copying" checkbox removed** at Chau's request. The
   popup it gated (`AskCloseTrueTest` → AskWindow: Close TrueTest / Copy without closing / Cancel,
   then `OfferRestart`) now always appears when TrueTest is running; no question when it isn't.

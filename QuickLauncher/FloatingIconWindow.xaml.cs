@@ -35,6 +35,13 @@ namespace QuickLauncher
             // pull it in once the window has a handle to find its monitor with, and again whenever
             // the screen layout changes.
             SourceInitialized += (s2, e) => KeepOnScreen();
+
+            // The taskbar is topmost too and comes to the front whenever it is clicked, which
+            // would bury an icon sitting on it. While the icon overlaps a taskbar, put it back on
+            // top every second (only then, so it never fights other topmost windows elsewhere).
+            var onTop = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            onTop.Tick += (s2, e) => { if (OverTaskbar()) TaskbarZ.BringToTop(this); };
+            onTop.Start();
             Microsoft.Win32.SystemEvents.DisplaySettingsChanged += (s2, e) =>
                 Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() => KeepOnScreen()));
 
@@ -108,14 +115,15 @@ namespace QuickLauncher
                 BusyRotation.BeginAnimation(RotateTransform.AngleProperty, null);
         }
 
-        // Moves the icon fully inside the work area (screen minus taskbar) of the monitor it is on,
-        // or the nearest one if it is on none. True if it had to move.
+        // Moves the icon fully onto the monitor it is on, or the nearest one if it is on none.
+        // The whole screen counts, taskbar included: the icon may sit on the taskbar (it is
+        // small enough to fit in it), just never partly off a screen. True if it had to move.
         public bool KeepOnScreen()
         {
             var h = new System.Windows.Interop.WindowInteropHelper(this).Handle;
             var src = PresentationSource.FromVisual(this);
             if (h == IntPtr.Zero || src?.CompositionTarget == null) return false;
-            var px = System.Windows.Forms.Screen.FromHandle(h).WorkingArea;    // device pixels, nearest monitor
+            var px = System.Windows.Forms.Screen.FromHandle(h).Bounds;    // device pixels, nearest monitor
             var toDip = src.CompositionTarget.TransformFromDevice;
             var tl = toDip.Transform(new Point(px.Left, px.Top));
             var br = toDip.Transform(new Point(px.Right, px.Bottom));
@@ -125,6 +133,15 @@ namespace QuickLauncher
             Left = l;
             Top = t;
             return true;
+        }
+
+        // True when part of the icon lies outside its monitor's work area, i.e. on the taskbar.
+        bool OverTaskbar()
+        {
+            var h = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+            if (h == IntPtr.Zero || !IsVisible) return false;
+            var wa = System.Windows.Forms.Screen.FromHandle(h).WorkingArea;
+            return TaskbarZ.GetWindowRect(h, out var r) && (r.L < wa.Left || r.T < wa.Top || r.R > wa.Right || r.B > wa.Bottom);
         }
 
         static bool IsOnScreen(double left, double top) =>
