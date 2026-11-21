@@ -24,6 +24,12 @@ namespace VideoBrowser
         /// <summary>Optional: returns tooltip text for a hovered value (e.g. a time).</summary>
         public Func<double, string> HoverText { get; set; }
 
+        /// <summary>Raised on every mouse move over the bar: (hovered value, x in client coords).</summary>
+        public event Action<double, int> HoverMoved;
+
+        /// <summary>Raised when the mouse leaves the bar (or a drag ends outside it).</summary>
+        public event EventHandler HoverEnded;
+
         readonly ToolTip _tip = new ToolTip { InitialDelay = 0, ReshowDelay = 0 };
         string _lastTip;
 
@@ -67,6 +73,7 @@ namespace VideoBrowser
                 Value = ValueAt(e.X);
                 Scrubbed?.Invoke(this, EventArgs.Empty);
             }
+            HoverMoved?.Invoke(ValueAt(e.X), e.X);
             if (HoverText != null)
             {
                 var t = HoverText(ValueAt(e.X));
@@ -81,6 +88,7 @@ namespace VideoBrowser
             Capture = false;
             Value = ValueAt(e.X);
             Scrubbed?.Invoke(this, EventArgs.Empty);
+            if (!ClientRectangle.Contains(e.Location)) HoverEnded?.Invoke(this, EventArgs.Empty);
         }
 
         protected override void OnMouseEnter(EventArgs e) { _hover = true; Invalidate(); }
@@ -88,6 +96,7 @@ namespace VideoBrowser
         protected override void OnMouseLeave(EventArgs e)
         {
             _hover = false; _lastTip = null; _tip.Hide(this); Invalidate();
+            if (!Dragging) HoverEnded?.Invoke(this, EventArgs.Empty);
         }
 
         protected override void OnPaint(PaintEventArgs e)

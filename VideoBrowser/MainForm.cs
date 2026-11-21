@@ -51,6 +51,7 @@ namespace VideoBrowser
         // ---- player
         readonly LibVLC _libVLC;
         readonly MediaPlayer _mp;
+        readonly SeekPreview _preview;
 
         // ---- UI
         readonly MenuStrip _menu = new MenuStrip();
@@ -101,6 +102,7 @@ namespace VideoBrowser
             _mp = new MediaPlayer(_libVLC) { EnableKeyInput = false, EnableMouseInput = false };
             _mp.EndReached += (s, e) => BeginInvoke((Action)OnEndReached);
             _mp.EncounteredError += (s, e) => BeginInvoke((Action)(() => SetStatus("Error: cannot play this file")));
+            _preview = new SeekPreview(this);
 
             // ---------- menu
             BuildMenu();
@@ -157,7 +159,14 @@ namespace VideoBrowser
             _seek.BackColor = BgPanel;
             _seek.Enabled = false;
             _seek.Scrubbed += (s, e) => { if (_mp.IsSeekable) _mp.Position = (float)_seek.Value; UpdateTime(); };
-            _seek.HoverText = v => _mp.Length > 0 ? Fmt((long)(v * _mp.Length)) : null;
+            // hover thumbnail + time popup (replaces the plain time tooltip)
+            _seek.HoverMoved += (v, x) =>
+            {
+                if (!_seek.Enabled || _mp.Length <= 0) { _preview.Hide(); return; }
+                var anchor = _seek.PointToScreen(new Point(x, 0));
+                _preview.Hover(v, Fmt((long)(v * _mp.Length)), anchor, Screen.FromControl(this).Bounds);
+            };
+            _seek.HoverEnded += (s, e) => _preview.Hide();
 
             var row = new FlowLayoutPanel
             {
@@ -576,6 +585,7 @@ namespace VideoBrowser
             _playing = item;
             using (var media = new Media(_libVLC, item.Path, FromType.FromPath))
                 _mp.Play(media);
+            _preview.Open(item.Path);
             _overlay.Visible = false;
             _seek.Enabled = true;
             Text = "Video Browser — " + Path.GetFileName(item.Path);
@@ -598,6 +608,7 @@ namespace VideoBrowser
         void StopPlayback()
         {
             _mp.Stop();
+            _preview.Close();
             _seek.Value = 0;
             _seek.Enabled = false;
             UpdateTime();
@@ -723,6 +734,7 @@ namespace VideoBrowser
             if (deletingPlaying)
             {
                 _mp.Stop();          // releases the file handle
+                _preview.Close();    // ...and so does the thumbnail player
                 _playing = null;
                 _overlay.Visible = true;
                 _seek.Value = 0;
@@ -850,6 +862,7 @@ namespace VideoBrowser
             bool over = RectangleToScreen(_controls.Bounds).Contains(Cursor.Position);
             bool show = over || _seek.Dragging || _volume.Dragging;
             if (_controls.Visible != show) _controls.Visible = show;
+            if (!show) _preview.Hide();
         }
 
         // =====================================================================
@@ -907,6 +920,7 @@ namespace VideoBrowser
             _settings.PlaylistWidth = _split.Panel2.Width;
             _settings.Save();
             _timer.Stop();
+            _preview.Dispose();
             _mp.Stop();
             base.OnFormClosing(e);
         }

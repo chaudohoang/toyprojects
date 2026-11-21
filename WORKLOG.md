@@ -8,6 +8,32 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ## 2026-11-21
 
+- **VideoBrowser: seek-bar hover thumbnails** (MPC-HC / VLC style). New `VideoBrowser\SeekPreview.cs`;
+  `SeekBar` gained `HoverMoved` / `HoverEnded` events; the plain time tooltip on the seek bar is gone
+  (the popup shows the time under the frame).
+  - **How:** a second, hidden `MediaPlayer` (on its own `LibVLC`, see the mute trap below) opens the playing file with
+    `:no-audio :no-spu :input-fast-seek :avcodec-hw=none`, decodes into a small RV32 buffer via
+    `SetVideoFormatCallbacks` + `SetVideoCallbacks` (frame scaled to fit 224×126, aspect kept), and is
+    paused on its first frame. Seeks while paused still emit a frame through the display callback
+    (libvlc 3.0.21) — that is what makes this work. One seek in flight at a time (600 ms timeout),
+    results cached in 400 buckets along the bar, cleared per file.
+  - **Trap (shipped once, fixed same day):** the first version created the hidden player with
+    `Mute = true` on the *shared* `LibVLC` → the real video played muted. In libvlc 3 every player
+    gets an audio output at creation and on Windows they share the process's audio session, so a
+    mute/volume on any player hits all of them. The preview now has its **own** `LibVLC` with
+    `--aout=adummy --no-audio`. Verified with a Core Audio session probe (scratch script): playing
+    a tone file → session `mute=False`, peak ≈ 0.24.
+  - **Trap:** lock and display callbacks run on *different* threads — don't hold a Monitor across
+    them (first draft did; `Monitor.Exit` from the other thread fails). Only the copy is locked.
+  - **Trap:** the hidden player also holds the file open. `_preview.Close()` must run wherever
+    `_mp.Stop()` releases the file (Stop button, delete-the-playing-file path) or Recycle Bin fails.
+  - Popup = owned, `WS_EX_NOACTIVATE|TOOLWINDOW|TOPMOST|TRANSPARENT` form + `HTTRANSPARENT`, so it
+    never steals focus or the mouse and stays above the video in fullscreen.
+  - Tested on a synthetic 2-min AVI (numbered frames, made by a throwaway Python script since there's
+    no ffmpeg here): thumbnails at 25/50/75/95 % show the right second, ~150 ms per new position,
+    hides on leave, works in fullscreen, file unlocked after Stop. Not tested on big HEVC/4K files.
+    Deploy copy `D:\PortableApps\VideoBrowser` **not updated** (it was running).
+
 - **Kit Helper 1.9.1: "Close TrueTest before copying" checkbox removed** at Chau's request. The
   popup it gated (`AskCloseTrueTest` → AskWindow: Close TrueTest / Copy without closing / Cancel,
   then `OfferRestart`) now always appears when TrueTest is running; no question when it isn't.
