@@ -37,11 +37,9 @@ namespace QuickLauncher
             SourceInitialized += (s2, e) => KeepOnScreen();
 
             // The taskbar is topmost too and comes to the front whenever it is clicked, which
-            // would bury an icon sitting on it. While the icon overlaps a taskbar, put it back on
-            // top every second (only then, so it never fights other topmost windows elsewhere).
-            var onTop = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-            onTop.Tick += (s2, e) => { if (OverTaskbar()) TaskbarZ.BringToTop(this); };
-            onTop.Start();
+            // would bury an icon sitting on it: see TaskbarZ. Acts only while the icon overlaps a
+            // taskbar, so it never fights other topmost windows elsewhere.
+            TaskbarZ.Keep(this, OverTaskbar);
             Microsoft.Win32.SystemEvents.DisplaySettingsChanged += (s2, e) =>
                 Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() => KeepOnScreen()));
 

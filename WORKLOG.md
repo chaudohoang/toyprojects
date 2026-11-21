@@ -52,6 +52,21 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     hides on leave, works in fullscreen, file unlocked after Stop. Not tested on big HEVC/4K files.
     Deploy copy `D:\PortableApps\VideoBrowser` **not updated** (it was running).
 
+- **Orb flashed when the taskbar was clicked: Quick Launcher 2.4.1, Kit Helper 1.9.4** (and
+  CharlieTheSlave). Built first as Kit Helper 1.9.3, but another session had already pushed a
+  different 1.9.3 (`042f2067`, LGD package detection), so this is 1.9.4 and contains both.
+  **Before bumping a version, `git fetch` and check origin's csproj**: sessions on the same repo
+  pick the same next number. The 1 s re-raise timer left it buried behind the taskbar for up to ~1.4 s.
+  `TaskbarZ.Keep` now also hooks `SetWinEventHook(EVENT_SYSTEM_FOREGROUND..EVENT_SYSTEM_CAPTURESTART)`
+  (out of context, own process skipped) and re-raises at once; CAPTURESTART is what catches a click
+  on a taskbar that was already in front. Timer kept as a backstop; the hook delegate is held in a
+  static list so the GC can't collect it. Measured (taskbar brought forward with an Alt tap +
+  SetForegroundWindow, z-order sampled every 5 ms, foreground handed back between rounds): old
+  531 / 169 / 758 / 400 / 0 ms buried, new 0 in all five, for all three apps.
+  - Deploy trap: removing the leftover `Quick Launcher.old.exe` *before* copying made the copy fail
+    on 5 PCs ("Cannot find path …Quick Launcher.exe", from the rename fallback). A minute later both
+    files were free and a plain copy worked. Copy first; delete the .old only after a good copy.
+    vpcca15fg was offline: still on 2.4.0 (+ .old 2.3.0), needs 2.4.1 when it is back.
 - **Smaller orb that may sit on the taskbar: Quick Launcher 2.4.0, Kit Helper 1.9.2** (and
   CharlieTheSlave, see DevWorkspace\WORKLOG.md). Window 60 → 44 px, circle 48 → 36 px, glyph
   smaller: fits inside the Windows 11 taskbar (48 px). `KeepOnScreen` now clamps to the monitor's

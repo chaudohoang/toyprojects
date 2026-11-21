@@ -2,6 +2,11 @@
 
 ## 2026-11-21
 
+- **CharlieTheSlave: no more flash when the taskbar is clicked.** `TaskbarZ.Keep` re-raises the icon
+  from a WinEvent hook (foreground / capture-start) instead of waiting for the 1 s timer; measured
+  0 ms buried in 5 of 5 rounds. Details in toyprojects\WORKLOG.md (same change in Quick Launcher and
+  Kit Helper). Published exe + zip refreshed.
+
 - **CharlieTheSlave: smaller floating icon that may sit on the taskbar** (same change as Quick
   Launcher / Kit Helper, see toyprojects\WORKLOG.md). 44 px window, 36 px circle, fits the
   Windows 11 taskbar; `KeepOnScreen` clamps to the monitor's full bounds; `TaskbarZ.cs` keeps it
