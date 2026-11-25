@@ -6,6 +6,18 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ---
 
+## 2026-11-25
+
+- **MultiRemoteTool: contact list couldn't scroll to the last rows on first launch** (fixed
+  until the window was resized). Cause in `ContactListView.UpdateScrollBar`: it computed
+  `Maximum = maxFirst + _scroll.LargeChange - 1`, reading `LargeChange` back — but WinForms
+  clamps that getter to `Maximum - Minimum + 1`, which is 1 while `Maximum` is still 0, so
+  the range collapsed (RustDesk, 11 contacts: thumb filled the track, wheel did nothing).
+  Each resize re-ran it from the previous Maximum, so it slowly converged. Fix: use the local
+  value, set `Maximum` before `LargeChange`, and clamp the wheel to a stored `_maxFirst`.
+  Verified on a copy of the deploy data (scrolls to row 11 at launch); exe copied to
+  `D:\PortableApps\MultiRemoteTool` (CLAUDE.md's deploy table says `E:\` — on this PC it's `D:\`).
+
 ## 2026-11-21
 
 - **Kit Helper 1.9.3: LGD package roots with inputTemplate\ / mainTemplate\ were not packages.**
@@ -66,7 +78,9 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   - Deploy trap: removing the leftover `Quick Launcher.old.exe` *before* copying made the copy fail
     on 5 PCs ("Cannot find path …Quick Launcher.exe", from the rename fallback). A minute later both
     files were free and a plain copy worked. Copy first; delete the .old only after a good copy.
-    vpcca15fg was offline: still on 2.4.0 (+ .old 2.3.0), needs 2.4.1 when it is back.
+    vpcca15fg was offline at the time; updated to 2.4.1 once it was back (all 9 PCs hash-checked
+    on 2.4.1). Leftover `.old` files removed where free; victus16 still runs its old copy from
+    `.old` until Quick Launcher is restarted there.
 - **Smaller orb that may sit on the taskbar: Quick Launcher 2.4.0, Kit Helper 1.9.2** (and
   CharlieTheSlave, see DevWorkspace\WORKLOG.md). Window 60 → 44 px, circle 48 → 36 px, glyph
   smaller: fits inside the Windows 11 taskbar (48 px). `KeepOnScreen` now clamps to the monitor's

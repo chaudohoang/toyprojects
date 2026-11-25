@@ -738,6 +738,7 @@ namespace MultiRemoteTool
         private int              _selectedIdx = -1;
         private int              _hoverIdx    = -1;
         private int              _firstRow    = 0;   // index of top visible row
+        private int              _maxFirst    = 0;   // largest valid _firstRow
         private Func<int, int[]> _getCols;
         private VScrollBar       _scroll;
 
@@ -823,16 +824,23 @@ namespace MultiRemoteTool
             {
                 _scroll.Visible = false;
                 _firstRow       = 0;
+                _maxFirst       = 0;
             }
             else
             {
                 // WinForms VScrollBar: effective max position = Maximum - LargeChange + 1
                 // We want that to equal maxFirst, so: Maximum = maxFirst + LargeChange - 1
-                _scroll.LargeChange = Math.Max(1, fullVisible);
-                _scroll.SmallChange = Math.Max(1, fullVisible / 5);
+                // Use the local value, never read _scroll.LargeChange back: its getter is
+                // clamped to (Maximum - Minimum + 1), so on first launch (Maximum still 0)
+                // it returns 1 and the scroll range collapses to nothing until a resize.
+                // Set Maximum before LargeChange for the same reason.
+                int large = Math.Max(1, fullVisible);
                 _scroll.Minimum     = 0;
-                _scroll.Maximum     = maxFirst + _scroll.LargeChange - 1;
+                _scroll.Maximum     = maxFirst + large - 1;
+                _scroll.LargeChange = large;
+                _scroll.SmallChange = Math.Max(1, fullVisible / 5);
                 _scroll.Visible     = true;
+                _maxFirst = maxFirst;
                 if (_firstRow > maxFirst) _firstRow = maxFirst;
                 _scroll.Value = _firstRow;
             }
@@ -853,8 +861,7 @@ namespace MultiRemoteTool
         {
             if (!_scroll.Visible) return;
             int lines = -(e.Delta / 120) * _scroll.SmallChange;
-            int nv    = Math.Max(0, Math.Min(_scroll.Maximum - _scroll.LargeChange + 1,
-                                             _firstRow + lines));
+            int nv    = Math.Max(0, Math.Min(_maxFirst, _firstRow + lines));
             _scroll.Value = nv;
             base.OnMouseWheel(e);
         }
