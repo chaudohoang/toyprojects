@@ -47,6 +47,7 @@ namespace VideoBrowser
         string _folder;
         int _scanToken;
         bool _inDialog, _endPending;
+        bool _muted;
 
         // ---- player
         readonly LibVLC _libVLC;
@@ -101,6 +102,7 @@ namespace VideoBrowser
             _libVLC = new LibVLC("--no-video-title-show");
             _mp = new MediaPlayer(_libVLC) { EnableKeyInput = false, EnableMouseInput = false };
             _mp.EndReached += (s, e) => BeginInvoke((Action)OnEndReached);
+            _mp.Playing += (s, e) => BeginInvoke((Action)ApplyAudio);
             _mp.EncounteredError += (s, e) => BeginInvoke((Action)(() => SetStatus("Error: cannot play this file")));
             _preview = new SeekPreview(this);
 
@@ -654,21 +656,31 @@ namespace VideoBrowser
         {
             v = Math.Max(0, Math.Min(100, v));
             _settings.Volume = v;
-            _mp.Volume = v;
             if (!_volume.Dragging) _volume.Value = v / 100.0;
-            if (v > 0 && _mp.Mute) _mp.Mute = false;
-            UpdateMuteGlyph();
+            if (v > 0) _muted = false;   // moving the volume up un-mutes, like most players
+            ApplyAudio();
         }
 
         void ToggleMute()
         {
-            _mp.Mute = !_mp.Mute;
+            _muted = !_muted;
+            ApplyAudio();
+        }
+
+        // Mute is tracked here, not read back from libvlc: libvlc 3 only applies mute/volume to an
+        // existing audio output (nothing while stopped), applies it asynchronously (reading
+        // _mp.Mute right after setting it returns the old value), and a new file starts unmuted.
+        // So the state lives in _muted and is pushed again every time a file starts playing.
+        void ApplyAudio()
+        {
+            _mp.Volume = _muted ? 0 : _settings.Volume;
+            _mp.Mute = _muted;
             UpdateMuteGlyph();
         }
 
         void UpdateMuteGlyph()
         {
-            _btnMute.Text = _mp.Mute || _settings.Volume == 0 ? "🔇" : "🔊";
+            _btnMute.Text = _muted || _settings.Volume == 0 ? "🔇" : "🔊";
         }
 
         void UpdateTime()

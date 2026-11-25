@@ -8,6 +8,18 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ## 2026-11-25
 
+- **VideoBrowser: clicking the speaker icon didn't mute** (`MainForm.ToggleMute`/`ApplyAudio`).
+  It toggled `_mp.Mute = !_mp.Mute`, but libvlc 3 applies mute asynchronously (the getter right
+  after the setter still returns the old value, so clicks flipped the wrong way), does nothing
+  while no audio output exists, and a new file came up unmuted. Now `_muted` is the source of
+  truth; `ApplyAudio` pushes `Volume = 0` + `Mute` and is re-run on every `Playing` event.
+  Tested by `BM_CLICK` on the button + reading the app's Windows audio session
+  (ISimpleAudioVolume): toggles each click, next file stays vol 0 / muted from its first sample.
+  The session *peak meter* kept moving while muted, so it is pre-session-volume — don't use it
+  as the "is it silent" signal; endpoint meter was useless because other audio was playing.
+  Deployed to `D:\PortableApps\VideoBrowser` (robocopy, `settings.txt` excluded; this also
+  delivered the not-yet-deployed seek-bar thumbnail build).
+
 - **MultiRemoteTool: contact list couldn't scroll to the last rows on first launch** (fixed
   until the window was resized). Cause in `ContactListView.UpdateScrollBar`: it computed
   `Maximum = maxFirst + _scroll.LargeChange - 1`, reading `LargeChange` back — but WinForms

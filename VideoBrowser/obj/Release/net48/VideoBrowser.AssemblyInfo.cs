@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VideoBrowser")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fa1a899e87770f762aa4cae8a97affaa033f1c30")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c8e1feee403eb697a3afe66ddd10da5f02ff44c1")]
 [assembly: System.Reflection.AssemblyProductAttribute("VideoBrowser")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Video Browser")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
