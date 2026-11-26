@@ -133,6 +133,26 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   one part only: untick the rest in the confirmation, or open that folder alone." Real drags: kit root
   → only Copy package (+ its confirmation, cancelled); OMIT alone → all single buttons back,
   ScratchDustDetect_NY highlighted. No backups made.
+- **Kit Helper 1.10.11-1.10.12: the confirmation doesn't block either; the latest one replaces it.**
+  Chau: OK → "Copy"; any newer copy action (another Copy all, opening a folder / several / a package)
+  replaces a pending confirmation. `MainWindow.Confirm(w)` shows it non-modal (owned by the panel)
+  and returns a Task<bool> completed on Closed with `w.Confirmed` (set by Copy); `CancelConfirm()`
+  closes the pending one first, and `SetSource` cancels it (it belonged to the old folder). Each copy
+  flow captures its source / install / database before awaiting, so a replaced confirmation's flow
+  just returns. HidePanel hides it (still pending), ShowNear brings it back on top of the results,
+  AutoHide counts it as part of the group. 1.10.12 added its `Deactivated` → AutoHide (1.10.11
+  missed it: clicking away from the confirmation hid nothing).
+  - Tested in the real app with real drags: OMIT → its confirmation; "Copy all → PUC" clicked on the
+    panel meanwhile → replaced; PUC+R2R dropped → replaced by the package one; button text "Copy";
+    click away (after giving the confirmation focus) hides panel + results + confirmation, K brings
+    all three back still pending; Cancel closes it. Copy through the non-modal confirmation into a
+    scratch database: 6 files, result tab. Database box restored.
+  - Harness traps: the DragSource form starts DoDragDrop on mouse-down, so clicking it doesn't
+    activate it - use a plain form (`clicktarget.ps1`) as the click-away target, and check it exists
+    before clicking. After a drag the cursor rests on the K icon, where AutoHide deliberately keeps
+    the panel - move the cursor before a focus change is meant to hide it.
+  - Two real copies at 12:34:37 (full W511BT package) and 12:34:49 (Kits from TrueTest 1.9 debug
+    Mobile) were not from these tests.
   - Seen while testing: six real copies into TrueTest 1.9 at 10:56-10:57 (OMIT, OMIT, POCB4.2, PUC, R2R,
     then the 4-folder package of the W511BT kit), not from these tests - Chau using 1.10.2. Backed up
     in `D:\Program\RVS\Kit Helper Backups\20261126_1056*` / `_1057*`.

@@ -95,6 +95,7 @@ namespace KitHelper
             if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
             Activate();
             ResultsWindow.Current?.ShowWithPanel(this);     // the two always appear together
+            if (currentConfirm != null && !currentConfirm.IsVisible) currentConfirm.Show();   // on top of the results
         }
 
         static double Clamp(double v, double min, double max) => v < min ? min : v > max ? max : v;
@@ -128,7 +129,7 @@ namespace KitHelper
                 // panel (a program starting) must still hide it. The K icon is the exception (its
                 // click toggles the panel itself).
                 if (!IsVisible || modalDepth > 0 || Program.Exiting || IsActive || (results != null && results.IsActive)
-                    || CursorOver(Anchor)) return;
+                    || (currentConfirm != null && currentConfirm.IsActive) || CursorOver(Anchor)) return;
                 HidePanel();
             }));
         }
@@ -195,6 +196,7 @@ namespace KitHelper
         {
             SaveSettings();
             ResultsWindow.Current?.Hide();
+            currentConfirm?.Hide();             // still pending; back with the panel
             Hide();
         }
 
@@ -272,6 +274,7 @@ namespace KitHelper
 
         void SetSource(string folder, string[] picks = null)
         {
+            CancelConfirm();                    // it was for the previous folder
             appliedSource = folder;
             picked = picks;
             CboSource.Text = folder;
@@ -635,7 +638,7 @@ namespace KitHelper
             var preview = CopyAll((s, l) => { }, null, dryRun: true);
             var confirm = new CopyResultWindow(title, where, preview, null, preview: true) { Owner = this };
             confirm.OfferVignetting(Vignetting.CopiedInis(preview));
-            if (Modal(() => confirm.ShowDialog()) != true) return;
+            if (!await Confirm(confirm)) return;
             string vigValue = confirm.VignettingValue;
             bool vigDx = confirm.VignettingIncludeDx;
             var excluded = confirm.Excluded;
@@ -681,7 +684,8 @@ namespace KitHelper
             var into = new CopyTarget { Name = target.Name, SubFolders = new[] { model }, IncludeSubdirs = false };
             // Confirm with the list of what will happen: the same copy, as a dry run.
             var preview = Copier.Run(source, inputImg, into, ownExe, (s, l) => { }, null, Path.Combine(Package.DatabaseDir, "InputIMG"), dryRun: true);
-            if (!ConfirmCopy("Copy to Database model " + model, $"{source}\n→ {Path.Combine(inputImg, model)}", preview, out var excluded)) return;
+            var excluded = await ConfirmCopy("Copy to Database model " + model, $"{source}\n→ {Path.Combine(inputImg, model)}", preview);
+            if (excluded == null) return;
 
             Log($"Copy {source} → {Path.Combine(inputImg, model)}", LogLevel.Info);
             var backup = new Backup(target.Name + " " + model, source, null, db);
@@ -719,7 +723,7 @@ namespace KitHelper
             var preview = Package.Preview(source, install, db, ownExe, picks);
             var confirm = new CopyResultWindow("Copy package " + name, where, preview, null, preview: true) { Owner = this };
             confirm.OfferVignetting(Vignetting.CopiedInis(preview));
-            if (Modal(() => confirm.ShowDialog()) != true) return;
+            if (!await Confirm(confirm)) return;
             string vigValue = confirm.VignettingValue;
             bool vigDx = confirm.VignettingIncludeDx;
             var excluded = confirm.Excluded;               // files unticked in the confirmation
@@ -746,14 +750,38 @@ namespace KitHelper
             LoadInstalls();
         }
 
-        // The confirmation before a copy: CopyResultWindow in preview mode. True = Copy.
-        // excluded: the destination files unticked there (for Copier.Excluding).
-        bool ConfirmCopy(string title, string where, Copier.Result preview, out ISet<string> excluded)
+        // The confirmation before a copy: CopyResultWindow in preview mode. Returns the destination
+        // files unticked there (for Copier.Excluding), or null when not confirmed.
+        async Task<ISet<string>> ConfirmCopy(string title, string where, Copier.Result preview)
         {
-            var w = new CopyResultWindow(title, where, preview, null, preview: true) { Owner = this };
-            bool ok = Modal(() => w.ShowDialog()) == true;
-            excluded = w.Excluded;
-            return ok;
+            var w = new CopyResultWindow(title, where, preview, null, preview: true);
+            return await Confirm(w) ? w.Excluded : null;
+        }
+
+        // The pending confirmation. Not modal (the panel stays usable), and only one at a time: the
+        // latest copy action - another Copy all button, or opening a folder / several folders / a
+        // package - closes the pending one (its copy then never happens) and shows its own. Shown and
+        // hidden with the panel, like the results window.
+        CopyResultWindow currentConfirm;
+
+        // True = Copy clicked; false = Cancel / ✕ / Esc, or replaced by a newer confirmation.
+        Task<bool> Confirm(CopyResultWindow w)
+        {
+            CancelConfirm();
+            var done = new TaskCompletionSource<bool>();
+            w.Owner = this;
+            w.Closed += (s, e) => { if (currentConfirm == w) currentConfirm = null; done.TrySetResult(w.Confirmed); };
+            w.Deactivated += (s, e) => AutoHide();      // clicking away hides it with the panel, still pending
+            currentConfirm = w;
+            if (IsVisible) w.Show();            // else it appears with the panel (ShowNear)
+            return done.Task;
+        }
+
+        void CancelConfirm()
+        {
+            var c = currentConfirm;
+            currentConfirm = null;
+            c?.Close();
         }
 
         // If TrueTest runs, ask whether to close it first: always, as a popup. (1.9.1 removed the
@@ -814,7 +842,8 @@ namespace KitHelper
             bool skipEdt = w.SkipEdtMobile;
             // Confirmation of the actual files, like every other copy.
             var preview = KitMigration.Run(from, to, targets, skipEdt, (s, l) => { }, null, dryRun: true);
-            if (!ConfirmCopy("Copy kits from " + Path.GetFileName(from), $"{from}\n→ {to}", preview, out var excluded)) return;
+            var excluded = await ConfirmCopy("Copy kits from " + Path.GetFileName(from), $"{from}\n→ {to}", preview);
+            if (excluded == null) return;
             if (!AskCloseTrueTest(to, "Copy kits", out string restartPath)) return;
 
             Log($"Copy kits {from} → {to} [{string.Join(", ", targets.SelectMany(t => t.SubFolders))}]"

@@ -15,7 +15,8 @@ namespace KitHelper
     // Shown when a copy finishes: every file, grouped by the folder it went to, with what
     // happened to it (New / Replaced / Failed / Not copied). Easier to check than the log.
     // Preview mode is the confirmation before a copy: the same list as it WILL happen
-    // (Replace / New / Not copied) with Cancel / OK; ShowDialog() == true means OK (copy).
+    // (Replace / New / Not copied) with Cancel / Copy. Shown non-modal (MainWindow.Confirm);
+    // Confirmed says whether Copy was clicked once it closes.
     public partial class CopyResultWindow : Window
     {
         readonly string backupRoot;
@@ -59,7 +60,7 @@ namespace KitHelper
                 BtnCopyText.Visibility = Visibility.Collapsed;     // a confirmation, not a report
                 BtnCancel.Visibility = Visibility.Visible;
                 BtnSelectAll.Visibility = BtnSelectNone.Visibility = Visibility.Visible;
-                BtnPrimary.Content = "OK";
+                BtnPrimary.Content = "Copy";
             }
             else
             {
@@ -284,10 +285,12 @@ namespace KitHelper
         void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => GetWindow((DependencyObject)sender)?.DragMove();
         void Close_Click(object sender, RoutedEventArgs e) { if (closeInstead != null) closeInstead(); else Close(); }
 
-        // Preview: "OK" confirms (ShowDialog returns true). Result: "Close".
+        public bool Confirmed { get; private set; }
+
+        // Preview: "Copy" confirms. Result: "Close".
         void Primary_Click(object sender, RoutedEventArgs e)
         {
-            if (preview) DialogResult = true;
+            if (preview) { Confirmed = true; Close(); }
             else if (closeInstead != null) closeInstead();
             else Close();
         }
