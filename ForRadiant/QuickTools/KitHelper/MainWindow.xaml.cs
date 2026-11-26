@@ -240,8 +240,8 @@ namespace KitHelper
             if (InModal) { OpenFolder(Path.GetDirectoryName(path), null, offerCopy: false); return; }   // just brings the dialog back
             OpenFolder(Path.GetDirectoryName(path), null, offerCopy: false);
             if (!string.Equals(Path.GetExtension(path), ".txt", StringComparison.OrdinalIgnoreCase)) return;
-            var item = CboRunInput.Items.OfType<RunInputItem>().FirstOrDefault(i => string.Equals(i.Path, path, StringComparison.OrdinalIgnoreCase));
-            if (item != null) CboRunInput.SelectedItem = item;
+            var item = allRunInputs.FirstOrDefault(i => string.Equals(i.Path, path, StringComparison.OrdinalIgnoreCase));
+            if (item != null) SelectInput(item.Path);
             else CboRunInput.Text = path;               // not a run input by its first line: use it anyway
             Dispatcher.BeginInvoke(new Action(OnRunInputChanged), DispatcherPriority.Background);
         }
@@ -355,14 +355,47 @@ namespace KitHelper
 
             // Run inputs found in this folder; keep a browsed file from elsewhere if one is set.
             string current = RunInputPath;
-            CboRunInput.Items.Clear();
+            allRunInputs.Clear();
             foreach (string f in RunInputFolders(folder, package).SelectMany(Kit.RunInputs).Distinct(StringComparer.OrdinalIgnoreCase))
-                CboRunInput.Items.Add(new RunInputItem(f, folder));
-            var match = CboRunInput.Items.Cast<RunInputItem>().FirstOrDefault(i => string.Equals(i.Path, current, StringComparison.OrdinalIgnoreCase));
-            if (match != null) CboRunInput.SelectedItem = match;
-            else if (CboRunInput.Items.Count > 0) CboRunInput.SelectedIndex = 0;
-            else if (!File.Exists(current)) CboRunInput.Text = "";
+                allRunInputs.Add(new RunInputItem(f, folder));
+            // The box lists one kind at a time (the mode's); start with the current input's kind, else
+            // the first input's.
+            var keep = allRunInputs.FirstOrDefault(i => string.Equals(i.Path, current, StringComparison.OrdinalIgnoreCase)) ?? allRunInputs.FirstOrDefault();
+            if (keep != null) SelectInput(keep.Path);
+            else
+            {
+                CboRunInput.Items.Clear();
+                if (!File.Exists(current)) CboRunInput.Text = "";
+            }
             OnRunInputChanged();
+        }
+
+        // Every run input found for the open folder; the box shows only the selected mode's.
+        readonly List<RunInputItem> allRunInputs = new List<RunInputItem>();
+
+        // Lists the inputs of one kind (Omit / PUC / POCBMobile) and selects keep, else the first;
+        // none of that kind: an empty box.
+        void ShowInputsFor(string mode, string keep)
+        {
+            var list = allRunInputs.Where(i => File.Exists(i.Path) && ModeOf(i.Path) == mode).ToList();
+            foreach (var i in list) i.ShowFolder = list.Count(x => string.Equals(x.Name, i.Name, StringComparison.OrdinalIgnoreCase)) > 1;
+            CboRunInput.Items.Clear();
+            foreach (var i in list) CboRunInput.Items.Add(i);
+            var sel = list.FirstOrDefault(i => string.Equals(i.Path, keep, StringComparison.OrdinalIgnoreCase)) ?? list.FirstOrDefault();
+            if (sel != null) CboRunInput.SelectedItem = sel;
+            else { CboRunInput.SelectedIndex = -1; CboRunInput.Text = ""; lastRunInput = ""; }
+        }
+
+        // Selects a listed input: its mode, then the list of that kind with it selected.
+        void SelectInput(string path)
+        {
+            string mode = ModeOf(path);
+            settingMode = true;
+            RbPocb.IsChecked = mode == "POCBMobile";
+            RbPuc.IsChecked = mode == "PUC";
+            RbOmit.IsChecked = mode == "Omit";
+            settingMode = false;
+            ShowInputsFor(mode, path);
         }
 
         // Where Run test looks for inputs: the open folder, an OMIT\ / PUC\ folder's model folders, and
@@ -416,16 +449,21 @@ namespace KitHelper
         sealed class RunInputItem
         {
             public readonly string Path;
-            readonly string shown;
-            // shown relative to the kit folder, so inputTest\x.txt and inputTemplate\x.txt stay apart
+            public readonly string Name;
+            readonly string folder;
+            // Shown as the file name only (the list holds one kind at a time, and inputTemplate* /
+            // inputTest* names already differ). Its folder, relative to the kit, is added only when
+            // another listed input has the same name (ShowInputsFor).
+            public bool ShowFolder;
             public RunInputItem(string path, string kit = null)
             {
                 Path = path;
-                string k = kit?.TrimEnd('\\');
-                shown = k != null && path.StartsWith(k + "\\", StringComparison.OrdinalIgnoreCase)
-                    ? path.Substring(k.Length + 1) : System.IO.Path.GetFileName(path);
+                Name = System.IO.Path.GetFileName(path);
+                string dir = System.IO.Path.GetDirectoryName(path) ?? "", k = kit?.TrimEnd('\\');
+                folder = k != null && dir.StartsWith(k + "\\", StringComparison.OrdinalIgnoreCase) ? dir.Substring(k.Length + 1)
+                       : string.Equals(dir, k, StringComparison.OrdinalIgnoreCase) ? "" : System.IO.Path.GetFileName(dir);
             }
-            public override string ToString() => shown;
+            public override string ToString() => ShowFolder && folder != "" ? $"{Name}  ({folder})" : Name;
         }
 
         string RunInputPath
@@ -468,12 +506,10 @@ namespace KitHelper
         void PickInputForMode()
         {
             string want = CheckedMode, cur = RunInputPath;
-            if (File.Exists(cur) && ModeOf(cur) == want) return;
-            var item = CboRunInput.Items.OfType<RunInputItem>().FirstOrDefault(i => File.Exists(i.Path) && ModeOf(i.Path) == want);
-            if (item != null) CboRunInput.SelectedItem = item;
-            // None of that kind among the listed ones: empty the box rather than run another kind's
-            // input in this mode (Browse… picks one from elsewhere).
-            else if (CboRunInput.Items.Count > 0) { CboRunInput.SelectedIndex = -1; CboRunInput.Text = ""; lastRunInput = ""; }
+            // A file browsed from elsewhere that already matches the mode stays.
+            if (File.Exists(cur) && ModeOf(cur) == want && !allRunInputs.Any(i => string.Equals(i.Path, cur, StringComparison.OrdinalIgnoreCase))) return;
+            // Only that kind's inputs in the box; none: an empty box rather than another kind's input.
+            ShowInputsFor(want, cur);
         }
 
         // SelectionChanged fires before the editable text follows the new item: read it after.

@@ -235,6 +235,20 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   - Real app: X4022 1st PUC package → 2 Omit + 2 PUC inputs, PUC ↔ Omit switches input + working dir;
     W511BT OMIT+PUC pick → 6 Omit + 5 PUC; D997 1st CPP package → 10 POCBMobile + 6 Omit, POCBMobile →
     a template with the POCBMobile dir, PUC → empty, Omit → Omit input. Confirmations cancelled.
+- **Kit Helper 1.10.23: the Run test input list shows only the selected mode's inputs.** Chau: Omit
+  listed PUC inputs and vice versa, and POCBMobile (none in the kit) still listed everything.
+  `allRunInputs` holds every input found; `ShowInputsFor(mode, keep)` fills the box with that kind's
+  only (none → empty box); `SelectInput(path)` sets the mode radios (settingMode) then the list;
+  SetSource starts with the current input's kind, else the first input's; a mode click
+  (`PickInputForMode`) refills the list, keeping a browsed file from elsewhere if it already matches;
+  a dropped .txt goes through SelectInput. Real app, W511BT kit: Omit → 6, PUC → 5 (PUC model
+  folder as working dir), POCBMobile → 0 / empty, Omit → 6. Started cleanly (checked first).
+- **Kit Helper 1.10.24: Run test inputs listed by file name only** (Chau: no OMIT\ / PUC\ prefix).
+  `RunInputItem` shows `Name`; `ShowInputsFor` sets `ShowFolder` only when two listed inputs share a
+  name ("x.txt  (folder)"). The 1.3.2 reason for relative names (inputTemplate\x vs inputTest\x) no
+  longer applies: those file names differ by prefix and the list holds one kind at a time.
+  `RunInputPath` still uses the item's full path. Real app, W511BT: Omit 6 / PUC 5 bare names, PUC
+  working dir still the model folder. First drag after the restart didn't arrive again (harness).
   - Seen while testing: six real copies into TrueTest 1.9 at 10:56-10:57 (OMIT, OMIT, POCB4.2, PUC, R2R,
     then the 4-folder package of the W511BT kit), not from these tests - Chau using 1.10.2. Backed up
     in `D:\Program\RVS\Kit Helper Backups\20261126_1056*` / `_1057*`.
