@@ -557,6 +557,26 @@ namespace KitHelper
             Directory.Exists(folder) ? Directory.GetFiles(folder, "*.ini").OrderBy(f => f, StringComparer.OrdinalIgnoreCase).ToArray()
                                      : new string[0];
 
+        // The folder's INIs and those of its subfolders (a package's parts, an InputIMG\ / OMIT\
+        // model folder), a few levels down and a bounded number of folders.
+        public static string[] IniFilesDeep(string folder, int maxDepth = 3, int maxFolders = 200)
+        {
+            var found = new List<string>();
+            var queue = new Queue<(string dir, int depth)>();
+            queue.Enqueue((folder, 0));
+            int seen = 0;
+            while (queue.Count > 0 && seen++ < maxFolders)
+            {
+                var (dir, depth) = queue.Dequeue();
+                if (!Directory.Exists(dir)) continue;
+                found.AddRange(IniFiles(dir));
+                if (depth < maxDepth)
+                    foreach (string d in Directory.GetDirectories(dir).OrderBy(d => d, StringComparer.OrdinalIgnoreCase))
+                        queue.Enqueue((d, depth + 1));
+            }
+            return found.ToArray();
+        }
+
         // Current value(s), comma-joined; null when the key is absent.
         public static string Read(string path)
         {

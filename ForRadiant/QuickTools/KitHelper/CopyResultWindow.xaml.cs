@@ -304,9 +304,8 @@ namespace KitHelper
             if (!preview) return;
             var list = files.Where(f => f != null).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
             int marked = list.Count(Unblocker.IsMarked);
-            TxtUnblock.Text = marked == 0
-                ? $"None of the {list.Count} file(s) is marked as downloaded from the internet."
-                : $"{marked} of {list.Count} file(s) are marked as downloaded from the internet: they would arrive blocked in TrueTest.";
+            ChkUnblock.ToolTip = "Removes the \"downloaded from the internet\" mark from the source files before copying, so they don't arrive blocked. "
+                               + $"Now {marked} of {list.Count} file(s) are marked.";
             PnlUnblock.Visibility = Visibility.Visible;
         }
 

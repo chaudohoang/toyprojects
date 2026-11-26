@@ -157,7 +157,7 @@
 
                                 <TextBlock Grid.Row="1" Text="Mode" Style="{StaticResource FieldLabel}" Margin="0,8,10,0"/>
                                 <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,8,0,0">
-                                    <RadioButton x:Name="RbOmit" Content="Omit" IsChecked="True"/>
+                                    <RadioButton x:Name="RbOmit" Content="Omit" IsChecked="True" Checked="RunMode_Changed"/>
                                     <RadioButton x:Name="RbPuc" Content="PUC" Checked="RunMode_Changed" Unchecked="RunMode_Changed"/>
                                     <RadioButton x:Name="RbPocb" Content="POCBMobile" Checked="RunMode_Changed" Unchecked="RunMode_Changed"/>
                                     <TextBlock x:Name="TxtRunModeHint" Style="{StaticResource Hint}" Margin="4,0,0,0" VerticalAlignment="Center" Text="Omit runs in the working dir"/>

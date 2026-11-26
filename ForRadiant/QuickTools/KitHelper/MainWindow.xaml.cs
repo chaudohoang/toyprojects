@@ -312,7 +312,6 @@ namespace KitHelper
             TxtSourceInfo.Text = picked != null ? $"{picked.Length} folders picked: {string.Join(", ", picked)}"
                                : $"{files} file(s), {dirs} subfolder(s), {inis} ini";
             TxtSourceInfo.Foreground = Brush("Dim");
-            RefreshIni();
             RememberRecent(folder);
 
             // Mark the copy target this folder is meant for.
@@ -348,16 +347,39 @@ namespace KitHelper
                             : $"Detected: {suggested.Name}  ({why})";
             TxtSuggest.Visibility = TxtSuggest.Text == "" ? Visibility.Collapsed : Visibility.Visible;
 
+            // Vignetting list: with a recognised kit or a package, the INIs in its subfolders too (an
+            // InputIMG\<model>, a package's parts); else only the folder's own (a parent folder full of
+            // kits must not have Set ON / OFF reach into all of them).
+            deepInis = package || picked != null || suggested != null;
+            RefreshIni();
+
             // Run inputs found in this folder; keep a browsed file from elsewhere if one is set.
             string current = RunInputPath;
             CboRunInput.Items.Clear();
-            foreach (string f in Kit.RunInputs(folder).Concat((modelSources ?? new string[0]).SelectMany(Kit.RunInputs)))
+            foreach (string f in RunInputFolders(folder, package).SelectMany(Kit.RunInputs).Distinct(StringComparer.OrdinalIgnoreCase))
                 CboRunInput.Items.Add(new RunInputItem(f, folder));
             var match = CboRunInput.Items.Cast<RunInputItem>().FirstOrDefault(i => string.Equals(i.Path, current, StringComparison.OrdinalIgnoreCase));
             if (match != null) CboRunInput.SelectedItem = match;
             else if (CboRunInput.Items.Count > 0) CboRunInput.SelectedIndex = 0;
             else if (!File.Exists(current)) CboRunInput.Text = "";
             OnRunInputChanged();
+        }
+
+        // Where Run test looks for inputs: the open folder, an OMIT\ / PUC\ folder's model folders, and
+        // for a package (or several picked folders) every part - OMIT\<model>, PUC\<model>, a
+        // POCBMobile kit, and a mirrored TrueTest\<sub> - so Omit, PUC and POCBMobile inputs of the
+        // whole kit are listed together, each shown with its subfolder.
+        IEnumerable<string> RunInputFolders(string folder, bool package)
+        {
+            var dirs = new List<string> { folder };
+            if (modelSources != null) dirs.AddRange(modelSources);
+            if (package)
+                foreach (var u in Package.Scan(folder, picked).Units)
+                {
+                    dirs.Add(u.Folder);
+                    if (u.Mirror != null && Directory.Exists(u.Folder)) dirs.AddRange(Directory.GetDirectories(u.Folder));
+                }
+            return dirs.Distinct(StringComparer.OrdinalIgnoreCase);
         }
 
         void RememberRecent(string folder)
@@ -422,6 +444,7 @@ namespace KitHelper
             string p = RunInputPath;
             if (p == lastRunInput) return;
             lastRunInput = p;
+            settingMode = true;                 // the input decides the mode: not a user's mode switch
             if (File.Exists(p))
             {
                 bool pocb = RunTest.IsPocbMobileInput(p);
@@ -429,14 +452,42 @@ namespace KitHelper
                 RbPuc.IsChecked = !pocb && RunTest.LooksLikePuc(p);
             }
             RbOmit.IsChecked = RbPuc.IsChecked != true && RbPocb.IsChecked != true;
+            settingMode = false;
             UpdateRunMode();
+        }
+
+        bool settingMode;
+
+        static string ModeOf(string input) =>
+            RunTest.IsPocbMobileInput(input) ? "POCBMobile" : RunTest.LooksLikePuc(input) ? "PUC" : "Omit";
+
+        string CheckedMode => RbPocb.IsChecked == true ? "POCBMobile" : RbPuc.IsChecked == true ? "PUC" : "Omit";
+
+        // The user switched Omit / PUC / POCBMobile: with several kits open (a package), jump to the
+        // first input of that kind, so each run test is one click away. No such input: keep the box.
+        void PickInputForMode()
+        {
+            string want = CheckedMode, cur = RunInputPath;
+            if (File.Exists(cur) && ModeOf(cur) == want) return;
+            var item = CboRunInput.Items.OfType<RunInputItem>().FirstOrDefault(i => File.Exists(i.Path) && ModeOf(i.Path) == want);
+            if (item != null) CboRunInput.SelectedItem = item;
+            // None of that kind among the listed ones: empty the box rather than run another kind's
+            // input in this mode (Browse… picks one from elsewhere).
+            else if (CboRunInput.Items.Count > 0) { CboRunInput.SelectedIndex = -1; CboRunInput.Text = ""; lastRunInput = ""; }
         }
 
         // SelectionChanged fires before the editable text follows the new item: read it after.
         void CboRunInput_SelectionChanged(object sender, SelectionChangedEventArgs e) =>
             Dispatcher.BeginInvoke(new Action(OnRunInputChanged), DispatcherPriority.Background);
         void CboRunInput_LostFocus(object sender, KeyboardFocusChangedEventArgs e) => OnRunInputChanged();
-        void RunMode_Changed(object sender, RoutedEventArgs e) => UpdateRunMode();
+        void RunMode_Changed(object sender, RoutedEventArgs e)
+        {
+            // RbOmit's IsChecked="True" raises Checked while the window is still loading, before the
+            // other radios / the input box exist (1.10.20 crashed at start on exactly that).
+            if (RbPuc == null || RbPocb == null || CboRunInput == null || TxtRunModeHint == null) return;
+            if (!settingMode) PickInputForMode();
+            UpdateRunMode();
+        }
 
         // PUC runs where its input lives (RunTestPUC.exe had no working-dir choice: it ran in the
         // folder it sat in). POCBMobile runs in the selected install's POCBMobile folder. Omit runs
@@ -556,15 +607,34 @@ namespace KitHelper
             public Brush Brush { get; set; }
         }
 
+        bool deepInis;
+
+        // The INIs the Vignetting list and Set ON / OFF work on: the open folder's (or the picked
+        // folders'), with subfolders when a kit / package is recognised (deepInis).
+        string[] KitInis()
+        {
+            string src = Source;
+            var roots = string.Equals(src, appliedSource, StringComparison.OrdinalIgnoreCase) && picked != null
+                ? picked.Select(p => Path.Combine(src, p)) : new[] { src };
+            return roots.SelectMany(r => deepInis ? Vignetting.IniFilesDeep(r) : Vignetting.IniFiles(r)).ToArray();
+        }
+
+        // Shown relative to the open folder: "D994-CB-FMM_MATHON\LGD_COMP_INI_….ini".
+        string IniName(string f)
+        {
+            string src = Source.TrimEnd('\\');
+            return f.StartsWith(src + "\\", StringComparison.OrdinalIgnoreCase) ? f.Substring(src.Length + 1) : Path.GetFileName(f);
+        }
+
         void RefreshIni()
         {
             var rows = new List<IniRow>();
-            foreach (string f in Vignetting.IniFiles(Source))
+            foreach (string f in KitInis())
             {
                 string v;
                 try { v = Vignetting.Read(f); } catch (Exception ex) { v = "error: " + ex.Message; }
                 if (v == null) continue;     // ini without the key: not a vignetting ini
-                rows.Add(new IniRow { Name = Path.GetFileName(f), Value = v, Brush = Vignetting.IsDx(f) ? Brush("Dim") : Brush("Fg") });
+                rows.Add(new IniRow { Name = IniName(f), Value = v, Brush = Vignetting.IsDx(f) ? Brush("Dim") : Brush("Fg") });
             }
             if (rows.Count == 0) rows.Add(new IniRow { Name = "(no ini with " + Vignetting.Key + ")", Value = "", Brush = Brush("Dim") });
             LvIni.ItemsSource = rows;
@@ -882,18 +952,34 @@ namespace KitHelper
             string from = w.From, to = w.To;
             var targets = w.Targets;
             bool skipEdt = w.SkipEdtMobile;
-            // Confirmation of the actual files, like every other copy.
+            // Confirmation of the actual files, like every other copy, with the same Unblock and
+            // Vignetting options.
             var preview = KitMigration.Run(from, to, targets, skipEdt, (s, l) => { }, null, dryRun: true);
-            var w2 = await ConfirmCopy("Copy kits from " + Path.GetFileName(from), $"{from}\n→ {to}", preview);
-            if (w2 == null) return;
-            var excluded = w2.Excluded;
+            var confirm = new CopyResultWindow("Copy kits from " + Path.GetFileName(from), $"{from}\n→ {to}", preview, null, preview: true);
+            confirm.OfferVignetting(Vignetting.CopiedInis(preview));
+            confirm.OfferUnblock(CopiedSources(preview));
+            if (!await Confirm(confirm)) return;
+            var excluded = confirm.Excluded;
+            string vigValue = confirm.VignettingValue;
+            bool vigDx = confirm.VignettingIncludeDx;
             if (!AskCloseTrueTest(to, "Copy kits", out string restartPath)) return;
+            if (confirm.UnblockFirst)
+                await UnblockFolders(targets.SelectMany(t => t.SubFolders).Select(s => Path.Combine(from, s)).Where(Directory.Exists).ToArray());
 
             Log($"Copy kits {from} → {to} [{string.Join(", ", targets.SelectMany(t => t.SubFolders))}]"
                 + (skipEdt && targets.Any(t => t.Name == "LGDVHCustomApp") ? $", skipping {KitMigration.EdtMobile}" : ""), LogLevel.Info);
             var backup = new Backup("Kits from " + Path.GetFileName(from), from, to, null);
             if (excluded.Count > 0) Log($"{excluded.Count} file(s) unticked, left as they are.", LogLevel.Info);
-            var r = await Busy(() => Copier.Excluding(excluded, () => KitMigration.Run(from, to, targets, skipEdt, Log, backup)));
+            var r = await Busy(() => Copier.Excluding(excluded, () =>
+            {
+                var res = KitMigration.Run(from, to, targets, skipEdt, Log, backup);
+                if (vigValue != null)
+                {
+                    Log($"Vignetting → {vigValue} in the copied INIs" + (vigDx ? " (DX included)" : " (DX left as is)"), LogLevel.Info);
+                    Vignetting.ApplyToCopied(res, vigValue, vigDx, Log);
+                }
+                return res;
+            }));
             backup.Report(Log);
             LogCopyResult(r);
             ShowCopyResult("Copy kits from " + Path.GetFileName(from), $"{from}\n→ {to}", r, backup);
@@ -908,14 +994,13 @@ namespace KitHelper
         {
             if (!CheckSource()) return;
             bool dx = ChkDx.IsChecked == true;
-            string source = Source;
+            var inis = KitInis().Select(f => (path: f, name: IniName(f))).ToList();
             Log($"Set {Vignetting.Key} = {value}{(dx ? " (including DX)" : "")}", LogLevel.Info);
             await Busy(() =>
             {
                 int changed = 0;
-                foreach (string f in Vignetting.IniFiles(source))
+                foreach (var (f, name) in inis)
                 {
-                    string name = Path.GetFileName(f);
                     try
                     {
                         if (Vignetting.IsDx(f) && !dx)

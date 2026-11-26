@@ -48,12 +48,10 @@
                 </StackPanel>
             </Border>
 
-            <!-- Confirmation only, kit copies: unblock the kit's files before copying (ticked by default). -->
+            <!-- Confirmation only: unblock the source files before copying (ticked by default). The tooltip
+                 says what it does and how many files are marked. -->
             <Border x:Name="PnlUnblock" DockPanel.Dock="Top" Style="{StaticResource Section}" Margin="0,0,0,10" Visibility="Collapsed">
-                <StackPanel>
-                    <CheckBox x:Name="ChkUnblock" IsChecked="True" Content="Unblock the kit files first (remove the &quot;downloaded from the internet&quot; mark)"/>
-                    <TextBlock x:Name="TxtUnblock" Style="{StaticResource Hint}" Margin="22,4,0,0" TextWrapping="Wrap"/>
-                </StackPanel>
+                <CheckBox x:Name="ChkUnblock" IsChecked="True" Content="Unblock all files"/>
             </Border>
 
             <!-- footer -->

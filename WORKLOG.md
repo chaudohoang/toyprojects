@@ -203,6 +203,38 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   returns the window (Excluded, UnblockFirst). Tested in the real app: scratch InputIMG\D992 model
   with all 6 files marked, database box on a scratch folder → confirmation "[On] 6 of 6 … marked",
   Copy → kit 0 marked, 6 copied files 0 marked. Database box restored.
+- **Kit Helper 1.10.18: "Unblock all files"; Unblock + Vignetting in Kits from old TrueTest.** Chau:
+  too many words. The option is now just a checkbox "Unblock all files" (what it does and "Now N of M
+  file(s) are marked" moved to its tooltip; TxtUnblock removed). `ShowMigrate` builds its own
+  confirmation with `OfferVignetting` + `OfferUnblock`: ticked Unblock → `UnblockFolders` on the old
+  install's selected folders; a vignetting choice → `Vignetting.ApplyToCopied` after
+  `KitMigration.Run` (its items carry From/To, so CopiedInis works). Real app: Kits from old TrueTest
+  (1.9 debug Mobile → 1.9, POCB4.1Net ticked) → confirmation with "Vignetting 4 INI file(s) … now 1 in
+  3, 1 in 1 DX" and "[On] Unblock all files" (tooltip 0 of 49 marked); cancelled, no backup. The
+  vignetting edit after a real migration was not run.
+- **Kit Helper 1.10.19: the panel's Vignetting list sees INIs in subfolders.** Chau: D994 1stPUC
+  `InputIMG` (2 model folders) was a package and its confirmation offered vignetting, but the panel's
+  Vignetting list said "no ini": `RefreshIni` / Set ON-OFF read only the folder's own *.ini (the INIs
+  are in `D994-CB-FMM_MATHON\`). Now `KitInis()`: the open (or picked) folders, recursively via
+  `Vignetting.IniFilesDeep` (3 levels, ≤200 folders) when a kit or package is recognised (`deepInis`),
+  else top level only, so a parent full of kits can't have Set ON reach into all of them. Rows show the
+  path relative to the open folder. RefreshIni moved after detection in SetSource. Real app: drop of
+  that InputIMG → list "D994-CB-FMM_MATHON\LGD_COMP_INI_D994_Mono_1st/2nd_GIB.ini = 1"; confirmation
+  "6 INI file(s) … now 1 in 6" (cancelled).
+- **Kit Helper 1.10.20-1.10.22: Run test across a package / several folders.** Chau: Run test only
+  found inputs for a single folder. `RunInputFolders`: the folder, OMIT/PUC model sources, and for a
+  package (or a pick) every unit's folder plus a mirror unit's subfolders (TrueTest\ScratchDustDetect_NY,
+  \PUC, \POCBMobile) → `Kit.RunInputs` on each, shown relative to the open folder. Mode radios:
+  a user's switch (`RunMode_Changed`, not while `settingMode` from an input change) calls
+  `PickInputForMode`: the first listed input whose `ModeOf` matches; none → the box is emptied (1.10.22,
+  so a PUC input can't run in POCBMobile mode). RbOmit got the Checked handler too.
+  - **1.10.20 crashed at start** (NullReference in `CheckedMode`): RbOmit's `IsChecked="True"` raises
+    Checked during InitializeComponent, before RbPuc / RbPocb exist. Kit Helper was down ~1 min on
+    this PC; 1.10.21 guards on the controls being built. Exactly the ForRadiant\CLAUDE.md
+    verification habit: after every UI build, confirm the process runs and no APPCRASH first.
+  - Real app: X4022 1st PUC package → 2 Omit + 2 PUC inputs, PUC ↔ Omit switches input + working dir;
+    W511BT OMIT+PUC pick → 6 Omit + 5 PUC; D997 1st CPP package → 10 POCBMobile + 6 Omit, POCBMobile →
+    a template with the POCBMobile dir, PUC → empty, Omit → Omit input. Confirmations cancelled.
   - Seen while testing: six real copies into TrueTest 1.9 at 10:56-10:57 (OMIT, OMIT, POCB4.2, PUC, R2R,
     then the 4-folder package of the W511BT kit), not from these tests - Chau using 1.10.2. Backed up
     in `D:\Program\RVS\Kit Helper Backups\20261126_1056*` / `_1057*`.
