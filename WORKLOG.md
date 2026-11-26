@@ -163,6 +163,46 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   heading short, measure the row (`header.SizeChanged`) minus its other children. Checked in a harness
   with a dry-run preview: TrueTest 1.9 paths in full; a long fake database path →
   "…\for the trimming test\DATABASE\InputIMG\X4022-CB-C2_POR_DX_SUNBEAM", clear of "6 new".
+- **Kit Helper 1.10.14: opening a folder unblocks it before its confirmation.** Chau: since opening
+  a folder presses its Copy all / Copy package (1.10.9), it should press Unblock too - CopyFile keeps
+  the Zone.Identifier stream, so a downloaded kit arrives blocked in TrueTest. `UnblockThenOffer`
+  (from `OpenFolder` when `offerCopy`): only when there is a highlighted action (not a parent full of
+  kits), only the opened folder or the picked ones, skipped while busy; then the confirmation if the
+  same folder is still open. `UnblockFolders` is shared with the Unblock button (same log wording).
+  Tested: scratch copy of the X4023 OMIT with Zone.Identifier on all 21 files, dropped on K → 0
+  marked, "Confirmation of Copy all → ScratchDustDetect_NY" (cancelled). First run's drag didn't
+  arrive (fired right after the app restart) - check the drag-result file before reading the outcome.
+- **Kit Helper 1.10.15: only the detected copy button is shown.** Chau found "Copy all → POCB4.2" on
+  an Omit kit wrote its model folder into POCB4.2\X4022-…, and LGDVHCustomApp listed files as
+  replaceable - any button "worked" on any folder. Now, with a recognised kit, every other Copy all
+  button is collapsed (the detected one stays, to reopen the confirmation after Cancel; packages
+  already showed only Copy package). Nothing recognised: all buttons + "Kit type not recognised: pick
+  the copy target yourself, or open the folder that holds the kit files." The hint now says
+  "Detected:"; section title "Copy kit → TrueTest / Database". Real drags: X4022 Omit → only
+  ScratchDustDetect_NY; outer kit folder → all + hint; dated kit → only Copy package. Confirmations
+  cancelled, no backups.
+- **Kit Helper 1.10.16: "Show all copy targets", and other-type files left out.** Chau: give a way to
+  see the hidden buttons, but a wrong button must not copy files of the wrong category. Chose "rule out
+  other-type files" over "rule out everything". `Kit.OwnersOf(file)`: name signatures (same as
+  Suggest) → target(s) the file belongs to, null = generic; LGD_PO_Compensation / LGD_COMP_INI belong
+  to POCB4.1Net AND Database model. `Copier.ByCategory(on, …)` ([ThreadStatic], like Excluding):
+  Run / RunRouted list such files as Not copied "<type> file, not for <target>". On only when a
+  button other than the detected one copies a recognised kit (`RulesOut`); the detected button,
+  packages and unrecognised folders are unchanged. `ChkAllTargets` shows with a detected kit and
+  resets per folder; the confirmation header adds "Detected as X: files of other kit types are left
+  out." Headless: X4022 Omit model → POCB4.2 with rule: 6 ruled out, PANEL_SHAPE tif New; without:
+  all New; → ScratchDustDetect_NY with rule on: all New. Real app: switch → 7 buttons, POCB4.2
+  confirmation "Copy 1 file(s)? … 8 not copied", cancelled. No backups.
+- **Kit Helper 1.10.17: unblock is an option in the confirmation (ticked), not done on open.**
+  Chau: like the Vignetting panel, a checkbox in the confirmation, checked by default. 1.10.14's
+  `UnblockThenOffer` removed (opening a folder unblocks nothing again). `CopyResultWindow.OfferUnblock
+  (files)`: "Unblock the kit files first" + "N of M file(s) are marked…" (`Unblocker.IsMarked` =
+  File.Exists on `\\?\file:Zone.Identifier`), shown for Copy all, Copy package and Database model
+  (not Kits from old TrueTest). Copy with it ticked → `UnblockFolders` on the sources (model folders,
+  package folder / picked folders) after the TrueTest question, then the copy. `ConfirmCopy` now
+  returns the window (Excluded, UnblockFirst). Tested in the real app: scratch InputIMG\D992 model
+  with all 6 files marked, database box on a scratch folder → confirmation "[On] 6 of 6 … marked",
+  Copy → kit 0 marked, 6 copied files 0 marked. Database box restored.
   - Seen while testing: six real copies into TrueTest 1.9 at 10:56-10:57 (OMIT, OMIT, POCB4.2, PUC, R2R,
     then the 4-folder package of the W511BT kit), not from these tests - Chau using 1.10.2. Backed up
     in `D:\Program\RVS\Kit Helper Backups\20261126_1056*` / `_1057*`.

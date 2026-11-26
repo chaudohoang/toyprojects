@@ -48,6 +48,14 @@
                 </StackPanel>
             </Border>
 
+            <!-- Confirmation only, kit copies: unblock the kit's files before copying (ticked by default). -->
+            <Border x:Name="PnlUnblock" DockPanel.Dock="Top" Style="{StaticResource Section}" Margin="0,0,0,10" Visibility="Collapsed">
+                <StackPanel>
+                    <CheckBox x:Name="ChkUnblock" IsChecked="True" Content="Unblock the kit files first (remove the &quot;downloaded from the internet&quot; mark)"/>
+                    <TextBlock x:Name="TxtUnblock" Style="{StaticResource Hint}" Margin="22,4,0,0" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
             <!-- footer -->
             <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
                 <Button x:Name="BtnSelectAll" Content="Select all" Click="SelectAll_Click" Visibility="Collapsed"/>

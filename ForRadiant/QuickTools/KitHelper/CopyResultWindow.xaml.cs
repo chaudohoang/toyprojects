@@ -295,6 +295,23 @@ namespace KitHelper
             PnlVignetting.Visibility = Visibility.Visible;
         }
 
+        // ---- unblock option (confirmation only)
+
+        // files: the kit files this copy would write from. Shows the option with how many are marked;
+        // ticked by default, the caller unblocks the kit before copying (UnblockFirst).
+        public void OfferUnblock(IEnumerable<string> files)
+        {
+            if (!preview) return;
+            var list = files.Where(f => f != null).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            int marked = list.Count(Unblocker.IsMarked);
+            TxtUnblock.Text = marked == 0
+                ? $"None of the {list.Count} file(s) is marked as downloaded from the internet."
+                : $"{marked} of {list.Count} file(s) are marked as downloaded from the internet: they would arrive blocked in TrueTest.";
+            PnlUnblock.Visibility = Visibility.Visible;
+        }
+
+        public bool UnblockFirst => PnlUnblock.Visibility == Visibility.Visible && ChkUnblock.IsChecked == true;
+
         // "1" / "0" to set, null to keep.
         public string VignettingValue => RbVigOn.IsChecked == true ? "1" : RbVigOff.IsChecked == true ? "0" : null;
         public bool VignettingIncludeDx => ChkVigDx.IsChecked == true;

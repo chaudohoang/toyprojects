@@ -258,6 +258,28 @@ namespace KitHelper
             finally { excluded = previous; }
         }
 
+        // On while a button OTHER than the detected one copies a recognised kit ("Show all copy
+        // targets"): files that clearly belong to another kit type (Kit.OwnersOf) are left out, so an
+        // Omit kit sent to POCB4.2 doesn't bring its LGD_OMIT_INI / ScratchDustDetect exes along.
+        // Generic files (PANEL_SHAPE*.tif, other dll / txt) are still copied.
+        [ThreadStatic] static bool byCategory;
+
+        public static T ByCategory<T>(bool on, Func<T> copy)
+        {
+            bool previous = byCategory;
+            byCategory = on;
+            try { return copy(); }
+            finally { byCategory = previous; }
+        }
+
+        // The kit type a file belongs to when it is not this target's, else null.
+        static string WrongCategory(string file, CopyTarget target)
+        {
+            if (!byCategory) return null;
+            var owners = Kit.OwnersOf(file);
+            return owners == null || owners.Contains(target.Name) ? null : owners[0];
+        }
+
         public sealed class Result
         {
             public int Copied, Failed, Skipped;
@@ -319,6 +341,17 @@ namespace KitHelper
                 log($"Not copying helper tools / Thumbs.db: {string.Join(", ", never)}", LogLevel.Detail);
             foreach (string n in never) r.Add(n, CopyStatus.Skipped, "helper tool / Explorer file, never copied");
 
+            foreach (string f in files.Where(f => WrongCategory(f, target) != null).ToList())
+            {
+                files.Remove(f); r.Skipped++;
+                r.Add(Path.GetFileName(f), CopyStatus.Skipped, $"{WrongCategory(f, target)} file, not for {target.Name}");
+            }
+            foreach (var sf in subFiles.Where(x => WrongCategory(x.from, target) != null).ToList())
+            {
+                subFiles.Remove(sf); r.Skipped++;
+                r.Add(sf.rel, CopyStatus.Skipped, $"{WrongCategory(sf.from, target)} file, not for {target.Name}");
+            }
+
             foreach (string sub in target.SubFolders)
             {
                 string dest = Path.Combine(install, sub);
@@ -366,6 +399,11 @@ namespace KitHelper
                 .Select(f => (from: f, rel: f.Substring(root.Length + 1)))
                 .Select(x => (x.from, x.rel, to: target.Route(kitName, x.rel)))
                 .ToList();
+            foreach (var x in routed.Where(x => x.to != null && WrongCategory(x.from, target) != null).ToList())
+            {
+                routed.Remove(x); r.Skipped++;
+                r.Add(x.rel, CopyStatus.Skipped, $"{WrongCategory(x.from, target)} file, not for {target.Name}");
+            }
             var left = routed.Where(x => x.to == null).Select(x => x.rel).ToList();
             if (left.Count > 0) log($"Not for {target.Name}, not copied: {string.Join(", ", left)}", LogLevel.Detail);
             foreach (string l in left) r.Add(l, CopyStatus.Skipped, $"not an input for {target.Name}");
@@ -603,6 +641,22 @@ namespace KitHelper
         }
 
         // Never copied by any target: the helper tools, and Explorer's per-folder cache files.
+        // The copy target(s) a file clearly belongs to by its name, or null for a generic file
+        // (PANEL_SHAPE*.tif, plain dll / txt). Used to leave other kit types' files out when a button
+        // other than the detected one is used (Copier.ByCategory). Same signatures as Suggest.
+        public static string[] OwnersOf(string fileName)
+        {
+            string n = Path.GetFileName(fileName);
+            bool M(string pattern) => Regex.IsMatch(n, pattern, RegexOptions.IgnoreCase);
+            if (M("^LGD_OMIT_INI") || M(@"^ScratchDustDetect.*\.exe$")) return new[] { "ScratchDustDetect_NY" };
+            if (M("^VNTT_Interp")) return new[] { "LGDVHCustomApp" };
+            if (M("^LGD_PO_Compensation") || M("^LGD_COMP_INI")) return new[] { "POCB4.1Net", "Database model" };
+            if (M(@"^input(Template|Test).*\.txt$")) return new[] { "POCBMobile" };
+            if (M(@"^Crop(\.|_params\.json$)") || M(@"^main_.*\.txt$")) return new[] { "POCB4.2" };
+            if (M(@"PUC.*\.(exe|dll|txt)$")) return new[] { "PUC" };
+            return null;
+        }
+
         public static bool NeverCopy(string fileName)
         {
             string n = Path.GetFileName(fileName);
@@ -936,6 +990,13 @@ namespace KitHelper
     {
         // Deletes the Zone.Identifier stream ("downloaded from the internet" mark). Recursive,
         // unlike UnblockFiles.exe, because extracted kits carry subfolders too.
+        // Whether the file carries the mark (for the confirmation's Unblock option).
+        public static bool IsMarked(string file)
+        {
+            try { return File.Exists(@"\\?\" + file + ":Zone.Identifier"); }
+            catch { return false; }
+        }
+
         public static (int unblocked, int total, int failed) Run(string folder, LogFn log)
         {
             int un = 0, total = 0, failed = 0;

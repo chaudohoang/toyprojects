@@ -220,6 +220,10 @@ namespace KitHelper
             if (offerCopy) Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(OfferSuggestedCopy));
         }
 
+        // The kit files a copy would write from (New / Replace rows), for the Unblock option.
+        static IEnumerable<string> CopiedSources(Copier.Result r) =>
+            r.Items.Where(i => (i.Status == CopyStatus.New || i.Status == CopyStatus.Replaced) && i.From != null).Select(i => i.From);
+
         // Opens the confirmation of the highlighted copy, if any: Copy package, else the suggested
         // Copy all button. Nothing when no kit type was recognised, while busy or a dialog is up.
         void OfferSuggestedCopy()
@@ -267,6 +271,23 @@ namespace KitHelper
         // would copy the whole parent folder, so they are hidden).
         string[] picked;
 
+        // The kit type recognised for the open folder (its button), or null: nothing recognised, or a package.
+        CopyTarget detectedTarget;
+
+        void UpdateCopyButtons()
+        {
+            bool all = ChkAllTargets.IsChecked == true;
+            foreach (var kv in copyButtons)
+                kv.Value.Visibility = detectedTarget == null || all || kv.Key == detectedTarget ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        void AllTargets_Changed(object sender, RoutedEventArgs e) => UpdateCopyButtons();
+
+        // True when this button is not the detected one of a recognised kit: its copy leaves out files
+        // of other kit types.
+        bool RulesOut(CopyTarget target) =>
+            detectedTarget != null && target != detectedTarget && string.Equals(Source, appliedSource, StringComparison.OrdinalIgnoreCase);
+
         // A kit's OMIT\ / PUC\ opened alone (Package.SingleTargetModels): the model folders its
         // suggested button copies, instead of the opened folder itself.
         string[] modelSources;
@@ -310,12 +331,21 @@ namespace KitHelper
                 if (models != null) { modelSources = models; modelTarget = suggested = mt; why = mwhy; }
             }
             foreach (var kv in copyButtons) kv.Value.Tag = kv.Key == suggested ? "suggested" : null;
+            // Only the detected action is offered: another button on a recognised kit copies it to the
+            // wrong place (an Omit kit's model folder into POCB4.2\<model>). Nothing recognised: every
+            // button, as the manual fallback. "Show all copy targets" brings the others back, and they
+            // leave out files of other kit types (Copier.ByCategory); it resets for each folder.
+            detectedTarget = package || picked != null ? null : suggested;
+            ChkAllTargets.IsChecked = false;
+            ChkAllTargets.Visibility = detectedTarget != null ? Visibility.Visible : Visibility.Collapsed;
+            UpdateCopyButtons();
             BtnPackage.Visibility = package ? Visibility.Visible : Visibility.Collapsed;
             BtnPackage.Tag = package ? "suggested" : null;
             TxtSuggest.Text = package ? (picked != null ? "Picked folders, copied as one package:\n" : "Package:\n") + Package.Describe(Package.Scan(folder, picked))
                                         + "\nTo copy one part only: untick the rest in the confirmation, or open that folder alone."
                             : picked != null ? "None of the picked folders is a kit folder Kit Helper knows. Open one folder to use the single copy buttons."
-                            : suggested == null ? "" : $"Suggested: {suggested.Name}  ({why})";
+                            : suggested == null ? (Directory.Exists(folder) ? "Kit type not recognised: pick the copy target yourself, or open the folder that holds the kit files." : "")
+                            : $"Detected: {suggested.Name}  ({why})";
             TxtSuggest.Visibility = TxtSuggest.Text == "" ? Visibility.Collapsed : Visibility.Visible;
 
             // Run inputs found in this folder; keep a browsed file from elsewhere if one is set.
@@ -613,14 +643,16 @@ namespace KitHelper
             if (target.ToDatabase) { DoCopyToDatabase(target); return; }
             if (Install == null) { Log("Pick a TrueTest install first.", LogLevel.Error); return; }
             string install = Install, source = Source;
+            bool ruleOut = RulesOut(target);
 
             // OMIT\ / PUC\ opened alone: its model folder(s) are what this button copies.
             var sources = target == modelTarget && modelSources != null && string.Equals(source, appliedSource, StringComparison.OrdinalIgnoreCase)
                 ? modelSources : new[] { source };
             string dests = string.Join(", ", target.For(sources[0]).SubFolders);
             string title = "Copy all → " + target.Name;
-            string where = $"{string.Join("\n", sources)}\n→ {install}  [{dests}]";
-            Copier.Result CopyAll(LogFn log, Backup b, bool dryRun)
+            string where = $"{string.Join("\n", sources)}\n→ {install}  [{dests}]"
+                         + (ruleOut ? $"\nDetected as {detectedTarget.Name}: files of other kit types are left out." : "");
+            Copier.Result CopyAll(LogFn log, Backup b, bool dryRun) => Copier.ByCategory(ruleOut, () =>
             {
                 var all = new Copier.Result();
                 foreach (string src in sources)
@@ -631,18 +663,20 @@ namespace KitHelper
                     all.Items.AddRange(one.Items);
                 }
                 return all;
-            }
+            });
 
             // Confirmation first, as for a package: the same copy as a dry run, files can be unticked,
             // and INIs carrying the vignetting key can be set on the way.
             var preview = CopyAll((s, l) => { }, null, dryRun: true);
             var confirm = new CopyResultWindow(title, where, preview, null, preview: true) { Owner = this };
             confirm.OfferVignetting(Vignetting.CopiedInis(preview));
+            confirm.OfferUnblock(CopiedSources(preview));
             if (!await Confirm(confirm)) return;
             string vigValue = confirm.VignettingValue;
             bool vigDx = confirm.VignettingIncludeDx;
             var excluded = confirm.Excluded;
             if (!AskCloseTrueTest(install, "Copy to " + target.Name, out string restartPath)) return;
+            if (confirm.UnblockFirst) await UnblockFolders(sources);
 
             Log($"Copy {string.Join(" + ", sources)} → {install} [{dests}]", LogLevel.Info);
             if (excluded.Count > 0) Log($"{excluded.Count} file(s) unticked, left as they are.", LogLevel.Info);
@@ -679,18 +713,23 @@ namespace KitHelper
         async void DoCopyToDatabase(CopyTarget target)
         {
             string db = PocbDatabase, source = Source, model = Path.GetFileName(source);
+            bool ruleOut = RulesOut(target);
             if (!Directory.Exists(db)) { Log($"Database folder not found: {db} (pick it under Database at the top).", LogLevel.Error); return; }
             string inputImg = Path.Combine(db, "InputIMG");
             var into = new CopyTarget { Name = target.Name, SubFolders = new[] { model }, IncludeSubdirs = false };
             // Confirm with the list of what will happen: the same copy, as a dry run.
-            var preview = Copier.Run(source, inputImg, into, ownExe, (s, l) => { }, null, Path.Combine(Package.DatabaseDir, "InputIMG"), dryRun: true);
-            var excluded = await ConfirmCopy("Copy to Database model " + model, $"{source}\n→ {Path.Combine(inputImg, model)}", preview);
-            if (excluded == null) return;
+            var preview = Copier.ByCategory(ruleOut, () =>
+                Copier.Run(source, inputImg, into, ownExe, (s, l) => { }, null, Path.Combine(Package.DatabaseDir, "InputIMG"), dryRun: true));
+            var w = await ConfirmCopy("Copy to Database model " + model, $"{source}\n→ {Path.Combine(inputImg, model)}"
+                + (ruleOut ? $"\nDetected as {detectedTarget.Name}: files of other kit types are left out." : ""), preview, offerUnblock: true);
+            if (w == null) return;
+            var excluded = w.Excluded;
+            if (w.UnblockFirst) await UnblockFolders(new[] { source });
 
             Log($"Copy {source} → {Path.Combine(inputImg, model)}", LogLevel.Info);
             var backup = new Backup(target.Name + " " + model, source, null, db);
-            var r = await Busy(() => Copier.Excluding(excluded, () =>
-                Copier.Run(source, inputImg, into, ownExe, Log, backup, Path.Combine(Package.DatabaseDir, "InputIMG"))));
+            var r = await Busy(() => Copier.ByCategory(ruleOut, () => Copier.Excluding(excluded, () =>
+                Copier.Run(source, inputImg, into, ownExe, Log, backup, Path.Combine(Package.DatabaseDir, "InputIMG")))));
             backup.Report(Log);
             LogCopyResult(r);
             ShowCopyResult("Copy to Database model " + model, $"{source}\n→ {Path.Combine(inputImg, model)}", r, backup);
@@ -723,12 +762,14 @@ namespace KitHelper
             var preview = Package.Preview(source, install, db, ownExe, picks);
             var confirm = new CopyResultWindow("Copy package " + name, where, preview, null, preview: true) { Owner = this };
             confirm.OfferVignetting(Vignetting.CopiedInis(preview));
+            confirm.OfferUnblock(CopiedSources(preview));
             if (!await Confirm(confirm)) return;
             string vigValue = confirm.VignettingValue;
             bool vigDx = confirm.VignettingIncludeDx;
             var excluded = confirm.Excluded;               // files unticked in the confirmation
             string restartPath = null;
             if (install != null && !AskCloseTrueTest(install, "Copy package", out restartPath)) return;
+            if (confirm.UnblockFirst) await UnblockFolders(picks?.Select(p => Path.Combine(source, p)).ToArray() ?? new[] { source });
 
             Log($"Copy package {source} → {install}" + (db != null ? $" + {db}" : ""), LogLevel.Info);
             var backup = new Backup("Package " + name, source, install, db);
@@ -750,12 +791,13 @@ namespace KitHelper
             LoadInstalls();
         }
 
-        // The confirmation before a copy: CopyResultWindow in preview mode. Returns the destination
-        // files unticked there (for Copier.Excluding), or null when not confirmed.
-        async Task<ISet<string>> ConfirmCopy(string title, string where, Copier.Result preview)
+        // The confirmation before a copy: CopyResultWindow in preview mode. Returns it once Copy was
+        // clicked (Excluded, UnblockFirst), or null when not confirmed.
+        async Task<CopyResultWindow> ConfirmCopy(string title, string where, Copier.Result preview, bool offerUnblock = false)
         {
             var w = new CopyResultWindow(title, where, preview, null, preview: true);
-            return await Confirm(w) ? w.Excluded : null;
+            if (offerUnblock) w.OfferUnblock(CopiedSources(preview));
+            return await Confirm(w) ? w : null;
         }
 
         // The pending confirmation. Not modal (the panel stays usable), and only one at a time: the
@@ -842,8 +884,9 @@ namespace KitHelper
             bool skipEdt = w.SkipEdtMobile;
             // Confirmation of the actual files, like every other copy.
             var preview = KitMigration.Run(from, to, targets, skipEdt, (s, l) => { }, null, dryRun: true);
-            var excluded = await ConfirmCopy("Copy kits from " + Path.GetFileName(from), $"{from}\n→ {to}", preview);
-            if (excluded == null) return;
+            var w2 = await ConfirmCopy("Copy kits from " + Path.GetFileName(from), $"{from}\n→ {to}", preview);
+            if (w2 == null) return;
+            var excluded = w2.Excluded;
             if (!AskCloseTrueTest(to, "Copy kits", out string restartPath)) return;
 
             Log($"Copy kits {from} → {to} [{string.Join(", ", targets.SelectMany(t => t.SubFolders))}]"
@@ -897,9 +940,23 @@ namespace KitHelper
         async void Unblock_Click(object sender, RoutedEventArgs e)
         {
             if (!CheckSource()) return;
-            string source = Source;
-            Log($"Unblock {source}", LogLevel.Info);
-            var r = await Busy(() => Unblocker.Run(source, Log));
+            await UnblockFolders(new[] { Source });
+        }
+
+        // Unblock button, and before a copy when its confirmation's Unblock option is ticked.
+        async Task UnblockFolders(string[] folders)
+        {
+            Log($"Unblock {string.Join(" + ", folders)}", LogLevel.Info);
+            var r = await Busy(() =>
+            {
+                int un = 0, total = 0, failed = 0;
+                foreach (string f in folders.Where(Directory.Exists))
+                {
+                    var one = Unblocker.Run(f, Log);
+                    un += one.unblocked; total += one.total; failed += one.failed;
+                }
+                return (unblocked: un, total, failed);
+            });
             // "0 unblocked" read like a failure when the files simply were not marked.
             if (r.failed > 0)
                 Log($"Done: {r.unblocked} unblocked, {r.failed} failed, of {r.total} file(s).", LogLevel.Error);

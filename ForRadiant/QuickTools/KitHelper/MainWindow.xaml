@@ -87,12 +87,16 @@
                 <StackPanel>
                     <Border Style="{StaticResource Section}">
                         <StackPanel>
-                            <TextBlock Text="Copy kit folder to TrueTest" Style="{StaticResource SectionTitle}"/>
+                            <TextBlock Text="Copy kit  →  TrueTest / Database" Style="{StaticResource SectionTitle}"/>
                             <!-- Combined package (TrueTest\ + DATABASE\ inside): shown only for one. -->
                             <Button x:Name="BtnPackage" Style="{StaticResource ActionButton}" Visibility="Collapsed" Click="Package_Click"
                                     Content="Copy package → TrueTest install + Database"/>
                             <StackPanel x:Name="CopyButtons"/>
                             <TextBlock x:Name="TxtSuggest" Foreground="{StaticResource Accent}" Margin="0,0,0,6" TextWrapping="Wrap"/>
+                            <!-- Only with a detected kit: the other buttons, which leave out files of other kit types. -->
+                            <CheckBox x:Name="ChkAllTargets" Content="Show all copy targets" Margin="0,0,0,6" Visibility="Collapsed"
+                                      Checked="AllTargets_Changed" Unchecked="AllTargets_Changed"
+                                      ToolTip="The other buttons copy only generic files: files that belong to another kit type (LGD_OMIT_INI, VNTT_Interp, PUC, Crop...) are left out."/>
                             <TextBlock Style="{StaticResource Hint}" Text="If TrueTest is running, you're asked whether to close it first (and restart it after). Every copy first backs up what it overwrites. POCB4.1Net skips *.tif, *.csv, LGD_VNTT.ini."/>
                             <Button x:Name="BtnBackups" Content="Open backups folder" Style="{StaticResource ActionButton}" Click="Backups_Click" Margin="0,4,0,0"
                                     ToolTip="One folder per copy, with backup.txt saying where its TrueTest\ and DATABASE\ go back to."/>
