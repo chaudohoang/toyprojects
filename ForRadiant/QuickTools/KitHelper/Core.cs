@@ -99,6 +99,24 @@ namespace KitHelper
         public Func<string, string, string> Route;   // (kit folder name, kit-relative path)
         public Func<string, bool> Skip = _ => false;
 
+        // A folder opened from inside a kit folder that is laid out as installed - POCB4.2\X4023,
+        // POCB4.2\mainTemplate - belongs at the same place under the install, not at the target's
+        // root, where its Crop_params.json / PANEL_SHAPE*.tif would overwrite the wrong ones.
+        // Only for one-folder targets that copy subfolders (POCB4.2, ScratchDustDetect_NY,
+        // LGDVHCustomApp): a kit for those mirrors the installed folder.
+        public CopyTarget For(string source)
+        {
+            if (SubFolders.Length != 1 || !IncludeSubdirs || ToDatabase || Route != null) return this;
+            string f = source.TrimEnd('\\');
+            string parent = Path.GetFileName(Path.GetDirectoryName(f) ?? "");
+            if (!parent.Equals(Path.GetFileName(SubFolders[0]), StringComparison.OrdinalIgnoreCase)) return this;
+            return new CopyTarget
+            {
+                Name = Name, Label = Label, IncludeSubdirs = true, Skip = Skip,
+                SubFolders = new[] { SubFolders[0] + "\\" + Path.GetFileName(f) },
+            };
+        }
+
         public static readonly CopyTarget[] All =
         {
             new CopyTarget
@@ -272,6 +290,7 @@ namespace KitHelper
                                  Backup backup, string backupPrefix = Package.TrueTestDir, bool dryRun = false)
         {
             if (target.Route != null) return RunRouted(source, install, target, ownExe, log, backup, backupPrefix, dryRun);
+            target = target.For(source);              // POCB4.2\X4023 → <install>\POCB4.2\X4023
             var r = new Result();
             var files = Directory.GetFiles(source)
                 .Where(f => !string.Equals(Path.GetFileName(f), ownExe, StringComparison.OrdinalIgnoreCase))
@@ -439,7 +458,9 @@ namespace KitHelper
         // install's copy is kept.
         public const string EdtMobile = "EDT_Mobile.csv";
 
-        public static Copier.Result Run(string from, string to, IEnumerable<CopyTarget> targets, bool skipEdtMobile, LogFn log, Backup backup)
+        // dryRun: create nothing, only list what would be copied (the confirmation).
+        public static Copier.Result Run(string from, string to, IEnumerable<CopyTarget> targets, bool skipEdtMobile, LogFn log, Backup backup,
+                                        bool dryRun = false)
         {
             var r = new Copier.Result();
             foreach (string sub in targets.SelectMany(t => t.SubFolders))
@@ -466,7 +487,7 @@ namespace KitHelper
                         continue;
                     }
                     string target = Path.Combine(dst, rel);
-                    try { Directory.CreateDirectory(Path.GetDirectoryName(target)); }
+                    try { if (!dryRun) Directory.CreateDirectory(Path.GetDirectoryName(target)); }
                     catch (Exception ex)
                     {
                         log($"  FAILED  {sub}\\{rel}: {ex.Message}", LogLevel.Error);
@@ -475,9 +496,10 @@ namespace KitHelper
                         r.Add(Path.Combine(Package.TrueTestDir, sub, rel), CopyStatus.Failed, "cannot create the folder: " + ex.Message);
                         continue;
                     }
-                    Copier.CopyOne(f, target, r, log, sub + "\\" + rel, backup, Path.Combine(Package.TrueTestDir, sub, rel));
+                    Copier.CopyOne(f, target, r, log, sub + "\\" + rel, backup, Path.Combine(Package.TrueTestDir, sub, rel), dryRun);
                 }
                 // Empty folders too, as xcopy /E would.
+                if (!dryRun)
                 foreach (string d in Directory.GetDirectories(src, "*", SearchOption.AllDirectories))
                     try { Directory.CreateDirectory(Path.Combine(dst, d.Substring(src.TrimEnd('\\').Length + 1))); } catch { }
             }
@@ -610,6 +632,10 @@ namespace KitHelper
 
             if (string.Equals(Path.GetFileName(folder.TrimEnd('\\')), "POCB4.2", StringComparison.OrdinalIgnoreCase))
             { why = "folder named POCB4.2"; return T("POCB4.2"); }
+            // A folder inside a kit's POCB4.2\ (X4023\, mainTemplate\, mainTest\): the POCB4.2 button
+            // copies it to POCB4.2\<its name> (CopyTarget.For).
+            if (string.Equals(Path.GetFileName(Path.GetDirectoryName(folder.TrimEnd('\\')) ?? ""), "POCB4.2", StringComparison.OrdinalIgnoreCase))
+            { why = $@"folder inside POCB4.2, goes to POCB4.2\{Path.GetFileName(folder.TrimEnd('\\'))}"; return T("POCB4.2"); }
             // The subfolder rules below (mainTemplate\, inputTemplate\, inputTest\) describe a kit laid out
             // as installed. A package root holds those subfolders too, next to its sequence and its
             // OMIT\ / PUC\ / InputIMG\ folders (D994 2ndPUC: inputTemplate\; X4024: mainTemplate\) - there
@@ -709,22 +735,60 @@ namespace KitHelper
         //    sequence), or at least two known category folders - so a parent folder full of kits
         //    (D:\Log, D:\Log\Kit) is not mistaken for one,
         //  - and it holds at least one unit.
-        public static bool Is(string folder)
+        //  - or it is a kit's own OMIT\ / PUC\ / InputIMG\ folder opened alone: its model folders are
+        //    the units (X4023 kit: OMIT\X4023-CB-P2-KS151-DX_MATHON). Not TrueTest's own PUC\ or the
+        //    database's InputIMG\, which hold installed models, not a kit.
+        // only: a pick of the folder's subfolders (several folders dropped at once). Those ARE the
+        // package, whatever the folder itself looks like.
+        public static bool Is(string folder, ICollection<string> only = null)
         {
-            if (!Directory.Exists(folder) || Kit.Suggest(folder, out _) != null) return false;
-            var dirs = Directory.GetDirectories(folder).Select(Path.GetFileName).ToList();
-            bool rooted = dirs.Any(n => n.Equals(TrueTestDir, StringComparison.OrdinalIgnoreCase) || n.Equals(DatabaseDir, StringComparison.OrdinalIgnoreCase))
-                       || Directory.EnumerateFiles(folder, "*.seqxc").Any()
-                       || dirs.Count(IsKnownCategory) >= 2;
-            if (!rooted) return false;
-            var l = Scan(folder);
+            if (!Directory.Exists(folder)) return false;
+            if (only == null)
+            {
+                if (Kit.Suggest(folder, out _) != null) return false;
+                var dirs = Directory.GetDirectories(folder).Select(Path.GetFileName).ToList();
+                bool rooted = dirs.Any(n => n.Equals(TrueTestDir, StringComparison.OrdinalIgnoreCase) || n.Equals(DatabaseDir, StringComparison.OrdinalIgnoreCase))
+                           || Directory.EnumerateFiles(folder, "*.seqxc").Any()
+                           || dirs.Count(IsKnownCategory) >= 2
+                           || IsKitContainer(folder);
+                if (!rooted) return false;
+                if (SingleTargetModels(folder, out _, out _) != null) return false;   // a plain OMIT\ / PUC\ kit
+            }
+            var l = Scan(folder, only);
             return !l.TooBig && l.Units.Count > 0;
+        }
+
+        // A kit's OMIT\ / PUC\ opened alone: when every model folder inside goes to the same
+        // install target, it is a kit for that one button (X4023 OMIT\X4023-…_MATHON →
+        // ScratchDustDetect_NY), and the button copies those model folders. Null otherwise
+        // (InputIMG\ models go to the database and maybe an install folder too: a package).
+        public static string[] SingleTargetModels(string folder, out CopyTarget target, out string why)
+        {
+            target = null; why = null;
+            if (!Directory.Exists(folder) || !IsKitContainer(folder)) return null;
+            var l = Scan(folder);
+            if (l.TooBig || l.Units.Count == 0) return null;
+            var t = l.Units[0].Target;
+            if (t == null || t.ToDatabase || l.Units.Any(u => u.Mirror != null || u.Target != t)) return null;
+            target = t;
+            why = l.Units.Count == 1 ? $"model folder {l.Units[0].Rel}\\ inside" : $"{l.Units.Count} model folders inside";
+            return l.Units.Select(u => u.Folder).ToArray();
+        }
+
+        static bool IsKitContainer(string folder)
+        {
+            string f = folder.TrimEnd('\\');
+            if (!IsContainer(Path.GetFileName(f))) return false;
+            string pf = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+            if (f.StartsWith(pf + "\\", StringComparison.OrdinalIgnoreCase)) return false;           // an install's own folder
+            return !string.Equals(Path.GetFileName(Path.GetDirectoryName(f) ?? ""), DatabaseDir, StringComparison.OrdinalIgnoreCase);
         }
 
         // Runs on every folder opened, so it gives up on a big tree instead of walking it.
         const int MaxFolders = 150;
 
-        public static Layout Scan(string folder)
+        // only: scan just these subfolders (by name) and leave the folder's own files out.
+        public static Layout Scan(string folder, ICollection<string> only = null)
         {
             var l = new Layout();
             string root = folder.TrimEnd('\\');
@@ -732,8 +796,9 @@ namespace KitHelper
             bool HasFiles(string d) => Directory.EnumerateFiles(d, "*", SearchOption.AllDirectories).Any(f => !Kit.NeverCopy(f));
             int visited = 0;
 
-            foreach (string f in Directory.GetFiles(root).Where(f => !Kit.NeverCopy(f)))
-                l.Left.Add((Rel(f), "not in a kit folder"));
+            if (only == null)
+                foreach (string f in Directory.GetFiles(root).Where(f => !Kit.NeverCopy(f)))
+                    l.Left.Add((Rel(f), "not in a kit folder"));
 
             void Discover(string dir, int depth)
             {
@@ -771,6 +836,15 @@ namespace KitHelper
             foreach (string d in Directory.GetDirectories(root).OrderBy(d => d, StringComparer.OrdinalIgnoreCase))
             {
                 string name = Path.GetFileName(d);
+                if (only != null && !only.Contains(name, StringComparer.OrdinalIgnoreCase)) continue;
+                if (only != null && Is(d))
+                {
+                    // A whole package among the picked folders: its units, under its name.
+                    var inner = Scan(d);
+                    foreach (var u in inner.Units) { u.Rel = name + "\\" + u.Rel; l.Units.Add(u); }
+                    foreach (var (rel, why) in inner.Left) l.Left.Add((name + "\\" + rel, why));
+                    continue;
+                }
                 if (name.Equals(TrueTestDir, StringComparison.OrdinalIgnoreCase) || name.Equals(DatabaseDir, StringComparison.OrdinalIgnoreCase))
                 {
                     if (HasFiles(d)) l.Units.Add(new Unit { Folder = d, Rel = name, Mirror = name.Equals(TrueTestDir, StringComparison.OrdinalIgnoreCase) ? TrueTestDir : DatabaseDir, Why = "mirrors the install layout" });
@@ -787,15 +861,15 @@ namespace KitHelper
             string.Join("\n", l.Units.Select(u => $"{u.Rel}\\  →  {u.Destination}"));
 
         // What Run would do (CopyResultWindow preview). Nothing is touched.
-        public static Copier.Result Preview(string folder, string install, string database, string ownExe) =>
-            Execute(folder, install, database, ownExe, (s, l) => { }, null, dryRun: true);
+        public static Copier.Result Preview(string folder, string install, string database, string ownExe, ICollection<string> only = null) =>
+            Execute(folder, install, database, ownExe, (s, l) => { }, null, dryRun: true, only);
 
-        public static Copier.Result Run(string folder, string install, string database, string ownExe, LogFn log, Backup backup) =>
-            Execute(folder, install, database, ownExe, log, backup, dryRun: false);
+        public static Copier.Result Run(string folder, string install, string database, string ownExe, LogFn log, Backup backup, ICollection<string> only = null) =>
+            Execute(folder, install, database, ownExe, log, backup, dryRun: false, only);
 
-        static Copier.Result Execute(string folder, string install, string database, string ownExe, LogFn log, Backup backup, bool dryRun)
+        static Copier.Result Execute(string folder, string install, string database, string ownExe, LogFn log, Backup backup, bool dryRun, ICollection<string> only)
         {
-            var layout = Scan(folder);
+            var layout = Scan(folder, only);
             var all = new Copier.Result();
             void Merge(Copier.Result r)
             {

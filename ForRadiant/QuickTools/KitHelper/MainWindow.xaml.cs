@@ -94,6 +94,7 @@ namespace KitHelper
             Show();
             if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
             Activate();
+            ResultsWindow.Current?.ShowWithPanel(this);     // the two always appear together
         }
 
         static double Clamp(double v, double min, double max) => v < min ? min : v > max ? max : v;
@@ -116,10 +117,20 @@ namespace KitHelper
         //  - one of the panel's own dialogs took focus (see Modal).
         int modalDepth;
 
-        void AutoHide()
+        // Panel or results window deactivated. Hides the pair unless the focus just moved between
+        // the two (checked once the new window is active) or onto the K icon.
+        public void AutoHide()
         {
-            if (!IsVisible || modalDepth > 0 || Program.Exiting || CursorOver(Anchor)) return;
-            HidePanel();
+            Dispatcher.BeginInvoke(DispatcherPriority.Input, new Action(() =>
+            {
+                var results = ResultsWindow.Current;
+                // Not the cursor position: a window that takes the focus while the mouse rests on the
+                // panel (a program starting) must still hide it. The K icon is the exception (its
+                // click toggles the panel itself).
+                if (!IsVisible || modalDepth > 0 || Program.Exiting || IsActive || (results != null && results.IsActive)
+                    || CursorOver(Anchor)) return;
+                HidePanel();
+            }));
         }
 
         // Runs a dialog with auto-hide suspended: opening it deactivates the panel.
@@ -183,11 +194,13 @@ namespace KitHelper
         void HidePanel()
         {
             SaveSettings();
+            ResultsWindow.Current?.Hide();
             Hide();
         }
 
         // A folder opened with Kit Helper (Explorer right-click, another copy, a drop on the icon).
-        public void OpenFolder(string folder)
+        // picks: several subfolders of folder dropped at once - copied together as one package.
+        public void OpenFolder(string folder, string[] picks = null, bool offerCopy = true)
         {
             // Not under an open dialog: the folder would change beneath it. Bring the dialog back.
             if (InModal)
@@ -197,16 +210,29 @@ namespace KitHelper
                 return;
             }
             ShowNear(Anchor);
-            Log($"Opened {folder}", LogLevel.Info);
+            Log(picks == null ? $"Opened {folder}" : $"Opened {picks.Length} folders in {folder}: {string.Join(", ", picks)}", LogLevel.Info);
             LoadInstalls();                             // TrueTest may have started or stopped since
-            SetSource(folder.TrimEnd('\\'));
+            SetSource(folder.TrimEnd('\\'), picks);
+            // Straight to the confirmation of what this folder is for (a package, several picked
+            // folders, or the suggested button): the results window may be covering the buttons.
+            if (offerCopy) Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(OfferSuggestedCopy));
+        }
+
+        // Opens the confirmation of the highlighted copy, if any: Copy package, else the suggested
+        // Copy all button. Nothing when no kit type was recognised, while busy or a dialog is up.
+        void OfferSuggestedCopy()
+        {
+            if (InModal || !IsVisible || !BtnPackage.IsEnabled) return;
+            if (BtnPackage.Visibility == Visibility.Visible) { Package_Click(BtnPackage, null); return; }
+            var suggested = copyButtons.FirstOrDefault(kv => "suggested".Equals(kv.Value.Tag)).Key;
+            if (suggested != null) DoCopy(suggested);
         }
 
         // A file dropped on the icon: open its folder; a .txt also becomes the run-test input.
         public void OpenFile(string path)
         {
-            if (InModal) { OpenFolder(Path.GetDirectoryName(path)); return; }   // just brings the dialog back
-            OpenFolder(Path.GetDirectoryName(path));
+            if (InModal) { OpenFolder(Path.GetDirectoryName(path), null, offerCopy: false); return; }   // just brings the dialog back
+            OpenFolder(Path.GetDirectoryName(path), null, offerCopy: false);
             if (!string.Equals(Path.GetExtension(path), ".txt", StringComparison.OrdinalIgnoreCase)) return;
             var item = CboRunInput.Items.OfType<RunInputItem>().FirstOrDefault(i => string.Equals(i.Path, path, StringComparison.OrdinalIgnoreCase));
             if (item != null) CboRunInput.SelectedItem = item;
@@ -234,9 +260,20 @@ namespace KitHelper
         string Source => CboSource.Text.Trim().TrimEnd('\\');
         string Install => CboInstall.SelectedItem as string;
 
-        void SetSource(string folder)
+        // Subfolders of Source picked by a multi-folder drop, or null = the whole folder. While set,
+        // the folder is offered only as a package of those subfolders (the single-target buttons
+        // would copy the whole parent folder, so they are hidden).
+        string[] picked;
+
+        // A kit's OMIT\ / PUC\ opened alone (Package.SingleTargetModels): the model folders its
+        // suggested button copies, instead of the opened folder itself.
+        string[] modelSources;
+        CopyTarget modelTarget;
+
+        void SetSource(string folder, string[] picks = null)
         {
             appliedSource = folder;
+            picked = picks;
             CboSource.Text = folder;
             if (!Directory.Exists(folder))
             {
@@ -248,27 +285,41 @@ namespace KitHelper
             int files = Directory.GetFiles(folder).Count(f => !Kit.NeverCopy(f) && !string.Equals(Path.GetFileName(f), ownExe, StringComparison.OrdinalIgnoreCase));
             int dirs = Directory.GetDirectories(folder).Length;
             int inis = Vignetting.IniFiles(folder).Length;
-            TxtSourceInfo.Text = $"{files} file(s), {dirs} subfolder(s), {inis} ini";
+            TxtSourceInfo.Text = picked != null ? $"{picked.Length} folders picked: {string.Join(", ", picked)}"
+                               : $"{files} file(s), {dirs} subfolder(s), {inis} ini";
             TxtSourceInfo.Foreground = Brush("Dim");
             RefreshIni();
             RememberRecent(folder);
 
             // Mark the copy target this folder is meant for.
             // A package is copied as a whole; its root matches no single target.
-            bool package = Package.Is(folder);
+            bool package = Package.Is(folder, picked);
             string why = null;
-            var suggested = package ? null : Kit.Suggest(folder, out why);
+            var suggested = package || picked != null ? null : Kit.Suggest(folder, out why);
+            // A package (whole folder or several picked folders) is copied with Copy package only: a
+            // single button would copy the folder's own loose files (.seqxc, .bmp, Kit Helper.exe),
+            // not its parts. Open one part to use the single buttons.
+            CopyButtons.Visibility = picked == null && !package ? Visibility.Visible : Visibility.Collapsed;
+            modelSources = null; modelTarget = null;
+            if (!package && picked == null && suggested == null)
+            {
+                var models = Package.SingleTargetModels(folder, out var mt, out string mwhy);
+                if (models != null) { modelSources = models; modelTarget = suggested = mt; why = mwhy; }
+            }
             foreach (var kv in copyButtons) kv.Value.Tag = kv.Key == suggested ? "suggested" : null;
             BtnPackage.Visibility = package ? Visibility.Visible : Visibility.Collapsed;
             BtnPackage.Tag = package ? "suggested" : null;
-            TxtSuggest.Text = package ? "Package:\n" + Package.Describe(Package.Scan(folder))
+            TxtSuggest.Text = package ? (picked != null ? "Picked folders, copied as one package:\n" : "Package:\n") + Package.Describe(Package.Scan(folder, picked))
+                                        + "\nTo copy one part only: untick the rest in the confirmation, or open that folder alone."
+                            : picked != null ? "None of the picked folders is a kit folder Kit Helper knows. Open one folder to use the single copy buttons."
                             : suggested == null ? "" : $"Suggested: {suggested.Name}  ({why})";
             TxtSuggest.Visibility = TxtSuggest.Text == "" ? Visibility.Collapsed : Visibility.Visible;
 
             // Run inputs found in this folder; keep a browsed file from elsewhere if one is set.
             string current = RunInputPath;
             CboRunInput.Items.Clear();
-            foreach (string f in Kit.RunInputs(folder)) CboRunInput.Items.Add(new RunInputItem(f, folder));
+            foreach (string f in Kit.RunInputs(folder).Concat((modelSources ?? new string[0]).SelectMany(Kit.RunInputs)))
+                CboRunInput.Items.Add(new RunInputItem(f, folder));
             var match = CboRunInput.Items.Cast<RunInputItem>().FirstOrDefault(i => string.Equals(i.Path, current, StringComparison.OrdinalIgnoreCase));
             if (match != null) CboRunInput.SelectedItem = match;
             else if (CboRunInput.Items.Count > 0) CboRunInput.SelectedIndex = 0;
@@ -559,14 +610,53 @@ namespace KitHelper
             if (target.ToDatabase) { DoCopyToDatabase(target); return; }
             if (Install == null) { Log("Pick a TrueTest install first.", LogLevel.Error); return; }
             string install = Install, source = Source;
+
+            // OMIT\ / PUC\ opened alone: its model folder(s) are what this button copies.
+            var sources = target == modelTarget && modelSources != null && string.Equals(source, appliedSource, StringComparison.OrdinalIgnoreCase)
+                ? modelSources : new[] { source };
+            string dests = string.Join(", ", target.For(sources[0]).SubFolders);
+            string title = "Copy all → " + target.Name;
+            string where = $"{string.Join("\n", sources)}\n→ {install}  [{dests}]";
+            Copier.Result CopyAll(LogFn log, Backup b, bool dryRun)
+            {
+                var all = new Copier.Result();
+                foreach (string src in sources)
+                {
+                    var one = Copier.Run(src, install, target, ownExe, log, b, Package.TrueTestDir, dryRun);
+                    all.Copied += one.Copied; all.Failed += one.Failed; all.Skipped += one.Skipped;
+                    all.AccessDenied |= one.AccessDenied;
+                    all.Items.AddRange(one.Items);
+                }
+                return all;
+            }
+
+            // Confirmation first, as for a package: the same copy as a dry run, files can be unticked,
+            // and INIs carrying the vignetting key can be set on the way.
+            var preview = CopyAll((s, l) => { }, null, dryRun: true);
+            var confirm = new CopyResultWindow(title, where, preview, null, preview: true) { Owner = this };
+            confirm.OfferVignetting(Vignetting.CopiedInis(preview));
+            if (Modal(() => confirm.ShowDialog()) != true) return;
+            string vigValue = confirm.VignettingValue;
+            bool vigDx = confirm.VignettingIncludeDx;
+            var excluded = confirm.Excluded;
             if (!AskCloseTrueTest(install, "Copy to " + target.Name, out string restartPath)) return;
 
-            Log($"Copy {source} → {install} [{string.Join(", ", target.SubFolders)}]", LogLevel.Info);
+            Log($"Copy {string.Join(" + ", sources)} → {install} [{dests}]", LogLevel.Info);
+            if (excluded.Count > 0) Log($"{excluded.Count} file(s) unticked, left as they are.", LogLevel.Info);
             var backup = new Backup(target.Name, source, install, null);
-            var r = await Busy(() => Copier.Run(source, install, target, ownExe, Log, backup));
+            var r = await Busy(() => Copier.Excluding(excluded, () =>
+            {
+                var res = CopyAll(Log, backup, dryRun: false);
+                if (vigValue != null)
+                {
+                    Log($"Vignetting → {vigValue} in the copied INIs" + (vigDx ? " (DX included)" : " (DX left as is)"), LogLevel.Info);
+                    Vignetting.ApplyToCopied(res, vigValue, vigDx, Log);
+                }
+                return res;
+            }));
             backup.Report(Log);
             LogCopyResult(r);
-            ShowCopyResult("Copy all → " + target.Name, $"{source}\n→ {install}", r, backup);
+            ShowCopyResult(title, where, r, backup);
             OfferRestart(restartPath);
             LoadInstalls();
         }
@@ -575,8 +665,9 @@ namespace KitHelper
         void ShowCopyResult(string title, string where, Copier.Result r, Backup backup)
         {
             if (r == null) return;
-            var w = new CopyResultWindow(title, where, r, backup.Count > 0 ? backup.Root : null) { Owner = this };
-            Modal(() => w.ShowDialog());
+            // Not modal: a tab in the results window, so the next copy can start right away.
+            var w = new CopyResultWindow(title, where, r, backup.Count > 0 ? backup.Root : null);
+            ResultsWindow.Add(this, w, title, r.Items.Any(i => i.Status == CopyStatus.Failed));
         }
 
         // A model folder → <database>\InputIMG\<its name>, the database being the one picked in the
@@ -605,8 +696,10 @@ namespace KitHelper
         {
             if (!CheckSource()) return;
             string source = Source;
-            var layout = Package.Scan(source);
-            if (!Package.Is(source)) { Log("Not a package: no kit folders found in " + source, LogLevel.Error); return; }
+            var picks = string.Equals(source, appliedSource, StringComparison.OrdinalIgnoreCase) ? picked : null;
+            var layout = Package.Scan(source, picks);
+            if (!Package.Is(source, picks)) { Log("Not a package: no kit folders found in " + source, LogLevel.Error); return; }
+            string name = Path.GetFileName(source) + (picks != null ? $" ({picks.Length} folders)" : "");
             // Ask only for what the package needs: a TrueTest install and/or a database.
             string install = null, db = null;
             if (layout.NeedsInstall)
@@ -623,8 +716,8 @@ namespace KitHelper
             string where = (install != null ? $"TrueTest install: {install}" : "") + (install != null && db != null ? "     " : "")
                          + (db != null ? $"Database: {db}" : "") + "\n" + Package.Describe(layout);
             // Confirmation, with the vignetting option when INIs carrying the key are copied.
-            var preview = Package.Preview(source, install, db, ownExe);
-            var confirm = new CopyResultWindow("Copy package " + Path.GetFileName(source), where, preview, null, preview: true) { Owner = this };
+            var preview = Package.Preview(source, install, db, ownExe, picks);
+            var confirm = new CopyResultWindow("Copy package " + name, where, preview, null, preview: true) { Owner = this };
             confirm.OfferVignetting(Vignetting.CopiedInis(preview));
             if (Modal(() => confirm.ShowDialog()) != true) return;
             string vigValue = confirm.VignettingValue;
@@ -634,11 +727,11 @@ namespace KitHelper
             if (install != null && !AskCloseTrueTest(install, "Copy package", out restartPath)) return;
 
             Log($"Copy package {source} → {install}" + (db != null ? $" + {db}" : ""), LogLevel.Info);
-            var backup = new Backup("Package " + Path.GetFileName(source), source, install, db);
+            var backup = new Backup("Package " + name, source, install, db);
             if (excluded.Count > 0) Log($"{excluded.Count} file(s) unticked, left as they are.", LogLevel.Info);
             var r = await Busy(() => Copier.Excluding(excluded, () =>
             {
-                var res = Package.Run(source, install, db, ownExe, Log, backup);
+                var res = Package.Run(source, install, db, ownExe, Log, backup, picks);
                 if (vigValue != null)
                 {
                     Log($"Vignetting → {vigValue} in the copied INIs" + (vigDx ? " (DX included)" : " (DX left as is)"), LogLevel.Info);
@@ -648,7 +741,7 @@ namespace KitHelper
             }));
             backup.Report(Log);
             LogCopyResult(r);
-            ShowCopyResult("Copy package " + Path.GetFileName(source), where, r, backup);
+            ShowCopyResult("Copy package " + name, where, r, backup);
             OfferRestart(restartPath);
             LoadInstalls();
         }
@@ -719,12 +812,16 @@ namespace KitHelper
             string from = w.From, to = w.To;
             var targets = w.Targets;
             bool skipEdt = w.SkipEdtMobile;
+            // Confirmation of the actual files, like every other copy.
+            var preview = KitMigration.Run(from, to, targets, skipEdt, (s, l) => { }, null, dryRun: true);
+            if (!ConfirmCopy("Copy kits from " + Path.GetFileName(from), $"{from}\n→ {to}", preview, out var excluded)) return;
             if (!AskCloseTrueTest(to, "Copy kits", out string restartPath)) return;
 
             Log($"Copy kits {from} → {to} [{string.Join(", ", targets.SelectMany(t => t.SubFolders))}]"
                 + (skipEdt && targets.Any(t => t.Name == "LGDVHCustomApp") ? $", skipping {KitMigration.EdtMobile}" : ""), LogLevel.Info);
             var backup = new Backup("Kits from " + Path.GetFileName(from), from, to, null);
-            var r = await Busy(() => KitMigration.Run(from, to, targets, skipEdt, Log, backup));
+            if (excluded.Count > 0) Log($"{excluded.Count} file(s) unticked, left as they are.", LogLevel.Info);
+            var r = await Busy(() => Copier.Excluding(excluded, () => KitMigration.Run(from, to, targets, skipEdt, Log, backup)));
             backup.Report(Log);
             LogCopyResult(r);
             ShowCopyResult("Copy kits from " + Path.GetFileName(from), $"{from}\n→ {to}", r, backup);
@@ -861,7 +958,9 @@ namespace KitHelper
         }
 
         void Open_Click(object sender, RoutedEventArgs e) => OpenInExplorer();
-        void Refresh_Click(object sender, RoutedEventArgs e) => SetSource(CboSource.Text.Trim());
+        // Same folder: keep a multi-folder pick.
+        void Refresh_Click(object sender, RoutedEventArgs e) =>
+            SetSource(CboSource.Text.Trim(), string.Equals(CboSource.Text.Trim(), appliedSource, StringComparison.OrdinalIgnoreCase) ? picked : null);
         void Rescan_Click(object sender, RoutedEventArgs e) => LoadInstalls();
 
         void BrowseRunInput_Click(object sender, RoutedEventArgs e)

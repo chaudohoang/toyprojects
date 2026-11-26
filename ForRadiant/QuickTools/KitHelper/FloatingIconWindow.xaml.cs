@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -147,6 +148,18 @@ namespace KitHelper
         {
             if (paths == null || paths.Length == 0) return;
             if (panel.InModal) { panel.FocusModal(); ShowToast("Close the open dialog first, then drop it again."); return; }
+            // Several folders from one Explorer window: copied together, like a package of them.
+            var dirs = paths.Where(Directory.Exists).Select(d => d.TrimEnd('\\')).ToArray();
+            if (dirs.Length > 1)
+            {
+                var parents = dirs.Select(d => Path.GetDirectoryName(d)).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+                if (parents.Count == 1 && parents[0] != null)
+                {
+                    panel.OpenFolder(parents[0], dirs.Select(Path.GetFileName).ToArray());
+                    return;
+                }
+                ShowToast("Those folders are in different places: opened the first one only.");
+            }
             string p = paths[0];
             if (Directory.Exists(p)) panel.OpenFolder(p);
             else if (File.Exists(p)) panel.OpenFile(p);

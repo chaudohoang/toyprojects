@@ -6,6 +6,137 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ---
 
+## 2026-11-26
+
+- **Kit Helper 1.10.0: a kit's OMIT\ / PUC\ / InputIMG\ opened alone is a package; several folders
+  dropped at once are copied as one package.** Reported on the X4023 W511BT kit
+  (`D:\Log\Kit\X4023-P2-KS151C-650-155 W511BT- …\20261123_X4023  MATLAB + LGD Crop_TT173`): dragging
+  `OMIT` or `PUC` showed nothing, because Kit.Suggest only reads a folder's own files and the model
+  folder sits one level down.
+  - `Package.Is`: a folder NAMED OMIT / PUC / InputIMG now counts as a package root
+    (`IsKitContainer`), except under Program Files (TrueTest's own PUC\) and an InputIMG whose parent
+    is `DATABASE` (C:\DATABASE\InputIMG, 223 installed models). Scan was already right for it.
+  - `Package.Is/Scan/Preview/Run(…, only)`: a pick of subfolder names. Only those are scanned, the
+    parent's loose files are not listed, and a picked folder that is itself a package contributes
+    its units under its own name. `FloatingIconWindow.OpenDropped`: >1 folder with one parent →
+    `MainWindow.OpenFolder(parent, names)`; different parents → first only + toast. While a pick is
+    active the single-target buttons are hidden (they'd copy the whole parent); Refresh keeps it.
+  - Before/after sweep of `Package.Is` over `D:\Log\Kit` (310 folders, PS 5.1 loading the HEAD exe vs
+    the new one): 0 True→False; the ~70 new Trues are all kits' own OMIT/PUC/InputIMG folders;
+    C:\DATABASE\InputIMG and the four installs' PUC\ stay False. Pick {OMIT, PUC, R2R} → 3 units;
+    dry-run preview 57 new / 7 skipped helpers, nothing written. Real OLE drags onto the K icon from
+    a throwaway DoDragDrop form (3 folders, then OMIT alone), panel + confirmation screenshotted
+    ("Confirmation of Copy package … (3 folders)"), cancelled. Self-installed to D:\Program\RVS.
+  - Not done: Explorer's "Open in Kit Helper" with several folders selected still opens them one by
+    one (Explorer launches the verb per item). Run test doesn't list inputs inside model subfolders.
+  - Manual: intro 1.10.0 in both languages, plus the stale 1.9.x bits (Close TrueTest checkbox gone,
+    tray icon / icon on the taskbar) and the two new features.
+- **Kit Helper 1.10.1: OMIT\ / PUC\ opened alone are a kit for ONE button, not a package** (Chau:
+  "detected as a package instead of just ScratchDust / PUC"). `Package.SingleTargetModels`: a kit
+  container whose units all go to the same install target (not the database) → that target, and the
+  model folders as its sources. `Is` returns false for such a folder; `MainWindow` highlights the
+  button ("Suggested: PUC (model folder X\ inside)"), `DoCopy` runs `Copier.Run` once per model folder
+  (files land directly in PUC\, not PUC\<model>\), and Run test lists the model folder's inputs.
+  InputIMG\ alone stays a package (database + possibly POCB4.1Net: two destinations).
+  - Checked on every OMIT/PUC/InputIMG under D:\Log\Kit: all 33 OMIT/PUC → single target, InputIMG →
+    package, install PUC\ and C:\DATABASE\InputIMG untouched. Real drags of OMIT and PUC onto the icon
+    (screenshots: right button highlighted, Omit/PUC input picked), copy of both into a scratch
+    install: 18 and 7 files at the folder root, helpers skipped. Not clicked into the real TrueTest.
+- **Kit Helper 1.10.2: a folder inside a kit's POCB4.2\ goes to POCB4.2\<its name>.** Before, opening
+  `POCB4.2\X4023` alone suggested POCB4.2 and the button dropped its Crop_params.json / PANEL_SHAPE*.tif
+  into `<install>\POCB4.2\` (overwriting the root Crop_params.json). Now `Kit.Suggest` says "folder
+  inside POCB4.2, goes to POCB4.2\X4023" and `CopyTarget.For(source)` - applied at the top of
+  `Copier.Run`, so every path (button, multi-folder pick, package unit) gets it - redirects a
+  one-folder, with-subfolders target (POCB4.2 / ScratchDustDetect_NY / LGDVHCustomApp) to
+  `<sub>\<folder name>` when the source's parent is named like that target.
+  - Before/after preview of every package under D:\Log\Kit (HEAD exe vs new): 3184 destination
+    paths, 0 differences. Scratch-install copies: X4023 → POCB4.2\X4023 (5), mainTemplate →
+    POCB4.2\mainTemplate (4), mainTest → POCB4.2\mainTest (4), whole POCB4.2 unchanged (24); pick
+    X4023 + X4024 → their own subfolders. Real drag of POCB4.2\X4023 onto the icon: button + hint OK.
+- **Kit Helper 1.10.3: every copy now has the confirmation (Chau: "use confirmation and result in all
+  cases").** Until now only Copy package and Database model had one; the Copy all → X buttons copied on
+  click (a 1.5.0 choice) and Kits from old TrueTest only had its folder checkboxes.
+  - `DoCopy`: dry run of the same `Copier.Run` per source (model folders included) → CopyResultWindow
+    in preview mode, with untick (`Copier.Excluding`) and the vignetting panel when INIs carrying the
+    key are copied; the header shows the real destination (`[POCB4.2\X4023]`). The TrueTest-running
+    question comes after the confirmation, as for packages.
+  - `KitMigration.Run(…, dryRun)`: no folder creation, `CopyOne(dryRun)`; `ShowMigrate` confirms with
+    it and honours unticks. No vignetting there (migration keeps the old install's values on purpose).
+  - Tested: migration dry run TrueTest 1.8 (POCB4.2 + LGDVHCustomApp) into an empty scratch folder →
+    142 items, nothing created; the real run into it → 141 copied, item list identical to the dry run.
+    Real drag of POCB4.2\X4023 + click on its button → "Confirmation of Copy all → POCB4.2", 5 Replace
+    under TrueTest\POCB4.2\X4023, helpers Not copied; cancelled, no backup folder made. Migrate dialog
+    not clicked through in the UI.
+- **Kit Helper 1.10.4: results no longer block; they stack as tabs** (Chau: confirmation must block,
+  the result must not). New `ResultsWindow` (not modal, `ShowActivated=False`, raised with
+  SetWindowPos NOACTIVATE so the panel keeps focus and doesn't auto-hide): one window, one tab per
+  result (mood dot, title, time, ✕), newest selected; closing the last tab closes it. The tab body is
+  the existing CopyResultWindow's content, moved out with `TakeContent` (window never shown, still
+  handles Open backup / Copy as text; its ✕ / Close close the tab). `ShowCopyResult` no longer goes
+  through `Modal`. AutoHide ignores clicks into the results window. Placed left of the panel;
+  `KeepOnScreen` on SizeChanged (first version, centred, grew off the bottom of the screen).
+  - Tested in a PS 5.1 STA harness with the real windows and Theme: 3 results (one with a Failed item)
+    → 3 tabs, red one selected, "3 results, 1 with errors", window never active; close one → 2 left;
+    close all → window gone. Installed 1.10.4 starts cleanly. Not yet seen after a real copy in the
+    real panel (no copy into Program Files was made for the test).
+- **Kit Helper 1.10.5: browser-style result tabs** (Chau: fixed small tabs, the extra ones hidden, not
+  all shown). WrapPanel → one row in a ScrollViewer (scrollbar hidden), tabs 150 px with a short title
+  ("POCB4.2", "Package …", "Kits from …"; full title + time in the tooltip), ‹ › shown only on
+  overflow and greyed at either end, mouse wheel scrolls the row, the selected tab is brought into
+  view after layout. Harness with 8 results: extent 1232 / viewport 687 px, newest in view, both
+  arrows on; scrolled to 0 → ‹ greyed. Installed 1.10.5 starts cleanly.
+- **Kit Helper 1.10.6-1.10.7: results window paired with the panel** (Chau: keep it in the panel's frame;
+  clicking the taskbar showed only the results, clicking K showed only the panel). `ResultsWindow`:
+  `Owner` = panel, centred on it (`ShowWithPanel`, after layout), no taskbar button. `ShowNear` shows
+  it with the panel, `HidePanel` hides it, its `Deactivated` calls the panel's `AutoHide`. `AutoHide`
+  is now deferred (Input priority) and keeps the pair if either is the active window.
+  - 1.10.7 fix: 1.10.6 also skipped hiding when the cursor was over the panel / results, so a window
+    taking the focus while the mouse rested there (a program starting) left both up. Only the K-icon
+    cursor check remains (its click toggles the panel itself).
+  - Tested in the real app with real clicks: Database model copy of D992-CB-MP00_TLSM twice into a
+    scratch database typed into the Database box (UIA ValuePattern) → one centred results window, 2
+    tabs, panel usable in between; panel ↔ results clicks keep both; click on another window hides
+    both (from either); K brings both back. Database box restored to C:\DATABASE and saved; the two
+    scratch backup folders removed. Trap: `notepad.exe` on Win11 reuses the open Notepad window (a tab
+    was added to Chau's) - use an own throwaway form as the click-away target.
+- **Kit Helper 1.10.8: results docked to the panel's left edge** (Chau: "cannot perform another drag
+  if the result is kept"). The drop did work (kit folder changed) but the owned, centred, ~925 px
+  results window hid the whole panel. Chau picked "beside the panel" over a pane inside it or
+  hide-on-next-action. `ResultsWindow.DockTo`: Left = panel.Left - Width + 16 (overlaps the two 10 px
+  transparent margins, 4 px gap), same Top / Height (no longer SizeToContent; the tab's list scroller
+  loses its 560 px cap and fills), `KeepOnScreen` for narrow screens. Panel `LocationChanged` re-docks;
+  either header drags the panel (results follow). Tested in the real app: scratch-database copies →
+  results at 216-996 beside the panel at 980-1920; drop of R2R with results open → panel switched to
+  it, LGDVHCustomApp suggested; click-away / K pairing unchanged.
+  - Test traps: (1) a click at the results' OLD spot hit "Copy all → POCB4.1Net" and opened a real
+    confirmation - cancelled, no backup = nothing copied. Recompute click targets after a layout
+    change. (2) The `-Command` throwaway form never appeared; the "away" clicks landed on whatever
+    was behind (a PowerShell console, then the Claude window). Verify the target window exists before
+    clicking it.
+- **Kit Helper 1.10.9: docking reverted; opening a folder pops up its confirmation.** Chau didn't like
+  the docked results: back to 1.10.7 (centred on the panel, SizeToContent, owned, paired show/hide).
+  Instead `OpenFolder` (drop, multi-drop, Explorer's Open in Kit Helper) queues `OfferSuggestedCopy`:
+  Copy package when the package button shows (incl. a multi-folder pick), else the suggested Copy all
+  button (incl. OMIT\ / PUC\ model sources, Database model). Skipped when nothing is recognised, while
+  busy or a dialog is up, and for a dropped .txt (`OpenFile` passes `offerCopy: false`). Browse /
+  typing a path don't trigger it.
+  - Tested in the real app with real drags, database box on a scratch folder first: model folder →
+    "Confirmation of Copy to Database model …" (→ scratch path, OK'd: result tab centred on the panel);
+    with results open, OMIT → ScratchDustDetect_NY confirmation on top; OMIT+PUC+R2R → package (3
+    folders); kit root → package (4 units); the outer kit folder → nothing. All TrueTest ones
+    cancelled, no backups made; database box restored. Harness note: a confirmation owned by the panel
+    is a UIA child of the panel window, not a top-level window.
+- **Kit Helper 1.10.10: single Copy all buttons hidden for a full package too** (Chau asked why a
+  multi-folder pick hid them but a package folder didn't - no reason, 1.2.0 just never hid them). On a
+  package root they copy its loose files (.seqxc, .bmp, Kit Helper.exe) into the target, never its
+  parts. `CopyButtons` now collapses when `package || picked != null`; the package hint adds "To copy
+  one part only: untick the rest in the confirmation, or open that folder alone." Real drags: kit root
+  → only Copy package (+ its confirmation, cancelled); OMIT alone → all single buttons back,
+  ScratchDustDetect_NY highlighted. No backups made.
+  - Seen while testing: six real copies into TrueTest 1.9 at 10:56-10:57 (OMIT, OMIT, POCB4.2, PUC, R2R,
+    then the 4-folder package of the W511BT kit), not from these tests - Chau using 1.10.2. Backed up
+    in `D:\Program\RVS\Kit Helper Backups\20261126_1056*` / `_1057*`.
+
 ## 2026-11-25
 
 - **VideoBrowser: clicking the speaker icon didn't mute** (`MainForm.ToggleMute`/`ApplyAudio`).

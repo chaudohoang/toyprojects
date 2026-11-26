@@ -26,3 +26,5 @@ E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\CopyResu
 E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\CopyResultWindow.g.cs
 E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\AskWindow.baml
 E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\AskWindow.g.cs
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\ResultsWindow.baml
+E:\Github\toyprojects\ForRadiant\QuickTools\KitHelper\obj\Release\net48\ResultsWindow.g.cs

@@ -263,13 +263,32 @@ namespace KitHelper
             ((TextBlock)w.FindName("TxtTitle")).Foreground = solid;
         }
 
-        void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => DragMove();
-        void Close_Click(object sender, RoutedEventArgs e) => Close();
+        // Result mode, shown as a tab of ResultsWindow instead of on its own: hands over the content,
+        // minus the outer frame and shadow. This window stays unshown and keeps handling the
+        // content's buttons; its ✕ / Close then close the tab (close).
+        Action closeInstead;
+        internal UIElement TakeContent(Action close)
+        {
+            closeInstead = close;
+            Frame.Margin = new Thickness(0);
+            Frame.BorderThickness = new Thickness(0);
+            Frame.Effect = null;
+            Frame.Background = Brushes.Transparent;
+            var content = (UIElement)Content;
+            Content = null;
+            return content;
+        }
+
+        // The header drags whichever window the content is in (this one, or ResultsWindow).
+        // The header drags whichever window the content is in (this one, or ResultsWindow).
+        void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => GetWindow((DependencyObject)sender)?.DragMove();
+        void Close_Click(object sender, RoutedEventArgs e) { if (closeInstead != null) closeInstead(); else Close(); }
 
         // Preview: "OK" confirms (ShowDialog returns true). Result: "Close".
         void Primary_Click(object sender, RoutedEventArgs e)
         {
             if (preview) DialogResult = true;
+            else if (closeInstead != null) closeInstead();
             else Close();
         }
 
