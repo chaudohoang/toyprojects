@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -93,6 +94,12 @@ namespace KitHelper
                              .ThenBy(i => i.Name, StringComparer.OrdinalIgnoreCase).ToList();
                 string counts = string.Join(" · ", items.GroupBy(i => i.Status).OrderBy(x => x.Key)
                                                         .Select(x => $"{x.Count()} {Label(x.Key).ToLowerInvariant()}"));
+                // The real destination folder ("C:\Program Files\...\TrueTest 1.9\ScratchDustDetect_NY")
+                // when every file of the group goes to the same one; else the group's own name
+                // ("Not copied", "Vignetting set to 1" across several folders).
+                var dirs = items.Where(i => i.To != null).Select(i => Path.GetDirectoryName(i.To))
+                                .Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+                string dest = g.Key != CopyItem.NotCopied && dirs.Count == 1 ? dirs[0] : null;
                 var header = new DockPanel { Margin = new Thickness(0, first ? 0 : 12, 0, 4) };
                 var countText = new TextBlock { Text = counts, Foreground = B("Dim"), VerticalAlignment = VerticalAlignment.Bottom };
                 DockPanel.SetDock(countText, Dock.Right);
@@ -107,16 +114,28 @@ namespace KitHelper
                     groupChecks[groupBox] = new List<CheckBox>();
                     header.Children.Add(groupBox);
                 }
-                header.Children.Add(new TextBlock
+                var heading = new TextBlock
                 {
-                    Text = g.Key == "" ? "(top level)" : g.Key,
+                    Text = dest ?? (g.Key == "" ? "(top level)" : g.Key),
                     FontWeight = FontWeights.SemiBold,
                     Foreground = B(g.Key == CopyItem.NotCopied ? "Dim" : "Fg"),
                     TextTrimming = TextTrimming.CharacterEllipsis,
-                });
+                };
+                if (dest != null)
+                {
+                    // A long path keeps its end ("…\TrueTest 1.9\ScratchDustDetect_NY"); hover shows it whole.
+                    heading.TextTrimming = TextTrimming.None;
+                    heading.Tag = dest;
+                    heading.ToolTip = dest;
+                    // Start short so the row doesn't grow to the full path (a vertical StackPanel gives a
+                    // child its own desired width when wider); the row's real width then decides.
+                    heading.Text = "…" + dest.Substring(Math.Max(0, dest.LastIndexOf('\\')));
+                    header.SizeChanged += (s, e) => FitPathEnd(heading);
+                }
+                header.Children.Add(heading);
                 Groups.Children.Add(header);
                 Groups.Children.Add(new Border { Height = 1, Background = B("Line"), Margin = new Thickness(0, 0, 0, 4) });
-                sb.AppendLine().AppendLine($"[{g.Key}]  {counts}");
+                sb.AppendLine().AppendLine($"[{dest ?? g.Key}]  {counts}");
                 first = false;
 
                 foreach (var it in items)
@@ -151,6 +170,37 @@ namespace KitHelper
             }
             text = sb.ToString();
             if (preview) UpdatePreviewSummary();
+        }
+
+        // Shows as much of the path in t.Tag as fits, cutting the START: whole trailing folders when
+        // possible ("…\TrueTest 1.9\ScratchDustDetect_NY"), else the end of the last one. The space is
+        // the heading row's width minus its other parts (folder checkbox, counts).
+        static void FitPathEnd(TextBlock t)
+        {
+            string full = t.Tag as string;
+            if (full == null || !(t.Parent is Panel row)) return;
+            double w = row.ActualWidth - 4;
+            foreach (FrameworkElement c in row.Children)
+                if (c != t) w -= c.ActualWidth + c.Margin.Left + c.Margin.Right + 8;
+            if (w <= 0) return;
+            var face = new Typeface(t.FontFamily, t.FontStyle, t.FontWeight, t.FontStretch);
+            double dip = VisualTreeHelper.GetDpi(t).PixelsPerDip;
+            double Width(string x) => new FormattedText(x, CultureInfo.CurrentUICulture, FlowDirection.LeftToRight, face,
+                                                        t.FontSize, Brushes.Black, dip).WidthIncludingTrailingWhitespace;
+            string text = full;
+            if (Width(full) > w)
+            {
+                text = null;
+                for (int i = full.IndexOf('\\'); i >= 0 && text == null; i = full.IndexOf('\\', i + 1))
+                    if (Width("…" + full.Substring(i)) <= w) text = "…" + full.Substring(i);
+                if (text == null)
+                {
+                    int k = full.LastIndexOf('\\') + 1;
+                    while (k < full.Length - 1 && Width("…" + full.Substring(k)) > w) k++;
+                    text = "…" + full.Substring(k);
+                }
+            }
+            if (t.Text != text) t.Text = text;
         }
 
         // ---- confirmation: tick / untick

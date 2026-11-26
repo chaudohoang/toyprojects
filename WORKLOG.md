@@ -153,6 +153,16 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
     the panel - move the cursor before a focus change is meant to hide it.
   - Two real copies at 12:34:37 (full W511BT package) and 12:34:49 (Kits from TrueTest 1.9 debug
     Mobile) were not from these tests.
+- **Kit Helper 1.10.13: group headings show the full destination path, start-trimmed.** Was
+  `TrueTest\ScratchDustDetect_NY` (the backup layout). Now the folder of the group's files' `To`
+  when they all share one (else the group name: Not copied, a vignetting group across folders).
+  `FitPathEnd` cuts the START: longest "…\tail" made of whole trailing folders that fits, else the end
+  of the last folder; full path in the tooltip and in Copy as text. Trap: a vertical StackPanel
+  arranges a child at max(its width, child's desired width), so the heading row grew to the full path
+  and the TextBlock's ActualWidth always "fit" (first try overlapped the counts). Fix: start the
+  heading short, measure the row (`header.SizeChanged`) minus its other children. Checked in a harness
+  with a dry-run preview: TrueTest 1.9 paths in full; a long fake database path →
+  "…\for the trimming test\DATABASE\InputIMG\X4022-CB-C2_POR_DX_SUNBEAM", clear of "6 new".
   - Seen while testing: six real copies into TrueTest 1.9 at 10:56-10:57 (OMIT, OMIT, POCB4.2, PUC, R2R,
     then the 4-folder package of the W511BT kit), not from these tests - Chau using 1.10.2. Backed up
     in `D:\Program\RVS\Kit Helper Backups\20261126_1056*` / `_1057*`.
