@@ -783,6 +783,7 @@ namespace KitHelper
         {
             public readonly List<Unit> Units = new List<Unit>();
             public readonly List<(string rel, string why)> Left = new List<(string, string)>();   // not copied
+            public readonly List<string> DataFiles = new List<string>();   // loose root files → TrueTest data folder
             public bool TooBig;                      // scan stopped: not a package (e.g. D:\Log itself)
             public bool NeedsDatabase => Units.Any(u => u.NeedsDatabase);
             public bool NeedsInstall => Units.Any(u => u.NeedsInstall);
@@ -872,7 +873,8 @@ namespace KitHelper
 
             if (only == null)
                 foreach (string f in Directory.GetFiles(root).Where(f => !Kit.NeverCopy(f)))
-                    l.Left.Add((Rel(f), "not in a kit folder"));
+                    if (IsDataFile(f)) l.DataFiles.Add(f);
+                    else l.Left.Add((Rel(f), "not in a kit folder"));
 
             void Discover(string dir, int depth)
             {
@@ -932,7 +934,28 @@ namespace KitHelper
 
         // One line per unit, for the panel and the confirmation:  OMIT\X4023-… → ScratchDustDetect_NY
         public static string Describe(Layout l) =>
-            string.Join("\n", l.Units.Select(u => $"{u.Rel}\\  →  {u.Destination}"));
+            string.Join("\n", l.Units.Select(u => $"{u.Rel}\\  →  {u.Destination}")
+                .Concat(l.DataFiles.Select(f => $"{Path.GetFileName(f)}  →  {string.Join(" + ", DataDestinations(f).DefaultIfEmpty("(no AppData\\1.8 / 1.9 folder)"))}")));
+
+        // The package root's loose files belong to TrueTest's data folder (Chau): the sequence
+        // (.seqxc) in Sequence\, the rest (panel-shape .bmp, subframe .txt) in AppData\1.8 AND
+        // AppData\1.9 - both, whatever install is selected - where those folders exist.
+        public const string DataRoot = @"C:\Radiant Vision Systems Data\TrueTest";
+        static readonly string[] AppDataVersions = { "1.8", "1.9" };
+
+        // Not scripts, programs or notes (README, Install.bat in our own packages).
+        static bool IsDataFile(string f)
+        {
+            string ext = Path.GetExtension(f).ToLowerInvariant(), name = Path.GetFileName(f);
+            return !new[] { ".exe", ".bat", ".cmd", ".ps1", ".lnk", ".url", ".md" }.Contains(ext)
+                && !name.StartsWith("README", StringComparison.OrdinalIgnoreCase);
+        }
+
+        // Folders under DataRoot a loose file goes to ("Sequence", "AppData\1.8", "AppData\1.9").
+        public static IEnumerable<string> DataDestinations(string file) =>
+            string.Equals(Path.GetExtension(file), ".seqxc", StringComparison.OrdinalIgnoreCase)
+                ? new[] { "Sequence" }
+                : AppDataVersions.Select(v => Path.Combine("AppData", v)).Where(d => Directory.Exists(Path.Combine(DataRoot, d))).ToArray();
 
         // What Run would do (CopyResultWindow preview). Nothing is touched.
         public static Copier.Result Preview(string folder, string install, string database, string ownExe, ICollection<string> only = null) =>
@@ -968,6 +991,25 @@ namespace KitHelper
                 }
                 else
                     Merge(Copier.Run(u.Folder, install, u.Target, ownExe, log, backup, TrueTestDir, dryRun));
+            }
+            foreach (string f in layout.DataFiles)
+            {
+                string name = Path.GetFileName(f);
+                var dests = DataDestinations(f).ToList();
+                if (dests.Count == 0) { all.Add(name, CopyStatus.Skipped, "no AppData\\1.8 or 1.9 folder in " + DataRoot); continue; }
+                foreach (string sub in dests)
+                {
+                    string dir = Path.Combine(DataRoot, sub);
+                    log($"{name}  →  {dir}", LogLevel.Info);
+                    try { if (!dryRun) Directory.CreateDirectory(dir); }
+                    catch (Exception ex)
+                    {
+                        all.Failed++; all.AccessDenied |= ex is UnauthorizedAccessException;
+                        all.Add(Path.Combine("TrueTest Data", sub, name), CopyStatus.Failed, "cannot create the folder: " + ex.Message, f, Path.Combine(dir, name));
+                        continue;
+                    }
+                    Copier.CopyOne(f, Path.Combine(dir, name), all, log, name, backup, Path.Combine("TrueTest Data", sub, name), dryRun);
+                }
             }
             foreach (var (rel, why) in layout.Left) all.Add(rel, CopyStatus.Skipped, why);
             return all;

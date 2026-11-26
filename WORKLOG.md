@@ -249,6 +249,17 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   longer applies: those file names differ by prefix and the list holds one kind at a time.
   `RunInputPath` still uses the item's full path. Real app, W511BT: Omit 6 / PUC 5 bare names, PUC
   working dir still the model folder. First drag after the restart didn't arrive again (harness).
+- **Kit Helper 1.10.25: a package's loose root files go to TrueTest's data folder.** Chau: the .seqxc
+  belongs in `C:\Radiant Vision Systems Data\TrueTest\Sequence`, the other loose files (PANEL_SHAPE
+  X4023 G.bmp, X4023-subframe-FOV85%.txt) in `AppData\1.8` and `AppData\1.9` - both, he chose that
+  over "match the selected install". The station already had them there (Sequence\X4023-…seqxc,
+  AppData\1.9\PANEL_SHAPE X4023 G.bmp). `Package.Scan` puts root files into `Layout.DataFiles`
+  (`IsDataFile`: not exe / bat / cmd / ps1 / lnk / url / md / README*; those stay "not in a kit
+  folder"); `DataDestinations`: Sequence for .seqxc, else the AppData\1.8 / 1.9 that exist. `Execute`
+  copies them with `Copier.CopyOne` (confirmation, untick, backup as "TrueTest Data\…", result); Describe
+  lists them. Picked folders don't include root files. Dry-run preview of the W511BT kit: seqxc
+  Replace in Sequence, bmp Replace in 1.9 / New in 1.8, subframe New in both; data folder 1549 files
+  before and after. Real app: package confirmation shows the three data groups; cancelled, no backup.
   - Seen while testing: six real copies into TrueTest 1.9 at 10:56-10:57 (OMIT, OMIT, POCB4.2, PUC, R2R,
     then the 4-folder package of the W511BT kit), not from these tests - Chau using 1.10.2. Backed up
     in `D:\Program\RVS\Kit Helper Backups\20261126_1056*` / `_1057*`.
