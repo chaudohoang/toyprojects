@@ -200,6 +200,8 @@ public partial class MainWindow : Window
 
             var indexes = new List<ArtIndex> { art };
             if (await LoadMdProArtAsync() is { } mdpro) indexes.Add(mdpro);
+            var mdproCards = await LoadMdProCardsAsync();
+            if (await Task.Run(() => MyArt.Load(mdproCards)) is { } mine) indexes.Add(mine);
 
             var pixels = Pixels.From(image);
             Status.Text = "Reading the screenshot…";
@@ -220,7 +222,8 @@ public partial class MainWindow : Window
                 ? $"Read all {found} cards from the screenshot."
                 : $"Read {found - unsure} of {found} cards from the screenshot. {unsure} couldn't be recognized " +
                   "(two cards with the same artwork, a shiny foil card, artwork it doesn't know, a very new card, or something drawn over it): they're the \"# ?\" lines in the list. Type their names in and build again." +
-                  (indexes.Count == 1 ? " If the screenshot is from MDPro, point MDPro folder… at your MDPro install to use its artwork too." : "");
+                  $" To have one recognized next time, put a clean picture of it in {MyArt.Dir() ?? MyArt.Folder}, named after the card (e.g. \"White-Horned Buster Dragon.png\")." +
+                  (mdproCards == null ? " If the screenshot is from MDPro, point MDPro folder… at your MDPro install to use its artwork too." : "");
             int copies = text.Split('\n').Count(l => l.StartsWith("# row"));
             if (copies > 0)
                 Status.Text += copies == 1

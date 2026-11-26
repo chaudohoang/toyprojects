@@ -1,5 +1,21 @@
 # Work log
 
+## 2026-11-25
+
+- **YdkeDeckBuilderWpf: `my-art\` folder for card pictures the indexes get wrong.** After MDPro's
+  "Update Pre-Release Cards", White-Horned Buster Dragon (101308022) and Blue-Eyes Chaos MAXIMUM
+  Dragon (101308027) were in `ygopro-super-pre.ypk` and in the rebuilt `mdpro-index.bin`, yet a Blue-Eyes
+  screenshot still left them as `# ?`. The data and the stamp/rebuild were fine. The pack's `pics\` are
+  phone photos of foil OCG cards (PASO), so they scored -0.17 and 0.26 against the clean renders on
+  screen, far below the 0.75 cutoff. A clean picture of White-Horned scored 0.865 with a 0.25 lead and
+  stayed at or below 0.46 against the other 56 cards. So: `MyArt` (CardRecognition.cs) reads
+  `my-art\<passcode>[ name].ext` or `my-art\<name>.ext` for every screenshot (whole card or art alone by
+  aspect; the name comes from MDPro's cdb when only the passcode is given), added as one more index in
+  `RecognizeAsync`. The status text for unrecognized cards now points at the folder. `publish\wpf\my-art\101308022.webp`
+  added. Chaos MAXIMUM still needs a clean picture. The diagnostic harness compiled CardRecognition.cs +
+  DeckCore.cs into a console net8.0-windows exe and ran `ScreenshotReader.Read` on the screenshot. That's
+  the quick way to get real scores next time.
+
 ## 2026-11-21
 
 - **CharlieTheSlave: no more flash when the taskbar is clicked.** `TaskbarZ.Keep` re-raises the icon

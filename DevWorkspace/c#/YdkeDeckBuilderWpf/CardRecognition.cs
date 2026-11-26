@@ -1031,6 +1031,67 @@ public static class MdProArt
     }
 }
 
+/// <summary>
+/// Card pictures the user drops into my-art\ (next to the exe, or %LOCALAPPDATA%\YdkeDeckBuilder), for cards
+/// whose only artwork in the indexes doesn't look like the screenshot. A pre-release card's MDPro picture is
+/// often a phone photo of a foil OCG card: on a Blue-Eyes deck screenshot, White-Horned Buster Dragon scored
+/// -0.17 against MDPro's (a rainbow foil photo) and 0.865 against a clean picture of the card, leading the
+/// next card by 0.25; that picture stayed at or below 0.46 against the other 56 cards on the screen.
+/// The file name says which card: "101308022.webp", "101308022 White-Horned Buster Dragon.png" or
+/// "White-Horned Buster Dragon.jpg". A whole card or the artwork alone (told apart by shape). Small enough
+/// to read again for every screenshot, so a new picture counts at once.
+/// </summary>
+public static class MyArt
+{
+    public const string Folder = "my-art";
+    static readonly string[] Extensions = { ".jpg", ".jpeg", ".png", ".webp", ".bmp", ".gif" };
+
+    /// <summary>The folder in use, created in the first writable data folder if there's none yet.</summary>
+    public static string? Dir()
+    {
+        var dirs = ArtIndex.DataDirs.Select(d => Path.Combine(d, Folder)).ToList();
+        if (dirs.FirstOrDefault(Directory.Exists) is { } found) return found;
+        foreach (var dir in dirs)
+        {
+            try { return Directory.CreateDirectory(dir).FullName; }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// The pictures as an index, or null if there are none. <paramref name="cards"/> (MDPro's, by id) names a
+    /// card given by passcode alone; without it, such a file needs the name after the passcode.
+    /// </summary>
+    public static ArtIndex? Load(IReadOnlyDictionary<int, MdProCard>? cards)
+    {
+        if (Dir() is not { } dir) return null;
+        var index = new ArtIndex();
+        int unnamed = 0;
+        foreach (var file in Directory.EnumerateFiles(dir).Where(f => Extensions.Contains(Path.GetExtension(f).ToLowerInvariant())))
+        {
+            var m = System.Text.RegularExpressions.Regex.Match(Path.GetFileNameWithoutExtension(file), @"^\s*(\d{5,9})?[\s_-]*(.*?)\s*$");
+            int? id = m.Groups[1].Success ? int.Parse(m.Groups[1].Value) : null;
+            string? name = m.Groups[2].Value is { Length: > 0 } n ? n
+                : id is { } i && cards != null && cards.TryGetValue(i, out var c) ? c.Name : null;
+            if (name == null) continue;
+            if (id is { } known && cards != null && cards.TryGetValue(known, out var card)) name = card.Name; // MDPro's spelling
+            try
+            {
+                using var s = File.OpenRead(file);
+                var px = Pixels.Load(s);
+                double aspect = (double)px.Width / px.Height;
+                var print = aspect is > 0.6 and < 0.8 ? ArtPrint.Of(px, 0, 0, px.Width, px.Height) : ArtPrint.OfArtOnly(px);
+                index.Entries.Add(new ArtEntry(id ?? -++unnamed, id ?? -unnamed, name, print));
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException or FileFormatException or ArgumentException) { }
+        }
+        if (index.Entries.Count == 0) return null;
+        index.Prepare();
+        return index;
+    }
+}
+
 /// <summary>Read-only queries through the SQLite that ships with Windows 10 and 11, so no package is needed.</summary>
 static class WinSqlite
 {
