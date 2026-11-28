@@ -9,7 +9,8 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 ## 2026-11-28
 
 - **New `phim-tool` (Python/Tkinter): episode links + downloader for phimvn2, tvhay/tvphim, motchill.**
-  Built earlier in `E:\Github\phim-tool`, moved into the repo today. Deploy: `D:\PortableApps\phim-tool`.
+  Built earlier in `E:\Github\phim-tool`, now at `DevWorkspace\python\phim-tool` (Python is its main stack).
+  Deploy: `D:\PortableApps\phim-tool`.
   - `ffmpeg\ffmpeg.exe` (110 MB) is git-ignored: over GitHub's 100 MB per-file limit. It lives only in the
     deploy folder; `downloader.find_ffmpeg` looks in `ffmpeg\` next to the tool, then PATH.
   - Queue tab (`hang_doi.py`) persists to `hang_doi.json` next to the tool: live data, never overwrite

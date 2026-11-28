@@ -52,7 +52,7 @@ not be overwritten with the repo's.
 |---|---|---|
 | `toyprojects\MultiRemoteTool` | `E:\PortableApps\MultiRemoteTool` | Has a `Radmin` platform the repo lacks; its own contact CSVs (real hosts); its own `settings.txt` ordering. |
 | `toyprojects\QuickLauncher` (was `GameLauncher`) | `D:\PortableApps\QuickLauncher` on this PC **and on all 8 others**: desktops `i5-2500`, `i5-3470`, `i5-3570`, `i5-4670`, `i3-9100f`, laptops `tp550ld`, `vpcca15fg`, `victus16` — reached as `\\<pc>\D\PortableApps\QuickLauncher` | Nothing: the folder holds only `Quick Launcher.exe` + `.exe.config` (data is in each PC's `%APPDATA%\QuickLauncher`). The desktop shortcut here points to it. To deploy, close the running copy here (single instance), copy the two files from `bin\Release\net48` to every PC, check the hash, start it again here. Copies on the other PCs are not running-checked: a running copy there locks the exe and the copy fails. |
-| `toyprojects\phim-tool` | `D:\PortableApps\phim-tool` | Has `ffmpeg\ffmpeg.exe` (110 MB, git-ignored: over GitHub's 100 MB limit) and its own `hang_doi.json` (the download queue). To deploy, copy the `.py`/`.pyw` files and `sites\` over; never `hang_doi.json` or `ffmpeg\`. Editing while the GUI runs is safe: changes apply on next launch. |
+| `toyprojects\DevWorkspace\python\phim-tool` | `D:\PortableApps\phim-tool` | Has `ffmpeg\ffmpeg.exe` (110 MB, git-ignored: over GitHub's 100 MB limit) and its own `hang_doi.json` (the download queue). To deploy, copy the `.py`/`.pyw` files and `sites\` over; never `hang_doi.json` or `ffmpeg\`. Editing while the GUI runs is safe: changes apply on next launch. |
 
 Sync the exe, the INIs and bundled viewers; leave `contacts_*.csv` alone on each side.
 
