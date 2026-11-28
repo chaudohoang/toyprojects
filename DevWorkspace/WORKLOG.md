@@ -1,5 +1,19 @@
 # Work log
 
+## 2026-11-28
+
+- **thuyet-minh-phim: moved into `python\thuyet-minh-phim` and deployed to `D:\PortableApps\ThuyetMinhPhim`.**
+  Before this it lived at `E:\Github\thuyet-minh-phim` and had no git history. It was moved on the same
+  volume (`Move-Item`), so old files kept Medium integrity and `.venv\Scripts\python.exe` still runs normally.
+  The folders did inherit this tree's Low label, so any file created here from now on is Low. That is harmless
+  for running from source, since python.exe stays Medium, but an exe that `installer\build.ps1` writes into
+  `dist\` will be Low. Run it from the D: copy, not from `dist\`. The venv survives moves because every script
+  calls `python -m ...`; only the `Scripts\*.exe` launchers hold the old path. The first move attempt failed
+  with "being used by another process": a background shell whose cwd was inside the folder was holding it. The
+  deploy copies `dist\portable\ThuyetMinhPhim` (2.3 GB, includes the VieNeu model under `data\`). Selftest passes
+  8/8 from source and from D:. `nghe-thu-giong\` (MP3 samples of all 29 voices, plus `nghe-thu.html`) is
+  git-ignored. Nothing committed yet.
+
 ## 2026-11-25
 
 - **YdkeDeckBuilderWpf: `my-art\` folder for card pictures the indexes get wrong.** After MDPro's

@@ -16,6 +16,7 @@ Every other path below is written relative to `<root>`.
 | YdkeDeckBuilder, ydke tool | `web\YdkeDeckBuilder\index.html` (the page), `c#\YdkeDeckBuilder` (desktop app) | Paste a Yu-Gi-Oh! deck list, get a `ydke://` code and a `.ydk` file. Looks cards up on the YGOPRODeck API. The page also works on its own from disk. The desktop app is WPF + WebView2 showing that same page; build it with `install.ps1` (output in `publish\`). |
 | YdkeDeckBuilderWpf, wpf ydke | `c#\YdkeDeckBuilderWpf` | Native WPF port of YdkeDeckBuilder (no WebView2, ~0.3 MB exe). Deck logic in `DeckCore.cs`, ported from the page's JavaScript; keep the two in step. Build with `build.ps1` (`-Share` adds a self-contained exe), output in `c#\YdkeDeckBuilder\publish\wpf\`. |
 | phim-tool, tool phim | `python\phim-tool` | Tkinter app: episode links + downloader (with a queue tab) for phimvn2, tvhay/tvphim, motchill. Used from `D:\PortableApps\phim-tool`, which also holds `ffmpeg\ffmpeg.exe` (git-ignored, 110 MB) and the live `hang_doi.json`; see the deploy table in `toyprojects\CLAUDE.md`. |
+| thuyet-minh-phim, thuyết minh phim, longtieng | `python\thuyet-minh-phim` | Tkinter app (package `longtieng`) that OCRs burned-in Vietnamese subtitles and reads them aloud, either live over a playing video or by exporting a dubbed copy of a film file or whole folders. Voices: Edge, Google, Microsoft An, 25 VieNeu. Its own `README.md` is the reference. Used from `D:\PortableApps\ThuyetMinhPhim` (portable build); see the deploy table in `toyprojects\CLAUDE.md`. |
 
 ## YdkeDeckBuilder notes
 

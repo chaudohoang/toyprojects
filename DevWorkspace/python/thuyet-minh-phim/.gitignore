@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+debug/
+config.json
+cache/
+
+build/
+dist/
+models/
+
+# File nghe thử giọng (tạo bằng script, không cần lưu)
+nghe-thu-giong/
+selftest.txt

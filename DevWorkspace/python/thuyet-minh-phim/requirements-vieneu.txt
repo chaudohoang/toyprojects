@@ -1,0 +1,11 @@
+# Giọng VieNeu-TTS v3 Turbo (offline, chạy CPU bằng ONNX Runtime). Cài bằng run.bat hoặc:
+#   .venv\Scripts\python -m pip install -r requirements-vieneu.txt
+#   .venv\Scripts\python -m pip install --no-deps vieneu
+# (--no-deps vì gói vieneu kéo theo gradio, librosa... chỉ cần cho web demo / nhân bản giọng)
+# ONNX Runtime chưa có cho Python 3.14+ -> app dùng Python 3.13.
+onnxruntime
+tokenizers
+sea-g2p
+huggingface_hub
+soxr
+soundfile

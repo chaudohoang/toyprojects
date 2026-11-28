@@ -1,0 +1,11 @@
+# Tuỳ chọn: VietOCR (đọc dấu tiếng Việt tốt hơn khi quét file phim). Cài bằng run.bat hoặc:
+#   .venv\Scripts\python -m pip install -r requirements-vietocr.txt
+#   .venv\Scripts\python -m pip install --no-deps vietocr
+#   .venv\Scripts\python tools\get_vietocr_model.py
+# (vietocr khai báo phụ thuộc cũ như pillow==10.2 không có cho Python mới, nên cài --no-deps)
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+torchvision
+einops
+pyyaml
+requests
