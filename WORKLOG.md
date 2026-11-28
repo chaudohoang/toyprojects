@@ -24,6 +24,68 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
   - Load check: a 570 MB episode in 51 s, Python ~27 % of one core, ffmpeg remux 3.7 s. Fine on old PCs;
     the heavy part is the grid of browser windows (`grid_open.py`), not the downloader.
 
+- **New `CameraViewer`: a desktop grid of the LAN cameras, so other PCs don't need EZStation / EZVIZ
+  Studio installed.** WinForms net48 + LibVLCSharp 3.9 / libvlc 3.0.21, same stack as VideoBrowser.
+  Shipped as a copy-the-folder app (`bin\Release\net48`, ~103 MB). Click a tile to see it big; Esc or click to go back.
+  - Source: the 11 channels of the Uniview NVR at 192.168.100.100, user `viewer`. The grid uses the sub stream
+    `/unicast/cN/s1/live`, the big view uses main `s0` with audio. The NVR answers RTSP DESCRIBE with a 401
+    (Digest + Basic). The `viewer` password was set by Chau and isn't recorded anywhere here; it goes into
+    the app's Settings and then `cameras.ini` (base64 only, git-ignored).
+  - EZVIZ ruled out for now: Mini O/C6N (.8/.9) have port 554 closed; LB1 bulb (.10) has 554 open but needs the
+    sticker verification code. Settings accepts any extra `rtsp://user:pass@…` row for later.
+  - Trap: `VideoView.MouseClick` never fires when something else is under `WindowFromPoint` (here the Windows
+    Firewall prompt's `Shell_SystemDim` overlay), because WinForms checks that on mouse-up. Tiles use `MouseUp`.
+    libvlc's "VLC video main" child is created disabled when `EnableMouseInput=false`, so real clicks do reach the VideoView.
+  - Tested here with local mp4s as fake cameras plus one real NVR channel without a password: the grid laid out 3×2
+    at 1280×760, click → big view, → switches camera, Esc → grid, the real channel showed "lỗi kết nối – đang thử lại…",
+    the app closed in ~0.5 s, and on first run Settings opened with the 11 channels.
+  - First real run with Chau's password: all 11 channels failed with live555 "authentication failed" (the log is
+    `camera-viewer.log` next to the exe, now written on every start; it leaves out Authorization headers).
+    A fake RTSP server on 127.0.0.1 (401 Digest) showed libvlc does send `:rtsp-user`/`:rtsp-pwd` as Digest, so the NVR
+    itself rejected the login: either a wrong password, or a lockout. The early test config had `viewer` with an EMPTY
+    password and retried every 6 s on several channels for minutes, which can trip Uniview's lock on bad logins.
+  - Fix: no connection attempt when the shared login has an empty password. On the first "authentication failed" log
+    line, every tile that isn't playing halts with no watchdog retries, and a red hint says so until Settings → Save or F5.
+    Against the fake server that is exactly 2 DESCRIBEs per channel (without and with auth) over 25 s.
+  - Settings got a "Kiểm tra đăng nhập" button (`RtspProbe.Run`: raw DESCRIBE without auth, then with Digest, then with
+    Basic; it reports only status lines and the password LENGTH). On the real NVR all three came back 401, with a
+    **6-character** password, but the NVR forces 9–20 characters for user passwords, so it wasn't `viewer`'s. Afterwards
+    a fresh EZStation login with `viewer` also failed. "EZStation still works" earlier was just its existing session.
+  - The last run alone logged 48 "authentication failed" entries, because every start opened 11 channels at once.
+    Now `StartTiles` does ONE test login (`RtspProbe.Check`) before starting any shared-login channel. Rejected → all
+    channels halt. Unreachable → wait and re-check every 15 s. The big view won't start until a login has succeeded.
+    Fake servers on 127.0.0.1: a wrong password is exactly 1 DESCRIBE-with-auth for 4 channels; the right password →
+    probe, then all 4 channels authenticate (a checking Digest/Basic server, password with a space and a colon).
+  - Resolved: Chau reset `viewer`'s password through EZCloud "Access web page" → Thiết lập → Hệ thống → Người dùng.
+    Before Chau typed the new password into Settings, the old saved one was blanked in cameras.ini, so starting the app
+    cost no extra bad login. Then: login test 200 OK (Digest and Basic), all 11 channels live in a 4/4/3 grid, 0
+    "authentication failed" lines, ~480 MB RAM. The cameras are fisheye-ish ~4:3, not 16:9, so the tiles have side bars.
+- **CameraViewer: EZVIZ C6N (.9) and Mini O (.8) over RTSP.** Both had port 554 closed (firmware V5.3.2 / V5.2.7,
+  2023). In EZVIZ Studio → Remote Configuration (Hikvision-style, logs in with the verification code) → C6N →
+  Network → General, Chau changed RTSP Port 554 → 8554 and let the camera reboot. Afterwards **554 was open on BOTH
+  cameras** and 8554 wasn't, so the reboot seems to be what woke RTSP, not the port number. The C6N answers OPTIONS
+  with 200. Without auth, every path gets a 401 (Digest + Basic), even a garbage one, so the path can't be checked
+  without the code. Using Hikvision's `/h264/ch1/{main,sub}/av_stream`.
+  - Remote Configuration first draws the full generic Hikvision menu (RS232, Service, Security, ATM…) and then hides
+    whatever the device doesn't report. The items that vanish are unsupported, not hidden features.
+  - App: per-camera login (`CamInfo.User/Pass`, columns "Tài khoản riêng / Mật khẩu riêng", stored as fields 5–6 of
+    `Camera=`; the password is base64). The startup login check is now per device + login (`Config.LoginKey`, one
+    `RtspProbe.Check` per group, ok/bad keys remembered until F5 or Save). "Kiểm tra đăng nhập" tests the selected row.
+    The NVR still plays and the EZVIZ tiles show "chưa nhập mật khẩu".
+  - **EZVIZ dropped for now.** With `admin` + the Image Encryption password (which Chau says is also the EZVIZ app
+    password), both the C6N AND the Mini O returned 401 for Digest and Basic. The Mini O had barely been tried, so a
+    lockout doesn't explain it: on this firmware the encryption password is not the RTSP password. Untried: the
+    factory verification code on the sticker under the base. These cameras were added via AP mode, not by QR, so Chau
+    never saw the code. Also untried: the EZVIZ Open Platform cloud route. Both rows stay in cameras.ini, disabled
+    (`Camera=0|…`), so no more bad-login strikes. Earlier wrong usernames tried: `5ope9r` (the EZVIZ account) and the
+    phone number.
+- **CameraViewer icon + deploy.** `app.ico` has 7 sizes (16–256, PNG entries): a white CCTV camera on a blue rounded
+  square with a 2×2 grid badge from 32 px up. It's drawn by a throwaway System.Drawing script that isn't kept in the
+  repo; regenerate by hand if needed. It's embedded via `<ApplicationIcon>`, and the form takes it with
+  `Icon.ExtractAssociatedIcon`, replacing the old drawn `MakeIcon()`. Deployed to `D:\PortableApps\CameraViewer`
+  (101 MB; exe hash matches; cameras.ini copied once, deploy steps in CLAUDE.md). Run from there: 11 channels live,
+  0 auth failures. The window took ~20 s to appear on first start.
+
 ## 2026-11-26
 
 - **Kit Helper 1.10.0: a kit's OMIT\ / PUC\ / InputIMG\ opened alone is a package; several folders

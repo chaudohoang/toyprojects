@@ -1,0 +1,5 @@
+# Camera setup the app writes next to its exe: holds the NVR password (only base64-obfuscated).
+# Build output itself IS committed on purpose.
+cameras.ini
+# Runtime log, rewritten on every start
+camera-viewer.log
