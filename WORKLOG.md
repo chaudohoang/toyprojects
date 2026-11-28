@@ -6,6 +6,23 @@ anything that would be expensive to rediscover. Code detail belongs in git; this
 
 ---
 
+## 2026-11-28
+
+- **New `phim-tool` (Python/Tkinter): episode links + downloader for phimvn2, tvhay/tvphim, motchill.**
+  Built earlier in `E:\Github\phim-tool`, moved into the repo today. Deploy: `D:\PortableApps\phim-tool`.
+  - `ffmpeg\ffmpeg.exe` (110 MB) is git-ignored: over GitHub's 100 MB per-file limit. It lives only in the
+    deploy folder; `downloader.find_ffmpeg` looks in `ffmpeg\` next to the tool, then PATH.
+  - Queue tab (`hang_doi.py`) persists to `hang_doi.json` next to the tool: live data, never overwrite
+    the deploy copy from the repo. One movie subfolder per link; the trailing `-1234` id is stripped only
+    for phimvn2 (`SLUG_HAS_ID`), tvphim numbers are year/part (`ac-nhan-2025`, `...-phan-3`).
+  - Broken sources: segments with 401/403/404/410 raise `SourceBroken` instead of retrying forever
+    (Rừng thép ep 3 Thuyết minh had segments 246–676 at 404 on kkphim, stuck at 36% for 1h+).
+    `.parts\nguon.txt` records which playlist the parts came from, so versions never mix.
+  - tvhay/tvphim/motchill all serve kkphim video, so `sites\kkphim.py` asks phimapi.com for every version
+    of the episode: priority Lồng tiếng → Thuyết minh → Vietsub, the rest are fallbacks in that order.
+  - Load check: a 570 MB episode in 51 s, Python ~27 % of one core, ffmpeg remux 3.7 s. Fine on old PCs;
+    the heavy part is the grid of browser windows (`grid_open.py`), not the downloader.
+
 ## 2026-11-26
 
 - **Kit Helper 1.10.0: a kit's OMIT\ / PUC\ / InputIMG\ opened alone is a package; several folders
